@@ -1,7 +1,7 @@
 
 -- ------
--- BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
--- Fate implementation : © <Your name here> <Your email address here>
+-- BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
+-- wayfarers implementation : © Alena Laskavaia <laskava@gmail.com>
 -- 
 -- This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
 -- See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -18,18 +18,26 @@
 -- Note: The database schema is created from this file when the game starts. If you modify this file,
 --       you have to restart a game to see your changes in database.
 
--- Example 1: create a standard "card" table to be used with the "Deck" tools (see example game "hearts"):
+CREATE TABLE IF NOT EXISTS `token` (
+  `token_key` varchar(64) NOT NULL,
+  `token_location` varchar(64) NOT NULL,
+  `token_state` int(10),
+  PRIMARY KEY (`token_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- CREATE TABLE IF NOT EXISTS `card` (
---   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
---   `card_type` varchar(16) NOT NULL,
---   `card_type_arg` int(11) NOT NULL,
---   `card_location` varchar(16) NOT NULL,
---   `card_location_arg` int(11) NOT NULL,
---   PRIMARY KEY (`card_id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `machine` (
+   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+   `rank` int(10) NOT NULL DEFAULT 1,
+   `type` varchar(64) NOT NULL,
+   `owner` varchar(10) NOT NULL DEFAULT '',
+   `data` JSON,
+   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 AUTO_INCREMENT=1;
 
-
--- Example 2: add a custom field to the standard "player" table
--- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
-
+CREATE TABLE IF NOT EXISTS `multiundo` (
+  `move_id` int(10) NOT NULL,
+  `player_id` int(10) NOT NULL,
+  `data` JSON NOT NULL,
+  `meta` JSON NOT NULL,
+  PRIMARY KEY (`move_id`,`player_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
