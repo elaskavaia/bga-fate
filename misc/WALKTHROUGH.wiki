@@ -1,0 +1,750 @@
+== Introduction ==
+
+This document is not a tutorial, but step by step instructions on how to build your own first game adaptation using the BGA Studio framework.
+
+Before you read this material, you must:
+* Read the overall presentations of the [[Studio|BGA Studio]].
+* Know (at least somewhat) the languages used by BGA Studio: PHP, SQL, HTML, CSS, JavaScript
+* Set up your development environment: [http://en.doc.boardgamearena.com/First_steps_with_BGA_Studio First Steps with BGA Studio]
+* Create a game using one of the available tutorials. Don't bother trying to create a new game until you have completed at least one of the tutorials.
+
+If you're stuck or have questions about this page post on [https://forum.boardgamearena.com/viewforum.php?f=12 BGA Developers forum].
+There is also a comunity-based Discord dev you can join here: https://discord.gg/YxEUacY.
+If you find typos in this wiki, fix them (to edit wiki login in BGA itself).
+
+== Select a First Game ==
+
+For your first '''real''' game (after you've completed at least one tutorial), you must select a game from one of these options:
+* [https://studio.boardgamearena.com/licensing Available Licenses]
+* Public Domain
+
+But what if the game you want isn't in either of those categories? If you're able to successfully publish another game, you may gain the trust of the BGA admins, and they will then be happy to assist you in obtaining a license for a game you really want to do. Alternatively, you can request a license yourself. For more about game licenses, see the [[BGA Game licenses]] page. Don't start a project until you are sure BGA have the licence for this game, or it will never be published to BGA!
+
+After you choose a game, but before creating a new project, take a few seconds to [http://studio.boardgamearena.com/#!projects check the list of current projects], to make sure that someone is not already developing that game. If they are, consider asking to join the project rather than starting a new project yourself.
+
+But even if you see a few projects with the name of the game in question, they may not be active. There are a lot of abandoned game projects. If it's not clear by the status of the project, then post to the Developers forum asking if anybody is actively working on the project, or send a message to the developers listed for the abandoned projects. At the same time, ask admins on the same forum to send you graphics for that game if they have them. (There's a button on the [https://studio.boardgamearena.com/licensing Available Licenses] page to request graphics, but that button just sends an email.)
+
+If your goal was to fix bugs in an existing project, first try to locate it on Studio. If the project cannot be found in Studio, write a support ticket to ask for access. Contact a project admin about getting write access to the original project, or ask if they are willing to apply your patches. If they are not active anymore, write a support ticket to ask for maintainance access for this project.
+
+If you want to take over an existing project, first ask on the forum to see if the project is abandoned, then get read-only access (via project list) and see if it's worth using the existing project. If it has no code or graphics, then just start from the scratch. If the original project admin is not answering, write a support ticket to ask for access.
+
+== Create a project ==
+
+If you have not already, you have to create a project in BGA Studio for this game. If the original game name is taken, check the previous paragraph about existing projects. 
+
+Find and start the game in turn based mode, make sure it works.
+
+Second, modify the text in .js file to output hello wold of something, reload the page in the browser and make sure your ftp sync works as expected.
+Note: if you have not setup [http://en.doc.boardgamearena.com/Tools_and_tips_of_BGA_Studio#File_Sync FTP auto-sync] yet, do it now, manually copying files is a no-starter.
+
+Update your project status on [http://studio.boardgamearena.com/#!studio Control Panel > Manage games] page, you can say "development started" or "waiting for the license" or "waiting for graphics" or a combination of those.
+
+== Development Tools ==
+
+At some point, you need to setup your development environment which consists of multiple tools, such as
+* Editor or IDE
+* Browser with dev tools
+* File sync tools
+* BGA Web tools
+* Image manipulation tools
+* Version control tools
+
+Please scan through articles from [[Studio#BGA_Studio_user_guide]] especially those related to debugging and tools, there is a lot of useful info there.
+
+== Hook version control system ==
+
+If it's a real game, I would commit the code to version control right at the start. You are going to find yourself in a situation where the game does not even start anymore and there is no way of debugging it unless you have a way to revert. That is where version control becomes very handy.
+If you don't know what I am talking about then at least back-up your files after each of the major steps. Starting now.
+You can also create a project on github, but make sure '''you don't commit original publisher graphics files''' and '''you don't include a file with your sftp password''' (github is automatically crawled for passwords by hackers; a hacking attempt occurred on BGA studio for this reason in June 2020).
+You can (and should) also commit your modification periodically via Studio Control Panel.
+
+== Obtain game graphics ==
+
+If you developing a game from the Available Licenses section, ask the admins to send you graphics by using the '''Request Art Files''' button available on the studio license page. While that request is being processed (it can take time, as it often requires some back and forth between the admins and the publishers) you can proceed to the next step - project creation.
+
+If you don't get original graphics you go to '''Scavenger Hunt'''
+
+* If you developing a public domain card game you can borrow standard cards from BGA generic assets, see [[Common_board_game_elements_image_resources]]
+* Standard game pieces - meeples, cubes, dice can be found here as well [[Common_board_game_elements_image_resources]]
+* Go to boardgamegeek.com find your game and obtain 3D game box image, 2D box image, and if you are lucky they also sometimes have boards and token scans in "Game Pieces" section of Images
+* If that fails, google "boardgame <name>" and check the Images section
+* Get the rules PDF as well, there're tools that allow you to extract graphics from PDF, which are usually good for meeples, cubes and such (can use pdfimages command line tool)
+
+Once you get the graphics one way or another you have to massage them to fit in the BGA criteria, which usually involves
+* If the publisher sends graphics in one token/card per file mode, you have to stitch them in sprite and scale down
+* For non square tiles and game pieces you need transparency
+* Usually you chop off the scoring "ring" around the board of the game since the scoring track is not needed for online adaptation
+
+More details about graphics requirements can be found here [[Game art: img directory]].
+
+[[File:Rrr_search.png]]
+
+== Obtain game documentation ==
+
+Also at this time obtain an electronic copy of rules, such as PDF (English version). 
+
+Also grab any other documents you may find on boardgamegeek such as FAQ, additional Reference books, and user created assistant documents, such
+as cheat-sheets (may be easier to get data from these than trying to scrub pdf). You create and place them in the doc/ folder of the project then
+exclude them from version control. There is also a misc/ folder now but it will hold up to 1 Mb of data files which would be checked in, so rules pdf's may not fit there.
+
+
+== Update game info and box graphics ==
+
+Even if is not playable yet, start with making sure the game looks descent in the game selector, meaning it has nice box graphics and the information is correct. 
+
+For that we need to edit [[Game_meta-information: gameinfos.inc.php|gameinfos.inc.php]].
+What you would do for the real game you would go to http://boardgamegeek.com find the game and use information from the website to fill the gameinfos.
+
+
+
+The next step is to set game metadata images, such as game box image, and they are handled in the Game Metadata Manager. Details about images can be found here: [[Game art: img directory]].
+
+[[File:Gamepanel_sharedcode.png]]
+
+Now try to start the game again. If you some-how introduced a syntax error in gameinfos file it may not actually work (game won't start).
+Always use "Express Start" button to start the game. You should see a standard state prompt from template. You should see X players on the right, testdude0 .. testdudeX-1.
+To switch between them press the red arrow button near their names, it will open another tab. This way you don't need to login and logout from multiple accounts!
+
+== Fix source copyright ==
+
+Now since you have your own project, you want to put your name in the copyright header, so replace
+
+  © <Your name here> <Your email address here>
+with
+  © John Snow <jsnow@gameofthrones.com>
+
+Well not exactly this but whatever your real name is. For all files in the project directory, it's about 10 files. Make sure the project still starts after that :)
+
+== Reduce the Rules ==
+
+Programming a game will take a lot more time than you may think. Most of the projects in the studio are abandoned because of a lack of patience or skill.
+To keep sane, start the game with *reduced* rules and try to complete that first.
+
+* If it has any expansions - do not even attempt to deal with them, not even - "I will just add graphics for them now and not use" - waste of time if you don't complete basic
+* If it has advanced rules - start with basic rules only, i.e. "beginner game"
+* If it has special rules for 2 players vs 4, start with the most basic form (i.e. 4), restrict to 4 players 
+* If it has 50 unique cards of 2 each - start with 2 unique cards with 25 each (just to keep it moving)
+* Any sort of rules that you think can be removed and not included in base - set aside for now 
+* Ignore any sort of cool animations - dice rolling, card flipping, choo-choo sounds of the trains - all this fluff can be added later
+
+
+== Design Game Elements ==
+First, make sure your have the [[BGA Studio Guidelines]] in mind!
+
+Technically game elements are already designed by a board game designer but your job is to map them to program space.
+Each physical piece (card, token, cube) will leave footprints all over the code (unfortunately in multiple disconnected places).
+To prepare the game you need to sort out these elements, i.e. categorize. I usually have the following categorization (in object oriented view):
+* Instance - all individual pieces are instances, i.e. two red cubes are two instances of 'red cube' type (class)
+* Type - element type which distinctly represents that element in appearance (i.e. red cube is a different type than blue cube)
+* Super Type - one of the more common types that similar properties (i.e. red OR cube)
+* Player color - supertype specific for player color (sometimes there are no colors but like player 1 - but is conceptually the same, I use color because it's easier to track)
+
+Personally, I like to encode my elements in a string using reverse DNS notation listing all the properties above, i.e.
+  meeple_ff0000_7 - this is instance #7 of type meeple_ff0000 (red meeple)
+Or
+  card_yellow_magic_2 - this is instance #2 of a yellow card (in this case yellow is the color of the deck, not related to player color) that can do magic
+
+So every game element would be in the
+
+1. Database - instances. The db record would be something like 
+  key|location|state
+  meeple_ff0000_7|slot_action_2|1
+  meeple_ff0000_2|tableau_ff0000|0
+2. Material file - types and supertypes, we never need repeating info here, so never list individual instances but only types or supertypes, in this case, we don't really need to define red meeple vs blue meeple
+  'meeple'=>{'name'=>totranslate('Meeple')}
+3. Client (js, css, tpl, etc) - instances and types. For example my meeple will be like 
+<pre>
+  <div id="meeple_ff0000_7" class="meeple meeple_ff0000"></div>
+</pre>
+with .css something like
+  .meeple { background-image: url(img/tokens.png); width: 2em; height: 2em;}
+  .meeple_ff0000 {background-position: 20% 0%;}
+4. Game php - setup and logic. During setup, you have to generate all the pieces and place them in the right positions. Also sometimes you need to reference elements to code the logic (I usually try to encode all rules in the material file as much as possible)
+
+For complex card games, I think it is best to keep all these info and rules in a spreadsheet and generate other files such as material.inc.php.
+See more info below about the design of the individual layers.
+
+More details on game elements can be found here [[BGA_Studio_Cookbook#Game_Elements]]
+
+== Create Initial Layout and Game Graphics ==
+
+Mentally it is easier to start with the game layout and graphics pieces. Even when nothing is working it gives you moral satisfaction!
+
+There are a few ways how the html could have been generated. You could have started with nothing and generate
+it all by javascript, or you could have started with complete game markup in html and make javascript just hide and move pieces around. 
+
+BGA framework used to provide a third way, which is mix of both. It is not longer in use. This page explains the template engine in great detail (for older games):[[Game_layout:_view_and_template:_yourgamename.view.php_and_yourgamename_yourgamename.tpl|Template Engine]].
+
+During this step you have to decide what technical solutions you will be using, such as
+* Use inline positioning of all moving pieces, controlled by JS. There are a few classes that already exist in Studio to help with that (see [[Studio#Game_interface_.28Client_side.29|Game Interface - Client Side]]). OR use html/css layout engine to position pieces (my personal choice).
+* Use BGA template engine OR create all ui elements by JS OR manually write or generate complete html markup. The game usually contains 200-300 pieces, it seems wrong but actually its faster to type all of this up in html/css when trying write than debug code for page generator.
+Static HTML markup also means you have to use players color or abstracted player number (such as red is 1, blue is 2) not player id's anywhere in JS, since player id is dynamic by nature.
+
+Start by creating and mapping all games assets, best way is probably to open rule book on "boardgame contents" page and go through every piece. Every piece of boardgame would have its "print" in multiple files in your game:
+* Some sort of "div" in html, where id of element match id of element in database (easiest way)
+* Css for the element (either unique or for class), usually with background property refering to part of sprite image
+* Entry in material.inc.php (or Game.php) referring to static properties of the element, i.e. name, tooltip, rules, etc
+* Entry in .js file to represent a static or initial location on the table OR creation template
+
+Here are some specific examples:
+
+'''Game Board'''
+
+Create entry in .js file for the board, in setup method and place inside the main game area
+<pre>
+            document.getElementById('game_play_area').insertAdjacentHTML('beforeend', `
+                   <div id="board" class="board shadow board4p"> ... </div>
+            `);
+</pre>
+Create entry in .css file for this board and other board variants (in example below we have 4 ppl board which is different than 2 ppl board)
+<pre>
+.board {
+	position: relative;
+	width: 980px;
+	height: 433px;
+	margin-bottom: 5px;
+}
+
+.board4p {
+	background-image: url(img/board4p.jpg);
+}
+</pre>
+That would be pretty much it for the board itself, as it does not really need a tooltip so we don't need entry in material file
+
+
+'''Game Board Slots'''
+
+These are interactive areas on the board, usually illustrated as such. In most cases you can get away with rectangular shapes, but sometimes you have to create circle or oval shapes (and in really advanced case would be some svg paths). For slots you can do the following:
+
+Entry in material file
+<pre>
+$this->token_types = array(
+...
+'slot_action_2' => array(
+  'type' => 'slot_action',
+  'name' => clienttranslate("2 Gray Track Advancements"),
+  'tooltip' => clienttranslate("This action gives you two advancements of gray track. You cannot use this action if you cannot complete all advancements."),
+  'o'=>"1,0,0,gg", // automatic rules
+),
+...
+</pre>
+
+Entry in template inside the "board" div
+<pre>
+	<div id="slot_action_2" class="slot_action_2 slot_action slot_w_1 slot"></div>
+</pre>
+
+Entry in .css with absolute position within the board (its actually better to use percentage - would be easier to scale later)
+<pre>
+.slot_action_2 {
+	top: 83px;
+	left: 37px;
+}
+.slot_action {
+	position: absolute;
+	width: 46px;
+	height: 26px;
+	padding: 9px 7px 6px 4px;
+}
+</pre>
+
+'''Meeples''' - also cards, tokens, other mobile stuff
+
+In CSS these guys will use "sprite" images with transparency, so it will look like this this:
+<pre>
+.meeple {
+	background-image: url(img/tokens.png);
+	width: 25px;
+	height: 25px;
+}
+.meeple_ff0000 { /* red */
+	background-position: 14% 0%;
+}
+</pre>
+As for creation you can either generate them using template (where whole thing wrapped in template block and {COLOR} replace with all possible colors in .view.php
+<pre>
+ <div id="meeple_{COLOR}_1" class="meeple meeple_{COLOR} meepleable"></div>
+ <div id="meeple_{COLOR}_2" class="meeple meeple_{COLOR} meepleable"></div>
+ ...
+</pre>
+
+Or you use html template in js 
+and create in js, like this
+<pre>
+ var tokenDiv = `<div id="meeple_${color}_${num}" class="meeple meeple_${color} meepleable"></div>` // this in js code somewhere before placing it
+</pre>
+If you dealing with cards and decks, there are pre-build components that can generate stuff for you.
+
+When do you create dom element matching game element?
+* If you have static layout you create it during setup() and its always there, but during initial setup or during notification it moved in proper spot (including "removed from the game" spot)
+* If you dynamically generated pieces you create the element during notification, and sometimes during animation. Also don't forgot to hook event listener to it if its interactive.
+
+
+One of the greatest parts about the web is all client side code can be viewed in your browser, so if you wondering how something is done in another BGA game just load the page and spy on it! In Chrome that would be right click and "Inspect Element". That would immediately show html of the given element alongside with css used for it (on the right). Another great way to learn is you can add yourself to any BGA project as read only from the project page!
+
+So at the end of this stage you should complete the following (keeping in mind reduced rules/material for first iteration):
+* Create a layout of the game, with positioning of main board, player areas, zones, other supporting areas, etc
+* Create css and html snippets for all game pieces: boards, tokens, meeples, etc. Place them all in initial template (even if they're not supposed to be visible at start). I.e. create fake player's hand with cards, put meeples on the board
+* Hook layout to number of players and colors picked by the game and test with multiple players
+* Figure out what you want to display in mini-player boards and hook it up
+* Create material file and populate with initial values (names, tooltips, rules) for all relevant game elements or classes of elements
+
+If at this time you don't have graphics yet create pieces with just CSS, you can use shape, background color and object text using css ::after construct to fake the pieces.
+
+
+[[File:Injected_text.png]]
+
+== Create Database Schema ==
+
+At some point you have to design your game database. Do it sooner than later since it would be harder to change it later, since some code decisions would be based on that.
+
+If you have grid-based abstract game use template from reversi, if you have a card game use template from hearts (the cards one also commented out in generated template for your project). The cards database goes with php class called [[Deck]].
+
+In general make it as simple as possible. Think about it, your game has 300 pieces (likely less). Using database to store this amount of data is like shooting a mosquito with a tank. Anything more complex then one table with 5 columns or two tables will only going to make it harder to develop and not improve performance. You can forget about normalizing and any fancy stuff you learn about databases in school. String field for a primary key would be as fast as integer when we talking about this size of data. So don't over-optimize with trying to have integers field that have state based on bitmask!
+
+Also remember that static (non dynamic) information about the game does not need to be stored in the database, that all include everything that does not change, i.e. all token/card properties such as name, tooltips, "strength", color, etc. This is stored in material file (used to be <code>material.inc.php</code> but you can just put this in Game.php) and server has access to it from anywhere, as well as the client if you send it with <code>getAllDatas()</code>. The only reason to store some of it in database is if it can affect your queries (i.e. type of token).
+
+Usually design process will contain the following steps:
+* Design game model - model that represent your game in progress, such as at any given step you can restore the game from that model
+* Mapping - now map real game to that model
+* Encoding - now represent this model in database and material file with reasonable amount of fields
+
+Example: '''The card game'''
+
+* In real word to "save" the game we take a picture of the play area, save cards from it, then put away draw deck, discard and hand of each player separately and mark it, also we will record current scoring (if any) and who's turn was it.
+* Framework handles state machine transition, so you don't have to worry about database design for that (i.e. who's turn it is, what phase of the game we are at, you still have to design it but as part of state machine step).
+* Also framework supports basic player information, color, order around the table, basic scoring, etc, so you don't have to worry about it either.
+* The only thing you need in your database is state of the "board", which is "where each pieces is, and in what state", or (position,rotation) pair.
+* The card state is very simple, it's usually "face up/face down", "tapped/untapped", "right side up/up side down".
+* As position go we never need real x,y,z. We need to know what "zone" card was, and depending on the zone it may sometimes need an extra "z" or "x" as card order. The zone position itself usually static or irrelevant.
+* So our model is: we have cards, which have some attributes, at any given point in time they belong to a "zone", and can also have order and state.
+* Now for mapping we should consider what info changes and what info is static, static info is always candidate for material file or html.
+* For dynamic stuff we should try to reduce amount of fields we need, i.e. we need a field for card, so its one, we need to know what zone cards belong to, its two, and we have possible few other fields, but if you look closely at you game you may find out that most of the zone only need one attribute at a time, i.e. draw pile always have cards face down, hand always face up, also for hand and discard order does not matter at all (but for draw it does matter). So in majority of cases we can get away with one single extra integer field representing state or order.
+* In real database both card and zone will be integers as primary keys referring to additional tables, but in our case its total overkill, so they can be strings as easily
+
+You can also use cards database schema and [[Deck]] implementation for most purposes (even you not dealing with cards).
+<pre>
+CREATE TABLE IF NOT EXISTS `card` (
+  `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `card_type` varchar(16) NOT NULL,
+  `card_type_arg` int(11) NOT NULL,
+  `card_location` varchar(16) NOT NULL,
+  `card_location_arg` int(11) NOT NULL,
+  PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+</pre>
+
+Another example: '''The euro game'''
+
+See details on database design for euro game at [[BGA_Studio_Cookbook#Database_for_The_euro_game]]
+
+So the piece mapping for non-grid based games can be in most case represented by (string: token_key, string: location, int: state), example of such database schema can be found here: [https://github.com/elaskavaia/bga-sharedcode/blob/master/dbmodel.sql dbmodel.sql] and class implementing access to it here [https://github.com/elaskavaia/bga-sharedcode/blob/master/modules/tokens.php tokens.php].
+
+<pre>
+CREATE TABLE IF NOT EXISTS `token` (
+  `token_key` varchar(32) NOT NULL,
+  `token_location` varchar(32) NOT NULL,
+  `token_state` int(10),
+  PRIMARY KEY (`token_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</pre>
+
+See [[Game database model: dbmodel.sql]] for details about editing the file.
+
+Note: the simpler the database is the less debugging of database issues you have to deal with including database migration. The tokens database above - if you use it you never have to worry about migration because you don't need extra tables in 95% of the games. Here are some example of how real games are mapped to such database:
+
+'''Chess:''' 
+
+chess is grid base game and normally you would use positional columns, but just for the sake of argument, the chess game will look like this
+{| class="wikitable"
+|+token
+! token_key
+! token_location
+! token_state
+|-
+|Q_white
+|f3
+|0
+|-
+|P_black_2
+|c6
+|0
+|-
+|K_black
+|e8
+|1
+|}
+And the state in this case indicated that kind was moved for example (which means castling cannot be performed)
+
+'''Classic card game''' 
+
+Lets pretend we need 2 decks for that game
+{| class="wikitable"
+|+token
+! token_key
+! token_location
+! token_state
+|-
+|Q_spades_1
+|hand_ff0000
+|0 /* state not used for hand */
+|-
+|10_hearts_2
+|tableau_ff0000
+|2 /* position */
+|-
+|10_hearts_1
+|tableau_common
+|1 /* face down */
+|}
+
+'''Eminent Domain (card game)''' 
+
+{| class="wikitable"
+|+token
+! token_key
+! token_location
+! token_state
+|-
+|card_tech_23
+|hand_ff0000
+|0 /* state not used for hand */
+|-
+|card_planet_19
+|tableau_ff0000
+|1 /* face up */
+|-
+|reource_s_22 /* silicon */
+|card_planet_19
+|2 /*  production state */
+|-
+|fighter_F_1
+|tableau_ff0000
+|0
+|}
+
+You can also look at other games that use Tokens database and access layer: Nippon, Dungeon Petz, Lewis & Clark, Battleship, Russian Railroads, Khronos.
+
+Note: you may need more DB tables to represent non-material aspect of the game. For example adanced action machine or multi-step undo tables.
+
+== Implement Game Setup ==
+
+Once you have your database schema you can do a proper game setup. Usually you open rulebook on the "Game Setup" page and implement these step by step populating the database (using database access API). Game initialization is performed in php method <code>setupNewGame</code>, this method is called once when game table is created. LOGGING does not work in this function.
+
+It very hard to debug this method, so this is how we recommend to structure it:
+
+<pre>
+protected function setupNewGame($players, $options = []) { 
+   
+   // here is some generate code from template LEAVE IT UNTOUCHED
+   ...
+
+   $this->initTables(); // this is YOUR new method
+}
+
+function initTables() {
+       try {
+            $players = $this->loadPlayersBasicInfos();
+            // code the function
+            $this->activeNextPlayer(); // just in case so its not 0
+            $this->initStats(); // to be coded
+            // Setup the initial game situation here
+            $this->initGameTables(); // to be coded
+            // beggining of the turn for active player (if player state if first state)
+            $player_id = $this->getActivePlayerId();
+            $this->playerStats->inc('turns_number', 1, $player_id, true);
+       } catch ( Exception $e ) {
+           // logging does not actually work in game init :(
+           // but if you calling from php chat it will work
+           $this->error("Fatal error while creating game");
+           $this->dump('err', $e);
+       }
+}
+</pre>
+
+For more tricks about debugging see this [https://en.doc.boardgamearena.com/Practical_debugging#Debugging_setupNewGame Debugging setupNewGame]
+
+For the <code>initStats()</code> method, its likely that all of the stats are <code>int</code> and you can just use this genetic initializer, but your stats have to start with <code>game_</code> prefix (verbatim):
+<pre>
+    public function initStats()
+    {
+        // INIT GAME STATISTIC
+        $all_stats = $this->getStatTypes();
+        $player_stats = $all_stats['player'];
+        // auto-initialize all stats that starts with game_
+        // we need a prefix because there is some other system stuff
+        foreach ($player_stats as $key => $value) {
+            if (str_starts_with($key, 'game_')) {
+                $this->playerStats->init($key, 0);
+            }
+            if ($key === 'turns_number') {
+                $this->playerStats->init($key, 0);
+            }
+        }
+        $table_stats = $all_stats['table'];
+        foreach ($table_stats as $key => $value) {
+            if (str_starts_with($key, 'game_')) {
+                $this->tableStats->init($key, 0);
+            }
+            if ($key === 'turns_number') {
+                $this->tableStats->init($key, 0);
+            }
+        }
+    }
+</pre>
+
+As for <code>initGameTables()</code> - if you have a SQL layer you can use it to initialize everything, if not - the best would be to push everything in php <code>array</code> and then do one <code>INSERT</code> at the end (after all the fiddling and shuffling).
+
+For example for the token database above, I will push all data into an array, then at the end run <code>INSERT</code>, i.e.
+
+        $values=[]; 
+        $values [] = "('meeple_ff0000_1', 'home_ff0000', 0)"; // this is actually string not array
+        ...
+        $sql = "INSERT INTO tokens (token_id, place_id, state) VALUES " . implode(',', $values);
+        $this->DbQuery($sql);
+
+== Implement one time game model synchronization ==
+
+Now at any point in the game we need to make sure that database information can be reflected back in UI, so we fix <code>getAllDatas</code> function to return all possible data we need to reconstruct the game. The template for <code>getAllDatas</code> is already taking care of player info, but you  have to alter it to return all other data from database visible to the "current" player.
+
+After that on the client side we should display this data, so in your .js file in <code>setup</code> function (which is the receiver of <code>getAllDatas</code>) you add calls that handle data send by server, usually by calling animation function such as "<code>placeToken</code>" or "<code>placeCard</code>".
+
+So this is roughly what you need to include in <code>getAllDatas()</code>:
+
+* Extra player info.
+* Material file variables as unfortunately they are not included automatically. Note - I strongly recommend using only one variable for generic data information, such as <code>$this->token_types</code>. If you start splitting it i.e. <code>card_types</code>, <code>meeple_types</code>, <code>building_types</code> - it will be very hard to deal with this programmatically as it will be lots of switches. Also call it the same as in php - otherwise its really hard to correlate.
+* Game options (if you know how to access them on client without passing via <code>getAllData()</code> edit this wiki). Example has generic code to pass all options, but you can use custom individual options.
+* Dump of database tables filtered by current player view.
+* To be fancy you can also include php constants so you can access them in js as well, example not included.
+
+<pre>
+    protected function getAllDatas() {
+        $result = [];
+
+        // 1. Get information about players
+        // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
+        // would have been much better if its just * but we not looking for easy solutions here! so it all have to be aliases
+        $sql = "SELECT player_id id, player_score score, player_no no FROM player"; // note - the framework will all bunch of more fields
+        $result ['players'] = self::getCollectionFromDb($sql);
+
+        // 2. Material data
+        $result['token_types'] = $this->token_types;
+        // 3. Game options
+        $table_options = $this->getTableOptions();
+        $result ['table_options'] = [];
+        foreach ( $table_options as $option_id => $option ) {
+            $value = 0;
+            if (array_key_exists($option_id, $this->gamestate->table_globals)) {
+                $value = (int) $this->gamestate->table_globals [$option_id];
+            }
+            $result ['table_options'] [$option_id] = $option;
+            $result ['table_options'] [$option_id] ['value'] = $value;
+        }
+        // 4. Rest of the database filtered by current player
+        $current_player_id = self::getCurrentPlayerId(); // !! We must only return informations visible by this player !!
+        $result ['tokens'] = [];
+        $players_basic = $this->loadPlayersBasicInfos();
+        foreach ( $players_basic as $player_id => $player_info ) {
+            $color = $player_info ['player_color'];
+            // tableau is public info
+            $result ['tokens']+=$this->tokens->getTokensInLocation("tableau_$color"); // this is sql access layer for tokens table but it can be just raw SQL query with getCollectionFromDb kind of call
+            //  hand if private info
+            if ($current_player_id==$player_id) {
+                $result ['tokens']+=$this->tokens->getTokensInLocation("hand_$color");
+            } else {
+                $result ['counters']["hand_$color"]=$this->tokens->countTokensInLocation("hand_$color");
+            }
+        }
+        $result ['counters']["deck]=$this->tokens->countTokensInLocation("deck");
+        $result ['counters']["discard"]=$this->tokens->countTokensInLocation("discard");
+
+        return $result;
+    }
+</pre>
+
+== Create State Machine ==
+
+Now you need to create a game state machine. Create one file for each game state, following [[State classes: State directory]] documentation.
+
+Now the state machine should be relatively simple. If you find yourself with machine with more than 20 states its probably not the way to go. Not all the player interactions need separate states, a lot of things can be implemented directly on client, i.e. if your player need to select a reward token, which offers choice of resource, instead of two states on server just have one state on server and possible few states on client (client side states) to collect this info.
+
+It is important to implement proper state handling on the client, usually it results in big <code>switch</code> in <code>onUpdateActionButtons</code> method.
+<pre>
+onUpdateActionButtons: function(stateName, args) {
+	console.log('onUpdateActionButtons: ' + stateName + " " + this.isCurrentPlayerActive() + " args:", args);
+	if (!this.isCurrentPlayerActive()) return;
+	switch (stateName) {
+		case 'playerTurn':
+	        dojo.query('.card').addClass('active_slot'); // activate board elements, when using static connector, see user input below
+		// add buttons
+		this.addActionButton('button_pass', _('Pass'), () => { this.bgaPerformAction('actPass'); });
+		// case...
+	}
+	if (this.on_client_state && !$('button_cancel')) {
+		this.addActionButton('button_cancel', _('Cancel'), 'cancelLocalStateEffects', 0, 0, 'gray');
+		this.addTooltip('button_cancel', _("This means cancel current action and start thinking"), '');
+	}
+},
+
+</pre>
+
+I keep <code>onLeavingState</code> pretty generic (and <code>onEnteringState</code> just for logging)
+<pre>
+onLeavingState: function (stateName) {
+	console.log('Leaving state: ' + stateName);
+	dojo.query('.active_slot').removeClass('active_slot');
+	dojo.query('.selected').removeClass('selected');
+},			
+				
+</pre>
+
+
+==Handle Turn Order==
+
+If your game goes in clockwise order in natural sitting position nothing is really needed, you just use standard API and you are good. However if position is complicated it may require some trickery.
+
+Usually turn order is done by "game state" (see state machine above). Basically it would be two choices:
+*Turn order depends on game situation (such as we take player with highest number of red cubes).
+*Turn order is custom and assign on previous step - i.e. we not playing in clockwise order anymore. In this case you either need to extend player table with new order info (CANNOT use <code>player_no</code> column) or use order markers that come with game (i.e. <code>marker_ff0000</code> on <code>position_1</code>). In this we can build player array in right order and pick next player based on previous player using existing helper function such as <code>$this->createNextPlayerTable($player_ids)</code>.
+
+Handling turn order would go to the game state which is usually follows active player state.
+
+==Hook User Input==
+
+This step can be done before or after some of the server steps, or you go in iterations switching back and forward until you get it done, up to you.
+
+Usually all pieces will be hooked to <code>onclick</code> during JS "<code>setup</code>" method, in addition if you create elements during server notification they have to be hooked up at that time.
+
+Also its a good idea to give player a visual cues on what game elements are clickable now, usually it will be a style, such as "<code>active_slot</code>", with visual effect of white dashed outline (outline is better than border, because border changes will make piece slightly move since it changes the size) or <code>box-shadow</code> (i.e. neon glow), that part is done in <code>onUpdateActionsButtons</code> (see above).
+
+So classic is static handlers, means handler is added in setup method using framework connect function:
+
+  this.connect( $('my_element'), 'onclick', 'onClickOnMyElement' );
+
+This is what is advertised in tutorials, however this is best suited for static html model - where elements are not deleted and recreated. When elements created dynamically if you using this method please be aware of memory leaks - this method stores the pointer to DOM element in arrays of handlers (to be able to disconnect later), but if element is deleted you must call <code>this.disconnect</code> before deleting with same node reference, or it will leak.
+
+If you using this method your handlers usually look like big ugly switch because it usually depending on state it will do right thing or deny action, typically it will look this this:
+ onCard: function(event) {
+ 	dojo.stopEvent(event);
+ 	var id = event.currentTarget.id;
+ 	console.trace("on slot " + id);
+ 	if (!id) return null;
+ 	// check player is active
+ 	if (!this.isCurrentPlayerActive()) {
+ 		this.showMessage(__("lang_mainsite", "This is not your turn"), "error");
+ 		return false;
+ 	}
+ 	// check node is marked with "active_slot" class (class name is whatever you want)
+ 	if (!dojo.hasClass(id, 'active_slot')) {
+ 		this.showMoveUnauthorized();
+ 		return false;
+ 	}
+ 	switch (this.gamedatas.gamestate.name) {
+ 		case 'playerTurn': // in this case we directly sending data to the server
+ 			this.bgaPerformAction('actPlayCard', { id }); // note that this wrapper also calls 'checkAction' on action parameter
+ 			return true;
+ 		case 'playerDiscard':  // in this case we need to collect more information, so we using cient state for that
+ 			dojo.addClass(id,'selected'); // mark card
+ 			this.setClientState("client_playerTurnSelectBonus", {
+ 				descriptionmyturn: _('${you} must select bonus for discard'),
+ 			});
+ 			return true;
+ 		default:
+ 			this.showMoveUnauthorized();
+ 			return false;
+ 	}
+ },
+
+You can also manage listeners yourself (vanilla event listeners or dojo). In this case be aware of registering double listener. See more example in [[Game_interface_logic:_yourgamename.js#Players_input|Player's Input]].
+
+Alternative to static handler are dynamic handlers which are only installed on elements that are active for specific game state, given the example above we would register the listeners in <code>playerTurn</code> state, i.e. in <code>onUpdateActionButtons</code> for <code>playerTurn</code>:
+<pre>
+dojo.query('.card').forEach((node) => {
+	dojo.addClass(node, 'active_slot');
+	dojo.addClass(node, 'temp_click_handler');
+	this.connect(node, 'click', event => this.bgaPerformAction('actPlayCard', { id: event.currentTarget.id }));
+});
+</pre>
+Above we did not need to do the heavy validation because we only presumably added handler in right state to right node and right active player (and removed correctly in between!)
+
+And in <code>onLeavingState</code> we will disconnect all of them (important!):
+<pre>
+dojo.query('.temp_click_handler').forEach((node) => {
+	dojo.removeClass(node, 'active_slot');
+	dojo.removeClass(node, 'temp_click_handler');
+	this.disconnect(node, 'click');
+});
+</pre>
+
+When user clicks on something, client sends an ajax call to server, server processes it and updates database, server sends notification in response, client hooks animations to server notification. See [[Game_interface_logic:_yourgamename.js#Notifications|JS Notifications]].
+
+Exception to this is client states, if you need to process two step user interaction such as select meeple, place meeple, you may want to avoid sending data to server until step is complete (which may involve direct client side animation). See [[BGA_Studio_Cookbook#Multi_Step_Interactions:_Select_Worker.2FPlace_Worker_-_Using_Selection|Multi-Step Interactions]]
+
+Part of the sending notifications would be to update player's scoring, BGA uses standard control for score (on JS side), see [[Game_interface_logic:_yourgamename.js#Update_players_score|Update Player's Score]].
+
+In BGA there is only two ways interact with the server (officially)
+*Initial data dump - when JS client starts it gets all current data via setup() method
+*Game actions - <code>bgaPerformAction</code>/ajaxcall from client, it returns error or ok (not data), then server send butch of notifications to client
+
+Note current ajaxcall is super vebosy, <code>bgaPerformAction</code> should be used instead.
+
+When you insert a single action you have to update multiples files: 
+*in ggg.js add bgaPerformAction, i.e. something like
+  this.addActionButton('pass', _('Pass'), () => this.bgaPerformAction('actPass'));
+* in states.php - add action 'actPass' to list of possible actions
+  'possibleactions' => ['actPass','actPlayCard'] 
+*in <code>game.php</code> - add action handler, there you must do the following:
+**possible do game specific check to validate what player doing is legal (even its not possible from your js side - player can cheat - not allow that).
+**do some database manipulations, using access API.
+**send notifications - this is the "reply" for action.
+**transition to new state (it very rare that  user will remain in the same state, except for multi-active states).
+*back to ggg.js add notification subscription and notification handler (two separate things).
+
+==Implement Notification handling and Animation==
+
+To handle notification you have to subscribe to it and implement the handlers, see [[Game_interface_logic:_yourgamename.js#Notifications|JS Notifications]].
+
+You can play with animation effects you want put in place, in general all the pieces that move in real game should be moving, such as meeples, resources tokens/cubes, cards, vp tokens. Regular piece animation is provided by BGA framework, but if you use html layout positioning not inline positioning you have to remove absolute positions (inline position styling) after each move. The set of functions for relative position token animation can found in https://github.com/elaskavaia/bga-sharedcode/blob/master/sharedcode.js 
+
+If you read [http://www.slideshare.net/boardgamearena/bga-studio-guidelines BGA developers guidelines] you know that you should not get carried away with animation, you are creating a board game not a video game... That also applies to sound effects (in general, you should not use any sounds effects beside already provided by framework).
+
+See  [[Game_interface_logic:_yourgamename.js#Access_and_manipulate_the_DOM|Animation and DOM Manipulation]] for JS reference.
+==Wrap Up==
+
+*Implement game progression (<code>getGameProgression()</code> in php).
+*Implement the [[Zombie Mode|Zombie mode]].  (<code>zombieTurn()</code> in php).
+*Define and implemented some meaningful statistics for your game (i.e. total points, point from source A, B, C...).
+*The games logs should explain what happened if player was not looking.
+*You need to implemented tiebreaking (using aux score field) and updated tiebreaker description in meta-data.
+*Make sure all UI strings are marked for translation.
+*UI elements which are images (i.e. tokens, cards) should have tooltips.
+
+==Alpha==
+When you think you game is completely working there is still bunch of stuff you have to do/check before telling admin that game is ready, please go though this [[Pre-release checklist]].
+
+If you think its completely ready, create a build and click on the "Request ALPHA status" button and admins will check your game and push it to alpha.
+
+Finally, visit the game page for your alpha game (https://boardgamearena.com/gamepanel?game=…) to add the following information if you can:
+*Links to the rules (in multiple languages if available).
+* Links to teaching videos.
+*In the "On the web" section, links to:
+**The official website for the game (if there is one).
+** The BoardGameGeek page for the game.
+* Consider writing a summary of the rules.
+
+Note: later can be done by community members, you don't actually have to do it yourself
+
+==Level Up==
+
+When you successfully created a basic game and you want more, it's time to make it fancy!
+
+*Add game extentions and variants using gameoptions file.
+*Add user preferences for customizations.
+*Use theming! That involves replacing hardwood background, changing tooltips, using different sounds, different fonts, changing state prompt and logs.
+*You can use fancy scoring board at the end of game instead of default nothing.
+*And finally super cool dice rolling, card flipping and victory points evaporating effects.
+
+==After the alpha stage ==
+If you want to update your game after alpha, please look at the [[Post-release phase]]
+
+[[Category:Studio]]
