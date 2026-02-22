@@ -72,54 +72,8 @@ class Material {
                 "type" => "err",
                 "name" => clienttranslate("Not valid placement"),
             ],
-
-            /* --- gen php begin op_material --- */
-    "Op_nop" => [ 
-        "type" => "nop",
-        "name" => clienttranslate("None"),
-],
-    "Op_savepoint" => [ 
-        "type" => "savepoint",
-        "name" => clienttranslate("None"),
-],
-    "Op_or" => [ 
-        "type" => "or",
-        "name" => clienttranslate("Choice"),
-],
-    "Op_order" => [ 
-        "type" => "order",
-        "name" => clienttranslate("Choose Order"),
-],
-    "Op_seq" => [ 
-        "type" => "seq",
-        "name" => clienttranslate("Sequence"),
-],
-    "Op_gain" => [ 
-        "type" => "gain",
-        "name" => clienttranslate("Gain"),
-],
-    "Op_pay" => [ 
-        "type" => "pay",
-        "name" => clienttranslate("Pay"),
-],
-    "Op_paygain" => [ 
-        "type" => "paygain",
-        "name" => clienttranslate("Trade"),
-],
-    "Op_turn" => [ 
-        "type" => "turn",
-        "name" => clienttranslate("Turn"),
-],
-    "Op_turnconf" => [ 
-        "type" => "turnconf",
-        "name" => clienttranslate("Confirm Turn"),
-],
-    "Op_finalScoring" => [ 
-        "type" => "finalScoring",
-        "name" => clienttranslate("Final Scoring"),
-],
-            /* --- gen php end op_material --- */
         ];
+        $this->addGeneratedTokens();
     }
 
     public function get(): array {
@@ -212,5 +166,58 @@ class Material {
             $this->token_types[$token_id] = [];
         }
         $this->token_types[$token_id] = array_merge($this->token_types[$token_id], $rules);
+    }
+
+    function addGeneratedTokens() {
+        $this->token_types += [
+            /* --- gen php begin op_material --- */
+    "Op_nop" => [ 
+        "type" => "nop",
+        "name" => clienttranslate("None"),
+],
+    "Op_savepoint" => [ 
+        "type" => "savepoint",
+        "name" => clienttranslate("None"),
+],
+    "Op_or" => [ 
+        "type" => "or",
+        "name" => clienttranslate("Choice"),
+],
+    "Op_order" => [ 
+        "type" => "order",
+        "name" => clienttranslate("Choose Order"),
+],
+    "Op_seq" => [ 
+        "type" => "seq",
+        "name" => clienttranslate("Sequence"),
+],
+    "Op_gain" => [ 
+        "type" => "gain",
+        "name" => clienttranslate("Gain"),
+],
+    "Op_pay" => [ 
+        "type" => "pay",
+        "name" => clienttranslate("Pay"),
+],
+    "Op_paygain" => [ 
+        "type" => "paygain",
+        "name" => clienttranslate("Trade"),
+],
+    "Op_turn" => [ 
+        "type" => "turn",
+        "name" => clienttranslate("Turn"),
+],
+    "Op_turnconf" => [ 
+        "type" => "turnconf",
+        "name" => clienttranslate("Confirm Turn"),
+],
+    "Op_finalScoring" => [ 
+        "type" => "finalScoring",
+        "name" => clienttranslate("Final Scoring"),
+],
+            /* --- gen php end op_material --- */
+
+            /* --- GEN PLACEHOLDR --- */
+        ];
     }
 }
