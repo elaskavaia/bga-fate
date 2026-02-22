@@ -1,0 +1,20 @@
+type|name|php
+#set id=Op_{type}
+
+#set class=
+
+
+nop|None
+savepoint|None
+or|Choice
+order|Choose Order
+seq|Sequence
+gain|Gain
+pay|Pay
+paygain|Trade
+
+
+turn|Turn
+turnconf|Confirm Turn
+
+finalScoring|Final Scoring

@@ -1,0 +1,228 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Bga\Games\Fate\Tests;
+
+use Bga\Games\Fate\Db\DbMachine;
+
+/**
+ * Test class for machine overriding db function to be in memory
+ */
+class MachineInMem extends DbMachine {
+    public $xtable;
+
+    function __construct($game = null, &$xtable_ref = null) {
+        parent::__construct($game);
+        $this->xtable = [];
+        if ($xtable_ref != null) {
+            $this->xtable = &$xtable_ref;
+        }
+    }
+
+    function _($text) {
+        return $text;
+    }
+
+    function escapeStringForDB($string) {
+        return $string;
+    }
+
+    function getExtremeRank(bool $getMax, $owner = null, $pool = null) {
+        $extrime = $getMax ? 0 : PHP_INT_MAX;
+        foreach ($this->xtable as $row) {
+            $rank = $row["rank"];
+            if (($owner === null || $row["owner"] === $owner) && ($pool === null || $row["pool"] === $pool)) {
+                if ($rank > 0) {
+                    if ($getMax) {
+                        if ($rank > $extrime) {
+                            $extrime = $rank;
+                        }
+                    } else {
+                        if ($rank < $extrime) {
+                            $extrime = $rank;
+                        }
+                    }
+                }
+            }
+        }
+        return $extrime;
+    }
+
+    function all() {
+        return $this->xtable;
+    }
+
+    function getOperationsByRank($rank = null, $owner = null, $type = null) {
+        if ($rank === null) {
+            $rank = $this->getTopRank($owner, $type);
+        }
+        $this->checkInt($rank);
+
+        $arr = $this->xtable;
+        return array_filter($arr, function ($elem) use ($rank, $owner, $type) {
+            return $elem["rank"] == $rank && ($owner === null || $elem["owner"] === $owner) && ($type === null || $elem["type"] === $type);
+        });
+    }
+
+    function getOperations($owner = null, $type = null) {
+        $arr = $this->xtable;
+        $res = array_filter($arr, function ($elem) use ($owner, $type) {
+            return $elem["rank"] >= 0 && ($owner === null || $elem["owner"] === $owner) && ($type === null || $elem["type"] === $type);
+        });
+        uasort($res, function ($a, $b) {
+            return $a["rank"] <=> $b["rank"];
+        });
+        return $res;
+    }
+
+    function getHistoricalOperations($owner = null, $type = null) {
+        $arr = $this->xtable;
+        $res = array_filter($arr, function ($elem) use ($owner, $type) {
+            return $elem["rank"] < 0 && ($owner === null || $elem["owner"] === $owner) && ($type === null || $elem["type"] === $type);
+        });
+        uasort($res, function ($a, $b) {
+            return $a["rank"] <=> $b["rank"];
+        });
+        return $res;
+    }
+
+    function getLastId() {
+        return count($this->xtable);
+    }
+    public static function DbQuery($sql, $specific_db = null, $bMulti = false) {
+        //echo "dbquery: $sql\n";
+        throw new \feException("not implemented query");
+    }
+
+    function DbSetField($field, $value, $idOrList, $quoted = false) {
+        $ids = $this->ids($idOrList);
+        foreach ($this->xtable as &$row) {
+            if (array_search($row["id"], $ids) !== false) {
+                $row[$field] = $value;
+            }
+        }
+    }
+
+    public static function getCollectionFromDB($sql, $bSingleValue = false, $low_priority_select = false) {
+        throw new \feException("not implemented query");
+    }
+
+    function insertList($rank, $list) {
+        foreach ($list as $row) {
+            if (!isset($row["id"])) {
+                $row["id"] = $this->getLastId() + 1;
+            }
+            $row["rank"] = $rank;
+
+            $this->xtable[] = $row;
+        }
+
+        return $this->getLastId();
+    }
+
+    function gettablearr($table = null, $fakeid = true) {
+        if (!$table) {
+            $table = $this->xtable;
+        }
+        $res = [];
+        $filds = $this->getTableFields();
+        $i = 1;
+        foreach ($table as $record) {
+            $flat = [];
+
+            if ($record["rank"] == -1) {
+                continue;
+            }
+
+            foreach ($filds as $key) {
+                if ($key == "id" && $fakeid) {
+                    $flat[] = $i;
+                } elseif ($key == "pool" || $key == "reason") {
+                    // ignore
+                } else {
+                    $flat[] = $record[$key];
+                }
+            }
+            $res[] = implode("|", $flat);
+            $i = $i + 1;
+        }
+        return $res;
+    }
+
+    function findByType($type, $index = 0) {
+        $arr = $this->xtable;
+        $subarr = array_filter($arr, function ($elem) use ($type) {
+            return $elem["type"] === $type;
+        });
+        $subarr = array_values($subarr);
+        if (count($subarr) == 0) {
+            return null;
+        }
+        if (count($subarr) <= $index) {
+            return null;
+        }
+        return $subarr[$index]["id"];
+    }
+
+    /**
+     * Get specific operations info
+     */
+    function infos($list) {
+        $ids = $this->ids($list);
+        $subarr = array_filter($this->xtable, function ($elem) use ($ids) {
+            if (array_search($elem["id"], $ids) !== false) {
+                return true;
+            }
+            return false;
+        });
+        return array_values($subarr);
+    }
+
+    function interrupt($from = 1, $count = 1) {
+        foreach ($this->xtable as &$row) {
+            if ($row["rank"] >= $from) {
+                $row["rank"] += $count;
+            }
+        }
+    }
+    function renice($list, $rank) {
+        $ids = $this->ids($list);
+        foreach ($this->xtable as &$row) {
+            if (array_search($row["id"], $ids) !== false) {
+                $row["rank"] = $rank;
+            }
+        }
+    }
+
+    function normalize() {
+        $top = $this->getTopRank();
+        if ($top > 1) {
+            foreach ($this->xtable as &$row) {
+                if ($row["rank"] >= $top) {
+                    $row["rank"] = $row["rank"] - $top + 1;
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove operations (its not really removed from db, but rank set to -1)
+     */
+    function hide($list) {
+        $ids = $this->ids($list);
+
+        foreach ($ids as $i) {
+            $row = &$this->xtable[$i - 1];
+            $row["rank"] = -1;
+        }
+    }
+
+    function prune() {
+        foreach ($this->xtable as &$row) {
+            if ($row["rank"] > 0 && $row["count"] == 0) {
+                $row["rank"] = -1;
+            }
+        }
+    }
+}

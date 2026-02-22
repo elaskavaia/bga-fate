@@ -1,3 +1,15 @@
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+
+
 class PlayerTurn {
     private game: Game;
     private bga: Bga;
@@ -62,18 +74,19 @@ export class Game {
         `);
 
         Object.values(gamedatas.players).forEach((player: FatePlayer) => {
-            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML('beforeend', `
-                <span id="energy-player-counter-${player.id}"></span> Energy
+            const playerId = Number(player.id);
+            this.bga.playerPanels.getElement(playerId).insertAdjacentHTML('beforeend', `
+                <span id="energy-player-counter-${playerId}"></span> Energy
             `);
             const counter = new ebg.counter();
-            counter.create(`energy-player-counter-${player.id}`, {
+            counter.create(`energy-player-counter-${playerId}`, {
                 value: (player as any).energy,
                 playerCounter: 'energy',
-                playerId: player.id
+                playerId
             });
 
             document.getElementById('player-tables')!.insertAdjacentHTML('beforeend', `
-                <div id="player-table-${player.id}">
+                <div id="player-table-${playerId}">
                     <strong>${player.name}</strong>
                     <div>Player zone content goes here</div>
                 </div>

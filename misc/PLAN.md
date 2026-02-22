@@ -12,6 +12,7 @@ This document is a plan for the implementation of the game Fate: Defenders of Gr
 
 
 ## High level plan
+[x] Transform templated project into typescript enabled
 [ ] Copy boiletplate code from another game: tokens db, machine db, common utils, etc
 [ ] Implement general rules
 [ ] Implement rules for one specific monster type
