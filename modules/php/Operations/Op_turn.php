@@ -29,7 +29,7 @@ class Op_turn extends Operation {
             $this->queue("ai_turn", $this->game->getAutomaColor());
             return true;
         }
-        $this->game->refillMainArea();
+
         $this->game->switchActivePlayer($this->getPlayerId(), true);
         $this->game->customUndoSavepoint($this->getPlayerId(), 1);
 
