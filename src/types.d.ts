@@ -9,9 +9,10 @@
  *
  */
 
- 
-interface FatePlayer extends Player {
-}
+interface CustomPlayer extends Player {}
 
-interface FateGamedatas extends Gamedatas<FatePlayer> {
+interface CustomGamedatas extends Gamedatas<CustomPlayer> {
+  tokens: { [key: string]: Token };
+  token_types: { [key: string]: any };
+  counters: { [key: string]: { value: number } };
 }
