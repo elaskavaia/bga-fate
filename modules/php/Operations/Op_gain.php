@@ -24,14 +24,6 @@ use Bga\Games\Fate\Game;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 class Op_gain extends CountableOperation {
-    public function auto(): bool {
-        if ($this->getPlayerId() == Game::PLAYER_AUTOMA) {
-            // AI  gets res track
-            $this->queue("ai_res", $this->game->getAutomaColor());
-            return true;
-        }
-        return parent::auto();
-    }
     function resolve(): void {
         $count = $this->getCheckedArg();
         //$this->game->systemAssert("missing reason", $this->getReason());

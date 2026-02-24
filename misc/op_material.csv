@@ -17,4 +17,27 @@ paygain|Trade
 turn|Turn
 turnconf|Confirm Turn
 
+
+# End of turn
+endOfTurn|End of Turn
+
 finalScoring|Final Scoring
+
+
+# Main actions (2 per turn, cannot repeat)
+#set kind=main
+actionMove|Move
+actionAttack|Attack|"notimpl"=>true
+actionPrepare|Prepare|"notimpl"=>true
+actionFocus|Focus|"notimpl"=>true
+actionMend|Mend|"notimpl"=>true
+actionPractice|Practice
+
+# Free actions (can be done between/after main actions)
+#set kind=free
+useEquipment|Use Equipment|"notimpl"=>true
+useAbility|Use Ability|"notimpl"=>true
+playEvent|Play Event|"notimpl"=>true
+shareGold|Share Gold|"notimpl"=>true
+
+#set kind=

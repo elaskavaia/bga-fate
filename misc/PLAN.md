@@ -35,7 +35,7 @@ Goal: Get the game starting with a board, players placed in Grimheim, town piece
 
 ### 1.1 Define Game Elements in CSV / Material
 
-[ ] Create `token_material.csv` — define all token types:
+[X] Create `token_material.csv` — define all token types:
   - `hero_<name>` — hero miniatures (one per hero: start with 2 heroes from 1 hero box)
   - `house_X` — 9 house tokens (X is 1 to 9)
   - `house_0` — Freyja's Well (the last town piece, losing condition)
@@ -51,12 +51,13 @@ Goal: Get the game starting with a board, players placed in Grimheim, town piece
   - Hero cards, ability cards, equipment cards, event cards (per hero deck)
 [ ] Create `location_material.csv` — define board locations:
   - `grimheim` — single area, central town
-  - Named locations: Troll Caves, Nailfare, Wyrm Lair, Spewing Mountain, Dead Plains, etc.
-  - Hex areas with terrain types: plains, mountain, forest, lake
-  - Roads connecting areas
   - Time track spots (short and long variants)
   - Monster supply spots on board
   - Player board slots: action slots (move, attack, prepare, focus, mend, practice), ability pile, equipment pile, event deck, discard, gold/experience storage
+[ ] Create `map_material.csv` — define board hexes. Map is hex grid 9x9 with flat top. Use Axial Coordinates with center being 0,0
+  - Named locations: Troll Caves, Nailfare, Wyrm Lair, Spewing Mountain, Dead Plains, etc.
+  - Hex areas with terrain types: plains, mountain, forest, lake
+  - Roads connecting areas
 [ ] Run `npm run genmat` to generate Material.php sections
 [ ] Define game constants in Material.php manual sections:
   - Terrain types: TERRAIN_PLAINS, TERRAIN_MOUNTAIN, TERRAIN_FOREST, TERRAIN_LAKE
@@ -67,7 +68,7 @@ Goal: Get the game starting with a board, players placed in Grimheim, town piece
 
 ### 1.2 Board Topology (Hex Map)
 
-[ ] Define hex grid adjacency data structure (PHP array in Material.php or separate data file)
+[ ] Define hex grid adjacency data structure (PHP array in hex_material.csv)
   - Each hex area identified by coordinate or ID
   - Store: terrain type, location name (if any), adjacent hexes, road connections
   - Mark which areas are part of multi-area locations (Troll Caves = 3 mountain hexes, Nailfare = 2 lake hexes)

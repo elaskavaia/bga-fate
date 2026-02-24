@@ -36,7 +36,7 @@ class Base extends Table {
     public OpMachine $machine;
     public Material $material;
     protected array $player_colors;
-    protected Base $game;
+    protected Game $game;
 
     function __construct() {
         // Your global variables labels:

@@ -5,3 +5,76 @@
  */
 
 /********* You can start writing your CSS below this line: **********/
+
+// --- Hex grid variables ---
+$hex-size: 50px; // distance from center to corner (pointy-top)
+$hex-width: calc($hex-size * sqrt(3)); // sqrt(3) * size ≈ width (pointy-top)
+$hex-height: $hex-size * 2; // full height of a pointy-top hex
+$hex-gap: 2px; // visual gap between hexes (applied as margin)
+$hex-bg: #d4c9a8;
+$hex-bg-hover: #c2b48e;
+$hex-border-color: #8b7d5e;
+$hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+
+#map_area {
+  position: relative;
+  margin: 10px auto;
+  // Size is set dynamically via inline style in TS, but provide a fallback
+  max-width: 2048px;
+}
+
+.hex {
+  position: absolute;
+  width: $hex-width;
+  height: $hex-height;
+  clip-path: $hex-clip;
+  background-color: $hex-bg;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  // Inner border effect using a pseudo-element (clip-path clips real borders)
+  &::before {
+    content: "";
+    position: absolute;
+    inset: $hex-gap;
+    clip-path: $hex-clip;
+    background-color: $hex-bg;
+    transition: background-color 0.15s ease;
+  }
+
+  &::after {
+    position: absolute;
+    content: attr(data-loc);
+    z-index: 3;
+    top: 30%;
+    left: 5%;
+  }
+
+  &:hover {
+    background-color: $hex-border-color;
+    &::after {
+      background-color: $hex-bg-hover;
+    }
+  }
+
+  &.active_slot {
+    background-color: #4a9;
+    &::after {
+      background-color: #77ccaa;
+    }
+  }
+
+  // --- Terrain types ---
+  &.terrain_forest::before {
+    background-color: #3a8a3e;
+  }
+}
+.hex.terrain_lake,
+.hex.terrain_lake::before {
+  background-color: #71adc5;
+}
+
+.hex.terrain_mountain,
+.hex.terrain_mountain::before {
+  background-color: #5a5b5c;
+}

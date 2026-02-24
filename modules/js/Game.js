@@ -1705,6 +1705,36 @@ class Game extends GameMachine {
     setup(gamedatas) {
         console.log("Starting game setup");
         super.setup(gamedatas);
+        // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
+        // Shifted axial coordinates: center at (9,9), range 1..17. Hex boundary: |q-9| + |r-9| + |q+r-18| <= 16
+        // Horizontal rows by r: row pattern 9, 10, 11, ..., 17, ..., 11, 10, 9
+        const HEX_SIZE = 50; // must match $hex-size in Game.scss
+        const HEX_W = HEX_SIZE * Math.sqrt(3);
+        const GRID_N = 8; // hex radius
+        const GRID_C = GRID_N + 1; // center offset (9)
+        // Pointy-top axial to pixel using zero-based coords for positioning
+        // Grid bounds: width = sqrt(3) * size * (2*N + 1), height = size * (3*N + 2)
+        const mapW = HEX_W * (2 * GRID_N + 1);
+        const mapH = HEX_SIZE * (3 * GRID_N + 2);
+        const hexes = [];
+        for (let r = 1; r <= 2 * GRID_N + 1; r++) {
+            const r0 = r - GRID_C; // zero-based r for pixel math
+            const qMin = Math.max(1, 1 - r0);
+            const qMax = Math.min(2 * GRID_N + 1, 2 * GRID_N + 1 - r0);
+            for (let q = qMin; q <= qMax; q++) {
+                const q0 = q - GRID_C; // zero-based q for pixel math
+                const px = HEX_W * GRID_N + HEX_SIZE * (Math.sqrt(3) * q0 + (Math.sqrt(3) / 2) * r0);
+                const py = HEX_SIZE * 1.5 * GRID_N + HEX_SIZE * 1.5 * r0;
+                const hexId = `hex_${q}_${r}`;
+                const terrain = this.getRulesFor(hexId, "terrain", "");
+                const loc = this.getRulesFor(hexId, "loc", "");
+                hexes.push(`<div class="hex terrain_${terrain}" id="${hexId}" style="left:${px}px;top:${py}px;" data-q="${q}" data-r="${r}" data-loc="${loc}"></div>`);
+            }
+        }
+        const hexHtml = hexes.join("\n");
+        this.bga.gameArea
+            .getElement()
+            .insertAdjacentHTML("beforeend", `<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`);
         this.bga.gameArea.getElement().insertAdjacentHTML("beforeend", `
             <div id="player-tables"></div>
         `);

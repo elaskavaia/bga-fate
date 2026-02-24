@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate;
 
 use Bga\GameFramework\NotificationMessage;
+use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Common\PGameTokens;
 use Bga\Games\Fate\Db\DbMultiUndo;
 use Bga\Games\Fate\Db\DbTokens;
@@ -70,10 +71,31 @@ class Game extends Base {
         $tokens = $this->tokens->db;
         // setup
         $pnum = $this->getPlayersNumber();
+        $startingPlayer = $this->getFirstPlayer();
         //         Main Board Setup
 
-        $startingPlayer = $this->getFirstPlayer();
-        $this->machine->queue("turnconf", $this->custom_getPlayerColorById($startingPlayer));
+        // Player setup
+        $players = $this->loadPlayersBasicInfos();
+
+        foreach ($players as $player_id => $player) {
+            //   - Create town pieces in Grimheim based on player count (1p=4, 2p=6, 3p=8, 4p=10)
+            //   - Create rune stone on first time track spot
+            //   - Create bonus markers: 3 red on Troll Caves area, 3 green on Nailfare area, 3 yellow on Wyrm Lair area
+            //   - Shuffle yellow and red monster card decks (as tokens in deck locations)
+            //   - Per player:
+            //     - Create hero miniature in Grimheim
+            //     - Create 3 player markers (2 action + 1 upgrade cost at position 5)
+            //     - Set up hero card (active), starting ability (active), starting equipment (active)
+            //     - Shuffle remaining 5 ability cards into ability pile (level I side up)
+            //     - Shuffle remaining equipment cards into equipment pile (face up)
+            //     - Shuffle event cards into event deck (face down)
+            //     - Give 2 gold, 1 mana on starting ability, draw 1 event card
+            //   - Each player draws 1 yellow monster card and places initial monsters
+            $color = $player["player_color"];
+            $this->tokens->db->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
+        }
+
+        $this->machine->queue("turn", $this->custom_getPlayerColorById($startingPlayer));
         $this->customUndoSavepoint($startingPlayer, 1);
         return GameDispatch::class;
     }
@@ -171,6 +193,31 @@ class Game extends Base {
 
         if ($value < 0 && $inc < 0) {
             $this->userAssert(clienttranslate("Insufficient resources to pay"));
+        }
+    }
+
+    function effect_moveCrystals(string $color, string $type, int $inc = 1, string $location, array $options = []) {
+        $message = array_get($options, "message", "*");
+        unset($options["message"]);
+
+        if ($inc == 0) {
+            return;
+        }
+
+        if ($inc > 0) {
+            $tokens = $this->tokens->db->pickTokensForLocation($inc, "supply_crystal_$type", $location);
+            // TODO: unlimite? create more if needed
+            $this->tokens->dbSetTokensLocation($tokens, $location);
+        } else {
+            $tokens = $this->tokens->db->pickTokensForLocation($inc, $location, "supply_crystal_$type");
+            $this->tokens->dbSetTokensLocation($tokens, $location);
+            if (count($tokens) < $inc) {
+                throw new UserException(
+                    new NotificationMessage(clienttranslate('Insufficient resources to pay: ${res_name"}'), [
+                        "res_name" => $this->getTokenName("crystal_$type"),
+                    ])
+                );
+            }
         }
     }
 

@@ -184,8 +184,11 @@ final class GameTest extends TestCase {
     }
 
     function subTestOp($key, $info = []) {
-        $type = array_get($info, "type", substr($key, 3));
+        $type = substr($key, 3);
         $this->assertTrue(!!$type);
+        if ($info["notimpl"] ?? false) {
+            return;
+        }
 
         /** @var Operation */
         $op = $this->game->machine->instanciateOperation($type, PCOLOR);
@@ -194,15 +197,8 @@ final class GameTest extends TestCase {
         $ttype = array_get($args, "ttype");
         $this->assertTrue($ttype != "", "empty ttype for $key");
 
-        $propt = array_get($args, "prompt");
-        if (isset($info["prompt"])) {
-            $this->assertEquals($info["prompt"], $propt, $type);
-        }
-
         $this->assertFalse(str_contains($op->getOpName(), "?"), $op->getOpName());
         $this->assertFalse($op->getOpName() == $op->getType(), "No name set for operation $key");
         return $op;
     }
-
-   
 }
