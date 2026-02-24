@@ -1,0 +1,31 @@
+id|name|count|type|create|location|faction|rank|strength|health|xp|move|armor
+#set _noquotes=create
+#set _noquotes=rank
+#set _noquotes=strength
+#set _noquotes=health
+#set _noquotes=xp
+#set _noquotes=move
+#set _noquotes=armor
+
+# Trollkin faction monsters
+monster_goblin|Goblin|20|monster trollkin rank1|2|supply_monster|trollkin|1|1|2|1|2
+monster_brute|Brute|15|monster trollkin rank2|2|supply_monster|trollkin|2|3|3|2
+monster_troll|Troll|10|monster trollkin rank3|2|supply_monster|trollkin|3|6|7|3
+
+# Fire Horde faction monsters
+monster_sprite|Sprite|20|monster firehorde rank1|2|supply_monster|firehorde|1|1|2|1
+monster_elemental|Elemental|15|monster firehorde rank2|2|supply_monster|firehorde|2|3|4|2
+monster_jotunn|Jotunn|10|monster firehorde rank3|2|supply_monster|firehorde|3|5|6|3
+
+# Dead faction monsters
+monster_imp|Imp|20|monster dead rank1|2|supply_monster|dead|1|2|2|1
+monster_skeleton|Skeleton|15|monster dead rank2|2|supply_monster|dead|2|4|3|2
+monster_draugr|Draugr|10|monster dead rank3|2|supply_monster|dead|3|6|5|3||1
+
+# Legend monsters (6 legends, each has yellow and red level sides)
+monster_legend_grendel|Grendel|1|monster legend|0|supply_monster|trollkin
+monster_legend_nidhuggr|Nidhuggr|1|monster legend|0|supply_monster|dead
+monster_legend_surt|Surt|1|monster legend|0|supply_monster|firehorde
+monster_legend_queen|Queen of the Dead|1|monster legend|0|supply_monster|dead
+monster_legend_hrungbald|Hrungbald|1|monster legend|0|supply_monster|trollkin
+monster_legend_seer|Seer of Odin|1|monster legend|0|supply_monster|firehorde

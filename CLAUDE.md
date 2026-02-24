@@ -113,7 +113,13 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 ### Adding New Game Elements
 
-1. Update the appropriate CSV file in misc/ (token_material.csv, card_material.csv, etc.)
+To add new file:
+1. Add file <name>.csv in misc/ with pipe (|) separated header
+2. Add comments in Material.php  `--- gen php begin <name> ---` and `--- gen php end <name> ---`  before `/* --- GEN PLACEHOLDR --- */`
+3. Run `npm run genmat` to regenerate Material.php
+
+To update:
+1. Update the appropriate CSV file in misc/ (tokens_material.csv, card_material.csv, etc.)
 2. Run `npm run genmat` to regenerate Material.php
 3. Material generation uses pipe (|) as field separator
 4. Translatable fields: name, tooltip, tooltip_action, text

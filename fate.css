@@ -4,3 +4,58 @@
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+#map_area {
+  position: relative;
+  margin: 10px auto;
+  max-width: 2048px;
+}
+
+.hex {
+  position: absolute;
+  width: 86.6025403784px;
+  height: 100px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background-color: #d4c9a8;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.hex::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background-color: #d4c9a8;
+  transition: background-color 0.15s ease;
+}
+.hex::after {
+  position: absolute;
+  content: attr(data-loc);
+  z-index: 3;
+  top: 30%;
+  left: 5%;
+}
+.hex:hover {
+  background-color: #8b7d5e;
+}
+.hex:hover::after {
+  background-color: #c2b48e;
+}
+.hex.active_slot {
+  background-color: #4a9;
+}
+.hex.active_slot::after {
+  background-color: #77ccaa;
+}
+.hex.terrain_forest::before {
+  background-color: #3a8a3e;
+}
+
+.hex.terrain_lake,
+.hex.terrain_lake::before {
+  background-color: #71adc5;
+}
+
+.hex.terrain_mountain,
+.hex.terrain_mountain::before {
+  background-color: #5a5b5c;
+}
