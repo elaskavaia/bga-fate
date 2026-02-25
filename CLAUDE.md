@@ -76,7 +76,7 @@ State classes in modules/php/States/ handle different game phases:
 
 TypeScript files in src/ compile to a single Game.js:
 
-- **GameXBody.ts** - Main game class (extends GameMachine), entry point for client logic
+- **Game.ts** - Main game class (extends GameMachine), entry point for client logic
 - **Game0Basics.ts** - First file in compilation order, basic definitions
 - **Game1Tokens.ts** - Token rendering and management
 - **GameMachine.ts** - Client-side state machine handling

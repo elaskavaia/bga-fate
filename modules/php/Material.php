@@ -16,6 +16,8 @@ class Material {
 
     const MA_PREF_CONFIRM_TURN = 101;
 
+    const TIME_TRACK_SHORT_LENGTH = 10;
+
     private array $token_types;
     private bool $adjusted = false;
     public function __construct() {
@@ -216,9 +218,10 @@ class Material {
         "type" => "endOfTurn",
         "name" => clienttranslate("End of Turn"),
 ],
-    "Op_finalScoring" => [ 
-        "type" => "finalScoring",
-        "name" => clienttranslate("Final Scoring"),
+// # Monster turn (runs after all players have taken their turn)
+    "Op_turnMonster" => [ 
+        "type" => "turnMonster",
+        "name" => clienttranslate("Monster Turn"),
 ],
 // # Main actions (2 per turn, cannot repeat)
     "Op_actionMove" => [ 

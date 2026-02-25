@@ -23,7 +23,7 @@ crystal_red|Red Crystal|50||2|supply_crystal_red
 crystal_yellow|Yellow Crystal|50||2|supply_crystal_yellow
 
 # rune stone - time track marker
-rune_stone|Rune Stone|1|rune_stone|1|timetrack_1
+rune_stone|Rune Stone|1|rune_stone|1|timetrack_1|
 
 # hero miniatures (one per hero, start with 2 heroes)
 

@@ -2,6 +2,13 @@
 
 This document is a plan for the implementation of the game Fate: Defenders of Grimheim on Board Game Arena (BGA). It outlines the steps and tasks required to create a digital version of the game that can be played online.
 
+## Documents
+
+See misc/DESIGN.md for preliminary design
+See misc/RULES.md for game rules
+See CLAUDE.md for project overview
+
+
 ## Prepare game assets
 
 [x] Read the rulebook of Fate: Defenders of Grimheim and create RULES.md.
@@ -29,634 +36,349 @@ This document is a plan for the implementation of the game Fate: Defenders of Gr
 
 ---
 
-## Phase 1: Core Game Framework and Board Setup
+## Iteration 0: Skeleton Game Loop (No Real Rules)
 
-Goal: Get the game starting with a board, players placed in Grimheim, town pieces, and time track visible.
+**Goal**: Game starts, shows board with map, each player has a hero on the board. Player can do "practice" (gain 1 XP) or "move" (click hex to move hero). Then monster turn just advances time track. Game ends when time track runs out. **Playable end-to-end on BGA.**
 
-### 1.1 Define Game Elements in CSV / Material
+**What already exists**: hex map rendering, token framework, Op_turn scaffold, Op_actionMove/Op_actionPractice stubs, state machine wiring.
 
-[X] Create `token_material.csv` — define all token types:
-  - `hero_<name>` — hero miniatures (one per hero: start with 2 heroes from 1 hero box)
-  - `house_X` — 9 house tokens (X is 1 to 9)
-  - `house_0` — Freyja's Well (the last town piece, losing condition)
-  - `runestone` — time track marker
-  - `crystal_green` (mana), `crystal_yellow` (gold/experience), `crystal_red` (damage)
-  - `die_damage` — damage dice for tracking monster damage
-  - `die_attack` — attack dice (20 total)
-  - `die_monster` — optional monster die
-  - `marker_{player_color}_X` — 3 per player (2 action markers + 1 upgrade cost marker)
-  - Monster tiles: `monster_goblin`, `monster_brute`, `monster_troll`, `monster_sprite`, `monster_elemental`, `monster_jotunn`, `monster_imp`, `monster_skeleton`, `monster_draugr`, `monster_legend_<name>`
-[ ] Create `card_material.csv` — define card types:
-  - Monster cards: `mcard_yellow_<id>`, `mcard_red_<id>` (54 total: 36 yellow, 18 red)
-  - Hero cards, ability cards, equipment cards, event cards (per hero deck)
-[ ] Create `location_material.csv` — define board locations:
-  - `grimheim` — single area, central town
-  - Time track spots (short and long variants)
-  - Monster supply spots on board
-  - Player board slots: action slots (move, attack, prepare, focus, mend, practice), ability pile, equipment pile, event deck, discard, gold/experience storage
-[ ] Create `map_material.csv` — define board hexes. Map is hex grid 9x9 with flat top. Use Axial Coordinates with center being 0,0
-  - Named locations: Troll Caves, Nailfare, Wyrm Lair, Spewing Mountain, Dead Plains, etc.
-  - Hex areas with terrain types: plains, mountain, forest, lake
-  - Roads connecting areas
-[ ] Run `npm run genmat` to generate Material.php sections
-[ ] Define game constants in Material.php manual sections:
-  - Terrain types: TERRAIN_PLAINS, TERRAIN_MOUNTAIN, TERRAIN_FOREST, TERRAIN_LAKE
-  - Monster ranks: RANK_1, RANK_2, RANK_3, RANK_LEGEND
-  - Monster factions: FACTION_TROLLKIN, FACTION_FIRE_HORDE, FACTION_DEAD
-  - Die faces: DIE_HIT, DIE_HIT_COVER, DIE_MISS, DIE_RUNE
-  - Action types: ACTION_MOVE, ACTION_ATTACK, ACTION_PREPARE, ACTION_FOCUS, ACTION_MEND, ACTION_PRACTICE
+### Server
+[x] `setupNewGame()`: create 1 hero per player in Grimheim, create rune stone on time track position 1, create town pieces (houses) in Grimheim
+[x] `Op_actionPractice`: implement — gain 1 XP (increment player counter)
+[ ] `Op_actionMove`: implement — player picks a hex, hero moves there (no validation yet beyond "is it a hex on the map")
+[x] `Op_endOfTurn`: reset, schedule next player or when everybody did one turn - schedule turnMonster
+[x] `Op_turnMonster`: advance rune stone on time track by 1 step, Win/loss check: if time track reaches end → win. (Loss condition deferred)
+[x] `getAllDatas()`: should work
 
-### 1.2 Board Topology (Hex Map)
+### Client
+[ ] Show hero tokens on map at their hex positions
+[ ] Practice action: button that sends action to server, updates XP counter
+[ ] Move action: click hex → send target hex to server → animate hero move
+[ ] Show time track position (rune stone counter or simple text)
 
-[ ] Define hex grid adjacency data structure (PHP array in hex_material.csv)
-  - Each hex area identified by coordinate or ID
-  - Store: terrain type, location name (if any), adjacent hexes, road connections
-  - Mark which areas are part of multi-area locations (Troll Caves = 3 mountain hexes, Nailfare = 2 lake hexes)
-  - Define monster paths: for each edge of the board, the path arrows directing monsters toward Grimheim
-  - Define road paths: where roads redirect monster movement
-[ ] Implement adjacency helper functions in PHP:
-  - `getAdjacentAreas($areaId)` — returns list of adjacent area IDs
-  - `getAreaTerrain($areaId)` — returns terrain type
-  - `isOccupied($areaId)` — checks if a character is on this area
-  - `getMonsterPath($areaId)` — returns next area on path toward Grimheim
-  - `getAreasInRange($areaId, $range)` — for ranged attacks
-  - `isAdjacentToGrimheim($areaId)` — boundary check
 
-### 1.3 Database and Token Setup
-
-[ ] Update `setupNewGame()` in Game.php:
-  - Create town pieces in Grimheim based on player count (1p=4, 2p=6, 3p=8, 4p=10)
-  - Create rune stone on first time track spot
-  - Create bonus markers: 3 red on Troll Caves area, 3 green on Nailfare area, 3 yellow on Wyrm Lair area
-  - Shuffle yellow and red monster card decks (as tokens in deck locations)
-  - Per player:
-    - Create hero miniature in Grimheim
-    - Create 3 player markers (2 action + 1 upgrade cost at position 5)
-    - Set up hero card (active), starting ability (active), starting equipment (active)
-    - Shuffle remaining 5 ability cards into ability pile (level I side up)
-    - Shuffle remaining equipment cards into equipment pile (face up)
-    - Shuffle event cards into event deck (face down)
-    - Give 2 gold, 1 mana on starting ability, draw 1 event card
-  - Each player draws 1 yellow monster card and places initial monsters
-[ ] Add game option for time track length (short vs long) in `gameoptions.json`
-[ ] Add game option for monster die (on/off) in `gameoptions.json`
-[ ] Add game option for difficulty (skip step 13, extra upgrade cost) in `gameoptions.json`
-
-### 1.4 Client-Side Board Layout
-
-[ ] Create board HTML/CSS layout in GameXBody.ts / SCSS:
-  - Main board with hex grid overlay (positioned divs or SVG for hex areas)
-  - Grimheim central area (special: holds multiple heroes + town pieces)
-  - Clickable hex areas with terrain-type CSS classes
-  - Monster supply areas around board edges
-  - Time track display (highlight current position, show reinforcement/skull markers)
-[ ] Create player board HTML/CSS:
-  - Action slots (move, attack, prepare, focus, mend, practice) with 2 empty slots for action markers
-  - Upgrade cost track
-  - Ability pile, equipment pile, event deck, discard pile areas
-  - Gold/experience counter display
-  - Hand area (up to 4 event cards)
-[ ] Create token/piece CSS sprites:
-  - Hero miniatures
-  - Town pieces (houses + well)
-  - Monster tiles (colored by faction)
-  - Crystal tokens (green/yellow/red)
-  - Player markers
-  - Dice faces
-[ ] Implement `getAllDatas()` to send full board state to client
-[ ] Implement `setup()` in JS to render initial game state from getAllDatas
-
-### 1.5 Tooltips and Info
-
-[ ] Add tooltips for all board locations (terrain type, special rules)
-[ ] Add tooltips for monster types (strength, health, rank, faction effect)
-[ ] Add tooltips for action slots (what each action does)
-[ ] Add player board tooltips (upgrade cost track explanation)
+### Validation
+[ ] Deploy to BGA studio, start a 2-player game, take turns, game ends
 
 ---
 
-## Phase 2: Basic Player Turn (Reduced Rules)
+## Iteration 1: Basic Movement Rules
 
-Goal: Players can take 2 actions per turn (move, attack, prepare, focus, mend, practice), then end turn. Start with one hero only.
+**Goal**: Movement follows actual rules — up to 3 steps, can't enter lakes/mountains (for heroes), can't pass through occupied hexes, entering Grimheim ends movement.
 
-### 2.1 Turn Structure Operations
+### Server
+[ ] Movement validation: check terrain, occupied hexes, max 3 steps
+[ ] Grimheim special rules: entering ends movement, exiting can go to any adjacent non-mountain hex
+[ ] Reachability calculation: given hero position, return set of valid destination hexes
 
-[ ] Create `Op_turn.php` — main player turn operation:
-  - Player must select 2 different actions (move action markers to action slots)
-  - Track which actions have been taken this turn
-  - Allow free actions between/after actions
-  - Enforce "cannot pick same action twice" rule
-[ ] Create `Op_endOfTurn.php` — end of turn sequence:
-  - Reset action markers to empty spots
-  - Check for upgrade eligibility (Phase 5)
-  - Add mana to cards with mana generation
-  - Draw 1 card (if hand < 4, or allow discard first)
-  - Allow cycling top equipment or top ability card
-[ ] Update state machine flow:
-  - Game starts → first player's turn
-  - Player turn → 2 actions + free actions → end of turn → next player
-  - After all players → monster turn (Phase 6)
-  - After monster turn → advance time → check win/loss → next round
+### Client
+[ ] Highlight reachable hexes when move action is active
+[ ] Multi-step movement: click intermediate hexes or final destination
+[ ] Show path preview
 
-### 2.2 Action Operations
-
-[ ] Create `Op_actionMove.php` — Move action: 
-  - Hero moves up to 3 areas
-  - Cannot move through occupied areas
-  - Cannot move into mountains (heroes) or lakes
-  - Entering Grimheim ends movement
-  - Exiting Grimheim can go to any adjacent non-mountain area
-  - Client: highlight reachable hexes, click to move step by step or click final destination
-[ ] Create `Op_actionAttack.php` — Attack action:
-  - Sum attack strength from hero + equipment + abilities
-  - Select target monster within range (default range 1)
-  - Roll attack dice
-  - Resolve hits (check cover for forest)
-  - Apply damage to monster; if killed, gain experience and remove tile
-  - Allow "this attack action" event cards after dice roll
-[ ] Create `Op_actionPrepare.php` — Prepare action:
-  - Draw 1 event card from personal event deck
-  - Hand limit is 4; allow discard to make room
-[ ] Create `Op_actionFocus.php` — Focus action:
-  - Add 1 mana (green) to one of player's abilities or equipment that uses mana
-  - Client: show eligible cards, click to add mana
-[ ] Create `Op_actionMend.php` — Mend action:
-  - Remove 2 damage from hero card
-  - If in Grimheim: may remove from equipment too, total 5 instead of 2
-  - Client: show damage tokens that can be removed, click to select
-[ ] Create `Op_actionPractice.php` — Practice action:
-  - Add 1 experience (yellow) to player board
-
-### 2.3 Free Action Operations
-
-[ ] Create `Op_useEquipment.php` — Use Equipment free action:
-  - Equipment can be used once per turn (track usage)
-  - Some require damage marker placement (check durability)
-  - Damage prevention equipment: can be used each time damage is received
-[ ] Create `Op_useAbility.php` — Use Ability free action:
-  - Abilities can be used once per turn
-  - Many require spending mana from the same card
-  - Damage prevention abilities: can be used each time damage is received
-[ ] Create `Op_playEvent.php` — Play Event free action:
-  - Play event card from hand
-  - Perform effect, then discard
-  - Cannot play during an action (except "this attack action" cards)
-  - Some events can be played outside your turn
-[ ] Create `Op_shareGold.php` — Share Gold free action:
-  - Give/receive gold with adjacent hero
-
-### 2.4 Client-Side Turn UI
-
-[ ] Implement action selection UI:
-  - Show available action slots (highlight unfilled ones)
-  - Click action slot to commit an action marker
-  - Show "End Turn" button after 2 actions taken
-  - Show "Undo" button to reverse action selection
-[ ] Implement move action UI:
-  - Highlight reachable areas within 3 steps
-  - Click-to-move with path visualization
-  - Animate hero movement along path
-[ ] Implement attack action UI:
-  - Highlight attackable monsters (in range)
-  - Click monster to attack
-  - Show dice roll animation
-  - Display hit/miss results
-  - Show damage applied to monster
-[ ] Implement card management UI:
-  - Hand display (event cards, up to 4)
-  - Click card to play (with confirmation)
-  - Discard interface when at hand limit
+### Tests
+[ ] PHP unit tests for movement validation and reachability
 
 ---
 
-## Phase 3: Monster System (One Type First)
+## Iteration 2: Monsters on the Board (Static)
 
-Goal: Implement monster tokens, monster cards for spawning, and basic monster presence on the board. Start with Trollkin faction (Goblins, Brutes, Trolls).
+**Goal**: Monsters appear on the board. No movement or combat yet — just spawning from monster cards during reinforcement.
 
-### 3.1 Monster Token Management
+### Server
+[ ] Define monster tokens in material (goblins only to start — Trollkin rank 1)
+[ ] Monster card data: define a few yellow monster cards with goblin placement
+[ ] `Op_reinforcement`: draw monster card, place goblins at specified locations
+[ ] Trigger reinforcement on time track spots marked with crossed axes
+[ ] Heroes can't move into hexes occupied by monsters
 
-[ ] Define monster properties in monster_material.csv:
-  - Per monster type: faction, rank, strength, health, experience reward
-  - Faction effects: Trollkin (+1 attack per adjacent trollkin), Fire Horde (range 2), Dead (runes = hits)
-  - Special: Goblin moves 2, Draugr has armor
-[ ] Create monster tile tokens during setup (in supply locations)
-[ ] Implement monster placement from monster cards:
-  - Parse card data for monster types and placement locations
-  - Check placement validity (supply available, areas not occupied, legend not already in play)
-  - If invalid, discard and draw new card
-[ ] Client: render monster tiles on board with faction-colored styling
+### Client
+[ ] Render monster tiles on map hexes
+[ ] Show monster card draw (simple notification, no animation needed)
 
-### 3.2 Monster Card Deck
-
-[ ] Define monster card data (36 yellow + 18 red cards):
-  - Each card specifies: location, list of monsters to place, and positions within location
-  - Legend cards: special stats, effects, accompanying monsters
-[ ] Implement monster card draw and resolution during reinforcement phase
-[ ] Handle "draw until valid card" logic
+### Tests
+[ ] PHP tests for monster placement from cards
 
 ---
 
-## Phase 4: Combat and Damage System
+## Iteration 3: Monster Movement
 
-Goal: Full attack resolution for heroes attacking monsters and monsters attacking heroes, including dice, cover, and knocked out heroes.
+**Goal**: Monsters move toward Grimheim on monster turn, following paths/arrows/roads. Monster entering Grimheim destroys a town piece.
 
-### 4.1 Dice System
+### Server
+[ ] Monster path calculation: arrows → roads → Grimheim
+[ ] Monster movement order: closest to Grimheim first
+[ ] Movement rules: don't move if adjacent to hero, can't enter occupied hex
+[ ] Monster entering Grimheim: remove monster + remove 1 town piece
+[ ] Loss condition: all town pieces destroyed (Freyja's Well is last)
 
-[ ] Implement attack dice roller (PHP):
-  - 20 attack dice with faces: Hit, Hit-with-cover, Miss, Rune
-  - Determine probabilities/face distribution from game components
-  - Roll N dice, return array of results
-[ ] Implement dice resolution:
-  - Count hits (Hit always counts; Hit-with-cover counts unless defender in forest)
-  - Rune: miss by default, but some effects trigger on runes
-  - Apply card effects that modify dice ("this attack action" events)
-[ ] Client: dice roll animation with result display
+### Client
+[ ] Animate monster movement (snap-to-position is fine)
+[ ] Show town piece removal
+[ ] Show win/loss end screen
 
-### 4.2 Hero Attacks Monster
-
-[ ] Calculate total attack strength:
-  - Hero card base strength
-  - + equipment strength bonuses
-  - + ability strength bonuses
-  - + temporary modifiers from events/effects
-[ ] Apply damage to monster:
-  - Track damage on monster tile with damage dice
-  - If damage >= health: monster killed
-  - Gain experience = monster's rank value (1/2/3)
-  - Remove monster tile, return to supply
-  - Legends: gain experience per legend card
-[ ] Handle Draugr armor (prevent 1 damage each time)
-
-### 4.3 Monster Attacks Hero
-
-[ ] Calculate monster attack strength:
-  - Base strength from monster type
-  - Trollkin bonus: +1 per adjacent trollkin
-  - Monster die bonus: +1 if monster die shows "Attack"
-[ ] Apply damage to hero:
-  - Place damage (red) on hero card
-  - Allow damage prevention effects (equipment/abilities)
-  - If damage >= health: hero is knocked out
-[ ] Knocked out hero handling:
-  - Move hero to Grimheim
-  - Set damage to exactly 5
-  - Remove 2 town pieces from Grimheim
-  - Check loss condition (Freyja's Well removed)
-[ ] Fire Horde range 2 attacks
-[ ] Dead faction: runes count as hits when Dead monsters attack
-
-### 4.4 Line of Sight
-
-[ ] Implement range checking:
-  - Default range 1 (adjacent)
-  - Fire Horde range 2
-  - Cannot shoot "over" Grimheim — count around borders
-  - No other line-of-sight blocking (can target behind mountains/characters)
+### Tests
+[ ] PHP tests for monster pathfinding
+[ ] PHP tests for movement order
+[ ] Integration test: monsters reach Grimheim → town piece removed
 
 ---
 
-## Phase 5: Equipment, Quests, and Upgrades
+## Iteration 4: Basic Combat
 
-Goal: Implement the quest/equipment system and hero upgrade mechanics.
+**Goal**: Heroes can attack adjacent monsters. Simple dice rolling, damage tracking, monster death.
 
-### 5.1 Quest System
+### Server
+[ ] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
+[ ] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
+[ ] Hero attack strength: just base hero value for now (no equipment/abilities)
+[ ] Damage tracking on monsters (counter on token)
+[ ] Monster killed: remove from board, gain XP
+[ ] Cover: if monster is in forest, hit-with-cover doesn't count
 
-[ ] Define quest requirements per equipment card in material data:
-  - Quest text parsing or structured data (e.g., "spend mend action on Nailfare")
-  - Quest types: spend action at location, kill monster, collect resources, etc.
-[ ] Implement quest progress tracking:
-  - Use tokens/state to track partial quest completion
-  - "Spend" action mechanic: take action without normal effect
-[ ] Implement quest completion:
-  - Move equipment card from pile to active cards
-  - Reveal new equipment card / new quest
-  - Handle Main Weapon replacement rule (only 1 main weapon; new covers old)
+### Client
+[ ] Attack action: highlight adjacent monsters, click to attack
+[ ] Show dice results (text/simple display, no animation needed yet)
+[ ] Show damage on monster tokens
+[ ] Show monster death
 
-### 5.2 Equipment Card Effects
-
-[ ] Implement equipment activation (free action):
-  - Once per turn usage tracking
-  - Durability system (damage markers on equipment)
-  - Various effect types: draw cards, gain resources, deal damage, prevent damage, modify attacks
-[ ] Implement equipment damage prevention (can be used each time damage received, separate from once-per-turn)
-
-### 5.3 Upgrade System
-
-[ ] Implement upgrade cost track:
-  - Costs: 5, 6, 7, 8, 9, 10, 10, 10... (track on player board)
-  - At end of turn, if player has enough experience: may upgrade
-  - Only one upgrade per turn
-[ ] Implement upgrade choices:
-  - A) Gain new ability: move top ability from pile to active cards
-  - B) Improve existing card: flip ability or hero card to upgraded (level II) side
-[ ] Mana generation on new abilities triggers immediately upon upgrade
-
-### 5.4 Ability Cards
-
-[ ] Define ability card data per hero in material:
-  - Level I and Level II sides
-  - Effects, mana costs, mana generation values
-  - Starting ability identification
-[ ] Implement ability activation (free action):
-  - Once per turn usage tracking
-  - Mana spending from the same card
-  - Various effect types per hero
-[ ] Implement mana generation at end of turn (all cards with green icon generate mana to themselves)
+### Tests
+[ ] PHP tests for dice rolling and hit calculation
+[ ] PHP tests for damage and monster death
 
 ---
 
-## Phase 6: Full Monster Turn
+## Iteration 5: Monster Attacks
 
-Goal: Complete monster turn sequence — time track advance, monster movement along paths, monster attacks, reinforcements.
+**Goal**: After movement, monsters adjacent to heroes attack. Hero damage, knocked out heroes.
 
-### 6.1 Time Track
+### Server
+[ ] Monster attack phase: all monsters adjacent to heroes attack
+[ ] Monster attack strength from monster data
+[ ] Trollkin faction bonus: +1 per adjacent trollkin
+[ ] Damage to hero (counter on hero card/token)
+[ ] Knocked out: damage >= health → hero to Grimheim, damage set to 5, remove 2 town pieces
+[ ] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
 
-[ ] Implement time track advancement:
-  - Move rune stone one step
-  - Check spot type: normal, reinforcement (crossed axes), skull (charge), or final spot
-  - Two track variants (short 30min/player, long 40min/player)
-[ ] Win condition: if Freyja's Well remains after last turn on time track
-[ ] Loss condition: if all town pieces (including Well) removed at any point
+### Client
+[ ] Show monster attacks in log
+[ ] Show hero damage counter
+[ ] Show knocked out animation (hero moves to Grimheim)
+[ ] Mend action UI
 
-### 6.2 Monster Movement
-
-[ ] Implement monster path following:
-  - Arrows at board edges define initial direction
-  - Follow arrows until reaching a road, then follow road to Grimheim
-  - Move order: closest to Grimheim first, farthest last
-  - If 2 monsters would enter same road area: one already on road moves first
-[ ] Movement rules:
-  - Monsters adjacent to heroes do NOT move
-  - Monsters cannot move into occupied areas (except legends can swap)
-  - Normal movement: 1 area per turn
-  - Goblins: move 2 areas instead of 1
-[ ] Charge rules:
-  - On skull turns: all monsters charge (move 1 additional area)
-  - Monster die "Charge" result: rank 1 monsters charge
-  - If monster can't attack after normal move but could by charging: it charges
-[ ] Legend movement: swap places with monsters blocking their path
-[ ] Monster entering Grimheim: remove monster + 1 town piece (legend = 3 town pieces)
-
-### 6.3 Monster Attacks
-
-[ ] After movement, all monsters adjacent to heroes attack:
-  - Players choose which hero is attacked if monster adjacent to multiple
-  - Apply monster attack strength + faction bonuses
-  - Resolve damage to hero (see Phase 4)
-[ ] Attack order chosen by players
-
-### 6.4 Reinforcements
-
-[ ] On reinforcement spots (yellow border = yellow cards, red border = red cards):
-  - Each player draws 1 monster card from appropriate deck
-  - Place monsters on board per card instructions
-  - Handle invalid placements (draw new card)
-
-### 6.5 Monster Die (Optional Variant)
-
-[ ] Implement monster die with 6 faces:
-  - Maneuver clockwise: monsters rotate around adjacent heroes
-  - Maneuver counter-clockwise: same but other direction
-  - Attack +1: all monsters get +1 strength this turn
-  - Push: heroes adjacent to monsters pushed 1 area toward Grimheim
-  - Charge: all rank 1 monsters charge
-  - Ambush: each hero (not in Grimheim) places 1 goblin adjacent to self
+### Tests
+[ ] PHP tests for monster attack resolution
+[ ] PHP tests for knocked out hero handling
 
 ---
 
-## Phase 7: Add Remaining Monster Types and Legends
+## Iteration 6: Full Game Loop with Goblins
 
-Goal: Implement all monster factions and legend monsters.
+**Goal**: Complete playable game with Trollkin goblins only. All 6 actions work. Short time track. Win/loss conditions. This is the true MVP.
 
-### 7.1 Fire Horde Faction
+### Server
+[ ] `Op_actionPrepare`: draw 1 event card (stub — just log "drew a card" if no cards yet)
+[ ] `Op_actionFocus`: add 1 mana to a card (stub — just log for now)
+[ ] Action selection: enforce "must pick 2 different actions" rule
+[ ] Charge: on skull time track spots, monsters move +1 extra
+[ ] Goblin special: moves 2 instead of 1
 
-[ ] Add Sprite (rank 1: str 1, hp 2), Elemental (rank 2: str 3, hp 4), Jotunn (rank 3: str 5, hp 6)
-[ ] Implement faction effect: attack range 2 for all fire horde monsters
+### Client
+[ ] Action selection UI: show 6 action buttons, disable already-picked action
+[ ] End turn button
+[ ] Undo support for action selection
 
-### 7.2 Dead Faction
-
-[ ] Add Imp (rank 1: str 2, hp 2), Skeleton (rank 2: str 4, hp 3), Draugr (rank 3: str 6, hp 5)
-[ ] Implement faction effect: runes count as hits when Dead attack
-[ ] Implement Draugr armor: prevent 1 damage each time dealt damage
-
-### 7.3 Trollkin Faction (already started in Phase 3)
-
-[ ] Verify: Goblin (rank 1: str 1, hp 2, move 2), Brute (rank 2: str 3, hp 3), Troll (rank 3: str 6, hp 7)
-[ ] Verify faction effect: +1 attack per adjacent trollkin
-
-### 7.4 Legend Monsters
-
-[ ] Add 6 legends with yellow/red level sides:
-  - Grendel, Nidhuggr, Surt, Queen of the Dead, Hrungbald, Seer of Odin
-[ ] Implement per-legend: unique stats, effects, reward experience
-[ ] Implement legend rules: destroy 3 town pieces on entering Grimheim, swap with monsters in path
-[ ] Legend cards: define monster card data for each legend (accompanying monsters and placement)
-
-### 7.5 All Monster Cards
-
-[ ] Define all 36 yellow monster cards (location + monster placement data)
-[ ] Define all 18 red monster cards (location + monster placement data, includes legends)
+### Tests
+[ ] Integration test: full round (all players turn + monster turn)
+[ ] Test win condition (survive time track)
+[ ] Test loss condition (all town pieces destroyed)
 
 ---
 
-## Phase 8: Add Remaining Heroes
+## Iteration 7: Add Brutes and Trolls
 
-Goal: Implement all 4 hero decks with their unique cards and abilities.
+**Goal**: Full Trollkin faction. Brutes (rank 2) and Trolls (rank 3) with higher stats.
 
-### 8.1 First Hero (pick simplest)
+### Server
+[ ] Add brute and troll token types and material data
+[ ] Add monster cards that spawn brutes and trolls
+[ ] Red monster card deck (has stronger monsters)
+[ ] Reinforcement: yellow cards on yellow spots, red cards on red spots
 
-[ ] Define hero card data (level I + II): attack strength, health, effect
-[ ] Define 6 ability cards (level I + II each): effects, mana costs, mana generation
-[ ] Define ~10 equipment cards: quests, effects, strength bonus, durability
-[ ] Define ~23 event cards: effects
-[ ] Implement all card effects as operations or effect handlers
-[ ] Test hero thoroughly
+### Client
+[ ] Different visual for brutes and trolls vs goblins
 
-### 8.2 Second Hero
-
-[ ] Repeat card definitions and effect implementations for hero 2
-[ ] Test hero 2
-
-### 8.3 Third and Fourth Heroes
-
-[ ] Repeat for heroes 3 and 4
-[ ] Test all heroes in combination
+### Tests
+[ ] Test mixed monster spawning and movement
 
 ---
 
-## Phase 9: Polish, Animations, and BGA Compliance
+## Iteration 8: Hero Cards and Equipment (1 Hero)
 
-Goal: Make the game look good, play smoothly, and meet BGA publishing requirements.
+**Goal**: Pick simplest hero. Implement hero card, starting equipment, starting ability. Equipment gives attack bonus. Ability can be activated.
 
-### 9.1 Animations
+### Server
+[ ] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
+[ ] Hero card effect applies during relevant actions
+[ ] Equipment: attack strength bonus, once-per-turn activation
+[ ] Ability: once-per-turn activation, costs mana
+[ ] Focus action: actually adds mana to ability/equipment cards
 
-[ ] Hero movement animation (smooth path following)
-[ ] Monster movement animation (path following, charging)
-[ ] Dice roll animation (3D or sprite-based)
-[ ] Card draw/play/discard animations
-[ ] Damage token placement/removal animations
-[ ] Monster spawn animation
-[ ] Town piece destruction animation
-[ ] Mana/gold/experience gain animations
+### Client
+[ ] Player board: show hero card, active ability, active equipment
+[ ] Card tooltips with effects
+[ ] Activate equipment/ability buttons (free actions)
 
-### 9.2 Game Log
-
-[ ] Comprehensive game log entries for all actions:
-  - Player actions (move, attack results, prepare, focus, mend, practice)
-  - Free actions (equipment use, ability use, event play)
-  - Monster movement, attacks, damage
-  - Reinforcements (which monsters appeared where)
-  - Quest completion, upgrades
-  - Town pieces destroyed, heroes knocked out
-  - Win/loss conditions
-[ ] Include card names and relevant values in log messages
-[ ] All log strings marked for translation
-
-### 9.3 UI Polish
-
-[ ] Responsive layout for different screen sizes
-[ ] Mini player boards in the BGA player panel area
-[ ] Card zoom on hover
-[ ] Clear visual indicators for:
-  - Current player's turn
-  - Available actions
-  - Attackable targets
-  - Monster threat level (adjacent to Grimheim)
-  - Quest progress
-  - Time track progression
-[ ] Help mode / rule reminders
-
-### 9.4 BGA Compliance
-
-[ ] Implement `getGameProgression()` — based on time track position
-[ ] Implement zombie mode (`zombieTurn()`) — auto-pass for disconnected players
-[ ] Define game statistics in `stats.json`:
-  - Monsters killed (total, per type/rank)
-  - Damage dealt / received
-  - Cards played
-  - Equipment acquired
-  - Upgrades performed
-  - Town pieces lost
-  - Turns survived
-[ ] Implement tiebreaking (cooperative game — win/loss only, but track contribution stats)
-[ ] Ensure all UI strings use translation functions
-[ ] Add tooltips to all interactive elements
-[ ] Verify hand-limit enforcement and all edge cases
+### Tests
+[ ] Test equipment attack bonus
+[ ] Test ability activation and mana spending
 
 ---
 
-## Phase 10: Testing and Alpha Release
+## Iteration 9: Event Cards and Prepare Action
 
-### 10.1 Automated Tests
+**Goal**: Event card deck works. Prepare action draws cards. Cards can be played as free actions.
 
-[ ] Unit tests for board topology / adjacency
-[ ] Unit tests for monster path calculation
-[ ] Unit tests for dice probability / combat resolution
-[ ] Unit tests for quest completion conditions
-[ ] Unit tests for upgrade cost calculation
-[ ] Integration tests for full turn cycle (player turn → monster turn → reinforcements)
-[ ] Integration tests for win/loss conditions
-[ ] Integration tests for knocked out hero handling
-[ ] Test with 1, 2, 3, and 4 players
+### Server
+[ ] Define first hero's event cards (start with 5-10 simplest ones)
+[ ] Event deck setup: shuffle at game start
+[ ] Prepare action: draw 1 event card, hand limit 4
+[ ] Play event: free action, apply effect, discard
+[ ] Event deck exhaustion: shuffle discard pile
 
-### 10.2 Manual Testing
+### Client
+[ ] Hand display (private to player)
+[ ] Play card from hand
+[ ] Discard interface when at hand limit
 
-[ ] Play through complete game with short time track
-[ ] Play through complete game with long time track
-[ ] Test all hero decks individually
+### Tests
+[ ] Test draw, play, discard cycle
+[ ] Test hand limit enforcement
+
+---
+
+## Iteration 10: Quest and Upgrade System
+
+**Goal**: Equipment cards have quests. Completing quests unlocks new equipment. Upgrade system (spend XP to gain abilities or improve cards).
+
+### Server
+[ ] Quest definitions on equipment cards
+[ ] Quest progress tracking
+[ ] Quest completion → new equipment active
+[ ] Upgrade cost track: 5, 6, 7, 8, 9, 10...
+[ ] End-of-turn upgrade option: spend XP for new ability or card improvement
+[ ] Mana generation at end of turn
+
+### Client
+[ ] Quest progress display on equipment cards
+[ ] Upgrade prompt at end of turn
+[ ] Ability pile and equipment pile browsing
+
+### Tests
+[ ] Test quest completion conditions
+[ ] Test upgrade cost calculation
+
+---
+
+## Iteration 11: Second Monster Faction (Fire Horde)
+
+**Goal**: Add Sprites, Elementals, Jotunn. Faction effect: range 2 attacks.
+
+### Server
+[ ] Fire Horde monster data and tokens
+[ ] Range 2 attack for Fire Horde monsters
+[ ] Monster cards that spawn Fire Horde monsters
+
+### Client
+[ ] Fire Horde visual styling
+[ ] Range indicator for ranged monster attacks
+
+### Tests
+[ ] Test range 2 attacks
+
+---
+
+## Iteration 12: Third Monster Faction (Dead) + Legends
+
+**Goal**: Add Imps, Skeletons, Draugr. Dead faction effect: runes = hits. Draugr armor. Add Legend monsters.
+
+### Server
+[ ] Dead faction monster data
+[ ] Runes count as hits for Dead attacks
+[ ] Draugr armor (prevent 1 damage each time)
+[ ] Legend monsters: unique stats, destroy 3 town pieces, swap movement
+[ ] All 54 monster cards defined
+
+### Client
+[ ] Dead faction visual styling
+[ ] Legend monster special display
+
+### Tests
+[ ] Test Dead faction effects
+[ ] Test Legend special rules
+
+---
+
+## Iteration 13: Remaining Heroes
+
+**Goal**: Implement heroes 2, 3, 4 with full card decks.
+
+### Server
+[ ] Hero 2: card data, abilities, equipment, events, all effects
+[ ] Hero 3: same
+[ ] Hero 4: same
+
+### Client
+[ ] Hero-specific card art/styling
+
+### Tests
+[ ] Test each hero independently
 [ ] Test hero combinations
-[ ] Test monster die variant
-[ ] Test edge cases:
-  - All town pieces destroyed (loss)
-  - Hero knocked out multiple times
-  - Multiple monsters entering Grimheim same turn
-  - Legend monster interactions
-  - Equipment pile exhausted
-  - Event deck exhausted (shuffle discard)
-  - Multiple heroes in Grimheim
-  - Charge + movement blocking scenarios
-
-### 10.3 Pre-Alpha Checklist
-
-[ ] Run `npm run build` with no errors
-[ ] Run `npm run tests` with all passing
-[ ] Verify game starts correctly for all player counts
-[ ] Verify game can be completed (win and loss scenarios)
-[ ] Check spelling in all translatable strings
-[ ] Review code for security issues (input validation on all actions)
-[ ] Check that no game state information leaks to wrong players (event cards in hand are private)
-[ ] Verify mobile/tablet layout works reasonably
-[ ] Submit for BGA Alpha review
 
 ---
 
-## Reduced-Rules First Iteration
+## Iteration 14: Monster Die and Game Options
 
-To keep development manageable per WALKTHROUGH.wiki guidance, the **first playable version** should include:
+**Goal**: Optional monster die variant. Game options for time track length, difficulty, player count.
 
-1. **1 hero only** (pick the simplest deck)
-2. **1 monster faction only** (Trollkin: Goblins + Brutes only, no Trolls initially)
-3. **Short time track only**
-4. **No monster die**
-5. **No legends**
-6. **Simplified quest system** (only 2-3 equipment cards)
-7. **2 players** (fixed count, easiest to test)
-8. **No damage prevention effects** (simplify combat)
-9. **Basic animations only** (snap-to-position, no smooth movement)
+### Server
+[ ] Monster die with 6 faces and effects
+[ ] Game options in gameoptions.json: time track (short/long), monster die (on/off), difficulty
+[ ] Long time track support
+[ ] 1-4 player support with correct town piece counts
 
-This gets a functional game loop running: player turns → monster spawns → monster moves → monster attacks → repeat until win/loss. Then expand from there.
+### Client
+[ ] Monster die roll display
+[ ] Game option selection in lobby
 
 ---
 
-## Token Naming Convention
+## Iteration 15: Polish and BGA Compliance
 
-Following the project's token naming pattern (`key = supertype_type_instance`):
+**Goal**: Animations, game log, responsive layout, BGA publishing requirements.
 
-| Token | Key Pattern | Example |
-|-------|------------|---------|
-| Hero miniature | `hero_<heroname>` | `hero_bjorn` |
-| Town piece | `town_house_<n>` / `town_well` | `town_house_3`, `town_well` |
-| Monster tile | `monster_<type>_<n>` | `monster_goblin_5`, `monster_troll_2` |
-| Monster card | `mcard_<color>_<n>` | `mcard_yellow_12`, `mcard_red_5` |
-| Hero card | `hcard_<hero>` | `hcard_bjorn` |
-| Ability card | `ability_<hero>_<n>` | `ability_bjorn_3` |
-| Equipment card | `equip_<hero>_<n>` | `equip_bjorn_7` |
-| Event card | `event_<hero>_<n>` | `event_bjorn_15` |
-| Player marker | `pmarker_<color>_<n>` | `pmarker_ff0000_1` |
-| Crystal (mana) | `mana_<owner>_<n>` | `mana_card_ability_bjorn_3_1` |
-| Crystal (gold/xp) | `gold_<player>_<n>` | counter, not individual tokens |
-| Crystal (damage) | `damage_<target>_<n>` | counter on hero/equipment card |
-| Rune stone | `rune_stone` | `rune_stone` |
-| Attack die | `adie_<n>` | `adie_1` through `adie_20` |
-| Damage die | `ddie_<n>` | `ddie_1` through `ddie_8` |
+### UI/UX
+[ ] Smooth movement animations (hero and monster)
+[ ] Dice roll animation
+[ ] Card play/draw animations
+[ ] Responsive layout
+[ ] Card zoom on hover
+[ ] Visual indicators (current turn, threats, quest progress)
 
-**Location naming:**
-| Location | Key Pattern | Example |
-|----------|------------|---------|
-| Board hex area | `area_<id>` | `area_23` |
-| Grimheim | `grimheim` | `grimheim` |
-| Monster supply | `supply_<type>` | `supply_goblin` |
-| Player hand | `hand_<color>` | `hand_ff0000` |
-| Player board | `pboard_<color>` | `pboard_ff0000` |
-| Active cards | `active_<color>` | `active_ff0000` |
-| Ability pile | `abilitypile_<color>` | `abilitypile_ff0000` |
-| Equipment pile | `equippile_<color>` | `equippile_ff0000` |
-| Event deck | `eventdeck_<color>` | `eventdeck_ff0000` |
-| Discard pile | `discard_<color>` | `discard_ff0000` |
-| Monster card deck | `mcardeck_yellow` / `mcardeck_red` | `mcardeck_yellow` |
-| Time track spot | `timetrack_<variant>_<n>` | `timetrack_short_5` |
+### BGA Requirements
+[ ] `getGameProgression()` based on time track
+[ ] `zombieTurn()` for disconnected players
+[ ] Game statistics in stats.json
+[ ] All strings translatable
+[ ] Tooltips on all interactive elements
+[ ] Input validation review (security)
+[ ] Private info check (event cards in hand)
+
+### Testing
+[ ] Full game playthrough (short + long track)
+[ ] All hero combinations
+[ ] All player counts
+[ ] Edge cases (multiple knockouts, legend interactions, empty decks)
+[ ] Pre-alpha BGA checklist
 
 ---
-
-## Key Technical Decisions
-
-1. **Cooperative game**: All players win or lose together. No hidden scoring. The `is_coop: 1` flag is already set in gameinfos.
-2. **Player order**: Fixed order, chosen at start. All players act each round, then monsters act.
-3. **Hex board representation**: Store adjacency as a PHP array (or JSON data file). Do not try to compute hex math — the board is irregular with named locations.
-4. **Monster movement**: Pre-compute paths from each board edge to Grimheim (following arrows + roads). Store as lookup table.
-5. **Crystals as counters**: Gold/experience and mana are tracked as integer counters on tokens (player board, cards), not as individual crystal tokens. Use `token_state` for counters.
-6. **Damage as counters**: Damage on heroes/monsters tracked as `token_state` integer on the target token, not as individual damage markers.
-7. **Card effects**: Implement as operations. Each unique card effect gets an operation class or a parameterized generic operation.
-8. **Undo support**: Use existing DbMultiUndo infrastructure. Allow undo within a turn (before confirming end of turn).
-9. **Monster AI**: Fully deterministic (no choices for monsters), so monster turn can be auto-resolved on server. Client just animates notifications.
-10. **Event deck exhaustion**: When event deck is empty, shuffle discard pile to form new deck (standard card game rule, verify with actual rules).

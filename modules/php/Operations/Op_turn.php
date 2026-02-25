@@ -14,11 +14,8 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Game;
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
-
-use function Bga\Games\Fate\getPart;
 
 /**
  * Main player turn operation.
@@ -73,6 +70,9 @@ class Op_turn extends Operation {
         return $result;
     }
 
+    public function requireConfirmation() {
+        return true;
+    }
     public function getPossibleMoves() {
         $res = [];
         $actionsTaken = $this->getActionsTaken();
@@ -138,7 +138,6 @@ class Op_turn extends Operation {
 
     private function queueEndOfTurn(): void {
         $this->queue("endOfTurn");
-        $this->queue("turnconf");
         $this->game->queueNextTurnOrEnd($this->getPlayerId());
     }
 

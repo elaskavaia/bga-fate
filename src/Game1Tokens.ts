@@ -1,5 +1,6 @@
 import { Game0Basics, NotificationMessage, placeHtml, getPart, getParentParts, StringProperties } from "./Game0Basics";
 import { LaAnimations } from "./LaAnimations";
+import { BgaAnimations } from "./libs";
 
 /**
  * Interface that mimics token datatabase object
@@ -90,7 +91,7 @@ export class Game1Tokens extends Game0Basics {
     this.updateCountersSafe(this.gamedatas.counters);
   }
 
-  onLeavingState(stateName: string): void {
+  onLeavingState(stateName: string, args: any): void {
     console.log("onLeavingState: " + stateName);
     //this.disconnectAllTemp();
     this.removeAllClasses(this.classActiveSlot, this.classActiveSlotHidden);

@@ -5,7 +5,8 @@
     "moduleResolution": "node",
     "lib": ["dom", "esnext"],
     "sourceMap": false,
-    "rootDir": "."
+    "rootDir": ".",
+    "typeRoots": ["src/types", "./node_modules/@types"]
   },
   "include": [
     "*.d.ts",

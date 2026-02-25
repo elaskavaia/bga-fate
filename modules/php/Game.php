@@ -74,6 +74,16 @@ class Game extends Base {
         $startingPlayer = $this->getFirstPlayer();
         //         Main Board Setup
 
+        $this->game->tokens->dbSetTokenLocation(
+            "rune_stone",
+            "timetrack_1",
+            1,
+            clienttranslate('Rune Stone: time advances to step ${new_state} of ${max}'),
+            [
+                "max" => Material::TIME_TRACK_SHORT_LENGTH,
+            ]
+        );
+
         // Player setup
         $players = $this->loadPlayersBasicInfos();
 
@@ -165,8 +175,17 @@ class Game extends Base {
     }
 
     function isEndOfGame() {
-        $num = $this->tokens->db->getTokenState(Game::GAME_STAGE);
-        return $num >= 5;
+        $currentStep = $this->tokens->db->getTokenState("rune_stone");
+        $maxSteps = Material::TIME_TRACK_SHORT_LENGTH;
+
+        if ($currentStep >= $maxSteps) {
+            return true;
+        }
+        return false;
+    }
+
+    function isHeroesWin() {
+        return true; // TODO: check if any houses left in Grimheim
     }
 
     function getUserPreference(int $player_id, int $code): int {
@@ -297,24 +316,28 @@ class Game extends Base {
     }
 
     /**
-     * Queue the next turn, or end the game if this was the final turn.
-     * When end game is triggered, game_stage holds the player number (1-4) who triggered it.
-     * After that player completes their turn (everyone got their final turn), set game_stage to 5.
+     * Queue the next player's turn, or monster turn if all players have gone.
+     * After monster turn, the first player starts the next round.
+     *
+     * Round structure: Player 1 turn → Player 2 turn → ... → Monster turn → repeat
      */
     function queueNextTurnOrEnd(int $playerId): void {
-        $gameStage = $this->tokens->db->getTokenState(Game::GAME_STAGE);
-
-        // If end game was triggered TODO
-        if (false) {
-            $this->machine->queue("finalScoring");
-            // Don't queue another turn - game will end
+        // Game already ended
+        if ($this->isEndOfGame()) {
             return;
         }
 
-        // Continue with the next turn
         $nextPlayerId = $this->getNextReadyPlayerId($playerId);
+        $firstPlayerId = $this->getFirstPlayer();
 
-        $this->machine->queue("turn", $this->custom_getPlayerColorById($nextPlayerId));
+        if ($nextPlayerId === $firstPlayerId) {
+            // All players have taken their turn — queue monster turn
+            // turnMonster will queue the next round's first player turn (or end the game)
+            $this->machine->queue("turnMonster", $this->getAutomaColor());
+        } else {
+            // More players still need to take their turn this round
+            $this->machine->queue("turn", $this->custom_getPlayerColorById($nextPlayerId));
+        }
     }
 
     public function customUndoSavepoint(int $player_id, int $barrier = 0, string $label = "undo"): void {

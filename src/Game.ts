@@ -9,6 +9,7 @@
  *
  */
 
+import { placeHtml } from "./Game0Basics";
 import { GameMachine } from "./GameMachine";
 
 class PlayerTurn {
@@ -21,11 +22,12 @@ class PlayerTurn {
   }
 
   onEnteringState(args: any, isCurrentPlayerActive: boolean) {
-    this.game.onEnteringState_PlayerTurn(args);
+    if (args._private) this.game.onEnteringState_PlayerTurn(args._private);
+    else this.game.onEnteringState_PlayerTurn(args);
   }
 
   onLeavingState(args: any, isCurrentPlayerActive: boolean) {
-    this.game.onLeavingState(args);
+    this.game.onLeavingState("PlayerTurn", args);
   }
 
   onPlayerActivationChange(args: any, isCurrentPlayerActive: boolean) {}
@@ -45,7 +47,46 @@ export class Game extends GameMachine {
   setup(gamedatas: CustomGamedatas) {
     console.log("Starting game setup");
     super.setup(gamedatas);
+    placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
+    placeHtml(`<div id="player_areas"></div>`, "thething");
+    const mapWrapper = "map_wrapper";
+    placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
+    this.createMap($(mapWrapper));
+    placeHtml(`<div id="timetracker_1"></div>`, mapWrapper);
+    placeHtml(`<div id="timetracker_2"></div>`, mapWrapper);
 
+    Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
+      // template leftovers TODO: remove
+      //const playerId = Number(player.id);
+      // this.bga.playerPanels.getElement(playerId).insertAdjacentHTML(
+      //   "beforeend",
+      //   `
+      //           <span id="energy-player-counter-${playerId}"></span> Energy
+      //       `
+      // );
+      // const counter = new ebg.counter();
+      // counter.create(`energy-player-counter-${playerId}`, {
+      //   value: (player as any).energy,
+      //   playerCounter: "energy",
+      //   playerId
+      // });
+      placeHtml(
+        `<div id="tableau_${player.color}">
+                    <strong>${player.name}</strong>
+                    <div>Player zone content goes here</div>
+                </div>`,
+        "player_areas"
+      );
+    });
+
+    this.setupGame(gamedatas);
+
+    this.setupNotifications();
+
+    console.log("Ending game setup");
+  }
+
+  createMap(parent: HTMLElement) {
     // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
     // Shifted axial coordinates: center at (9,9), range 1..17. Hex boundary: |q-9| + |r-9| + |q+r-18| <= 16
     // Horizontal rows by r: row pattern 9, 10, 11, ..., 17, ..., 11, 10, 9
@@ -79,51 +120,37 @@ export class Game extends GameMachine {
 
     const hexHtml = hexes.join("\n");
 
-    this.bga.gameArea
-      .getElement()
-      .insertAdjacentHTML("beforeend", `<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`);
-
-    this.bga.gameArea.getElement().insertAdjacentHTML(
-      "beforeend",
-      `
-            <div id="player-tables"></div>
-        `
-    );
-
-    Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
-      const playerId = Number(player.id);
-      this.bga.playerPanels.getElement(playerId).insertAdjacentHTML(
-        "beforeend",
-        `
-                <span id="energy-player-counter-${playerId}"></span> Energy
-            `
-      );
-      const counter = new ebg.counter();
-      counter.create(`energy-player-counter-${playerId}`, {
-        value: (player as any).energy,
-        playerCounter: "energy",
-        playerId
-      });
-
-      document.getElementById("player-tables")!.insertAdjacentHTML(
-        "beforeend",
-        `
-                <div id="player-table-${playerId}">
-                    <strong>${player.name}</strong>
-                    <div>Player zone content goes here</div>
-                </div>
-            `
-      );
-    });
-
-    this.setupNotifications();
-
-    console.log("Ending game setup");
+    placeHtml(`<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`, parent);
   }
 
   setupNotifications() {
     console.log("notifications subscriptions setup");
 
-    this.bga.notifications.setupPromiseNotifications({});
+    // automatically listen to the notifications, based on the `notif_xxx` function on this class.
+    this.bga.notifications.setupPromiseNotifications({
+      minDuration: 1,
+      minDurationNoText: 1,
+
+      logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
+      //handlers: [this, this.tokens],
+      onStart: (notifName, msg, args) => {
+        if (msg) this.setSubPrompt(msg, args);
+      }
+      // onEnd: (notifName, msg, args) => this.setSubPrompt("", args)
+    });
+  }
+  async notif_message(args: any) {
+    //console.log("notif", args);
+    return gameui.wait(1);
+  }
+
+  async notif_undoMove(args: any) {
+    console.log("notif", args);
+    return gameui.wait(1);
+  }
+
+  async notif_lastTurn(args: any) {
+    //this.gamedatas.lastTurn = true;
+    //this.updateBanner();
   }
 }

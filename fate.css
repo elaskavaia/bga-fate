@@ -59,3 +59,10 @@
 .hex.terrain_mountain::before {
   background-color: #5a5b5c;
 }
+
+.crystal_yellow {
+  background-color: #ffeb3b;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}

@@ -296,7 +296,7 @@ class Base extends Table {
 
     function custom_getPlayerNameById(int $p): string {
         if ($p == self::PLAYER_AUTOMA) {
-            return "Aida";
+            return "Monsters";
         }
         return $this->getPlayerNameById($p);
     }
@@ -387,7 +387,7 @@ class Base extends Table {
             $infos[self::PLAYER_AUTOMA]["player_id"] = self::PLAYER_AUTOMA;
             $infos[self::PLAYER_AUTOMA]["player_no"] = 2;
             $infos[self::PLAYER_AUTOMA]["player_color"] = $this->getAutomaColor();
-            $infos[self::PLAYER_AUTOMA]["player_name"] = "Aida";
+            $infos[self::PLAYER_AUTOMA]["player_name"] = "Monsters";
             $infos[self::PLAYER_AUTOMA]["player_ai"] = 1;
             $infos[self::PLAYER_AUTOMA]["player_score"] = 0;
         }

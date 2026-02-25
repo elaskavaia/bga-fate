@@ -17,12 +17,10 @@ namespace Bga\Games\Fate\Operations;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Practice action: add 1 experience (yellow crystal) to the player board.
+ * Focus action: hero focuses to gain fate tokens or reroll dice.
  */
-class Op_actionPractice extends Operation {
+class Op_actionFocus extends Operation {
     function resolve(): void {
-        // - Increment experience counter on player board
-        $owner = $this->getOwner();
-        $this->game->effect_moveCrystals($owner, "yellow", 1, "tableau_$owner");
+        $this->game->systemAssert("Op_actionFocus is not implemented");
     }
 }

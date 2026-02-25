@@ -257,8 +257,8 @@ export class GameMachine extends Game1Tokens {
     return args.ttype == "token_count";
   }
 
-  onLeavingState(stateName: string): void {
-    super.onLeavingState(stateName);
+  onLeavingState(stateName: string, args: OpInfo): void {
+    super.onLeavingState(stateName, args);
     $("button_undo")?.remove();
   }
 

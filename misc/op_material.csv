@@ -21,7 +21,10 @@ turnconf|Confirm Turn
 # End of turn
 endOfTurn|End of Turn
 
-finalScoring|Final Scoring
+# Monster turn (runs after all players have taken their turn)
+turnMonster|Monster Turn
+
+
 
 
 # Main actions (2 per turn, cannot repeat)
