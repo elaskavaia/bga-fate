@@ -367,7 +367,7 @@ export class GameMachine extends Game1Tokens {
       .performAction("action_resolve", {
         data: JSON.stringify(args)
       })
-      ?.then((x) => {
+      .then((x) => {
         console.log("action complete", x);
       })
       .catch((e: any) => {
@@ -384,7 +384,7 @@ export class GameMachine extends Game1Tokens {
             .performAction("action_undo", [], {
               checkAction: false
             })
-            ?.catch((e: any) => {
+            .catch((e: any) => {
               this.setSubPrompt(e.message, e.args);
             }),
         {
@@ -496,6 +496,7 @@ export class GameMachine extends Game1Tokens {
 
   setSubPrompt(text: string, args: any = {}) {
     if (!text) text = "";
+    if (!args) args = [];
     const message = this.format_string_recursive(this.getTr(text, args), args);
 
     // have to set after otherwise status update wipes it

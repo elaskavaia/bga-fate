@@ -5,85 +5,258 @@
  */
 
 /********* You can start writing your CSS below this line: **********/
+@use "variables" as v;
+@use "Map";
+@use "Tokens";
+@use "Minis";
+@use "Cards";
 
-// --- Hex grid variables ---
-$hex-size: 50px; // distance from center to corner (pointy-top)
-$hex-width: calc($hex-size * sqrt(3)); // sqrt(3) * size ≈ width (pointy-top)
-$hex-height: $hex-size * 2; // full height of a pointy-top hex
-$hex-gap: 2px; // visual gap between hexes (applied as margin)
-$hex-bg: #d4c9a8;
-$hex-bg-hover: #c2b48e;
-$hex-border-color: #8b7d5e;
-$hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+// @font-face {
+//   font-family: "Official";
+//   src: url("img/ConcursoItalian.otf");
+// }
 
-#map_area {
-  position: relative;
-  margin: 10px auto;
-  // Size is set dynamically via inline style in TS, but provide a fallback
-  max-width: 2048px;
+// :root {
+//   --accent-game-font: Roboto, Arial, sans-serif;
+//   --accent-game-font: "Official"; // TODO: remove when option is added
+// }
+
+// .pref_font_game:root {
+//   --accent-game-font: "Official";
+// }
+
+#gameaction_status_wrap {
+  display: block !important; // prevent flickering of top bar
+
+  img {
+    display: none;
+  }
+}
+.subtitle {
+  font-size: x-small;
+}
+#page-title {
+  min-height: 76px !important;
+  line-height: 24px;
+}
+#pagemaintitle_wrap {
+  min-height: 42px !important;
 }
 
-.hex {
+#oversurface {
   position: absolute;
-  width: $hex-width;
-  height: $hex-height;
-  clip-path: $hex-clip;
-  background-color: $hex-bg;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+#oversurface > * {
+  position: absolute;
+  transition-property: all;
+  transition-duration: 500ms;
+  transition-timing-function: ease-in-out;
+  /* background-color: blue; */
+  transform-origin: center center;
+}
+
+.phantom {
+  animation: pulse 500ms ease-in-out;
+}
+
+.limbo {
+  display: none;
+}
+
+#thething {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+// BUTTONS
+
+.bgabutton_gray {
+  border: 1px solid #0606065e;
+  box-shadow: 0 1px 0 #000;
+}
+
+.bgabutton_targetcolor {
+  background-color: #2196f3c7;
+}
+
+.bgabutton.disabled {
+  pointer-events: unset; // undo bga default
+}
+
+// .bgabutton.disabled:hover {
+//   background-color: red;
+// }
+
+.bgabutton.disabled:active {
+  pointer-events: unset; // none - prevent default click, but not hover
+}
+
+button.bgabutton > * {
+  pointer-events: unset; // unset point event to inner elements
+}
+
+.gg_selected,
+.gg_selected_alt {
+  box-shadow: 0px 0px 5px 5px v.$selectionColor;
+}
+
+.active_slot {
   cursor: pointer;
-  box-sizing: border-box;
+  //box-shadow: 0px 0px 4px 2px v.$activeColor !important;
 
-  // Inner border effect using a pseudo-element (clip-path clips real borders)
-  &::before {
-    content: "";
-    position: absolute;
-    inset: $hex-gap;
-    clip-path: $hex-clip;
-    background-color: $hex-bg;
-    transition: background-color 0.15s ease;
+  outline: 2px dashed v.$activeColor;
+  outline-offset: -3px;
+
+  &.gg_selected,
+  &.gg_selected_alt {
+    outline: 4px dashed v.$selectionColor;
   }
+}
 
-  &::after {
-    position: absolute;
-    content: attr(data-loc);
-    z-index: 3;
-    top: 30%;
-    left: 5%;
+.gg_selected_alt {
+  &.segment {
+    margin-top: 0em !important;
   }
+  &.target_container_card {
+    margin-top: 0em !important;
+  }
+}
 
+.selection_area .disabled {
+  filter: opacity(0.3);
+}
+
+/*
+.gg_selected_alt[data-count] {
+  box-shadow:
+    0 0 0 2px white,
+    0.3em 0.3em 1em gray !important;
+}
+*/
+.bgabutton {
+  &.gg_selected,
+  &.gg_selected_alt {
+    border: 1px solid blue;
+  }
+  &[data-count]::after {
+    content: " x " attr(data-count);
+  }
+}
+//#page-title
+.action-button {
+  min-width: 4em;
+  line-height: 24px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  min-height: 30px;
+}
+
+#undoredo_wrap {
+  margin-left: 5px;
+  margin-right: 5px;
+  float: right;
+}
+// unset top otherwise its misaligned
+#go_to_next_table_active_player,
+#go_to_next_table_inactive_player {
+  top: 0px;
+}
+
+.button_undo {
+  min-width: 2em;
+  background-image: none;
+  // &::before {
+  //   content: "\f049"; //' "\f0e2";
+  //   font-size: large;
+  //   font-family: FontAwesome;
+  // }
+}
+
+#overall-content {
+  overflow: visible; // when hidden it prevents sticky position to work
+}
+
+.player-board {
+  background-color: #f8f8f8;
+}
+
+.score-sheet {
+  background-image: url(img/starbg.jpg);
+  background-size: cover;
+  font-family: var(--accent-game-font);
+  font-size: large;
+  table,
+  td,
+  th {
+    border: 1px solid darkgray;
+    border-collapse: collapse;
+    padding: 8px;
+    color: white;
+  }
+  .bga-score-sheet_player-name {
+    color: var(--player-color);
+  }
+  table tr:first-child {
+    background-color: #cba014;
+  }
+}
+
+#test_stuff > * {
+  display: inline-block;
+}
+
+.target_container {
+  position: relative;
+
+  min-width: 64px;
+  border: 1px solid gray;
+  border-radius: 10%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  color: #060606;
+
+  & > * {
+    position: relative;
+    display: inline-block;
+  }
   &:hover {
-    background-color: $hex-border-color;
-    &::after {
-      background-color: $hex-bg-hover;
-    }
-  }
-
-  &.active_slot {
-    background-color: #4a9;
-    &::after {
-      background-color: #77ccaa;
-    }
-  }
-
-  // --- Terrain types ---
-  &.terrain_forest::before {
-    background-color: #3a8a3e;
+    background-color: #e0e0e0;
+    cursor: pointer;
   }
 }
-.hex.terrain_lake,
-.hex.terrain_lake::before {
-  background-color: #71adc5;
-}
 
-.hex.terrain_mountain,
-.hex.terrain_mountain::before {
-  background-color: #5a5b5c;
-}
+// html {
+//   background: none;
+//   background-color: #b9ecbe;
+// }
+// html:before {
+//   background-image: url(img/bg.jpg);
+//   background-position: 50% 100%;
+//   background-repeat: no-repeat;
+//   background-size: cover;
+//   content: " ";
+//   display: block;
+//   height: 100%;
+//   width: 100%;
+//   left: 0;
+//   top: 0;
 
-// crystall
+//   opacity: 0.7;
+//   position: fixed;
 
-.crystal_yellow {
-  background-color: #ffeb3b;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
+//   z-index: -1;
+// }

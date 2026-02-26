@@ -32,6 +32,12 @@ hero_2|Astrid|1|hero|1|limbo
 hero_3|Kara|1|hero|1|limbo
 hero_4|Boldur|1|hero|1|limbo
 
+# hero cards (one per hero, placed on player tableau during setup)
+card_hero_1|Bjorn|1|card|1|limbo
+card_hero_2|Astrid|1|card|1|limbo
+card_hero_3|Kara|1|card|1|limbo
+card_hero_4|Boldur|1|card|1|limbo
+
 # attack dice (20 total)
 die_attack|Attack Die|20|die|2|supply_dice
 

@@ -41,8 +41,7 @@ class Op_turn extends Operation {
 
     function canSkip() {
         // Player can end turn early (skip remaining actions)
-        $remaining = $this->getActionsRemaining();
-        return $remaining > 0 && $remaining < self::ACTIONS_PER_TURN;
+        return true;
     }
 
     function getSkipName() {
@@ -137,7 +136,7 @@ class Op_turn extends Operation {
     }
 
     private function queueEndOfTurn(): void {
-        $this->queue("endOfTurn");
+        $this->queue("turnEnd");
         $this->game->queueNextTurnOrEnd($this->getPlayerId());
     }
 

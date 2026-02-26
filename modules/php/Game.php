@@ -86,6 +86,7 @@ class Game extends Base {
 
         // Player setup
         $players = $this->loadPlayersBasicInfos();
+        $heroNo = 1;
 
         foreach ($players as $player_id => $player) {
             //   - Create town pieces in Grimheim based on player count (1p=4, 2p=6, 3p=8, 4p=10)
@@ -103,6 +104,11 @@ class Game extends Base {
             //   - Each player draws 1 yellow monster card and places initial monsters
             $color = $player["player_color"];
             $this->tokens->db->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
+
+            // Assign hero to player (Iteration 0: sequential assignment, later will be player choice)
+            $tokens->moveToken("card_hero_$heroNo", "tableau_{$color}");
+            $tokens->moveToken("hero_$heroNo", "hex_9_9"); // Start in Grimheim
+            $heroNo++;
         }
 
         $this->machine->queue("turn", $this->custom_getPlayerColorById($startingPlayer));
@@ -276,6 +282,19 @@ class Game extends Base {
 
     function getVariantSoloBoard() {
         return (int) $this->getGameStateValue("variant_solo_board");
+    }
+
+    /**
+     * Returns the hero miniature token id for the current operation owner.
+     * Looks up which card_hero_N is on the player's tableau, then returns hero_N.
+     */
+    function getHeroTokenId(string $owner): string {
+        $heroCardKey = $this->game->tokens->db->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
+        $this->systemAssert("No hero card found", $heroCardKey);
+
+        // card_hero_1 → hero_1
+        $heroNo = substr($heroCardKey, strlen("card_hero_"));
+        return "hero_$heroNo";
     }
 
     function getRulesFor($token_id, $field = "r", $default = "") {

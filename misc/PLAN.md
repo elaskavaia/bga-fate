@@ -45,8 +45,8 @@ See CLAUDE.md for project overview
 ### Server
 [x] `setupNewGame()`: create 1 hero per player in Grimheim, create rune stone on time track position 1, create town pieces (houses) in Grimheim
 [x] `Op_actionPractice`: implement — gain 1 XP (increment player counter)
-[ ] `Op_actionMove`: implement — player picks a hex, hero moves there (no validation yet beyond "is it a hex on the map")
-[x] `Op_endOfTurn`: reset, schedule next player or when everybody did one turn - schedule turnMonster
+[x] `Op_actionMove`: implement — player picks a hex, hero moves there (no validation yet beyond "is it a hex on the map")
+[x] `Op_turnEnd`: reset, schedule next player or when everybody did one turn - schedule turnMonster
 [x] `Op_turnMonster`: advance rune stone on time track by 1 step, Win/loss check: if time track reaches end → win. (Loss condition deferred)
 [x] `getAllDatas()`: should work
 

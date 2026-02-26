@@ -48,6 +48,7 @@ export class Game extends GameMachine {
     console.log("Starting game setup");
     super.setup(gamedatas);
     placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
+    placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
     placeHtml(`<div id="player_areas"></div>`, "thething");
     const mapWrapper = "map_wrapper";
     placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
@@ -121,6 +122,10 @@ export class Game extends GameMachine {
     const hexHtml = hexes.join("\n");
 
     placeHtml(`<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`, parent);
+
+    parent.querySelectorAll(".hex").forEach((node: HTMLElement) => {
+      this.addListenerWithGuard(node, (e) => this.onToken(e));
+    });
   }
 
   setupNotifications() {
@@ -139,6 +144,15 @@ export class Game extends GameMachine {
       // onEnd: (notifName, msg, args) => this.setSubPrompt("", args)
     });
   }
+
+  async notif_tokenMoved(args: any) {
+    return super.notif_tokenMoved(args);
+  }
+
+  async notif_counter(args: any) {
+    return super.notif_counter(args);
+  }
+
   async notif_message(args: any) {
     //console.log("notif", args);
     return gameui.wait(1);

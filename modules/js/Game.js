@@ -1490,7 +1490,7 @@ class GameMachine extends Game1Tokens {
             .performAction("action_resolve", {
             data: JSON.stringify(args)
         })
-            ?.then((x) => {
+            .then((x) => {
             console.log("action complete", x);
         })
             .catch((e) => {
@@ -1503,7 +1503,7 @@ class GameMachine extends Game1Tokens {
                 .performAction("action_undo", [], {
                 checkAction: false
             })
-                ?.catch((e) => {
+                .catch((e) => {
                 this.setSubPrompt(e.message, e.args);
             }), {
                 color: "alert",
@@ -1608,6 +1608,8 @@ class GameMachine extends Game1Tokens {
     setSubPrompt(text, args = {}) {
         if (!text)
             text = "";
+        if (!args)
+            args = [];
         const message = this.format_string_recursive(this.getTr(text, args), args);
         // have to set after otherwise status update wipes it
         setTimeout(() => {
@@ -1711,6 +1713,7 @@ class Game extends GameMachine {
         console.log("Starting game setup");
         super.setup(gamedatas);
         placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
+        placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="player_areas"></div>`, "thething");
         const mapWrapper = "map_wrapper";
         placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
@@ -1770,6 +1773,9 @@ class Game extends GameMachine {
         }
         const hexHtml = hexes.join("\n");
         placeHtml(`<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`, parent);
+        parent.querySelectorAll(".hex").forEach((node) => {
+            this.addListenerWithGuard(node, (e) => this.onToken(e));
+        });
     }
     setupNotifications() {
         console.log("notifications subscriptions setup");
@@ -1785,6 +1791,12 @@ class Game extends GameMachine {
             }
             // onEnd: (notifName, msg, args) => this.setSubPrompt("", args)
         });
+    }
+    async notif_tokenMoved(args) {
+        return super.notif_tokenMoved(args);
+    }
+    async notif_counter(args) {
+        return super.notif_counter(args);
     }
     async notif_message(args) {
         //console.log("notif", args);

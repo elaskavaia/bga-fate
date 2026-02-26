@@ -149,6 +149,9 @@ final class GameTest extends TestCase {
     }
     public function testInstanciateAllOperations() {
         $this->game();
+        $this->game->tokens->createTokens();
+        $this->game->tokens->db->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->db->moveToken("hero_1", "hex_9_9");
         $token_types = $this->game->material->get();
         $tested = [];
         foreach ($token_types as $key => $info) {

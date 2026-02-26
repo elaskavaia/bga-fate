@@ -1,0 +1,111 @@
+$full-colors-list: (
+  _ff0000: #ff0000,
+  _008000: #008000,
+  _0000ff: #0000ff,
+  _ffa500: #ffa500,
+  _e94190: #e94190,
+  _982fff: #982fff,
+  _72c3b1: #72c3b1,
+  _f07f16: #f07f16,
+  _bdd002: #bdd002,
+  _7b7b7b: #7b7b7b,
+  _000000: #000000,
+  _ffffff: #ffffff,
+  _6cd0f6: #6cd0f6,
+  _ef58a2: #ef58a2,
+  _ffcc02: #ffcc02,
+  _a0d28c: #a0d28c
+);
+//  "player_colors" => ["ff0000", "ffcc02", "6cd0f6", "982fff"],
+$colors-list: (
+  _ff0000: #ff0000,
+  _ffcc02: #ffcc02,
+  _6cd0f6: #6cd0f6,
+  _982fff: #982fff
+);
+$textShadowWhite:
+  #fff -1px -1px,
+  #fff 1px 1px,
+  #fff -1px 1px,
+  #fff 1px -1px;
+
+$textShadowBlack:
+  -1px -1px rgba(0, 0, 0, 0.267),
+  1px 1px rgba(0, 0, 0, 0.267),
+  -1px 1px rgba(0, 0, 0, 0.267),
+  1px -1px rgba(0, 0, 0, 0.267);
+
+$textShadowBlackStrong:
+  #000 0px 0px 2px,
+  #000 0px 0px 2px,
+  #000 0px 0px 2px,
+  #000 0px 0px 2px,
+  #000 0px 0px 2px,
+  #000 0px 0px 2px;
+
+$textShadowRed: #f00 0px 0px 2px;
+$boxShadowBlack: 1px 1px 3px 1px #000000b0;
+$boxShadowGreen: 1px 1px 1px 0px greenyellow;
+$dropShadow2: drop-shadow(2px 2px 3px black);
+$dropShadow3: drop-shadow(1px 1px 3px black);
+
+$activeColor: #19bedb;
+$activeShadowColor: greenyellow;
+$selectionColor: #3f51b5;
+$activeShadowFilter: drop-shadow(0px 0px 5px $activeShadowColor) drop-shadow(0px 0px 10px $activeShadowColor);
+
+$ratioW: 240;
+$ratioH: 382;
+$cardHeight: 200px;
+$cardWidth: calc($cardHeight * $ratioW / $ratioH);
+$pboardHeight: calc($cardHeight * 2.4);
+
+@keyframes active-pulse {
+  0% {
+    scale: 1;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+  }
+  70% {
+    scale: 1.2;
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+  100% {
+    scale: 1;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1) !important;
+  }
+  50% {
+    transform: scale(1.5) !important;
+  }
+  100% {
+    transform: scale(1) !important;
+  }
+}
+
+@keyframes pulse-drop-shadow {
+  0% {
+    filter: drop-shadow(0 0 1px $activeColor) drop-shadow(0 0 1px $activeColor);
+  }
+  50% {
+    filter: drop-shadow(2px 2px 4px $activeColor) drop-shadow(-2px -2px 4px $activeColor);
+  }
+  100% {
+    filter: drop-shadow(0 0 1px $activeColor) drop-shadow(0 0 1px $activeColor);
+  }
+}
+
+@keyframes pulse-box-shadow {
+  0% {
+    box-shadow: 0 0 0 0 $activeColor;
+  }
+  50% {
+    box-shadow: 0 0 6px 4px $activeColor;
+  }
+  100% {
+    box-shadow: 0 0 0 0 $activeColor;
+  }
+}

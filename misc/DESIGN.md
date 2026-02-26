@@ -57,7 +57,7 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 
 - `turn` (player) — Main player turn: pick 2 actions + free actions — *implemented*
 - `turnconf` (player) — Confirm end of turn (undo checkpoint) — *stub*
-- `endOfTurn` (auto) — Reset turn state, queue next player or monsterTurn — *implemented*
+- `turnEnd` (auto) — Reset turn state, queue next player or monsterTurn — *implemented*
 - `turnMonster` (auto) — Advance time track; check win/loss; queue next round — *implemented*
 - `actionMove` (main) — Hero moves up to 3 hexes — *stub*
 - `actionAttack` (main) — Hero attacks adjacent monster — *notimpl*

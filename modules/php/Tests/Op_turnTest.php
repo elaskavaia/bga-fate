@@ -262,7 +262,7 @@ final class Op_turnTest extends TestCase {
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
         $this->assertNotNull($top);
-        $this->assertEquals("endOfTurn", $top->getType());
+        $this->assertEquals("turnEnd", $top->getType());
     }
 
     // -------------------------------------------------------------------------

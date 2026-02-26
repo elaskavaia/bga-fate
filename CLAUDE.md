@@ -111,7 +111,54 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 4. Run `npm run genmat` to update Material.php
 5. Add tests in modules/php/Tests/
 
-### Adding New Game Elements
+### Adding New Game Element
+
+Every physical game piece leaves footprints in multiple places: database, material, CSS, and client-side code. Follow this checklist when adding a new element.
+
+**1. Design (DESIGN.md)**
+   - Check if DESIGN.md already describes this element; if not, add an entry documenting:
+     - Token key pattern using reverse DNS notation: `supertype_type_instance` (e.g. `monster_goblin_5`, `card_hero_1`)
+     - Whether it is player-specific (keyed by color) or global
+     - Possible locations of these tokens (e.g. `supply`, `hex_X_Y`, `hand_<color>`, `tableau_<color>`)
+     - Possible states and what they mean
+     - Whether it exists in the DB tokens table as a key, only as a location
+
+**2. Material (CSV + genmat)**
+   - Add or update the element type/supertype in the appropriate CSV file in misc/ (e.g. `token_material.csv`, `card_material.csv`)
+   - You can define types and supertypes and not individual instances in material (in this case instances are created during setup, for example if we need 50 crystals - they all the same, we only need to define crystal as supertype)
+   - Include translatable fields (name, tooltip) where needed
+   - Run `npm run genmat` to regenerate Material.php
+
+**3. Setup (Game.php)**
+   - Tokens are auto-created by `PGameTokens::createTokens()` based on the `create` field in the CSV:
+     - `0` = do not create, `1` = single token with id as-is, `2` = indexed (`{id}_{INDEX}`), `3` = per-player indexed (`{id}_{COLOR}_{INDEX}`), `4` = per-player single (`{id}_{COLOR}`), `5` = indexed per-player (`{id}_{INDEX}_{COLOR}`)
+   - The `location` column sets the initial location; `{COLOR}` placeholders are expanded per player
+   - Only add manual setup code in `setupNewGame()` if auto-creation is insufficient (e.g. conditional placement, shuffling into decks)
+
+**4. Graphics assets**
+   - Check if sprite images exist in img/ for this element
+   - If not, ask the user to provide graphics assets before proceeding with CSS
+
+**5. CSS/SCSS (src/css/)**
+   - SCSS files are organized by element category: `Cards.scss` for cards, `Tokens.scss` for tokens/meeples/crystals, `Minis.scss` for hero miniatures, `Map.scss` for map/hex styles. Entry point is `GameXBody.scss` which imports all others via `@use`
+   - Supertype class sets shared properties (background-image, dimensions): `.meeple { background-image: url(img/tokens.png); width: 25px; height: 25px; }`
+   - Type class sets sprite position: `.meeple_ff0000 { background-position: 14% 0%; }`
+   - Run `npm run build:scss` to verify
+
+**6. Client-side (src/Game.ts and related)**
+   - DOM elements use id matching the token key and classes matching supertype/type: `<div id="meeple_ff0000_7" class="meeple meeple_ff0000"></div>`
+   - Override `getPlaceRedirect(tokenInfo, args)` in Game.ts to handle:
+     - Location redirects: map server location to a client container by setting `result.location` (e.g. server `tableau_ff0000` → client `breakroom_ff0000`)
+     - Click handlers: set `result.onClick = (x) => this.onToken(x)` for interactive elements
+     - Use `result.nop = true` to suppress animation for non-visual tokens
+   - Override `updateTokenDisplayInfo(tokenDisplayInfo)` in Game.ts to:
+     - Build dynamic tooltips per token type (switch on `tokenInfo.mainType`)
+     - Set `tokenInfo.showtooltip = false` to hide tooltips for layout-only elements
+     - Enrich `tokenInfo.imageTypes` with extra CSS classes
+   - If a new location container is needed, create it in `setup(gamedatas: CustomGamedatas)()` . Dynamic containers can also be created on-demand in `getPlaceRedirect` using `placeHtml()`
+
+
+### Adding New Game Material Element
 
 To add new file:
 1. Add file <name>.csv in misc/ with pipe (|) separated header

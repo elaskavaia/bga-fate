@@ -348,13 +348,13 @@ class Base extends Table {
         return $table[0];
     }
     function getNextReadyPlayerId($player_id): int {
-        if ($this->isSolo()) {
-            if ($player_id == self::PLAYER_AUTOMA) {
-                return $this->getFirstPlayer();
-            } else {
-                return self::PLAYER_AUTOMA;
-            }
-        }
+        // if ($this->isSolo()) {
+        //     if ($player_id == self::PLAYER_AUTOMA) {
+        //         return $this->getFirstPlayer();
+        //     } else {
+        //         return self::PLAYER_AUTOMA;
+        //     }
+        // }
         $this->systemAssert("invalid player id $player_id", $this->isRealPlayer($player_id));
         $player_id = $this->getPlayerAfter($player_id);
         return $player_id;
