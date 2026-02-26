@@ -1,0 +1,73 @@
+num|name|spawnloc|spawn
+
+
+# spawnloc - locate where they spawn
+# spawn format: monster_type:hex_q_r (comma-separated for multiple spawns)
+#set id=card_monster_{num}
+
+# Monster cards - yellow deck (early game) - 36
+#set ctype=yellow
+#set location=deck_monster_yellow
+#set type=card card_monster ctype_{ctype}
+# Yellow legends (1-6)
+1|Queen of the Dead|DeadPlains
+2|Seer of Odin|MarshOfSorrow
+3|Grendel|OgreValley
+4|Surt|SpewingMountain
+5|Hrungbald|DarkForest
+6|Nidhuggr|Highlands
+# Yellow regular (7-36)
+7|Fiery Projectiles|Highlands
+8|Whirlwind|Highlands
+9|Trekking Monsters|Highlands
+10|Burnt Offerings|Highlands
+11|Autumn Claw|Highlands
+12|Mischievous Sprites|SpewingMountain
+13|Fire-Breathing Stones|SpewingMountain
+14|Autumn Youth Camp|SpewingMountain
+15|Air Strike|SpewingMountain
+16|Reunion|SpewingMountain
+17|Boneyard|MarshOfSorrow
+18|Bad to the Bone|MarshOfSorrow
+19|Eyes in the Dark|MarshOfSorrow
+20|Skeletons on a Leash|MarshOfSorrow
+21|Marching|MarshOfSorrow
+22|Impulsive Swarm|DeadPlains
+23|Bone Structures|DeadPlains
+24|Brain Dead|DeadPlains
+25|Dead Trio|DeadPlains
+26|Sudden Death|DeadPlains
+27|Brutish Offense|OgreValley
+28|Flanking|OgreValley
+29|Foraging|OgreValley
+30|Krusty the Babysitter|OgreValley
+31|Strollin'|OgreValley
+32|Younglings|DarkForest
+33|Brutal Band|DarkForest
+34|Family Trip|DarkForest
+35|Forest Patrol|DarkForest
+36|Feral Trolls|DarkForest
+
+#set ctype=red
+#set location=deck_monster_red
+# Monster cards - red deck (late game) - 18
+# Red legends (37-42)
+37|Queen of the Dead|DeadPlains
+38|Seer of Odin|MarshOfSorrow
+39|Grendel|OgreValley
+40|Surt|SpewingMountain
+41|Hrungbald|DarkForest
+42|Nidhuggr|Highlands
+# Red regular (43-54)
+43|Feed the Flames|Highlands
+44|Brimstone|Highlands
+45|Eruption|SpewingMountain
+46|The Red Tide|SpewingMountain
+47|Walking Armies|MarshOfSorrow
+48|Gloomy Fate|MarshOfSorrow
+49|Ragar Summoning|DeadPlains
+50|Intense Darkness|DeadPlains
+51|Travelogue|OgreValley
+52|Primal Breezes|OgreValley
+53|Trollkin United|DarkForest
+54|Brawling Brutes|DarkForest

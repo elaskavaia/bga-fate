@@ -10,6 +10,7 @@
  */
 
 import { placeHtml } from "./Game0Basics";
+import { Token, TokenMoveInfo, AnimArgs } from "./Game1Tokens";
 import { GameMachine } from "./GameMachine";
 
 class PlayerTurn {
@@ -49,6 +50,7 @@ export class Game extends GameMachine {
     super.setup(gamedatas);
     placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
     placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
+    placeHtml(`<div id="supply_monster" class="supply"></div>`, "limbo");
     placeHtml(`<div id="player_areas"></div>`, "thething");
     const mapWrapper = "map_wrapper";
     placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
@@ -122,6 +124,15 @@ export class Game extends GameMachine {
     parent.querySelectorAll(".hex").forEach((node: HTMLElement) => {
       this.addListenerWithGuard(node, (e) => this.onToken(e));
     });
+  }
+
+  getPlaceRedirect(tokenInfo: Token, args: AnimArgs = {}): TokenMoveInfo {
+    const result = tokenInfo as TokenMoveInfo;
+    const mainType = tokenInfo.key.split("_")[0];
+    if (mainType === "monster") {
+      // placeholder
+    }
+    return result;
   }
 
   setupNotifications() {

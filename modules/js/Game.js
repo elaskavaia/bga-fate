@@ -1714,6 +1714,7 @@ class Game extends GameMachine {
         super.setup(gamedatas);
         placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
+        placeHtml(`<div id="supply_monster" class="supply"></div>`, "limbo");
         placeHtml(`<div id="player_areas"></div>`, "thething");
         const mapWrapper = "map_wrapper";
         placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
@@ -1773,6 +1774,14 @@ class Game extends GameMachine {
         parent.querySelectorAll(".hex").forEach((node) => {
             this.addListenerWithGuard(node, (e) => this.onToken(e));
         });
+    }
+    getPlaceRedirect(tokenInfo, args = {}) {
+        const result = tokenInfo;
+        const mainType = tokenInfo.key.split("_")[0];
+        if (mainType === "monster") {
+            // placeholder
+        }
+        return result;
     }
     setupNotifications() {
         console.log("notifications subscriptions setup");

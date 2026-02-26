@@ -384,6 +384,7 @@ class Game extends Base {
     /**
      * BFS reachability: returns all hexes reachable from $startHex within $maxSteps.
      * Grimheim counts as one area (0 cost between its hexes).
+     * Entering Grimheim ends movement. Exiting Grimheim costs 1 step.
      * @param string $moverType "hero" or "monster" — heroes cannot enter mountains, monsters can
      * @return array<string, int> hex => distance
      */
@@ -413,12 +414,11 @@ class Game extends Base {
                 if (!$this->canEnterHex($neighbor, $moverType)) {
                     continue;
                 }
-                // Entering Grimheim: add all Grimheim hexes at same cost
-                if ($this->isInGrimheim($neighbor)) {
+                // Entering Grimheim ends movement — mark reachable but don't expand
+                if (!$startInGrimheim && $this->isInGrimheim($neighbor)) {
                     foreach ($this->getHexesInGrimheim() as $gHex) {
                         if (!isset($visited[$gHex])) {
                             $visited[$gHex] = $steps + 1;
-                            $queue[] = [$gHex, $steps + 1];
                         }
                     }
                 } else {
@@ -427,7 +427,7 @@ class Game extends Base {
                 }
             }
         }
-        // Remove start hex (and Grimheim siblings at distance 0 if starting there)
+        // Remove start hex
         unset($visited[$startHex]);
         return $visited;
     }
@@ -588,6 +588,14 @@ class Game extends Base {
         //$this->notify->player($this->getActivePlayerId(), "resetInterfaceWithAllDatas", "", $newGameDatas); // this is notification to reset all data
         $this->notify->all("message", "setup is done", []);
         $this->notify->all("undoRestorePoint", "", []);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_monster() {
+        // Place a few goblins on the map for visual testing
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_7");
+        $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_12_6");
+        $this->tokens->dbSetTokenLocation("monster_goblin_3", "hex_5_10");
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

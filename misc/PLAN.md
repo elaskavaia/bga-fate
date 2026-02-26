@@ -74,17 +74,16 @@ See CLAUDE.md for project overview
   - `isOccupied($hexId)` — checks if a character is on this area
   - `getMoveDistance($hexId, $otherHexId)` - distance beetwin hexes, if adjecent its 1, if one of them invalid its -1
 
-[ ] Movement validation: check terrain, occupied hexes, max 3 steps
-[ ] Grimheim special rules: entering ends movement, exiting can go to any adjacent non-mountain hex
-[ ] Reachability calculation: given hero position, return set of valid destination hexes
+[x] Movement validation: check terrain, occupied hexes, max 3 steps
+[x] Grimheim special rules: entering ends movement, exiting can go to any adjacent non-mountain hex
+[x] Reachability calculation: given hero position, return set of valid destination hexes (`getReachableHexes()`)
 
 ### Client
-[ ] Highlight reachable hexes when move action is active
-[ ] Multi-step movement: click intermediate hexes or final destination
-[ ] Show path preview
+[x] Highlight reachable hexes when move action is active
+[ ] Show path preview - SKIP FOR NOW
 
 ### Tests
-[ ] PHP unit tests for movement validation and reachability
+[x] PHP unit tests for movement validation and reachability
 
 ---
 
@@ -93,15 +92,15 @@ See CLAUDE.md for project overview
 **Goal**: Monsters appear on the board. No movement or combat yet — just spawning from monster cards during reinforcement.
 
 ### Server
-[ ] Define monster tokens in material (goblins only to start — Trollkin rank 1)
+[x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
 [ ] Monster card data: define a few yellow monster cards with goblin placement
 [ ] `Op_reinforcement`: draw monster card, place goblins at specified locations
 [ ] Trigger reinforcement on time track spots marked with crossed axes
-[ ] Heroes can't move into hexes occupied by monsters
+[x] Heroes can't move into hexes occupied by monsters — done in Iteration 1
 
 ### Client
-[ ] Render monster tiles on map hexes
-[ ] Show monster card draw (simple notification, no animation needed)
+[x] Render monster tiles on map hexes — placeholder circles with faction color and name label
+[ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css 
 
 ### Tests
 [ ] PHP tests for monster placement from cards

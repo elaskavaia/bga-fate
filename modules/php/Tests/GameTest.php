@@ -239,6 +239,38 @@ final class GameTest extends TestCase {
         $this->assertArrayHasKey("hex_12_8", $reachable);
     }
 
+    public function testEnteringGrimheimEndsMovement() {
+        $game = $this->game;
+
+        // From hex_11_8 (adjacent to Grimheim hex_10_8), entering Grimheim ends movement
+        $reachable = $game->getReachableHexes("hex_11_8", 3);
+
+        // All Grimheim hexes should be reachable
+        $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
+        $this->assertArrayHasKey("hex_9_9", $reachable); // Grimheim
+        $this->assertArrayHasKey("hex_8_9", $reachable); // Grimheim
+
+        // But hexes on the other side of Grimheim should NOT be reachable
+        // because entering Grimheim ends movement
+        $this->assertArrayNotHasKey("hex_7_9", $reachable); // beyond Grimheim
+        $this->assertArrayNotHasKey("hex_7_10", $reachable); // beyond Grimheim
+    }
+
+    public function testExitingGrimheimCostsOneStep() {
+        $game = $this->game;
+
+        // From Grimheim, adjacent non-mountain hexes should be at distance 1
+        $reachable = $game->getReachableHexes("hex_9_9", 3);
+
+        // hex_11_8 is adjacent to Grimheim border hex hex_10_8
+        $this->assertArrayHasKey("hex_11_8", $reachable);
+        $this->assertEquals(1, $reachable["hex_11_8"]);
+
+        // hex_7_9 is adjacent to Grimheim border hex hex_8_9
+        $this->assertArrayHasKey("hex_7_9", $reachable);
+        $this->assertEquals(1, $reachable["hex_7_9"]);
+    }
+
     public function testInstanciateAllOperations() {
         $this->game();
         $this->game->tokens->createTokens();
