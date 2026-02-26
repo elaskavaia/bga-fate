@@ -1,0 +1,26 @@
+.timetrack {
+  position: absolute;
+  top: 0;
+  right: 0;
+  outline: 1px solid green;
+  height: 100px;
+  width: 100px;
+}
+
+.map_wrapper {
+  position: relative;
+  aspect-ratio: 4096 / 3134;
+  width: 1892px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url(img/EN_Game_Board.jpg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 0;
+  }
+}

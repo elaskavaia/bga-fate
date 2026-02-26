@@ -53,8 +53,8 @@ export class Game extends GameMachine {
     const mapWrapper = "map_wrapper";
     placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
     this.createMap($(mapWrapper));
-    placeHtml(`<div id="timetracker_1"></div>`, mapWrapper);
-    placeHtml(`<div id="timetracker_2"></div>`, mapWrapper);
+    placeHtml(`<div id="timetrack_1"></div>`, mapWrapper);
+    placeHtml(`<div id="timetrack_2"></div>`, mapWrapper);
 
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       // template leftovers TODO: remove
@@ -91,37 +91,33 @@ export class Game extends GameMachine {
     // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
     // Shifted axial coordinates: center at (9,9), range 1..17. Hex boundary: |q-9| + |r-9| + |q+r-18| <= 16
     // Horizontal rows by r: row pattern 9, 10, 11, ..., 17, ..., 11, 10, 9
-    const HEX_SIZE = 50; // must match $hex-size in Game.scss
-    const HEX_W = HEX_SIZE * Math.sqrt(3);
     const GRID_N = 8; // hex radius
     const GRID_C = GRID_N + 1; // center offset (9)
-
-    // Pointy-top axial to pixel using zero-based coords for positioning
-    // Grid bounds: width = sqrt(3) * size * (2*N + 1), height = size * (3*N + 2)
-    const mapW = HEX_W * (2 * GRID_N + 1);
-    const mapH = HEX_SIZE * (3 * GRID_N + 2);
+    const COLS = 2 * GRID_N + 1; // 17
+    const ROWS = 3 * GRID_N + 2; // 26
     const hexes: string[] = [];
 
-    for (let r = 1; r <= 2 * GRID_N + 1; r++) {
-      const r0 = r - GRID_C; // zero-based r for pixel math
+    for (let r = 1; r <= COLS; r++) {
+      const r0 = r - GRID_C; // zero-based r
       const qMin = Math.max(1, 1 - r0);
-      const qMax = Math.min(2 * GRID_N + 1, 2 * GRID_N + 1 - r0);
+      const qMax = Math.min(COLS, COLS - r0);
       for (let q = qMin; q <= qMax; q++) {
-        const q0 = q - GRID_C; // zero-based q for pixel math
-        const px = HEX_W * GRID_N + HEX_SIZE * (Math.sqrt(3) * q0 + (Math.sqrt(3) / 2) * r0);
-        const py = HEX_SIZE * 1.5 * GRID_N + HEX_SIZE * 1.5 * r0;
+        const q0 = q - GRID_C; // zero-based q
+        // Position as % of map_area: px/mapW*100 and py/mapH*100
+        const leftPct = ((GRID_N + q0 + r0 / 2) / COLS) * 100;
+        const topPct = ((1.5 * (GRID_N + r0)) / ROWS) * 100;
         const hexId = `hex_${q}_${r}`;
         const terrain = this.getRulesFor(hexId, "terrain", "");
         const loc = this.getRulesFor(hexId, "loc", "");
         hexes.push(
-          `<div class="hex terrain_${terrain}" id="${hexId}" style="left:${px}px;top:${py}px;" data-q="${q}" data-r="${r}" data-loc="${loc}"></div>`
+          `<div class="hex terrain_${terrain}" id="${hexId}" style="left:${leftPct}%;top:${topPct}%;" data-q="${q}" data-r="${r}" data-loc="${loc}"></div>`
         );
       }
     }
 
     const hexHtml = hexes.join("\n");
 
-    placeHtml(`<div id="map_area" style="width:${mapW}px;height:${mapH}px;">${hexHtml}</div>`, parent);
+    placeHtml(`<div id="map_area">${hexHtml}</div>`, parent);
 
     parent.querySelectorAll(".hex").forEach((node: HTMLElement) => {
       this.addListenerWithGuard(node, (e) => this.onToken(e));

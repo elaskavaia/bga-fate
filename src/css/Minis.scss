@@ -1,14 +1,14 @@
 // Hero and monster miniatures
 .hero {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
 
   .hex & {
     position: absolute;
-    top: 30%;
-    left: 30%;
+    top: 24%;
+    left: 14%;
   }
 }
 
@@ -23,4 +23,25 @@
 }
 .hero_4 {
   background-position: 40% 0%;
+}
+
+.rune_stone {
+  width: 60px;
+  height: 60px;
+  background-image: url(img/mini_houses.png);
+  background-size: 600% auto;
+  background-position: 100% 0%;
+
+  .timetrack & {
+    position: absolute;
+    top: 30%;
+    left: 30%;
+  }
+  &::after {
+    position: absolute;
+    content: attr(data-state);
+    z-index: 3;
+    top: 30%;
+    left: 5%;
+  }
 }

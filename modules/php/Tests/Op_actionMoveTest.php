@@ -32,37 +32,58 @@ final class Op_actionMoveTest extends TestCase {
     // getPossibleMoves
     // -------------------------------------------------------------------------
 
-    public function testAllMapHexesOffered(): void {
+    public function testReachableHexesFromGrimheim(): void {
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        // Should contain hex entries from map_material
-        $this->assertArrayHasKey("hex_9_1", $moves);
+        // Grimheim hexes (other than starting hex) are reachable at distance 0
         $this->assertArrayHasKey("hex_9_8", $moves);
-        $this->assertArrayHasKey("hex_9_9", $moves);
+        $this->assertArrayHasKey("hex_10_8", $moves);
+        $this->assertArrayHasKey("hex_8_10", $moves);
+
+        // Adjacent to Grimheim (distance 1)
+        $this->assertArrayHasKey("hex_11_8", $moves);
+        $this->assertArrayHasKey("hex_7_8", $moves);
     }
 
-    public function testCurrentHexNotApplicable(): void {
-        // hero_1 starts at hex_9_9 (Grimheim)
+    public function testCurrentHexNotReachable(): void {
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["hex_9_9"]["q"]);
+        // Current hex should not be in the list
+        $this->assertArrayNotHasKey("hex_9_9", $moves);
     }
 
-    public function testOtherHexesAreValid(): void {
+    public function testTooFarHexesNotReachable(): void {
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        $this->assertEquals(Material::RET_OK, $moves["hex_9_1"]["q"]);
-        $this->assertEquals(Material::RET_OK, $moves["hex_9_8"]["q"]);
+        // hex_9_1 is far from Grimheim (> 3 steps)
+        $this->assertArrayNotHasKey("hex_9_1", $moves);
+    }
+
+    public function testMountainHexesNotReachable(): void {
+        $op = $this->createOp();
+        $moves = $op->getPossibleMoves();
+
+        // hex_9_11 is mountain, should not be reachable
+        $this->assertArrayNotHasKey("hex_9_11", $moves);
+    }
+
+    public function testOccupiedHexBlocks(): void {
+        // Place another hero on an adjacent hex
+        $this->game->tokens->db->moveToken("hero_2", "hex_11_8");
+        $op = $this->createOp();
+        $moves = $op->getPossibleMoves();
+
+        // Occupied hex should not be reachable
+        $this->assertArrayNotHasKey("hex_11_8", $moves);
     }
 
     public function testNoNonMapLocationsOffered(): void {
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        // These are not map hexes
         $this->assertArrayNotHasKey("limbo", $moves);
         $this->assertArrayNotHasKey("supply_crystal_yellow", $moves);
         $this->assertArrayNotHasKey("timetrack_1", $moves);
@@ -74,24 +95,21 @@ final class Op_actionMoveTest extends TestCase {
 
     public function testResolveMovesHeroToTargetHex(): void {
         $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_9_1"]);
+        $op->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
         $location = $this->game->tokens->db->getTokenLocation("hero_1");
-        $this->assertEquals("hex_9_1", $location);
+        $this->assertEquals("hex_11_8", $location);
     }
 
     public function testResolveToCurrentHexThrows(): void {
-        // hero_1 is at hex_9_9 — resolving to current hex should fail
         $op = $this->createOp();
         $this->expectException(\Bga\GameFramework\UserException::class);
         $op->action_resolve([Operation::ARG_TARGET => "hex_9_9"]);
     }
 
-    public function testResolveUpdatesTokenLocation(): void {
+    public function testResolveToUnreachableHexThrows(): void {
         $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_10_1"]);
-
-        $location = $this->game->tokens->db->getTokenLocation("hero_1");
-        $this->assertEquals("hex_10_1", $location);
+        $this->expectException(\Bga\GameFramework\UserException::class);
+        $op->action_resolve([Operation::ARG_TARGET => "hex_9_1"]);
     }
 }

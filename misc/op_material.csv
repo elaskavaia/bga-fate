@@ -41,6 +41,6 @@ actionPractice|Practice
 useEquipment|Use Equipment|"notimpl"=>true
 useAbility|Use Ability|"notimpl"=>true
 playEvent|Play Event|"notimpl"=>true
-shareGold|Share Gold|"notimpl"=>true
+#shareGold|Share Gold|"notimpl"=>true
 
 #set kind=

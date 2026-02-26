@@ -147,6 +147,98 @@ final class GameTest extends TestCase {
     protected function setUp(): void {
         $this->game();
     }
+    public function testGetAdjacentHexes() {
+        $game = $this->game;
+
+        // Center hex (9,9) should have 6 neighbors
+        $adj = $game->getAdjacentHexes("hex_9_9");
+        $this->assertCount(6, $adj);
+        sort($adj);
+        $this->assertEquals(["hex_10_8", "hex_10_9", "hex_8_10", "hex_8_9", "hex_9_10", "hex_9_8"], $adj);
+
+        // Edge hex should have fewer neighbors
+        $adj = $game->getAdjacentHexes("hex_1_9");
+        $this->assertLessThan(6, count($adj));
+        $this->assertContains("hex_2_9", $adj);
+        $this->assertNotContains("hex_0_9", $adj); // off the board
+
+        // Non-existent hex returns empty
+        $this->assertEmpty($game->getAdjacentHexes("hex_99_99"));
+    }
+
+    public function testGetMoveDistance() {
+        $game = $this->game;
+
+        // Same hex
+        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_9_9"));
+        // Grimheim
+        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_10_9"));
+        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_9_8"));
+        // Two steps
+        $this->assertEquals(2, $game->getMoveDistance("hex_11_6", "hex_11_8"));
+        // Invalid
+        $this->assertEquals(-1, $game->getMoveDistance("hex_9_9", "hex_99_99"));
+        $this->assertEquals(-1, $game->getMoveDistance("hex_99_99", "hex_9_9"));
+
+        // Grimheim hexes: distance 0 between any two Grimheim hexes
+        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_8_10")); // both Grimheim
+        $this->assertEquals(0, $game->getMoveDistance("hex_8_9", "hex_10_8")); // both Grimheim, far apart
+
+        // Distance from Grimheim to adjacent non-Grimheim hex
+        $this->assertEquals(1, $game->getMoveDistance("hex_9_9", "hex_11_8")); // hex_11_8 is adjacent to hex_10_8 (Grimheim)
+        $this->assertEquals(1, $game->getMoveDistance("hex_11_8", "hex_8_9")); // symmetric
+    }
+
+    public function testGetReachableHexes() {
+        $game = $this->game;
+
+        // From a Grimheim hex, all Grimheim hexes are at distance 0
+        $reachable = $game->getReachableHexes("hex_9_9", 3);
+        $this->assertArrayHasKey("hex_9_8", $reachable); // Grimheim
+        $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
+        $this->assertEquals(0, $reachable["hex_9_8"]);
+
+        // Adjacent non-Grimheim hex at distance 1
+        $this->assertArrayHasKey("hex_11_8", $reachable);
+        $this->assertEquals(1, $reachable["hex_11_8"]);
+
+        // Start hex excluded
+        $this->assertArrayNotHasKey("hex_9_9", $reachable);
+
+        // Mountain hexes not reachable for heroes
+        $this->assertArrayNotHasKey("hex_9_11", $reachable); // mountain
+
+        // Far hexes not reachable
+        $this->assertArrayNotHasKey("hex_9_1", $reachable);
+    }
+
+    public function testGetReachableHexesMountainForMonster() {
+        $game = $this->game;
+
+        // hex_13_4 is mountain — not reachable by hero
+        $reachable = $game->getReachableHexes("hex_12_4", 1, "hero");
+        $this->assertArrayNotHasKey("hex_13_4", $reachable);
+
+        // But reachable by monster
+        $reachable = $game->getReachableHexes("hex_12_4", 1, "monster");
+        $this->assertArrayHasKey("hex_13_4", $reachable);
+    }
+
+    public function testGetReachableHexesBlockedByOccupied() {
+        $game = $this->game;
+        $game->tokens->createTokens();
+
+        // Place a hero on hex_11_8
+        $game->tokens->db->moveToken("hero_1", "hex_11_8");
+
+        // hex_11_8 should not be reachable (occupied)
+        $reachable = $game->getReachableHexes("hex_10_8", 3);
+        $this->assertArrayNotHasKey("hex_11_8", $reachable);
+
+        // Hexes behind the occupied one should still be reachable via other paths
+        $this->assertArrayHasKey("hex_12_8", $reachable);
+    }
+
     public function testInstanciateAllOperations() {
         $this->game();
         $this->game->tokens->createTokens();

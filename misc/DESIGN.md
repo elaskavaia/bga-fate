@@ -81,7 +81,7 @@ The client renders tokens by placing them inside DOM elements whose `id` matches
 - `map_area` — Container div for the entire hex grid
 - `hex_{q}_{r}` — Individual hex cell (e.g. `hex_9_9` = Grimheim)
 
-Hexes use pointy-top axial coordinates, center at (9,9), radius 8. Tokens placed at a hex location become children of that hex's div. Hexes get class `.active_slot` when they are valid move targets.
+Hexes use pointy-top axial coordinates, center at (9,9), radius 8. Tokens placed at a hex location become children of that hex's div. Hexes get class `.active_slot` when they are valid move targets. First row is 1.
 
 ### Player Areas
 

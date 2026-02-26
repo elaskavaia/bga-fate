@@ -18,7 +18,7 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Move action: hero moves to a hex on the board (Iteration 0: no validation beyond "is it a hex").
+ * Move action: hero moves to a hex on the board
  */
 class Op_actionMove extends Operation {
     function getPossibleMoves(): array {
@@ -26,18 +26,11 @@ class Op_actionMove extends Operation {
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->db->getTokenLocation($heroId);
 
+        $reachable = $this->game->getReachableHexes($currentHex, 3);
         $moves = [];
-        $tokenTypes = $this->game->material->getTokensWithPrefix("hex");
-        foreach ($tokenTypes as $key => $info) {
-            // Any hex on the map is valid — no terrain validation in Iteration 0
-            if ($key === $currentHex) {
-                // Can't move to current position
-                $moves[$key] = ["q" => Material::ERR_NOT_APPLICABLE];
-            } else {
-                $moves[$key] = ["q" => Material::RET_OK];
-            }
+        foreach (array_keys($reachable) as $hexId) {
+            $moves[$hexId] = ["q" => Material::RET_OK];
         }
-
         return $moves;
     }
 

@@ -51,14 +51,14 @@ See CLAUDE.md for project overview
 [x] `getAllDatas()`: should work
 
 ### Client
-[ ] Show hero tokens on map at their hex positions
-[ ] Practice action: button that sends action to server, updates XP counter
-[ ] Move action: click hex → send target hex to server → animate hero move
-[ ] Show time track position (rune stone counter or simple text)
+[X] Show hero tokens on map at their hex positions
+[X] Practice action: button that sends action to server, updates XP counter
+[X] Move action: click hex → send target hex to server → animate hero move
+[x] Show time track position (rune stone counter or simple text)
 
 
 ### Validation
-[ ] Deploy to BGA studio, start a 2-player game, take turns, game ends
+[x] Deploy to BGA studio, start a 1-player game, take turns, game ends
 
 ---
 
@@ -67,6 +67,13 @@ See CLAUDE.md for project overview
 **Goal**: Movement follows actual rules — up to 3 steps, can't enter lakes/mountains (for heroes), can't pass through occupied hexes, entering Grimheim ends movement.
 
 ### Server
+
+[x] Implement adjacency helper functions in Game PHP:
+  - `getAdjacentHex($hexId)` — returns list of adjacent area IDs (hex id is hex_9_9)
+  - `getHexTerrain($hexId)` — returns terrain type
+  - `isOccupied($hexId)` — checks if a character is on this area
+  - `getMoveDistance($hexId, $otherHexId)` - distance beetwin hexes, if adjecent its 1, if one of them invalid its -1
+
 [ ] Movement validation: check terrain, occupied hexes, max 3 steps
 [ ] Grimheim special rules: entering ends movement, exiting can go to any adjacent non-mountain hex
 [ ] Reachability calculation: given hero position, return set of valid destination hexes
@@ -107,6 +114,7 @@ See CLAUDE.md for project overview
 
 ### Server
 [ ] Monster path calculation: arrows → roads → Grimheim
+  - `getMonsterPath($hexId)` — returns next area on path toward Grimheim
 [ ] Monster movement order: closest to Grimheim first
 [ ] Movement rules: don't move if adjacent to hero, can't enter occupied hex
 [ ] Monster entering Grimheim: remove monster + remove 1 town piece
@@ -130,6 +138,7 @@ See CLAUDE.md for project overview
 
 ### Server
 [ ] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
+  - `getAreasInRange($areaId, $range)` — for ranged attacks
 [ ] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
 [ ] Hero attack strength: just base hero value for now (no equipment/abilities)
 [ ] Damage tracking on monsters (counter on token)

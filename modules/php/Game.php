@@ -297,6 +297,164 @@ class Game extends Base {
         return "hero_$heroNo";
     }
 
+    function getAdjacentHexes(string $hexId): array {
+        [$q, $r] = $this->getHexCoords($hexId);
+        // Axial hex directions (pointy-top)
+        $dirs = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+        $result = [];
+        foreach ($dirs as [$dq, $dr]) {
+            $nId = "hex_" . ($q + $dq) . "_" . ($r + $dr);
+            if ($this->isValidHex($nId)) {
+                $result[] = $nId;
+            }
+        }
+        return $result;
+    }
+
+    function getMoveDistance(string $hexId, string $otherHexId): int {
+        if (!$this->isValidHex($hexId) || !$this->isValidHex($otherHexId)) {
+            return -1;
+        }
+        $g1 = $this->isInGrimheim($hexId);
+        $g2 = $this->isInGrimheim($otherHexId);
+        if ($g1 && $g2) {
+            return 0;
+        }
+        if ($g1 || $g2) {
+            return $this->getMoveDistanceFromGrimheim($g1 ? $otherHexId : $hexId);
+        }
+        return $this->getHexDistance($hexId, $otherHexId);
+    }
+
+    function getHexesInGrimheim(): array {
+        $grimhelmHexes = [];
+
+        foreach (array_keys($this->material->getTokensWithPrefix("hex")) as $key) {
+            if ($this->isInGrimheim($key)) {
+                $grimhelmHexes[] = $key;
+            }
+        }
+        return $grimhelmHexes;
+    }
+
+    function isInGrimheim(string $hexId): bool {
+        return $this->getHexNamedLocation($hexId) === "Grimheim";
+    }
+
+    function getMoveDistanceFromGrimheim(string $hexId): int {
+        $grimhelmHexes = $this->getHexesInGrimheim();
+        $min = PHP_INT_MAX;
+        foreach ($grimhelmHexes as $gHex) {
+            $d = $this->getHexDistance($hexId, $gHex);
+            if ($d < $min) {
+                $min = $d;
+            }
+        }
+        return $min;
+    }
+
+    function getHexDistance(string $hexId, string $otherHexId): int {
+        [$q1, $r1] = $this->getHexCoords($hexId);
+        [$q2, $r2] = $this->getHexCoords($otherHexId);
+        $dq = $q1 - $q2;
+        $dr = $r1 - $r2;
+        return (int) ((abs($dq) + abs($dr) + abs($dq + $dr)) / 2);
+    }
+
+    function getHexCoords(string $hexId): array {
+        $q = (int) getPart($hexId, 1, true);
+        $r = (int) getPart($hexId, 2, true);
+        return [$q, $r];
+    }
+
+    function canEnterHex(string $hexId, string $moverType): bool {
+        $terrain = $this->getHexTerrain($hexId);
+        if ($terrain === "lake") {
+            return false;
+        }
+        if ($terrain === "mountain" && $moverType === "hero") {
+            return false;
+        }
+        if ($this->isOccupied($hexId)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * BFS reachability: returns all hexes reachable from $startHex within $maxSteps.
+     * Grimheim counts as one area (0 cost between its hexes).
+     * @param string $moverType "hero" or "monster" — heroes cannot enter mountains, monsters can
+     * @return array<string, int> hex => distance
+     */
+    function getReachableHexes(string $startHex, int $maxSteps = 3, string $moverType = "hero"): array {
+        $startInGrimheim = $this->isInGrimheim($startHex);
+        // BFS queue: [hexId, stepsUsed]
+        $visited = [$startHex => 0];
+        $queue = [[$startHex, 0]];
+        // If starting in Grimheim, seed all Grimheim hexes at distance 0
+        if ($startInGrimheim) {
+            foreach ($this->getHexesInGrimheim() as $gHex) {
+                if (!isset($visited[$gHex])) {
+                    $visited[$gHex] = 0;
+                    $queue[] = [$gHex, 0];
+                }
+            }
+        }
+        while ($queue) {
+            [$current, $steps] = array_shift($queue);
+            if ($steps >= $maxSteps) {
+                continue;
+            }
+            foreach ($this->getAdjacentHexes($current) as $neighbor) {
+                if (isset($visited[$neighbor])) {
+                    continue;
+                }
+                if (!$this->canEnterHex($neighbor, $moverType)) {
+                    continue;
+                }
+                // Entering Grimheim: add all Grimheim hexes at same cost
+                if ($this->isInGrimheim($neighbor)) {
+                    foreach ($this->getHexesInGrimheim() as $gHex) {
+                        if (!isset($visited[$gHex])) {
+                            $visited[$gHex] = $steps + 1;
+                            $queue[] = [$gHex, $steps + 1];
+                        }
+                    }
+                } else {
+                    $visited[$neighbor] = $steps + 1;
+                    $queue[] = [$neighbor, $steps + 1];
+                }
+            }
+        }
+        // Remove start hex (and Grimheim siblings at distance 0 if starting there)
+        unset($visited[$startHex]);
+        return $visited;
+    }
+
+    function isValidHex(string $hexId): bool {
+        return $this->material->getRulesFor($hexId, "*", null) !== null;
+    }
+
+    function isOccupied(string $hexId): bool {
+        $tokens = $this->tokens->getTokensOfTypeInLocation(null, $hexId);
+        foreach ($tokens as $token) {
+            $supertype = getPart($token["key"], 0);
+            if ($supertype === "hero" || $supertype === "monster") {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function getHexTerrain(string $hexId): string {
+        return $this->material->getRulesFor($hexId, "terrain", "");
+    }
+
+    function getHexNamedLocation(string $hexId): string {
+        return $this->material->getRulesFor($hexId, "loc", "");
+    }
+
     function getRulesFor($token_id, $field = "r", $default = "") {
         return $this->material->getRulesFor($token_id, $field, $default);
     }

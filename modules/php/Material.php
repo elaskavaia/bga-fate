@@ -52,7 +52,7 @@ class Material {
                 //
                 "code" => Material::ERR_MAX,
                 "type" => "err",
-                "name" => clienttranslate("Maximum capacity is reached"),
+                "name" => clienttranslate("Too far"),
             ],
             "err_5" => [
                 //
@@ -186,116 +186,110 @@ class Material {
     function addGeneratedTokens() {
         $this->token_types += [
             /* --- gen php begin op_material --- */
-    "Op_nop" => [ 
-        "type" => "nop",
-        "name" => clienttranslate("None"),
-],
-    "Op_savepoint" => [ 
-        "type" => "savepoint",
-        "name" => clienttranslate("None"),
-],
-    "Op_or" => [ 
-        "type" => "or",
-        "name" => clienttranslate("Choice"),
-],
-    "Op_order" => [ 
-        "type" => "order",
-        "name" => clienttranslate("Choose Order"),
-],
-    "Op_seq" => [ 
-        "type" => "seq",
-        "name" => clienttranslate("Sequence"),
-],
-    "Op_gain" => [ 
-        "type" => "gain",
-        "name" => clienttranslate("Gain"),
-],
-    "Op_pay" => [ 
-        "type" => "pay",
-        "name" => clienttranslate("Pay"),
-],
-    "Op_paygain" => [ 
-        "type" => "paygain",
-        "name" => clienttranslate("Trade"),
-],
-    "Op_turn" => [ 
-        "type" => "turn",
-        "name" => clienttranslate("Turn"),
-],
-    "Op_turnconf" => [ 
-        "type" => "turnconf",
-        "name" => clienttranslate("Confirm Turn"),
-],
-// # End of turn
-    "Op_turnEnd" => [ 
-        "type" => "turnEnd",
-        "name" => clienttranslate("End of Turn"),
-],
-// # Monster turn (runs after all players have taken their turn)
-    "Op_turnMonster" => [ 
-        "type" => "turnMonster",
-        "name" => clienttranslate("Monster Turn"),
-],
-// # Main actions (2 per turn, cannot repeat)
-    "Op_actionMove" => [ 
-        "kind" => "main",
-        "type" => "actionMove",
-        "name" => clienttranslate("Move"),
-],
-    "Op_actionAttack" => [ 
-        "kind" => "main",
-        "type" => "actionAttack",
-        "name" => clienttranslate("Attack"),
-        "notimpl"=>true,
-],
-    "Op_actionPrepare" => [ 
-        "kind" => "main",
-        "type" => "actionPrepare",
-        "name" => clienttranslate("Prepare"),
-        "notimpl"=>true,
-],
-    "Op_actionFocus" => [ 
-        "kind" => "main",
-        "type" => "actionFocus",
-        "name" => clienttranslate("Focus"),
-        "notimpl"=>true,
-],
-    "Op_actionMend" => [ 
-        "kind" => "main",
-        "type" => "actionMend",
-        "name" => clienttranslate("Mend"),
-        "notimpl"=>true,
-],
-    "Op_actionPractice" => [ 
-        "kind" => "main",
-        "type" => "actionPractice",
-        "name" => clienttranslate("Practice"),
-],
-// # Free actions (can be done between/after main actions)
-    "Op_useEquipment" => [ 
-        "kind" => "free",
-        "type" => "useEquipment",
-        "name" => clienttranslate("Use Equipment"),
-        "notimpl"=>true,
-],
-    "Op_useAbility" => [ 
-        "kind" => "free",
-        "type" => "useAbility",
-        "name" => clienttranslate("Use Ability"),
-        "notimpl"=>true,
-],
-    "Op_playEvent" => [ 
-        "kind" => "free",
-        "type" => "playEvent",
-        "name" => clienttranslate("Play Event"),
-        "notimpl"=>true,
-],
-    "Op_shareGold" => [ 
-        "kind" => "free",
-        "type" => "shareGold",
-        "name" => clienttranslate("Share Gold"),
-        "notimpl"=>true,
-],
+            "Op_nop" => [
+                "type" => "nop",
+                "name" => clienttranslate("None"),
+            ],
+            "Op_savepoint" => [
+                "type" => "savepoint",
+                "name" => clienttranslate("None"),
+            ],
+            "Op_or" => [
+                "type" => "or",
+                "name" => clienttranslate("Choice"),
+            ],
+            "Op_order" => [
+                "type" => "order",
+                "name" => clienttranslate("Choose Order"),
+            ],
+            "Op_seq" => [
+                "type" => "seq",
+                "name" => clienttranslate("Sequence"),
+            ],
+            "Op_gain" => [
+                "type" => "gain",
+                "name" => clienttranslate("Gain"),
+            ],
+            "Op_pay" => [
+                "type" => "pay",
+                "name" => clienttranslate("Pay"),
+            ],
+            "Op_paygain" => [
+                "type" => "paygain",
+                "name" => clienttranslate("Trade"),
+            ],
+            "Op_turn" => [
+                "type" => "turn",
+                "name" => clienttranslate("Turn"),
+            ],
+            "Op_turnconf" => [
+                "type" => "turnconf",
+                "name" => clienttranslate("Confirm Turn"),
+            ],
+            // # End of turn
+            "Op_turnEnd" => [
+                "type" => "turnEnd",
+                "name" => clienttranslate("End of Turn"),
+            ],
+            // # Monster turn (runs after all players have taken their turn)
+            "Op_turnMonster" => [
+                "type" => "turnMonster",
+                "name" => clienttranslate("Monster Turn"),
+            ],
+            // # Main actions (2 per turn, cannot repeat)
+            "Op_actionMove" => [
+                "kind" => "main",
+                "type" => "actionMove",
+                "name" => clienttranslate("Move"),
+            ],
+            "Op_actionAttack" => [
+                "kind" => "main",
+                "type" => "actionAttack",
+                "name" => clienttranslate("Attack"),
+                "notimpl" => true,
+            ],
+            "Op_actionPrepare" => [
+                "kind" => "main",
+                "type" => "actionPrepare",
+                "name" => clienttranslate("Prepare"),
+                "notimpl" => true,
+            ],
+            "Op_actionFocus" => [
+                "kind" => "main",
+                "type" => "actionFocus",
+                "name" => clienttranslate("Focus"),
+                "notimpl" => true,
+            ],
+            "Op_actionMend" => [
+                "kind" => "main",
+                "type" => "actionMend",
+                "name" => clienttranslate("Mend"),
+                "notimpl" => true,
+            ],
+            "Op_actionPractice" => [
+                "kind" => "main",
+                "type" => "actionPractice",
+                "name" => clienttranslate("Practice"),
+            ],
+            // # Free actions (can be done between/after main actions)
+            "Op_useEquipment" => [
+                "kind" => "free",
+                "type" => "useEquipment",
+                "name" => clienttranslate("Use Equipment"),
+                "notimpl" => true,
+            ],
+            "Op_useAbility" => [
+                "kind" => "free",
+                "type" => "useAbility",
+                "name" => clienttranslate("Use Ability"),
+                "notimpl" => true,
+            ],
+            "Op_playEvent" => [
+                "kind" => "free",
+                "type" => "playEvent",
+                "name" => clienttranslate("Play Event"),
+                "notimpl" => true,
+            ],
             /* --- gen php end op_material --- */
 
             /* --- gen php begin token_material --- */
@@ -1244,6 +1238,7 @@ class Material {
                 "location" => "map_hexes",
                 "x" => 9,
                 "y" => 8,
+                "terrain" => "plains",
                 "loc" => "Grimheim",
                 "c" => "yellow",
             ],
@@ -1251,6 +1246,7 @@ class Material {
                 "location" => "map_hexes",
                 "x" => 10,
                 "y" => 8,
+                "terrain" => "plains",
                 "loc" => "Grimheim",
                 "c" => "yellow",
             ],

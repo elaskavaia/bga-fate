@@ -155,7 +155,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
      - Build dynamic tooltips per token type (switch on `tokenInfo.mainType`)
      - Set `tokenInfo.showtooltip = false` to hide tooltips for layout-only elements
      - Enrich `tokenInfo.imageTypes` with extra CSS classes
-   - If a new location container is needed, create it in `setup(gamedatas: CustomGamedatas)()` . Dynamic containers can also be created on-demand in `getPlaceRedirect` using `placeHtml()`
+   - Check all locations token can be in. If a new location container is needed, create it in `setup(gamedatas: CustomGamedatas)()` . Dynamic containers can also be created on-demand in `getPlaceRedirect` using `placeHtml()`
 
 
 ### Adding New Game Material Element

@@ -1,27 +1,31 @@
 // --- Hex grid variables ---
-$hex-size: 50px; // distance from center to corner (pointy-top)
-$hex-width: calc($hex-size * sqrt(3)); // sqrt(3) * size ≈ width (pointy-top)
-$hex-height: $hex-size * 2; // full height of a pointy-top hex
-$hex-gap: 2px; // visual gap between hexes (applied as margin)
+// All hex dimensions derive from map height. Grid: GRID_N=8, 26 rows, 17 columns
+// Hex positions use % so the grid scales with the container
+$map-height: 1300px;
+$grid-cols: 17; // 2*GRID_N + 1
+$grid-rows: 26; // 3*GRID_N + 2
+$hex-width-pct: calc(100% / $grid-cols); // one hex width as % of map_area
+$hex-height-pct: calc(100% / $grid-rows * 2); // one hex height as % of map_area (hex-height = 2 * hex-size)
 $hex-bg: #d4c9a8;
-$hex-bg-hover: #c2b48e;
+$hex-bg-hover: #8ec2ac67;
 $hex-border-color: #8b7d5e;
 $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 
 #map_area {
-  position: relative;
-  margin: 10px auto;
-  // Size is set dynamically via inline style in TS, but provide a fallback
-  max-width: 2048px;
+  position: absolute;
+  top: 5%;
+  left: 10%;
+  // aspect ratio: width / height = sqrt(3)*17 / 26
+  aspect-ratio: calc(sqrt(3) * $grid-cols / $grid-rows);
+  height: $map-height;
 }
 
 .hex {
   position: absolute;
-  width: $hex-width;
-  height: $hex-height;
+  width: $hex-width-pct;
+  height: $hex-height-pct;
   clip-path: $hex-clip;
-  background-color: $hex-bg;
-  cursor: pointer;
+  background-color: transparent;
   box-sizing: border-box;
 
   // Inner border effect using a pseudo-element (clip-path clips real borders)
@@ -34,39 +38,47 @@ $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   //   transition: background-color 0.15s ease;
   // }
 
-  &::after {
-    position: absolute;
-    content: attr(data-loc);
-    z-index: 3;
-    top: 30%;
-    left: 5%;
-  }
+  // &::after {
+  //   position: absolute;
+  //   content: attr(data-loc);
+  //   font-size: xx-small;
+  //   z-index: 3;
+  //   top: 30%;
+  //   left: 5%;
+  // }
 
   &:hover {
-    background-color: $hex-border-color;
-    &::after {
-      background-color: $hex-bg-hover;
-    }
+    background-color: $hex-bg-hover;
   }
 
   &.active_slot {
-    background-color: #4a9;
-    &::after {
-      background-color: #77ccaa;
+    cursor: pointer;
+    // Hex-shaped dashed border using inset ::before with contrasting background
+    // The parent clip-path clips children, so we use a slightly inset hex polygon
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      // SVG hex polygon inset by ~3px (in 100-unit viewBox ≈ 3 units)
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%2300ff88' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+      pointer-events: none;
     }
+
+    // &:hover::before {
+    //   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%23ffffff' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
+    // }
   }
 
   // --- Terrain types ---
-  &.terrain_forest {
-    background-color: #3a8a3e;
-  }
 }
-.hex.terrain_lake,
-.hex.terrain_lake::before {
-  background-color: #71adc5;
-}
+// .hex.terrain_lake,
+// .hex.terrain_lake::before {
+//   background-color: #71adc5;
+// }
 
-.hex.terrain_mountain,
-.hex.terrain_mountain::before {
-  background-color: #5a5b5c;
-}
+// .hex.terrain_mountain,
+// .hex.terrain_mountain::before {
+//   background-color: #5a5b5c;
+// }

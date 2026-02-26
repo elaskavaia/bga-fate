@@ -52,51 +52,35 @@
   }
 }
 #map_area {
-  position: relative;
-  margin: 10px auto;
-  max-width: 2048px;
+  position: absolute;
+  top: 5%;
+  left: 10%;
+  aspect-ratio: 1.1324947588;
+  height: 1300px;
 }
 
 .hex {
   position: absolute;
-  width: 86.6025403784px;
-  height: 100px;
+  width: 5.8823529412%;
+  height: 7.6923076923%;
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  background-color: #d4c9a8;
-  cursor: pointer;
+  background-color: transparent;
   box-sizing: border-box;
 }
-.hex::after {
-  position: absolute;
-  content: attr(data-loc);
-  z-index: 3;
-  top: 30%;
-  left: 5%;
-}
 .hex:hover {
-  background-color: #8b7d5e;
-}
-.hex:hover::after {
-  background-color: #c2b48e;
+  background-color: rgba(142, 194, 172, 0.4039215686);
 }
 .hex.active_slot {
-  background-color: #4a9;
+  cursor: pointer;
 }
-.hex.active_slot::after {
-  background-color: #77ccaa;
-}
-.hex.terrain_forest {
-  background-color: #3a8a3e;
-}
-
-.hex.terrain_lake,
-.hex.terrain_lake::before {
-  background-color: #71adc5;
-}
-
-.hex.terrain_mountain,
-.hex.terrain_mountain::before {
-  background-color: #5a5b5c;
+.hex.active_slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%2300ff88' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  pointer-events: none;
 }
 
 .crystal_yellow {
@@ -107,25 +91,83 @@
 }
 
 .hero {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
 }
 .hex .hero {
   position: absolute;
-  top: 30%;
-  left: 30%;
+  top: 24%;
+  left: 14%;
 }
 
 .hero_1 {
   background-position: 20% 0%;
 }
 
+.hero_2 {
+  background-position: 0% 0%;
+}
+
+.hero_3 {
+  background-position: 60% 0%;
+}
+
+.hero_4 {
+  background-position: 40% 0%;
+}
+
+.rune_stone {
+  width: 60px;
+  height: 60px;
+  background-image: url(img/mini_houses.png);
+  background-size: 600% auto;
+  background-position: 100% 0%;
+}
+.timetrack .rune_stone {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+}
+.rune_stone::after {
+  position: absolute;
+  content: attr(data-state);
+  z-index: 3;
+  top: 30%;
+  left: 5%;
+}
+
 .card {
   width: 140px;
   height: 200px;
   border: 1px solid black;
+}
+
+.timetrack {
+  position: absolute;
+  top: 0;
+  right: 0;
+  outline: 1px solid green;
+  height: 100px;
+  width: 100px;
+}
+
+.map_wrapper {
+  position: relative;
+  aspect-ratio: 4096/3134;
+  width: 1892px;
+}
+.map_wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url(img/EN_Game_Board.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 0;
 }
 
 #gameaction_status_wrap {
