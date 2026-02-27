@@ -1,15 +1,18 @@
+// Center hero/monster figures inside a hex
+.hex > .hero,
+.hex > .monster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+
 // Hero and monster miniatures
 .hero {
   width: 64px;
   height: 64px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
-
-  .hex & {
-    position: absolute;
-    top: 24%;
-    left: 14%;
-  }
 }
 
 .hero_1 {
@@ -27,19 +30,13 @@
 
 // Monster placeholders (colored circles with name label)
 .monster {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: #8b4513;
   border: 2px solid #5a2d0c;
   z-index: 1;
   position: relative;
-
-  .hex & {
-    position: absolute;
-    top: 24%;
-    left: 18%;
-  }
 
   &::after {
     content: attr(data-name);
@@ -67,17 +64,194 @@
   border-color: #8b2e14;
 }
 .monster.dead {
-  background-color: #6a5acd;
-  border-color: #483d8b;
+  background-color: #9b59b6;
+  border-color: #6c3483;
 }
 
-// Rank indicators (border style)
+// Goblin: square with rounded corners, lighter green, letter abbreviation
+.monster.monster_goblin {
+  border-radius: 6px;
+  background-color: #6fbf5a;
+  border-color: #4a8a3a;
+
+  &::after {
+    content: "G";
+    font-size: 18px;
+  }
+}
+
+// Brute: square with rounded corners, medium green, letter abbreviation
+.monster.monster_brute {
+  border-radius: 6px;
+  background-color: #3d8a2e;
+  border-color: #2a6120;
+
+  &::after {
+    content: "B";
+    font-size: 18px;
+  }
+}
+
+// Troll: square with rounded corners, dark green, letter abbreviation
+.monster.monster_troll {
+  border-radius: 6px;
+  background-color: #2a5e1a;
+  border-color: #1a3d10;
+
+  &::after {
+    content: "T";
+    font-size: 18px;
+  }
+}
+
+// Sprite: rounded triangle, light orange/red, letter abbreviation
+.monster.monster_sprite {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #e8c43a;
+
+  &::after {
+    content: "S";
+    font-size: 18px;
+    top: 20%;
+  }
+}
+
+// Elemental: rounded triangle, medium red, letter abbreviation
+.monster.monster_elemental {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #e8713a;
+
+  &::after {
+    content: "E";
+    font-size: 18px;
+    top: 20%;
+  }
+}
+
+// Jotunn: rounded triangle, dark red, letter abbreviation
+.monster.monster_jotunn {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #c94420;
+
+  &::after {
+    content: "J";
+    font-size: 18px;
+    top: 20%;
+  }
+}
+
+// Imp: pentagon, pink, letter abbreviation
+.monster.monster_imp {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #e87aab;
+
+  &::after {
+    content: "I";
+    font-size: 18px;
+    top: 15%;
+  }
+}
+
+// Skeleton: pentagon, purple, letter abbreviation
+.monster.monster_skeleton {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #9b59b6;
+
+  &::after {
+    content: "S";
+    font-size: 18px;
+    top: 15%;
+  }
+}
+
+// Draugr: pentagon, dark purple, letter abbreviation
+.monster.monster_draugr {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #5b2d8e;
+
+  &::after {
+    content: "D";
+    font-size: 18px;
+    top: 15%;
+  }
+}
+
+// Rank indicators (border style + darker background per rank)
 .monster.rank2 {
+  width: 44px;
+  height: 44px;
   border-width: 3px;
+
+  &.trollkin {
+    background-color: #3a6e2a;
+  }
+  &.firehorde {
+    background-color: #b03a1a;
+  }
+  &.dead {
+    background-color: #884aaa;
+  }
 }
 .monster.rank3 {
+  width: 52px;
+  height: 52px;
   border-width: 4px;
   border-style: double;
+
+  &.trollkin {
+    background-color: #2a5518;
+  }
+  &.firehorde {
+    background-color: #8b2e14;
+  }
+  &.dead {
+    background-color: #6c3483;
+  }
+}
+
+// House / town pieces
+.house {
+  width: 52x;
+  height: 52px;
+  background-image: url(img/mini_houses.png);
+  background-size: 600% auto;
+  background-position: 40% 0%; // default: middle house sprite
+
+  .hex > & {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+
+.housemodel_1 {
+  background-position: 0% 0%;
+}
+.housemodel_2 {
+  background-position: 20% 0%;
+}
+.housemodel_3 {
+  background-position: 40% 0%;
+}
+.housemodel_4 {
+  background-position: 60% 0%;
+}
+// Freyja's Well — stone well sprite (5th position)
+.well {
+  background-position: 80% 0%;
 }
 
 .rune_stone {

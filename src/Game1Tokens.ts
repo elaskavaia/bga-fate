@@ -646,6 +646,11 @@ export class Game1Tokens extends Game0Basics {
   // override to generate dynamic tooltips and such
   updateTokenDisplayInfo(tokenDisplayInfo: TokenDisplayInfo) {}
 
+  ttSection(prefix: string, text: string) {
+    if (prefix) return `<p><b>${prefix}</b>: ${text}</p>`;
+    else return `<p>${text}</p>`;
+  }
+
   createTokenImage(tokenId: string, state: number = 0) {
     const div = document.createElement("div");
     div.id = tokenId + "_tt_" + this.globlog++;

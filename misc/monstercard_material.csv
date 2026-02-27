@@ -1,8 +1,8 @@
-num|name|spawnloc|spawn
+num|name|spawnloc|spawn|ftext
 
-
+#set create=1
 # spawnloc - locate where they spawn
-# spawn format: monster_type:hex_q_r (comma-separated for multiple spawns)
+# spawn format: comma separed list of monster type abbreviation as they appear on location, i.e for Flanking it will be "G,G,,,B,,,T,,B"
 #set id=card_monster_{num}
 
 # Monster cards - yellow deck (early game) - 36
@@ -10,64 +10,64 @@ num|name|spawnloc|spawn
 #set location=deck_monster_yellow
 #set type=card card_monster ctype_{ctype}
 # Yellow legends (1-6)
-1|Queen of the Dead|DeadPlains
-2|Seer of Odin|MarshOfSorrow
-3|Grendel|OgreValley
-4|Surt|SpewingMountain
-5|Hrungbald|DarkForest
-6|Nidhuggr|Highlands
+1|Queen of the Dead|Nailfare|L|Scary as Hel.
+2|Seer of Odin|TempleRuins|L|They say she sees everything, except what's before her eyes.
+3|Grendel|TrollCaves|L|Grendel has a face only a mother could love...and she's not too sure.
+4|Surt|Highlands|L,J,E,E|He really lights up the day.
+5|Hrungbald|OgreValley|L,B,B,B|Hrungbald Hammerfist has a fearsome reputation, a word he can't really pronounce.
+6|Nidhuggr|WyrmLair|L|Rumor has it that whoever dies will be his personal flosser in the afterlife.
 # Yellow regular (7-36)
-7|Fiery Projectiles|Highlands
-8|Whirlwind|Highlands
-9|Trekking Monsters|Highlands
-10|Burnt Offerings|Highlands
-11|Autumn Claw|Highlands
-12|Mischievous Sprites|SpewingMountain
-13|Fire-Breathing Stones|SpewingMountain
-14|Autumn Youth Camp|SpewingMountain
-15|Air Strike|SpewingMountain
-16|Reunion|SpewingMountain
-17|Boneyard|MarshOfSorrow
-18|Bad to the Bone|MarshOfSorrow
-19|Eyes in the Dark|MarshOfSorrow
-20|Skeletons on a Leash|MarshOfSorrow
-21|Marching|MarshOfSorrow
-22|Impulsive Swarm|DeadPlains
-23|Bone Structures|DeadPlains
-24|Brain Dead|DeadPlains
-25|Dead Trio|DeadPlains
-26|Sudden Death|DeadPlains
-27|Brutish Offense|OgreValley
-28|Flanking|OgreValley
-29|Foraging|OgreValley
-30|Krusty the Babysitter|OgreValley
-31|Strollin'|OgreValley
-32|Younglings|DarkForest
-33|Brutal Band|DarkForest
-34|Family Trip|DarkForest
-35|Forest Patrol|DarkForest
-36|Feral Trolls|DarkForest
+7|Fiery Projectiles|Highlands|J,J,E|I never expected this hero business to include so much running!
+8|Whirlwinds|Highlands|E,E,E,E,E|They always wind up attacking.
+9|Trending Monsters|Highlands|J,E,E,S,S|They are so hot right now.
+10|Burnt Offerings|Highlands|E,E,E,E,S|They just have to fire you first.
+11|Jotunn Clan|Highlands|J,E,E,S,S|We just follow the big guy's orders.
+12|Mischievous Sprites|SpewingMountain|S,S,S,S,S,S,S,S|Like a bunch of hot-tempered kids, only on fire.
+13|Fire-Breathing Stones|SpewingMountain|J,E,E,E|As if just "breathing stones" wasn't bad enough...
+14|Jotunn Youth Camp|SpewingMountain|E,E,E,S,S,S|The small ones need experience - let's warm them up...
+15|Air Strike|SpewingMountain|J,E,S,S,S,S|Strategic bombing.
+16|Reunion|SpewingMountain|J,E,E,S,S|And they thought: "Why not at the human city? We can have a barbecue!"
+17|Boneyard|MarshOfSorrow|S,S,S,S,I|Ivar the Boneless had bones after all!
+18|Bad to the Bone|MarshOfSorrow|D,S,S,S|Yes, literally, their bones are rotten.
+19|Eyes in the Dark|MarshOfSorrow|S,S,I,I,I,I,I,I|Can you see them? They see you!
+20|Skeletons on a Leash|MarshOfSorrow|D,D,S,S|Draugrs' favorite pets.
+21|Marshing|MarshOfSorrow|D,S,I,I,I,I|Out for a walk...
+22|Imp-ressive Swarm|DeadPlains|I,I,I,I,I,I,I,S,S|The sound of large flapping wings and toxic drool is just the appetizer.
+23|Bone Structures|DeadPlains|S,S,S,S,S|No, it doesn't make them look fat...
+24|Brain Dead|DeadPlains|I,S,S,D|Pure instincts.
+25|Dead Trio|DeadPlains|D,D,D|All for one!
+26|Sudden Death|DeadPlains|I,I,S,S,D|They are upping their game, it could be over at any moment.
+27|Brutish Offense|OgreValley|B,B,B,B,B|Relentless, ruthless, senseless, clueless.
+28|Flanking|OgreValley|G,G,,,B,,,T,,B|They are, quite flankly, devastating to our defenses.
+29|Foraging|OgreValley|T,B,B,G,G|Only looking for food.
+30|Brutus the Babysitter|OgreValley|B,G,G,G,G,G,G,G|Stay with the group!
+31|Strolling|OgreValley|T,T,B|Out for a walk, very aimlessly.
+32|Younglings|DarkForest|B,G,G,G,G,G,G,G|There are so many of them; what are we going to do?
+33|Brutal Band|DarkForest|B,B,B,B,B|Specializing in war drums.
+34|Family Trip|DarkForest|T,B,G,G,G,G|The kids are so eager, let them run ahead...
+35|Forest Patrol|DarkForest|B,B,B,B,G,G|Attacking at their first convenience.
+36|Viral Trolls|DarkForest|T,T,T|The sheer amount of bacteria in their boogers and toxic breath makes them viral.
 
 #set ctype=red
 #set location=deck_monster_red
 # Monster cards - red deck (late game) - 18
 # Red legends (37-42)
-37|Queen of the Dead|DeadPlains
-38|Seer of Odin|MarshOfSorrow
-39|Grendel|OgreValley
-40|Surt|SpewingMountain
-41|Hrungbald|DarkForest
-42|Nidhuggr|Highlands
+37|Queen of the Dead|DeadPlains|L,S,S,S,I,I,I,I,D|Scary as Hel.
+38|Seer of Odin|MarshOfSorrow|L,S,S,S,S,I,I,I|I didn't see it coming, but she did...
+39|Grendel|OgreValley|L,G,G,G|Trolls will be trolls.
+40|Surt|SpewingMountain|L,E,E,E|Hotter than a summer day in Muspelheim, and twice as destructive.
+41|Hrungbald|DarkForest|L,B,B,B,B,B,G,G|Now with added fury and an even smaller vocabulary.
+42|Nidhuggr|Highlands|L,E,E,E,E|Nidhuggr, the eater of worlds, has ordered Viking for dinner.
 # Red regular (43-54)
-43|Feed the Flames|Highlands
-44|Brimstone|Highlands
-45|Eruption|SpewingMountain
-46|The Red Tide|SpewingMountain
-47|Walking Armies|MarshOfSorrow
-48|Gloomy Fate|MarshOfSorrow
-49|Ragar Summoning|DeadPlains
-50|Intense Darkness|DeadPlains
-51|Travelogue|OgreValley
-52|Primal Breezes|OgreValley
-53|Trollkin United|DarkForest
-54|Brawling Brutes|DarkForest
+43|Feed the Flames|Highlands|J,E,E,E,E,S,S,S,S,S,S,S|You've never seen flames spread this fast!
+44|Brimstone|Highlands|J,J,J,J,S,S|A trial by fire.
+45|Erupting|SpewingMountain|J,J,J,J,E|The ancient Jotunn arrive through the fire portal.
+46|The Red Tide|SpewingMountain|J,J,E,E,S,S,S,S,S,S|If they could do this every month, they would. But we won't let them. Period.
+47|Walking Armors|MarshOfSorrow|D,D,D,D|It's the march of sorrow.
+48|Gloom Fate|MarshOfSorrow|D,S,S,S,S,S,S,S|They're raised from the dead just to be killed again. Gotta pity those guys...
+49|Dread Summoning|DeadPlains|I,I,I,I,S,D,D,D|Death was just a brief pause. Now they're back for the finale, and they're dead serious about it...
+50|Intense Darkness|DeadPlains|I,I,S,S,S,S,D,D|I don't understand it, but it hurts, so it has to be real.
+51|Trololololol|OgreValley|T,T,T,T,G,G|Four grown trolls singing; it might be the death of me.
+52|Immoral Brutes|OgreValley|T,B,B,B,B,B,B,G|They do what they want, moralless.
+53|Trollkin United|DarkForest|T,T,B,B,B,G,G,G,G|A seldom-sighted formation of trolls.
+54|Brawling Brutes|DarkForest|T,B,B,B,B,G,G,G,G,G,G|Cheap to hire, fierce fighters. Not that bright, though.

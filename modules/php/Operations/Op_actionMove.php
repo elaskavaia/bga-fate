@@ -41,6 +41,12 @@ class Op_actionMove extends Operation {
         $target = $this->getCheckedArg();
         $heroId = $this->game->getHeroTokenId($this->getOwner());
 
+        // When entering Grimheim, place hero at their home hex (from material)
+        if ($this->game->isInGrimheim($target)) {
+            $target = $this->game->getRulesFor($heroId, "location", $target);
+        }
+
+        // TODO: do set location to individual hexes along the path to animate
         $this->dbSetTokenLocation($heroId, $target, null, clienttranslate('${player_name} moves hero to ${token_name}'), [
             "token_name" => $this->game->getTokenName($target, $target),
         ]);

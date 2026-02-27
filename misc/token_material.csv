@@ -10,9 +10,19 @@ id|name|count|type|create|location|php
 #set _noquotes=create
 #set state=0
 
-#9 house tokens (X is 1 to 9)
-house|House|9|house|2|hex_9_10
-house_0|Freya's Well|1|house well|1|hex_9_9
+#9 house tokens (X is 1 to 9)  1p=4, 2p=6, 3p=8, 4p=10
+house_0|Freya's Well|1|house housemodel_0 well|1|hex_9_9
+house_1|House|1|housemodel_1|1|hex_9_8
+house_2|House|1|housemodel_4|1|hex_9_10
+house_3|House|1|housemodel_1|1|hex_9_8
+house_4|House|1|housemodel_4|1|hex_9_10
+house_5|House|1|housemodel_1|1|hex_9_8
+house_6|House|1|housemodel_4|1|hex_9_10
+house_7|House|1|housemodel_1|1|hex_9_8
+house_8|House|1|housemodel_4|1|hex_9_10
+house_9|House|1|housemodel_1|1|hex_9_8
+
+
 
 # player markers: 2 action markers + 1 upgrade cost marker per player
 marker|Player Marker|3|marker|3|limbo
@@ -27,15 +37,15 @@ rune_stone|Rune Stone|1|rune_stone|1|timetrack_1|
 
 # hero miniatures (one per hero, start with 2 heroes)
 
-hero_1|Bjorn|1|hero|1|hex_9_8
-hero_2|Astrid|1|hero|1|limbo
-hero_3|Kara|1|hero|1|limbo
-hero_4|Boldur|1|hero|1|limbo
+hero_1|Bjorn|1|hero|1|hex_8_9
+hero_2|Alva|1|hero|1|hex_8_10
+hero_3|Embla|1|hero|1|hex_10_8
+hero_4|Boldur|1|hero|1|hex_10_9
 
 # hero cards (one per hero, placed on player tableau during setup)
 card_hero_1|Bjorn|1|card|1|limbo
-card_hero_2|Astrid|1|card|1|limbo
-card_hero_3|Kara|1|card|1|limbo
+card_hero_2|Alva|1|card|1|limbo
+card_hero_3|Embla|1|card|1|limbo
 card_hero_4|Boldur|1|card|1|limbo
 
 # attack dice (20 total)

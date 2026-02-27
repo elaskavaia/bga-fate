@@ -6,7 +6,7 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `hero_<hero>` — Hero miniature (e.g. `hero_1` = Bjorn)
 - `house_<n>` — Town piece (e.g. `house_0` = well)
 - `monster_<type>_<n>` — Monster tile (e.g. `monster_goblin_5`, `monster_troll_2`)
-- `card_monster_<color>_<n>` — Monster card (e.g. `card_monster_yellow_12`)
+- `card_monster_<n>` — Monster card (e.g. `card_monster_12`); type includes `ctype_yellow` or `ctype_red`
 - `card_hero_<hero>` — Hero card (e.g. `card_hero_1`)
 - `card_ability_<hero>_<n>` — Ability card (e.g. `card_ability_1_3`)
 - `card_equip_<hero>_<n>` — Equipment card (e.g. `card_equip_1_7`)
@@ -121,6 +121,7 @@ These locations hold tokens that are not on the map. They should have a hidden o
 - `supply_monster` — Undeployed monster tiles
 
 - `deck_monster_yellow` / `deck_monster_red` — Monster card draw piles
+- `display_monsterturn` — Drawn monster cards during reinforcement (cleared at start of next monster turn); state 0 = placed, state 1 = skipped (grayed out)
 
 - `oversurface` — Transparent overlay for phantom token animations (pointer-events: none)
 - `limbo` — Off-screen sink for tokens not yet placed

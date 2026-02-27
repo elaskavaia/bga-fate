@@ -1067,6 +1067,12 @@ class Game1Tokens extends Game0Basics {
     }
     // override to generate dynamic tooltips and such
     updateTokenDisplayInfo(tokenDisplayInfo) { }
+    ttSection(prefix, text) {
+        if (prefix)
+            return `<p><b>${prefix}</b>: ${text}</p>`;
+        else
+            return `<p>${text}</p>`;
+    }
     createTokenImage(tokenId, state = 0) {
         const div = document.createElement("div");
         div.id = tokenId + "_tt_" + this.globlog++;
@@ -1721,6 +1727,9 @@ class Game extends GameMachine {
         this.createMap($(mapWrapper));
         placeHtml(`<div id="timetrack_1"></div>`, mapWrapper);
         placeHtml(`<div id="timetrack_2"></div>`, mapWrapper);
+        placeHtml(`<div id="display_monsterturn"></div>`, $("thething"));
+        placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "thething");
+        placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "thething");
         Object.values(gamedatas.players).forEach((player) => {
             // template leftovers TODO: remove
             //const playerId = Number(player.id);
@@ -1773,15 +1782,73 @@ class Game extends GameMachine {
         placeHtml(`<div id="map_area">${hexHtml}</div>`, parent);
         parent.querySelectorAll(".hex").forEach((node) => {
             this.addListenerWithGuard(node, (e) => this.onToken(e));
+            this.updateTooltip(node.id);
         });
     }
     getPlaceRedirect(tokenInfo, args = {}) {
         const result = tokenInfo;
-        const mainType = tokenInfo.key.split("_")[0];
-        if (mainType === "monster") {
-            // placeholder
-        }
         return result;
+    }
+    updateTokenDisplayInfo(tokenInfo) {
+        // override to generate dynamic tooltips and such
+        const mainType = tokenInfo.mainType;
+        const token = $(tokenInfo.tokenId);
+        const parentId = token?.parentElement?.id;
+        const state = parseInt(token?.dataset.state);
+        const tokenId = tokenInfo.tokenId;
+        const subType = getPart(tokenId, 1);
+        switch (mainType) {
+            case "card": {
+                if (subType === "monster") {
+                    const spawnLoc = this.getTokenName(tokenInfo.spawnloc);
+                    tokenInfo.tooltip = this.ttSection(_("Spawn Location"), spawnLoc);
+                    if (tokenInfo.ftext)
+                        tokenInfo.tooltip += this.ttSection(_("Flavor"), String(tokenInfo.ftext));
+                }
+                break;
+            }
+            case "monster": {
+                tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
+                tokenInfo.tooltip += this.ttSection(_("Rank"), String(tokenInfo.rank));
+                tokenInfo.tooltip += this.ttSection(_("Strength"), String(tokenInfo.strength));
+                tokenInfo.tooltip += this.ttSection(_("Health"), String(tokenInfo.health));
+                if (tokenInfo.move)
+                    tokenInfo.tooltip += this.ttSection(_("Move"), String(tokenInfo.move));
+                if (tokenInfo.armor)
+                    tokenInfo.tooltip += this.ttSection(_("Armor"), String(tokenInfo.armor));
+                if (tokenInfo.xp)
+                    tokenInfo.tooltip += this.ttSection(_("XP"), String(tokenInfo.xp));
+                break;
+            }
+            case "house": {
+                tokenInfo.tooltip = this.ttSection(_("Type"), String(tokenInfo.name));
+                break;
+            }
+            case "hex": {
+                const q = getPart(tokenId, 1);
+                const r = getPart(tokenId, 2);
+                if (!r)
+                    return;
+                //             "hex_9_1" => [
+                //         "location" => "map_hexes",
+                //         "x" => 9,
+                //         "y" => 1,
+                //         "terrain" => "forest",
+                //         "loc" => "DarkForest",
+                //         "c" => "red",
+                // ],
+                const locname = this.getTokenName(tokenInfo.loc);
+                const areacolor = this.getTokenName(tokenInfo.c);
+                const terrainname = this.getTokenName(tokenInfo.terrain);
+                tokenInfo.name = _("Hex") + ` (${r},${q})`;
+                tokenInfo.tooltip = this.ttSection(_("Terrain"), terrainname);
+                tokenInfo.tooltip += this.ttSection(_("Coords"), `(${r},${q})`);
+                if (tokenInfo.loc)
+                    tokenInfo.tooltip += this.ttSection(_("Location"), locname);
+                if (tokenInfo.c)
+                    tokenInfo.tooltip += this.ttSection(_("Location Color"), areacolor);
+            }
+        }
     }
     setupNotifications() {
         console.log("notifications subscriptions setup");

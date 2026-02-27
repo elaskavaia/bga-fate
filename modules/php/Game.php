@@ -84,31 +84,33 @@ class Game extends Base {
             ]
         );
 
-        // Player setup
-        $players = $this->loadPlayersBasicInfos();
-        $heroNo = 1;
+        // Shuffle monster card decks
+        $tokens->shuffle("deck_monster_yellow");
+        $tokens->shuffle("deck_monster_red");
 
+        // Remove excess town pieces based on player count (1p=4, 2p=6, 3p=8, 4p=10)
+        $players = $this->loadPlayersBasicInfos();
+        $pnum = count($players);
+        $townPieceCount = 2 * $pnum + 2; // 1p=4, 2p=6, 3p=8, 4p=10
+        for ($i = $townPieceCount; $i <= 9; $i++) {
+            $tokens->moveToken("house_$i", "limbo");
+        }
+
+        // Player setup — heroes start at their CSV-defined hex positions
+        $heroNo = 1;
         foreach ($players as $player_id => $player) {
-            //   - Create town pieces in Grimheim based on player count (1p=4, 2p=6, 3p=8, 4p=10)
-            //   - Create rune stone on first time track spot
-            //   - Create bonus markers: 3 red on Troll Caves area, 3 green on Nailfare area, 3 yellow on Wyrm Lair area
-            //   - Shuffle yellow and red monster card decks (as tokens in deck locations)
-            //   - Per player:
-            //     - Create hero miniature in Grimheim
-            //     - Create 3 player markers (2 action + 1 upgrade cost at position 5)
-            //     - Set up hero card (active), starting ability (active), starting equipment (active)
-            //     - Shuffle remaining 5 ability cards into ability pile (level I side up)
-            //     - Shuffle remaining equipment cards into equipment pile (face up)
-            //     - Shuffle event cards into event deck (face down)
-            //     - Give 2 gold, 1 mana on starting ability, draw 1 event card
-            //   - Each player draws 1 yellow monster card and places initial monsters
             $color = $player["player_color"];
             $this->tokens->db->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
             // Assign hero to player (Iteration 0: sequential assignment, later will be player choice)
             $tokens->moveToken("card_hero_$heroNo", "tableau_{$color}");
-            $tokens->moveToken("hero_$heroNo", "hex_9_9"); // Start in Grimheim
+            // Hero already at starting hex from material, no move needed
             $heroNo++;
+        }
+        // Move unused heroes to limbo
+        for ($i = $heroNo; $i <= 4; $i++) {
+            $tokens->moveToken("hero_$i", "limbo");
+            $tokens->moveToken("card_hero_$i", "limbo");
         }
 
         $this->machine->queue("turn", $this->custom_getPlayerColorById($startingPlayer));
@@ -191,7 +193,9 @@ class Game extends Base {
     }
 
     function isHeroesWin() {
-        return true; // TODO: check if any houses left in Grimheim
+        // Heroes win if at least Freyja's Well remains in Grimheim
+        $wellLoc = $this->tokens->db->getTokenLocation("house_0");
+        return $wellLoc === "hex_9_9";
     }
 
     function getUserPreference(int $player_id, int $code): int {
@@ -455,6 +459,28 @@ class Game extends Base {
         return $this->material->getRulesFor($hexId, "loc", "");
     }
 
+    /**
+     * Returns all hex IDs belonging to a named location, sorted left-to-right, top-to-bottom
+     * (by y ascending, then x ascending).
+     */
+    function getHexesInLocation(string $locName): array {
+        $hexes = [];
+        foreach (array_keys($this->material->getTokensWithPrefix("hex")) as $key) {
+            if ($this->getHexNamedLocation($key) === $locName) {
+                $hexes[] = $key;
+            }
+        }
+        usort($hexes, function (string $a, string $b) {
+            [$ax, $ay] = $this->getHexCoords($a);
+            [$bx, $by] = $this->getHexCoords($b);
+            if ($ay !== $by) {
+                return $ay - $by;
+            }
+            return $ax - $bx;
+        });
+        return $hexes;
+    }
+
     function getRulesFor($token_id, $field = "r", $default = "") {
         return $this->material->getRulesFor($token_id, $field, $default);
     }
@@ -541,37 +567,37 @@ class Game extends Base {
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }
-    /**
-     * Example of debug function.
-     * Here, jump to a state you want to test (by default, jump to next player state)
-     * You can trigger it on Studio using the Debug button on the right of the top bar.
-     */
-    public function debug_goToState(int $state = 3) {
-        $this->gamestate->jumpToState($state);
-    }
+    // /**
+    //  * Example of debug function.
+    //  * Here, jump to a state you want to test (by default, jump to next player state)
+    //  * You can trigger it on Studio using the Debug button on the right of the top bar.
+    //  */
+    // public function debug_goToState(int $state = 3) {
+    //     $this->gamestate->jumpToState($state);
+    // }
 
     /**
      * Another example of debug function, to easily test the zombie code.
      */
-    public function debug_playAutomatically(int $moves = 1) {
-        $count = 0;
-        while (intval($this->gamestate->getCurrentMainStateId()) < 99 && $count < $moves) {
-            $count++;
-            foreach ($this->gamestate->getActivePlayerList() as $playerId) {
-                $playerId = (int) $playerId;
-                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
-            }
-        }
-    }
-    public function debug_playAutomatically1() {
-        return $this->debug_playAutomatically(1);
-    }
+    // public function debug_playAutomatically(int $moves = 1) {
+    //     $count = 0;
+    //     while (intval($this->gamestate->getCurrentMainStateId()) < 99 && $count < $moves) {
+    //         $count++;
+    //         foreach ($this->gamestate->getActivePlayerList() as $playerId) {
+    //             $playerId = (int) $playerId;
+    //             $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+    //         }
+    //     }
+    // }
+    // public function debug_playAutomatically1() {
+    //     return $this->debug_playAutomatically(1);
+    // }
 
     function debug_maxRes() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
 
-        $this->machine->push("5food", $color);
-        $this->machine->push("5coin", $color);
+        // $this->machine->push("5food", $color);
+        // $this->machine->push("5coin", $color);
 
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
@@ -592,10 +618,45 @@ class Game extends Base {
     }
 
     function debug_monster() {
-        // Place a few goblins on the map for visual testing
+        // Place monsters on the map for visual testing
+        // Trollkin faction
         $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_7");
         $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_12_6");
         $this->tokens->dbSetTokenLocation("monster_goblin_3", "hex_5_10");
+        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_8");
+        $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_11_5");
+        $this->tokens->dbSetTokenLocation("monster_troll_1", "hex_4_9");
+        $this->tokens->dbSetTokenLocation("monster_troll_2", "hex_13_7");
+        // Fire Horde faction
+        $this->tokens->dbSetTokenLocation("monster_sprite_1", "hex_8_3");
+        $this->tokens->dbSetTokenLocation("monster_sprite_2", "hex_13_5");
+        $this->tokens->dbSetTokenLocation("monster_elemental_1", "hex_6_4");
+        $this->tokens->dbSetTokenLocation("monster_elemental_2", "hex_14_6");
+        $this->tokens->dbSetTokenLocation("monster_jotunn_1", "hex_4_7");
+        $this->tokens->dbSetTokenLocation("monster_jotunn_2", "hex_12_9");
+        // Dead faction
+        $this->tokens->dbSetTokenLocation("monster_imp_1", "hex_3_6");
+        $this->tokens->dbSetTokenLocation("monster_imp_2", "hex_14_4");
+        $this->tokens->dbSetTokenLocation("monster_skeleton_1", "hex_5_5");
+        $this->tokens->dbSetTokenLocation("monster_skeleton_2", "hex_12_3");
+        $this->tokens->dbSetTokenLocation("monster_draugr_1", "hex_7_4");
+        $this->tokens->dbSetTokenLocation("monster_draugr_2", "hex_11_8");
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_houses() {
+        // Move a couple houses out of Grimheim to test removal visuals
+        $this->tokens->dbSetTokenLocation("house_0", "hex_8_9");
+        $this->tokens->dbSetTokenLocation("house_2", "hex_8_9");
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_monsterCards() {
+        // Place a few monster cards on display_monsterturn for visual testing
+        $this->tokens->dbSetTokenLocation("card_monster_28", "display_monsterturn", 0); // Flanking (yellow)
+        $this->tokens->dbSetTokenLocation("card_monster_36", "display_monsterturn", 0); // Viral Trolls (yellow)
+        $this->tokens->dbSetTokenLocation("card_monster_22", "display_monsterturn", 1); // Imp-ressive Swarm (skipped)
+        $this->tokens->dbSetTokenLocation("card_monster_43", "display_monsterturn", 0); // Feed the Flames (red)
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

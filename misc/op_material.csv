@@ -24,6 +24,9 @@ turnEnd|End of Turn
 # Monster turn (runs after all players have taken their turn)
 turnMonster|Monster Turn
 
+# Monster reinforcement (auto: draw monster cards, place monsters)
+reinforcement|Reinforcement
+
 
 
 

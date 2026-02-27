@@ -1,0 +1,57 @@
+/* tooltips */
+.tundra .dijitTooltipContainer,
+.tooltipcontainer {
+  background: white;
+  color: black;
+  border: unset;
+  border-radius: unset;
+  padding: unset;
+  margin: 0;
+}
+
+.tundra .dijitTooltipContainer {
+  box-shadow: 1px 1px 2px 2px #00000080;
+}
+
+.tooltipcontainer {
+  background-size: cover;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .tooltiptitle {
+    position: relative;
+    font-weight: bold;
+    padding: 0.1em;
+    font-size: x-large;
+  }
+
+  .tooltip-body {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  li {
+    list-style: circle;
+  }
+
+  .tooltiptext {
+    max-width: 500px;
+    top: unset;
+  }
+}
+
+.tooltip-left {
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.tooltip-right {
+  padding: 0.5em;
+  padding-left: 0em;
+}

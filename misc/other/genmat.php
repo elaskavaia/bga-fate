@@ -272,7 +272,8 @@ function genbody($incsv, $conout) {
             } elseif (is_numeric($value) || array_search($key, $g_noquotes) !== false) {
                 $exp = $value;
             } elseif (strpos($value, "\"") !== false) {
-                $exp = "'$value'";
+                $escaped = str_replace("'", "\\'", $value);
+                $exp = "'$escaped'";
             } else {
                 $exp = "\"$value\"";
             }

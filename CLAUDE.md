@@ -105,13 +105,19 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 ### Adding a New Operation
 
-1. Create modules/php/Operations/Op_yourOperation.php extending Operation
-2. Implement required methods: effect(), canResolve(), etc.
-3. Add operation definition to misc/op_material.csv if it needs material data
+Prompt: add <name> operation. Read CLAUDE.md for instructions
+
+1. Create modules/php/Operations/Op_<name>.php extending Operation (or CountableOperation)
+2. Implement required methods: resolve(), getPrompt(), getPossibleMoves(), etc.
+3. Add operation definition to misc/op_material.csv 
 4. Run `npm run genmat` to update Material.php
 5. Add tests in modules/php/Tests/
+6. If new game elements introduced, proceed with instruction on how to add game element
 
 ### Adding New Game Element
+
+Prompt: add <name> location. Read CLAUDE.md for instructions.
+Prompt: add <name> game element. Read CLAUDE.md for instructions.
 
 Every physical game piece leaves footprints in multiple places: database, material, CSS, and client-side code. Follow this checklist when adding a new element.
 
@@ -157,26 +163,32 @@ Every physical game piece leaves footprints in multiple places: database, materi
      - Enrich `tokenInfo.imageTypes` with extra CSS classes
    - Check all locations token can be in. If a new location container is needed, create it in `setup(gamedatas: CustomGamedatas)()` . Dynamic containers can also be created on-demand in `getPlaceRedirect` using `placeHtml()`
 
+**7. Ask user to validate in browser**
+    - Create or update php function with debug_ prefix to create some of the elements (or move around)
+    - Ask user to validate how it looks and check tooltips
+
 
 ### Adding New Game Material Element
 
+Prompt: add new material file <name>. Read CLAUDE.md for instructions.
+
 To add new file:
-1. Add file <name>.csv in misc/ with pipe (|) separated header
-2. Add comments in Material.php  `--- gen php begin <name> ---` and `--- gen php end <name> ---`  before `/* --- GEN PLACEHOLDR --- */`
+1. Add file <name>_material.csv in misc/ with pipe (|) separated header
+2. Add comments in Material.php  `--- gen php begin <name>_material ---` and `--- gen php end <name>_material ---`  before `/* --- GEN PLACEHOLDR --- */`
 3. Run `npm run genmat` to regenerate Material.php
 
 To update:
 1. Update the appropriate CSV file in misc/ (tokens_material.csv, card_material.csv, etc.)
 2. Run `npm run genmat` to regenerate Material.php
 3. Material generation uses pipe (|) as field separator
-4. Translatable fields: name, tooltip, tooltip_action, text
-5. Special directives in CSV: `#set _tr=field` (mark field as translatable), `#set _noquotes=field` (no quotes in output)
+4. Special directives in CSV: `#set _tr=field` (mark field as translatable), `#set _noquotes=field` (no quotes in output)
 
 ### Working with Tests
 
 - Tests use an in-memory implementation (MachineInMem, TokensInMem) for fast execution
 - Test base classes provide game setup utilities
 - APP_GAMEMODULE_PATH must point to bga-sharedcode for BGA framework dependencies
+- use `npm run tests` to run tests
 
 
 ## BGA-Specific Considerations

@@ -90,16 +90,19 @@
   border-radius: 50%;
 }
 
+.hex > .hero,
+.hex > .monster {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+
 .hero {
   width: 64px;
   height: 64px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
-}
-.hex .hero {
-  position: absolute;
-  top: 24%;
-  left: 14%;
 }
 
 .hero_1 {
@@ -119,18 +122,13 @@
 }
 
 .monster {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background-color: #8b4513;
   border: 2px solid #5a2d0c;
   z-index: 1;
   position: relative;
-}
-.hex .monster {
-  position: absolute;
-  top: 24%;
-  left: 18%;
 }
 .monster::after {
   content: attr(data-name);
@@ -158,17 +156,175 @@
 }
 
 .monster.dead {
-  background-color: #6a5acd;
-  border-color: #483d8b;
+  background-color: #9b59b6;
+  border-color: #6c3483;
+}
+
+.monster.monster_goblin {
+  border-radius: 6px;
+  background-color: #6fbf5a;
+  border-color: #4a8a3a;
+}
+.monster.monster_goblin::after {
+  content: "G";
+  font-size: 18px;
+}
+
+.monster.monster_brute {
+  border-radius: 6px;
+  background-color: #3d8a2e;
+  border-color: #2a6120;
+}
+.monster.monster_brute::after {
+  content: "B";
+  font-size: 18px;
+}
+
+.monster.monster_troll {
+  border-radius: 6px;
+  background-color: #2a5e1a;
+  border-color: #1a3d10;
+}
+.monster.monster_troll::after {
+  content: "T";
+  font-size: 18px;
+}
+
+.monster.monster_sprite {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #e8c43a;
+}
+.monster.monster_sprite::after {
+  content: "S";
+  font-size: 18px;
+  top: 20%;
+}
+
+.monster.monster_elemental {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #e8713a;
+}
+.monster.monster_elemental::after {
+  content: "E";
+  font-size: 18px;
+  top: 20%;
+}
+
+.monster.monster_jotunn {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  border-radius: 0;
+  border: none;
+  background-color: #c94420;
+}
+.monster.monster_jotunn::after {
+  content: "J";
+  font-size: 18px;
+  top: 20%;
+}
+
+.monster.monster_imp {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #e87aab;
+}
+.monster.monster_imp::after {
+  content: "I";
+  font-size: 18px;
+  top: 15%;
+}
+
+.monster.monster_skeleton {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #9b59b6;
+}
+.monster.monster_skeleton::after {
+  content: "S";
+  font-size: 18px;
+  top: 15%;
+}
+
+.monster.monster_draugr {
+  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
+  border-radius: 0;
+  border: none;
+  background-color: #5b2d8e;
+}
+.monster.monster_draugr::after {
+  content: "D";
+  font-size: 18px;
+  top: 15%;
 }
 
 .monster.rank2 {
+  width: 44px;
+  height: 44px;
   border-width: 3px;
+}
+.monster.rank2.trollkin {
+  background-color: #3a6e2a;
+}
+.monster.rank2.firehorde {
+  background-color: #b03a1a;
+}
+.monster.rank2.dead {
+  background-color: #884aaa;
 }
 
 .monster.rank3 {
+  width: 52px;
+  height: 52px;
   border-width: 4px;
   border-style: double;
+}
+.monster.rank3.trollkin {
+  background-color: #2a5518;
+}
+.monster.rank3.firehorde {
+  background-color: #8b2e14;
+}
+.monster.rank3.dead {
+  background-color: #6c3483;
+}
+
+.house {
+  width: 52x;
+  height: 52px;
+  background-image: url(img/mini_houses.png);
+  background-size: 600% auto;
+  background-position: 40% 0%;
+}
+.hex > .house {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.housemodel_1 {
+  background-position: 0% 0%;
+}
+
+.housemodel_2 {
+  background-position: 20% 0%;
+}
+
+.housemodel_3 {
+  background-position: 40% 0%;
+}
+
+.housemodel_4 {
+  background-position: 60% 0%;
+}
+
+.well {
+  background-position: 80% 0%;
 }
 
 .rune_stone {
@@ -197,6 +353,266 @@
   border: 1px solid black;
 }
 
+.card_monster {
+  width: 196px;
+  height: 144px;
+  background-image: url(img/EN_Monster_Cards.jpg);
+  background-size: 600% 900%;
+  border-radius: 6px;
+}
+
+#display_monsterturn .card_monster[data-state="1"] {
+  filter: grayscale(80%) opacity(0.5);
+}
+
+.card_monster_1 {
+  background-position: 0% 0%;
+}
+
+.card_monster_2 {
+  background-position: 20% 0%;
+}
+
+.card_monster_3 {
+  background-position: 40% 0%;
+}
+
+.card_monster_4 {
+  background-position: 60% 0%;
+}
+
+.card_monster_5 {
+  background-position: 80% 0%;
+}
+
+.card_monster_6 {
+  background-position: 100% 0%;
+}
+
+.card_monster_7 {
+  background-position: 0% 12.5%;
+}
+
+.card_monster_8 {
+  background-position: 20% 12.5%;
+}
+
+.card_monster_9 {
+  background-position: 40% 12.5%;
+}
+
+.card_monster_10 {
+  background-position: 60% 12.5%;
+}
+
+.card_monster_11 {
+  background-position: 80% 12.5%;
+}
+
+.card_monster_12 {
+  background-position: 100% 12.5%;
+}
+
+.card_monster_13 {
+  background-position: 0% 25%;
+}
+
+.card_monster_14 {
+  background-position: 20% 25%;
+}
+
+.card_monster_15 {
+  background-position: 40% 25%;
+}
+
+.card_monster_16 {
+  background-position: 60% 25%;
+}
+
+.card_monster_17 {
+  background-position: 80% 25%;
+}
+
+.card_monster_18 {
+  background-position: 100% 25%;
+}
+
+.card_monster_19 {
+  background-position: 0% 37.5%;
+}
+
+.card_monster_20 {
+  background-position: 20% 37.5%;
+}
+
+.card_monster_21 {
+  background-position: 40% 37.5%;
+}
+
+.card_monster_22 {
+  background-position: 60% 37.5%;
+}
+
+.card_monster_23 {
+  background-position: 80% 37.5%;
+}
+
+.card_monster_24 {
+  background-position: 100% 37.5%;
+}
+
+.card_monster_25 {
+  background-position: 0% 50%;
+}
+
+.card_monster_26 {
+  background-position: 20% 50%;
+}
+
+.card_monster_27 {
+  background-position: 40% 50%;
+}
+
+.card_monster_28 {
+  background-position: 60% 50%;
+}
+
+.card_monster_29 {
+  background-position: 80% 50%;
+}
+
+.card_monster_30 {
+  background-position: 100% 50%;
+}
+
+.card_monster_31 {
+  background-position: 0% 62.5%;
+}
+
+.card_monster_32 {
+  background-position: 20% 62.5%;
+}
+
+.card_monster_33 {
+  background-position: 40% 62.5%;
+}
+
+.card_monster_34 {
+  background-position: 60% 62.5%;
+}
+
+.card_monster_35 {
+  background-position: 80% 62.5%;
+}
+
+.card_monster_36 {
+  background-position: 100% 62.5%;
+}
+
+.card_monster_37 {
+  background-position: 0% 75%;
+}
+
+.card_monster_38 {
+  background-position: 20% 75%;
+}
+
+.card_monster_39 {
+  background-position: 40% 75%;
+}
+
+.card_monster_40 {
+  background-position: 60% 75%;
+}
+
+.card_monster_41 {
+  background-position: 80% 75%;
+}
+
+.card_monster_42 {
+  background-position: 100% 75%;
+}
+
+.card_monster_43 {
+  background-position: 0% 87.5%;
+}
+
+.card_monster_44 {
+  background-position: 20% 87.5%;
+}
+
+.card_monster_45 {
+  background-position: 40% 87.5%;
+}
+
+.card_monster_46 {
+  background-position: 60% 87.5%;
+}
+
+.card_monster_47 {
+  background-position: 80% 87.5%;
+}
+
+.card_monster_48 {
+  background-position: 100% 87.5%;
+}
+
+.card_monster_49 {
+  background-position: 0% 100%;
+}
+
+.card_monster_50 {
+  background-position: 20% 100%;
+}
+
+.card_monster_51 {
+  background-position: 40% 100%;
+}
+
+.card_monster_52 {
+  background-position: 60% 100%;
+}
+
+.card_monster_53 {
+  background-position: 80% 100%;
+}
+
+.card_monster_54 {
+  background-position: 100% 100%;
+}
+
+.deck_monster {
+  width: 196px;
+  height: 144px;
+  border: 2px solid;
+  border-radius: 6px;
+  display: inline-block;
+}
+.deck_monster > * {
+  display: none;
+}
+
+#deck_monster_yellow {
+  background-color: #c9a83a;
+  border-color: #a08520;
+}
+
+#deck_monster_red {
+  background-color: #a03030;
+  border-color: #7a2020;
+}
+
+#display_monsterturn {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 10px;
+}
+
 .timetrack {
   position: absolute;
   top: 0;
@@ -221,6 +637,60 @@
   background-position: center;
   pointer-events: none;
   z-index: 0;
+}
+
+/* tooltips */
+.tundra .dijitTooltipContainer,
+.tooltipcontainer {
+  background: white;
+  color: black;
+  border: unset;
+  border-radius: unset;
+  padding: unset;
+  margin: 0;
+}
+
+.tundra .dijitTooltipContainer {
+  box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.5019607843);
+}
+
+.tooltipcontainer {
+  background-size: cover;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.tooltipcontainer .tooltiptitle {
+  position: relative;
+  font-weight: bold;
+  padding: 0.1em;
+  font-size: x-large;
+}
+.tooltipcontainer .tooltip-body {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.tooltipcontainer li {
+  list-style: circle;
+}
+.tooltipcontainer .tooltiptext {
+  max-width: 500px;
+  top: unset;
+}
+
+.tooltip-left {
+  padding: 0.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.tooltip-right {
+  padding: 0.5em;
+  padding-left: 0em;
 }
 
 #gameaction_status_wrap {

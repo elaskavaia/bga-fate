@@ -1,8 +1,72 @@
-// Hero and monster miniatures
+@use "sass:math";
+
+// Card styles
+
 .card {
   width: 140px;
   height: 200px;
-  // background-image: url(img/mini_heroes.png);
-  // background-size: 600% auto;
   border: 1px solid black;
+}
+
+// Monster cards — landscape, 6 columns x 9 rows sprite sheet
+// Native card size: 392 x 288, aspect ratio ~1.36:1
+.card_monster {
+  width: 196px;
+  height: 144px;
+  background-image: url(img/EN_Monster_Cards.jpg);
+  background-size: 600% 900%;
+  border-radius: 6px;
+}
+
+// State 1 = skipped card (grayed out)
+#display_monsterturn .card_monster[data-state="1"] {
+  filter: grayscale(80%) opacity(0.5);
+}
+
+// Per-card background positions: card N -> col=(N-1)%6, row=floor((N-1)/6)
+// background-position: (col/5*100)% (row/8*100)%
+@for $n from 1 through 54 {
+  $col: ($n - 1) % 6;
+  $row: math.floor(math.div($n - 1, 6));
+  $x: math.div($col, 5) * 100%;
+  $y: math.div($row, 8) * 100%;
+
+  .card_monster_#{$n} {
+    background-position: $x $y;
+  }
+}
+
+// Monster card deck (face-down pile)
+.deck_monster {
+  width: 196px;
+  height: 144px;
+  border: 2px solid;
+  border-radius: 6px;
+  display: inline-block;
+
+  & > * {
+    display: none;
+  }
+}
+
+#deck_monster_yellow {
+  background-color: #c9a83a;
+  border-color: #a08520;
+}
+
+#deck_monster_red {
+  background-color: #a03030;
+  border-color: #7a2020;
+}
+
+// Display area for monster cards during reinforcement
+#display_monsterturn {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 10px;
 }

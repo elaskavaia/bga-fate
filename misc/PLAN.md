@@ -93,17 +93,18 @@ See CLAUDE.md for project overview
 
 ### Server
 [x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
-[ ] Monster card data: define a few yellow monster cards with goblin placement
-[ ] `Op_reinforcement`: draw monster card, place goblins at specified locations
-[ ] Trigger reinforcement on time track spots marked with crossed axes
+[x] Monster card data: define a few yellow monster cards with goblin placement
+[ ] Fix spawn locations in monster cards — current data is not correct
+[x] `Op_reinforcement`: draw monster card, place goblins at specified locations
+[x] Trigger reinforcement on time track spots marked with crossed axes
 [x] Heroes can't move into hexes occupied by monsters — done in Iteration 1
 
 ### Client
 [x] Render monster tiles on map hexes — placeholder circles with faction color and name label
-[ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css 
+[ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css - SKIP FOR NOW
 
 ### Tests
-[ ] PHP tests for monster placement from cards
+[X] PHP tests for monster placement from cards
 
 ---
 
@@ -120,7 +121,7 @@ See CLAUDE.md for project overview
 [ ] Loss condition: all town pieces destroyed (Freyja's Well is last)
 
 ### Client
-[ ] Animate monster movement (snap-to-position is fine)
+[x] Animate monster movement (snap-to-position is fine)
 [ ] Show town piece removal
 [ ] Show win/loss end screen
 

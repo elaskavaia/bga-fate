@@ -21,13 +21,25 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Monster turn operation.
  * Runs after all players have completed their turns.
  *
- * Iteration 0: Just advances the time track and checks win condition.
- * Later iterations will add: monster movement, monster attacks, reinforcements.
+ * Steps (per rules): 1. Advance time marker, 2. Monster dice (skip), 3. Monsters move (TODO),
+ * 4. Monsters attack (TODO), 5. Reinforcements (if on axes spot).
  */
 class Op_turnMonster extends Operation {
     function resolve(): void {
+        $this->cleanupMonsterDisplay();
         $this->advanceTimeTrack();
+        $this->queueReinforcements();
         $this->queueNextRound();
+    }
+
+    private function cleanupMonsterDisplay(): void {
+        $cards = $this->game->tokens->getTokensOfTypeInLocation("card_monster", "display_monsterturn");
+        foreach ($cards as $card) {
+            $cardId = $card["key"];
+            $deck = $this->game->tokens->getRulesFor($cardId, "location");
+            $minState = $this->game->tokens->db->getExtremePosition(false, $deck);
+            $this->game->tokens->dbSetTokenLocation($cardId, $deck, $minState - 1, ""); // no notify text
+        }
     }
 
     private function advanceTimeTrack(): void {
@@ -45,6 +57,18 @@ class Op_turnMonster extends Operation {
                 "max" => $maxSteps,
             ]
         );
+    }
+
+    private function queueReinforcements(): void {
+        $step = $this->game->tokens->db->getTokenState("rune_stone");
+        $track = $this->game->tokens->db->getTokenLocation("rune_stone");
+        $slotId = "slot_{$track}_{$step}";
+        $spotType = $this->game->tokens->getRulesFor($slotId, "r", "tm_yellow_shield");
+        if ($spotType === "tm_yellow_axes") {
+            $this->queue("reinforcement", null, ["deck" => "deck_monster_yellow"]);
+        } elseif ($spotType === "tm_red_axes") {
+            $this->queue("reinforcement", null, ["deck" => "deck_monster_red"]);
+        }
     }
 
     private function queueNextRound(): void {

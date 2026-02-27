@@ -1,0 +1,38 @@
+id|name
+
+# Terrain types
+forest|Forest
+plains|Plains
+mountain|Mountain
+lake|Lake
+
+# Named locations
+DarkForest|Dark Forest
+DeadPlains|Dead Plains
+Grimheim|Grimheim
+Highlands|Highlands
+MarshOfSorrow|Marsh of Sorrow
+Nailfare|Nailfare
+OgreValley|Ogre Valley
+RobberCamp|Robber Camp
+SpewingMountain|Spewing Mountain
+TempleRuins|Temple Ruins
+TrollCaves|Troll Caves
+WitchCabin|Witch Cabin
+WyrmLair|Wyrm Lair
+
+# Monster factions
+trollkin|Trollkin
+firehorde|Fire Horde
+dead|Dead
+
+# Area colors (used on map hex flags)
+red|Red
+yellow|Yellow
+
+# Time track spot types
+tm_yellow_axes|Yellow Reinforcements
+tm_red_axes|Red Reinforcements
+tm_yellow_shield|Yellow Shield
+tm_red_shield|Red Shield
+tm_red_skull|Charge
