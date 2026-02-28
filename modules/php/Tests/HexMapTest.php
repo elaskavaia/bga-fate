@@ -209,30 +209,30 @@ final class HexMapTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // setOccupancyOnMap
+    // moveCharacterOnMap
     // -------------------------------------------------------------------------
 
-    public function testSetOccupancyOnMapPlacesCharacter(): void {
+    public function testmoveCharacterOnMapPlacesCharacter(): void {
         $this->game->hexMap->getOccupancyMap(); // init cache
-        $this->game->hexMap->setOccupancyOnMap("monster_goblin_1", "hex_12_8");
+        $this->game->hexMap->moveCharacter("monster_goblin_1", "hex_12_8");
         $this->assertEquals("hex_12_8", $this->game->hexMap->getCharacterHex("monster_goblin_1"));
         $this->assertTrue($this->game->hexMap->isOccupied("hex_12_8"));
     }
 
-    public function testSetOccupancyOnMapMovesCharacter(): void {
+    public function testmoveCharacterOnMapMovesCharacter(): void {
         $this->game->hexMap->getOccupancyMap();
-        $this->game->hexMap->setOccupancyOnMap("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->setOccupancyOnMap("monster_goblin_1", "hex_11_8");
+        $this->game->hexMap->moveCharacter("monster_goblin_1", "hex_12_8");
+        $this->game->hexMap->moveCharacter("monster_goblin_1", "hex_11_8");
         // Should be on new hex
         $this->assertEquals("hex_11_8", $this->game->hexMap->getCharacterHex("monster_goblin_1"));
         // Old hex should be free
         $this->assertFalse($this->game->hexMap->isOccupied("hex_12_8"));
     }
 
-    public function testSetOccupancyOnMapRemovesCharacter(): void {
+    public function testmoveCharacterOnMapRemovesCharacter(): void {
         $this->game->hexMap->getOccupancyMap();
-        $this->game->hexMap->setOccupancyOnMap("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->setOccupancyOnMap("monster_goblin_1", null);
+        $this->game->hexMap->moveCharacter("monster_goblin_1", "hex_12_8");
+        $this->game->hexMap->moveCharacter("monster_goblin_1", "limbo");
         $this->assertNull($this->game->hexMap->getCharacterHex("monster_goblin_1"));
         $this->assertFalse($this->game->hexMap->isOccupied("hex_12_8"));
     }
@@ -304,10 +304,7 @@ final class HexMapTest extends TestCase {
             if ($prev !== null) {
                 [$px, $py] = $this->game->hexMap->getHexCoords($prev);
                 [$cx, $cy] = $this->game->hexMap->getHexCoords($hex);
-                $this->assertTrue(
-                    $cy > $py || ($cy === $py && $cx >= $px),
-                    "Hexes should be sorted by y then x: $prev before $hex"
-                );
+                $this->assertTrue($cy > $py || ($cy === $py && $cx >= $px), "Hexes should be sorted by y then x: $prev before $hex");
             }
             $prev = $hex;
         }

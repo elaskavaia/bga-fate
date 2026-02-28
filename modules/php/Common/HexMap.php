@@ -223,9 +223,14 @@ class HexMap {
         return null;
     }
 
-    function moveCharacter(string $charId, string $location, string $message) {
+    function moveCharacter(string $charId, string $location, string $message = "*") {
         $this->game->tokens->dbSetTokenLocation($charId, $location, 0, $message);
-        $this->setOccupancyOnMap($charId, $this->isValidHex($location) ? $location : null);
+        $this->moveCharacterOnMap($charId, $location);
+    }
+
+    function moveStuff(string $tokenId, string $location, string $message = "*") {
+        $this->game->tokens->dbSetTokenLocation($tokenId, $location, 0, $message);
+        $this->moveStuffOnMap($tokenId, $location);
     }
 
     /**
@@ -233,7 +238,7 @@ class HexMap {
      * @param string $tokenId The token to move
      * @param string|null $hex Target hex, or null to remove from map entirely
      */
-    function setOccupancyOnMap(string $tokenId, ?string $hex): void {
+    private function moveCharacterOnMap(string $tokenId, ?string $hex): void {
         $fromHex = $this->getCharacterHex($tokenId);
         // Remove from current hex
         if ($fromHex !== null) {
@@ -246,8 +251,27 @@ class HexMap {
                 $this->game->systemAssert("collission on $hex", $this->map[$hex]["character"] == null);
                 $this->map[$hex]["character"] = $tokenId;
             } else {
-                $this->map[$hex]["stuff"][$tokenId] = 0;
+                $this->game->systemAssert("$tokenId is not a character");
             }
+        }
+    }
+
+    private function moveStuffOnMap(string $tokenId, ?string $hex): void {
+        $characterType = getPart($tokenId, 0);
+        if ($characterType === "hero" || $characterType === "monster") {
+            $this->game->systemAssert("moveStuffOnMap should not be used for character tokens");
+        }
+        $occ = $this->getOccupancyMap();
+        // Remove from current hex
+        foreach ($occ as $h => $entry) {
+            if (isset($entry["stuff"][$tokenId])) {
+                unset($this->map[$h]["stuff"][$tokenId]);
+                break;
+            }
+        }
+        // Place on new hex
+        if ($this->isValidHex($hex)) {
+            $this->map[$hex]["stuff"][$tokenId] = 0;
         }
     }
     /**

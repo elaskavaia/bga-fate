@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . "/GameTest.php";
 
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\Operations\Op_actionMove;
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Tests\GameUT;
@@ -104,12 +103,14 @@ final class Op_actionMoveTest extends TestCase {
     public function testResolveToCurrentHexThrows(): void {
         $op = $this->createOp();
         $this->expectException(\Bga\GameFramework\UserException::class);
+        $this->expectOutputRegex("/./");
         $op->action_resolve([Operation::ARG_TARGET => "hex_9_9"]);
     }
 
     public function testResolveToUnreachableHexThrows(): void {
         $op = $this->createOp();
         $this->expectException(\Bga\GameFramework\UserException::class);
+        $this->expectOutputRegex("/./");
         $op->action_resolve([Operation::ARG_TARGET => "hex_9_1"]);
     }
 }

@@ -89,7 +89,9 @@ class Op_turnMonster extends Operation {
         $monsters = $this->game->hexMap->getMonstersOnMap();
 
         if ($isChargeTurn) {
-            $this->game->notify->all("message", clienttranslate("Skull turn! All monsters charge toward Grimheim!"), []);
+            $this->game->notify->all("message", clienttranslate("Skull turn! All monsters charge toward Grimheim!"));
+        } else {
+            $this->game->notify->all("message", clienttranslate("All monsters slowly walk toward Grimheim"));
         }
 
         foreach ($monsters as $m) {
@@ -123,7 +125,7 @@ class Op_turnMonster extends Operation {
         if (!$charge && !$this->game->hexMap->isHeroAdjacentTo($currentHex)) {
             $nextHex = $this->game->hexMap->getMonsterNextHex($currentHex);
             if ($nextHex !== null && $this->game->hexMap->isHeroAdjacentTo($nextHex)) {
-                $this->moveMonsterOneStep($monsterId, $currentHex);
+                $this->moveMonsterOneStep($monsterId, $currentHex, clienttranslate('${token_name} charges toward the nearest hero!'));
             }
         }
     }
@@ -133,7 +135,7 @@ class Op_turnMonster extends Operation {
      *
      * @return string|null The new hex the monster is on, or null if it couldn't move or entered Grimheim.
      */
-    private function moveMonsterOneStep(string $monsterId, string $currentHex): ?string {
+    private function moveMonsterOneStep(string $monsterId, string $currentHex, string $message = ""): ?string {
         // Already in Grimheim — shouldn't happen, but skip
         if ($this->game->hexMap->isInGrimheim($currentHex)) {
             return null;
@@ -162,7 +164,7 @@ class Op_turnMonster extends Operation {
             return null;
         }
 
-        $this->game->hexMap->moveCharacter($monsterId, $nextHex, clienttranslate('monsters move ${token_name} toward Grimheim'));
+        $this->game->hexMap->moveCharacter($monsterId, $nextHex, $message);
         return $nextHex;
     }
 
@@ -194,12 +196,12 @@ class Op_turnMonster extends Operation {
                 $monsterId,
                 $targetHouseRec["location"], // to show animations on monster
                 null,
-                clienttranslate('${token_name} enters Grimheim and destroys the house')
+                clienttranslate('${token_name} enters Grimheim and destroys the house!')
             );
             $this->game->tokens->dbSetTokenLocation($targetHouseRec["key"], "limbo", 0, "");
         }
         // Remove monster from the map
-        $this->game->hexMap->moveCharacter($monsterId, "supply_monsters", clienttranslate('monsters remove ${token_name} from the map'));
+        $this->game->hexMap->moveCharacter($monsterId, "supply_monsters", clienttranslate('${token_name} goes home happy'));
     }
 
     private function queueReinforcements(string $spotType): void {
@@ -217,9 +219,9 @@ class Op_turnMonster extends Operation {
         if ($this->game->isEndOfGame()) {
             if ($this->game->isHeroesWin()) {
                 // Time track completed — players win!
-                $this->game->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! You win!"), []);
+                $this->game->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! Heroes win!"), []);
             } else {
-                $this->game->notify->all("message", clienttranslate("The heroes have failed. The monster wins!"), []);
+                $this->game->notify->all("message", clienttranslate("The Heroes have failed. The Monsters wins!"), []);
             }
             return;
         }

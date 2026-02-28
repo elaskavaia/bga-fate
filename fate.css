@@ -110,11 +110,12 @@
   top: 50%;
   left: 50%;
   translate: -50% -50%;
+  height: 100%;
 }
 
 .hero {
-  width: 64px;
-  height: 64px;
+  aspect-ratio: 1;
+  height: 94px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
 }
@@ -136,8 +137,8 @@
 }
 
 .monster {
-  width: 36px;
-  height: 36px;
+  aspect-ratio: 1;
+  height: 94px;
   border-radius: 50%;
   background-color: #8b4513;
   border: 2px solid #5a2d0c;
@@ -152,7 +153,7 @@
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 8px;
+  font-size: medium;
   font-weight: bold;
   text-align: center;
   line-height: 1.1;
@@ -162,149 +163,122 @@
 .monster.trollkin {
   background-color: #4a7a3a;
   border-color: #2d4d22;
+  border-radius: 20%;
+}
+.monster.trollkin::after {
+  content: "trollkin";
+  font-size: xx-large;
 }
 
-.monster.firehorde {
-  background-color: #c94420;
-  border-color: #8b2e14;
-}
-
-.monster.dead {
-  background-color: #9b59b6;
-  border-color: #6c3483;
-}
-
-.monster.monster_goblin {
-  border-radius: 6px;
-  background-color: #6fbf5a;
-  border-color: #4a8a3a;
-}
 .monster.monster_goblin::after {
   content: "G";
-  font-size: 18px;
 }
 
 .monster.monster_brute {
-  border-radius: 6px;
-  background-color: #3d8a2e;
-  border-color: #2a6120;
+  background-color: rgb(34, 102, 34);
 }
 .monster.monster_brute::after {
   content: "B";
-  font-size: 18px;
 }
 
 .monster.monster_troll {
-  border-radius: 6px;
-  background-color: #2a5e1a;
-  border-color: #1a3d10;
+  background-color: #0a2202;
 }
 .monster.monster_troll::after {
   content: "T";
-  font-size: 18px;
+}
+
+.monster.firehorde {
+  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
+  background-color: #c94420;
+  border-color: #8b2e14;
+  border-radius: 0;
+  border: none;
+}
+.monster.firehorde::after {
+  content: "firehorde";
+  font-size: xx-large;
+  top: 20%;
 }
 
 .monster.monster_sprite {
-  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
-  border-radius: 0;
-  border: none;
   background-color: #e8c43a;
 }
 .monster.monster_sprite::after {
   content: "S";
-  font-size: 18px;
-  top: 20%;
 }
 
 .monster.monster_elemental {
-  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
-  border-radius: 0;
-  border: none;
   background-color: #e8713a;
 }
 .monster.monster_elemental::after {
   content: "E";
-  font-size: 18px;
-  top: 20%;
 }
 
 .monster.monster_jotunn {
-  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
-  border-radius: 0;
-  border: none;
   background-color: #c94420;
 }
 .monster.monster_jotunn::after {
   content: "J";
-  font-size: 18px;
-  top: 20%;
 }
 
-.monster.monster_imp {
-  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
-  border-radius: 0;
-  border: none;
-  background-color: #e87aab;
-}
-.monster.monster_imp::after {
-  content: "I";
-  font-size: 18px;
-  top: 15%;
-}
-
-.monster.monster_skeleton {
+.monster.dead {
   clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
   border-radius: 0;
   border: none;
   background-color: #9b59b6;
+  border-color: #6c3483;
 }
-.monster.monster_skeleton::after {
-  content: "S";
-  font-size: 18px;
+.monster.dead::after {
+  content: "dead";
+  font-size: xx-large;
   top: 15%;
 }
 
+.monster.monster_imp {
+  background-color: #e87aab;
+}
+.monster.monster_imp::after {
+  content: "I";
+}
+
+.monster.monster_skeleton {
+  background-color: #9b59b6;
+}
+.monster.monster_skeleton::after {
+  content: "S";
+}
+
 .monster.monster_draugr {
-  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
-  border-radius: 0;
-  border: none;
   background-color: #5b2d8e;
 }
 .monster.monster_draugr::after {
   content: "D";
-  font-size: 18px;
-  top: 15%;
+}
+
+.monster.rank1 {
+  height: 54px;
+  border-width: 3px;
+}
+.hex .monster.rank1 {
+  height: 40%;
 }
 
 .monster.rank2 {
-  width: 44px;
-  height: 44px;
+  height: 74px;
   border-width: 3px;
 }
-.monster.rank2.trollkin {
-  background-color: #3a6e2a;
-}
-.monster.rank2.firehorde {
-  background-color: #b03a1a;
-}
-.monster.rank2.dead {
-  background-color: #884aaa;
+.hex .monster.rank2 {
+  height: 50%;
 }
 
 .monster.rank3 {
-  width: 52px;
-  height: 52px;
+  height: 94px;
   border-width: 4px;
   border-style: double;
 }
-.monster.rank3.trollkin {
-  background-color: #2a5518;
-}
-.monster.rank3.firehorde {
-  background-color: #8b2e14;
-}
-.monster.rank3.dead {
-  background-color: #6c3483;
+.hex .monster.rank3 {
+  height: 60%;
 }
 
 .house {
