@@ -599,6 +599,12 @@
   padding: 8px;
 }
 
+/**
+ * fate.scss
+ *
+ * Fate stylesheet
+ */
+/********* You can start writing your CSS below this line: **********/
 #supply {
   display: flex;
   flex-direction: row;
@@ -735,6 +741,61 @@
   outline: 1px solid green;
   height: 5%;
   width: 5%;
+}
+
+#mainarea {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 0;
+  position: relative;
+}
+
+.board_layout_controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 10;
+  padding: 4px 8px;
+  margin: 5px;
+}
+.board_layout_controls .layout_button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.board_layout_controls .layout_button:hover {
+  background: #e0e0e0;
+  border-color: #999;
+}
+.board_layout_controls .layout_button.active {
+  background: #19bedb;
+  border-color: #19bedb;
+  color: white;
+}
+
+#ebd-body[data-board-layout=scale] #mainarea {
+  overflow: visible;
+  justify-content: center;
+}
+
+#ebd-body[data-board-layout=scroll] #mainarea {
+  overflow-x: auto;
+  overflow-y: visible;
+  justify-content: safe center;
+}
+#ebd-body[data-board-layout=scroll] #mainarea #thething {
+  min-width: max-content;
 }
 
 .map_wrapper {

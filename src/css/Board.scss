@@ -1,3 +1,5 @@
+@use "variables" as v;
+
 // Supply areas
 #supply {
   display: flex;
@@ -116,6 +118,68 @@
   outline: 1px solid green;
   height: 5%;
   width: 5%;
+}
+
+#mainarea {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 0;
+  position: relative;
+}
+
+// Layout controls - moved to player board by setupLocalControls
+.board_layout_controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 10;
+  padding: 4px 8px;
+  margin: 5px;
+
+  .layout_button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #e0e0e0;
+      border-color: #999;
+    }
+
+    &.active {
+      background: v.$activeColor;
+      border-color: v.$activeColor;
+      color: white;
+    }
+  }
+}
+
+// Layout mode: Scale to fit
+#ebd-body[data-board-layout="scale"] #mainarea {
+  overflow: visible;
+  justify-content: center;
+}
+
+// Layout mode: Horizontal scroll
+#ebd-body[data-board-layout="scroll"] #mainarea {
+  overflow-x: auto;
+  overflow-y: visible;
+  justify-content: safe center;
+
+  #thething {
+    min-width: max-content;
+  }
 }
 
 .map_wrapper {

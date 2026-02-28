@@ -1711,6 +1711,10 @@ class PlayerTurn {
 class Game extends GameMachine {
     constructor(bga) {
         super(bga);
+        this.boardLayout = "scale";
+        this.boundUpdateBoardScale = () => {
+            this.updateBoardScale($("thething"));
+        };
         console.log("fate constructor");
         this.playerTurn = new PlayerTurn(this, bga);
         this.bga.states.register("PlayerTurn", this.playerTurn);
@@ -1718,8 +1722,14 @@ class Game extends GameMachine {
     setup(gamedatas) {
         console.log("Starting game setup");
         super.setup(gamedatas);
-        placeHtml(`<div id="thething"></div>`, this.bga.gameArea.getElement());
+        placeHtml(`<div id="mainarea">
+        <div id="thething"></div>
+      </div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
+        placeHtml(`<div id="board_layout_controls" class="board_layout_controls">
+        <button id="layout_scale" class="layout_button active">\u2922</button>
+        <button id="layout_scroll" class="layout_button">\u2194</button>
+      </div>`, "limbo");
         placeHtml(`<div id="supply" class="supply"></div>`, "thething");
         placeHtml(`<div id="supply_monster" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_crystal_green" class="supply"></div>`, "supply");
@@ -1728,11 +1738,11 @@ class Game extends GameMachine {
         placeHtml(`<div id="supply_dice" class="supply"></div>`, "supply");
         placeHtml(`<div id="players_panels"></div>`, "thething");
         const mapWrapper = "map_wrapper";
-        placeHtml(`<div id="${mapWrapper}" class="${mapWrapper}"></div>`, "thething");
+        placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "thething");
         this.createMap($(mapWrapper));
         placeHtml(`<div id="timetrack_1"></div>`, mapWrapper);
         placeHtml(`<div id="timetrack_2"></div>`, mapWrapper);
-        placeHtml(`<div id="display_monsterturn"></div>`, $("thething"));
+        placeHtml(`<div id="display_monsterturn"></div>`, "thething");
         placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
         placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
         Object.values(gamedatas.players).forEach((player) => {
@@ -1756,6 +1766,7 @@ class Game extends GameMachine {
                 </div>`, "players_panels");
         });
         this.setupGame(gamedatas);
+        this.setupLayoutControls();
         this.setupNotifications();
         console.log("Ending game setup");
     }
@@ -1897,6 +1908,65 @@ class Game extends GameMachine {
     async notif_lastTurn(args) {
         //this.gamedatas.lastTurn = true;
         //this.updateBanner();
+    }
+    // --- Layout controls: scale-to-fit vs horizontal scroll ---
+    setupLayoutControls() {
+        super.setupLocalControls("board_layout_controls");
+        const savedLayout = localStorage.getItem("fate_board_layout") || "scale";
+        this.boardLayout = savedLayout;
+        this.applyBoardLayout();
+        $("layout_scale").addEventListener("click", () => this.setBoardLayout("scale"));
+        $("layout_scroll").addEventListener("click", () => this.setBoardLayout("scroll"));
+        $("layout_scale").title = _("Board Layout: Scale to fit");
+        $("layout_scroll").title = _("Board Layout: Horizontal scroll");
+    }
+    setBoardLayout(layout) {
+        this.boardLayout = layout;
+        localStorage.setItem("fate_board_layout", layout);
+        this.applyBoardLayout();
+    }
+    applyBoardLayout() {
+        $("ebd-body").dataset.boardLayout = this.boardLayout;
+        this.boundUpdateBoardScale();
+        document.querySelectorAll(".layout_button").forEach((btn) => btn.classList.remove("active"));
+        $(`layout_${this.boardLayout}`)?.classList.add("active");
+        if (this.boardLayout === "scale") {
+            window.addEventListener("resize", this.boundUpdateBoardScale);
+        }
+        else {
+            window.removeEventListener("resize", this.boundUpdateBoardScale);
+        }
+    }
+    updateBoardScale(scalecontrol) {
+        const set = this.boardLayout === "scale";
+        const parent = scalecontrol.parentElement;
+        scalecontrol.style.transform = "none";
+        scalecontrol.style.width = "";
+        scalecontrol.style.height = "";
+        scalecontrol.style.marginBottom = "";
+        scalecontrol.style.transformOrigin = "";
+        scalecontrol.scrollLeft = 0;
+        scalecontrol.dataset.scale = "1";
+        parent.scrollLeft = 0;
+        if (!set)
+            return;
+        const naturalWidth = scalecontrol.scrollWidth;
+        const availableWidth = parent.clientWidth;
+        let scale = 1;
+        if (naturalWidth > availableWidth) {
+            scale = availableWidth / naturalWidth;
+        }
+        this.applyScale(scalecontrol, scale);
+    }
+    applyScale(scalecontrol, scale) {
+        if (Math.abs(scale - 1) < 0.01)
+            return;
+        const naturalHeight = scalecontrol.offsetHeight;
+        scalecontrol.dataset.scale = String(scale);
+        scalecontrol.style.transform = `scale(${scale})`;
+        scalecontrol.style.transformOrigin = "top center";
+        const reducedHeight = naturalHeight * (1 - scale);
+        scalecontrol.style.marginBottom = `-${reducedHeight}px`;
     }
 }
 
