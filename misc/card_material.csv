@@ -1,0 +1,223 @@
+num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment
+#set id=card_{ctype}_{hno}_{num}
+#set create=1
+#set _noquotes=create
+9|1|Eagle Eye I|ability|1|+1|||||You have attack range +1.|If I can see it, I can hit it.|
+10|1|Eagle Eye II|ability|1|+2|||||You have attack range +2. You always ignore armor.|Yeah, why shoot the armor?|
+11|1|Long Shot I|ability|1||||||Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.|
+12|1|Long Shot II|ability|1||||||Add damage to wach attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.||
+13|1|Nailed Together I|ability|1||||||If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).||
+14|1|Nailed Together II|ability|1|+2|||||If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.||
+7|1|Stitching I|ability|1||||||Remove 1 damage from any hero or equipment within range 1.|If you're in a pinch, Bjorn can patch.|
+8|1|Stitching II|ability|1||||||Remove a total of 2 damage from heroes and equipment within range 1.||
+5|1|Suppressive Fire I|ability|1||||||Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.||
+6|1|Suppressive Fire II|ability|1||||||Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.||
+3|1|Sure Shot I|ability|1||||1||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?|
+4|1|Sure Shot II|ability|1||||2||2-4[MANA]: Deal that much damage to a monster within attack range.||
+13|2|Flexibility I|ability|1||||1||1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.||
+14|2|Flexibility II|ability|1||||2||1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.||
+3|2|Hail of Arrows I|ability|1||||1||3[MANA]: Deal 1 damage to 3 monsters within attack range.||
+4|2|Hail of Arrows II|ability|1||||2||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.||
+11|2|Snipe I|ability|1||||||Roll 2[DIE_ATTACK] against a monster within attack range.||
+12|2|Snipe II|ability|1||||||Roll 5[DIE_ATTACK] against a monster within attack range.||
+7|2|Starsong I|ability|1||||||At the end of your turn, draw 1 additional card.||
+8|2|Starsong II|ability|1||||||At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.||
+9|2|Suppressive Fire I|ability|1||||||Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.||
+10|2|Suppressive Fire II|ability|1||||||Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.||
+5|2|Treetreader I|ability|1||+2||||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.|
+6|2|Treetreader II|ability|1||+2||||Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.|
+7|3|Fleetfoot I|ability|1||+1||||Move 1 area.|Oh no, she's surrounding us!|
+8|3|Fleetfoot II|ability|1||+3||||Move 1 area. You may always move into mountains and through occupied areas.||
+5|3|In Charge I|ability|1||||||After each move action, you may kill an adjacent rank 1 monster.||
+6|3|In Charge II|ability|1||||||After each move action, you may kill an adjacent rank 1 or rank 2 monster.||
+11|3|Queen of the Hill I|ability|1||||||Deal 2 damage to an adjacent monster and switch places with it.|Let's dance...|
+12|3|Queen of the Hill II|ability|1||||||Deal 4 damage to an adjacent monster and switch places with it.|Another round? Ok!|
+9|3|Reaper Swing I|ability|1||||||In each attack action, you may divide the damage you deal between the target and another adjacent monster.||
+10|3|Reaper Swing II|ability|1|+3|||||In each attack action, you may divide the damage you deal between the target and another adjacent monster.||
+3|3|Riposte I|ability|1||||1||2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.||
+4|3|Riposte II|ability|1||||2||3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.|
+13|3|Swift Kick I|ability|1||||||Deal 1 damage to an adjacent non-legend monster and move it 1 area.||
+14|3|Swift Kick II|ability|1||||||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.||
+9|4|Beefy Berserker I|ability|1|+1|||||Runes [RUNE] always count as hits for you. Because that's the way you roll.||
+10|4|Beefy Berserker II|ability|1|+3|||||Runes [RUNE] always count as hits for you. It runes in the family.||
+11|4|Dreadnought I|ability|1||||1||1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.|
+12|4|Dreadnought II|ability|1||||1||1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.||
+13|4|Fortified I|ability|1||||||Heal 1 damage from Boldur.|It's not hiding, it's strategic positioning.|
+14|4|Fortified II|ability|1|+1|+2||||Heal 1 damage from Boldur.||
+3|4|Rapid Strike I|ability|1||||1||3[MANA]: Perform an attack action.||
+4|4|Rapid Strike II|ability|1||||1||2[MANA]: Perform an attack action. May be used several times per turn.||
+5|4|Sweeping Strike I|ability|1||||||Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.||
+6|4|Sweeping Strike II|ability|1||||||Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.||
+7|4|Wrecking Ball I|ability|1||||||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area.|He's on a roll!|
+8|4|Wrecking Ball II|ability|1||||||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1.||
+11|5|Déjà Vu I|ability|1||||||Once per turn, when playing a card, perform its effect twice.|Wait a minute, didn't you just do that?|
+12|5|Déjà Vu II|ability|1||||||Once per turn, when playing a card, perform its effect twice, then return it to hand.|Wait a minute, didn't you just read that?|
+13|5|Elementary Student I|ability|1||||||Add 1 mana [MANA] to any card.|Finkel is on fire today!|
+14|5|Elementary Student II|ability|1||||||Add 1 mana [MANA] to each card that generates [MANA].|Finkel is on FIRE today!|
+3|5|Fireball I|ability|1||||1||3-5[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action.|Goodness gracious|
+4|5|Fireball II|ability|1||||2||4-8[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action. Alsodeal 1 damage to each character adjacent to the target.|...great balls of fire!|
+5|5|Fire Spark I|ability|1||||1||2[MANA]: Roll 3[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|The light at the end of the tunnel is coming toward you.|
+6|5|Fire Spark II|ability|1||||2||2[MANA]: Roll 4[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|Inventing spectacular new fireworks.|
+7|5|Melt I|ability|1||||1||1-2[MANA]: Kill an adjacent monster with that much remaining health.|I'm melting! I'm melting!|
+8|5|Melt II|ability|1||||2||1-4[MANA]: Kill an adjacent monster with that much remaining health.|Blub blub blub…|
+9|5|Twister I|ability|1||||1||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas.|I got carried away…|
+10|5|Twister II|ability|1||||2||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas. May be used once per character.|Relocates houses, little girls, and even their dogs.|
+5|6|Chain Reaction I|ability|1||||1||3[MANA]: Roll 3[DIE_ATTACK], 2[DIE_ATTACK], and 1[DIE_ATTACK] against 3 monsters (respectively) within range 2.|A cascade of calamity.|
+6|6|Chain Reaction II|ability|1||||2||4[MANA]: Roll 3, 2, and 1 damage to 3 monsters (respectively) within range 2.||
+7|6|Confusion I|ability|1||||1||2[MANA]: Attack with a non-legend monster within range 2.||
+8|6|Confusion II|ability|1||||2||2[MANA]: Attack with a non-legend monster within range 3. May be used several times per turn with different monsters.||
+13|6|Discipline I|ability|1||||||Add 1 mana [MANA] to any card or gain 1 experience [XP].||
+14|6|Discipline II|ability|1||||||Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.||
+11|6|Meditation I|ability|1||||1||Freely move mana [MANA] from Meditation to other cards.|Meditating? Sleeping? Both do wonders for you.|
+12|6|Meditation II|ability|1||||2||Freely move mana [MANA] between your cards.|Repeat until you reach enlightenment: ”Wah Tefu Layam”.|
+3|6|Spark I|ability|1||||1||2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.|
+4|6|Spark II|ability|1||||2||1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.|
+9|6|Stonesoul I|ability|1||||1||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.|
+10|6|Stonesoul II|ability|1||||2||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…|
+15|1|Bjorn's First Bow|equip|1|+1|||||This is your Main Weapon. Attack range 2.|Not something he's proud of. Still not bad for a five-year-old.|
+20|1|Black Arrows|equip|1|||||<i>Spend 1 attack action in the Robber Camp</i> to loot it.|Starts with 3 arrows here (use zxp> markers).<br>Spend 1 arrow to add 3 damage to this attack action.|Painted black for the funeral they are about to attend.|
+16|1|Bone Bane Bow|equip|1|+3||||<i>Spend a mend action on Nailfare</i> to bind the relics.|This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target.|This bunch of bones, bound by braided bamboo became the bane of the banished breathless.|
+21|1|Helmet|equip|1|||3||<i>Kill a brute or a skeleton. Take this helmet instead of the gold</i> [XP].|[DAMAGE]: Prevent 1 damage.|Radiating forcefulness.|
+24|1|Home Sewn Cape|equip|1|||||<i>Spend 1 attack action when not adjacent to a monster.</i> Your very own fabrication.|Add 1 [MANA] here very time you roll a [RUNE].<br>2[MANA]: Move 1 area.<br>3[MANA]: Prevent 2 damage.|”Did Bjorn make this?”<br>”Sew it seams…”|
+23|1|Home Sewn Tunic|equip|1|||3||Practice makes perfect. <i>Spend 1 practice action and 1 experience</i> [XP] to make it.|[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remoce all damage from this card.|When your life hangs by a thread, this is sturdier than it seams.|
+19|1|Leather Purse|equip|1|||3||<i>After killing a trollkin, take this bag and spawn 2 brutes next to you.</i> They want the bag back.|[DAMAGE]: Heal 2 damage from yourself or any adjacent hero.|Keeping your tools handy: thread, needles, bandages, herbs, and a pocket-sized mead sack.|
+18|1|Quiver|equip|1|+1||3||<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.|[DAMAGE]: Add 1 damage to this attack action.|Makes your enemies quiver in their boots.|
+17|1|Throwing Axes|equip|2|||2||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.|I keep missing him…|
+22|1|Trollbane|equip|1|+3||||<i>Collect 5 gold</i> [XP] <i>from killing trollkin</i> to get a fearsome reputation.|This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin.|Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.|
+23|2|Alva's Bracers|equip|1||||1|<i>Pay 5 gold [XP] on a road</i> to have them imported from Alfheim.|3[MANA]: Perform an attack action.|Brace for impact!|
+15|2|Alva's First Bow|equip|1|+1|||||This is your Main Weapon. Attack range 2.||
+22|2|Belt of Youth|equip|1||+2|||<i>Enter 8 forest areas</i> to gather support from the Elders.|Heal 1 damage from Alva.|Ironically known as the Waist of Time, it actually carries rejuvenating powers.|
+25|2|Bloodline Crystal|equip|1||||2|<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.|3[MANA]: Add 2 damage to this attack action.<br>3[MANA]: Draw 1 card.|I'm … a princess? I knew it!|
+24|2|Elven Arrows|equip|1|+2||||<i>Stand in the Troll Caves and spawn an adjacent troll.</i> Oops!||Elven treasures long forgotten. Used as toothpicks for ages.|
+21|2|Elven Blade|equip|1|||||<i>Kill 3 adjacent monsters</i> to practice switching weapons.|After each attack action, deal 1 damage to a monster adjacent to Alva.||
+18|2|Quiver|equip|1|+1||3||<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.|[DAMAGE]: Add 1 damage to this attack action.|Makes your enemies quiver in their boots.|
+20|2|Singing Bow|equip|1|+3||||<i>When you have rolled 10[DIE_ATTACK] in forests</i>, you have learned the songs of the trees.|This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card.|Sings your swan song.|
+17|2|Throwing Darts|equip|1|||2||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.|”I'm ready to try it blindfolded…”|
+16|2|Tiara|equip|1|||||<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!|Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.||
+19|2|Windbite|equip|1|+3||||<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.|This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].|It anticipates your wishes.|
+19|3|Blade Decorations|equip|1|+1||||<i>Pay 2 gold [XP] in Grimheim</i> to decorate your sword.||Now this is what I call a broad sword.|
+25|3|Custom Armor|equip|1|||3||<i>Pay 4 gold [XP]</i> to have it made. Then get anormored with it.|[DAMAGE]: Prevent 2 damage.|Armor is the blacksmith's strong suit.|
+15|3|Flimsy Blade|equip|1|+1||||||This miserable heirloom doesn't look like much, and it's not nearly as good as it looks...|
+16|3|Healing Potion|equip|1|||4||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|This mead is barely legal.|
+17|3|Heels|equip|1|||||<i>Spend 1 mend action and discard 2 cards in the Witch Cabin.</i> That witch had style!|Deal 1 damage to an adjacent monster.|High heels can be sooo painful.|
+20|3|Helmet|equip|1|||3||<i>Kill a brute or a skeleton. Take this instead of the gold [XP].</i>|[DAMAGE]: Prevent 1 damage.|Heading for trouble.|
+23|3|Leg Guards|equip|1|+1||||<i>Spend 1 focus action.</i> They're that tight.||Keeps my legs pretty, and leaves funny marks on their faces.|
+22|3|Raven's Claw|equip|1|+1||||<i>Enter 10 forest areas</i> to search for the long-forgotten sword.|This is your Main Weapon. Add 2 damage to each attack action.|The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.|
+18|3|Tailored Boots|equip|1|||2||<i>Pay the shoemaker 2 gold [XP] in town.</i> He'll heel your shoes and save their soles.|[DAMAGE]: Move 1 area.|Fooling your foes with fancy footwork.|
+26|3|Throwing Knives|equip|1|||2||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster.|Now between the fingers...|
+24|3|Warrior Shield|equip|1|||2||"<i>Spend 1 attack action</i>, ""negotiating"" with the traveling merchant."|[DAMAGE]: Prevent 1 damage and draw 1 card.|A backup disc to save your life.|
+21|3|Wildfire Blade|equip|1|+2||||<i>Spend 1 mend action in the Spewing Mountain</i> to forge it.|This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster.|Forged in the flames of kidnapped sprites.|
+24|4|Battle Boots|equip|1|+1||||<i>Spend 1 focus action</i> to permanently attach them to your feet.||Stepping on every toe within range.|
+15|4|Boldur's First Pick|equip|1|+1|||||This is your Main Weapon.|Picks anything, even noses.|
+20|4|Dvalin's Pick|equip|1|||||<i>End your movement adjacent to 3 mountain areas.</i> The tomb had better be there!|Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card.|Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.|
+23|4|Dwarf Helm|equip|1|||4||<i>Spend 2 gold [XP] in the Temple Ruins.</i> A bowl is a good start.|[DAMAGE]: Prevent 1 damage.|People hit what they can reach. On Boldur, that's mainly his head.|
+18|4|Dwarf Mail|equip|1|||||<i>Enter 7 areas adjacent to mountains.</i> Silly family tradition!|Prevent the first damage dealt to Boldur each monster turn.|Wearing this, Boldur is quite a hot male.|
+25|4|Dwarf Pick|equip|1|+1||||<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.||”Boldur, this is for you, so you know I would always pick you! X O X O”|
+22|4|Eitri's Pick|equip|1|+2||||<i>End your movement adjacent to 4 monsters or 1 legend</i> to pick a fight.|This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action.|Used by Eitiri, who forged Thor's hammer Mjölnir.|
+17|4|Mining Equipment|equip|1|||2||<i>Pay 1 gold</i> [XP] for the equipment. Then <i>pay 2 gold</i> [XP] for insureance and taxes.|[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas.|I'm digging this gold rush…|
+19|4|Orebiter|equip|1|||||<i>Lose 2 gold</i>[XP]. The potential gain is endless.|You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP].|It's an auto-pick.|
+26|4|Precision Axes|equip|1|||3||<i>Spend 1 practice action in a forest</i> to get access to these.|[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster.|Boldur is not happy until he can fell a tree in one throw.|
+16|4|Shield|equip|1|||2||<i>Enter the Ogre Valley or skip the gold [XP] from killing a troll.</i>|[DAMAGE]: Prevent 2 damage.|Breaking off one side of a troll breastplate should do the trick|
+21|4|Smiterbiter|equip|1|+1||||<i>End your movementin the Marsh of Sorrow</i>, covered to the beard in yuck.|This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action.|I axed your first.|
+15|5|Cane|equip|1|||2|||[DAMAGE]: Move 1 area.|His cane is comforting – it makes him quite hopful.|
+26|5|Drink of the Tides|equip|1|||||<i>End your movement next to water</i> to gather the seaweed.|Heal 1 damage from Finkel or an adjacent hero.||
+19|5|Element Ring|equip|1|||||<i>Spend a mend action adjacent to mountain, plains, and forest.</i>|Add 1 damage to each attack action.|Forged where the elements meet, this ring rules them all.|
+21|5|Lightning Rod|equip|1|||||<i>Spend a prepare action and 4 experience</i> [XP] to install it.|Each time you damage a monster, you may spend 1 mana [MANA] from any card to deal 1 additional damage.|Magic well grounded.|
+18|5|Magic Cape|equip|1|||||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|A fashion accessory to display your cape-abilities. It's got you covered.||
+22|5|Power Staff|equip|1|+2||||<i>Deal 3 damage to yourself in the Temple Ruins</i>.|This is your Main Weapon. Attack range 2.|The hidden dungeon of the old ruin is not safe. At least not with Finkel there…|
+16|5|Ring of Au|equip|1|||3||<i>Remove 7 [MANA] from your cards</i> to make the magical inscriptions.|[DAMAGE]: Heal 2 damage from yourself or any adjacent hero.<br>[DAMAGE]: Deal 2 damage to an adjacent monster.|Ow, ow, ow!|
+24|5|Rune Scroll|equip|1|||2||<i>Spend 2 practice actions</i> to study the runes.|[DAMAGE]: Draw 1 card.||
+23|5|Sacred Scroll|equip|1|||2||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
+17|5|Wand|equip|1|+1||2||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
+25|5|Wand of Excessive Power|equip|1|+2||||<i>Discard 3 cards from hand</i> to hotwire it.|This is your Main Weapon. After each attack action, add 1 mana [MANA] to any card.|It's definitely not free of charge.|
+20|5|Wizard's Hat|equip|1|||||<i>Spend 4 mana</i> [MANA] to conjure a… groundhog!? I bet you didn't expect that! |When you roll any number of [DIE_ATTACK], roll 1 additional [DIE_ATTACK].|Hatters gonna hat.|
+18|6|Blessed Staff|equip|1|+3||||<i>Spend 1 attack action in Dead Plains</i> to unearth it.|This is your Main Weapon. All [RUNE] count as hits for you.|Buried with its hopefully still-dead owner, it radiates power.|
+15|6|Circle of Life|equip|1|||3|||Damage dealt to Sindra may be placed on Circle of Life instead. Each time you use a mend action, repair 1 damage from Circle of Life.||
+23|6|Cursed Heirloom|equip|1||+1|||<i>Equip this for free</i>, if you dare.|Before your first action each turn, you must take 1 damage. Then draw a card if possible.|This ancient hand-me-down has claimed the lives of 3 of Sindra's kin.|
+20|6|Element Staff|equip|1|+2||||<i>Play 6 cards</i> to get attuned to its powers.|This is your Main Weapon. After each attack action, add 1[MANA] here. You may remove up to 3[MANA] from here to add that much damage to your attack action.|It's elemental stuff.|
+22|6|Healing Potion|equip|1|||4||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|Life in a botle.|
+26|6|Magic Cape|equip|1|||||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|You always have cover.|Natural camouflage.|
+21|6|Mana Crystal|equip|1||||1|<i>Enter a plains area in the Spewing Mountain</i> to search the lava flows.|Remove any number of mana [MANA] from here to prevent that much damage against you or another hero within range 2.|At the slopes of the Spewing Mountain, where ancient rocks hide arcane stones.|
+16|6|Sacred Scroll|equip|1|||2||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
+24|6|Sindra's Amulet|equip|1|||2||<i>Enter Nailfare. Place a card from your discard pile under this card.</i>|[DAMAGE]: Perform the effect of the card under this.|Ritual magic, trapped in a crystal.|
+19|6|Trinket|equip|1||||1|<i>Use 5 mana [MANA] in a single turn</i> to conjure it accidentally.|3[MANA]: If you have used your 2 actions this turn, perform one of the 4 remaining actions.|It is the little things in life that inspire.|
+25|6|Wand|equip|1|+1||2||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
+17|6|Wizard's Hat|equip|1|||||<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.||Hatters gonna hat.|
+#set create=2
+29|1|Back Down|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
+28|1|Burning Arrows|event|4||||||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!|
+32|1|Limber Bow|event|2||||||You have attack range +2 this turn.|Twannng!|
+26|1|Master Shot|event|4||||||Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…|
+31|1|Perfect Aim|event|2||||||Reroll all misses.|Hitting where it hurts, not always in the head.|
+33|1|Piercing Arrows|event|2||||||Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!|
+25|1|Prey|event|2||||||mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.|
+27|1|Rest|event|2||||||Heal 2 damage from Bjorn.|Sea therapy, works every time...|
+34|1|Seek Shelter|event|1||||||Move up to 2 areas into a location. You may not move more this turn.|Phew, lucky there was a cave here… Who's snoring?|
+30|1|Sewing|event|2||||||Remove 1 damage from each of your cards.|Needles to say, sewing has been a common thread in Bjorn's crafts.|
+28|2|Agility|event|2||||||Move 2 areas. Just because you can.||
+35|2|Back Down!|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
+30|2|Inspire Defense|event|2||||||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!|
+27|2|Mastery|event|3||||||Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…|
+26|2|Multi-Shot|event|3||||||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.|
+34|2|Piercing Arrows|event|2||||||Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!|
+32|2|Popular|event|2||||||Play in Grimheim to gain 2 gold [XP].|I could get used to this…|
+36|2|Prey|event|1||||||mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.|
+31|2|Rest|event|2||||||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.|
+33|2|Speedy Attack|event|2||||||Discard another card from hand to perform an attack action.||
+29|2|Take a Knee|event|2||||||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.|
+30|3|Courage|event|2||||||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.|
+36|3|Durability|event|1||||||Remove all damage from an equipment card.||
+28|3|Kick|event|3||||||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.|
+34|3|Magic Runes|event|2||||||If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.|
+27|3|Maneuver|event|2||||||Move 1 area.|Embla has a way of tackling her problems from many angles.|
+37|3|Preparations|event|1||||||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?|
+35|3|Rest|event|2||||||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.|
+31|3|Retaliation|event|3||||||Play after an adjacent monster attacked you to deal 2 damage to it.||
+29|3|Sophisticated|event|2||||||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.|
+33|3|Speedy Attack|event|2||||||Discard another card from hand to perform an attack action.||
+32|3|Vigilance|event|2||||||Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.|
+32|4|Berserk|event|3||||||Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!|
+36|4|Boldur's Gate|event|1||||||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.|
+35|4|Dodge|event|1||||||Prevent up to 2 damage.|Did you miss me?|
+34|4|Durability|event|1||||||Remove all damage from an equipment card.|Can't even handle the mead?|
+33|4|Focus|event|2||||||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.|
+31|4|Kick|event|3||||||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.|
+29|4|Maneuver|event|2||||||Move 1 area.||
+27|4|Miner|event|2||||||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.|
+38|4|Portable Smithy|event|1||||||Spend 1 prepare action to complete your quest.|Travel-sized anvil. Check!|
+30|4|Rest|event|2||||||Heal 2 damage from Boldur.|I need a hospital… no, I need a tavern…|
+37|4|Seek Shelter|event|1||||||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.|
+28|4|Short Temper|event|3||||||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.|
+35|5|Blinding Flash|event|2||||||Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!|
+30|5|Blown Away|event|2||||||Move anyone within range 2 up to 2 areas.|His presence can do that to you.|
+36|5|Burning Aura|event|1||||||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.|
+28|5|Chain Lightning|event|3||||||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.|
+34|5|Durability|event|2||||||Remove all damage from an equipment card.||
+33|5|Heat Death|event|2||||||Play when you rolled any [RUNE] against a non-Legend monster to kill it.||
+31|5|Heat Stroke|event|2||||||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.|
+27|5|Lightning Bolt|event|3||||||Deal 1 damage to a monster within range 3.|You're in for a shock!|
+32|5|Power Surge|event|2||||||Add 2 mana [MANA] to 1 of your cards.||
+37|5|Quick Reflexes|event|1||||||After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?|
+29|5|Rain of Fire|event|2||||||Deal 1 damage to each adjacent monster.||
+35|6|Alchemy|event|1||||||Remove up to 5 mana [MANA] to gain that much gold [XP].|It is a golden opportunity.|
+32|6|Bowling|event|3||||||Choose an adjacent area and the area directly behind it. Any monsters there are dealt 1 damage and may be moved 1 area.|Spare no one.|
+34|6|Focus|event|1||||||Spend 1 focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|What was that recipe again?|
+29|6|Hard Rock|event|3||||||Roll 3[DIE_ATTACK] against a monster within range 2.|She will, she will, rock you!|
+33|6|Heavy Metal|event|2||||||Pay 1 or 2 gold [XP] and choose a monster within range 2. Deal 2 damage to it for each [XP] paid.|You want a ton of gold? You won't like it.|
+27|6|Lava Spike|event|3||||||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.|
+30|6|Petrify|event|3||||||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.|
+31|6|Power Surge|event|3||||||Add 2 mana [MANA] to 1 of your cards.||
+28|6|Stoneskin|event|3||||||Prevent up to 2 damage.|Sticks and stones can't break my bones…|
+#set create=1
+1|1|Bjorn|hero|1|2|9||||After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain – he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.|
+2|1|Bjorn|hero|1|4|10||||After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.|
+1|2|Alva|hero|1|2|9||||End your move action in a forest to add 1 mana [MANA] to any card.|Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that – butterflies are pretty!|
+2|2|Alva|hero|1|4|10||||End any movement in a forset to add 1 mana [MANA] to any card.|”I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.”|
+1|3|Embla|hero|1|3|9||||Move 4.|Embla is fast, really tough, and passionately competetive. She is inarguably the best defender of Grimheim... because you just don't argue with her.|[MANA], [XP], [DAMAGE], [DIE_ATTACK], [RUNE], <br> (line break)
+2|3|Embla|hero|1|5|10||||Move 4.|All creatures are precious to Embla. Their exact worth is determined by the bounty.|
+1|4|Boldur|hero|1|3|6||||Armor. (Always prevents 1 damage)|Ants can carry several times their own body weight. So can Boldur. He's forging his thick armor to prove this point, and promote heavy metal.|
+2|4|Boldur|hero|1|5|7||||Armor. (Always prevents 1 damage)|Going berserk at the local inn, Boldur spent a drunken evening challenging all visitors to arm-wrestling. He broke the tavern record as well as fifteen arms, earning him the nickname the Arm-y.|
+1|5|Finkel|hero|1|3|9||||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Newly graduated from the pyromaniac program of the Wizarding School for Elven Orphans Who Can't Read Good, Finkel sets out to cause the heat of battle. A warm welcome to everyone!|
+2|5|Finkel|hero|1|5|10||||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Today's forecast shows fire and brimstone over large parts of the countryside.|
+1|6|Sindra|hero|1|2|6||||3[MANA]: Spend a move action to move to ANY area (even mountains).|The friendly neighborhood grandma, suddenly appearing with surprises for all: milk and cookies for the kids, and hails of levitating rocks for her enemies.|
+2|6|Sindra|hero|1|3|8||||3[MANA]: Spend ANY action to move to ANY area (even mountains).|Sindra now uses her short fuse to ignite powerful explosions.|

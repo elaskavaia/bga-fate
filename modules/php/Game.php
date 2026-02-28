@@ -106,14 +106,18 @@ class Game extends Base {
             $this->tokens->db->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
             // Assign hero to player (Iteration 0: sequential assignment, later will be player choice)
-            $tokens->moveToken("card_hero_$heroNo", "tableau_{$color}");
+            // Starting cards: hero=1, ability=3, equip=15
+            $tokens->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
+            $tokens->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
+            $tokens->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
             // Hero already at starting hex from material, no move needed
             $heroNo++;
         }
         // Move unused heroes to limbo
         for ($i = $heroNo; $i <= 4; $i++) {
             $tokens->moveToken("hero_$i", "limbo");
-            $tokens->moveToken("card_hero_$i", "limbo");
+            $tokens->moveToken("card_hero_{$i}_1", "limbo");
+            $tokens->moveToken("card_hero_{$i}_2", "limbo");
         }
         $color = $this->custom_getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
@@ -298,14 +302,14 @@ class Game extends Base {
 
     /**
      * Returns the hero miniature token id for the current operation owner.
-     * Looks up which card_hero_N is on the player's tableau, then returns hero_N.
+     * Looks up which card_hero_N_M is on the player's tableau, then returns hero_N.
      */
     function getHeroTokenId(string $owner): string {
         $heroCardKey = $this->game->tokens->db->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
         $this->systemAssert("No hero card found", $heroCardKey);
 
-        // card_hero_1 → hero_1
-        $heroNo = substr($heroCardKey, strlen("card_hero_"));
+        // card_hero_1_1 → hero_1
+        $heroNo = getPart($heroCardKey, 2); // card_hero_<heroNo>_<num>
         return "hero_$heroNo";
     }
 

@@ -41,12 +41,9 @@ hero_1|Bjorn|1|hero|1|hex_8_9
 hero_2|Alva|1|hero|1|hex_8_10
 hero_3|Embla|1|hero|1|hex_10_8
 hero_4|Boldur|1|hero|1|hex_10_9
-
-# hero cards (one per hero, placed on player tableau during setup)
-card_hero_1|Bjorn|1|card|1|limbo
-card_hero_2|Alva|1|card|1|limbo
-card_hero_3|Embla|1|card|1|limbo
-card_hero_4|Boldur|1|card|1|limbo
+#expantions?
+hero_5|Finkel|1|hero|1|limbo
+hero_6|Sindra|1|hero|1|limbo
 
 # attack dice (20 total)
 die_attack|Attack Die|20|die|2|supply_dice

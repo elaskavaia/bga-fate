@@ -7,10 +7,10 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `house_<n>` — Town piece (e.g. `house_0` = well)
 - `monster_<type>_<n>` — Monster tile (e.g. `monster_goblin_5`, `monster_troll_2`)
 - `card_monster_<n>` — Monster card (e.g. `card_monster_12`); type includes `ctype_yellow` or `ctype_red`
-- `card_hero_<hero>` — Hero card (e.g. `card_hero_1`)
-- `card_ability_<hero>_<n>` — Ability card (e.g. `card_ability_1_3`)
+- `card_hero_<hero>_<n>` — Hero card (e.g. `card_hero_1_1` = Level I starting, `card_hero_1_2` = Level II upgraded). Odd `<n>` = front (Level I), even `<n>` = back (Level II). Two-sided card.
+- `card_ability_<hero>_<n>` — Ability card (e.g. `card_ability_1_3`). Odd `<n>` = Level I, even `<n>` = Level II (flipped side). These are two-sided cards.
 - `card_equip_<hero>_<n>` — Equipment card (e.g. `card_equip_1_7`)
-- `card_event_<hero>_<n>` — Event card (e.g. `card_event_1_15`)
+- `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) - last <i> some even cards are duplicated, so it tell them apart
 - `marker_<color>_<n>` — Player marker (e.g. `marker_ff0000_1`)
 - `crystal_green_<n>` — Mana crystal (individual tokens on cards)
 - `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
@@ -19,6 +19,9 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `die_attack_<n>` — Attack die (1..20)
 - `die_damage_<n>` — Damage die (1..8)
 - `die_monster_<n>` — Monster die
+
+Shortening of words:
+- Equipment -> equip
 
 **Location naming:**
 
