@@ -99,9 +99,12 @@ class Game extends Base {
             $tokensDb->moveToken("house_$i", "limbo");
         }
 
-        // Player setup — heroes start at their CSV-defined hex positions
-        $heroNo = 1;
+        // Player setup — heroes randomly assigned
+        $heroNos = range(1, 4);
+        shuffle($heroNos);
+        $heroIdx = 0;
         foreach ($players as $player_id => $player) {
+            $heroNo = $heroNos[$heroIdx++];
             $color = $player["player_color"];
             $tokensDb->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
@@ -132,11 +135,13 @@ class Game extends Base {
             $tokensDb->shuffle("deck_equip_{$color}");
             $tokensDb->shuffle("deck_event_{$color}");
             // Hero already at starting hex from material, no move needed
-            $heroNo++;
         }
         // Move unused heroes to limbo
-        for ($i = $heroNo; $i <= 4; $i++) {
-            $tokensDb->moveToken("hero_$i", "limbo");
+        $usedHeros = array_slice($heroNos, 0, $heroIdx);
+        for ($i = 1; $i <= 4; $i++) {
+            if (!in_array($i, $usedHeros)) {
+                $tokensDb->moveToken("hero_$i", "limbo");
+            }
         }
         $color = $this->custom_getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
@@ -188,8 +193,7 @@ class Game extends Base {
 
         // Add heroNo to each player
         foreach ($result["players"] as $player_id => &$pdata) {
-            $heroTokenId = $this->getHeroTokenId($pdata["color"]); // "hero_N"
-            $pdata["heroNo"] = (int) getPart($heroTokenId, 1);
+            $pdata["heroNo"] = $this->getHeroNumber($pdata["color"]);
         }
         unset($pdata);
 
@@ -327,16 +331,20 @@ class Game extends Base {
     }
 
     /**
-     * Returns the hero miniature token id for the current operation owner.
-     * Looks up which card_hero_N_M is on the player's tableau, then returns hero_N.
+     * Returns the hero number (1-4) for a player color.
+     * Looks up which card_hero_N_M is on the player's tableau.
      */
-    function getHeroTokenId(string $owner): string {
+    function getHeroNumber(string $owner): int {
         $heroCardKey = $this->game->tokens->db->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
         $this->systemAssert("No hero card found", $heroCardKey);
+        return (int) getPart($heroCardKey, 2); // card_hero_<heroNo>_<num>
+    }
 
-        // card_hero_1_1 → hero_1
-        $heroNo = getPart($heroCardKey, 2); // card_hero_<heroNo>_<num>
-        return "hero_$heroNo";
+    /**
+     * Returns the hero miniature token id for a player color, e.g. "hero_1".
+     */
+    function getHeroTokenId(string $owner): string {
+        return "hero_" . $this->getHeroNumber($owner);
     }
 
     function getRulesFor($token_id, $field = "r", $default = "") {

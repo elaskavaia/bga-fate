@@ -201,7 +201,7 @@ class Op_turnMonster extends Operation {
             $this->game->tokens->dbSetTokenLocation($targetHouseRec["key"], "limbo", 0, "");
         }
         // Remove monster from the map
-        $this->game->hexMap->moveCharacter($monsterId, "supply_monsters", clienttranslate('${token_name} goes home happy'));
+        $this->game->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name} goes home happy'));
     }
 
     private function queueReinforcements(string $spotType): void {

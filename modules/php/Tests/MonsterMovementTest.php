@@ -192,7 +192,7 @@ final class MonsterMovementTest extends TestCase {
 
         // brute_1 should have entered Grimheim (removed)
         $loc1 = $this->game->tokens->db->getTokenLocation("monster_brute_1");
-        $this->assertEquals("supply_monsters", $loc1, "Closest monster should enter Grimheim");
+        $this->assertEquals("supply_monster", $loc1, "Closest monster should enter Grimheim");
 
         // brute_2 should have moved to hex_11_8 (now vacated)
         $loc2 = $this->game->tokens->db->getTokenLocation("monster_brute_2");
@@ -212,7 +212,7 @@ final class MonsterMovementTest extends TestCase {
 
         // Monster should be removed
         $loc = $this->game->tokens->db->getTokenLocation("monster_goblin_1");
-        $this->assertEquals("supply_monsters", $loc);
+        $this->assertEquals("supply_monster", $loc);
 
         // One fewer house
         $housesAfter = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
@@ -266,7 +266,7 @@ final class MonsterMovementTest extends TestCase {
 
         // Legend should be removed
         $loc = $this->game->tokens->db->getTokenLocation("monster_legend_grendel");
-        $this->assertEquals("supply_monsters", $loc);
+        $this->assertEquals("supply_monster", $loc);
 
         // Three fewer houses
         $housesAfter = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
@@ -321,7 +321,7 @@ final class MonsterMovementTest extends TestCase {
 
         // goblin_2 (closer) should have entered Grimheim
         $loc2 = $this->game->tokens->db->getTokenLocation("monster_goblin_2");
-        $this->assertEquals("supply_monsters", $loc2, "Closer monster should enter Grimheim first");
+        $this->assertEquals("supply_monster", $loc2, "Closer monster should enter Grimheim first");
 
         // goblin_1 (farther) should have moved closer
         $newLoc1 = $this->game->tokens->db->getTokenLocation("monster_goblin_1");

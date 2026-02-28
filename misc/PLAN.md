@@ -25,7 +25,7 @@ See CLAUDE.md for project overview
 [x] Copy boilerplate code from another game: tokens db, machine db, common utils, etc
 [x] Phase 1: Core game framework and board setup
 [x] Phase 2: Basic player turn with one hero (reduced rules)
-[~] Phase 3: Monster system with one monster type (spawning done, movement TODO)
+[x] Phase 3: Monster system with one monster type (spawning + movement done)
 [ ] Phase 4: Combat and damage system
 [ ] Phase 5: Equipment, quests, and upgrades
 [ ] Phase 6: Full monster turn (movement, attack, reinforcements)
@@ -94,7 +94,7 @@ See CLAUDE.md for project overview
 ### Server
 [x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
 [x] Monster card data: define a few yellow monster cards with goblin placement
-[ ] Fix spawn locations in monster cards — current data is not correct
+[ ] Fix spawn locations in monster cards — current data is not correct - SKIP FOR NOW
 [x] `Op_reinforcement`: draw monster card, place goblins at specified locations
 [x] Trigger reinforcement on time track spots marked with crossed axes
 [x] Heroes can't move into hexes occupied by monsters — done in Iteration 1
@@ -102,7 +102,7 @@ See CLAUDE.md for project overview
 ### Client
 [x] Render monster tiles on map hexes — placeholder circles with faction color and name label
 [ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css - SKIP FOR NOW
-[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
+[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)  - SKIP FOR NOW
 
 ### Tests
 [X] PHP tests for monster placement from cards
@@ -114,22 +114,21 @@ See CLAUDE.md for project overview
 **Goal**: Monsters move toward Grimheim on monster turn, following paths/arrows/roads. Monster entering Grimheim destroys a town piece.
 
 ### Server
-[ ] Monster path calculation: arrows → roads → Grimheim
-  - `getMonsterPath($hexId)` — returns next area on path toward Grimheim
-[ ] Monster movement order: closest to Grimheim first
-[ ] Movement rules: don't move if adjacent to hero, can't enter occupied hex
-[ ] Monster entering Grimheim: remove monster + remove 1 town piece
-[ ] Loss condition: all town pieces destroyed (Freyja's Well is last)
+[x] Monster path calculation: arrows → roads → Grimheim — `getMonsterNextHex()` + `getDistanceMapToGrimheim()` in HexMap.php
+[x] Monster movement order: closest to Grimheim first — `getMonstersOnMap()` sorts by distance
+[x] Movement rules: don't move if adjacent to hero, can't enter occupied hex — `moveMonsterOneStep()` in Op_turnMonster.php
+[x] Monster entering Grimheim: remove monster + remove 1 town piece — `monsterEntersGrimheim()`, legends destroy 3
+[x] Loss condition: all town pieces destroyed (Freyja's Well is last) — `isHeroesWin()` in Game.php
 
 ### Client
 [x] Animate monster movement (snap-to-position is fine)
-[ ] Show town piece removal
-[ ] Show win/loss end screen
+[x] Show town piece removal
+[ ] Show win/loss end screen — BGA default end screen works, custom UI deferred
 
 ### Tests
-[ ] PHP tests for monster pathfinding
-[ ] PHP tests for movement order
-[ ] Integration test: monsters reach Grimheim → town piece removed
+[x] PHP tests for monster pathfinding — 8 tests in MonsterMovementTest.php
+[x] PHP tests for movement order — sorting + closest-first integration tests
+[x] Integration test: monsters reach Grimheim → town piece removed — house destruction, Freyja's Well, legend, charge tests
 
 ---
 
