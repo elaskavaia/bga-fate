@@ -13,7 +13,8 @@
     "predeploy": "npm run build && npm run lint:php && npm run tests",
     "genmat": "php8.4 misc/other/genmat.php misc/*.csv",
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
-    "tests": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./modules/php/Tests/_autoload.php  --colors=always modules/php/Tests"
+    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./modules/php/Tests/_autoload.php  --colors=always",
+    "tests": "npm run test -- modules/php/Tests"
   },
   "author": "Alena Laskavaia",
   "license": "EPL2.0",

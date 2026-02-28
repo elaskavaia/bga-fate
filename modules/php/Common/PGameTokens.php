@@ -300,6 +300,27 @@ class PGameTokens {
         }
     }
 
+    /**
+     * Move a token to a new location, update DB, and send a "tokenMoved" notification.
+     *
+     * The following keys are auto-added to $args (and available in $notif as substitution variables):
+     *  - token_id   — the token key being moved
+     *  - place_id   — the destination location
+     *  - token_name — will be change to actual token name on the client
+     *  - place_name — same as place_id (used for log rendering, will be change to name)
+     *  - new_state  — the state value after the move
+     *  - place_from — the token's previous location
+     *  - token_div  — same as token_id (only added when $notif contains '${token_div}')
+     *
+     * Caller-supplied $args take precedence over auto-added keys (merged after).
+     *
+     * @param string      $token_id  Token key to move
+     * @param string|null $place_id  Destination location (null = keep current location)
+     * @param int|null    $state     New state value (null = keep current state)
+     * @param string      $notif     Notification message with ${…} placeholders ("*" = default message)
+     * @param array       $args      Extra notification args (merged over auto-added keys)
+     * @param int         $player_id Player to attribute the notification to (0 = auto-detect)
+     */
     function dbSetTokenLocation($token_id, $place_id, $state = null, $notif = "*", $args = [], int $player_id = 0) {
         if (is_array($token_id)) {
             $this->game->error("token_id is array " . toJson($token_id));

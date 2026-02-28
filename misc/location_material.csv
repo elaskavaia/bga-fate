@@ -1,0 +1,23 @@
+id|name|location|scope|counter|content|php
+#set type=location
+
+#set create=0
+# Monster card decks
+deck_monster_yellow|Yellow Monster Deck|display_monsterturn|global|public|hidden|
+deck_monster_red|Red Monster Deck|display_monsterturn|global|public|hidden|
+
+# Monster turn display
+display_monsterturn|Monster Cards|thething|global|hidden|public|
+
+# Supply areas
+supply_monster|Monster Supply|supply|global|hidden|public|
+supply_crystal_green|Green Crystal Supply|supply|global|hidden|public|
+supply_crystal_red|Red Crystal Supply|supply|global|hidden|public|
+supply_crystal_yellow|Yellow Crystal Supply|supply|global|hidden|public|
+supply_dice|Dice Supply|supply|global|hidden|public|
+
+#set showtooltip=0
+limbo|Limbo||global|hidden|hidden|
+tableau|Player Area|players_panels|player|hidden|public|
+hand|Player Hand|players_panels|player|hidden|private|
+supply|Supply|thething|global|hidden|public|

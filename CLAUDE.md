@@ -4,25 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of Grimheim" (also will be refers in Fate). It uses a custom template with minimal Dojo dependencies, featuring TypeScript for client-side code and PHP for server-side game logic.
+This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of Grimheim" (also will be refers in Fate). It uses TypeScript, Scss for client-side code and PHP for server-side game logic.
 
 ## Development Commands
 
-### Build and Watch
+### Build 
 
 - `npm run build` - Full build (TypeScript, SCSS, and material generation)
 - `npm run build:ts` - Compile TypeScript to .js
 - `npm run build:scss` - Compile SCSS to fate.css
-- `npm run watch:ts` - Watch and compile TypeScript
-- `npm run watch:scss` - Watch and compile SCSS
 - `npm run genmat` - Generate Material.php from CSV files in misc/
+- `npm run lint:php`- Check for php syntax errors
+- `npm run predeploy` - Generate and test everything
 
 
 ### Testing
 
 - `npm run tests` - Run all PHPUnit tests
-- To run a single test file: `APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap ./modules/php/Tests/_autoload.php modules/php/Tests/<TestFile>.php`
-- Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository
+- `npm run test -- modules/php/Tests/<TestFile>.php` - Run a single test file
+- `npm run test -- --filter testMethodName modules/php/Tests/<TestFile>.php` - Run a single test method
+- Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
 
 ### Code Formatting
 
@@ -61,6 +62,12 @@ Game elements are defined in CSV files and auto-generated into PHP code:
 - **PGameTokens** ([modules/php/Common/PGameTokens.php](modules/php/Common/PGameTokens.php)) - Game-specific token logic wrapper
 - Tokens represent all physical game pieces (cards, dice, workers, resources, etc.)
 
+### Hex Map
+
+- **HexMap** ([modules/php/Common/HexMap.php](modules/php/Common/HexMap.php)) - All hex grid logic: adjacency, distance, terrain queries, pathfinding, and monster movement helpers
+- Accessed via `$this->game->hexMap->` from operations and `$game->hexMap->` from tests
+- Key functions: `getAdjacentHexes`, `getReachableHexes`, `getDistanceMapToGrimheim`, `getMonsterNextHex`, `getMonstersOnMap`, `isHeroAdjacentTo`, `getHexesInLocation`, `isOccupied`, `isInGrimheim`
+
 
 ### Game States
 
@@ -95,7 +102,7 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 #. Run the full build process: `npm run build`
 #. Check for any build errors in TypeScript, SCSS, or material generation
-#. Run tests: `npm run tests`
+#. Run tests: `npm run predeploy`
 #. Check and fix failed tests
 #. Show git status to see which files have changed
 #. Check for spelling mistakes and issues in changed code
@@ -133,6 +140,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
    - Add or update the element type/supertype in the appropriate CSV file in misc/ (e.g. `token_material.csv`, `card_material.csv`)
    - You can define types and supertypes and not individual instances in material (in this case instances are created during setup, for example if we need 50 crystals - they all the same, we only need to define crystal as supertype)
    - Include translatable fields (name, tooltip) where needed
+   - If a game element is location it usually goes to `location_material.csv`
    - Run `npm run genmat` to regenerate Material.php
 
 **3. Setup (Game.php)**

@@ -26,7 +26,7 @@ class Op_actionMove extends Operation {
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->db->getTokenLocation($heroId);
 
-        $reachable = $this->game->getReachableHexes($currentHex, 3);
+        $reachable = $this->game->hexMap->getReachableHexes($currentHex, 3);
         $moves = [];
         foreach (array_keys($reachable) as $hexId) {
             $moves[$hexId] = ["q" => Material::RET_OK];
@@ -42,14 +42,12 @@ class Op_actionMove extends Operation {
         $heroId = $this->game->getHeroTokenId($this->getOwner());
 
         // When entering Grimheim, place hero at their home hex (from material)
-        if ($this->game->isInGrimheim($target)) {
+        if ($this->game->hexMap->isInGrimheim($target)) {
             $target = $this->game->getRulesFor($heroId, "location", $target);
         }
 
         // TODO: do set location to individual hexes along the path to animate
-        $this->dbSetTokenLocation($heroId, $target, null, clienttranslate('${player_name} moves hero to ${token_name}'), [
-            "token_name" => $this->game->getTokenName($target, $target),
-        ]);
+        $this->dbSetTokenLocation($heroId, $target, null, clienttranslate('${player_name} moves hero to ${place_name}'));
     }
 
     public function getPrompt() {

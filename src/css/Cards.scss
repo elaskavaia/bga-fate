@@ -62,11 +62,9 @@
 // Display area for monster cards during reinforcement
 #display_monsterturn {
   position: relative;
-  width: 100%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
-  min-height: 10px;
 }

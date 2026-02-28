@@ -49,10 +49,10 @@ final class Op_reinforcementTest extends TestCase {
         $op->resolve();
 
         // DarkForest hexes should now have monsters
-        $darkForestHexes = $this->game->getHexesInLocation("DarkForest");
+        $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
         $monstersPlaced = 0;
         foreach ($darkForestHexes as $hex) {
-            if ($this->game->isOccupied($hex)) {
+            if ($this->game->hexMap->isOccupied($hex)) {
                 $monstersPlaced++;
             }
         }
@@ -70,7 +70,7 @@ final class Op_reinforcementTest extends TestCase {
         $op->resolve();
 
         // Check OgreValley hexes for correct monster types
-        $ogreValleyHexes = $this->game->getHexesInLocation("OgreValley");
+        $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
         $trollCount = 0;
         $bruteCount = 0;
         foreach ($ogreValleyHexes as $hex) {
@@ -96,7 +96,7 @@ final class Op_reinforcementTest extends TestCase {
         $this->game->tokens->db->setTokenState("card_monster_31", 998); // second
 
         // Occupy the first hex in DarkForest — card 36 can't place at index 0
-        $darkForestHexes = $this->game->getHexesInLocation("DarkForest");
+        $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
         $this->game->tokens->db->moveToken("hero_1", $darkForestHexes[0]);
 
         $this->game->setPlayersNumber(1);
@@ -107,7 +107,7 @@ final class Op_reinforcementTest extends TestCase {
         $card36State = $this->game->tokens->db->getTokenState("card_monster_36");
         $this->assertEquals(1, $card36State); // skipped
 
-        $ogreValleyHexes = $this->game->getHexesInLocation("OgreValley");
+        $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
         $monsterCount = 0;
         foreach ($ogreValleyHexes as $hex) {
             $tokens = $this->game->tokens->getTokensOfTypeInLocation("monster", $hex);
@@ -127,7 +127,7 @@ final class Op_reinforcementTest extends TestCase {
         $this->game->tokens->db->setTokenState("card_monster_31", 998); // second
 
         // Occupy first hex of DeadPlains
-        $deadPlainsHexes = $this->game->getHexesInLocation("DeadPlains");
+        $deadPlainsHexes = $this->game->hexMap->getHexesInLocation("DeadPlains");
         $this->game->tokens->db->moveToken("hero_1", $deadPlainsHexes[0]);
 
         $this->game->setPlayersNumber(1);
@@ -138,7 +138,7 @@ final class Op_reinforcementTest extends TestCase {
         $card22State = $this->game->tokens->db->getTokenState("card_monster_22");
         $this->assertEquals(1, $card22State); // skipped
 
-        $ogreValleyHexes = $this->game->getHexesInLocation("OgreValley");
+        $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
         $monsterCount = 0;
         foreach ($ogreValleyHexes as $hex) {
             $tokens = $this->game->tokens->getTokensOfTypeInLocation("monster", $hex);
@@ -218,15 +218,15 @@ final class Op_reinforcementTest extends TestCase {
         $this->assertNotEquals("reinforcement", $top->getType());
     }
 
-    public function testNoReinforcementOnSkullStep(): void {
-        // Step 9 = tm_red_skull → no reinforcement (charge only, not implemented yet)
+    public function testReinforcementOnSkullStep(): void {
+        // Step 9 = tm_red_skull → red reinforcement + charge
         $this->game->tokens->db->setTokenState("rune_stone", 8); // will advance to 9
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
         $this->assertNotNull($top);
-        $this->assertNotEquals("reinforcement", $top->getType());
+        $this->assertEquals("reinforcement", $top->getType());
     }
 
     // -------------------------------------------------------------------------
@@ -234,22 +234,22 @@ final class Op_reinforcementTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testGetHexesInLocationDarkForest(): void {
-        $hexes = $this->game->getHexesInLocation("DarkForest");
+        $hexes = $this->game->hexMap->getHexesInLocation("DarkForest");
         $this->assertNotEmpty($hexes);
         // All returned hexes should have loc=DarkForest
         foreach ($hexes as $hex) {
-            $this->assertEquals("DarkForest", $this->game->getHexNamedLocation($hex));
+            $this->assertEquals("DarkForest", $this->game->hexMap->getHexNamedLocation($hex));
         }
         // Should be sorted top-to-bottom, left-to-right
         for ($i = 1; $i < count($hexes); $i++) {
-            [$ax, $ay] = $this->game->getHexCoords($hexes[$i - 1]);
-            [$bx, $by] = $this->game->getHexCoords($hexes[$i]);
+            [$ax, $ay] = $this->game->hexMap->getHexCoords($hexes[$i - 1]);
+            [$bx, $by] = $this->game->hexMap->getHexCoords($hexes[$i]);
             $this->assertTrue($ay < $by || ($ay === $by && $ax <= $bx), "Hexes not sorted: {$hexes[$i - 1]} vs {$hexes[$i]}");
         }
     }
 
     public function testGetHexesInLocationEmpty(): void {
-        $hexes = $this->game->getHexesInLocation("NonExistentLocation");
+        $hexes = $this->game->hexMap->getHexesInLocation("NonExistentLocation");
         $this->assertEmpty($hexes);
     }
 }

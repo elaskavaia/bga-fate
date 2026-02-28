@@ -43,7 +43,7 @@ num|name|spawnloc|spawn|ftext
 30|Brutus the Babysitter|OgreValley|B,G,G,G,G,G,G,G|Stay with the group!
 31|Strolling|OgreValley|T,T,B|Out for a walk, very aimlessly.
 32|Younglings|DarkForest|B,G,G,G,G,G,G,G|There are so many of them; what are we going to do?
-33|Brutal Band|DarkForest|B,B,B,B,B|Specializing in war drums.
+33|Brutal Band|DarkForest|,,B,B,B,B,,,,,,B|Specializing in war drums.
 34|Family Trip|DarkForest|T,B,G,G,G,G|The kids are so eager, let them run ahead...
 35|Forest Patrol|DarkForest|B,B,B,B,G,G|Attacking at their first convenience.
 36|Viral Trolls|DarkForest|T,T,T|The sheer amount of bacteria in their boogers and toxic breath makes them viral.

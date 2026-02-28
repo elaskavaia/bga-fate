@@ -13,23 +13,23 @@ See CLAUDE.md for project overview
 
 [x] Read the rulebook of Fate: Defenders of Grimheim and create RULES.md.
 [x] Assets of the game including rulebook PDF located at ~/Develop/bga/bga-assets/
-[ ] Main Board (jpg) at least 2048px width
+[x] Main Board (jpg) — img/EN_Game_Board.jpg
 [ ] Player boards (jpg) one per hero
-[ ] Cards (jpg) at least 125px width - sprite - one per hero plus monster cards one sprite for all
-[ ] Miniatures (png) - sprite
-[ ] Other 3d pieces and iconography (png) - sprite
+[~] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards TODO
+[~] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites TODO
+[ ] Other 3d pieces and iconography (png) - sprite (crystals, dice, etc.)
 
 ## High level plan
 
 [x] Transform templated project into typescript enabled
 [x] Copy boilerplate code from another game: tokens db, machine db, common utils, etc
-[ ] Phase 1: Core game framework and board setup
-[ ] Phase 2: Basic player turn with one hero (reduced rules)
-[ ] Phase 3: Monster system with one monster type
+[x] Phase 1: Core game framework and board setup
+[x] Phase 2: Basic player turn with one hero (reduced rules)
+[~] Phase 3: Monster system with one monster type (spawning done, movement TODO)
 [ ] Phase 4: Combat and damage system
 [ ] Phase 5: Equipment, quests, and upgrades
 [ ] Phase 6: Full monster turn (movement, attack, reinforcements)
-[ ] Phase 7: Add remaining monster types and legends
+[x] Phase 7: Add remaining monster types and legends (all 3 factions done in Iter 2)
 [ ] Phase 8: Add remaining heroes
 [ ] Phase 9: Polish, animations, and BGA compliance
 [ ] Phase 10: Testing and alpha release
@@ -102,6 +102,7 @@ See CLAUDE.md for project overview
 ### Client
 [x] Render monster tiles on map hexes — placeholder circles with faction color and name label
 [ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css - SKIP FOR NOW
+[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
 
 ### Tests
 [X] PHP tests for monster placement from cards
@@ -209,16 +210,16 @@ See CLAUDE.md for project overview
 **Goal**: Full Trollkin faction. Brutes (rank 2) and Trolls (rank 3) with higher stats.
 
 ### Server
-[ ] Add brute and troll token types and material data
-[ ] Add monster cards that spawn brutes and trolls
-[ ] Red monster card deck (has stronger monsters)
-[ ] Reinforcement: yellow cards on yellow spots, red cards on red spots
+[x] Add brute and troll token types and material data — all 3 factions (trollkin, firehorde, dead) with 3 ranks each defined in monster_material.csv
+[x] Add monster cards that spawn brutes and trolls — all 54 cards defined in monstercard_material.csv
+[x] Red monster card deck (has stronger monsters) — 18 red cards defined, Op_reinforcement supports deck parameter
+[x] Reinforcement: yellow cards on yellow spots, red cards on red spots — Op_reinforcement handles both decks
 
 ### Client
-[ ] Different visual for brutes and trolls vs goblins
+[x] Different visual for brutes and trolls vs goblins — all 9 monster types have distinct CSS in Minis.scss with rank-based sizing
 
 ### Tests
-[ ] Test mixed monster spawning and movement
+[x] Test mixed monster spawning and movement — Op_reinforcementTest covers brutes/trolls
 
 ---
 

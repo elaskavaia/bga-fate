@@ -151,49 +151,49 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // Center hex (9,9) should have 6 neighbors
-        $adj = $game->getAdjacentHexes("hex_9_9");
+        $adj = $game->hexMap->getAdjacentHexes("hex_9_9");
         $this->assertCount(6, $adj);
         sort($adj);
         $this->assertEquals(["hex_10_8", "hex_10_9", "hex_8_10", "hex_8_9", "hex_9_10", "hex_9_8"], $adj);
 
         // Edge hex should have fewer neighbors
-        $adj = $game->getAdjacentHexes("hex_1_9");
+        $adj = $game->hexMap->getAdjacentHexes("hex_1_9");
         $this->assertLessThan(6, count($adj));
         $this->assertContains("hex_2_9", $adj);
         $this->assertNotContains("hex_0_9", $adj); // off the board
 
         // Non-existent hex returns empty
-        $this->assertEmpty($game->getAdjacentHexes("hex_99_99"));
+        $this->assertEmpty($game->hexMap->getAdjacentHexes("hex_99_99"));
     }
 
     public function testGetMoveDistance() {
         $game = $this->game;
 
         // Same hex
-        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_9_9"));
+        $this->assertEquals(0, $game->hexMap->getMoveDistance("hex_9_9", "hex_9_9"));
         // Grimheim
-        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_10_9"));
-        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_9_8"));
+        $this->assertEquals(0, $game->hexMap->getMoveDistance("hex_9_9", "hex_10_9"));
+        $this->assertEquals(0, $game->hexMap->getMoveDistance("hex_9_9", "hex_9_8"));
         // Two steps
-        $this->assertEquals(2, $game->getMoveDistance("hex_11_6", "hex_11_8"));
+        $this->assertEquals(2, $game->hexMap->getMoveDistance("hex_11_6", "hex_11_8"));
         // Invalid
-        $this->assertEquals(-1, $game->getMoveDistance("hex_9_9", "hex_99_99"));
-        $this->assertEquals(-1, $game->getMoveDistance("hex_99_99", "hex_9_9"));
+        $this->assertEquals(-1, $game->hexMap->getMoveDistance("hex_9_9", "hex_99_99"));
+        $this->assertEquals(-1, $game->hexMap->getMoveDistance("hex_99_99", "hex_9_9"));
 
         // Grimheim hexes: distance 0 between any two Grimheim hexes
-        $this->assertEquals(0, $game->getMoveDistance("hex_9_9", "hex_8_10")); // both Grimheim
-        $this->assertEquals(0, $game->getMoveDistance("hex_8_9", "hex_10_8")); // both Grimheim, far apart
+        $this->assertEquals(0, $game->hexMap->getMoveDistance("hex_9_9", "hex_8_10")); // both Grimheim
+        $this->assertEquals(0, $game->hexMap->getMoveDistance("hex_8_9", "hex_10_8")); // both Grimheim, far apart
 
         // Distance from Grimheim to adjacent non-Grimheim hex
-        $this->assertEquals(1, $game->getMoveDistance("hex_9_9", "hex_11_8")); // hex_11_8 is adjacent to hex_10_8 (Grimheim)
-        $this->assertEquals(1, $game->getMoveDistance("hex_11_8", "hex_8_9")); // symmetric
+        $this->assertEquals(1, $game->hexMap->getMoveDistance("hex_9_9", "hex_11_8")); // hex_11_8 is adjacent to hex_10_8 (Grimheim)
+        $this->assertEquals(1, $game->hexMap->getMoveDistance("hex_11_8", "hex_8_9")); // symmetric
     }
 
     public function testGetReachableHexes() {
         $game = $this->game;
 
         // From a Grimheim hex, all Grimheim hexes are at distance 0
-        $reachable = $game->getReachableHexes("hex_9_9", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3);
         $this->assertArrayHasKey("hex_9_8", $reachable); // Grimheim
         $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
         $this->assertEquals(0, $reachable["hex_9_8"]);
@@ -216,11 +216,11 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // hex_13_4 is mountain — not reachable by hero
-        $reachable = $game->getReachableHexes("hex_12_4", 1, "hero");
+        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, "hero");
         $this->assertArrayNotHasKey("hex_13_4", $reachable);
 
         // But reachable by monster
-        $reachable = $game->getReachableHexes("hex_12_4", 1, "monster");
+        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, "monster");
         $this->assertArrayHasKey("hex_13_4", $reachable);
     }
 
@@ -232,7 +232,7 @@ final class GameTest extends TestCase {
         $game->tokens->db->moveToken("hero_1", "hex_11_8");
 
         // hex_11_8 should not be reachable (occupied)
-        $reachable = $game->getReachableHexes("hex_10_8", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_10_8", 3);
         $this->assertArrayNotHasKey("hex_11_8", $reachable);
 
         // Hexes behind the occupied one should still be reachable via other paths
@@ -243,7 +243,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // From hex_11_8 (adjacent to Grimheim hex_10_8), entering Grimheim ends movement
-        $reachable = $game->getReachableHexes("hex_11_8", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_11_8", 3);
 
         // All Grimheim hexes should be reachable
         $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
@@ -260,7 +260,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // From Grimheim, adjacent non-mountain hexes should be at distance 1
-        $reachable = $game->getReachableHexes("hex_9_9", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3);
 
         // hex_11_8 is adjacent to Grimheim border hex hex_10_8
         $this->assertArrayHasKey("hex_11_8", $reachable);

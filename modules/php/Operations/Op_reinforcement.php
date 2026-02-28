@@ -49,7 +49,7 @@ class Op_reinforcement extends Operation {
             $monsterTypes = $this->parseSpawnString($spawnStr, $spawnLoc);
 
             // Get available hexes in the spawn location
-            $allHexes = $this->game->getHexesInLocation($spawnLoc);
+            $allHexes = $this->game->hexMap->getHexesInLocation($spawnLoc);
 
             // Move card to display
             $this->dbSetTokenLocation($cardId, "display_monsterturn", 0, clienttranslate('Monster card drawn: ${token_name}'));
@@ -59,7 +59,7 @@ class Op_reinforcement extends Operation {
             $placements = [];
             foreach ($monsterTypes as $index => $monsterType) {
                 $hex = $allHexes[$index];
-                if ($this->game->isOccupied($hex)) {
+                if ($this->game->hexMap->isOccupied($hex)) {
                     $errors = true;
                     break;
                 }
@@ -92,7 +92,7 @@ class Op_reinforcement extends Operation {
             }
 
             foreach ($placements as $monsterId => $hex) {
-                $this->dbSetTokenLocation($monsterId, $hex, 0, clienttranslate('${token_name} placed at ${place_name}'));
+                $this->game->hexMap->moveCharacter($monsterId, $hex, clienttranslate('monsters move ${token_name} to ${place_name}'));
             }
             return;
         }
