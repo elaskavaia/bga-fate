@@ -81,8 +81,10 @@ export class Game extends GameMachine {
 
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
+      const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
       placeHtml(
-        `<div id="tableau_${color}" class="tableau">
+        `<div id="tableau_${color}" class="tableau ${hnoClass}">
+
         <div id="pboard_${color}" class="pboard">
           <div id="slot_gold_${color}" class="pboard_slot slot_gold"></div>
           <div id="deck_ability_${color}" class="pboard_slot deck deck_ability"></div>
@@ -99,6 +101,7 @@ export class Game extends GameMachine {
                     <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
            </div>
+        <div id="cardsarea_${color}" class="cardsarea"></div>
         </div>`,
         "players_panels"
       );
@@ -168,6 +171,11 @@ export class Game extends GameMachine {
       const color = loc.substring("tableau_".length);
       result.location = `slot_gold_${color}`;
     }
+    // Redirect cards on tableau to the card area
+    if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+      const color = loc.substring("tableau_".length);
+      result.location = `cardsarea_${color}`;
+    }
     return result;
   }
 
@@ -184,22 +192,29 @@ export class Game extends GameMachine {
         if (subType === "monster") {
           const spawnLoc = this.getTokenName(tokenInfo.spawnloc);
           tokenInfo.tooltip = this.ttSection(_("Spawn Location"), spawnLoc);
-          if (tokenInfo.ftext) tokenInfo.tooltip += this.ttSection(_("Flavor"), String(tokenInfo.ftext));
+          if (tokenInfo.ftext) tokenInfo.tooltip += this.ttSection(_("Flavor"), tokenInfo.ftext);
+        } else if (["hero", "ability", "equip", "event"].includes(subType)) {
+          const heroName = this.getTokenName(`hero_${tokenInfo.hno}`);
+          tokenInfo.tooltip = this.ttSection(_("Hero"), heroName);
+          tokenInfo.tooltip += this.ttSection(_("Type"), this.getTokenName(`ctype_${subType}`));
+          if (tokenInfo.quest) tokenInfo.tooltip += this.ttSection(_("Quest"), this.getTr(tokenInfo.quest));
+          if (tokenInfo.effect) tokenInfo.tooltip += this.ttSection(_("Effect"), this.getTr(tokenInfo.effect));
+          if (tokenInfo.flavour) tokenInfo.tooltip += this.iiSection(this.getTr(tokenInfo.flavour));
         }
         break;
       }
       case "monster": {
         tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-        tokenInfo.tooltip += this.ttSection(_("Rank"), String(tokenInfo.rank));
-        tokenInfo.tooltip += this.ttSection(_("Strength"), String(tokenInfo.strength));
-        tokenInfo.tooltip += this.ttSection(_("Health"), String(tokenInfo.health));
-        if (tokenInfo.move) tokenInfo.tooltip += this.ttSection(_("Move"), String(tokenInfo.move));
-        if (tokenInfo.armor) tokenInfo.tooltip += this.ttSection(_("Armor"), String(tokenInfo.armor));
-        if (tokenInfo.xp) tokenInfo.tooltip += this.ttSection(_("XP"), String(tokenInfo.xp));
+        tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
+        tokenInfo.tooltip += this.ttSection(_("Strength"), tokenInfo.strength);
+        tokenInfo.tooltip += this.ttSection(_("Health"), tokenInfo.health);
+        if (tokenInfo.move) tokenInfo.tooltip += this.ttSection(_("Move"), tokenInfo.move);
+        if (tokenInfo.armor) tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
+        if (tokenInfo.xp) tokenInfo.tooltip += this.ttSection(_("XP"), tokenInfo.xp);
         break;
       }
       case "house": {
-        tokenInfo.tooltip = this.ttSection(_("Type"), String(tokenInfo.name));
+        tokenInfo.tooltip = this.ttSection(_("Type"), this.getTr(tokenInfo.name));
         break;
       }
       case "hex": {

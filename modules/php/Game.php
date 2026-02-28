@@ -120,7 +120,7 @@ class Game extends Base {
                 $location = $deckMap[$ctype] ?? "limbo";
                 $count = $info["count"] ?? 1;
                 $info["location"] = $location;
-                $info["create"] = ($count > 1) ? 2 : 1;
+                $info["create"] = $count > 1 ? 2 : 1;
                 $this->tokens->createTokenFromInfo($cardId, $info);
             }
             // Move starting cards to tableau
@@ -185,6 +185,13 @@ class Game extends Base {
         $result = parent::getAllDatas();
 
         $result = array_merge($result, $this->tokens->getAllDatas());
+
+        // Add heroNo to each player
+        foreach ($result["players"] as $player_id => &$pdata) {
+            $heroTokenId = $this->getHeroTokenId($pdata["color"]); // "hero_N"
+            $pdata["heroNo"] = (int) getPart($heroTokenId, 1);
+        }
+        unset($pdata);
 
         $gameStage = $this->tokens->db->getTokenState(Game::GAME_STAGE);
         $isGameEnded = $gameStage >= 5;
@@ -508,6 +515,29 @@ class Game extends Base {
         $this->tokens->dbSetTokenLocation("card_monster_36", "display_monsterturn", 0); // Viral Trolls (yellow)
         $this->tokens->dbSetTokenLocation("card_monster_22", "display_monsterturn", 1); // Imp-ressive Swarm (skipped)
         $this->tokens->dbSetTokenLocation("card_monster_43", "display_monsterturn", 0); // Feed the Flames (red)
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_heroCards(int $hno = 1) {
+        // Place all cards for hero $hno on the current player's tableau for visual testing
+        // Creates cards if they don't exist (e.g. testing a hero nobody is playing)
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
+            if (($info["hno"] ?? null) != $hno) {
+                continue;
+            }
+            $tokens = $this->tokens->db->getTokensOfTypeInLocation($cardId, null);
+            if (!$tokens) {
+                // Card doesn't exist yet — create it (count>1 needs indexed tokens)
+                $count = $info["count"] ?? 1;
+                $info["location"] = "tableau_{$color}";
+                $info["create"] = $count > 1 ? 2 : 1;
+                $this->tokens->createTokenFromInfo($cardId, $info);
+            } else {
+                $firstKey = array_key_first($tokens);
+                $this->tokens->dbSetTokenLocation($firstKey, "tableau_{$color}", 0, "", ["noa" => true]);
+            }
+        }
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

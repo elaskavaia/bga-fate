@@ -1,5 +1,6 @@
 num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment
 #set id=card_{ctype}_{hno}_{num}
+#set type=card card_{ctype} hno_{hno} cnum_{num} hcard
 #set create=0
 #set _noquotes=create
 # Abilities

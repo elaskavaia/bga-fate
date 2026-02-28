@@ -650,7 +650,9 @@ export class Game1Tokens extends Game0Basics {
     if (prefix) return `<p><b>${prefix}</b>: ${text}</p>`;
     else return `<p>${text}</p>`;
   }
-
+  iiSection(text: string) {
+    return `<p><i>${text}</i></p>`;
+  }
   createTokenImage(tokenId: string, state: number = 0) {
     const div = document.createElement("div");
     div.id = tokenId + "_tt_" + this.globlog++;

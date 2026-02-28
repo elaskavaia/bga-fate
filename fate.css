@@ -383,10 +383,16 @@
   left: 40%;
 }
 
+/**
+ * fate.scss
+ *
+ * Fate stylesheet
+ */
+/********* You can start writing your CSS below this line: **********/
 .card {
-  width: 140px;
   height: 200px;
-  border: 1px solid black;
+  aspect-ratio: 0.7328244275;
+  border-radius: 5%;
 }
 
 .card_monster {
@@ -614,6 +620,226 @@
 }
 
 .card_monster_54 {
+  background-position: 100% 100%;
+}
+
+.hcard.hno_1 {
+  background-image: url("img/bjorn_hero_cards.jpg");
+  background-size: 600% auto;
+}
+
+.hcard.hno_2 {
+  background-image: url("img/alva_hero_cards.jpg");
+  background-size: 600% auto;
+}
+
+.hcard.hno_3 {
+  background-image: url("img/embla_hero_cards.jpg");
+  background-size: 600% auto;
+}
+
+.hcard.hno_4 {
+  background-image: url("img/boldur_hero_cards.jpg");
+  background-size: 600% auto;
+}
+
+.hcard.cnum_1 {
+  background-position: 0% 0%;
+}
+
+.hcard.cnum_2 {
+  background-position: 20% 0%;
+}
+
+.hcard.cnum_3 {
+  background-position: 40% 0%;
+}
+
+.hcard.cnum_4 {
+  background-position: 60% 0%;
+}
+
+.hcard.cnum_5 {
+  background-position: 80% 0%;
+}
+
+.hcard.cnum_6 {
+  background-position: 100% 0%;
+}
+
+.hcard.cnum_7 {
+  background-position: 0% 16.6666666667%;
+}
+
+.hcard.cnum_8 {
+  background-position: 20% 16.6666666667%;
+}
+
+.hcard.cnum_9 {
+  background-position: 40% 16.6666666667%;
+}
+
+.hcard.cnum_10 {
+  background-position: 60% 16.6666666667%;
+}
+
+.hcard.cnum_11 {
+  background-position: 80% 16.6666666667%;
+}
+
+.hcard.cnum_12 {
+  background-position: 100% 16.6666666667%;
+}
+
+.hcard.cnum_13 {
+  background-position: 0% 33.3333333333%;
+}
+
+.hcard.cnum_14 {
+  background-position: 20% 33.3333333333%;
+}
+
+.hcard.cnum_15 {
+  background-position: 40% 33.3333333333%;
+}
+
+.hcard.cnum_16 {
+  background-position: 60% 33.3333333333%;
+}
+
+.hcard.cnum_17 {
+  background-position: 80% 33.3333333333%;
+}
+
+.hcard.cnum_18 {
+  background-position: 100% 33.3333333333%;
+}
+
+.hcard.cnum_19 {
+  background-position: 0% 50%;
+}
+
+.hcard.cnum_20 {
+  background-position: 20% 50%;
+}
+
+.hcard.cnum_21 {
+  background-position: 40% 50%;
+}
+
+.hcard.cnum_22 {
+  background-position: 60% 50%;
+}
+
+.hcard.cnum_23 {
+  background-position: 80% 50%;
+}
+
+.hcard.cnum_24 {
+  background-position: 100% 50%;
+}
+
+.hcard.cnum_25 {
+  background-position: 0% 66.6666666667%;
+}
+
+.hcard.cnum_26 {
+  background-position: 20% 66.6666666667%;
+}
+
+.hcard.cnum_27 {
+  background-position: 40% 66.6666666667%;
+}
+
+.hcard.cnum_28 {
+  background-position: 60% 66.6666666667%;
+}
+
+.hcard.cnum_29 {
+  background-position: 80% 66.6666666667%;
+}
+
+.hcard.cnum_30 {
+  background-position: 100% 66.6666666667%;
+}
+
+.hcard.cnum_31 {
+  background-position: 0% 83.3333333333%;
+}
+
+.hcard.cnum_32 {
+  background-position: 20% 83.3333333333%;
+}
+
+.hcard.cnum_33 {
+  background-position: 40% 83.3333333333%;
+}
+
+.hcard.cnum_34 {
+  background-position: 60% 83.3333333333%;
+}
+
+.hcard.cnum_35 {
+  background-position: 80% 83.3333333333%;
+}
+
+.hcard.cnum_36 {
+  background-position: 100% 83.3333333333%;
+}
+
+.hcard.cnum_37 {
+  background-position: 0% 100%;
+}
+
+.hcard.cnum_38 {
+  background-position: 20% 100%;
+}
+
+.tableau.hno_1 .deck_equip,
+.tableau.hno_1 .deck_event {
+  background-image: url("img/bjorn_hero_cards.jpg");
+  background-size: 600% auto;
+}
+.tableau.hno_1 .deck_equip {
+  background-position: 80% 100%;
+}
+.tableau.hno_1 .deck_event {
+  background-position: 100% 100%;
+}
+
+.tableau.hno_2 .deck_equip,
+.tableau.hno_2 .deck_event {
+  background-image: url("img/alva_hero_cards.jpg");
+  background-size: 600% auto;
+}
+.tableau.hno_2 .deck_equip {
+  background-position: 80% 100%;
+}
+.tableau.hno_2 .deck_event {
+  background-position: 100% 100%;
+}
+
+.tableau.hno_3 .deck_equip,
+.tableau.hno_3 .deck_event {
+  background-image: url("img/embla_hero_cards.jpg");
+  background-size: 600% auto;
+}
+.tableau.hno_3 .deck_equip {
+  background-position: 80% 100%;
+}
+.tableau.hno_3 .deck_event {
+  background-position: 100% 100%;
+}
+
+.tableau.hno_4 .deck_equip,
+.tableau.hno_4 .deck_event {
+  background-image: url("img/boldur_hero_cards.jpg");
+  background-size: 600% auto;
+}
+.tableau.hno_4 .deck_equip {
+  background-position: 80% 100%;
+}
+.tableau.hno_4 .deck_event {
   background-position: 100% 100%;
 }
 
@@ -875,6 +1101,15 @@
   flex-wrap: wrap;
 }
 
+.cardsarea {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 146.5648854962px;
+  min-height: 200px;
+}
+
 .pboard {
   position: relative;
   width: 520px;
@@ -1039,6 +1274,10 @@
 .tooltip-right {
   padding: 0.5em;
   padding-left: 0em;
+}
+
+.tooltipimage.hcard {
+  height: 300px;
 }
 
 #gameaction_status_wrap {

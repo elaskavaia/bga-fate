@@ -170,6 +170,16 @@
   flex-wrap: wrap;
 }
 
+// --- Card area: played cards displayed next to the player board ---
+.cardsarea {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: v.$cardWidth;
+  min-height: v.$cardHeight;
+}
+
 // --- Player board (pboard): background image with positioned slots ---
 .pboard {
   position: relative;

@@ -9,7 +9,9 @@
  *
  */
 
-interface CustomPlayer extends Player {}
+interface CustomPlayer extends Player {
+  heroNo?: number;
+}
 
 interface CustomGamedatas extends Gamedatas<CustomPlayer> {
   tokens: { [key: string]: Token };

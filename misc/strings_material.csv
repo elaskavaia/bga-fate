@@ -30,6 +30,12 @@ dead|Dead
 red|Red
 yellow|Yellow
 
+# Hero card types
+ctype_hero|Hero
+ctype_ability|Ability
+ctype_equip|Equipment
+ctype_event|Event
+
 # Time track spot types
 tm_yellow_axes|Yellow Reinforcements
 tm_red_axes|Red Reinforcements

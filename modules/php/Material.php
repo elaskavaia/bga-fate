@@ -2836,6 +2836,19 @@ class Material {
     "yellow" => [ 
         "name" => clienttranslate("Yellow"),
 ],
+// # Hero card types
+    "ctype_hero" => [ 
+        "name" => clienttranslate("Hero"),
+],
+    "ctype_ability" => [ 
+        "name" => clienttranslate("Ability"),
+],
+    "ctype_equip" => [ 
+        "name" => clienttranslate("Equipment"),
+],
+    "ctype_event" => [ 
+        "name" => clienttranslate("Event"),
+],
 // # Time track spot types
     "tm_yellow_axes" => [ 
         "name" => clienttranslate("Yellow Reinforcements"),
@@ -3041,32 +3054,32 @@ class Material {
         "name" => clienttranslate("Abilities"),
         "location" => "tableau",
         "scope" => "player",
-        "counter" => "hidden",
-        "content" => "public",
+        "counter" => "public",
+        "content" => "hidden",
 ],
     "deck_equip" => [ 
         "type" => "location",
         "name" => clienttranslate("Equipment"),
         "location" => "tableau",
         "scope" => "player",
-        "counter" => "hidden",
-        "content" => "public",
+        "counter" => "public",
+        "content" => "hidden",
 ],
     "deck_event" => [ 
         "type" => "location",
         "name" => clienttranslate("Event Deck"),
         "location" => "tableau",
         "scope" => "player",
-        "counter" => "hidden",
-        "content" => "public",
+        "counter" => "public",
+        "content" => "hidden",
 ],
     "discard" => [ 
         "type" => "location",
         "name" => clienttranslate("Discard"),
         "location" => "tableau",
         "scope" => "player",
-        "counter" => "hidden",
-        "content" => "public",
+        "counter" => "public",
+        "content" => "hidden",
 ],
     "limbo" => [ 
         "type" => "location",
@@ -3107,6 +3120,7 @@ class Material {
             /* --- gen php begin card_material --- */
 // # Abilities
     "card_ability_1_9" => [ 
+        "type" => "card card_ability hno_1 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 1,
@@ -3118,6 +3132,7 @@ class Material {
         "flavour" => "If I can see it, I can hit it.",
 ],
     "card_ability_1_10" => [ 
+        "type" => "card card_ability hno_1 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 1,
@@ -3129,6 +3144,7 @@ class Material {
         "flavour" => "Yeah, why shoot the armor?",
 ],
     "card_ability_1_11" => [ 
+        "type" => "card card_ability hno_1 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 1,
@@ -3139,6 +3155,7 @@ class Material {
         "flavour" => "Sure, it's a long shot. But Bjorn enjoys a challenge.",
 ],
     "card_ability_1_12" => [ 
+        "type" => "card card_ability hno_1 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 1,
@@ -3148,6 +3165,7 @@ class Material {
         "effect" => "Add damage to wach attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.",
 ],
     "card_ability_1_13" => [ 
+        "type" => "card card_ability hno_1 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 1,
@@ -3157,6 +3175,7 @@ class Material {
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).",
 ],
     "card_ability_1_14" => [ 
+        "type" => "card card_ability hno_1 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 1,
@@ -3167,6 +3186,7 @@ class Material {
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.",
 ],
     "card_ability_1_7" => [ 
+        "type" => "card card_ability hno_1 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 1,
@@ -3177,6 +3197,7 @@ class Material {
         "flavour" => "If you're in a pinch, Bjorn can patch.",
 ],
     "card_ability_1_8" => [ 
+        "type" => "card card_ability hno_1 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 1,
@@ -3186,6 +3207,7 @@ class Material {
         "effect" => "Remove a total of 2 damage from heroes and equipment within range 1.",
 ],
     "card_ability_1_5" => [ 
+        "type" => "card card_ability hno_1 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 1,
@@ -3195,6 +3217,7 @@ class Material {
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
     "card_ability_1_6" => [ 
+        "type" => "card card_ability hno_1 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 1,
@@ -3204,6 +3227,7 @@ class Material {
         "effect" => "Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
     "card_ability_1_3" => [ 
+        "type" => "card card_ability hno_1 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 1,
@@ -3215,6 +3239,7 @@ class Material {
         "flavour" => "Who needs luck when you have certainty?",
 ],
     "card_ability_1_4" => [ 
+        "type" => "card card_ability hno_1 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 1,
@@ -3225,6 +3250,7 @@ class Material {
         "effect" => "2-4[MANA]: Deal that much damage to a monster within attack range.",
 ],
     "card_ability_2_13" => [ 
+        "type" => "card card_ability hno_2 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 2,
@@ -3235,6 +3261,7 @@ class Material {
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.",
 ],
     "card_ability_2_14" => [ 
+        "type" => "card card_ability hno_2 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 2,
@@ -3245,6 +3272,7 @@ class Material {
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.",
 ],
     "card_ability_2_3" => [ 
+        "type" => "card card_ability hno_2 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 2,
@@ -3255,6 +3283,7 @@ class Material {
         "effect" => "3[MANA]: Deal 1 damage to 3 monsters within attack range.",
 ],
     "card_ability_2_4" => [ 
+        "type" => "card card_ability hno_2 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 2,
@@ -3265,6 +3294,7 @@ class Material {
         "effect" => "1-4[MANA]: Deal 1 damage to that many different monsters within attack range.",
 ],
     "card_ability_2_11" => [ 
+        "type" => "card card_ability hno_2 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 2,
@@ -3274,6 +3304,7 @@ class Material {
         "effect" => "Roll 2[DIE_ATTACK] against a monster within attack range.",
 ],
     "card_ability_2_12" => [ 
+        "type" => "card card_ability hno_2 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 2,
@@ -3283,6 +3314,7 @@ class Material {
         "effect" => "Roll 5[DIE_ATTACK] against a monster within attack range.",
 ],
     "card_ability_2_7" => [ 
+        "type" => "card card_ability hno_2 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 2,
@@ -3292,6 +3324,7 @@ class Material {
         "effect" => "At the end of your turn, draw 1 additional card.",
 ],
     "card_ability_2_8" => [ 
+        "type" => "card card_ability hno_2 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 2,
@@ -3301,6 +3334,7 @@ class Material {
         "effect" => "At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.",
 ],
     "card_ability_2_9" => [ 
+        "type" => "card card_ability hno_2 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 2,
@@ -3310,6 +3344,7 @@ class Material {
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
     "card_ability_2_10" => [ 
+        "type" => "card card_ability hno_2 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 2,
@@ -3319,6 +3354,7 @@ class Material {
         "effect" => "Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
     "card_ability_2_5" => [ 
+        "type" => "card card_ability hno_2 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 2,
@@ -3330,6 +3366,7 @@ class Material {
         "flavour" => "I will make like a tree and leave.",
 ],
     "card_ability_2_6" => [ 
+        "type" => "card card_ability hno_2 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 2,
@@ -3341,6 +3378,7 @@ class Material {
         "flavour" => "All good things are tree.",
 ],
     "card_ability_3_7" => [ 
+        "type" => "card card_ability hno_3 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 3,
@@ -3352,6 +3390,7 @@ class Material {
         "flavour" => "Oh no, she's surrounding us!",
 ],
     "card_ability_3_8" => [ 
+        "type" => "card card_ability hno_3 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 3,
@@ -3362,6 +3401,7 @@ class Material {
         "effect" => "Move 1 area. You may always move into mountains and through occupied areas.",
 ],
     "card_ability_3_5" => [ 
+        "type" => "card card_ability hno_3 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 3,
@@ -3371,6 +3411,7 @@ class Material {
         "effect" => "After each move action, you may kill an adjacent rank 1 monster.",
 ],
     "card_ability_3_6" => [ 
+        "type" => "card card_ability hno_3 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 3,
@@ -3380,6 +3421,7 @@ class Material {
         "effect" => "After each move action, you may kill an adjacent rank 1 or rank 2 monster.",
 ],
     "card_ability_3_11" => [ 
+        "type" => "card card_ability hno_3 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 3,
@@ -3390,6 +3432,7 @@ class Material {
         "flavour" => "Let's dance...",
 ],
     "card_ability_3_12" => [ 
+        "type" => "card card_ability hno_3 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 3,
@@ -3400,6 +3443,7 @@ class Material {
         "flavour" => "Another round? Ok!",
 ],
     "card_ability_3_9" => [ 
+        "type" => "card card_ability hno_3 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 3,
@@ -3409,6 +3453,7 @@ class Material {
         "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
 ],
     "card_ability_3_10" => [ 
+        "type" => "card card_ability hno_3 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 3,
@@ -3419,6 +3464,7 @@ class Material {
         "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
 ],
     "card_ability_3_3" => [ 
+        "type" => "card card_ability hno_3 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 3,
@@ -3429,6 +3475,7 @@ class Material {
         "effect" => "2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.",
 ],
     "card_ability_3_4" => [ 
+        "type" => "card card_ability hno_3 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 3,
@@ -3440,6 +3487,7 @@ class Material {
         "flavour" => "What goes around comes around... with interest.",
 ],
     "card_ability_3_13" => [ 
+        "type" => "card card_ability hno_3 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 3,
@@ -3449,6 +3497,7 @@ class Material {
         "effect" => "Deal 1 damage to an adjacent non-legend monster and move it 1 area.",
 ],
     "card_ability_3_14" => [ 
+        "type" => "card card_ability hno_3 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 3,
@@ -3458,6 +3507,7 @@ class Material {
         "effect" => "Deal 2 damage to an adjacent non-legend monster and move it 2 areas.",
 ],
     "card_ability_4_9" => [ 
+        "type" => "card card_ability hno_4 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 4,
@@ -3468,6 +3518,7 @@ class Material {
         "effect" => "Runes [RUNE] always count as hits for you. Because that's the way you roll.",
 ],
     "card_ability_4_10" => [ 
+        "type" => "card card_ability hno_4 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 4,
@@ -3478,6 +3529,7 @@ class Material {
         "effect" => "Runes [RUNE] always count as hits for you. It runes in the family.",
 ],
     "card_ability_4_11" => [ 
+        "type" => "card card_ability hno_4 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 4,
@@ -3489,6 +3541,7 @@ class Material {
         "flavour" => "Armor so heavy that even gravity's jealous.",
 ],
     "card_ability_4_12" => [ 
+        "type" => "card card_ability hno_4 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 4,
@@ -3499,6 +3552,7 @@ class Material {
         "effect" => "1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.",
 ],
     "card_ability_4_13" => [ 
+        "type" => "card card_ability hno_4 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 4,
@@ -3509,6 +3563,7 @@ class Material {
         "flavour" => "It's not hiding, it's strategic positioning.",
 ],
     "card_ability_4_14" => [ 
+        "type" => "card card_ability hno_4 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 4,
@@ -3520,6 +3575,7 @@ class Material {
         "effect" => "Heal 1 damage from Boldur.",
 ],
     "card_ability_4_3" => [ 
+        "type" => "card card_ability hno_4 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 4,
@@ -3530,6 +3586,7 @@ class Material {
         "effect" => "3[MANA]: Perform an attack action.",
 ],
     "card_ability_4_4" => [ 
+        "type" => "card card_ability hno_4 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 4,
@@ -3540,6 +3597,7 @@ class Material {
         "effect" => "2[MANA]: Perform an attack action. May be used several times per turn.",
 ],
     "card_ability_4_5" => [ 
+        "type" => "card card_ability hno_4 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 4,
@@ -3549,6 +3607,7 @@ class Material {
         "effect" => "Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.",
 ],
     "card_ability_4_6" => [ 
+        "type" => "card card_ability hno_4 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 4,
@@ -3558,6 +3617,7 @@ class Material {
         "effect" => "Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.",
 ],
     "card_ability_4_7" => [ 
+        "type" => "card card_ability hno_4 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 4,
@@ -3568,6 +3628,7 @@ class Material {
         "flavour" => "He's on a roll!",
 ],
     "card_ability_4_8" => [ 
+        "type" => "card card_ability hno_4 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 4,
@@ -3577,6 +3638,7 @@ class Material {
         "effect" => "Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1.",
 ],
     "card_ability_5_11" => [ 
+        "type" => "card card_ability hno_5 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 5,
@@ -3587,6 +3649,7 @@ class Material {
         "flavour" => "Wait a minute, didn't you just do that?",
 ],
     "card_ability_5_12" => [ 
+        "type" => "card card_ability hno_5 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 5,
@@ -3597,6 +3660,7 @@ class Material {
         "flavour" => "Wait a minute, didn't you just read that?",
 ],
     "card_ability_5_13" => [ 
+        "type" => "card card_ability hno_5 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 5,
@@ -3607,6 +3671,7 @@ class Material {
         "flavour" => "Finkel is on fire today!",
 ],
     "card_ability_5_14" => [ 
+        "type" => "card card_ability hno_5 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 5,
@@ -3617,6 +3682,7 @@ class Material {
         "flavour" => "Finkel is on FIRE today!",
 ],
     "card_ability_5_3" => [ 
+        "type" => "card card_ability hno_5 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 5,
@@ -3628,6 +3694,7 @@ class Material {
         "flavour" => "Goodness gracious",
 ],
     "card_ability_5_4" => [ 
+        "type" => "card card_ability hno_5 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 5,
@@ -3639,6 +3706,7 @@ class Material {
         "flavour" => "...great balls of fire!",
 ],
     "card_ability_5_5" => [ 
+        "type" => "card card_ability hno_5 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 5,
@@ -3650,6 +3718,7 @@ class Material {
         "flavour" => "The light at the end of the tunnel is coming toward you.",
 ],
     "card_ability_5_6" => [ 
+        "type" => "card card_ability hno_5 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 5,
@@ -3661,6 +3730,7 @@ class Material {
         "flavour" => "Inventing spectacular new fireworks.",
 ],
     "card_ability_5_7" => [ 
+        "type" => "card card_ability hno_5 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 5,
@@ -3672,6 +3742,7 @@ class Material {
         "flavour" => "I'm melting! I'm melting!",
 ],
     "card_ability_5_8" => [ 
+        "type" => "card card_ability hno_5 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 5,
@@ -3683,6 +3754,7 @@ class Material {
         "flavour" => "Blub blub blub…",
 ],
     "card_ability_5_9" => [ 
+        "type" => "card card_ability hno_5 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 5,
@@ -3694,6 +3766,7 @@ class Material {
         "flavour" => "I got carried away…",
 ],
     "card_ability_5_10" => [ 
+        "type" => "card card_ability hno_5 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 5,
@@ -3705,6 +3778,7 @@ class Material {
         "flavour" => "Relocates houses, little girls, and even their dogs.",
 ],
     "card_ability_6_5" => [ 
+        "type" => "card card_ability hno_6 cnum_5 hcard",
         "create" => 0,
         "num" => 5,
         "hno" => 6,
@@ -3716,6 +3790,7 @@ class Material {
         "flavour" => "A cascade of calamity.",
 ],
     "card_ability_6_6" => [ 
+        "type" => "card card_ability hno_6 cnum_6 hcard",
         "create" => 0,
         "num" => 6,
         "hno" => 6,
@@ -3726,6 +3801,7 @@ class Material {
         "effect" => "4[MANA]: Roll 3, 2, and 1 damage to 3 monsters (respectively) within range 2.",
 ],
     "card_ability_6_7" => [ 
+        "type" => "card card_ability hno_6 cnum_7 hcard",
         "create" => 0,
         "num" => 7,
         "hno" => 6,
@@ -3736,6 +3812,7 @@ class Material {
         "effect" => "2[MANA]: Attack with a non-legend monster within range 2.",
 ],
     "card_ability_6_8" => [ 
+        "type" => "card card_ability hno_6 cnum_8 hcard",
         "create" => 0,
         "num" => 8,
         "hno" => 6,
@@ -3746,6 +3823,7 @@ class Material {
         "effect" => "2[MANA]: Attack with a non-legend monster within range 3. May be used several times per turn with different monsters.",
 ],
     "card_ability_6_13" => [ 
+        "type" => "card card_ability hno_6 cnum_13 hcard",
         "create" => 0,
         "num" => 13,
         "hno" => 6,
@@ -3755,6 +3833,7 @@ class Material {
         "effect" => "Add 1 mana [MANA] to any card or gain 1 experience [XP].",
 ],
     "card_ability_6_14" => [ 
+        "type" => "card card_ability hno_6 cnum_14 hcard",
         "create" => 0,
         "num" => 14,
         "hno" => 6,
@@ -3764,6 +3843,7 @@ class Material {
         "effect" => "Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.",
 ],
     "card_ability_6_11" => [ 
+        "type" => "card card_ability hno_6 cnum_11 hcard",
         "create" => 0,
         "num" => 11,
         "hno" => 6,
@@ -3775,6 +3855,7 @@ class Material {
         "flavour" => "Meditating? Sleeping? Both do wonders for you.",
 ],
     "card_ability_6_12" => [ 
+        "type" => "card card_ability hno_6 cnum_12 hcard",
         "create" => 0,
         "num" => 12,
         "hno" => 6,
@@ -3786,6 +3867,7 @@ class Material {
         "flavour" => "Repeat until you reach enlightenment: ”Wah Tefu Layam”.",
 ],
     "card_ability_6_3" => [ 
+        "type" => "card card_ability hno_6 cnum_3 hcard",
         "create" => 0,
         "num" => 3,
         "hno" => 6,
@@ -3797,6 +3879,7 @@ class Material {
         "flavour" => "A spark is all it takes.",
 ],
     "card_ability_6_4" => [ 
+        "type" => "card card_ability hno_6 cnum_4 hcard",
         "create" => 0,
         "num" => 4,
         "hno" => 6,
@@ -3808,6 +3891,7 @@ class Material {
         "flavour" => "Some people just have that spark.",
 ],
     "card_ability_6_9" => [ 
+        "type" => "card card_ability hno_6 cnum_9 hcard",
         "create" => 0,
         "num" => 9,
         "hno" => 6,
@@ -3819,6 +3903,7 @@ class Material {
         "flavour" => "Her feet are firmly planted in midair.",
 ],
     "card_ability_6_10" => [ 
+        "type" => "card card_ability hno_6 cnum_10 hcard",
         "create" => 0,
         "num" => 10,
         "hno" => 6,
@@ -3831,6 +3916,7 @@ class Material {
 ],
 // # Equipment
     "card_equip_1_15" => [ 
+        "type" => "card card_equip hno_1 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 1,
@@ -3842,6 +3928,7 @@ class Material {
         "flavour" => "Not something he's proud of. Still not bad for a five-year-old.",
 ],
     "card_equip_1_20" => [ 
+        "type" => "card card_equip hno_1 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 1,
@@ -3853,6 +3940,7 @@ class Material {
         "flavour" => "Painted black for the funeral they are about to attend.",
 ],
     "card_equip_1_16" => [ 
+        "type" => "card card_equip hno_1 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 1,
@@ -3865,6 +3953,7 @@ class Material {
         "flavour" => "This bunch of bones, bound by braided bamboo became the bane of the banished breathless.",
 ],
     "card_equip_1_21" => [ 
+        "type" => "card card_equip hno_1 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 1,
@@ -3877,6 +3966,7 @@ class Material {
         "flavour" => "Radiating forcefulness.",
 ],
     "card_equip_1_24" => [ 
+        "type" => "card card_equip hno_1 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 1,
@@ -3888,6 +3978,7 @@ class Material {
         "flavour" => "”Did Bjorn make this?”<br>”Sew it seams…”",
 ],
     "card_equip_1_23" => [ 
+        "type" => "card card_equip hno_1 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 1,
@@ -3900,6 +3991,7 @@ class Material {
         "flavour" => "When your life hangs by a thread, this is sturdier than it seams.",
 ],
     "card_equip_1_19" => [ 
+        "type" => "card card_equip hno_1 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 1,
@@ -3912,6 +4004,7 @@ class Material {
         "flavour" => "Keeping your tools handy: thread, needles, bandages, herbs, and a pocket-sized mead sack.",
 ],
     "card_equip_1_18" => [ 
+        "type" => "card card_equip hno_1 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 1,
@@ -3925,6 +4018,7 @@ class Material {
         "flavour" => "Makes your enemies quiver in their boots.",
 ],
     "card_equip_1_17" => [ 
+        "type" => "card card_equip hno_1 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 1,
@@ -3937,6 +4031,7 @@ class Material {
         "flavour" => "I keep missing him…",
 ],
     "card_equip_1_22" => [ 
+        "type" => "card card_equip hno_1 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 1,
@@ -3949,6 +4044,7 @@ class Material {
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",
 ],
     "card_equip_2_23" => [ 
+        "type" => "card card_equip hno_2 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 2,
@@ -3961,6 +4057,7 @@ class Material {
         "flavour" => "Brace for impact!",
 ],
     "card_equip_2_15" => [ 
+        "type" => "card card_equip hno_2 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 2,
@@ -3971,6 +4068,7 @@ class Material {
         "effect" => "This is your Main Weapon. Attack range 2.",
 ],
     "card_equip_2_22" => [ 
+        "type" => "card card_equip hno_2 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 2,
@@ -3983,6 +4081,7 @@ class Material {
         "flavour" => "Ironically known as the Waist of Time, it actually carries rejuvenating powers.",
 ],
     "card_equip_2_25" => [ 
+        "type" => "card card_equip hno_2 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 2,
@@ -3995,6 +4094,7 @@ class Material {
         "flavour" => "I'm … a princess? I knew it!",
 ],
     "card_equip_2_24" => [ 
+        "type" => "card card_equip hno_2 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 2,
@@ -4006,6 +4106,7 @@ class Material {
         "flavour" => "Elven treasures long forgotten. Used as toothpicks for ages.",
 ],
     "card_equip_2_21" => [ 
+        "type" => "card card_equip hno_2 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 2,
@@ -4016,6 +4117,7 @@ class Material {
         "effect" => "After each attack action, deal 1 damage to a monster adjacent to Alva.",
 ],
     "card_equip_2_18" => [ 
+        "type" => "card card_equip hno_2 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 2,
@@ -4029,6 +4131,7 @@ class Material {
         "flavour" => "Makes your enemies quiver in their boots.",
 ],
     "card_equip_2_20" => [ 
+        "type" => "card card_equip hno_2 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 2,
@@ -4041,6 +4144,7 @@ class Material {
         "flavour" => "Sings your swan song.",
 ],
     "card_equip_2_17" => [ 
+        "type" => "card card_equip hno_2 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 2,
@@ -4053,6 +4157,7 @@ class Material {
         "flavour" => "”I'm ready to try it blindfolded…”",
 ],
     "card_equip_2_16" => [ 
+        "type" => "card card_equip hno_2 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 2,
@@ -4063,6 +4168,7 @@ class Material {
         "effect" => "Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.",
 ],
     "card_equip_2_19" => [ 
+        "type" => "card card_equip hno_2 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 2,
@@ -4075,6 +4181,7 @@ class Material {
         "flavour" => "It anticipates your wishes.",
 ],
     "card_equip_3_19" => [ 
+        "type" => "card card_equip hno_3 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 3,
@@ -4086,6 +4193,7 @@ class Material {
         "flavour" => "Now this is what I call a broad sword.",
 ],
     "card_equip_3_25" => [ 
+        "type" => "card card_equip hno_3 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 3,
@@ -4098,6 +4206,7 @@ class Material {
         "flavour" => "Armor is the blacksmith's strong suit.",
 ],
     "card_equip_3_15" => [ 
+        "type" => "card card_equip hno_3 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 3,
@@ -4108,6 +4217,7 @@ class Material {
         "flavour" => "This miserable heirloom doesn't look like much, and it's not nearly as good as it looks...",
 ],
     "card_equip_3_16" => [ 
+        "type" => "card card_equip hno_3 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 3,
@@ -4120,6 +4230,7 @@ class Material {
         "flavour" => "This mead is barely legal.",
 ],
     "card_equip_3_17" => [ 
+        "type" => "card card_equip hno_3 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 3,
@@ -4131,6 +4242,7 @@ class Material {
         "flavour" => "High heels can be sooo painful.",
 ],
     "card_equip_3_20" => [ 
+        "type" => "card card_equip hno_3 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 3,
@@ -4143,6 +4255,7 @@ class Material {
         "flavour" => "Heading for trouble.",
 ],
     "card_equip_3_23" => [ 
+        "type" => "card card_equip hno_3 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 3,
@@ -4154,6 +4267,7 @@ class Material {
         "flavour" => "Keeps my legs pretty, and leaves funny marks on their faces.",
 ],
     "card_equip_3_22" => [ 
+        "type" => "card card_equip hno_3 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 3,
@@ -4166,6 +4280,7 @@ class Material {
         "flavour" => "The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.",
 ],
     "card_equip_3_18" => [ 
+        "type" => "card card_equip hno_3 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 3,
@@ -4178,6 +4293,7 @@ class Material {
         "flavour" => "Fooling your foes with fancy footwork.",
 ],
     "card_equip_3_26" => [ 
+        "type" => "card card_equip hno_3 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 3,
@@ -4190,6 +4306,7 @@ class Material {
         "flavour" => "Now between the fingers...",
 ],
     "card_equip_3_24" => [ 
+        "type" => "card card_equip hno_3 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 3,
@@ -4202,6 +4319,7 @@ class Material {
         "flavour" => "A backup disc to save your life.",
 ],
     "card_equip_3_21" => [ 
+        "type" => "card card_equip hno_3 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 3,
@@ -4214,6 +4332,7 @@ class Material {
         "flavour" => "Forged in the flames of kidnapped sprites.",
 ],
     "card_equip_4_24" => [ 
+        "type" => "card card_equip hno_4 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 4,
@@ -4225,6 +4344,7 @@ class Material {
         "flavour" => "Stepping on every toe within range.",
 ],
     "card_equip_4_15" => [ 
+        "type" => "card card_equip hno_4 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 4,
@@ -4236,6 +4356,7 @@ class Material {
         "flavour" => "Picks anything, even noses.",
 ],
     "card_equip_4_20" => [ 
+        "type" => "card card_equip hno_4 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 4,
@@ -4247,6 +4368,7 @@ class Material {
         "flavour" => "Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.",
 ],
     "card_equip_4_23" => [ 
+        "type" => "card card_equip hno_4 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 4,
@@ -4259,6 +4381,7 @@ class Material {
         "flavour" => "People hit what they can reach. On Boldur, that's mainly his head.",
 ],
     "card_equip_4_18" => [ 
+        "type" => "card card_equip hno_4 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 4,
@@ -4270,6 +4393,7 @@ class Material {
         "flavour" => "Wearing this, Boldur is quite a hot male.",
 ],
     "card_equip_4_25" => [ 
+        "type" => "card card_equip hno_4 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 4,
@@ -4281,6 +4405,7 @@ class Material {
         "flavour" => "”Boldur, this is for you, so you know I would always pick you! X O X O”",
 ],
     "card_equip_4_22" => [ 
+        "type" => "card card_equip hno_4 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 4,
@@ -4293,6 +4418,7 @@ class Material {
         "flavour" => "Used by Eitiri, who forged Thor's hammer Mjölnir.",
 ],
     "card_equip_4_17" => [ 
+        "type" => "card card_equip hno_4 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 4,
@@ -4305,6 +4431,7 @@ class Material {
         "flavour" => "I'm digging this gold rush…",
 ],
     "card_equip_4_19" => [ 
+        "type" => "card card_equip hno_4 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 4,
@@ -4316,6 +4443,7 @@ class Material {
         "flavour" => "It's an auto-pick.",
 ],
     "card_equip_4_26" => [ 
+        "type" => "card card_equip hno_4 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 4,
@@ -4328,6 +4456,7 @@ class Material {
         "flavour" => "Boldur is not happy until he can fell a tree in one throw.",
 ],
     "card_equip_4_16" => [ 
+        "type" => "card card_equip hno_4 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 4,
@@ -4340,6 +4469,7 @@ class Material {
         "flavour" => "Breaking off one side of a troll breastplate should do the trick",
 ],
     "card_equip_4_21" => [ 
+        "type" => "card card_equip hno_4 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 4,
@@ -4352,6 +4482,7 @@ class Material {
         "flavour" => "I axed your first.",
 ],
     "card_equip_5_15" => [ 
+        "type" => "card card_equip hno_5 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 5,
@@ -4363,6 +4494,7 @@ class Material {
         "flavour" => "His cane is comforting – it makes him quite hopful.",
 ],
     "card_equip_5_26" => [ 
+        "type" => "card card_equip hno_5 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 5,
@@ -4373,6 +4505,7 @@ class Material {
         "effect" => "Heal 1 damage from Finkel or an adjacent hero.",
 ],
     "card_equip_5_19" => [ 
+        "type" => "card card_equip hno_5 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 5,
@@ -4384,6 +4517,7 @@ class Material {
         "flavour" => "Forged where the elements meet, this ring rules them all.",
 ],
     "card_equip_5_21" => [ 
+        "type" => "card card_equip hno_5 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 5,
@@ -4395,6 +4529,7 @@ class Material {
         "flavour" => "Magic well grounded.",
 ],
     "card_equip_5_18" => [ 
+        "type" => "card card_equip hno_5 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 5,
@@ -4405,6 +4540,7 @@ class Material {
         "effect" => "A fashion accessory to display your cape-abilities. It's got you covered.",
 ],
     "card_equip_5_22" => [ 
+        "type" => "card card_equip hno_5 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 5,
@@ -4417,6 +4553,7 @@ class Material {
         "flavour" => "The hidden dungeon of the old ruin is not safe. At least not with Finkel there…",
 ],
     "card_equip_5_16" => [ 
+        "type" => "card card_equip hno_5 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 5,
@@ -4429,6 +4566,7 @@ class Material {
         "flavour" => "Ow, ow, ow!",
 ],
     "card_equip_5_24" => [ 
+        "type" => "card card_equip hno_5 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 5,
@@ -4440,6 +4578,7 @@ class Material {
         "effect" => "[DAMAGE]: Draw 1 card.",
 ],
     "card_equip_5_23" => [ 
+        "type" => "card card_equip hno_5 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 5,
@@ -4452,6 +4591,7 @@ class Material {
         "flavour" => "Arcane letters, archaic language, but beyond that, new spells to be learned.",
 ],
     "card_equip_5_17" => [ 
+        "type" => "card card_equip hno_5 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 5,
@@ -4465,6 +4605,7 @@ class Material {
         "flavour" => "Now extra long, to support wand-ering.",
 ],
     "card_equip_5_25" => [ 
+        "type" => "card card_equip hno_5 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 5,
@@ -4477,6 +4618,7 @@ class Material {
         "flavour" => "It's definitely not free of charge.",
 ],
     "card_equip_5_20" => [ 
+        "type" => "card card_equip hno_5 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 5,
@@ -4488,6 +4630,7 @@ class Material {
         "flavour" => "Hatters gonna hat.",
 ],
     "card_equip_6_18" => [ 
+        "type" => "card card_equip hno_6 cnum_18 hcard",
         "create" => 0,
         "num" => 18,
         "hno" => 6,
@@ -4500,6 +4643,7 @@ class Material {
         "flavour" => "Buried with its hopefully still-dead owner, it radiates power.",
 ],
     "card_equip_6_15" => [ 
+        "type" => "card card_equip hno_6 cnum_15 hcard",
         "create" => 0,
         "num" => 15,
         "hno" => 6,
@@ -4510,6 +4654,7 @@ class Material {
         "effect" => "Damage dealt to Sindra may be placed on Circle of Life instead. Each time you use a mend action, repair 1 damage from Circle of Life.",
 ],
     "card_equip_6_23" => [ 
+        "type" => "card card_equip hno_6 cnum_23 hcard",
         "create" => 0,
         "num" => 23,
         "hno" => 6,
@@ -4522,6 +4667,7 @@ class Material {
         "flavour" => "This ancient hand-me-down has claimed the lives of 3 of Sindra's kin.",
 ],
     "card_equip_6_20" => [ 
+        "type" => "card card_equip hno_6 cnum_20 hcard",
         "create" => 0,
         "num" => 20,
         "hno" => 6,
@@ -4534,6 +4680,7 @@ class Material {
         "flavour" => "It's elemental stuff.",
 ],
     "card_equip_6_22" => [ 
+        "type" => "card card_equip hno_6 cnum_22 hcard",
         "create" => 0,
         "num" => 22,
         "hno" => 6,
@@ -4546,6 +4693,7 @@ class Material {
         "flavour" => "Life in a botle.",
 ],
     "card_equip_6_26" => [ 
+        "type" => "card card_equip hno_6 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 6,
@@ -4557,6 +4705,7 @@ class Material {
         "flavour" => "Natural camouflage.",
 ],
     "card_equip_6_21" => [ 
+        "type" => "card card_equip hno_6 cnum_21 hcard",
         "create" => 0,
         "num" => 21,
         "hno" => 6,
@@ -4569,6 +4718,7 @@ class Material {
         "flavour" => "At the slopes of the Spewing Mountain, where ancient rocks hide arcane stones.",
 ],
     "card_equip_6_16" => [ 
+        "type" => "card card_equip hno_6 cnum_16 hcard",
         "create" => 0,
         "num" => 16,
         "hno" => 6,
@@ -4581,6 +4731,7 @@ class Material {
         "flavour" => "Arcane letters, archaic language, but beyond that, new spells to be learned.",
 ],
     "card_equip_6_24" => [ 
+        "type" => "card card_equip hno_6 cnum_24 hcard",
         "create" => 0,
         "num" => 24,
         "hno" => 6,
@@ -4593,6 +4744,7 @@ class Material {
         "flavour" => "Ritual magic, trapped in a crystal.",
 ],
     "card_equip_6_19" => [ 
+        "type" => "card card_equip hno_6 cnum_19 hcard",
         "create" => 0,
         "num" => 19,
         "hno" => 6,
@@ -4605,6 +4757,7 @@ class Material {
         "flavour" => "It is the little things in life that inspire.",
 ],
     "card_equip_6_25" => [ 
+        "type" => "card card_equip hno_6 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 6,
@@ -4618,6 +4771,7 @@ class Material {
         "flavour" => "Now extra long, to support wand-ering.",
 ],
     "card_equip_6_17" => [ 
+        "type" => "card card_equip hno_6 cnum_17 hcard",
         "create" => 0,
         "num" => 17,
         "hno" => 6,
@@ -4629,6 +4783,7 @@ class Material {
 ],
 // # Events
     "card_event_1_29" => [ 
+        "type" => "card card_event hno_1 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 1,
@@ -4639,6 +4794,7 @@ class Material {
         "flavour" => "Let's call it a warning shot.",
 ],
     "card_event_1_28" => [ 
+        "type" => "card card_event hno_1 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 1,
@@ -4649,6 +4805,7 @@ class Material {
         "flavour" => "Don't aim for too long!",
 ],
     "card_event_1_32" => [ 
+        "type" => "card card_event hno_1 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 1,
@@ -4659,6 +4816,7 @@ class Material {
         "flavour" => "Twannng!",
 ],
     "card_event_1_26" => [ 
+        "type" => "card card_event hno_1 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 1,
@@ -4669,6 +4827,7 @@ class Material {
         "flavour" => "I wondered where the arrow went. Then it hit me…",
 ],
     "card_event_1_31" => [ 
+        "type" => "card card_event hno_1 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 1,
@@ -4679,6 +4838,7 @@ class Material {
         "flavour" => "Hitting where it hurts, not always in the head.",
 ],
     "card_event_1_33" => [ 
+        "type" => "card card_event hno_1 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 1,
@@ -4689,6 +4849,7 @@ class Material {
         "flavour" => "Make sure the arrow head is sterilized!",
 ],
     "card_event_1_25" => [ 
+        "type" => "card card_event hno_1 cnum_25 hcard",
         "create" => 0,
         "num" => 25,
         "hno" => 1,
@@ -4699,6 +4860,7 @@ class Material {
         "flavour" => "Pray for your life.",
 ],
     "card_event_1_27" => [ 
+        "type" => "card card_event hno_1 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 1,
@@ -4709,6 +4871,7 @@ class Material {
         "flavour" => "Sea therapy, works every time...",
 ],
     "card_event_1_34" => [ 
+        "type" => "card card_event hno_1 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 1,
@@ -4719,6 +4882,7 @@ class Material {
         "flavour" => "Phew, lucky there was a cave here… Who's snoring?",
 ],
     "card_event_1_30" => [ 
+        "type" => "card card_event hno_1 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 1,
@@ -4729,6 +4893,7 @@ class Material {
         "flavour" => "Needles to say, sewing has been a common thread in Bjorn's crafts.",
 ],
     "card_event_2_28" => [ 
+        "type" => "card card_event hno_2 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 2,
@@ -4738,6 +4903,7 @@ class Material {
         "effect" => "Move 2 areas. Just because you can.",
 ],
     "card_event_2_35" => [ 
+        "type" => "card card_event hno_2 cnum_35 hcard",
         "create" => 0,
         "num" => 35,
         "hno" => 2,
@@ -4748,6 +4914,7 @@ class Material {
         "flavour" => "Let's call it a warning shot.",
 ],
     "card_event_2_30" => [ 
+        "type" => "card card_event hno_2 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 2,
@@ -4758,6 +4925,7 @@ class Material {
         "flavour" => "Anything for you, Alva!",
 ],
     "card_event_2_27" => [ 
+        "type" => "card card_event hno_2 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 2,
@@ -4768,6 +4936,7 @@ class Material {
         "flavour" => "When they don't get the hint at the first arrow, add some more…",
 ],
     "card_event_2_26" => [ 
+        "type" => "card card_event hno_2 cnum_26 hcard",
         "create" => 0,
         "num" => 26,
         "hno" => 2,
@@ -4778,6 +4947,7 @@ class Material {
         "flavour" => "Two-for-one deal, express delivery.",
 ],
     "card_event_2_34" => [ 
+        "type" => "card card_event hno_2 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 2,
@@ -4788,6 +4958,7 @@ class Material {
         "flavour" => "Make sure the arrow head is sterilized!",
 ],
     "card_event_2_32" => [ 
+        "type" => "card card_event hno_2 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 2,
@@ -4798,6 +4969,7 @@ class Material {
         "flavour" => "I could get used to this…",
 ],
     "card_event_2_36" => [ 
+        "type" => "card card_event hno_2 cnum_36 hcard",
         "create" => 0,
         "num" => 36,
         "hno" => 2,
@@ -4808,6 +4980,7 @@ class Material {
         "flavour" => "Pray for your life.",
 ],
     "card_event_2_31" => [ 
+        "type" => "card card_event hno_2 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 2,
@@ -4818,6 +4991,7 @@ class Material {
         "flavour" => "If you defend the village, I'll take care of the rest.",
 ],
     "card_event_2_33" => [ 
+        "type" => "card card_event hno_2 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 2,
@@ -4827,6 +5001,7 @@ class Material {
         "effect" => "Discard another card from hand to perform an attack action.",
 ],
     "card_event_2_29" => [ 
+        "type" => "card card_event hno_2 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 2,
@@ -4837,6 +5012,7 @@ class Material {
         "flavour" => "Just what he kneeded.",
 ],
     "card_event_3_30" => [ 
+        "type" => "card card_event hno_3 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 3,
@@ -4847,6 +5023,7 @@ class Material {
         "flavour" => "The bigger they are, the harder they fall.",
 ],
     "card_event_3_36" => [ 
+        "type" => "card card_event hno_3 cnum_36 hcard",
         "create" => 0,
         "num" => 36,
         "hno" => 3,
@@ -4856,6 +5033,7 @@ class Material {
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_3_28" => [ 
+        "type" => "card card_event hno_3 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 3,
@@ -4866,6 +5044,7 @@ class Material {
         "flavour" => "I get a kick out of you.",
 ],
     "card_event_3_34" => [ 
+        "type" => "card card_event hno_3 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 3,
@@ -4876,6 +5055,7 @@ class Material {
         "flavour" => "These runes were made by the famous Blade Runer.",
 ],
     "card_event_3_27" => [ 
+        "type" => "card card_event hno_3 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 3,
@@ -4886,6 +5066,7 @@ class Material {
         "flavour" => "Embla has a way of tackling her problems from many angles.",
 ],
     "card_event_3_37" => [ 
+        "type" => "card card_event hno_3 cnum_37 hcard",
         "create" => 0,
         "num" => 37,
         "hno" => 3,
@@ -4896,6 +5077,7 @@ class Material {
         "flavour" => "Ready, set... Wait - you're still getting dressed?",
 ],
     "card_event_3_35" => [ 
+        "type" => "card card_event hno_3 cnum_35 hcard",
         "create" => 0,
         "num" => 35,
         "hno" => 3,
@@ -4906,6 +5088,7 @@ class Material {
         "flavour" => "If you defend the village, I'll take care of the rest.",
 ],
     "card_event_3_31" => [ 
+        "type" => "card card_event hno_3 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 3,
@@ -4915,6 +5098,7 @@ class Material {
         "effect" => "Play after an adjacent monster attacked you to deal 2 damage to it.",
 ],
     "card_event_3_29" => [ 
+        "type" => "card card_event hno_3 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 3,
@@ -4925,6 +5109,7 @@ class Material {
         "flavour" => "That's my cup of tea.",
 ],
     "card_event_3_33" => [ 
+        "type" => "card card_event hno_3 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 3,
@@ -4934,6 +5119,7 @@ class Material {
         "effect" => "Discard another card from hand to perform an attack action.",
 ],
     "card_event_3_32" => [ 
+        "type" => "card card_event hno_3 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 3,
@@ -4944,6 +5130,7 @@ class Material {
         "flavour" => "Under cover, over confident.",
 ],
     "card_event_4_32" => [ 
+        "type" => "card card_event hno_4 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 4,
@@ -4954,6 +5141,7 @@ class Material {
         "flavour" => "Grr… Wraaaaaaah!",
 ],
     "card_event_4_36" => [ 
+        "type" => "card card_event hno_4 cnum_36 hcard",
         "create" => 0,
         "num" => 36,
         "hno" => 4,
@@ -4964,6 +5152,7 @@ class Material {
         "flavour" => "Narrow is the gate that leads to the inn.",
 ],
     "card_event_4_35" => [ 
+        "type" => "card card_event hno_4 cnum_35 hcard",
         "create" => 0,
         "num" => 35,
         "hno" => 4,
@@ -4974,6 +5163,7 @@ class Material {
         "flavour" => "Did you miss me?",
 ],
     "card_event_4_34" => [ 
+        "type" => "card card_event hno_4 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 4,
@@ -4984,6 +5174,7 @@ class Material {
         "flavour" => "Can't even handle the mead?",
 ],
     "card_event_4_33" => [ 
+        "type" => "card card_event hno_4 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 4,
@@ -4994,6 +5185,7 @@ class Material {
         "flavour" => "Think, think… think.",
 ],
     "card_event_4_31" => [ 
+        "type" => "card card_event hno_4 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 4,
@@ -5004,6 +5196,7 @@ class Material {
         "flavour" => "I get a kick out of you.",
 ],
     "card_event_4_29" => [ 
+        "type" => "card card_event hno_4 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 4,
@@ -5013,6 +5206,7 @@ class Material {
         "effect" => "Move 1 area.",
 ],
     "card_event_4_27" => [ 
+        "type" => "card card_event hno_4 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 4,
@@ -5023,6 +5217,7 @@ class Material {
         "flavour" => "All dwarves are minors until they turn fifty.",
 ],
     "card_event_4_38" => [ 
+        "type" => "card card_event hno_4 cnum_38 hcard",
         "create" => 0,
         "num" => 38,
         "hno" => 4,
@@ -5033,6 +5228,7 @@ class Material {
         "flavour" => "Travel-sized anvil. Check!",
 ],
     "card_event_4_30" => [ 
+        "type" => "card card_event hno_4 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 4,
@@ -5043,6 +5239,7 @@ class Material {
         "flavour" => "I need a hospital… no, I need a tavern…",
 ],
     "card_event_4_37" => [ 
+        "type" => "card card_event hno_4 cnum_37 hcard",
         "create" => 0,
         "num" => 37,
         "hno" => 4,
@@ -5053,6 +5250,7 @@ class Material {
         "flavour" => "It's not fleeing, it's a tactical retreat.",
 ],
     "card_event_4_28" => [ 
+        "type" => "card card_event hno_4 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 4,
@@ -5063,6 +5261,7 @@ class Material {
         "flavour" => "Beware! Boldur's brutal blows bring bad bruises.",
 ],
     "card_event_5_35" => [ 
+        "type" => "card card_event hno_5 cnum_35 hcard",
         "create" => 0,
         "num" => 35,
         "hno" => 5,
@@ -5073,6 +5272,7 @@ class Material {
         "flavour" => "Survival tactic: flash someone!",
 ],
     "card_event_5_30" => [ 
+        "type" => "card card_event hno_5 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 5,
@@ -5083,6 +5283,7 @@ class Material {
         "flavour" => "His presence can do that to you.",
 ],
     "card_event_5_36" => [ 
+        "type" => "card card_event hno_5 cnum_36 hcard",
         "create" => 0,
         "num" => 36,
         "hno" => 5,
@@ -5093,6 +5294,7 @@ class Material {
         "flavour" => "He's so hot right now.",
 ],
     "card_event_5_28" => [ 
+        "type" => "card card_event hno_5 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 5,
@@ -5103,6 +5305,7 @@ class Material {
         "flavour" => "If the voltage doesn't kill you, the electric bill will.",
 ],
     "card_event_5_34" => [ 
+        "type" => "card card_event hno_5 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 5,
@@ -5112,6 +5315,7 @@ class Material {
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_5_33" => [ 
+        "type" => "card card_event hno_5 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 5,
@@ -5121,6 +5325,7 @@ class Material {
         "effect" => "Play when you rolled any [RUNE] against a non-Legend monster to kill it.",
 ],
     "card_event_5_31" => [ 
+        "type" => "card card_event hno_5 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 5,
@@ -5131,6 +5336,7 @@ class Material {
         "flavour" => "Monsters don't use sunblock. Too bad for them.",
 ],
     "card_event_5_27" => [ 
+        "type" => "card card_event hno_5 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 5,
@@ -5141,6 +5347,7 @@ class Material {
         "flavour" => "You're in for a shock!",
 ],
     "card_event_5_32" => [ 
+        "type" => "card card_event hno_5 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 5,
@@ -5150,6 +5357,7 @@ class Material {
         "effect" => "Add 2 mana [MANA] to 1 of your cards.",
 ],
     "card_event_5_37" => [ 
+        "type" => "card card_event hno_5 cnum_37 hcard",
         "create" => 0,
         "num" => 37,
         "hno" => 5,
@@ -5160,6 +5368,7 @@ class Material {
         "flavour" => "Now you see me, now you… still see me, but further away. Ain't that impressive?",
 ],
     "card_event_5_29" => [ 
+        "type" => "card card_event hno_5 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 5,
@@ -5169,6 +5378,7 @@ class Material {
         "effect" => "Deal 1 damage to each adjacent monster.",
 ],
     "card_event_6_35" => [ 
+        "type" => "card card_event hno_6 cnum_35 hcard",
         "create" => 0,
         "num" => 35,
         "hno" => 6,
@@ -5179,6 +5389,7 @@ class Material {
         "flavour" => "It is a golden opportunity.",
 ],
     "card_event_6_32" => [ 
+        "type" => "card card_event hno_6 cnum_32 hcard",
         "create" => 0,
         "num" => 32,
         "hno" => 6,
@@ -5189,6 +5400,7 @@ class Material {
         "flavour" => "Spare no one.",
 ],
     "card_event_6_34" => [ 
+        "type" => "card card_event hno_6 cnum_34 hcard",
         "create" => 0,
         "num" => 34,
         "hno" => 6,
@@ -5199,6 +5411,7 @@ class Material {
         "flavour" => "What was that recipe again?",
 ],
     "card_event_6_29" => [ 
+        "type" => "card card_event hno_6 cnum_29 hcard",
         "create" => 0,
         "num" => 29,
         "hno" => 6,
@@ -5209,6 +5422,7 @@ class Material {
         "flavour" => "She will, she will, rock you!",
 ],
     "card_event_6_33" => [ 
+        "type" => "card card_event hno_6 cnum_33 hcard",
         "create" => 0,
         "num" => 33,
         "hno" => 6,
@@ -5219,6 +5433,7 @@ class Material {
         "flavour" => "You want a ton of gold? You won't like it.",
 ],
     "card_event_6_27" => [ 
+        "type" => "card card_event hno_6 cnum_27 hcard",
         "create" => 0,
         "num" => 27,
         "hno" => 6,
@@ -5229,6 +5444,7 @@ class Material {
         "flavour" => "Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.",
 ],
     "card_event_6_30" => [ 
+        "type" => "card card_event hno_6 cnum_30 hcard",
         "create" => 0,
         "num" => 30,
         "hno" => 6,
@@ -5239,6 +5455,7 @@ class Material {
         "flavour" => "Your fate is set in stone.",
 ],
     "card_event_6_31" => [ 
+        "type" => "card card_event hno_6 cnum_31 hcard",
         "create" => 0,
         "num" => 31,
         "hno" => 6,
@@ -5248,6 +5465,7 @@ class Material {
         "effect" => "Add 2 mana [MANA] to 1 of your cards.",
 ],
     "card_event_6_28" => [ 
+        "type" => "card card_event hno_6 cnum_28 hcard",
         "create" => 0,
         "num" => 28,
         "hno" => 6,
@@ -5259,6 +5477,7 @@ class Material {
 ],
 // # Heroes
     "card_hero_1_1" => [ 
+        "type" => "card card_hero hno_1 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 1,
@@ -5271,6 +5490,7 @@ class Material {
         "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain – he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
 ],
     "card_hero_1_2" => [ 
+        "type" => "card card_hero hno_1 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 1,
@@ -5283,6 +5503,7 @@ class Material {
         "flavour" => "Bjorn can solve any problem, including the problems caused by his previous solutions.",
 ],
     "card_hero_2_1" => [ 
+        "type" => "card card_hero hno_2 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 2,
@@ -5295,6 +5516,7 @@ class Material {
         "flavour" => "Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that – butterflies are pretty!",
 ],
     "card_hero_2_2" => [ 
+        "type" => "card card_hero hno_2 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 2,
@@ -5307,6 +5529,7 @@ class Material {
         "flavour" => "”I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.”",
 ],
     "card_hero_3_1" => [ 
+        "type" => "card card_hero hno_3 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 3,
@@ -5320,6 +5543,7 @@ class Material {
         "comment" => "[MANA], [XP], [DAMAGE], [DIE_ATTACK], [RUNE], <br> (line break)",
 ],
     "card_hero_3_2" => [ 
+        "type" => "card card_hero hno_3 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 3,
@@ -5332,6 +5556,7 @@ class Material {
         "flavour" => "All creatures are precious to Embla. Their exact worth is determined by the bounty.",
 ],
     "card_hero_4_1" => [ 
+        "type" => "card card_hero hno_4 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 4,
@@ -5344,6 +5569,7 @@ class Material {
         "flavour" => "Ants can carry several times their own body weight. So can Boldur. He's forging his thick armor to prove this point, and promote heavy metal.",
 ],
     "card_hero_4_2" => [ 
+        "type" => "card card_hero hno_4 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 4,
@@ -5356,6 +5582,7 @@ class Material {
         "flavour" => "Going berserk at the local inn, Boldur spent a drunken evening challenging all visitors to arm-wrestling. He broke the tavern record as well as fifteen arms, earning him the nickname the Arm-y.",
 ],
     "card_hero_5_1" => [ 
+        "type" => "card card_hero hno_5 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 5,
@@ -5368,6 +5595,7 @@ class Material {
         "flavour" => "Newly graduated from the pyromaniac program of the Wizarding School for Elven Orphans Who Can't Read Good, Finkel sets out to cause the heat of battle. A warm welcome to everyone!",
 ],
     "card_hero_5_2" => [ 
+        "type" => "card card_hero hno_5 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 5,
@@ -5380,6 +5608,7 @@ class Material {
         "flavour" => "Today's forecast shows fire and brimstone over large parts of the countryside.",
 ],
     "card_hero_6_1" => [ 
+        "type" => "card card_hero hno_6 cnum_1 hcard",
         "create" => 0,
         "num" => 1,
         "hno" => 6,
@@ -5392,6 +5621,7 @@ class Material {
         "flavour" => "The friendly neighborhood grandma, suddenly appearing with surprises for all: milk and cookies for the kids, and hails of levitating rocks for her enemies.",
 ],
     "card_hero_6_2" => [ 
+        "type" => "card card_hero hno_6 cnum_2 hcard",
         "create" => 0,
         "num" => 2,
         "hno" => 6,
