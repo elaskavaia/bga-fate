@@ -1,3 +1,5 @@
+@use "variables" as v;
+
 // crystals
 
 .crystal_yellow {
@@ -20,3 +22,16 @@
   height: 20px;
   border-radius: 50%;
 }
+
+// Action markers
+.marker {
+  width: 24px;
+  aspect-ratio: 1;
+  background-color: red;
+}
+
+// @each $key, $color in v.$colors-list {
+//   .marker_#{$key} {
+//     background-color: $color;
+//   }
+// }

@@ -56,7 +56,7 @@
   top: 5%;
   left: 10%;
   aspect-ratio: 1.1324947588;
-  height: 1300px;
+  height: 1040px;
 }
 
 .hex {
@@ -83,6 +83,12 @@
   pointer-events: none;
 }
 
+/**
+ * fate.scss
+ *
+ * Fate stylesheet
+ */
+/********* You can start writing your CSS below this line: **********/
 .crystal_yellow {
   background-color: #ffeb3b;
   width: 20px;
@@ -102,6 +108,12 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
+}
+
+.marker {
+  width: 24px;
+  aspect-ratio: 1;
+  background-color: red;
 }
 
 .hex > .hero,
@@ -282,7 +294,7 @@
 }
 
 .house {
-  width: 52x;
+  width: 52px;
   height: 52px;
   background-image: url(img/mini_houses.png);
   background-size: 600% auto;
@@ -325,14 +337,50 @@
 .timetrack .rune_stone {
   position: absolute;
   top: 30%;
-  left: 30%;
+  left: 0%;
+}
+.timetrack_1 .rune_stone[data-state="1"] {
+  top: -2%;
+}
+.timetrack_1 .rune_stone[data-state="2"] {
+  top: 6.1818181818%;
+}
+.timetrack_1 .rune_stone[data-state="3"] {
+  top: 14.3636363636%;
+}
+.timetrack_1 .rune_stone[data-state="4"] {
+  top: 22.5454545455%;
+}
+.timetrack_1 .rune_stone[data-state="5"] {
+  top: 30.7272727273%;
+}
+.timetrack_1 .rune_stone[data-state="6"] {
+  top: 38.9090909091%;
+}
+.timetrack_1 .rune_stone[data-state="7"] {
+  top: 47.0909090909%;
+}
+.timetrack_1 .rune_stone[data-state="8"] {
+  top: 55.2727272727%;
+}
+.timetrack_1 .rune_stone[data-state="9"] {
+  top: 63.4545454545%;
+}
+.timetrack_1 .rune_stone[data-state="10"] {
+  top: 71.6363636364%;
+}
+.timetrack_1 .rune_stone[data-state="11"] {
+  top: 79.8181818182%;
+}
+.timetrack_1 .rune_stone[data-state="12"] {
+  top: 88%;
 }
 .rune_stone::after {
   position: absolute;
   content: attr(data-state);
   z-index: 3;
   top: 30%;
-  left: 5%;
+  left: 40%;
 }
 
 .card {
@@ -644,20 +692,20 @@
 .pile_monster::after {
   content: counter(pile);
   position: absolute;
-  bottom: -10%;
-  right: -10%;
-  min-width: 1.2em;
-  height: 1.2em;
-  background-color: #333;
+  /* bottom: -10%; */
+  /* right: -10%; */
+  /* min-width: 1.2em; */
+  /* height: 1.2em; */
+  /* background-color: #333; */
   color: white;
-  font-size: 0.7em;
+  text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
+  /* font-size: 0.7em; */
   font-weight: bold;
-  line-height: 1.2em;
+  /* line-height: 1.2em; */
   text-align: center;
-  border-radius: 50%;
-  padding: 0 0.2em;
+  /* border-radius: 50%; */
+  /* padding: 0 0.2em; */
   z-index: 10;
-  pointer-events: none;
 }
 
 .supply_crystal_green,
@@ -682,20 +730,20 @@
 .supply_crystal_yellow::after {
   content: counter(pile);
   position: absolute;
-  bottom: -10%;
-  right: -10%;
-  min-width: 1.2em;
-  height: 1.2em;
-  background-color: #333;
+  /* bottom: -10%; */
+  /* right: -10%; */
+  /* min-width: 1.2em; */
+  /* height: 1.2em; */
+  /* background-color: #333; */
   color: white;
-  font-size: 0.7em;
+  text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
+  /* font-size: 0.7em; */
   font-weight: bold;
-  line-height: 1.2em;
+  /* line-height: 1.2em; */
   text-align: center;
-  border-radius: 50%;
-  padding: 0 0.2em;
+  /* border-radius: 50%; */
+  /* padding: 0 0.2em; */
   z-index: 10;
-  pointer-events: none;
 }
 
 .pile_monster.monster_goblin {
@@ -736,11 +784,15 @@
 
 .timetrack {
   position: absolute;
-  top: 0;
-  right: 0;
-  outline: 1px solid green;
-  height: 5%;
-  width: 5%;
+  bottom: 5%;
+  right: 8%;
+  height: 40%;
+  width: 3%;
+}
+
+.timetrack_2 {
+  height: 53%;
+  right: 4.5%;
 }
 
 #mainarea {
@@ -801,7 +853,7 @@
 .map_wrapper {
   position: relative;
   aspect-ratio: 4096/3134;
-  width: 1892px;
+  width: 1514px;
 }
 .map_wrapper::before {
   content: "";
@@ -813,6 +865,126 @@
   background-position: center;
   pointer-events: none;
   z-index: 0;
+}
+
+.tableau {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pboard {
+  position: relative;
+  width: 520px;
+  aspect-ratio: 1024/531;
+  background-image: url(img/EN_Player_Board.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.pboard_slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slot_gold {
+  left: 8%;
+  top: 12%;
+  width: 14%;
+  height: 15%;
+  position: relative;
+  counter-reset: pile;
+}
+.slot_gold > * {
+  counter-increment: pile;
+}
+.slot_gold > *:not(:last-child) {
+  position: absolute;
+  visibility: hidden;
+}
+.slot_gold::after {
+  content: counter(pile);
+  position: absolute;
+  /* bottom: -10%; */
+  /* right: -10%; */
+  /* min-width: 1.2em; */
+  /* height: 1.2em; */
+  /* background-color: #333; */
+  color: white;
+  text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
+  /* font-size: 0.7em; */
+  font-weight: bold;
+  /* line-height: 1.2em; */
+  text-align: center;
+  /* border-radius: 50%; */
+  /* padding: 0 0.2em; */
+  z-index: 10;
+}
+
+.pboard .deck {
+  width: 22%;
+  height: 59%;
+  top: 36%;
+}
+.pboard .deck_ability {
+  left: 3%;
+}
+.pboard .deck_equip {
+  left: 27%;
+}
+.pboard .deck_event {
+  left: 51%;
+}
+.pboard .discard {
+  left: 75%;
+}
+
+.aslot {
+  height: 8%;
+  aspect-ratio: 1;
+}
+
+.aslot_empty {
+  top: 12%;
+  left: 69%;
+}
+
+.aslot_empty + .aslot_empty {
+  top: 22%;
+}
+
+.aslot_actionMove {
+  top: 12%;
+  left: 48%;
+}
+
+.aslot_actionAttack {
+  top: 12%;
+  left: 55%;
+}
+
+.aslot_actionPrepare {
+  top: 12%;
+  left: 61%;
+}
+
+.aslot_actionFocus {
+  top: 22%;
+  left: 48%;
+}
+
+.aslot_actionMend {
+  top: 22%;
+  left: 55%;
+}
+
+.aslot_actionPractice {
+  top: 22%;
+  left: 61%;
 }
 
 /* tooltips */

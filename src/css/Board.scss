@@ -29,95 +29,56 @@
 
 // Each pile_monster shows one token shape + a count badge
 .pile_monster {
-  position: relative;
-  counter-reset: pile;
-
-  // Stack all children on top of each other
-  > .monster {
-    counter-increment: pile;
-
-    // Hide all except the last one
-    &:not(:last-child) {
-      position: absolute;
-      visibility: hidden;
-    }
-  }
-
-  // Counter badge on the pile
-  &::after {
-    content: counter(pile);
-    position: absolute;
-    bottom: -10%;
-    right: -10%;
-    min-width: 1.2em;
-    height: 1.2em;
-    background-color: #333;
-    color: white;
-    font-size: 0.7em;
-    font-weight: bold;
-    line-height: 1.2em;
-    text-align: center;
-    border-radius: 50%;
-    padding: 0 0.2em;
-    z-index: 10;
-    pointer-events: none;
-  }
+  @include v.pile-counter(".monster");
 }
 
 // Crystal supply piles: stack with counter (same trick as monster piles)
 .supply_crystal_green,
 .supply_crystal_red,
 .supply_crystal_yellow {
-  position: relative;
-  counter-reset: pile;
-
-  > * {
-    counter-increment: pile;
-
-    &:not(:last-child) {
-      position: absolute;
-      visibility: hidden;
-    }
-  }
-
-  &::after {
-    content: counter(pile);
-    position: absolute;
-    bottom: -10%;
-    right: -10%;
-    min-width: 1.2em;
-    height: 1.2em;
-    background-color: #333;
-    color: white;
-    font-size: 0.7em;
-    font-weight: bold;
-    line-height: 1.2em;
-    text-align: center;
-    border-radius: 50%;
-    padding: 0 0.2em;
-    z-index: 10;
-    pointer-events: none;
-  }
+  @include v.pile-counter;
 }
 
 // Predefined display order for monster piles: trollkin, firehorde, dead
-.pile_monster.monster_goblin { order: 1; }
-.pile_monster.monster_brute { order: 2; }
-.pile_monster.monster_troll { order: 3; }
-.pile_monster.monster_sprite { order: 4; }
-.pile_monster.monster_elemental { order: 5; }
-.pile_monster.monster_jotunn { order: 6; }
-.pile_monster.monster_imp { order: 7; }
-.pile_monster.monster_skeleton { order: 8; }
-.pile_monster.monster_draugr { order: 9; }
+.pile_monster.monster_goblin {
+  order: 1;
+}
+.pile_monster.monster_brute {
+  order: 2;
+}
+.pile_monster.monster_troll {
+  order: 3;
+}
+.pile_monster.monster_sprite {
+  order: 4;
+}
+.pile_monster.monster_elemental {
+  order: 5;
+}
+.pile_monster.monster_jotunn {
+  order: 6;
+}
+.pile_monster.monster_imp {
+  order: 7;
+}
+.pile_monster.monster_skeleton {
+  order: 8;
+}
+.pile_monster.monster_draugr {
+  order: 9;
+}
 
 .timetrack {
   position: absolute;
-  top: 0;
-  right: 0;
-  outline: 1px solid green;
-  height: 5%;
-  width: 5%;
+  bottom: 5%;
+  right: 8%;
+  //outline: 1px solid green;
+  height: 40%;
+  width: 3%;
+}
+.timetrack_2 {
+  height: 53%;
+  right: 4.5%;
 }
 
 #mainarea {
@@ -185,7 +146,7 @@
 .map_wrapper {
   position: relative;
   aspect-ratio: 4096 / 3134;
-  width: 1892px;
+  width: 1514px;
 
   &::before {
     content: "";
@@ -198,4 +159,101 @@
     pointer-events: none;
     z-index: 0;
   }
+}
+
+// --- Player tableau: outer wrapper for hero card, pboard, etc. ---
+.tableau {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+// --- Player board (pboard): background image with positioned slots ---
+.pboard {
+  position: relative;
+  width: 520px;
+  aspect-ratio: 1024 / 531;
+  background-image: url(img/EN_Player_Board.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.pboard_slot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  //outline: 2px dashed red;
+}
+
+// Experience / Gold slot — top-left corner of player board
+.slot_gold {
+  left: 8%;
+  top: 12%;
+  width: 14%;
+  height: 15%;
+  @include v.pile-counter;
+}
+
+// Card stone areas — positioned over the 4 stone illustrations
+// Abilities, Equipment, Event Deck, Discard (left to right)
+.pboard {
+  .deck {
+    width: 22%;
+    height: 59%;
+    top: 36%;
+  }
+  .deck_ability {
+    left: 3%;
+  }
+  .deck_equip {
+    left: 27%;
+  }
+  .deck_event {
+    left: 51%;
+  }
+  .discard {
+    left: 75%;
+  }
+}
+
+// Action slots — positioned over the action icons on the player board
+// Top row: Move, Attack, Prepare
+// Bottom row: Focus, Mend, Practice
+.aslot {
+  height: 8%;
+  aspect-ratio: 1;
+}
+.aslot_empty {
+  top: 12%;
+  left: 69%;
+}
+.aslot_empty + .aslot_empty {
+  top: 22%;
+}
+.aslot_actionMove {
+  top: 12%;
+  left: 48%;
+}
+.aslot_actionAttack {
+  top: 12%;
+  left: 55%;
+}
+.aslot_actionPrepare {
+  top: 12%;
+  left: 61%;
+}
+.aslot_actionFocus {
+  top: 22%;
+  left: 48%;
+}
+.aslot_actionMend {
+  top: 22%;
+  left: 55%;
+}
+.aslot_actionPractice {
+  top: 22%;
+  left: 61%;
 }

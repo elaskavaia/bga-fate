@@ -33,8 +33,8 @@ class Op_turnEnd extends Operation {
         // TODO: implement end-of-turn sequence:
         // 1. Reset action markers to empty slots
         $owner = $this->getOwner();
-        $this->dbSetTokenLocation("marker_{$owner}_1", "aslot_{$owner}_empty_1", 0);
-        $this->dbSetTokenLocation("marker_{$owner}_2", "aslot_{$owner}_empty_2", 0);
+        $this->dbSetTokenLocation("marker_{$owner}_1", "aslot_{$owner}_empty_1", 0, "");
+        $this->dbSetTokenLocation("marker_{$owner}_2", "aslot_{$owner}_empty_2", 0, "");
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
         // 3. Add mana to cards with mana generation (green icon)
         // 4. Draw 1 event card (if hand < 4, otherwise allow discard first)

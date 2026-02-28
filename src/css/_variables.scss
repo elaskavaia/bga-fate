@@ -60,6 +60,41 @@ $cardHeight: 200px;
 $cardWidth: calc($cardHeight * $ratioW / $ratioH);
 $pboardHeight: calc($cardHeight * 2.4);
 
+// Mixin: stack children, show only last, add counter badge
+// $child: selector for countable children (default: *)
+@mixin pile-counter($child: "*") {
+  position: relative;
+  counter-reset: pile;
+
+  > #{$child} {
+    counter-increment: pile;
+
+    &:not(:last-child) {
+      position: absolute;
+      visibility: hidden;
+    }
+  }
+
+  &::after {
+    content: counter(pile);
+    position: absolute;
+    /* bottom: -10%; */
+    /* right: -10%; */
+    /* min-width: 1.2em; */
+    /* height: 1.2em; */
+    /* background-color: #333; */
+    color: white;
+    text-shadow: $textShadowBlackStrong;
+    /* font-size: 0.7em; */
+    font-weight: bold;
+    /* line-height: 1.2em; */
+    text-align: center;
+    /* border-radius: 50%; */
+    /* padding: 0 0.2em; */
+    z-index: 10;
+  }
+}
+
 @keyframes active-pulse {
   0% {
     scale: 1;

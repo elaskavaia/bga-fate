@@ -194,7 +194,7 @@
 
 // House / town pieces
 .house {
-  width: 52x;
+  width: 52px;
   height: 52px;
   background-image: url(img/mini_houses.png);
   background-size: 600% auto;
@@ -235,13 +235,18 @@
   .timetrack & {
     position: absolute;
     top: 30%;
-    left: 30%;
+    left: 0%;
+  }
+  @for $n from 1 through 12 {
+    .timetrack_1 &[data-state="#{$n}"] {
+      top: calc(-2% + 90% / 11 * ($n - 1));
+    }
   }
   &::after {
     position: absolute;
     content: attr(data-state);
     z-index: 3;
     top: 30%;
-    left: 5%;
+    left: 40%;
   }
 }

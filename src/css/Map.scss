@@ -1,7 +1,7 @@
 // --- Hex grid variables ---
 // All hex dimensions derive from map height. Grid: GRID_N=8, 26 rows, 17 columns
 // Hex positions use % so the grid scales with the container
-$map-height: 1300px;
+$map-height: 1040px;
 $grid-cols: 17; // 2*GRID_N + 1
 $grid-rows: 26; // 3*GRID_N + 2
 $hex-width-pct: calc(100% / $grid-cols); // one hex width as % of map_area

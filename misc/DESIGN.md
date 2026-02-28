@@ -23,14 +23,15 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 **Location naming:**
 
 - `hex_<x>_<y>` — Board hex area (e.g. `hex_9_9` = Grimheim)
-- `supply` — Monster supply
+- `supply_monster` — Monster supply
 - `hand_<color>` — Player hand (e.g. `hand_ff0000`)
-- `tableau_<color>` — Player board (e.g. `tableau_ff0000`)
+- `tableau_<color>` — Player area (e.g. `tableau_ff0000`)
+- `pboard_<color>` — Player board
 - `cards_<color>` — Active cards area
 - `deck_ability_<color>` — Ability pile
 - `deck_equip_<color>` — Equipment pile
 - `deck_event_<color>` — Event deck
-- `discard_<color>` — Discard pile (? need per type?)
+- `discard_<color>` — Discard pile 
 - `deck_monster_yellow` / `deck_monster_red` — Monster card decks
 - `timetrack_<n>` — Time track step slot; actual step tracked as `token_state` on `rune_stone`
 

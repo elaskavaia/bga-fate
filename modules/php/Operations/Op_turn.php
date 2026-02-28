@@ -90,9 +90,11 @@ class Op_turn extends Operation {
         }
 
         // Always offer free actions (they don't consume main action slots)
+        // When main actions remain, free actions are secondary; when none remain, they become primary
         // TODO: check actual availability of each free action (has equipment, has ability, has event cards, etc.)
+        $sec = $remaining > 0;
         foreach ($this->getActionsByKind("free") as $action) {
-            $res[$action] = ["q" => 0, "sec" => true, "name" => $this->game->getTokenName("Op_$action")];
+            $res[$action] = ["q" => 0, "sec" => $sec, "name" => $this->game->getTokenName("Op_$action")];
         }
 
         return $res;

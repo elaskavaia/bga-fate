@@ -73,32 +73,33 @@ export class Game extends GameMachine {
     const mapWrapper = "map_wrapper";
     placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "thething");
     this.createMap($(mapWrapper));
-    placeHtml(`<div id="timetrack_1"></div>`, mapWrapper);
-    placeHtml(`<div id="timetrack_2"></div>`, mapWrapper);
+    placeHtml(`<div id="timetrack_1" class="timetrack token timetrack_1"></div>`, mapWrapper);
+    placeHtml(`<div id="timetrack_2" class="timetrack token timetrack_2"></div>`, mapWrapper);
     placeHtml(`<div id="display_monsterturn"></div>`, "thething");
     placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
     placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
 
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
-      // template leftovers TODO: remove
-      //const playerId = Number(player.id);
-      // this.bga.playerPanels.getElement(playerId).insertAdjacentHTML(
-      //   "beforeend",
-      //   `
-      //           <span id="energy-player-counter-${playerId}"></span> Energy
-      //       `
-      // );
-      // const counter = new ebg.counter();
-      // counter.create(`energy-player-counter-${playerId}`, {
-      //   value: (player as any).energy,
-      //   playerCounter: "energy",
-      //   playerId
-      // });
+      const color = player.color;
       placeHtml(
-        `<div id="tableau_${player.color}">
-                    <strong>${player.name}</strong>
-                    <div>Player zone content goes here</div>
-                </div>`,
+        `<div id="tableau_${color}" class="tableau">
+        <div id="pboard_${color}" class="pboard">
+          <div id="slot_gold_${color}" class="pboard_slot slot_gold"></div>
+          <div id="deck_ability_${color}" class="pboard_slot deck deck_ability"></div>
+          <div id="deck_equip_${color}" class="pboard_slot deck deck_equip"></div>
+          <div id="deck_event_${color}" class="pboard_slot deck deck_event"></div>
+          <div id="discard_${color}" class="pboard_slot deck discard"></div>
+
+          <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
+          <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
+          <div id="aslot_${color}_actionPrepare" class="pboard_slot aslot aslot_actionPrepare"></div>
+          <div id="aslot_${color}_actionFocus" class="pboard_slot aslot aslot_actionFocus"></div>
+          <div id="aslot_${color}_actionMend" class="pboard_slot aslot aslot_actionMend"></div>
+          <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
+                    <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
+          <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
+           </div>
+        </div>`,
         "players_panels"
       );
     });
@@ -152,14 +153,20 @@ export class Game extends GameMachine {
   getPlaceRedirect(tokenInfo: Token, args: AnimArgs = {}): TokenMoveInfo {
     const result = tokenInfo as TokenMoveInfo;
     const loc = tokenInfo.location;
+    const tokenKey = tokenInfo.key;
     // Stack monsters by type in supply: create sub-container per monster type
     if (loc === "supply_monster") {
-      const monsterType = getPart(tokenInfo.key, 0) + "_" + getPart(tokenInfo.key, 1); // e.g. "monster_goblin"
+      const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
       const subId = "supply_" + monsterType;
       if (!$(subId)) {
         placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "supply_monster");
       }
       result.location = subId;
+    }
+    // Redirect gold crystals on tableau to the gold slot on the player board
+    if (loc.startsWith("tableau_") && tokenKey.startsWith("crystal_yellow")) {
+      const color = loc.substring("tableau_".length);
+      result.location = `slot_gold_${color}`;
     }
     return result;
   }

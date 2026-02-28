@@ -16,6 +16,12 @@ supply_crystal_red|Red Crystal Supply|supply|global|hidden|public|
 supply_crystal_yellow|Yellow Crystal Supply|supply|global|hidden|public|
 supply_dice|Dice Supply|supply|global|hidden|public|
 
+# Player board sub-locations
+deck_ability|Abilities|tableau|player|hidden|public|
+deck_equip|Equipment|tableau|player|hidden|public|
+deck_event|Event Deck|tableau|player|hidden|public|
+discard|Discard|tableau|player|hidden|public|
+
 #set showtooltip=0
 limbo|Limbo||global|hidden|hidden|
 tableau|Player Area|players_panels|player|hidden|public|
