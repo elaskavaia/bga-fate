@@ -2,6 +2,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 #set id=card_{ctype}_{hno}_{num}
 #set create=0
 #set _noquotes=create
+# Abilities
 9|1|Eagle Eye I|ability|1|+1|||||You have attack range +1.|If I can see it, I can hit it.|
 10|1|Eagle Eye II|ability|1|+2|||||You have attack range +2. You always ignore armor.|Yeah, why shoot the armor?|
 11|1|Long Shot I|ability|1||||||Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.|
@@ -74,6 +75,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 4|6|Spark II|ability|1||||2||1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.|
 9|6|Stonesoul I|ability|1||||1||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.|
 10|6|Stonesoul II|ability|1||||2||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…|
+# Equipment
 15|1|Bjorn's First Bow|equip|1|+1|||||This is your Main Weapon. Attack range 2.|Not something he's proud of. Still not bad for a five-year-old.|
 20|1|Black Arrows|equip|1|||||<i>Spend 1 attack action in the Robber Camp</i> to loot it.|Starts with 3 arrows here (use zxp> markers).<br>Spend 1 arrow to add 3 damage to this attack action.|Painted black for the funeral they are about to attend.|
 16|1|Bone Bane Bow|equip|1|+3||||<i>Spend a mend action on Nailfare</i> to bind the relics.|This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target.|This bunch of bones, bound by braided bamboo became the bane of the banished breathless.|
@@ -143,7 +145,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 19|6|Trinket|equip|1||||1|<i>Use 5 mana [MANA] in a single turn</i> to conjure it accidentally.|3[MANA]: If you have used your 2 actions this turn, perform one of the 4 remaining actions.|It is the little things in life that inspire.|
 25|6|Wand|equip|1|+1||2||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
 17|6|Wizard's Hat|equip|1|||||<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.||Hatters gonna hat.|
-#set create=0
+# Events
 29|1|Back Down|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
 28|1|Burning Arrows|event|4||||||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!|
 32|1|Limber Bow|event|2||||||You have attack range +2 this turn.|Twannng!|
@@ -208,7 +210,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 30|6|Petrify|event|3||||||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.|
 31|6|Power Surge|event|3||||||Add 2 mana [MANA] to 1 of your cards.||
 28|6|Stoneskin|event|3||||||Prevent up to 2 damage.|Sticks and stones can't break my bones…|
-#set create=0
+# Heroes
 1|1|Bjorn|hero|1|2|9||||After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain – he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.|
 2|1|Bjorn|hero|1|4|10||||After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.|
 1|2|Alva|hero|1|2|9||||End your move action in a forest to add 1 mana [MANA] to any card.|Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that – butterflies are pretty!|

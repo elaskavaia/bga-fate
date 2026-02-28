@@ -3105,6 +3105,7 @@ class Material {
 ],
             /* --- gen php end location_material --- */
             /* --- gen php begin card_material --- */
+// # Abilities
     "card_ability_1_9" => [ 
         "create" => 0,
         "num" => 9,
@@ -3828,6 +3829,7 @@ class Material {
         "effect" => "2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.",
         "flavour" => "She's completely stoned…",
 ],
+// # Equipment
     "card_equip_1_15" => [ 
         "create" => 0,
         "num" => 15,
@@ -4625,6 +4627,7 @@ class Material {
         "quest" => "<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.",
         "flavour" => "Hatters gonna hat.",
 ],
+// # Events
     "card_event_1_29" => [ 
         "create" => 0,
         "num" => 29,
@@ -5254,6 +5257,7 @@ class Material {
         "effect" => "Prevent up to 2 damage.",
         "flavour" => "Sticks and stones can't break my bones…",
 ],
+// # Heroes
     "card_hero_1_1" => [ 
         "create" => 0,
         "num" => 1,
