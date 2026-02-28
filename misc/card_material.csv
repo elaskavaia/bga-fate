@@ -1,6 +1,6 @@
 num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment
 #set id=card_{ctype}_{hno}_{num}
-#set create=1
+#set create=0
 #set _noquotes=create
 9|1|Eagle Eye I|ability|1|+1|||||You have attack range +1.|If I can see it, I can hit it.|
 10|1|Eagle Eye II|ability|1|+2|||||You have attack range +2. You always ignore armor.|Yeah, why shoot the armor?|
@@ -143,7 +143,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 19|6|Trinket|equip|1||||1|<i>Use 5 mana [MANA] in a single turn</i> to conjure it accidentally.|3[MANA]: If you have used your 2 actions this turn, perform one of the 4 remaining actions.|It is the little things in life that inspire.|
 25|6|Wand|equip|1|+1||2||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
 17|6|Wizard's Hat|equip|1|||||<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.||Hatters gonna hat.|
-#set create=2
+#set create=0
 29|1|Back Down|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
 28|1|Burning Arrows|event|4||||||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!|
 32|1|Limber Bow|event|2||||||You have attack range +2 this turn.|Twannng!|
@@ -208,7 +208,7 @@ num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|co
 30|6|Petrify|event|3||||||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.|
 31|6|Power Surge|event|3||||||Add 2 mana [MANA] to 1 of your cards.||
 28|6|Stoneskin|event|3||||||Prevent up to 2 damage.|Sticks and stones can't break my bones…|
-#set create=1
+#set create=0
 1|1|Bjorn|hero|1|2|9||||After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain – he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.|
 2|1|Bjorn|hero|1|4|10||||After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.|
 1|2|Alva|hero|1|2|9||||End your move action in a forest to add 1 mana [MANA] to any card.|Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that – butterflies are pretty!|

@@ -183,7 +183,7 @@ class PGameTokens {
         }
     }
 
-    protected function createTokenFromInfo($id, $info) {
+    function createTokenFromInfo($id, $info) {
         $create_type = array_get($info, "create", 0);
         if (!$create_type) {
             return;
@@ -211,7 +211,7 @@ class PGameTokens {
                 $count = 1;
             }
             // location and state use recursive parent fallback
-            $location = $this->game->getRulesFor($id, "location", "limbo");
+            $location = $this->game->getRulesFor($id, "location", $info["location"] ?? "limbo");
             $state = $this->game->getRulesFor($id, "state", 0);
             $start = array_get($info, "start", 1);
             if (strpos($token_id, "{COLOR}") === false) {

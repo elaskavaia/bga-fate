@@ -71,7 +71,7 @@ class Game extends Base {
     */
     protected function setupGameTables() {
         $this->tokens->createTokens();
-        $tokens = $this->tokens->db;
+        $tokensDb = $this->tokens->db;
         // setup
         $pnum = $this->getPlayersNumber();
         $startingPlayer = $this->getFirstPlayer();
@@ -88,36 +88,55 @@ class Game extends Base {
         );
 
         // Shuffle monster card decks
-        $tokens->shuffle("deck_monster_yellow");
-        $tokens->shuffle("deck_monster_red");
+        $tokensDb->shuffle("deck_monster_yellow");
+        $tokensDb->shuffle("deck_monster_red");
 
         // Remove excess town pieces based on player count (1p=4, 2p=6, 3p=8, 4p=10)
         $players = $this->loadPlayersBasicInfos();
         $pnum = count($players);
         $townPieceCount = 2 * $pnum + 2; // 1p=4, 2p=6, 3p=8, 4p=10
         for ($i = $townPieceCount; $i <= 9; $i++) {
-            $tokens->moveToken("house_$i", "limbo");
+            $tokensDb->moveToken("house_$i", "limbo");
         }
 
         // Player setup — heroes start at their CSV-defined hex positions
         $heroNo = 1;
         foreach ($players as $player_id => $player) {
             $color = $player["player_color"];
-            $this->tokens->db->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
+            $tokensDb->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
-            // Assign hero to player (Iteration 0: sequential assignment, later will be player choice)
-            // Starting cards: hero=1, ability=3, equip=15
-            $tokens->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
-            $tokens->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
-            $tokens->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
+            // Create all cards for this hero and place in appropriate decks
+            $deckMap = [
+                "hero" => "limbo",
+                "ability" => "deck_ability_{$color}",
+                "equip" => "deck_equip_{$color}",
+                "event" => "deck_event_{$color}",
+            ];
+            foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
+                if (($info["hno"] ?? null) != $heroNo) {
+                    continue;
+                }
+                $ctype = $info["ctype"];
+                $location = $deckMap[$ctype] ?? "limbo";
+                $count = $info["count"] ?? 1;
+                $info["location"] = $location;
+                $info["create"] = ($count > 1) ? 2 : 1;
+                $this->tokens->createTokenFromInfo($cardId, $info);
+            }
+            // Move starting cards to tableau
+            $tokensDb->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
+            $tokensDb->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
+            $tokensDb->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
+            // Shuffle decks
+            $tokensDb->shuffle("deck_ability_{$color}");
+            $tokensDb->shuffle("deck_equip_{$color}");
+            $tokensDb->shuffle("deck_event_{$color}");
             // Hero already at starting hex from material, no move needed
             $heroNo++;
         }
         // Move unused heroes to limbo
         for ($i = $heroNo; $i <= 4; $i++) {
-            $tokens->moveToken("hero_$i", "limbo");
-            $tokens->moveToken("card_hero_{$i}_1", "limbo");
-            $tokens->moveToken("card_hero_{$i}_2", "limbo");
+            $tokensDb->moveToken("hero_$i", "limbo");
         }
         $color = $this->custom_getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);

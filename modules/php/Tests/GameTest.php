@@ -108,6 +108,10 @@ class GameUT extends Game {
         return $op->action_resolve([Operation::ARG_TARGET => $target]);
     }
 
+    public function setupGameTables() {
+        return parent::setupGameTables();
+    }
+
     // override/stub methods here that access db and stuff
 }
 
@@ -271,10 +275,69 @@ final class GameTest extends TestCase {
         $this->assertEquals(1, $reachable["hex_7_9"]);
     }
 
+    public function testSetupCreatesHeroCardsInDecks() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        // Hero 1 assigned to player 1 (PCOLOR), hero 2 to player 2 (BCOLOR)
+        // Starting cards should be on tableau
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_hero_1_1"));
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_ability_1_3"));
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_equip_1_15"));
+
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_hero_2_1"));
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_ability_2_3"));
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_equip_2_15"));
+    }
+
+    public function testSetupHeroCardsInCorrectDecks() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        // Hero 1 Level II hero card should be in limbo (not a starting card)
+        $this->assertEquals("limbo", $game->tokens->db->getTokenLocation("card_hero_1_2"));
+
+        // Non-starting ability cards should be in ability deck
+        $this->assertEquals("deck_ability_" . PCOLOR, $game->tokens->db->getTokenLocation("card_ability_1_9"));
+
+        // Non-starting equip cards should be in equip deck
+        $this->assertEquals("deck_equip_" . PCOLOR, $game->tokens->db->getTokenLocation("card_equip_1_20"));
+
+        // Event cards (indexed) should be in event deck
+        $this->assertEquals("deck_event_" . PCOLOR, $game->tokens->db->getTokenLocation("card_event_1_28_1"));
+        $this->assertEquals("deck_event_" . PCOLOR, $game->tokens->db->getTokenLocation("card_event_1_28_2"));
+    }
+
+    public function testSetupUnusedHeroesInLimbo() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        // 2 players: heroes 3 and 4 should be in limbo
+        $this->assertEquals("limbo", $game->tokens->db->getTokenLocation("hero_3"));
+        $this->assertEquals("limbo", $game->tokens->db->getTokenLocation("hero_4"));
+
+        // No cards created for unused heroes
+        $this->assertNull($game->tokens->db->getTokenInfo("card_hero_3_1"));
+        $this->assertNull($game->tokens->db->getTokenInfo("card_hero_4_1"));
+    }
+
+    public function testSetupEventCardDuplicates() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        // Burning Arrows (num=28) has count=4, should create 4 indexed tokens
+        for ($i = 1; $i <= 4; $i++) {
+            $loc = $game->tokens->db->getTokenLocation("card_event_1_28_{$i}");
+            $this->assertNotNull($loc, "card_event_1_28_{$i} should exist");
+            $this->assertEquals("deck_event_" . PCOLOR, $loc);
+        }
+        // 5th copy should not exist
+        $this->assertNull($game->tokens->db->getTokenInfo("card_event_1_28_5"));
+    }
+
     public function testInstanciateAllOperations() {
         $this->game();
-        $this->game->tokens->createTokens();
-        $this->game->tokens->db->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->setupGameTables();
         $this->game->tokens->db->moveToken("hero_1", "hex_9_9");
         $token_types = $this->game->material->get();
         $tested = [];
