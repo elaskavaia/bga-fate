@@ -68,6 +68,14 @@ class Op_actionAttack extends Operation {
         $strength = $this->game->getHeroAttackStrength($owner);
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
 
+        // Clean up any leftover dice on display from a previous attack
+        $leftover = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        if (count($leftover) > 0) {
+            $leftoverKeys = array_map(fn($d) => $d["key"], $leftover);
+            $this->dbSetTokensLocation($leftoverKeys, "supply_die_attack", 6, "");
+        }
+
+        // TODO: attack dice sides are wrong — log does not show the side that was rolled
         // Roll attack dice — pick from supply (silent bulk move), then notify each with its roll result for animation
         $diceResults = [];
         $diceTokens = $this->game->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
@@ -94,11 +102,7 @@ class Op_actionAttack extends Operation {
             // TODO: handle armor (draugr — reduce hits)
         }
 
-        // Apply damage
+        // Apply damage — dice stay on display_battle so the player can see them
         $this->game->effect_applyDamage($monsterId, $targetHex, $hits, $owner);
-
-        // Return dice to supply
-        $dieKeys = array_map(fn($d) => $d["id"], $diceResults);
-        $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
     }
 }

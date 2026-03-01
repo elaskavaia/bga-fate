@@ -45,6 +45,17 @@ class Op_reinforcement extends Operation {
             $spawnLoc = $this->game->tokens->getRulesFor($cardId, "spawnloc");
             $spawnStr = $this->game->tokens->getRulesFor($cardId, "spawn");
 
+            // TODO: Skip legend cards — not yet implemented
+            if (str_contains($spawnStr, "L")) {
+                $this->dbSetTokenLocation(
+                    $cardId,
+                    "display_monsterturn",
+                    1,
+                    clienttranslate('${token_name} is a legend card, drawing another...')
+                );
+                continue;
+            }
+
             // Parse spawn string into list of monster types
             $monsterTypes = $this->parseSpawnString($spawnStr, $spawnLoc);
 

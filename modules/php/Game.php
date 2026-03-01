@@ -348,7 +348,7 @@ class Game extends Base {
     }
 
     /**
-     * Apply damage to a monster on a hex: move red crystals from supply to the monster's hex.
+     * Apply damage to a monster: move red crystals from supply onto the monster token.
      * If total damage >= monster health, the monster is killed (moved to supply, XP awarded).
      * @return bool true if the monster was killed
      */
@@ -356,11 +356,11 @@ class Game extends Base {
         if ($amount <= 0) {
             return false;
         }
-        // Place red crystals on the monster's hex
-        $this->effect_moveCrystals($owner, "red", $amount, $monsterHex);
+        // Place red crystals on the monster token
+        $this->effect_moveCrystals($owner, "red", $amount, $monsterId);
 
-        // Count total red crystals on this hex
-        $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterHex);
+        // Count total red crystals on this monster
+        $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId);
         $totalDamage = count($crystals);
 
         // Check if monster is killed
@@ -369,8 +369,8 @@ class Game extends Base {
             // Monster killed — award XP
             $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
             $this->effect_gainXp($owner, $xp);
-            // Remove red crystals from hex back to supply
-            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterHex);
+            // Remove red crystals from monster back to supply
+            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterId);
             // Remove monster from map
             $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${player_name} kills ${token_name}'));
             return true;

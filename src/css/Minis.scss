@@ -1,3 +1,5 @@
+@use "variables" as v;
+
 // Center hero/monster figures inside a hex
 .hex > .hero,
 .hex > .monster {
@@ -39,19 +41,51 @@
   z-index: 1;
   position: relative;
 
-  &::after {
+  &::before {
     content: attr(data-name);
     position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: medium;
+    font-size: x-large;
     font-weight: bold;
+  }
+}
+
+// Bucket: generic sub-container for tokens placed on another token
+.bucket {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+
+  // Hide token children — only the count badge is visible
+  > * {
+    position: absolute;
+    visibility: hidden;
+  }
+
+  // Count badge (shown when data-count > 0)
+  &[data-count]:not([data-count="0"])::after {
+    content: attr(data-count);
+    display: block;
+    min-width: 1.4em;
+    height: 1.4em;
+    color: white;
+    font-size: 0.7em;
+    font-weight: bold;
+    line-height: 1.4em;
     text-align: center;
-    line-height: 1.1;
-    pointer-events: none;
+    border-radius: 50%;
+  }
+}
+
+// Red crystal bucket: damage indicator (red badge, bottom-right)
+.bucket_crystal_red {
+  bottom: 0;
+  right: 0;
+  &[data-count]:not([data-count="0"])::after {
+    background-color: #e53935;
   }
 }
 
@@ -60,35 +94,21 @@
   background-color: #4a7a3a;
   border-color: #2d4d22;
   border-radius: 20%;
-  &::after {
-    content: "trollkin";
-    font-size: xx-large;
-  }
 }
 
 // Goblin: square with rounded corners, lighter green, letter abbreviation
 .monster.monster_goblin {
-  &::after {
-    content: "G";
-  }
+  background-color: #4a7a3a;
 }
 
 // Brute: square with rounded corners, medium green, letter abbreviation
 .monster.monster_brute {
   background-color: rgb(34, 102, 34);
-
-  &::after {
-    content: "B";
-  }
 }
 
 // Troll: square with rounded corners, dark green, letter abbreviation
 .monster.monster_troll {
   background-color: #0a2202;
-
-  &::after {
-    content: "T";
-  }
 }
 
 .monster.firehorde {
@@ -96,36 +116,23 @@
   background-color: #c94420;
   border-color: #8b2e14;
   border-radius: 0;
-  border: none;
-  &::after {
-    content: "firehorde";
-    font-size: xx-large;
+  &::before {
     top: 20%;
   }
 }
 // Sprite: rounded triangle, light orange/red, letter abbreviation
 .monster.monster_sprite {
   background-color: #e8c43a;
-
-  &::after {
-    content: "S";
-  }
 }
 
 // Elemental: rounded triangle, medium red, letter abbreviation
 .monster.monster_elemental {
   background-color: #e8713a;
-  &::after {
-    content: "E";
-  }
 }
 
 // Jotunn: rounded triangle, dark red, letter abbreviation
 .monster.monster_jotunn {
   background-color: #c94420;
-  &::after {
-    content: "J";
-  }
 }
 
 .monster.dead {
@@ -134,9 +141,7 @@
   border: none;
   background-color: #9b59b6;
   border-color: #6c3483;
-  &::after {
-    content: "dead";
-    font-size: xx-large;
+  &::before {
     top: 15%;
   }
 }
@@ -144,28 +149,16 @@
 // Imp: pentagon, pink, letter abbreviation
 .monster.monster_imp {
   background-color: #e87aab;
-
-  &::after {
-    content: "I";
-  }
 }
 
 // Skeleton: pentagon, purple, letter abbreviation
 .monster.monster_skeleton {
   background-color: #9b59b6;
-
-  &::after {
-    content: "S";
-  }
 }
 
 // Draugr: pentagon, dark purple, letter abbreviation
 .monster.monster_draugr {
   background-color: #5b2d8e;
-
-  &::after {
-    content: "D";
-  }
 }
 
 // Rank indicators (border style + darker background per rank)

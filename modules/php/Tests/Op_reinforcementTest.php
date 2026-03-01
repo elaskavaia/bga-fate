@@ -147,6 +147,55 @@ final class Op_reinforcementTest extends TestCase {
         $this->assertEquals(3, $monsterCount);
     }
 
+    public function testSkipsLegendCard(): void {
+        // Card 1 "Queen of the Dead": spawn=L (legend only, no regular monsters)
+        // Card 36 "Viral Trolls": T,T,T (regular card)
+        $this->game->tokens->moveToken("card_monster_1", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_1", 999); // top
+        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_36", 998); // second
+
+        $this->game->setPlayersNumber(1);
+        $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
+        $op->resolve();
+
+        // Legend card should be skipped (state=1)
+        $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_1"));
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_1"));
+
+        // Regular card should be placed
+        $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_36"));
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_36"));
+
+        // Trolls should be on DarkForest hexes
+        $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
+        $trollCount = 0;
+        foreach ($darkForestHexes as $hex) {
+            $tokens = $this->game->tokens->getTokensOfTypeInLocation("monster_troll", $hex);
+            $trollCount += count($tokens);
+        }
+        $this->assertEquals(3, $trollCount);
+    }
+
+    public function testSkipsLegendCardWithMixedSpawn(): void {
+        // Card 5 "Hrungbald": spawn=L,B,B,B (legend + regular monsters)
+        // Should still be skipped entirely since L is present
+        // Card 36 "Viral Trolls": T,T,T (fallback)
+        $this->game->tokens->moveToken("card_monster_5", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_5", 999); // top
+        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_36", 998); // second
+
+        $this->game->setPlayersNumber(1);
+        $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
+        $op->resolve();
+
+        // Legend card skipped
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_5"));
+        // Regular card placed
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_36"));
+    }
+
     public function testCardGoesToDisplay(): void {
         // Card 36 "Viral Trolls": T,T,T
         $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");

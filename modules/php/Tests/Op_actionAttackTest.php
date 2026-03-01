@@ -102,7 +102,7 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(0, $crystals);
     }
 
@@ -114,7 +114,7 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(0, $crystals); // 0 hits = 0 damage
     }
 
@@ -126,7 +126,7 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_troll_1"));
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(2, $crystals);
     }
 
@@ -138,23 +138,35 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
     }
 
-    public function testResolveDiceReturnedToSupply(): void {
+    public function testDiceStayOnDisplayAfterAttack(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        // Count dice in supply before
-        $diceBefore = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "supply_die_attack");
-        $countBefore = count($diceBefore);
+        $this->game->randQueue = [5, 5, 5];
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
-        // All dice should be back in supply after
-        $diceAfter = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "supply_die_attack");
-        $this->assertCount($countBefore, $diceAfter);
-
-        // No dice should be on display_battle
+        // Dice should remain on display_battle so the player can see them
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
-        $this->assertCount(0, $diceOnDisplay);
+        $this->assertCount(3, $diceOnDisplay);
+    }
+
+    public function testSecondAttackCleansUpPreviousDice(): void {
+        // First attack — dice land on display_battle
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->randQueue = [1, 1, 1];
+        $op = $this->createOp();
+        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+
+        $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        $this->assertCount(3, $diceOnDisplay);
+
+        // Second attack — old dice cleaned up, new dice placed
+        $this->game->randQueue = [5, 5, 5];
+        $op2 = $this->createOp();
+        $op2->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+
+        $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        $this->assertCount(3, $diceOnDisplay);
     }
 
     // -------------------------------------------------------------------------
@@ -170,8 +182,8 @@ final class Op_actionAttackTest extends TestCase {
         $this->assertTrue($killed);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
-        // No red crystals should remain on hex
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        // No red crystals should remain on monster
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(0, $crystals);
     }
 
@@ -184,8 +196,8 @@ final class Op_actionAttackTest extends TestCase {
         $this->assertFalse($killed);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
-        // 1 red crystal should be on hex
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        // 1 red crystal should be on monster
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(1, $crystals);
     }
 
@@ -197,7 +209,7 @@ final class Op_actionAttackTest extends TestCase {
         // First attack: 3 damage
         $killed = $this->game->effect_applyDamage("monster_troll_1", "hex_12_8", 3, PCOLOR);
         $this->assertFalse($killed);
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(3, $crystals);
 
         // Second attack: 4 more damage — total 7, enough to kill
@@ -206,7 +218,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
 
         // All red crystals returned to supply
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(0, $crystals);
     }
 
@@ -218,7 +230,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->assertFalse($killed);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(0, $crystals);
     }
 
@@ -305,7 +317,7 @@ final class Op_actionAttackTest extends TestCase {
 
         // 1 hit is not enough to kill goblin (health=2)
         $this->assertEquals("hex_12_4", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_4");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(1, $crystals);
     }
 

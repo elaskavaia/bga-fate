@@ -151,8 +151,8 @@ See CLAUDE.md for project overview
 [x] Add attack dice game element — token_material.csv, dice_material.csv, Tokens.scss, Game.ts
 
 ### Server
-[ ] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
-  - `getAreasInRange($areaId, $range)` — for ranged attacks
+[x] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
+[ ] `getAreasInRange($areaId, $range)` — for ranged attacks
 [ ] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
 [ ] Hero attack strength: just base hero value for now (no equipment/abilities)
 [ ] Damage tracking on monsters (red crystals placed on monster/hero)

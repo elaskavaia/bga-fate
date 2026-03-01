@@ -205,12 +205,15 @@
 }
 
 // Experience / Gold slot — top-left corner of player board
-.slot_gold {
+.bucket_crystal_yellow {
   left: 8%;
   top: 12%;
   width: 14%;
   height: 15%;
-  @include v.pile-counter;
+  &[data-count]:not([data-count="0"])::after {
+    background-color: #ffeb3b;
+    color: black;
+  }
 }
 
 // Card stone areas — positioned over the 4 stone illustrations

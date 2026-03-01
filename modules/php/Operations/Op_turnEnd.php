@@ -25,16 +25,18 @@ class Op_turnEnd extends Operation {
         return ["confirm"];
     }
 
-    public function requireConfirmation() {
-        return true;
-    }
-
     function resolve(): void {
         // TODO: implement end-of-turn sequence:
         // 1. Reset action markers to empty slots
         $owner = $this->getOwner();
         $this->dbSetTokenLocation("marker_{$owner}_1", "aslot_{$owner}_empty_1", 0, "");
         $this->dbSetTokenLocation("marker_{$owner}_2", "aslot_{$owner}_empty_2", 0, "");
+        // Return any dice left on display_battle to supply
+        $dice = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        if (count($dice) > 0) {
+            $dieKeys = array_map(fn($d) => $d["key"], $dice);
+            $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
+        }
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
         // 3. Add mana to cards with mana generation (green icon)
         // 4. Draw 1 event card (if hand < 4, otherwise allow discard first)
