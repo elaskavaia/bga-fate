@@ -161,7 +161,7 @@ class Base extends Table {
     }
 
     public function getDefaultStatValue(string $key, string $type): ?int {
-        if (startsWith($key, "game_")) {
+        if (str_starts_with($key, "game_")) {
             return 0;
         } elseif ($key === "turns_number") {
             return 0;
@@ -522,8 +522,8 @@ class Base extends Table {
                 if (
                     is_string($value) &&
                     is_string($key) &&
-                    (endsWith($key, "_tr") ||
-                        (endsWith($key, "_name") && $key != "player_name" && $key != "token_name" && $key != "place_name"))
+                    (str_ends_with($key, "_tr") ||
+                        (str_ends_with($key, "_name") && $key != "player_name" && $key != "token_name" && $key != "place_name"))
                 ) {
                     $i18n[] = $key;
                 }
@@ -547,7 +547,7 @@ class Base extends Table {
         // automaticaly add to preserve array all keys if they ends with _preserve
         $preserve = array_get($args, "preserve", []);
         foreach ($args as $key => $arg) {
-            if (is_string($arg) && endsWith($key, "_preserve")) {
+            if (is_string($arg) && str_ends_with($key, "_preserve")) {
                 $preserve[] = $key;
             }
             if ($key == "reason_tr") {
@@ -619,7 +619,7 @@ class Base extends Table {
     }
 
     function evaluateTerm($x, $owner, $context = null, ?array $options = null) {
-        if (startsWith($x, "count") && strlen($x) > 6) {
+        if (str_starts_with($x, "count") && strlen($x) > 6) {
             $method = new ReflectionMethod(get_class($this), "$x");
             if (!$method) {
                 throw new Exception("Uknown term $x");
@@ -792,21 +792,6 @@ class Base extends Table {
     }
 }
 // GLOBAL utility functions
-function startsWith($haystack, $needle) {
-    if ($haystack === null) {
-        throw new Exception("ee");
-    }
-    // search backwards starting from haystack length characters from the end
-    return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
-}
-
-function endsWith($haystack, $needle) {
-    if ($haystack === null) {
-        return false;
-    }
-    $length = strlen($needle);
-    return $length === 0 || substr($haystack, -$length) === $needle;
-}
 
 function custom_array_rotate(array $array, int $start_index, int $direction) {
     $keys = array_keys($array);
@@ -855,14 +840,6 @@ function uRShift($a, $b = 1) {
     return ($a >> $b) & ~((1 << 8 * PHP_INT_SIZE - 1) >> $b - 1);
 }
 
-if (!function_exists("array_key_first")) {
-    function array_key_first(array $arr) {
-        foreach ($arr as $key => $unused) {
-            return $key;
-        }
-        return null;
-    }
-}
 if (!function_exists("array_get")) {
     /**
      * Get an item from an array using "dot" notation.

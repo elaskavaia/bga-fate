@@ -15,7 +15,6 @@ use PHPUnit\Framework\TestCase;
 
 use function Bga\Games\Fate\array_get;
 use function Bga\Games\Fate\getPart;
-use function Bga\Games\Fate\startsWith;
 use function Bga\Games\Fate\toJson;
 
 //       "player_colors" => ["ff0000", "ffcc02", "6cd0f6", "982fff"],
@@ -378,7 +377,7 @@ final class GameTest extends TestCase {
         $tested = [];
         foreach ($token_types as $key => $info) {
             $this->assertTrue(!!$key);
-            if (!startsWith($key, "Op_")) {
+            if (!str_starts_with($key, "Op_")) {
                 continue;
             }
             echo "testing op $key\n";
@@ -392,7 +391,7 @@ final class GameTest extends TestCase {
         foreach ($files as $file) {
             $base = basename($file);
             $this->assertTrue(!!$base);
-            if (!startsWith($base, "Op_")) {
+            if (!str_starts_with($base, "Op_")) {
                 continue;
             }
             $mne = preg_replace("/Op_(.*).php/", "\\1", $base);

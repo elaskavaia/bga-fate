@@ -22,7 +22,6 @@ use Bga\GameFramework\SystemException;
 use Bga\Games\Fate\Game;
 
 use function Bga\Games\Fate\array_get;
-use function Bga\Games\Fate\endsWith;
 use function Bga\Games\Fate\toJson;
 
 class DbTokens {
@@ -32,14 +31,13 @@ class DbTokens {
     // autoreshuffle_trigger = array( 'obj' => object, 'method' => method_name )
     // If defined, tell the name of the deck and what is the corresponding discard (ex : "mydeck" => "mydiscard")
     var $autoreshuffle_custom = [];
-    private $custom_fields;
+
     protected $keyindex = []; // cache
 
     public Game $game; // game ref
     function __construct(Game $game) {
         $this->game = $game;
         $this->table = "token";
-        $this->custom_fields = [];
         $this->autoreshuffle_trigger = ["obj" => $this, "method" => "autoreshuffleHandler"];
     }
 
@@ -464,9 +462,8 @@ class DbTokens {
             $sql .= " AND token_location $like '$location' ";
         }
         if ($state !== null) {
-            $op = $this->extractStateOperator($state);
             self::checkState($state, false);
-            $sql .= " AND token_state $op '$state'";
+            $sql .= " AND token_state = '$state'";
         }
         if ($order_by !== null) {
             $sql .= " ORDER BY $order_by ASC";
@@ -586,24 +583,6 @@ class DbTokens {
         if (preg_match("/^[A-Za-z{$extra}][A-Za-z_0-9{$extra}-]*$/", $location) == 0) {
             throw new SystemException("location must be alphanum and underscore non empty string");
         }
-    }
-
-    function extractStateOperator(&$state) {
-        $op = "";
-        if ($state !== null) {
-            $state = trim($state);
-            $matches = [];
-            $res = preg_match("/^(>=|>|<=|<|<>|!=|=|) *(-?[0-9]+)$/", $state, $matches, PREG_OFFSET_CAPTURE);
-            if ($res == 1) {
-                $op = $matches[1][0];
-                $rest = $matches[2][0];
-                $state = $rest;
-            }
-        }
-        if (!$op) {
-            $op = "=";
-        }
-        return $op;
     }
 
     final function checkState($state, $canBeNull = false) {
@@ -772,17 +751,8 @@ class DbTokens {
 
     function getSelectQuery() {
         $sql = "SELECT token_key AS \"key\", token_location AS \"location\", token_state AS \"state\"";
-        if (count($this->custom_fields)) {
-            $sql .= ", ";
-            $sql .= implode(", ", $this->custom_fields);
-        }
         $sql .= " FROM " . $this->table;
         return $sql;
-    }
-
-    function setCustomFields($fields_array) {
-        $this->checkTokenKeyArray($fields_array);
-        $this->custom_fields = $fields_array;
     }
 
     function dbReplaceValues($values) {
@@ -1033,7 +1003,7 @@ class DbTokens {
                 if ($content_type == "private" && $this->game->isRealPlayer($player_id)) {
                     // content allow only if location of same color
                     $color = $this->game->custom_getPlayerColorById($player_id);
-                    return endsWith($location, $color);
+                    return str_ends_with($location, $color);
                 }
                 return false;
             } else {
@@ -1055,11 +1025,17 @@ class DbTokens {
         $this->dbSetTokenLocation($token_id, null, $state, $notif, $args, $player_id);
     }
 
-    function dbPickTokenForLocation($from_place, $to_place, $state = null, $notif = "*", $args = [], int $player_id = 0) {
-        $picks = $this->pickTokensForLocation(1, $from_place, $to_place);
-        $pick = array_shift($picks);
-        if ($pick) {
-            $this->dbSetTokenLocation($pick["key"], $to_place, $state, $notif, ["place_from" => $from_place] + $args, $player_id);
+    function dbPickTokensForLocation(int $count, $from_place, $to_place, $state = null, $notif = "*", $args = [], int $player_id = 0) {
+        $picks = $this->pickTokensForLocation($count, $from_place, $to_place);
+        $real = count($picks);
+
+        if ($real > 0) {
+            if ($real == 1) {
+                $pick = array_shift($picks);
+                $this->dbSetTokenLocation($pick["key"], $to_place, $state, $notif, ["place_from" => $from_place] + $args, $player_id);
+            } else {
+                $this->dbSetTokensLocation($picks, $to_place, $state, $notif, ["place_from" => $from_place] + $args, $player_id);
+            }
         } else {
             $this->game->notifyMessage(clienttranslate('Nothing left in ${token_name}'), ["token_name" => $from_place]);
         }

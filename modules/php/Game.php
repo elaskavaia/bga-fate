@@ -148,7 +148,7 @@ class Game extends Base {
     }
 
     public function getDefaultStatValue(string $key, string $type): ?int {
-        if (startsWith($key, "game_")) {
+        if (str_starts_with($key, "game_")) {
             return 0;
         } elseif ($key === "turns_number") {
             return 0;
