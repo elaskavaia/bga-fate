@@ -117,51 +117,51 @@
   background-size: 600% auto;
 }
 
-.die_attack.side_1 {
+.die_attack[data-state="1"] {
   background-position: 0% 0%;
 }
 
-.die_attack.side_2 {
+.die_attack[data-state="2"] {
   background-position: 20% 0%;
 }
 
-.die_attack.side_3 {
+.die_attack[data-state="3"] {
   background-position: 40% 0%;
 }
 
-.die_attack.side_4 {
+.die_attack[data-state="4"] {
   background-position: 60% 0%;
 }
 
-.die_attack.side_5 {
+.die_attack[data-state="5"] {
   background-position: 80% 0%;
 }
 
-.die_attack.side_6 {
+.die_attack[data-state="6"] {
   background-position: 100% 0%;
 }
 
-.die_monster.side_1 {
+.die_monster[data-state="1"] {
   background-position: 0% 100%;
 }
 
-.die_monster.side_2 {
+.die_monster[data-state="2"] {
   background-position: 20% 100%;
 }
 
-.die_monster.side_3 {
+.die_monster[data-state="3"] {
   background-position: 40% 100%;
 }
 
-.die_monster.side_4 {
+.die_monster[data-state="4"] {
   background-position: 60% 100%;
 }
 
-.die_monster.side_5 {
+.die_monster[data-state="5"] {
   background-position: 80% 100%;
 }
 
-.die_monster.side_6 {
+.die_monster[data-state="6"] {
   background-position: 100% 100%;
 }
 

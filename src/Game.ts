@@ -88,7 +88,7 @@ export class Game extends GameMachine {
         `<div id="tableau_${color}" class="tableau ${hnoClass}">
 
         <div id="pboard_${color}" class="pboard">
-          <div id="slot_gold_${color}" class="pboard_slot slot_gold"></div>
+          <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
           <div id="deck_ability_${color}" class="pboard_slot deck deck_ability"></div>
           <div id="deck_equip_${color}" class="pboard_slot deck deck_equip"></div>
           <div id="deck_event_${color}" class="pboard_slot deck deck_event"></div>
@@ -156,9 +156,10 @@ export class Game extends GameMachine {
   }
 
   getPlaceRedirect(tokenInfo: Token, args: AnimArgs = {}): TokenMoveInfo {
-    const result = tokenInfo as TokenMoveInfo;
+    const result = { ...tokenInfo } as TokenMoveInfo;
     const loc = tokenInfo.location;
     const tokenKey = tokenInfo.key;
+
     // Stack monsters by type in supply: create sub-container per monster type
     if (loc === "supply_monster") {
       const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
@@ -167,18 +168,47 @@ export class Game extends GameMachine {
         placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "supply_monster");
       }
       result.location = subId;
-    }
-    // Redirect gold crystals on tableau to the gold slot on the player board
-    if (loc.startsWith("tableau_") && tokenKey.startsWith("crystal_yellow")) {
-      const color = loc.substring("tableau_".length);
-      result.location = `slot_gold_${color}`;
-    }
-    // Redirect cards on tableau to the card area
-    if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+    } else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+      // Redirect cards on tableau to the card area
       const color = loc.substring("tableau_".length);
       result.location = `cardsarea_${color}`;
+    } else if (tokenKey.startsWith("crystal_")) {
+      // Bucket redirect: tokens placed on another token get a sub-container bucket
+      // e.g. crystal_red on monster_goblin_1 → bucket_crystal_red_monster_goblin_1
+      const bucketType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "crystal_red"
+      const tokenNode = $(tokenKey);
+      const oldBucket = tokenNode?.parentElement;
+      const oldBucketId = oldBucket?.classList.contains("bucket") ? oldBucket.id : null;
+
+      if (!loc.startsWith("supply")) {
+        const bucketId = `bucket_${bucketType}_${loc}`;
+        if (!$(bucketId)) {
+          placeHtml(`<div id="${bucketId}" class="bucket bucket_${bucketType}"></div>`, loc);
+        }
+        result.location = bucketId;
+
+        result.onEnd = () => {
+          if (oldBucketId) {
+            // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
+            this.updateBucketCount(oldBucketId);
+          }
+          this.updateBucketCount(bucketId);
+        };
+      }
     }
     return result;
+  }
+
+  /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
+  updateBucketCount(bucketId: string) {
+    const bucket = $(bucketId);
+    if (bucket) {
+      let count = 0;
+      for (let i = 0; i < bucket.children.length; i++) {
+        if (!bucket.children[i].classList.contains("bucket")) count++;
+      }
+      bucket.dataset.count = String(count);
+    }
   }
 
   updateTokenDisplayInfo(tokenInfo: TokenDisplayInfo) {
@@ -218,10 +248,9 @@ export class Game extends GameMachine {
       }
       case "die": {
         const dtype = getPart(tokenId, 1); // "attack" or "monster"
-        const tokenData = this.gamedatas.tokens?.[tokenId];
-        const dieState = tokenData ? Number(tokenData.state) : 0;
+        const dieState = this.getTokenState(tokenId);
         if (dieState >= 1 && dieState <= 6) {
-          tokenInfo.imageTypes += ` side_${dieState}`;
+          tokenInfo.imageData = { state: String(dieState) };
           const sideKey = `side_die_${dtype}_${dieState}`;
           const sideInfo = this.getRulesFor(sideKey, "name", "");
           if (sideInfo) tokenInfo.tooltip = this.ttSection(_("Result"), this.getTr(sideInfo));

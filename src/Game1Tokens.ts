@@ -17,6 +17,7 @@ export interface TokenDisplayInfo {
   typeKey: string; // this is key in token_types structure
   mainType: string; // first type
   imageTypes: string; // all classes
+  imageData?: Record<string, string>; // data-* attributes for tooltip image
   name?: string | NotificationMessage;
   tooltip?: string | NotificationMessage;
   showtooltip?: boolean;
@@ -340,8 +341,8 @@ export class Game1Tokens extends Game0Basics {
   async placeTokenServer(tokenId: string, location: string, state?: number, args?: any) {
     const tokenInfo = this.setTokenInfo(tokenId, location, state, true, args);
     await this.placeToken(tokenId, tokenInfo, args);
-    this.updateTooltip(tokenId);
-    this.updateTooltip(tokenInfo.location);
+    this.updateTooltip(tokenId, undefined, { force: true });
+    this.updateTooltip(tokenInfo.location, undefined, { force: true });
   }
 
   prapareToken(tokenId: string, tokenDbInfo?: Token, args: AnimArgs = {}) {
@@ -420,7 +421,7 @@ export class Game1Tokens extends Game0Basics {
     }
   }
 
-  updateTooltip(tokenId: string, attachTo?: ElementOrId, delay?: number) {
+  updateTooltip(tokenId: string, attachTo?: ElementOrId, options: { delay?: number; force?: boolean } = {}) {
     if (attachTo === undefined) {
       attachTo = tokenId;
     }
@@ -436,7 +437,7 @@ export class Game1Tokens extends Game0Basics {
       console.error("cannot calc tooltip" + tokenId);
       return;
     }
-    var tokenInfo = this.getTokenDisplayInfo(tokenId);
+    var tokenInfo = this.getTokenDisplayInfo(tokenId, options.force);
     if (tokenInfo.name) {
       attachNode.dataset.name = this.game.getTr(tokenInfo.name);
     }
@@ -460,7 +461,7 @@ export class Game1Tokens extends Game0Basics {
       if (attachNode.id != tokenId) attachNode.dataset.tt = tokenId; // id of token that provides the tooltip
 
       //console.log("addTooltipHtml", attachNode.id);
-      this.game.addTooltipHtml(attachNode.id, main, delay ?? this.game.defaultTooltipDelay);
+      this.game.addTooltipHtml(attachNode.id, main, options.delay ?? this.game.defaultTooltipDelay);
       attachNode.removeAttribute("title"); // unset title so both title and tooltip do not show up
 
       this.handleStackedTooltips(attachNode);
@@ -483,7 +484,7 @@ export class Game1Tokens extends Game0Basics {
   }
 
   getTooltipHtmlForTokenInfo(tokenInfo: TokenDisplayInfo) {
-    return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, tokenInfo.reverseImageTypes);
+    return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, tokenInfo.reverseImageTypes, tokenInfo.imageData);
   }
 
   getTokenName(tokenId: string, force: boolean = true): string {
@@ -500,7 +501,8 @@ export class Game1Tokens extends Game0Basics {
     name: string | NotificationMessage,
     message: string | NotificationMessage,
     imgTypes: string = "",
-    reverseImgTypes: string = ""
+    reverseImgTypes: string = "",
+    imageData?: Record<string, string>
   ) {
     if (name == null || message == "-") return "";
     if (!message) message = "";
@@ -515,7 +517,12 @@ export class Game1Tokens extends Game0Basics {
           <div class='tooltipimage ${reverseImgTypes}'></div>
         `;
       } else {
-        divImg = `<div class='tooltipimage ${imgTypes}'></div>`;
+        const dataAttrs = imageData
+          ? Object.entries(imageData)
+              .map(([k, v]) => `data-${k}="${v}"`)
+              .join(" ")
+          : "";
+        divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
       }
       var itypes = imgTypes.split(" ");
       for (var i = 0; i < itypes.length; i++) {
@@ -543,9 +550,13 @@ export class Game1Tokens extends Game0Basics {
     </div>`;
   }
 
-  getTokenInfoState(tokenId: string) {
+  getTokenState(tokenId: string) {
     var tokenInfo = this.gamedatas.tokens[tokenId];
-    return Number(tokenInfo.state);
+    return Number(tokenInfo?.state);
+  }
+  getTokenLocation(tokenId: string) {
+    var tokenInfo = this.gamedatas.tokens[tokenId];
+    return tokenInfo?.location;
   }
 
   getAllRules(tokenId: string) {

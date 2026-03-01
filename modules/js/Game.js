@@ -785,8 +785,8 @@ class Game1Tokens extends Game0Basics {
     async placeTokenServer(tokenId, location, state, args) {
         const tokenInfo = this.setTokenInfo(tokenId, location, state, true, args);
         await this.placeToken(tokenId, tokenInfo, args);
-        this.updateTooltip(tokenId);
-        this.updateTooltip(tokenInfo.location);
+        this.updateTooltip(tokenId, undefined, { force: true });
+        this.updateTooltip(tokenInfo.location, undefined, { force: true });
     }
     prapareToken(tokenId, tokenDbInfo, args = {}) {
         if (!tokenDbInfo) {
@@ -860,7 +860,7 @@ class Game1Tokens extends Game0Basics {
             // this.showMessage(token + " -> FAILED -> " + place + "\n" + e, "error");
         }
     }
-    updateTooltip(tokenId, attachTo, delay) {
+    updateTooltip(tokenId, attachTo, options = {}) {
         if (attachTo === undefined) {
             attachTo = tokenId;
         }
@@ -875,7 +875,7 @@ class Game1Tokens extends Game0Basics {
             console.error("cannot calc tooltip" + tokenId);
             return;
         }
-        var tokenInfo = this.getTokenDisplayInfo(tokenId);
+        var tokenInfo = this.getTokenDisplayInfo(tokenId, options.force);
         if (tokenInfo.name) {
             attachNode.dataset.name = this.game.getTr(tokenInfo.name);
         }
@@ -895,7 +895,7 @@ class Game1Tokens extends Game0Basics {
             if (attachNode.id != tokenId)
                 attachNode.dataset.tt = tokenId; // id of token that provides the tooltip
             //console.log("addTooltipHtml", attachNode.id);
-            this.game.addTooltipHtml(attachNode.id, main, delay ?? this.game.defaultTooltipDelay);
+            this.game.addTooltipHtml(attachNode.id, main, options.delay ?? this.game.defaultTooltipDelay);
             attachNode.removeAttribute("title"); // unset title so both title and tooltip do not show up
             this.handleStackedTooltips(attachNode);
         }
@@ -916,7 +916,7 @@ class Game1Tokens extends Game0Basics {
         return this.getTooltipHtmlForTokenInfo(tokenInfo);
     }
     getTooltipHtmlForTokenInfo(tokenInfo) {
-        return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, tokenInfo.reverseImageTypes);
+        return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, tokenInfo.reverseImageTypes, tokenInfo.imageData);
     }
     getTokenName(tokenId, force = true) {
         var tokenInfo = this.getTokenDisplayInfo(tokenId);
@@ -929,7 +929,7 @@ class Game1Tokens extends Game0Basics {
             return "? " + tokenId;
         }
     }
-    getTooltipHtml(name, message, imgTypes = "", reverseImgTypes = "") {
+    getTooltipHtml(name, message, imgTypes = "", reverseImgTypes = "", imageData) {
         if (name == null || message == "-")
             return "";
         if (!message)
@@ -946,7 +946,12 @@ class Game1Tokens extends Game0Basics {
         `;
             }
             else {
-                divImg = `<div class='tooltipimage ${imgTypes}'></div>`;
+                const dataAttrs = imageData
+                    ? Object.entries(imageData)
+                        .map(([k, v]) => `data-${k}="${v}"`)
+                        .join(" ")
+                    : "";
+                divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
             }
             var itypes = imgTypes.split(" ");
             for (var i = 0; i < itypes.length; i++) {
@@ -972,9 +977,13 @@ class Game1Tokens extends Game0Basics {
         <div class='tooltip-body'>${body}</div>
     </div>`;
     }
-    getTokenInfoState(tokenId) {
+    getTokenState(tokenId) {
         var tokenInfo = this.gamedatas.tokens[tokenId];
-        return Number(tokenInfo.state);
+        return Number(tokenInfo?.state);
+    }
+    getTokenLocation(tokenId) {
+        var tokenInfo = this.gamedatas.tokens[tokenId];
+        return tokenInfo?.location;
     }
     getAllRules(tokenId) {
         return this.getRulesFor(tokenId, "*", null);
@@ -1756,7 +1765,7 @@ class Game extends GameMachine {
             placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}">
 
         <div id="pboard_${color}" class="pboard">
-          <div id="slot_gold_${color}" class="pboard_slot slot_gold"></div>
+          <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
           <div id="deck_ability_${color}" class="pboard_slot deck deck_ability"></div>
           <div id="deck_equip_${color}" class="pboard_slot deck deck_equip"></div>
           <div id="deck_event_${color}" class="pboard_slot deck deck_event"></div>
@@ -1811,7 +1820,7 @@ class Game extends GameMachine {
         });
     }
     getPlaceRedirect(tokenInfo, args = {}) {
-        const result = tokenInfo;
+        const result = { ...tokenInfo };
         const loc = tokenInfo.location;
         const tokenKey = tokenInfo.key;
         // Stack monsters by type in supply: create sub-container per monster type
@@ -1823,17 +1832,46 @@ class Game extends GameMachine {
             }
             result.location = subId;
         }
-        // Redirect gold crystals on tableau to the gold slot on the player board
-        if (loc.startsWith("tableau_") && tokenKey.startsWith("crystal_yellow")) {
-            const color = loc.substring("tableau_".length);
-            result.location = `slot_gold_${color}`;
-        }
-        // Redirect cards on tableau to the card area
-        if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+        else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+            // Redirect cards on tableau to the card area
             const color = loc.substring("tableau_".length);
             result.location = `cardsarea_${color}`;
         }
+        else if (tokenKey.startsWith("crystal_")) {
+            // Bucket redirect: tokens placed on another token get a sub-container bucket
+            // e.g. crystal_red on monster_goblin_1 → bucket_crystal_red_monster_goblin_1
+            const bucketType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "crystal_red"
+            const tokenNode = $(tokenKey);
+            const oldBucket = tokenNode?.parentElement;
+            const oldBucketId = oldBucket?.classList.contains("bucket") ? oldBucket.id : null;
+            if (!loc.startsWith("supply")) {
+                const bucketId = `bucket_${bucketType}_${loc}`;
+                if (!$(bucketId)) {
+                    placeHtml(`<div id="${bucketId}" class="bucket bucket_${bucketType}"></div>`, loc);
+                }
+                result.location = bucketId;
+                result.onEnd = () => {
+                    if (oldBucketId) {
+                        // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
+                        this.updateBucketCount(oldBucketId);
+                    }
+                    this.updateBucketCount(bucketId);
+                };
+            }
+        }
         return result;
+    }
+    /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
+    updateBucketCount(bucketId) {
+        const bucket = $(bucketId);
+        if (bucket) {
+            let count = 0;
+            for (let i = 0; i < bucket.children.length; i++) {
+                if (!bucket.children[i].classList.contains("bucket"))
+                    count++;
+            }
+            bucket.dataset.count = String(count);
+        }
     }
     updateTokenDisplayInfo(tokenInfo) {
         // override to generate dynamic tooltips and such
@@ -1880,10 +1918,9 @@ class Game extends GameMachine {
             }
             case "die": {
                 const dtype = getPart(tokenId, 1); // "attack" or "monster"
-                const tokenData = this.gamedatas.tokens?.[tokenId];
-                const dieState = tokenData ? Number(tokenData.state) : 0;
+                const dieState = this.getTokenState(tokenId);
                 if (dieState >= 1 && dieState <= 6) {
-                    tokenInfo.imageTypes += ` side_${dieState}`;
+                    tokenInfo.imageData = { state: String(dieState) };
                     const sideKey = `side_die_${dtype}_${dieState}`;
                     const sideInfo = this.getRulesFor(sideKey, "name", "");
                     if (sideInfo)

@@ -32,16 +32,16 @@
   background-size: 600% auto;
 }
 
-// Attack die - side class added by updateTokenDisplayInfo from gamedatas state
+// Attack die — styled via data-state attribute (set by token system)
 @for $i from 1 through 6 {
-  .die_attack.side_#{$i} {
+  .die_attack[data-state="#{$i}"] {
     background-position: math.percentage(calc(($i - 1) / 5)) 0%;
   }
 }
 
-// Monster die - side class added by updateTokenDisplayInfo from gamedatas state
+// Monster die — styled via data-state attribute (set by token system)
 @for $i from 1 through 6 {
-  .die_monster.side_#{$i} {
+  .die_monster[data-state="#{$i}"] {
     background-position: math.percentage(calc(($i - 1) / 5)) 100%;
   }
 }
