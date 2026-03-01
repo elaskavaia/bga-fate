@@ -15,10 +15,10 @@ final class Op_actionMoveTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
         // Assign hero 1 to PCOLOR player
-        $this->game->tokens->db->moveToken("card_hero_1", "tableau_" . PCOLOR);
-        $this->game->tokens->db->moveToken("hero_1", "hex_9_9");
+        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("hero_1", "hex_9_9");
     }
 
     private function createOp(): Op_actionMove {
@@ -71,7 +71,7 @@ final class Op_actionMoveTest extends TestCase {
 
     public function testOccupiedHexBlocks(): void {
         // Place another hero on an adjacent hex
-        $this->game->tokens->db->moveToken("hero_2", "hex_11_8");
+        $this->game->tokens->moveToken("hero_2", "hex_11_8");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
@@ -96,7 +96,7 @@ final class Op_actionMoveTest extends TestCase {
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
-        $location = $this->game->tokens->db->getTokenLocation("hero_1");
+        $location = $this->game->tokens->getTokenLocation("hero_1");
         $this->assertEquals("hex_11_8", $location);
     }
 

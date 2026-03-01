@@ -35,7 +35,7 @@ class Op_actionAttack extends Operation {
     function getPossibleMoves(): array {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
-        $currentHex = $this->game->tokens->db->getTokenLocation($heroId);
+        $currentHex = $this->game->tokens->getTokenLocation($heroId);
         // TODO: support attack range 2+ from equipment (e.g. bow)
         $adjacentHexes = $this->game->hexMap->getAdjacentHexes($currentHex);
         $moves = [];
@@ -70,7 +70,7 @@ class Op_actionAttack extends Operation {
 
         // Roll attack dice — pick from supply (silent bulk move), then notify each with its roll result for animation
         $diceResults = [];
-        $diceTokens = $this->game->tokens->db->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
+        $diceTokens = $this->game->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
         foreach ($diceTokens as $die) {
             $dieId = $die["key"];
             $roll = $this->game->bgaRand(1, 6);

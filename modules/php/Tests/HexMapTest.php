@@ -13,9 +13,9 @@ final class HexMapTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
         $this->game->setPlayersNumber(1);
-        $this->game->tokens->db->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
     }
 
     // -------------------------------------------------------------------------
@@ -143,14 +143,14 @@ final class HexMapTest extends TestCase {
     }
 
     public function testGetOccupancyMapShowsHeroes(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->hexMap->invalidateOccupancy();
         $occ = $this->game->hexMap->getOccupancyMap();
         $this->assertEquals("hero_1", $occ["hex_11_8"]["character"]);
     }
 
     public function testGetOccupancyMapShowsMonsters(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
         $occ = $this->game->hexMap->getOccupancyMap();
         $this->assertEquals("monster_goblin_1", $occ["hex_12_8"]["character"]);
@@ -165,7 +165,7 @@ final class HexMapTest extends TestCase {
 
     public function testGetOccupancyMapHousesInStuff(): void {
         $occ = $this->game->hexMap->getOccupancyMap();
-        // Houses are placed in Grimheim hexes during createTokens
+        // Houses are placed in Grimheim hexes during createAllTokens
         $foundHouse = false;
         foreach ($occ as $entry) {
             foreach (array_keys($entry["stuff"]) as $key) {
@@ -182,7 +182,7 @@ final class HexMapTest extends TestCase {
         // Load cache
         $this->game->hexMap->getOccupancyMap();
         // Move token directly in DB
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         // Cache still has old data
         $occ1 = $this->game->hexMap->getOccupancyMap();
         // Invalidate and reload
@@ -196,14 +196,14 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testGetCharacterHexFound(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertEquals("hex_11_8", $this->game->hexMap->getCharacterHex("hero_1"));
     }
 
     public function testGetCharacterHexNotOnMap(): void {
         // hero_1 is in supply or off-map
-        $this->game->tokens->db->moveToken("hero_1", "limbo");
+        $this->game->tokens->moveToken("hero_1", "limbo");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertNull($this->game->hexMap->getCharacterHex("hero_1"));
     }
@@ -242,7 +242,7 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testIsOccupiedTrue(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertTrue($this->game->hexMap->isOccupied("hex_11_8"));
     }
@@ -274,7 +274,7 @@ final class HexMapTest extends TestCase {
     }
 
     public function testCanEnterHexOccupiedBlocked(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertFalse($this->game->hexMap->canEnterHex("hex_11_8", "monster"));
     }
@@ -315,23 +315,23 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testIsHeroAdjacentToAdjacentHex(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
 
     public function testIsHeroAdjacentToSameHex(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_12_8");
+        $this->game->tokens->moveToken("hero_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
 
     public function testIsHeroAdjacentToFarAway(): void {
         // Move all heroes far from target
-        $this->game->tokens->db->moveToken("hero_1", "hex_1_1");
-        $this->game->tokens->db->moveToken("hero_2", "hex_1_1");
-        $this->game->tokens->db->moveToken("hero_3", "hex_1_1");
-        $this->game->tokens->db->moveToken("hero_4", "hex_1_1");
+        $this->game->tokens->moveToken("hero_1", "hex_1_1");
+        $this->game->tokens->moveToken("hero_2", "hex_1_1");
+        $this->game->tokens->moveToken("hero_3", "hex_1_1");
+        $this->game->tokens->moveToken("hero_4", "hex_1_1");
         $this->game->hexMap->invalidateOccupancy();
         $this->assertFalse($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
@@ -346,8 +346,8 @@ final class HexMapTest extends TestCase {
     }
 
     public function testGetMonstersOnMapSortedByDistance(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_13_7"); // far
-        $this->game->tokens->db->moveToken("monster_goblin_2", "hex_11_8"); // close (dist 1)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7"); // far
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_11_8"); // close (dist 1)
         $this->game->hexMap->invalidateOccupancy();
 
         $monsters = $this->game->hexMap->getMonstersOnMap();
@@ -358,8 +358,8 @@ final class HexMapTest extends TestCase {
     }
 
     public function testGetMonstersOnMapExcludesHeroes(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $monsters = $this->game->hexMap->getMonstersOnMap();

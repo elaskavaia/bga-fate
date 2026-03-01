@@ -16,7 +16,7 @@ final class Op_reinforcementTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
     }
 
     private function createReinforcementOp(array $data = []): Op_reinforcement {
@@ -41,8 +41,8 @@ final class Op_reinforcementTest extends TestCase {
     public function testPlacesMonstersFromYellowCard(): void {
         // Card 32 "Younglings" in DarkForest: B,G,G,G,G,G,G,G (1 brute + 7 goblins)
         // Move card 32 to top of yellow deck
-        $this->game->tokens->db->moveToken("card_monster_32", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_32", 999); // highest = top
+        $this->game->tokens->moveToken("card_monster_32", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_32", 999); // highest = top
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
@@ -62,8 +62,8 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testCorrectMonsterTypesPlaced(): void {
         // Card 31 "Strolling" in OgreValley: T,T,B (2 trolls + 1 brute)
-        $this->game->tokens->db->moveToken("card_monster_31", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_31", 999);
+        $this->game->tokens->moveToken("card_monster_31", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_31", 999);
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
@@ -90,21 +90,21 @@ final class Op_reinforcementTest extends TestCase {
     public function testSkipsCardWhenHexOccupied(): void {
         // Card 36 "Viral Trolls" in DarkForest: T,T,T (monsters at hex indices 0,1,2)
         // Card 31 "Strolling" in OgreValley: T,T,B (no occupied hexes there)
-        $this->game->tokens->db->moveToken("card_monster_36", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_36", 999); // top
-        $this->game->tokens->db->moveToken("card_monster_31", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_31", 998); // second
+        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_36", 999); // top
+        $this->game->tokens->moveToken("card_monster_31", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_31", 998); // second
 
         // Occupy the first hex in DarkForest — card 36 can't place at index 0
         $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
-        $this->game->tokens->db->moveToken("hero_1", $darkForestHexes[0]);
+        $this->game->tokens->moveToken("hero_1", $darkForestHexes[0]);
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
         $op->resolve();
 
         // Card 36 should be skipped (on display at state=1), card 31 placed in OgreValley
-        $card36State = $this->game->tokens->db->getTokenState("card_monster_36");
+        $card36State = $this->game->tokens->getTokenState("card_monster_36");
         $this->assertEquals(1, $card36State); // skipped
 
         $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
@@ -121,21 +121,21 @@ final class Op_reinforcementTest extends TestCase {
         // Card 31 "Strolling" in OgreValley: T,T,B (different location, no blocked hexes)
         // Occupy hex[0] in DeadPlains so card 22 fails, then card 31 should be placed
 
-        $this->game->tokens->db->moveToken("card_monster_22", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_22", 999); // top
-        $this->game->tokens->db->moveToken("card_monster_31", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_31", 998); // second
+        $this->game->tokens->moveToken("card_monster_22", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_22", 999); // top
+        $this->game->tokens->moveToken("card_monster_31", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_31", 998); // second
 
         // Occupy first hex of DeadPlains
         $deadPlainsHexes = $this->game->hexMap->getHexesInLocation("DeadPlains");
-        $this->game->tokens->db->moveToken("hero_1", $deadPlainsHexes[0]);
+        $this->game->tokens->moveToken("hero_1", $deadPlainsHexes[0]);
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
         $op->resolve();
 
         // Card 22 skipped, card 31's monsters placed in OgreValley
-        $card22State = $this->game->tokens->db->getTokenState("card_monster_22");
+        $card22State = $this->game->tokens->getTokenState("card_monster_22");
         $this->assertEquals(1, $card22State); // skipped
 
         $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
@@ -149,31 +149,31 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testCardGoesToDisplay(): void {
         // Card 36 "Viral Trolls": T,T,T
-        $this->game->tokens->db->moveToken("card_monster_36", "deck_monster_yellow");
-        $this->game->tokens->db->setTokenState("card_monster_36", 999);
+        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_36", 999);
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
         $op->resolve();
 
         // Card should now be on display_monsterturn
-        $loc = $this->game->tokens->db->getTokenLocation("card_monster_36");
+        $loc = $this->game->tokens->getTokenLocation("card_monster_36");
         $this->assertEquals("display_monsterturn", $loc);
     }
 
     public function testCleanupMovesCardToBottomOfDeck(): void {
         // Place a card on display as if reinforcement just happened
-        $this->game->tokens->db->moveToken("card_monster_36", "display_monsterturn");
+        $this->game->tokens->moveToken("card_monster_36", "display_monsterturn");
 
         // Run turnMonster — cleanup should move card back to bottom of deck
-        $this->game->tokens->db->setTokenState("rune_stone", 0);
+        $this->game->tokens->setTokenState("rune_stone", 0);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $loc = $this->game->tokens->db->getTokenLocation("card_monster_36");
+        $loc = $this->game->tokens->getTokenLocation("card_monster_36");
         $this->assertEquals("deck_monster_yellow", $loc);
         // Should be at the bottom (below min of other cards)
-        $state = $this->game->tokens->db->getTokenState("card_monster_36");
+        $state = $this->game->tokens->getTokenState("card_monster_36");
         $this->assertLessThan(0, $state);
     }
 
@@ -183,7 +183,7 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testReinforcementTriggeredOnYellowAxesStep(): void {
         // Step 1 = tm_yellow_axes → should queue reinforcement
-        $this->game->tokens->db->setTokenState("rune_stone", 0); // will advance to 1
+        $this->game->tokens->setTokenState("rune_stone", 0); // will advance to 1
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
@@ -195,7 +195,7 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testReinforcementTriggeredOnRedAxesStep(): void {
         // Step 7 = tm_red_axes → should queue reinforcement with red deck
-        $this->game->tokens->db->setTokenState("rune_stone", 6); // will advance to 7
+        $this->game->tokens->setTokenState("rune_stone", 6); // will advance to 7
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
@@ -208,7 +208,7 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testNoReinforcementOnShieldStep(): void {
         // Step 2 = tm_yellow_shield → no reinforcement
-        $this->game->tokens->db->setTokenState("rune_stone", 1); // will advance to 2
+        $this->game->tokens->setTokenState("rune_stone", 1); // will advance to 2
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
@@ -220,7 +220,7 @@ final class Op_reinforcementTest extends TestCase {
 
     public function testReinforcementOnSkullStep(): void {
         // Step 9 = tm_red_skull → red reinforcement + charge
-        $this->game->tokens->db->setTokenState("rune_stone", 8); // will advance to 9
+        $this->game->tokens->setTokenState("rune_stone", 8); // will advance to 9
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 

@@ -23,7 +23,6 @@ namespace Bga\Games\Fate;
 use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Common\HexMap;
-use Bga\Games\Fate\Common\PGameTokens;
 use Bga\Games\Fate\Db\DbMultiUndo;
 use Bga\Games\Fate\Db\DbTokens;
 use Bga\Games\Fate\OpCommon\AiOperation;
@@ -37,7 +36,7 @@ class Game extends Base {
     public static Game $instance;
     public OpMachine $machine;
     public Material $material;
-    public PGameTokens $tokens;
+    public DbTokens $tokens;
     public HexMap $hexMap;
     public DbMultiUndo $dbMultiUndo;
 
@@ -50,8 +49,7 @@ class Game extends Base {
 
         $this->material = new Material();
         $this->machine = new OpMachine();
-        $tokens = new DbTokens($this);
-        $this->tokens = new PGameTokens($this, $tokens);
+        $this->tokens = new DbTokens($this);
         $this->hexMap = new HexMap($this);
         $this->dbMultiUndo = new DbMultiUndo($this, "restorePlayerTables");
 
@@ -70,8 +68,7 @@ class Game extends Base {
         called from setupNewGame
     */
     protected function setupGameTables() {
-        $this->tokens->createTokens();
-        $tokensDb = $this->tokens->db;
+        $this->tokens->createAllTokens();
         // setup
         $pnum = $this->getPlayersNumber();
         $startingPlayer = $this->getFirstPlayer();
@@ -88,15 +85,15 @@ class Game extends Base {
         );
 
         // Shuffle monster card decks
-        $tokensDb->shuffle("deck_monster_yellow");
-        $tokensDb->shuffle("deck_monster_red");
+        $this->tokens->shuffle("deck_monster_yellow");
+        $this->tokens->shuffle("deck_monster_red");
 
         // Remove excess town pieces based on player count (1p=4, 2p=6, 3p=8, 4p=10)
         $players = $this->loadPlayersBasicInfos();
         $pnum = count($players);
         $townPieceCount = 2 * $pnum + 2; // 1p=4, 2p=6, 3p=8, 4p=10
         for ($i = $townPieceCount; $i <= 9; $i++) {
-            $tokensDb->moveToken("house_$i", "limbo");
+            $this->tokens->moveToken("house_$i", "limbo");
         }
 
         // Player setup — heroes randomly assigned
@@ -106,7 +103,7 @@ class Game extends Base {
         foreach ($players as $player_id => $player) {
             $heroNo = $heroNos[$heroIdx++];
             $color = $player["player_color"];
-            $tokensDb->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
+            $this->tokens->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
             // Create all cards for this hero and place in appropriate decks
             $deckMap = [
@@ -127,20 +124,20 @@ class Game extends Base {
                 $this->tokens->createTokenFromInfo($cardId, $info);
             }
             // Move starting cards to tableau
-            $tokensDb->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
-            $tokensDb->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
-            $tokensDb->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
+            $this->tokens->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
+            $this->tokens->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
+            $this->tokens->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
             // Shuffle decks
-            $tokensDb->shuffle("deck_ability_{$color}");
-            $tokensDb->shuffle("deck_equip_{$color}");
-            $tokensDb->shuffle("deck_event_{$color}");
+            $this->tokens->shuffle("deck_ability_{$color}");
+            $this->tokens->shuffle("deck_equip_{$color}");
+            $this->tokens->shuffle("deck_event_{$color}");
             // Hero already at starting hex from material, no move needed
         }
         // Move unused heroes to limbo
         $usedHeros = array_slice($heroNos, 0, $heroIdx);
         for ($i = 1; $i <= 4; $i++) {
             if (!in_array($i, $usedHeros)) {
-                $tokensDb->moveToken("hero_$i", "limbo");
+                $this->tokens->moveToken("hero_$i", "limbo");
             }
         }
         $color = $this->custom_getPlayerColorById($startingPlayer);
@@ -197,7 +194,7 @@ class Game extends Base {
         }
         unset($pdata);
 
-        $gameStage = $this->tokens->db->getTokenState(Game::GAME_STAGE);
+        $gameStage = $this->tokens->getTokenState(Game::GAME_STAGE);
         $isGameEnded = $gameStage >= 5;
         $result["gameEnded"] = $isGameEnded;
         $result["lastTurn"] = $gameStage >= 1 && $gameStage <= 4;
@@ -221,7 +218,7 @@ class Game extends Base {
     }
 
     function isEndOfGame() {
-        $currentStep = $this->tokens->db->getTokenState("rune_stone");
+        $currentStep = $this->tokens->getTokenState("rune_stone");
         $maxSteps = Material::TIME_TRACK_SHORT_LENGTH;
 
         if ($currentStep >= $maxSteps) {
@@ -236,7 +233,7 @@ class Game extends Base {
 
     function isHeroesWin() {
         // Heroes win if at least Freyja's Well remains in Grimheim
-        $wellLoc = $this->tokens->db->getTokenLocation("house_0");
+        $wellLoc = $this->tokens->getTokenLocation("house_0");
         return $wellLoc === "hex_9_9";
     }
 
@@ -276,12 +273,12 @@ class Game extends Base {
         }
 
         if ($inc > 0) {
-            $tokens = $this->tokens->db->pickTokensForLocation($inc, "supply_crystal_$type", $location);
-            // TODO: unlimite? create more if needed
-            $this->tokens->dbSetTokensLocation($tokens, $location);
+            $tokens = $this->tokens->pickTokensForLocation($inc, "supply_crystal_$type", $location);
+            // TODO: unlimited? create more if needed
+            $this->tokens->dbSetTokensLocation($tokens, $location, 0, $message);
         } else {
             $needed = abs($inc);
-            $tokens = $this->tokens->db->pickTokensForLocation($needed, $location, "supply_crystal_$type");
+            $tokens = $this->tokens->pickTokensForLocation($needed, $location, "supply_crystal_$type");
             if (count($tokens) < $needed) {
                 throw new UserException(
                     new NotificationMessage(clienttranslate('Insufficient resources to pay: ${res_name}'), [
@@ -375,11 +372,7 @@ class Game extends Base {
             // Remove red crystals from hex back to supply
             $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterHex);
             // Remove monster from map
-            $this->hexMap->moveCharacter(
-                $monsterId,
-                "supply_monster",
-                clienttranslate('${player_name} kills ${token_name}')
-            );
+            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${player_name} kills ${token_name}'));
             return true;
         }
         return false;
@@ -404,7 +397,7 @@ class Game extends Base {
      * Looks up which card_hero_N_M is on the player's tableau.
      */
     function getHeroNumber(string $owner): int {
-        $heroCardKey = $this->game->tokens->db->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
+        $heroCardKey = $this->game->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
         $this->systemAssert("No hero card found", $heroCardKey);
         return (int) getPart($heroCardKey, 2); // card_hero_<heroNo>_<num>
     }
@@ -604,7 +597,7 @@ class Game extends Base {
     //         if (($info["hno"] ?? null) != $hno) {
     //             continue;
     //         }
-    //         $tokens = $this->tokens->db->getTokensOfTypeInLocation($cardId, null);
+    //         $tokens = $this->tokens->getTokensOfTypeInLocation($cardId, null);
     //         if (!$tokens) {
     //             // Card doesn't exist yet — create it (count>1 needs indexed tokens)
     //             $count = $info["count"] ?? 1;

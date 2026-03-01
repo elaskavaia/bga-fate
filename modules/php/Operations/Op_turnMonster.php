@@ -42,8 +42,8 @@ class Op_turnMonster extends Operation {
      * Get the time track spot type for the current step.
      */
     private function getCurrentSpotType(): string {
-        $step = $this->game->tokens->db->getTokenState("rune_stone");
-        $track = $this->game->tokens->db->getTokenLocation("rune_stone");
+        $step = $this->game->tokens->getTokenState("rune_stone");
+        $track = $this->game->tokens->getTokenLocation("rune_stone");
         $slotId = "slot_{$track}_{$step}";
         return $this->game->tokens->getRulesFor($slotId, "r", "tm_yellow_shield");
     }
@@ -53,14 +53,14 @@ class Op_turnMonster extends Operation {
         foreach ($cards as $card) {
             $cardId = $card["key"];
             $deck = $this->game->tokens->getRulesFor($cardId, "location");
-            $minState = $this->game->tokens->db->getExtremePosition(false, $deck);
+            $minState = $this->game->tokens->getExtremePosition(false, $deck);
             $this->game->tokens->dbSetTokenLocation($cardId, $deck, $minState - 1, ""); // no notify text
         }
     }
 
     // TODO: support long time track (timetrack_2) based on game option
     private function advanceTimeTrack(): void {
-        $currentStep = $this->game->tokens->db->getTokenState("rune_stone");
+        $currentStep = $this->game->tokens->getTokenState("rune_stone");
         $nextStep = $currentStep + 1;
         $maxSteps = Material::TIME_TRACK_SHORT_LENGTH;
 

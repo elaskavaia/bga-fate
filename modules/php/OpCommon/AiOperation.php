@@ -69,7 +69,7 @@ abstract class AiOperation extends CountableOperation {
 
     function aiGetBoardNumber(): int {
         $owner = $this->getOwner();
-        return -(int) $this->game->tokens->db->getTokenState("pboard_$owner");
+        return -(int) $this->game->tokens->getTokenState("pboard_$owner");
     }
 
     function countCards(string $owner, string $color): int {

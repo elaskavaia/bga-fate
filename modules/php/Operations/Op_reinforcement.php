@@ -36,7 +36,7 @@ class Op_reinforcement extends Operation {
     private function drawAndPlaceMonsters(string $deck): void {
         $maxRetries = 20; // safety limit to avoid infinite loop
         for ($retry = 0; $retry < $maxRetries; $retry++) {
-            $cardInfo = $this->game->tokens->db->getTokenOnTop($deck);
+            $cardInfo = $this->game->tokens->getTokenOnTop($deck);
             if ($cardInfo === null) {
                 $this->game->notifyMessage(clienttranslate("Monster deck is empty — no reinforcements"));
                 return;

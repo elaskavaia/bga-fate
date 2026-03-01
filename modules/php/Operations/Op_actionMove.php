@@ -24,7 +24,7 @@ class Op_actionMove extends Operation {
     function getPossibleMoves(): array {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
-        $currentHex = $this->game->tokens->db->getTokenLocation($heroId);
+        $currentHex = $this->game->tokens->getTokenLocation($heroId);
 
         $reachable = $this->game->hexMap->getReachableHexes($currentHex, 3);
         $moves = [];

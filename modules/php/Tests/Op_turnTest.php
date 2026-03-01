@@ -16,7 +16,7 @@ final class Op_turnTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
     }
 
     private function createOp(array $data = []): Op_turn {
@@ -143,7 +143,7 @@ final class Op_turnTest extends TestCase {
 
     public function testResolveMainActionQueuesActionOp(): void {
         // Setup markers in limbo so the resolve can place them
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_1", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
@@ -156,17 +156,17 @@ final class Op_turnTest extends TestCase {
 
     public function testResolveMainActionMovesMarker(): void {
         $markerKey = "marker_" . PCOLOR . "_1";
-        $this->game->tokens->db->moveToken($markerKey, "limbo");
+        $this->game->tokens->moveToken($markerKey, "limbo");
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
 
-        $location = $this->game->tokens->db->getTokenLocation($markerKey);
+        $location = $this->game->tokens->getTokenLocation($markerKey);
         $this->assertEquals("aslot_" . PCOLOR . "_actionPractice", $location);
     }
 
     public function testResolveFirstActionDecrementsRemaining(): void {
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_1", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
@@ -183,8 +183,8 @@ final class Op_turnTest extends TestCase {
     }
 
     public function testResolveSecondMarkerPlacedForSecondAction(): void {
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_1", "limbo");
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_2", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "limbo");
 
         // First action
         $op = $this->createOp();
@@ -196,7 +196,7 @@ final class Op_turnTest extends TestCase {
         $turnOp->action_resolve([Operation::ARG_TARGET => "actionMove"]);
 
         $marker2 = "marker_" . PCOLOR . "_2";
-        $location = $this->game->tokens->db->getTokenLocation($marker2);
+        $location = $this->game->tokens->getTokenLocation($marker2);
         $this->assertEquals("aslot_" . PCOLOR . "_actionMove", $location);
     }
 
@@ -205,8 +205,8 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveDuplicateMainActionThrows(): void {
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_1", "limbo");
-        $this->game->tokens->db->moveToken("marker_" . PCOLOR . "_2", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "limbo");
 
         // Take practice as first action
         $op = $this->createOp();

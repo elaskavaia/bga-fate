@@ -15,12 +15,12 @@ final class Op_actionAttackTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
         // Assign hero 1 (Bjorn) to PCOLOR: strength 2, starting ability (Sure Shot, no +str), starting equip (+1)
-        $this->game->tokens->db->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->db->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
-        $this->game->tokens->db->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
     private function createOp(): Op_actionAttack {
@@ -41,7 +41,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testAdjacentMonsterIsTargetable(): void {
         // hex_12_8 is adjacent to hex_11_8
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
@@ -49,15 +49,15 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testNonAdjacentMonsterNotTargetable(): void {
         // hex_13_7 is 2 steps from hex_11_8
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_13_7");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("hex_13_7", $moves);
     }
 
     public function testMultipleAdjacentMonsters(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_11_7");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
@@ -66,7 +66,7 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testAdjacentHeroNotTargetable(): void {
-        $this->game->tokens->db->moveToken("hero_2", "hex_12_8");
+        $this->game->tokens->moveToken("hero_2", "hex_12_8");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("hex_12_8", $moves);
@@ -84,8 +84,8 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testAttackStrengthHeroCardOnly(): void {
         // Remove equipment and ability
-        $this->game->tokens->db->moveToken("card_equip_1_15", "limbo");
-        $this->game->tokens->db->moveToken("card_ability_1_3", "limbo");
+        $this->game->tokens->moveToken("card_equip_1_15", "limbo");
+        $this->game->tokens->moveToken("card_ability_1_3", "limbo");
         $strength = $this->game->getHeroAttackStrength(PCOLOR);
         $this->assertEquals(2, $strength); // hero card only
     }
@@ -96,36 +96,36 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testResolveAllHitsKillsGoblin(): void {
         // Goblin: health=2. Bjorn strength=3. Seed all dice to side 5 (hit) → 3 hits, kills goblin
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->randQueue = [5, 5, 5];
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
-        $this->assertEquals("supply_monster", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
         $this->assertCount(0, $crystals);
     }
 
     public function testResolveAllMissesLeaveMonsterAlive(): void {
         // Seed all dice to side 1 (miss) → 0 hits
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->randQueue = [1, 1, 1];
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
-        $this->assertEquals("hex_12_8", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
         $this->assertCount(0, $crystals); // 0 hits = 0 damage
     }
 
     public function testResolvePartialHitsApplyDamage(): void {
         // Troll: health=7. Seed: hit, miss, hit → 2 hits, not enough to kill
-        $this->game->tokens->db->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
         $this->game->randQueue = [5, 1, 6]; // side 5=hit, side 1=miss, side 6=hit
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
-        $this->assertEquals("hex_12_8", $this->game->tokens->db->getTokenLocation("monster_troll_1"));
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_troll_1"));
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
         $this->assertCount(2, $crystals);
     }
@@ -139,7 +139,7 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testResolveDiceReturnedToSupply(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
         // Count dice in supply before
         $diceBefore = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "supply_die_attack");
@@ -163,12 +163,12 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testDamageKillsMonsterWhenEnough(): void {
         // Goblin: health=2
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 2, PCOLOR);
         $this->assertTrue($killed);
-        $this->assertEquals("supply_monster", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         // No red crystals should remain on hex
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
@@ -177,12 +177,12 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testDamageDoesNotKillWhenInsufficient(): void {
         // Goblin: health=2
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 1, PCOLOR);
         $this->assertFalse($killed);
-        $this->assertEquals("hex_12_8", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         // 1 red crystal should be on hex
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
@@ -191,7 +191,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testDamageAccumulates(): void {
         // Troll: health=7
-        $this->game->tokens->db->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         // First attack: 3 damage
@@ -203,7 +203,7 @@ final class Op_actionAttackTest extends TestCase {
         // Second attack: 4 more damage — total 7, enough to kill
         $killed = $this->game->effect_applyDamage("monster_troll_1", "hex_12_8", 4, PCOLOR);
         $this->assertTrue($killed);
-        $this->assertEquals("supply_monster", $this->game->tokens->db->getTokenLocation("monster_troll_1"));
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
 
         // All red crystals returned to supply
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
@@ -211,12 +211,12 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testZeroDamageDoesNothing(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 0, PCOLOR);
         $this->assertFalse($killed);
-        $this->assertEquals("hex_12_8", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_8");
         $this->assertCount(0, $crystals);
@@ -228,7 +228,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testXpAwardedOnKill(): void {
         // Goblin: xp=1
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -240,7 +240,7 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testXpNotAwardedOnSurvive(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -253,7 +253,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testBruteGivesMoreXp(): void {
         // Brute: health=3, xp=2
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -270,7 +270,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testHeroNotOnMapReturnsEmpty(): void {
         // Move hero off the map — getPossibleMoves should return empty, not crash
-        $this->game->tokens->db->moveToken("hero_1", "limbo");
+        $this->game->tokens->moveToken("hero_1", "limbo");
         $this->game->hexMap->invalidateOccupancy();
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
@@ -279,8 +279,8 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testForestHexProvidesCover(): void {
         // hex_12_4 is forest, hex_12_5 is plains and adjacent
-        $this->game->tokens->db->moveToken("hero_1", "hex_12_5");
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_4");
+        $this->game->tokens->moveToken("hero_1", "hex_12_5");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_4");
         $this->game->hexMap->invalidateOccupancy();
 
         $terrain = $this->game->hexMap->getHexTerrain("hex_12_4");
@@ -295,8 +295,8 @@ final class Op_actionAttackTest extends TestCase {
     public function testCoverBlocksHitcov(): void {
         // hex_12_4 is forest. Goblin health=2.
         // Seed: side 4 (hitcov), side 4 (hitcov), side 5 (hit) → only 1 real hit (hitcov blocked by cover)
-        $this->game->tokens->db->moveToken("hero_1", "hex_12_5");
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_4");
+        $this->game->tokens->moveToken("hero_1", "hex_12_5");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_4");
         $this->game->hexMap->invalidateOccupancy();
 
         $this->game->randQueue = [4, 4, 5];
@@ -304,7 +304,7 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_4"]);
 
         // 1 hit is not enough to kill goblin (health=2)
-        $this->assertEquals("hex_12_4", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("hex_12_4", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_12_4");
         $this->assertCount(1, $crystals);
     }
@@ -312,7 +312,7 @@ final class Op_actionAttackTest extends TestCase {
     public function testHitcovCountsWithoutCover(): void {
         // hex_12_8 is plains (no cover). Goblin health=2.
         // Seed: side 4 (hitcov), side 4 (hitcov), side 1 (miss) → 2 hits, kills goblin
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
         $terrain = $this->game->hexMap->getHexTerrain("hex_12_8");
         $this->assertNotEquals("forest", $terrain);
@@ -322,6 +322,6 @@ final class Op_actionAttackTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
 
         // 2 hitcov hits on non-forest hex → goblin killed
-        $this->assertEquals("supply_monster", $this->game->tokens->db->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
 }

@@ -6,7 +6,6 @@ namespace Bga\Games\Fate\Tests;
 use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\Notify;
 use Bga\GameFramework\UserException;
-use Bga\Games\Fate\Common\PGameTokens;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\OpCommon\OpMachine;
@@ -62,8 +61,7 @@ class GameUT extends Game {
         $this->_colors = [PCOLOR, BCOLOR];
         $this->notify = new FakeNotify();
 
-        $tokens = new TokensInMem($this);
-        $this->tokens = new PGameTokens($this, $tokens);
+        $this->tokens = new TokensInMem($this);
     }
 
     function setPlayersNumber(int $num) {
@@ -91,7 +89,7 @@ class GameUT extends Game {
 
     function init(int $x = 0) {
         //$this->adjustedMaterial(true);
-        //$this->createTokens();
+        //$this->createAllTokens();
         $this->gamestate->changeActivePlayer(10);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
         return $this;
@@ -244,10 +242,10 @@ final class GameTest extends TestCase {
 
     public function testGetReachableHexesBlockedByOccupied() {
         $game = $this->game;
-        $game->tokens->createTokens();
+        $game->tokens->createAllTokens();
 
         // Place a hero on hex_11_8
-        $game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $game->tokens->moveToken("hero_1", "hex_11_8");
 
         // hex_11_8 should not be reachable (occupied)
         $reachable = $game->hexMap->getReachableHexes("hex_10_8", 3);
@@ -298,13 +296,13 @@ final class GameTest extends TestCase {
         $bh = $this->getHeroNumber(BCOLOR);
 
         // Starting cards should be on tableau
-        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_hero_{$ph}_1"));
-        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_ability_{$ph}_3"));
-        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->db->getTokenLocation("card_equip_{$ph}_15"));
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->getTokenLocation("card_hero_{$ph}_1"));
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->getTokenLocation("card_ability_{$ph}_3"));
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->getTokenLocation("card_equip_{$ph}_15"));
 
-        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_hero_{$bh}_1"));
-        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_ability_{$bh}_3"));
-        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->db->getTokenLocation("card_equip_{$bh}_15"));
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->getTokenLocation("card_hero_{$bh}_1"));
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->getTokenLocation("card_ability_{$bh}_3"));
+        $this->assertEquals("tableau_" . BCOLOR, $game->tokens->getTokenLocation("card_equip_{$bh}_15"));
     }
 
     public function testSetupHeroCardsInCorrectDecks() {
@@ -314,18 +312,18 @@ final class GameTest extends TestCase {
         $ph = $this->getHeroNumber(PCOLOR);
 
         // Level II hero card should be in limbo (not a starting card)
-        $this->assertEquals("limbo", $game->tokens->db->getTokenLocation("card_hero_{$ph}_2"));
+        $this->assertEquals("limbo", $game->tokens->getTokenLocation("card_hero_{$ph}_2"));
 
         // Non-starting ability cards should be in ability deck
-        $this->assertEquals("deck_ability_" . PCOLOR, $game->tokens->db->getTokenLocation("card_ability_{$ph}_9"));
+        $this->assertEquals("deck_ability_" . PCOLOR, $game->tokens->getTokenLocation("card_ability_{$ph}_9"));
 
         // Non-starting equip cards should be in equip deck — find one that exists for this hero
         // All heroes have equipment starting at num=16+
-        $this->assertEquals("deck_equip_" . PCOLOR, $game->tokens->db->getTokenLocation("card_equip_{$ph}_16"));
+        $this->assertEquals("deck_equip_" . PCOLOR, $game->tokens->getTokenLocation("card_equip_{$ph}_16"));
 
         // Event cards — find an event with count>1 for this hero
         // All heroes have events; find first indexed event token
-        $eventTokens = $game->tokens->db->getTokensOfTypeInLocation("card_event_{$ph}", "deck_event_" . PCOLOR);
+        $eventTokens = $game->tokens->getTokensOfTypeInLocation("card_event_{$ph}", "deck_event_" . PCOLOR);
         $this->assertNotEmpty($eventTokens, "Should have event cards in deck");
     }
 
@@ -340,9 +338,9 @@ final class GameTest extends TestCase {
         // 2 players: unused heroes should be in limbo
         for ($i = 1; $i <= 4; $i++) {
             if (!in_array($i, $usedHeros)) {
-                $this->assertEquals("limbo", $game->tokens->db->getTokenLocation("hero_$i"));
+                $this->assertEquals("limbo", $game->tokens->getTokenLocation("hero_$i"));
                 // No cards created for unused heroes
-                $this->assertNull($game->tokens->db->getTokenInfo("card_hero_{$i}_1"));
+                $this->assertNull($game->tokens->getTokenInfo("card_hero_{$i}_1"));
             }
         }
     }
@@ -359,12 +357,12 @@ final class GameTest extends TestCase {
             if ($count > 1) {
                 // Should create $count indexed tokens in event deck
                 for ($i = 1; $i <= $count; $i++) {
-                    $loc = $game->tokens->db->getTokenLocation("{$cardId}_{$i}");
+                    $loc = $game->tokens->getTokenLocation("{$cardId}_{$i}");
                     $this->assertNotNull($loc, "{$cardId}_{$i} should exist");
                     $this->assertEquals("deck_event_" . PCOLOR, $loc);
                 }
                 // One more should not exist
-                $this->assertNull($game->tokens->db->getTokenInfo("{$cardId}_" . ($count + 1)));
+                $this->assertNull($game->tokens->getTokenInfo("{$cardId}_" . ($count + 1)));
                 return; // one check is enough
             }
         }
@@ -375,7 +373,7 @@ final class GameTest extends TestCase {
         $this->game();
         $this->game->setupGameTables();
         $heroId = $this->game->getHeroTokenId(PCOLOR); // e.g. "hero_3"
-        $this->game->tokens->db->moveToken($heroId, "hex_9_9");
+        $this->game->tokens->moveToken($heroId, "hex_9_9");
         $token_types = $this->game->material->get();
         $tested = [];
         foreach ($token_types as $key => $info) {

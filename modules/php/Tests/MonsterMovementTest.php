@@ -14,15 +14,15 @@ final class MonsterMovementTest extends TestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
-        $this->game->tokens->createTokens();
+        $this->game->tokens->createAllTokens();
         $this->game->setPlayersNumber(1);
         // Assign hero 1 to player
-        $this->game->tokens->db->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
         // Move all heroes far away so they don't interfere with monster tests
-        $this->game->tokens->db->moveToken("hero_1", "hex_1_1");
-        $this->game->tokens->db->moveToken("hero_2", "hex_1_2");
-        $this->game->tokens->db->moveToken("hero_3", "hex_2_1");
-        $this->game->tokens->db->moveToken("hero_4", "hex_2_2");
+        $this->game->tokens->moveToken("hero_1", "hex_1_1");
+        $this->game->tokens->moveToken("hero_2", "hex_1_2");
+        $this->game->tokens->moveToken("hero_3", "hex_2_1");
+        $this->game->tokens->moveToken("hero_4", "hex_2_2");
     }
 
     private function createTurnMonsterOp(): Op_turnMonster {
@@ -118,9 +118,9 @@ final class MonsterMovementTest extends TestCase {
 
     public function testMonstersOnMapSortedByDistance(): void {
         // Place monsters at different distances from Grimheim
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_11_8"); // dist 1
-        $this->game->tokens->db->moveToken("monster_goblin_2", "hex_13_7"); // dist 3
-        $this->game->tokens->db->moveToken("monster_goblin_3", "hex_12_8"); // dist 2
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // dist 1
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7"); // dist 3
+        $this->game->tokens->moveToken("monster_goblin_3", "hex_12_8"); // dist 2
 
         $monsters = $this->game->hexMap->getMonstersOnMap();
         $this->assertCount(3, $monsters);
@@ -135,18 +135,18 @@ final class MonsterMovementTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testIsHeroAdjacentToTrue(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // hex_12_8 is adjacent to hex_11_8
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
 
     public function testIsHeroAdjacentToFalse(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_1_1"); // far away
+        $this->game->tokens->moveToken("hero_1", "hex_1_1"); // far away
         $this->assertFalse($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
 
     public function testIsHeroOnSameHex(): void {
-        $this->game->tokens->db->moveToken("hero_1", "hex_12_8");
+        $this->game->tokens->moveToken("hero_1", "hex_12_8");
         // Hero on the same hex counts as adjacent
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
@@ -157,61 +157,61 @@ final class MonsterMovementTest extends TestCase {
 
     public function testMonsterMovesTowardGrimheim(): void {
         // Use brute (move=1) to test single-step movement
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $distBefore = $this->game->hexMap->getDistanceMapToGrimheim()["hex_12_8"];
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1); // shield step, no reinforcements
+        $this->game->tokens->setTokenState("rune_stone", 1); // shield step, no reinforcements
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $newLoc = $this->game->tokens->db->getTokenLocation("monster_brute_1");
+        $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
         $distAfter = $this->game->hexMap->getDistanceMapToGrimheim()[$newLoc] ?? PHP_INT_MAX;
         $this->assertLessThan($distBefore, $distAfter, "Monster should have moved closer to Grimheim");
     }
 
     public function testMonsterDoesNotMoveWhenAdjacentToHero(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->tokens->db->moveToken("hero_1", "hex_11_8"); // adjacent
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8"); // adjacent
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $loc = $this->game->tokens->db->getTokenLocation("monster_goblin_1");
+        $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("hex_12_8", $loc, "Monster should not move when adjacent to hero");
     }
 
     public function testMonsterDoesNotMoveIntoOccupiedHex(): void {
         // Two brutes (move=1), the closer one blocks the path
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_11_8"); // dist 1
-        $this->game->tokens->db->moveToken("monster_brute_2", "hex_12_8"); // dist 2, wants to move to hex_11_8
+        $this->game->tokens->moveToken("monster_brute_1", "hex_11_8"); // dist 1
+        $this->game->tokens->moveToken("monster_brute_2", "hex_12_8"); // dist 2, wants to move to hex_11_8
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         // brute_1 should have entered Grimheim (removed)
-        $loc1 = $this->game->tokens->db->getTokenLocation("monster_brute_1");
+        $loc1 = $this->game->tokens->getTokenLocation("monster_brute_1");
         $this->assertEquals("supply_monster", $loc1, "Closest monster should enter Grimheim");
 
         // brute_2 should have moved to hex_11_8 (now vacated)
-        $loc2 = $this->game->tokens->db->getTokenLocation("monster_brute_2");
+        $loc2 = $this->game->tokens->getTokenLocation("monster_brute_2");
         $this->assertEquals("hex_11_8", $loc2, "Second monster should move into vacated hex");
     }
 
     public function testMonsterEnteringGrimheimDestroysHouse(): void {
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_11_8"); // dist 1 from Grimheim
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // dist 1 from Grimheim
 
         // Count houses before
         $housesBefore = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
         $countBefore = count($housesBefore);
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         // Monster should be removed
-        $loc = $this->game->tokens->db->getTokenLocation("monster_goblin_1");
+        $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("supply_monster", $loc);
 
         // One fewer house
@@ -222,7 +222,7 @@ final class MonsterMovementTest extends TestCase {
     public function testFreyjasWellDestroyedLast(): void {
         // Move all houses except Freyja's Well to limbo
         for ($i = 1; $i <= 9; $i++) {
-            $this->game->tokens->db->moveToken("house_$i", "limbo");
+            $this->game->tokens->moveToken("house_$i", "limbo");
         }
         // Only house_0 (Freyja's Well) remains
         $houses = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
@@ -230,21 +230,21 @@ final class MonsterMovementTest extends TestCase {
         $this->assertArrayHasKey("house_0", $houses);
 
         // Monster enters Grimheim
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_11_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8");
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         // Freyja's Well should now be destroyed
-        $wellLoc = $this->game->tokens->db->getTokenLocation("house_0");
+        $wellLoc = $this->game->tokens->getTokenLocation("house_0");
         $this->assertEquals("limbo", $wellLoc, "Freyja's Well should be destroyed when it's the last house");
     }
 
     public function testLossConditionWhenWellDestroyed(): void {
         // Destroy all houses including Freyja's Well
         for ($i = 0; $i <= 9; $i++) {
-            $this->game->tokens->db->moveToken("house_$i", "limbo");
+            $this->game->tokens->moveToken("house_$i", "limbo");
         }
 
         // Game should end and heroes should lose
@@ -253,19 +253,19 @@ final class MonsterMovementTest extends TestCase {
     }
 
     public function testLegendEnteringGrimheimDestroys3Houses(): void {
-        $this->game->tokens->db->moveToken("monster_legend_grendel", "hex_11_8"); // dist 1 from Grimheim
+        $this->game->tokens->moveToken("monster_legend_grendel", "hex_11_8"); // dist 1 from Grimheim
 
         // Count houses before
         $housesBefore = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
         $countBefore = count($housesBefore);
         $this->assertGreaterThanOrEqual(3, $countBefore, "Need at least 3 houses for this test");
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         // Legend should be removed
-        $loc = $this->game->tokens->db->getTokenLocation("monster_legend_grendel");
+        $loc = $this->game->tokens->getTokenLocation("monster_legend_grendel");
         $this->assertEquals("supply_monster", $loc);
 
         // Three fewer houses
@@ -275,16 +275,16 @@ final class MonsterMovementTest extends TestCase {
 
     public function testChargeOnSkullTurnAddsOneStep(): void {
         // Brute (move=1) at distance 3 from Grimheim — on a normal turn moves 1, on skull turn moves 2
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_13_7"); // dist 3
+        $this->game->tokens->moveToken("monster_brute_1", "hex_13_7"); // dist 3
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $distBefore = $distMap["hex_13_7"];
 
         // Set rune stone to step 8, so advanceTimeTrack moves it to step 9 (tm_red_skull)
-        $this->game->tokens->db->setTokenState("rune_stone", 8);
+        $this->game->tokens->setTokenState("rune_stone", 8);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $newLoc = $this->game->tokens->db->getTokenLocation("monster_brute_1");
+        $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
         $distAfter = $distMap[$newLoc] ?? PHP_INT_MAX;
         // Should have moved 2 steps (1 base + 1 charge) instead of 1
         $this->assertEquals($distBefore - 2, $distAfter, "Monster should move 2 steps on charge turn (1 base + 1 charge)");
@@ -292,39 +292,39 @@ final class MonsterMovementTest extends TestCase {
 
     public function testNoChargeOnShieldTurn(): void {
         // Brute at distance 3 — on a shield turn moves only 1 step
-        $this->game->tokens->db->moveToken("monster_brute_1", "hex_13_7"); // dist 3
+        $this->game->tokens->moveToken("monster_brute_1", "hex_13_7"); // dist 3
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $distBefore = $distMap["hex_13_7"];
 
         // Step 1 → step 2 = tm_yellow_shield (no charge)
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $newLoc = $this->game->tokens->db->getTokenLocation("monster_brute_1");
+        $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
         $distAfter = $distMap[$newLoc] ?? PHP_INT_MAX;
         $this->assertEquals($distBefore - 1, $distAfter, "Monster should move only 1 step on shield turn");
     }
 
     public function testMonsterMovementOrderClosestFirst(): void {
         // Place monsters at different distances
-        $this->game->tokens->db->moveToken("monster_goblin_1", "hex_13_7"); // far
-        $this->game->tokens->db->moveToken("monster_goblin_2", "hex_11_8"); // close (dist 1)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7"); // far
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_11_8"); // close (dist 1)
 
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $g1Before = $distMap["hex_13_7"];
         $g2Before = $distMap["hex_11_8"];
 
-        $this->game->tokens->db->setTokenState("rune_stone", 1);
+        $this->game->tokens->setTokenState("rune_stone", 1);
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         // goblin_2 (closer) should have entered Grimheim
-        $loc2 = $this->game->tokens->db->getTokenLocation("monster_goblin_2");
+        $loc2 = $this->game->tokens->getTokenLocation("monster_goblin_2");
         $this->assertEquals("supply_monster", $loc2, "Closer monster should enter Grimheim first");
 
         // goblin_1 (farther) should have moved closer
-        $newLoc1 = $this->game->tokens->db->getTokenLocation("monster_goblin_1");
+        $newLoc1 = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertNotEquals("hex_13_7", $newLoc1, "Far monster should have moved");
         $this->assertLessThan($g1Before, $distMap[$newLoc1] ?? PHP_INT_MAX, "Far monster should be closer to Grimheim");
     }
