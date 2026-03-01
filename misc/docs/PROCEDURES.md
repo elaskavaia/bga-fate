@@ -4,7 +4,7 @@ Step-by-step checklists for common development tasks. Referenced from CLAUDE.md.
 
 ## Adding a New Operation
 
-Prompt: add <name> operation. Read CLAUDE.md for instructions
+Prompt: add <name> operation. Read PROCEDURES.md for instructions
 
 #. Create `modules/php/Operations/Op_<name>.php` with a **minimal empty template**
    - Extend `Operation` (default choice)
@@ -48,8 +48,8 @@ Prompt: add <name> operation. Read CLAUDE.md for instructions
 
 ## Adding New Game Element
 
-Prompt: add <name> location. Read CLAUDE.md for instructions.
-Prompt: add <name> game element. Read CLAUDE.md for instructions.
+Prompt: add <name> location. Read PROCEDURES.md for instructions.
+Prompt: add <name> game element. Read PROCEDURES.md for instructions.
 
 Every physical game piece leaves footprints in multiple places: database, material, CSS, and client-side code. Follow this checklist when adding a new element.
 
@@ -69,7 +69,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
    - Run `npm run genmat` to regenerate Material.php
 
 **3. Setup (Game.php)**
-   - Tokens are auto-created by `PGameTokens::createTokens()` based on the `create` field in the CSV:
+   - Tokens are auto-created by `DbTokens::createAllTokens()` based on the `create` field in the CSV:
      - `0` = do not create, `1` = single token with id as-is, `2` = indexed (`{id}_{INDEX}`), `3` = per-player indexed (`{id}_{COLOR}_{INDEX}`), `4` = per-player single (`{id}_{COLOR}`), `5` = indexed per-player (`{id}_{INDEX}_{COLOR}`)
    - The `location` column sets the initial location; `{COLOR}` placeholders are expanded per player
    - Only add manual setup code in `setupNewGame()` if auto-creation is insufficient (e.g. conditional placement, shuffling into decks)
@@ -103,7 +103,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
 
 ## Adding New Game Material Element
 
-Prompt: add new material file <name>. Read CLAUDE.md for instructions.
+Prompt: add new material file <name>. Read PROCEDURES.md for instructions.
 
 To add new file:
 1. Add file <name>_material.csv in misc/ with pipe (|) separated header

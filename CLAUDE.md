@@ -58,8 +58,7 @@ Game elements are defined in CSV files and auto-generated into PHP code:
 
 ### Token Management
 
-- **DbTokens** ([modules/php/Db/DbTokens.php](modules/php/Db/DbTokens.php)) - Database layer for token storage
-- **PGameTokens** ([modules/php/Common/PGameTokens.php](modules/php/Common/PGameTokens.php)) - Game-specific token logic wrapper
+- **DbTokens** ([modules/php/Db/DbTokens.php](modules/php/Db/DbTokens.php)) - Token storage, notifications, counters, and material-based creation
 - Tokens represent all physical game pieces (cards, dice, workers, resources, etc.)
 
 ### Hex Map
@@ -112,10 +111,10 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 Detailed step-by-step checklists are in separate files — read them when performing these tasks:
 
-- **Adding a new operation** — see [misc/PROCEDURES.md](misc/PROCEDURES.md#adding-a-new-operation)
-- **Adding a new game element** (token, location, card) — see [misc/PROCEDURES.md](misc/PROCEDURES.md#adding-new-game-element)
-- **Adding a new material CSV file** — see [misc/PROCEDURES.md](misc/PROCEDURES.md#adding-new-game-material-element)
-- **Graphics assets** (PDF sources, sprite conversion) — see [misc/GRAPHICS.md](misc/GRAPHICS.md)
+- **Adding a new operation** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-a-new-operation)
+- **Adding a new game element** (token, location, card) — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-new-game-element)
+- **Adding a new material CSV file** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-new-game-material-element)
+- **Graphics assets** (PDF sources, sprite conversion) — see [misc/docs/GRAPHICS.md](misc/docs/GRAPHICS.md)
 
 ### Working with Tests
 
