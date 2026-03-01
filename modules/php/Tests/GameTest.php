@@ -407,6 +407,52 @@ final class GameTest extends TestCase {
         }
     }
 
+    public function testMoveCrystalsGain() {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+
+        $supply = $game->tokens->countTokensInLocation("supply_crystal_yellow");
+        $tableau = $game->tokens->countTokensInLocation("tableau_" . PCOLOR);
+
+        $game->effect_moveCrystals(PCOLOR, "yellow", 3, "tableau_" . PCOLOR);
+
+        $this->assertEquals($supply - 3, $game->tokens->countTokensInLocation("supply_crystal_yellow"));
+        $this->assertEquals($tableau + 3, $game->tokens->countTokensInLocation("tableau_" . PCOLOR));
+    }
+
+    public function testMoveCrystalsPay() {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+
+        // Give player some crystals first
+        $game->effect_moveCrystals(PCOLOR, "yellow", 5, "tableau_" . PCOLOR);
+        $supply = $game->tokens->countTokensInLocation("supply_crystal_yellow");
+        $tableau = $game->tokens->countTokensInLocation("tableau_" . PCOLOR);
+
+        $game->effect_moveCrystals(PCOLOR, "yellow", -3, "tableau_" . PCOLOR);
+
+        $this->assertEquals($supply + 3, $game->tokens->countTokensInLocation("supply_crystal_yellow"));
+        $this->assertEquals($tableau - 3, $game->tokens->countTokensInLocation("tableau_" . PCOLOR));
+    }
+
+    public function testMoveCrystalsZeroDoesNothing() {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+
+        $supply = $game->tokens->countTokensInLocation("supply_crystal_red");
+        $game->effect_moveCrystals(PCOLOR, "red", 0, "hex_9_9");
+        $this->assertEquals($supply, $game->tokens->countTokensInLocation("supply_crystal_red"));
+    }
+
+    public function testMoveCrystalsPayInsufficientThrows() {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+
+        // Tableau starts empty — paying should throw
+        $this->expectException(UserException::class);
+        $game->effect_moveCrystals(PCOLOR, "green", -1, "tableau_" . PCOLOR);
+    }
+
     function subTestOp($key, $info = []) {
         $type = substr($key, 3);
         $this->assertTrue(!!$type);
