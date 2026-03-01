@@ -464,6 +464,13 @@ class Base extends Table {
         throw new UserException("Internal Error. That should not have happened. Reload page and Retry" . " " . $log);
     }
 
+    /**
+     * Wrapper for bga_rand — override in test subclass to control randomness.
+     */
+    function bgaRand(int $min, int $max): int {
+        return bga_rand($min, $max);
+    }
+
     function dumpError($log) {
         $move = $this->getNextMoveId();
         $this->error("Internal Error during move $move: $log.");

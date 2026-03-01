@@ -17,7 +17,7 @@ See CLAUDE.md for project overview
 [ ] Player boards (jpg) one per hero
 [~] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards TODO
 [~] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites TODO
-[ ] Other 3d pieces and iconography (png) - sprite (crystals, dice, etc.)
+[~] Other 3d pieces and iconography (png) — dice sprite done (img/dice.png), crystals TODO
 
 ## High level plan
 
@@ -41,6 +41,13 @@ See CLAUDE.md for project overview
 **Goal**: Game starts, shows board with map, each player has a hero on the board. Player can do "practice" (gain 1 XP) or "move" (click hex to move hero). Then monster turn just advances time track. Game ends when time track runs out. **Playable end-to-end on BGA.**
 
 **What already exists**: hex map rendering, token framework, Op_turn scaffold, Op_actionMove/Op_actionPractice stubs, state machine wiring.
+
+### Game Elements
+[x] Add hero miniature tokens (hero_1..hero_4) — token_material.csv
+[x] Add house tokens (house_0..house_9) — token_material.csv
+[x] Add rune stone token — token_material.csv
+[x] Add crystal tokens (green, red, yellow) — token_material.csv
+[x] Add action marker tokens — token_material.csv
 
 ### Server
 [x] `setupNewGame()`: create 1 hero per player in Grimheim, create rune stone on time track position 1, create town pieces (houses) in Grimheim
@@ -91,6 +98,10 @@ See CLAUDE.md for project overview
 
 **Goal**: Monsters appear on the board. No movement or combat yet — just spawning from monster cards during reinforcement.
 
+### Game Elements
+[x] Add monster tokens game element — monster_material.csv
+[x] Add monster card game element — monstercard_material.csv
+
 ### Server
 [x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
 [x] Monster card data: define a few yellow monster cards with goblin placement
@@ -136,12 +147,15 @@ See CLAUDE.md for project overview
 
 **Goal**: Heroes can attack adjacent monsters. Simple dice rolling, damage tracking, monster death.
 
+### Game Elements
+[x] Add attack dice game element — token_material.csv, dice_material.csv, Tokens.scss, Game.ts
+
 ### Server
 [ ] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
   - `getAreasInRange($areaId, $range)` — for ranged attacks
 [ ] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
 [ ] Hero attack strength: just base hero value for now (no equipment/abilities)
-[ ] Damage tracking on monsters (counter on token)
+[ ] Damage tracking on monsters (red crystals placed on monster/hero)
 [ ] Monster killed: remove from board, gain XP
 [ ] Cover: if monster is in forest, hit-with-cover doesn't count
 
@@ -226,6 +240,10 @@ See CLAUDE.md for project overview
 
 **Goal**: Pick simplest hero. Implement hero card, starting equipment, starting ability. Equipment gives attack bonus. Ability can be activated.
 
+### Game Elements
+[x] Add hero card game element (all heroes) — card_material.csv, Cards.scss, Game.ts
+[ ] Add hero card sprite for first hero — img/<hero>_hero_cards.jpg
+
 ### Server
 [ ] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
 [ ] Hero card effect applies during relevant actions
@@ -291,15 +309,15 @@ See CLAUDE.md for project overview
 
 ## Iteration 11: Second Monster Faction (Fire Horde)
 
-**Goal**: Add Sprites, Elementals, Jotunn. Faction effect: range 2 attacks.
+**Superseded by Iteration 7** — all 3 factions (trollkin, firehorde, dead) with 3 ranks each already defined.
 
 ### Server
-[ ] Fire Horde monster data and tokens
+[x] Fire Horde monster data and tokens — done in Iter 7
 [ ] Range 2 attack for Fire Horde monsters
-[ ] Monster cards that spawn Fire Horde monsters
+[x] Monster cards that spawn Fire Horde monsters — done in Iter 7
 
 ### Client
-[ ] Fire Horde visual styling
+[x] Fire Horde visual styling — done in Iter 7
 [ ] Range indicator for ranged monster attacks
 
 ### Tests
@@ -309,17 +327,17 @@ See CLAUDE.md for project overview
 
 ## Iteration 12: Third Monster Faction (Dead) + Legends
 
-**Goal**: Add Imps, Skeletons, Draugr. Dead faction effect: runes = hits. Draugr armor. Add Legend monsters.
+**Superseded by Iteration 7** — all factions and legends already defined in material.
 
 ### Server
-[ ] Dead faction monster data
+[x] Dead faction monster data — done in Iter 7
 [ ] Runes count as hits for Dead attacks
 [ ] Draugr armor (prevent 1 damage each time)
-[ ] Legend monsters: unique stats, destroy 3 town pieces, swap movement
-[ ] All 54 monster cards defined
+[x] Legend monsters: unique stats, destroy 3 town pieces, swap movement — material + movement done in Iter 3/7
+[x] All 54 monster cards defined — done in Iter 7
 
 ### Client
-[ ] Dead faction visual styling
+[x] Dead faction visual styling — done in Iter 7
 [ ] Legend monster special display
 
 ### Tests
@@ -331,6 +349,9 @@ See CLAUDE.md for project overview
 ## Iteration 13: Remaining Heroes
 
 **Goal**: Implement heroes 2, 3, 4 with full card decks.
+
+### Game Elements
+[ ] Add hero card sprites for heroes 2, 3, 4 — img/<hero>_hero_cards.jpg
 
 ### Server
 [ ] Hero 2: card data, abilities, equipment, events, all effects
@@ -349,6 +370,9 @@ See CLAUDE.md for project overview
 ## Iteration 14: Monster Die and Game Options
 
 **Goal**: Optional monster die variant. Game options for time track length, difficulty, player count.
+
+### Game Elements
+[x] Add monster die game element — token_material.csv, dice_material.csv, Tokens.scss, Game.ts
 
 ### Server
 [ ] Monster die with 6 faces and effects
@@ -388,6 +412,78 @@ See CLAUDE.md for project overview
 [ ] All hero combinations
 [ ] All player counts
 [ ] Edge cases (multiple knockouts, legend interactions, empty decks)
-[ ] Pre-alpha BGA checklist
+[ ] Pre-alpha BGA checklist (see below)
 
 ---
+
+## Pre-Alpha BGA Checklist
+
+Source: https://en.doc.boardgamearena.com/Pre-release_checklist
+
+### License
+[ ] BGA has a license for the game
+
+### Metadata and Graphics
+[ ] gameinfos.inc.php has correct, up-to-date info
+[ ] Box art: 3D game box, transparent background, correct publisher icon
+[ ] Game Metadata Manager images added
+[ ] Remove unused images from img/
+[ ] Images compressed into sprite sheets
+[ ] Individual images under 4MB, total under 15MB
+[ ] Freeware fonts only, with license docs
+
+### Server Side
+[ ] `giveExtraTime()` called during player turns
+[ ] `getGameProgression()` implemented
+[ ] `zombieTurn()` implemented
+[ ] Game statistics defined and coded
+[ ] Notification messages: helpful but not excessive
+[ ] Tiebreaking logic implemented
+[ ] No manual DB transaction management
+[ ] DB schema supports game completion
+
+### Client Side
+[ ] ajaxcall/bgaPerformAction only on player actions, never programmatic
+
+### User Interface
+[ ] BGA UI design guidelines compliance
+[ ] English text: punctuation, capitalization, present tense, gender neutrality
+[ ] Non-full-width elements centered
+[ ] Browser zoom doesn't blur/pixelate graphics
+[ ] Non-obvious elements have tooltips
+[ ] All strings translation-ready
+[ ] CSS class names use game-specific prefix
+[ ] Consider posting on developer forum for design feedback
+
+### Special Testing
+[ ] Minified JS/CSS tested via management page
+[ ] Spectator mode tested (public visible, private hidden)
+[ ] In-game replay from notification log works
+[ ] Complete game replay works start to end
+[ ] Works in Chrome and Firefox (Edge, Safari recommended)
+[ ] Mobile device / Chrome mobile mode tested
+[ ] Real-time mode tested with giveExtraTime()
+[ ] Waiting screen compatibility verified
+
+### Cleanup
+[ ] Remove unnecessary console.log statements
+[ ] Remove debug logging from PHP
+[ ] Copyright headers in all source files
+[ ] Remove unnecessary files from main folder (move to misc/)
+[ ] Delete unused graphics from img/
+
+### Static Analysis
+[ ] Run "Check project" from control panel
+
+### Move to Alpha
+[ ] Correct formal game name for project
+[ ] Build new release from "manage game" page
+[ ] Verify build log
+[ ] Click "Request ALPHA status"
+
+---
+
+## TODO
+
+* Fix stacked tooltips
+* Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes

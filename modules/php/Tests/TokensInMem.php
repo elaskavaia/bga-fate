@@ -149,6 +149,15 @@ class TokensInMem extends DbTokens {
         return $tokens;
     }
 
+    function moveTokens($tokens, $location, $state = 0) {
+        self::checkLocation($location);
+        self::checkState($state, true);
+        self::checkTokenKeyArray($tokens);
+        foreach ($tokens as $key) {
+            $this->moveToken($key, $location, $state);
+        }
+    }
+
     function shuffle($location) {
         $tokens = $this->getTokensOfTypeInLocation(null, $location);
         $keys = array_keys($tokens);

@@ -309,6 +309,20 @@ class HexMap {
         return isset($occ[$hexId]) && $occ[$hexId]["character"] !== null;
     }
 
+    /**
+     * Returns the token ID of the character on this hex if it matches the given type, or null.
+     * @param string $hexId hex to check
+     * @param string $characterType "hero" or "monster"
+     */
+    function isOccupiedByCharacterType(string $hexId, string $characterType): ?string {
+        $occ = $this->getOccupancyMap();
+        $char = $occ[$hexId]["character"] ?? null;
+        if ($char !== null && getPart($char, 0) === $characterType) {
+            return $char;
+        }
+        return null;
+    }
+
     function canEnterHex(string $hexId, string $characterType): bool {
         if ($this->isImpassable($hexId, $characterType)) {
             return false;

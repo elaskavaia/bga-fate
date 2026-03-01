@@ -264,7 +264,6 @@ class Material {
         "kind" => "main",
         "type" => "actionAttack",
         "name" => clienttranslate("Attack"),
-        "notimpl"=>true,
 ],
     "Op_actionPrepare" => [ 
         "kind" => "main",
@@ -497,16 +496,8 @@ class Material {
         "count" => 20,
         "type" => "die",
         "create" => 2,
-        "location" => "supply_dice",
-],
-// # damage dice (8 total, for tracking monster damage)
-    "die_damage" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Damage Die"),
-        "count" => 8,
-        "type" => "die",
-        "create" => 2,
-        "location" => "supply_dice",
+        "location" => "supply_die_attack",
+        "state"=>6,
 ],
 // # monster die (optional variant, 1 die)
     "die_monster" => [ 
@@ -515,7 +506,8 @@ class Material {
         "count" => 1,
         "type" => "die",
         "create" => 1,
-        "location" => "supply_dice",
+        "location" => "supply_die_monster",
+        "state"=>6,
 ],
             /* --- gen php end token_material --- */
 
@@ -3007,6 +2999,15 @@ class Material {
         "counter" => "hidden",
         "content" => "public",
 ],
+// # Battle display (dice rolled during attack)
+    "display_battle" => [ 
+        "type" => "location",
+        "name" => clienttranslate("Battle"),
+        "location" => "thething",
+        "scope" => "global",
+        "counter" => "hidden",
+        "content" => "public",
+],
 // # Supply areas
     "supply_monster" => [ 
         "type" => "location",
@@ -3040,9 +3041,17 @@ class Material {
         "counter" => "hidden",
         "content" => "public",
 ],
-    "supply_dice" => [ 
+    "supply_die_attack" => [ 
         "type" => "location",
-        "name" => clienttranslate("Dice Supply"),
+        "name" => clienttranslate("Attack Dice Supply"),
+        "location" => "supply",
+        "scope" => "global",
+        "counter" => "hidden",
+        "content" => "public",
+],
+    "supply_die_monster" => [ 
+        "type" => "location",
+        "name" => clienttranslate("Monster Die Supply"),
         "location" => "supply",
         "scope" => "global",
         "counter" => "hidden",
@@ -5634,6 +5643,82 @@ class Material {
         "flavour" => "Sindra now uses her short fuse to ignite powerful explosions.",
 ],
             /* --- gen php end card_material --- */
+            /* --- gen php begin dice_material --- */
+// # Attack die (hit x 2, hit-with-cover, miss x 2, rune)
+    "side_die_attack_1" => [ 
+        "dtype" => "attack",
+        "side" => 1,
+        "rule" => "miss",
+        "name" => clienttranslate("Miss"),
+],
+    "side_die_attack_2" => [ 
+        "dtype" => "attack",
+        "side" => 2,
+        "rule" => "miss",
+        "name" => clienttranslate("Miss"),
+],
+    "side_die_attack_3" => [ 
+        "dtype" => "attack",
+        "side" => 3,
+        "rule" => "rune",
+        "name" => clienttranslate("Miss (Rune)"),
+],
+    "side_die_attack_4" => [ 
+        "dtype" => "attack",
+        "side" => 4,
+        "rule" => "hitcov",
+        "name" => clienttranslate("Hit (except Forest)"),
+],
+    "side_die_attack_5" => [ 
+        "dtype" => "attack",
+        "side" => 5,
+        "rule" => "hit",
+        "name" => clienttranslate("Hit"),
+],
+    "side_die_attack_6" => [ 
+        "dtype" => "attack",
+        "side" => 6,
+        "rule" => "hit",
+        "name" => clienttranslate("Hit"),
+],
+// # Monster die (variant - optional difficulty increase)
+    "side_die_monster_1" => [ 
+        "dtype" => "monster",
+        "side" => 1,
+        "rule" => "maneuver_1",
+        "name" => clienttranslate("Maneuver (clockwise)"),
+],
+    "side_die_monster_2" => [ 
+        "dtype" => "monster",
+        "side" => 2,
+        "rule" => "maneuver_2",
+        "name" => clienttranslate("Maneuver (counter-clockwise)"),
+],
+    "side_die_monster_3" => [ 
+        "dtype" => "monster",
+        "side" => 3,
+        "rule" => "attack",
+        "name" => clienttranslate("Attack (+1 strength)"),
+],
+    "side_die_monster_4" => [ 
+        "dtype" => "monster",
+        "side" => 4,
+        "rule" => "push",
+        "name" => clienttranslate("Push (toward Grimheim)"),
+],
+    "side_die_monster_5" => [ 
+        "dtype" => "monster",
+        "side" => 5,
+        "rule" => "charge",
+        "name" => clienttranslate("Charge (rank 1)"),
+],
+    "side_die_monster_6" => [ 
+        "dtype" => "monster",
+        "side" => 6,
+        "rule" => "ambush",
+        "name" => clienttranslate("Ambush (spawn goblin)"),
+],
+            /* --- gen php end dice_material --- */
             /* --- GEN PLACEHOLDR --- */
         ];
     }

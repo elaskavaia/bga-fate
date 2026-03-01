@@ -39,6 +39,12 @@
   @include v.pile-counter;
 }
 
+// Dice supply piles: show top die + count
+#supply_die_attack,
+#supply_die_monster {
+  @include v.pile-counter(".die");
+}
+
 // Predefined display order for monster piles: trollkin, firehorde, dead
 .pile_monster.monster_goblin {
   order: 1;

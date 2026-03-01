@@ -1,0 +1,16 @@
+dtype|side|rule|name
+#set id=side_die_{dtype}_{side}
+# Attack die (hit x 2, hit-with-cover, miss x 2, rune)
+attack|1|miss|Miss
+attack|2|miss|Miss
+attack|3|rune|Miss (Rune)
+attack|4|hitcov|Hit (except Forest)
+attack|5|hit|Hit
+attack|6|hit|Hit
+# Monster die (variant - optional difficulty increase)
+monster|1|maneuver_1|Maneuver (clockwise)
+monster|2|maneuver_2|Maneuver (counter-clockwise)
+monster|3|attack|Attack (+1 strength)
+monster|4|push|Push (toward Grimheim)
+monster|5|charge|Charge (rank 1)
+monster|6|ambush|Ambush (spawn goblin)

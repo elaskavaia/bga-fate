@@ -114,12 +114,45 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 Prompt: add <name> operation. Read CLAUDE.md for instructions
 
-1. Create modules/php/Operations/Op_<name>.php extending Operation (or CountableOperation)
-2. Implement required methods: resolve(), getPrompt(), getPossibleMoves(), etc.
-3. Add operation definition to misc/op_material.csv 
-4. Run `npm run genmat` to update Material.php
-5. Add tests in modules/php/Tests/
-6. If new game elements introduced, proceed with instruction on how to add game element
+#. Create `modules/php/Operations/Op_<name>.php` with a **minimal empty template**
+   - Extend `Operation` (default choice)
+   - Only add `resolve()` as an empty stub
+   - Add a comment block at the top with relevant rules from RULES.md
+#. Add operation definition to `misc/op_material.csv`
+#. Run `npm run genmat` to update Material.php
+#. Run `npm run tests` — **verify everything passes before continuing**
+#. **Present design to user for approval** — before implementing logic, outline:
+   - Which rules apply (quote from RULES.md)
+   - Operation type (automated / user-facing / countable)
+   - What `getPossibleMoves()` will return (valid targets, error cases)
+   - What `resolve()` will do (token moves, state changes, sub-operations)
+   - Any new game elements or helpers needed
+#. Determine operation type:
+   - **Automated** — no user choice (e.g. reinforcement, turn end)
+   - **User-facing** — player selects a target (e.g. move, attack)
+   - **Countable** — repeatable N times (e.g. gain X gold) → switch base class to `CountableOperation`
+#. For **user-facing** operations, implement:
+   - `getPrompt()` — prompt text shown to the player (use `clienttranslate()`)
+   - `getPossibleMoves()` — valid targets as assoc array
+     - Keys are token IDs so the client can highlight them for clicking
+     - Valid: `["q" => Material::RET_OK]`, invalid: `["q" => ERR_CODE]`
+   - `canSkip()` — return `true` if action is optional
+#. Ask user to code review before moving to next step
+#. Implement `resolve()` — executes the game logic
+   - Use `$this->getCheckedArg()` to get the validated user selection
+   - Use `$this->dbSetTokenLocation()` to move tokens with notifications
+   - Use `$this->queue()` to chain sub-operations
+   - For multi-step operations, the operation may re-queue itself with extra data
+   - For **automated** operations, `resolve()` may be the only required method
+#. Ask user what do for ui choices
+   - `getUiArgs()` — optional UI hints (e.g. `["buttons" => false]` for map-only selection)
+   - `getExtraArgs()` — optional extra data for client (e.g. `["token_div" => $id]`)
+#. Ask user to code review before moving to next step
+#. Add tests in `modules/php/Tests/`
+   - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
+   - Test `getPossibleMoves()` returns expected valid/invalid targets
+   - Test `resolve()` produces correct side effects (token moves, state changes)
+#. If new game elements are introduced, follow the "Adding New Game Element" checklist below
 
 ### Adding New Game Element
 

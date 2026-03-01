@@ -46,12 +46,10 @@ hero_5|Finkel|1|hero|1|limbo
 hero_6|Sindra|1|hero|1|limbo
 
 # attack dice (20 total)
-die_attack|Attack Die|20|die|2|supply_dice
+die_attack|Attack Die|20|die|2|supply_die_attack|"state"=>6
 
-# damage dice (8 total, for tracking monster damage)
-die_damage|Damage Die|8|die|2|supply_dice
 
 # monster die (optional variant, 1 die)
-die_monster|Monster Die|1|die|1|supply_dice
+die_monster|Monster Die|1|die|1|supply_die_monster|"state"=>6
 
 

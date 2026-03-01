@@ -280,15 +280,16 @@ class Game extends Base {
             // TODO: unlimite? create more if needed
             $this->tokens->dbSetTokensLocation($tokens, $location);
         } else {
-            $tokens = $this->tokens->db->pickTokensForLocation($inc, $location, "supply_crystal_$type");
-            $this->tokens->dbSetTokensLocation($tokens, $location);
-            if (count($tokens) < $inc) {
+            $needed = abs($inc);
+            $tokens = $this->tokens->db->pickTokensForLocation($needed, $location, "supply_crystal_$type");
+            if (count($tokens) < $needed) {
                 throw new UserException(
-                    new NotificationMessage(clienttranslate('Insufficient resources to pay: ${res_name"}'), [
+                    new NotificationMessage(clienttranslate('Insufficient resources to pay: ${res_name}'), [
                         "res_name" => $this->getTokenName("crystal_$type"),
                     ])
                 );
             }
+            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type");
         }
     }
 
@@ -324,6 +325,74 @@ class Game extends Base {
         if ($stat) {
             $this->playerStats->inc($stat, $inc, $player_id);
         }
+    }
+
+    /**
+     * Returns the total attack strength for a hero: base hero card + equipment + abilities on tableau.
+     * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
+     */
+    function getHeroAttackStrength(string $owner): int {
+        $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+        $total = 0;
+        foreach ($cards as $card) {
+            $cardId = $card["key"];
+            $strength = $this->material->getRulesFor($cardId, "strength", "");
+            if ($strength === "" || $strength === null) {
+                continue;
+            }
+            $strength = (string) $strength;
+            if (str_starts_with($strength, "+")) {
+                $total += (int) substr($strength, 1);
+            } else {
+                $total += (int) $strength;
+            }
+        }
+        return max($total, 0);
+    }
+
+    /**
+     * Apply damage to a monster on a hex: move red crystals from supply to the monster's hex.
+     * If total damage >= monster health, the monster is killed (moved to supply, XP awarded).
+     * @return bool true if the monster was killed
+     */
+    function effect_applyDamage(string $monsterId, string $monsterHex, int $amount, string $owner): bool {
+        if ($amount <= 0) {
+            return false;
+        }
+        // Place red crystals on the monster's hex
+        $this->effect_moveCrystals($owner, "red", $amount, $monsterHex);
+
+        // Count total red crystals on this hex
+        $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterHex);
+        $totalDamage = count($crystals);
+
+        // Check if monster is killed
+        $health = (int) $this->material->getRulesFor($monsterId, "health", 0);
+        if ($totalDamage >= $health) {
+            // Monster killed — award XP
+            $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
+            $this->effect_gainXp($owner, $xp);
+            // Remove red crystals from hex back to supply
+            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterHex);
+            // Remove monster from map
+            $this->hexMap->moveCharacter(
+                $monsterId,
+                "supply_monster",
+                clienttranslate('${player_name} kills ${token_name}')
+            );
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Award XP (yellow crystals) to a hero by moving them from supply to their tableau.
+     */
+    function effect_gainXp(string $owner, int $amount): void {
+        if ($amount <= 0) {
+            return;
+        }
+        $this->effect_moveCrystals($owner, "yellow", $amount, "tableau_$owner");
     }
 
     function getVariantSoloBoard() {
@@ -483,71 +552,72 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_monster() {
-        // Place monsters on the map for visual testing
-        // Trollkin faction
-        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_7");
-        $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_12_6");
-        $this->tokens->dbSetTokenLocation("monster_goblin_3", "hex_5_10");
-        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_8");
-        $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_11_5");
-        $this->tokens->dbSetTokenLocation("monster_troll_1", "hex_4_9");
-        $this->tokens->dbSetTokenLocation("monster_troll_2", "hex_13_7");
-        // Fire Horde faction
-        $this->tokens->dbSetTokenLocation("monster_sprite_1", "hex_8_3");
-        $this->tokens->dbSetTokenLocation("monster_sprite_2", "hex_13_5");
-        $this->tokens->dbSetTokenLocation("monster_elemental_1", "hex_6_4");
-        $this->tokens->dbSetTokenLocation("monster_elemental_2", "hex_14_6");
-        $this->tokens->dbSetTokenLocation("monster_jotunn_1", "hex_4_7");
-        $this->tokens->dbSetTokenLocation("monster_jotunn_2", "hex_12_9");
-        // Dead faction
-        $this->tokens->dbSetTokenLocation("monster_imp_1", "hex_3_6");
-        $this->tokens->dbSetTokenLocation("monster_imp_2", "hex_14_4");
-        $this->tokens->dbSetTokenLocation("monster_skeleton_1", "hex_5_5");
-        $this->tokens->dbSetTokenLocation("monster_skeleton_2", "hex_12_3");
-        $this->tokens->dbSetTokenLocation("monster_draugr_1", "hex_7_4");
-        $this->tokens->dbSetTokenLocation("monster_draugr_2", "hex_11_8");
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
+    // Debug functions below: kept commented out, uncomment as needed for BGA Studio testing
+    // function debug_monster() {
+    //     // Place monsters on the map for visual testing
+    //     // Trollkin faction
+    //     $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_7");
+    //     $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_12_6");
+    //     $this->tokens->dbSetTokenLocation("monster_goblin_3", "hex_5_10");
+    //     $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_8");
+    //     $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_11_5");
+    //     $this->tokens->dbSetTokenLocation("monster_troll_1", "hex_4_9");
+    //     $this->tokens->dbSetTokenLocation("monster_troll_2", "hex_13_7");
+    //     // Fire Horde faction
+    //     $this->tokens->dbSetTokenLocation("monster_sprite_1", "hex_8_3");
+    //     $this->tokens->dbSetTokenLocation("monster_sprite_2", "hex_13_5");
+    //     $this->tokens->dbSetTokenLocation("monster_elemental_1", "hex_6_4");
+    //     $this->tokens->dbSetTokenLocation("monster_elemental_2", "hex_14_6");
+    //     $this->tokens->dbSetTokenLocation("monster_jotunn_1", "hex_4_7");
+    //     $this->tokens->dbSetTokenLocation("monster_jotunn_2", "hex_12_9");
+    //     // Dead faction
+    //     $this->tokens->dbSetTokenLocation("monster_imp_1", "hex_3_6");
+    //     $this->tokens->dbSetTokenLocation("monster_imp_2", "hex_14_4");
+    //     $this->tokens->dbSetTokenLocation("monster_skeleton_1", "hex_5_5");
+    //     $this->tokens->dbSetTokenLocation("monster_skeleton_2", "hex_12_3");
+    //     $this->tokens->dbSetTokenLocation("monster_draugr_1", "hex_7_4");
+    //     $this->tokens->dbSetTokenLocation("monster_draugr_2", "hex_11_8");
+    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    // }
 
-    function debug_houses() {
-        // Move a couple houses out of Grimheim to test removal visuals
-        $this->tokens->dbSetTokenLocation("house_0", "hex_8_9");
-        $this->tokens->dbSetTokenLocation("house_2", "hex_8_9");
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
+    // function debug_houses() {
+    //     // Move a couple houses out of Grimheim to test removal visuals
+    //     $this->tokens->dbSetTokenLocation("house_0", "hex_8_9");
+    //     $this->tokens->dbSetTokenLocation("house_2", "hex_8_9");
+    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    // }
 
-    function debug_monsterCards() {
-        // Place a few monster cards on display_monsterturn for visual testing
-        $this->tokens->dbSetTokenLocation("card_monster_28", "display_monsterturn", 0); // Flanking (yellow)
-        $this->tokens->dbSetTokenLocation("card_monster_36", "display_monsterturn", 0); // Viral Trolls (yellow)
-        $this->tokens->dbSetTokenLocation("card_monster_22", "display_monsterturn", 1); // Imp-ressive Swarm (skipped)
-        $this->tokens->dbSetTokenLocation("card_monster_43", "display_monsterturn", 0); // Feed the Flames (red)
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
+    // function debug_monsterCards() {
+    //     // Place a few monster cards on display_monsterturn for visual testing
+    //     $this->tokens->dbSetTokenLocation("card_monster_28", "display_monsterturn", 0); // Flanking (yellow)
+    //     $this->tokens->dbSetTokenLocation("card_monster_36", "display_monsterturn", 0); // Viral Trolls (yellow)
+    //     $this->tokens->dbSetTokenLocation("card_monster_22", "display_monsterturn", 1); // Imp-ressive Swarm (skipped)
+    //     $this->tokens->dbSetTokenLocation("card_monster_43", "display_monsterturn", 0); // Feed the Flames (red)
+    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    // }
 
-    function debug_heroCards(int $hno = 1) {
-        // Place all cards for hero $hno on the current player's tableau for visual testing
-        // Creates cards if they don't exist (e.g. testing a hero nobody is playing)
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
-            if (($info["hno"] ?? null) != $hno) {
-                continue;
-            }
-            $tokens = $this->tokens->db->getTokensOfTypeInLocation($cardId, null);
-            if (!$tokens) {
-                // Card doesn't exist yet — create it (count>1 needs indexed tokens)
-                $count = $info["count"] ?? 1;
-                $info["location"] = "tableau_{$color}";
-                $info["create"] = $count > 1 ? 2 : 1;
-                $this->tokens->createTokenFromInfo($cardId, $info);
-            } else {
-                $firstKey = array_key_first($tokens);
-                $this->tokens->dbSetTokenLocation($firstKey, "tableau_{$color}", 0, "", ["noa" => true]);
-            }
-        }
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
+    // function debug_heroCards(int $hno = 1) {
+    //     // Place all cards for hero $hno on the current player's tableau for visual testing
+    //     // Creates cards if they don't exist (e.g. testing a hero nobody is playing)
+    //     $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+    //     foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
+    //         if (($info["hno"] ?? null) != $hno) {
+    //             continue;
+    //         }
+    //         $tokens = $this->tokens->db->getTokensOfTypeInLocation($cardId, null);
+    //         if (!$tokens) {
+    //             // Card doesn't exist yet — create it (count>1 needs indexed tokens)
+    //             $count = $info["count"] ?? 1;
+    //             $info["location"] = "tableau_{$color}";
+    //             $info["create"] = $count > 1 ? 2 : 1;
+    //             $this->tokens->createTokenFromInfo($cardId, $info);
+    //         } else {
+    //             $firstKey = array_key_first($tokens);
+    //             $this->tokens->dbSetTokenLocation($firstKey, "tableau_{$color}", 0, "", ["noa" => true]);
+    //         }
+    //     }
+    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    // }
 
     function debug_dumpMachineDb() {
         $t = $this->machine->gettablearr();
@@ -561,6 +631,16 @@ class Game extends Base {
     function debugLog($info, $args = []) {
         $this->notify->all("log", "", ["log" => $info, "args" => $args]);
         //$this->warn($info . ": " . toJson($args));
+    }
+
+    function debug_dice() {
+        // Place 6 attack dice with different sides for visual testing
+        for ($i = 11; $i <= 16; $i++) {
+            $this->tokens->dbSetTokenLocation("die_attack_$i", "display_monsterturn", $i - 10);
+        }
+        // Place monster die with side 1
+        $this->tokens->dbSetTokenLocation("die_monster_3", "display_monsterturn", 4);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
     function debug_eval(string $x) {

@@ -41,6 +41,15 @@ class GameUT extends Game {
     var $gameap_number = 0;
     var $var_colonies = 0;
     var $_colors = [];
+    /** @var int[] Predetermined values for bgaRand(). Consumed in order; falls back to $min when empty. */
+    public array $randQueue = [];
+
+    function bgaRand(int $min, int $max): int {
+        if ($this->randQueue) {
+            return array_shift($this->randQueue);
+        }
+        return $min;
+    }
 
     function __construct() {
         parent::__construct();

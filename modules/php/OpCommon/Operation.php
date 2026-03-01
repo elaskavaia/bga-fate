@@ -239,6 +239,10 @@ abstract class Operation {
         $this->game->tokens->dbSetTokenLocation($tokenId, $placeId, $state, $notif, $args, $this->getPlayerId());
     }
 
+    function dbSetTokensLocation(array $tokenArr, string $placeId, int|null $state = null, string $notif = "*", mixed $args = []) {
+        $this->game->tokens->dbSetTokensLocation($tokenArr, $placeId, $state, $notif, $args, $this->getPlayerId());
+    }
+
     function dbSetTokenState($tokenId, $state = null, $notif = "*", $args = []) {
         $this->game->tokens->dbSetTokenState($tokenId, $state, $notif, $args, $this->getPlayerId());
     }

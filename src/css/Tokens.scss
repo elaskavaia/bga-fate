@@ -1,4 +1,5 @@
 @use "variables" as v;
+@use "sass:math";
 
 // crystals
 
@@ -21,6 +22,41 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
+}
+
+// Dice
+.die {
+  background-image: url("img/dice.png");
+  aspect-ratio: 1;
+  height: 64px;
+  background-size: 600% auto;
+}
+
+// Attack die - side class added by updateTokenDisplayInfo from gamedatas state
+@for $i from 1 through 6 {
+  .die_attack.side_#{$i} {
+    background-position: math.percentage(calc(($i - 1) / 5)) 0%;
+  }
+}
+
+// Monster die - side class added by updateTokenDisplayInfo from gamedatas state
+@for $i from 1 through 6 {
+  .die_monster.side_#{$i} {
+    background-position: math.percentage(calc(($i - 1) / 5)) 100%;
+  }
+}
+
+// Battle display (dice rolled during attack) — overlays map top center
+#display_battle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
 }
 
 // Action markers

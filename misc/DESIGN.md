@@ -16,9 +16,11 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
 - `crystal_red_<n>` — Damage crystal (individual tokens on cards and things)
 - `rune_stone` — Time track marker (singleton)
-- `die_attack_<n>` — Attack die (1..20)
-- `die_damage_<n>` — Damage die (1..8)
+### Dice
+The "state" of the die token is the dice value (1-6). These side values will map to sides of real die.
+- `die_attack_<n>` — Attack die (1..20).
 - `die_monster_<n>` — Monster die
+
 
 Shortening of words:
 - Equipment -> equip
@@ -39,6 +41,8 @@ Shortening of words:
 - `timetrack_<n>` — Time track step slot; actual step tracked as `token_state` on `rune_stone`
 
 ---
+
+
 
 ## Operation Catalog
 
@@ -120,7 +124,8 @@ When a player picks a main action, a marker token moves to `aslot_{color}_{actio
 These locations hold tokens that are not on the map. They should have a hidden or off-screen DOM element so token parenting doesn't break.
 
 
-- `supply_dice` — Attack and damage dice pool
+- `supply_die_attack` — Attack and damage dice pool
+- `supply_die_monster` — Monster die pool
 - `supply_crystal_green` / `supply_crystal_red` / `supply_crystal_yellow` — Crystal supply pools
 - `supply_monster` — Undeployed monster tiles
 
@@ -139,7 +144,7 @@ These locations hold tokens that are not on the map. They should have a hidden o
 3. **Hex board representation**: Store adjacency as a PHP array (or JSON data file). Do not try to compute hex math — the board is irregular with named locations.
 4. **Monster movement**: Pre-compute paths from each board edge to Grimheim (following arrows + roads). Store as lookup table.
 5. **Crystals as counters**: Gold/experience and mana are tracked as individual crystal tokens.
-6. **Damage as counters**: Damage on heroes/monsters tracked as `token_state` integer on die_damage (which is on character).
+6. **Damage tracking**: Damage on heroes/monsters tracked using red crystals (`crystal_red`), same as the physical game's "damage dice" which are just counters. No separate damage tokens needed.
 7. **Card effects**: Implement as operations. Each unique card effect gets an operation class or a parameterized generic operation.
 8. **Undo support**: Use existing DbMultiUndo infrastructure. Allow undo within a turn (before confirming end of turn).
 9. **Monster AI**: Fully deterministic (no choices for monsters), so monster turn can be auto-resolved on server. Client just animates notifications.
