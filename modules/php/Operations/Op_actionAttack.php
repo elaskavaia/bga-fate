@@ -68,41 +68,10 @@ class Op_actionAttack extends Operation {
         $strength = $this->game->getHeroAttackStrength($owner);
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
 
-        // Clean up any leftover dice on display from a previous attack
-        $leftover = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
-        if (count($leftover) > 0) {
-            $leftoverKeys = array_map(fn($d) => $d["key"], $leftover);
-            $this->dbSetTokensLocation($leftoverKeys, "supply_die_attack", 6, "");
-        }
-
-        // TODO: attack dice sides are wrong — log does not show the side that was rolled
-        // Roll attack dice — pick from supply (silent bulk move), then notify each with its roll result for animation
-        $diceResults = [];
-        $diceTokens = $this->game->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
-        foreach ($diceTokens as $die) {
-            $dieId = $die["key"];
-            $roll = $this->game->bgaRand(1, 6);
-            $this->dbSetTokenLocation($dieId, "display_battle", $roll, clienttranslate('${player_name} rolls ${token_name}'));
-            $diceResults[] = ["id" => $dieId, "roll" => $roll];
-        }
-
-        // Check cover: is monster on a forest hex?
-        $hasCover = $this->game->hexMap->getHexTerrain($targetHex) === "forest";
-
-        // Count hits
-        $hits = 0;
-        foreach ($diceResults as $d) {
-            $rule = $this->game->material->getRulesFor("side_die_attack_" . $d["roll"], "rule", "miss");
-            if ($rule === "hit") {
-                $hits++;
-            } elseif ($rule === "hitcov" && !$hasCover) {
-                $hits++;
-            }
-            // TODO: handle rune effects (some cards trigger on rune)
-            // TODO: handle armor (draugr — reduce hits)
-        }
+        $heroId = $this->game->getHeroTokenId($owner);
+        $hits = $this->game->rollAttackDice($heroId, $monsterId, $strength);
 
         // Apply damage — dice stay on display_battle so the player can see them
-        $this->game->effect_applyDamage($monsterId, $targetHex, $hits, $owner);
+        $this->game->effect_applyDamageMonster($monsterId, $hits, $owner);
     }
 }

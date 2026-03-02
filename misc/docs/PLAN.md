@@ -153,16 +153,16 @@ See CLAUDE.md for project overview
 ### Server
 [x] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
 [ ] `getAreasInRange($areaId, $range)` — for ranged attacks
-[ ] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
-[ ] Hero attack strength: just base hero value for now (no equipment/abilities)
-[ ] Damage tracking on monsters (red crystals placed on monster/hero)
-[ ] Monster killed: remove from board, gain XP
-[ ] Cover: if monster is in forest, hit-with-cover doesn't count
+[X] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
+[X] Hero attack strength: just base hero value for now (no equipment/abilities)
+[X] Damage tracking on monsters (red crystals placed on monster/hero)
+[X] Monster killed: remove from board, gain XP
+[X] Cover: if monster is in forest, hit-with-cover doesn't count
 
 ### Client
-[ ] Attack action: highlight adjacent monsters, click to attack
-[ ] Show dice results (text/simple display, no animation needed yet)
-[ ] Show damage on monster tokens
+[X] Attack action: highlight adjacent monsters, click to attack
+[X] Show dice results (text/simple display, no animation needed yet)
+[X] Show damage on monster tokens
 [ ] Show monster death
 
 ### Tests

@@ -286,7 +286,7 @@ class Game extends Base {
                     ])
                 );
             }
-            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type");
+            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type", 0, $message);
         }
     }
 
@@ -348,31 +348,93 @@ class Game extends Base {
     }
 
     /**
+     * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
+     * Used by both hero attacks and monster attacks.
+     * @return int number of hits
+     */
+    function rollAttackDice(string $attackerId, string $defenderId, int $strength): int {
+        $this->notifyMessage(clienttranslate('${token_name} attacks ${token2_name} with strength ${strength}'), [
+            "token_name" => $attackerId,
+            "token2_name" => $defenderId,
+            "strength" => $strength,
+        ]);
+
+        // Forest hex provides cover — "hitcov" results are blocked
+        $defenderHex = $this->hexMap->getCharacterHex($defenderId);
+        $hasCover = $defenderHex !== null && $this->hexMap->getHexTerrain($defenderHex) === "forest";
+
+        // Clean up any leftover dice on display from a previous attack
+        $leftover = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        if (count($leftover) > 0) {
+            $leftoverKeys = array_map(fn($d) => $d["key"], $leftover);
+            $this->tokens->dbSetTokensLocation($leftoverKeys, "supply_die_attack", 6, "");
+        }
+
+        // Roll attack dice — pick from supply, then notify each with its roll result
+        $hits = 0;
+        $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
+        foreach ($diceTokens as $die) {
+            $dieId = $die["key"];
+            $roll = $this->bgaRand(1, 6);
+            $sideName = $this->material->getRulesFor("side_die_attack_$roll", "name", "?");
+            $this->tokens->dbSetTokenLocation(
+                $dieId,
+                "display_battle",
+                $roll,
+                clienttranslate('${token_name} attacks ${token2_name} - ${side_name}'),
+                [
+                    "token_name" => $attackerId,
+                    "token2_name" => $defenderId,
+                    "side_name" => $sideName,
+                ]
+            );
+            $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
+            if ($rule === "hit" || ($rule === "hitcov" && !$hasCover)) {
+                $hits++;
+            }
+            // TODO: handle rune effects (some cards trigger on rune)
+            // TODO: handle armor (draugr — reduce hits)
+        }
+        return $hits;
+    }
+
+    /**
      * Apply damage to a monster: move red crystals from supply onto the monster token.
      * If total damage >= monster health, the monster is killed (moved to supply, XP awarded).
      * @return bool true if the monster was killed
      */
-    function effect_applyDamage(string $monsterId, string $monsterHex, int $amount, string $owner): bool {
+    function effect_applyDamageMonster(string $monsterId, int $amount, string $owner): bool {
         if ($amount <= 0) {
+            $this->notifyMessage(clienttranslate('${token_name} takes no damage'), ["token_name" => $monsterId]);
             return false;
         }
         // Place red crystals on the monster token
-        $this->effect_moveCrystals($owner, "red", $amount, $monsterId);
+        $this->effect_moveCrystals($owner, "red", $amount, $monsterId, ["message" => ""]);
 
         // Count total red crystals on this monster
         $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId);
         $totalDamage = count($crystals);
+        $health = (int) $this->material->getRulesFor($monsterId, "health", 0);
+
+        $this->notifyMessage(clienttranslate('${token_name} takes ${amount} damage (${totalDamage}/${health})'), [
+            "token_name" => $monsterId,
+            "amount" => $amount,
+            "totalDamage" => $totalDamage,
+            "health" => $health,
+        ]);
 
         // Check if monster is killed
-        $health = (int) $this->material->getRulesFor($monsterId, "health", 0);
         if ($totalDamage >= $health) {
             // Monster killed — award XP
             $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
             $this->effect_gainXp($owner, $xp);
             // Remove red crystals from monster back to supply
-            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterId);
+            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterId, ["message" => ""]);
             // Remove monster from map
-            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${player_name} kills ${token_name}'));
+            $heroId = $this->getHeroTokenId($owner);
+            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token2_name} kills ${token_name}'), [
+                "token2_name" => $heroId,
+            ]);
             return true;
         }
         return false;

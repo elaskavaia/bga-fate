@@ -170,7 +170,7 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // effect_applyDamage
+    // effect_applyDamageMonster
     // -------------------------------------------------------------------------
 
     public function testDamageKillsMonsterWhenEnough(): void {
@@ -178,7 +178,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
-        $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 2, PCOLOR);
+        $killed = $this->game->effect_applyDamageMonster("monster_goblin_1", 2, PCOLOR);
         $this->assertTrue($killed);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
@@ -192,7 +192,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
-        $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 1, PCOLOR);
+        $killed = $this->game->effect_applyDamageMonster("monster_goblin_1", 1, PCOLOR);
         $this->assertFalse($killed);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
@@ -207,13 +207,13 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // First attack: 3 damage
-        $killed = $this->game->effect_applyDamage("monster_troll_1", "hex_12_8", 3, PCOLOR);
+        $killed = $this->game->effect_applyDamageMonster("monster_troll_1", 3, PCOLOR);
         $this->assertFalse($killed);
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(3, $crystals);
 
         // Second attack: 4 more damage — total 7, enough to kill
-        $killed = $this->game->effect_applyDamage("monster_troll_1", "hex_12_8", 4, PCOLOR);
+        $killed = $this->game->effect_applyDamageMonster("monster_troll_1", 4, PCOLOR);
         $this->assertTrue($killed);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
 
@@ -226,7 +226,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
-        $killed = $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 0, PCOLOR);
+        $killed = $this->game->effect_applyDamageMonster("monster_goblin_1", 0, PCOLOR);
         $this->assertFalse($killed);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
@@ -245,7 +245,7 @@ final class Op_actionAttackTest extends TestCase {
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
-        $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 2, PCOLOR);
+        $this->game->effect_applyDamageMonster("monster_goblin_1", 2, PCOLOR);
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 1, $xpAfter);
@@ -257,7 +257,7 @@ final class Op_actionAttackTest extends TestCase {
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
-        $this->game->effect_applyDamage("monster_goblin_1", "hex_12_8", 1, PCOLOR);
+        $this->game->effect_applyDamageMonster("monster_goblin_1", 1, PCOLOR);
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore, $xpAfter);
@@ -270,7 +270,7 @@ final class Op_actionAttackTest extends TestCase {
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
-        $this->game->effect_applyDamage("monster_brute_1", "hex_12_8", 3, PCOLOR);
+        $this->game->effect_applyDamageMonster("monster_brute_1", 3, PCOLOR);
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 2, $xpAfter);

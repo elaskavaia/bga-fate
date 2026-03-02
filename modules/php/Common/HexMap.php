@@ -223,8 +223,8 @@ class HexMap {
         return null;
     }
 
-    function moveCharacter(string $charId, string $location, string $message = "*") {
-        $this->game->tokens->dbSetTokenLocation($charId, $location, 0, $message);
+    function moveCharacter(string $charId, string $location, string $message = "*", array $args = []) {
+        $this->game->tokens->dbSetTokenLocation($charId, $location, 0, $message, $args);
         $this->moveCharacterOnMap($charId, $location);
     }
 
