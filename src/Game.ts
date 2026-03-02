@@ -196,6 +196,17 @@ export class Game extends GameMachine {
         };
       }
     }
+
+    // Dice landing on display_battle: show evaporate effect at the attack target
+    if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+      const target = args.anim_target;
+      const prevOnEnd = result.onEnd;
+      result.onEnd = (node) => {
+        prevOnEnd?.(node);
+        this.animationLa.evaporate(node, target);
+      };
+    }
+
     return result;
   }
 

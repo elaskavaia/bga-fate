@@ -42,6 +42,7 @@ export interface AnimArgs {
   delay?: number;
   place_from?: string;
   inc?: number;
+  anim_target?: string;
 }
 
 export class Game1Tokens extends Game0Basics {

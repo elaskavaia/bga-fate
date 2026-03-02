@@ -386,6 +386,7 @@ class Game extends Base {
                     "token_name" => $attackerId,
                     "token2_name" => $defenderId,
                     "side_name" => $sideName,
+                    "anim_target" => $defenderId,
                 ]
             );
             $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");

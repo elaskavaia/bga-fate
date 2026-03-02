@@ -442,6 +442,38 @@ class LaAnimations {
         clone.style.transitionDuration = undefined;
         return clone;
     }
+    /**
+     * Clone an element, position it over a target, then float up and fade out.
+     * The original element is not affected.
+     */
+    evaporate(mobileId, targetId, duration) {
+        const mobileNode = $(mobileId);
+        const targetNode = $(targetId);
+        if (!mobileNode || !targetNode)
+            return;
+        if (duration === undefined)
+            duration = 1200;
+        // Project a clone of the target to get its position on oversurface
+        const targetClone = this.projectOnto(targetNode, "_evap_dest");
+        const targetLeft = targetClone.style.left;
+        const targetTop = targetClone.style.top;
+        targetClone.remove();
+        // Project a clone of the mobile onto oversurface
+        const clone = this.projectOnto(mobileNode, "_evap");
+        // Reposition clone over the target (centered horizontally, above vertically)
+        clone.style.left = targetLeft;
+        clone.style.top = targetTop;
+        clone.style.pointerEvents = "none";
+        clone.offsetHeight; // force reflow
+        // Animate: float up + fade out
+        clone.style.transitionDuration = duration + "ms";
+        clone.style.transitionProperty = "opacity, transform";
+        clone.style.transitionTimingFunction = "ease-out";
+        clone.offsetHeight; // force reflow
+        clone.style.opacity = "0";
+        clone.style.transform = (clone.style.transform || "") + " translateY(-60px) scale(1.3)";
+        setTimeout(() => clone.remove(), duration);
+    }
     cardFlip(mobileId, newState, duration, onEnd) {
         var mobileNode = $(mobileId);
         if (!mobileNode)
@@ -1858,6 +1890,15 @@ class Game extends GameMachine {
                     this.updateBucketCount(bucketId);
                 };
             }
+        }
+        // Dice landing on display_battle: show evaporate effect at the attack target
+        if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+            const target = args.anim_target;
+            const prevOnEnd = result.onEnd;
+            result.onEnd = (node) => {
+                prevOnEnd?.(node);
+                this.animationLa.evaporate(node, target);
+            };
         }
         return result;
     }
