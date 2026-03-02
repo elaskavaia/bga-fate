@@ -15,7 +15,7 @@
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
     "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./modules/php/Tests/_autoload.php  --colors=always",
     "tests": "npm run test -- modules/php/Tests",
-    "jstests": "TS_NODE_PROJECT=jstests/tsconfig.test.json mocha -r ts-node/register -r jstests/setup.ts jstests/**/*.spec.ts"
+    "jstests": "TS_NODE_PROJECT=jstests/tsconfig.json mocha -r ts-node/register -r jstests/setup.ts jstests/**/*.spec.ts"
   },
   "author": "Alena Laskavaia",
   "license": "EPL2.0",
