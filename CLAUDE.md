@@ -15,7 +15,7 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - `npm run build:scss` - Compile SCSS to fate.css
 - `npm run genmat` - Generate Material.php from CSV files in misc/
 - `npm run lint:php`- Check for php syntax errors
-- `npm run predeploy` - Generate and test everything
+- `npm run predeploy` - Generate and test everything (build + PHP lint + PHP tests + JS tests)
 
 
 ### Testing
@@ -24,6 +24,7 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - `npm run test -- modules/php/Tests/<TestFile>.php` - Run a single test file
 - `npm run test -- --filter testMethodName modules/php/Tests/<TestFile>.php` - Run a single test method
 - Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
+- `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in jstests/*.spec.ts)
 
 ### Code Formatting
 
@@ -96,6 +97,10 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 - PHP Operation classes: `Op_<operationName>.php` (e.g., Op_cardDraw.php)
 - Material CSV files: `<category>_material.csv` (e.g., token_material.csv, card_material.csv)
 - PHP namespaces: `Bga\Games\Fate\<Subdirectory>`
+
+## After completing a task
+
+- Check [misc/docs/PLAN.md](misc/docs/PLAN.md) and mark completed items with `[x]`
 
 ## Prepare the game for BGA deployment:
 
