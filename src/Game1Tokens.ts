@@ -29,6 +29,7 @@ export interface TokenMoveInfo extends Token {
   onEnd?: (node: Element) => void;
   onClick?: (event?: any) => void;
   animtime?: number;
+  noa?: boolean;
   nop?: boolean;
   place_from?: string;
   inc?: number;
@@ -406,7 +407,7 @@ export class Game1Tokens extends Game0Basics {
       const tokenNode = $(tokenId);
       let animTime = placeInfo.animtime ?? this.defaultAnimationDuration;
 
-      if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
+      if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
         animTime = 0;
       }
 

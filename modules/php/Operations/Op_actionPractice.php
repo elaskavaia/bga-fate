@@ -23,6 +23,6 @@ class Op_actionPractice extends Operation {
     function resolve(): void {
         // - Increment experience counter on player board
         $owner = $this->getOwner();
-        $this->game->effect_moveCrystals($owner, "yellow", 1, "tableau_$owner");
+        $this->game->effect_moveCrystals("yellow", 1, "tableau_$owner");
     }
 }

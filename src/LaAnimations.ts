@@ -155,6 +155,47 @@ export class LaAnimations {
   }
 
   /**
+   * Pulse an element: scale up then back to normal size.
+   * If called again while already pulsing, queues the next pulse after the current one.
+   */
+  pulse(targetId: ElementOrId, scale: number = 2, duration: number = 400) {
+    const node = $(targetId) as HTMLElement;
+    if (!node) return;
+    const pending = Number(node.dataset.pulseQueue || 0);
+    if (pending > 0) {
+      node.dataset.pulseQueue = String(pending + 1);
+      return;
+    }
+    node.dataset.pulseQueue = "1";
+    this.doPulse(node, scale, duration);
+  }
+
+  private doPulse(node: HTMLElement, scale: number, duration: number) {
+    const half = duration / 2;
+    node.style.transitionDuration = half + "ms";
+    node.style.transitionProperty = "transform";
+    node.style.transitionTimingFunction = "ease-out";
+    node.offsetHeight;
+    node.style.transform = `scale(${scale})`;
+    setTimeout(() => {
+      node.style.transitionTimingFunction = "ease-in";
+      node.style.transform = "";
+      setTimeout(() => {
+        const remaining = Number(node.dataset.pulseQueue || 0) - 1;
+        if (remaining > 0) {
+          node.dataset.pulseQueue = String(remaining);
+          this.doPulse(node, scale, duration);
+        } else {
+          delete node.dataset.pulseQueue;
+          node.style.removeProperty("transition-duration");
+          node.style.removeProperty("transition-property");
+          node.style.removeProperty("transition-timing-function");
+        }
+      }, half);
+    }, half);
+  }
+
+  /**
    * Clone an element, position it over a target, then float up and fade out.
    * The original element is not affected.
    */
@@ -187,6 +228,36 @@ export class LaAnimations {
     clone.style.transform = (clone.style.transform || "") + " translateY(-60px) scale(1.3)";
 
     setTimeout(() => clone.remove(), duration);
+  }
+
+  /**
+   * Shrink and fade an element in place.
+   * The element is hidden (opacity 0) during the animation; a clone performs the visual effect.
+   */
+  shrinkAndFade(mobileId: ElementOrId, duration?: number): Promise<void> {
+    const mobileNode = $(mobileId) as HTMLElement;
+    if (!mobileNode) return Promise.resolve();
+    if (duration === undefined) duration = 600;
+
+    const clone = this.projectOnto(mobileNode, "_shrink");
+    clone.style.pointerEvents = "none";
+    mobileNode.style.opacity = "0";
+    clone.offsetHeight; // force reflow
+
+    clone.style.transitionDuration = duration + "ms";
+    clone.style.transitionProperty = "opacity, transform";
+    clone.style.transitionTimingFunction = "ease-in";
+    clone.offsetHeight; // force reflow
+    clone.style.opacity = "0";
+    clone.style.transform = (clone.style.transform || "") + " scale(0)";
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        clone.remove();
+        mobileNode.style.removeProperty("opacity");
+        resolve();
+      }, duration);
+    });
   }
 
   cardFlip(mobileId: ElementOrId, newState: string, duration?: number, onEnd?: (node?: HTMLElement) => void) {

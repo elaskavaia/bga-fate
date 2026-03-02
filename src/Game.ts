@@ -168,6 +168,13 @@ export class Game extends GameMachine {
         placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "supply_monster");
       }
       result.location = subId;
+      // Shrink & fade at current position, then snap to supply
+      if ($(tokenKey)?.parentElement?.id?.startsWith("hex_")) {
+        result.noa = true;
+        result.onStart = async (node) => {
+          await this.animationLa.shrinkAndFade(node);
+        };
+      }
     } else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
       // Redirect cards on tableau to the card area
       const color = loc.substring("tableau_".length);
@@ -187,22 +194,28 @@ export class Game extends GameMachine {
         }
         result.location = bucketId;
 
-        result.onEnd = () => {
-          if (oldBucketId) {
-            // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
-            this.updateBucketCount(oldBucketId);
-          }
-          this.updateBucketCount(bucketId);
-        };
+        // Crystal landing on a monster: suppress slide, pulse the crystal bucket instead
+        if (loc.startsWith("monster")) {
+          result.noa = true;
+          result.onEnd = () => {
+            if (oldBucketId) this.updateBucketCount(oldBucketId);
+            this.updateBucketCount(bucketId);
+            this.animationLa.pulse(bucketId);
+          };
+        } else {
+          result.onEnd = () => {
+            if (oldBucketId) {
+              // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
+              this.updateBucketCount(oldBucketId);
+            }
+            this.updateBucketCount(bucketId);
+          };
+        }
       }
-    }
-
-    // Dice landing on display_battle: show evaporate effect at the attack target
-    if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+    } else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+      // Dice landing on display_battle: show evaporate effect at the attack target
       const target = args.anim_target;
-      const prevOnEnd = result.onEnd;
       result.onEnd = (node) => {
-        prevOnEnd?.(node);
         this.animationLa.evaporate(node, target);
       };
     }

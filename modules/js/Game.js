@@ -443,6 +443,47 @@ class LaAnimations {
         return clone;
     }
     /**
+     * Pulse an element: scale up then back to normal size.
+     * If called again while already pulsing, queues the next pulse after the current one.
+     */
+    pulse(targetId, scale = 2, duration = 400) {
+        const node = $(targetId);
+        if (!node)
+            return;
+        const pending = Number(node.dataset.pulseQueue || 0);
+        if (pending > 0) {
+            node.dataset.pulseQueue = String(pending + 1);
+            return;
+        }
+        node.dataset.pulseQueue = "1";
+        this.doPulse(node, scale, duration);
+    }
+    doPulse(node, scale, duration) {
+        const half = duration / 2;
+        node.style.transitionDuration = half + "ms";
+        node.style.transitionProperty = "transform";
+        node.style.transitionTimingFunction = "ease-out";
+        node.offsetHeight;
+        node.style.transform = `scale(${scale})`;
+        setTimeout(() => {
+            node.style.transitionTimingFunction = "ease-in";
+            node.style.transform = "";
+            setTimeout(() => {
+                const remaining = Number(node.dataset.pulseQueue || 0) - 1;
+                if (remaining > 0) {
+                    node.dataset.pulseQueue = String(remaining);
+                    this.doPulse(node, scale, duration);
+                }
+                else {
+                    delete node.dataset.pulseQueue;
+                    node.style.removeProperty("transition-duration");
+                    node.style.removeProperty("transition-property");
+                    node.style.removeProperty("transition-timing-function");
+                }
+            }, half);
+        }, half);
+    }
+    /**
      * Clone an element, position it over a target, then float up and fade out.
      * The original element is not affected.
      */
@@ -473,6 +514,34 @@ class LaAnimations {
         clone.style.opacity = "0";
         clone.style.transform = (clone.style.transform || "") + " translateY(-60px) scale(1.3)";
         setTimeout(() => clone.remove(), duration);
+    }
+    /**
+     * Shrink and fade an element in place.
+     * The element is hidden (opacity 0) during the animation; a clone performs the visual effect.
+     */
+    shrinkAndFade(mobileId, duration) {
+        const mobileNode = $(mobileId);
+        if (!mobileNode)
+            return Promise.resolve();
+        if (duration === undefined)
+            duration = 600;
+        const clone = this.projectOnto(mobileNode, "_shrink");
+        clone.style.pointerEvents = "none";
+        mobileNode.style.opacity = "0";
+        clone.offsetHeight; // force reflow
+        clone.style.transitionDuration = duration + "ms";
+        clone.style.transitionProperty = "opacity, transform";
+        clone.style.transitionTimingFunction = "ease-in";
+        clone.offsetHeight; // force reflow
+        clone.style.opacity = "0";
+        clone.style.transform = (clone.style.transform || "") + " scale(0)";
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                clone.remove();
+                mobileNode.style.removeProperty("opacity");
+                resolve();
+            }, duration);
+        });
     }
     cardFlip(mobileId, newState, duration, onEnd) {
         var mobileNode = $(mobileId);
@@ -875,7 +944,7 @@ class Game1Tokens extends Game0Basics {
             }
             const tokenNode = $(tokenId);
             let animTime = placeInfo.animtime ?? this.defaultAnimationDuration;
-            if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
+            if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
                 animTime = 0;
             }
             if (placeInfo.onStart)
@@ -1863,6 +1932,13 @@ class Game extends GameMachine {
                 placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "supply_monster");
             }
             result.location = subId;
+            // Shrink & fade at current position, then snap to supply
+            if ($(tokenKey)?.parentElement?.id?.startsWith("hex_")) {
+                result.noa = true;
+                result.onStart = async (node) => {
+                    await this.animationLa.shrinkAndFade(node);
+                };
+            }
         }
         else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
             // Redirect cards on tableau to the card area
@@ -1882,21 +1958,31 @@ class Game extends GameMachine {
                     placeHtml(`<div id="${bucketId}" class="bucket bucket_${bucketType}"></div>`, loc);
                 }
                 result.location = bucketId;
-                result.onEnd = () => {
-                    if (oldBucketId) {
-                        // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
-                        this.updateBucketCount(oldBucketId);
-                    }
-                    this.updateBucketCount(bucketId);
-                };
+                // Crystal landing on a monster: suppress slide, pulse the crystal bucket instead
+                if (loc.startsWith("monster")) {
+                    result.noa = true;
+                    result.onEnd = () => {
+                        if (oldBucketId)
+                            this.updateBucketCount(oldBucketId);
+                        this.updateBucketCount(bucketId);
+                        this.animationLa.pulse(bucketId);
+                    };
+                }
+                else {
+                    result.onEnd = () => {
+                        if (oldBucketId) {
+                            // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
+                            this.updateBucketCount(oldBucketId);
+                        }
+                        this.updateBucketCount(bucketId);
+                    };
+                }
             }
         }
-        // Dice landing on display_battle: show evaporate effect at the attack target
-        if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+        else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
+            // Dice landing on display_battle: show evaporate effect at the attack target
             const target = args.anim_target;
-            const prevOnEnd = result.onEnd;
             result.onEnd = (node) => {
-                prevOnEnd?.(node);
                 this.animationLa.evaporate(node, target);
             };
         }

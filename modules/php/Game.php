@@ -264,7 +264,7 @@ class Game extends Base {
         }
     }
 
-    function effect_moveCrystals(string $color, string $type, int $inc = 1, string $location, array $options = []) {
+    function effect_moveCrystals(string $type, int $inc = 1, string $location, array $options = []) {
         $message = array_get($options, "message", "*");
         unset($options["message"]);
 
@@ -392,6 +392,9 @@ class Game extends Base {
             $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
             if ($rule === "hit" || ($rule === "hitcov" && !$hasCover)) {
                 $hits++;
+
+                // Place red crystals on the monster token
+                $this->effect_moveCrystals("red", 1, $defenderId, ["message" => ""]);
             }
             // TODO: handle rune effects (some cards trigger on rune)
             // TODO: handle armor (draugr — reduce hits)
@@ -400,7 +403,7 @@ class Game extends Base {
     }
 
     /**
-     * Apply damage to a monster: move red crystals from supply onto the monster token.
+     * Apply damage to a monster:
      * If total damage >= monster health, the monster is killed (moved to supply, XP awarded).
      * @return bool true if the monster was killed
      */
@@ -409,8 +412,6 @@ class Game extends Base {
             $this->notifyMessage(clienttranslate('${token_name} takes no damage'), ["token_name" => $monsterId]);
             return false;
         }
-        // Place red crystals on the monster token
-        $this->effect_moveCrystals($owner, "red", $amount, $monsterId, ["message" => ""]);
 
         // Count total red crystals on this monster
         $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId);
@@ -430,7 +431,7 @@ class Game extends Base {
             $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
             $this->effect_gainXp($owner, $xp);
             // Remove red crystals from monster back to supply
-            $this->effect_moveCrystals($owner, "red", -$totalDamage, $monsterId, ["message" => ""]);
+            $this->effect_moveCrystals("red", -$totalDamage, $monsterId, ["message" => ""]);
             // Remove monster from map
             $heroId = $this->getHeroTokenId($owner);
             $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token2_name} kills ${token_name}'), [
@@ -448,7 +449,7 @@ class Game extends Base {
         if ($amount <= 0) {
             return;
         }
-        $this->effect_moveCrystals($owner, "yellow", $amount, "tableau_$owner");
+        $this->effect_moveCrystals("yellow", $amount, "tableau_$owner");
     }
 
     function getVariantSoloBoard() {
