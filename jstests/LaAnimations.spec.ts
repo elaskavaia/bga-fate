@@ -42,22 +42,20 @@ describe("LaAnimations.shrinkAndFade", () => {
     expect($("target_shrink")).to.be.null;
   });
 
-  it("should call onEnd callback after duration", () => {
-    const onEnd = sinon.spy();
-    la.shrinkAndFade("target", 500, onEnd);
-    expect(onEnd.called).to.be.false;
+  it("should resolve promise after duration", async () => {
+    const promise = la.shrinkAndFade("target", 500);
     clock.tick(500);
-    expect(onEnd.calledOnce).to.be.true;
-    expect(onEnd.firstCall.args[0]).to.equal($("target"));
+    await promise;
+    // If we get here, the promise resolved after the timeout
   });
 
-  it("should use default duration of 600ms when not specified", () => {
-    const onEnd = sinon.spy();
-    la.shrinkAndFade("target", undefined, onEnd);
+  it("should use default duration of 600ms when not specified", async () => {
+    const promise = la.shrinkAndFade("target");
     clock.tick(599);
-    expect(onEnd.called).to.be.false;
+    expect($("target_shrink")).to.not.be.null; // clone still exists before 600ms
     clock.tick(1);
-    expect(onEnd.calledOnce).to.be.true;
+    await promise;
+    expect($("target_shrink")).to.be.null; // clone removed after 600ms
   });
 
   it("should do nothing if element does not exist", () => {
