@@ -63,24 +63,27 @@
   position: absolute;
   width: 5.8823529412%;
   height: 7.6923076923%;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   background-color: transparent;
   box-sizing: border-box;
 }
-.hex:hover {
+.hex::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  pointer-events: none;
+  z-index: 2;
+}
+.hex:hover::after {
   background-color: rgba(142, 194, 172, 0.4039215686);
 }
 .hex.active_slot {
   cursor: pointer;
+  outline: none;
 }
-.hex.active_slot::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%2300ff88' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
+.hex.active_slot::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%2319bedb' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
   background-size: 100% 100%;
-  pointer-events: none;
 }
 
 /**
@@ -203,6 +206,7 @@
   height: 94px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
+  filter: drop-shadow(2px 2px 3px black);
 }
 
 .hero_1 {
@@ -224,21 +228,11 @@
 .monster {
   aspect-ratio: 1;
   height: 94px;
-  border-radius: 50%;
-  background-color: #8b4513;
-  border: 2px solid #5a2d0c;
   z-index: 1;
   position: relative;
-}
-.monster::before {
-  content: attr(data-name);
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: x-large;
-  font-weight: bold;
+  background-image: url(img/mini_monsters.png);
+  background-size: 300% 300%;
+  filter: drop-shadow(2px 2px 3px black);
 }
 
 .bucket {
@@ -264,99 +258,47 @@
 }
 
 .bucket_crystal_red {
-  bottom: 0;
-  right: 0;
+  bottom: 6%;
+  right: 40%;
 }
 .bucket_crystal_red[data-count]:not([data-count="0"])::after {
   background-color: #e53935;
 }
 
-.monster.trollkin {
-  background-color: #4a7a3a;
-  border-color: #2d4d22;
-  border-radius: 20%;
-}
-
-.monster.monster_goblin {
-  background-color: #4a7a3a;
-}
-
-.monster.monster_brute {
-  background-color: rgb(34, 102, 34);
-}
-
-.monster.monster_troll {
-  background-color: #0a2202;
-}
-
-.monster.firehorde {
-  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
-  background-color: #c94420;
-  border-color: #8b2e14;
-  border-radius: 0;
-}
-.monster.firehorde::before {
-  top: 20%;
-}
-
-.monster.monster_sprite {
-  background-color: #e8c43a;
-}
-
-.monster.monster_elemental {
-  background-color: #e8713a;
-}
-
-.monster.monster_jotunn {
-  background-color: #c94420;
-}
-
-.monster.dead {
-  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
-  border-radius: 0;
-  border: none;
-  background-color: #9b59b6;
-  border-color: #6c3483;
-}
-.monster.dead::before {
-  top: 15%;
-}
-
-.monster.monster_imp {
-  background-color: #e87aab;
+.monster.monster_draugr {
+  background-position: 0% 0%;
 }
 
 .monster.monster_skeleton {
-  background-color: #9b59b6;
+  background-position: 50% 0%;
 }
 
-.monster.monster_draugr {
-  background-color: #5b2d8e;
+.monster.monster_imp {
+  background-position: 100% 0%;
 }
 
-.monster.rank1 {
-  height: 54px;
-  border-width: 3px;
-}
-.hex .monster.rank1 {
-  height: 40%;
+.monster.monster_troll {
+  background-position: 0% 50%;
 }
 
-.monster.rank2 {
-  height: 74px;
-  border-width: 3px;
-}
-.hex .monster.rank2 {
-  height: 50%;
+.monster.monster_brute {
+  background-position: 50% 50%;
 }
 
-.monster.rank3 {
-  height: 94px;
-  border-width: 4px;
-  border-style: double;
+.monster.monster_goblin {
+  background-position: 100% 50%;
 }
-.hex .monster.rank3 {
-  height: 60%;
+
+.monster.monster_jotunn {
+  background-position: 0% 100%;
+}
+
+.monster.monster_elemental {
+  background-position: 50% 100%;
+}
+
+.monster.monster_sprite {
+  background-position: 100% 100%;
 }
 
 .house {
@@ -365,6 +307,7 @@
   background-image: url(img/mini_houses.png);
   background-size: 600% auto;
   background-position: 40% 0%;
+  filter: drop-shadow(2px 2px 3px black);
 }
 .hex > .house {
   position: absolute;

@@ -255,6 +255,7 @@ export class Game1Tokens extends Game0Basics {
     const classes = displayInfo.imageTypes.split(/  */);
     tokenNode.classList.add(...classes);
     if (displayInfo.name) tokenNode.dataset.name = this.getTr(displayInfo.name);
+    if (displayInfo.tc) tokenNode.dataset.tc = displayInfo.tc;
     this.addListenerWithGuard(tokenNode, placeInfo.onClick);
   }
 
@@ -654,7 +655,7 @@ export class Game1Tokens extends Game0Basics {
   getTokenPresentaton(type: string, tokenKey: string, args: any = {}): string {
     if (type.includes("_div")) return this.createTokenImage(tokenKey);
     if (tokenKey.includes("wicon")) return this.createTokenImage(tokenKey);
-    return this.getTokenName(tokenKey); // just a name for now
+    return this.getTokenName(tokenKey);
   }
   // override to generate dynamic tooltips and such
   updateTokenDisplayInfo(tokenDisplayInfo: TokenDisplayInfo) {}
@@ -690,6 +691,7 @@ export class Game1Tokens extends Game0Basics {
       if (log && args) {
         var keys = [
           "token_name",
+          "token_name2",
           "token2_name",
           "token_divs",
           "token_names",

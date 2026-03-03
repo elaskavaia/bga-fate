@@ -16,6 +16,7 @@
   height: 94px;
   background-image: url(img/mini_heroes.png);
   background-size: 600% auto;
+  filter: v.$dropShadow2;
 }
 
 .hero_1 {
@@ -31,26 +32,16 @@
   background-position: 40% 0%;
 }
 
-// Monster placeholders (colored circles with name label)
+// Monster miniatures (sprite sheet: 3x3 grid, rows = factions, cols = rank 3→1)
+// Size differences are baked into the sprite — no per-rank sizing needed
 .monster {
   aspect-ratio: 1;
   height: 94px;
-  border-radius: 50%;
-  background-color: #8b4513;
-  border: 2px solid #5a2d0c;
   z-index: 1;
   position: relative;
-
-  &::before {
-    content: attr(data-name);
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: x-large;
-    font-weight: bold;
-  }
+  background-image: url(img/mini_monsters.png);
+  background-size: 300% 300%;
+  filter: v.$dropShadow2;
 }
 
 // Bucket: generic sub-container for tokens placed on another token
@@ -81,108 +72,46 @@
 }
 
 // Red crystal bucket: damage indicator (red badge, bottom-right)
+
 .bucket_crystal_red {
-  bottom: 0;
-  right: 0;
+  bottom: 6%;
+  right: 40%;
+
   &[data-count]:not([data-count="0"])::after {
     background-color: #e53935;
   }
 }
 
-// Faction colors
-.monster.trollkin {
-  background-color: #4a7a3a;
-  border-color: #2d4d22;
-  border-radius: 20%;
-}
-
-// Goblin: square with rounded corners, lighter green, letter abbreviation
-.monster.monster_goblin {
-  background-color: #4a7a3a;
-}
-
-// Brute: square with rounded corners, medium green, letter abbreviation
-.monster.monster_brute {
-  background-color: rgb(34, 102, 34);
-}
-
-// Troll: square with rounded corners, dark green, letter abbreviation
-.monster.monster_troll {
-  background-color: #0a2202;
-}
-
-.monster.firehorde {
-  clip-path: polygon(50% 3%, 56% 8%, 93% 82%, 91% 89%, 85% 93%, 15% 93%, 9% 89%, 7% 82%, 44% 8%);
-  background-color: #c94420;
-  border-color: #8b2e14;
-  border-radius: 0;
-  &::before {
-    top: 20%;
-  }
-}
-// Sprite: rounded triangle, light orange/red, letter abbreviation
-.monster.monster_sprite {
-  background-color: #e8c43a;
-}
-
-// Elemental: rounded triangle, medium red, letter abbreviation
-.monster.monster_elemental {
-  background-color: #e8713a;
-}
-
-// Jotunn: rounded triangle, dark red, letter abbreviation
-.monster.monster_jotunn {
-  background-color: #c94420;
-}
-
-.monster.dead {
-  clip-path: polygon(50% 0%, 97% 35%, 79% 91%, 21% 91%, 3% 35%);
-  border-radius: 0;
-  border: none;
-  background-color: #9b59b6;
-  border-color: #6c3483;
-  &::before {
-    top: 15%;
-  }
-}
-
-// Imp: pentagon, pink, letter abbreviation
-.monster.monster_imp {
-  background-color: #e87aab;
-}
-
-// Skeleton: pentagon, purple, letter abbreviation
-.monster.monster_skeleton {
-  background-color: #9b59b6;
-}
-
-// Draugr: pentagon, dark purple, letter abbreviation
+// Sprite positions: columns = rank3 (0%), rank2 (50%), rank1 (100%); rows = faction
+// Row 0 = dead, Row 1 = trollkin, Row 2 = firehorde
 .monster.monster_draugr {
-  background-color: #5b2d8e;
+  background-position: 0% 0%;
+}
+.monster.monster_skeleton {
+  background-position: 50% 0%;
+}
+.monster.monster_imp {
+  background-position: 100% 0%;
 }
 
-// Rank indicators (border style + darker background per rank)
-.monster.rank1 {
-  height: 54px;
-  border-width: 3px;
-  .hex & {
-    height: 40%;
-  }
+.monster.monster_troll {
+  background-position: 0% 50%;
 }
-.monster.rank2 {
-  height: 74px;
-  border-width: 3px;
-  .hex & {
-    height: 50%;
-  }
+.monster.monster_brute {
+  background-position: 50% 50%;
 }
-.monster.rank3 {
-  height: 94px;
-  border-width: 4px;
-  border-style: double;
-  .hex & {
-    height: 60%;
-  }
+.monster.monster_goblin {
+  background-position: 100% 50%;
+}
+
+.monster.monster_jotunn {
+  background-position: 0% 100%;
+}
+.monster.monster_elemental {
+  background-position: 50% 100%;
+}
+.monster.monster_sprite {
+  background-position: 100% 100%;
 }
 
 // House / town pieces
@@ -192,6 +121,7 @@
   background-image: url(img/mini_houses.png);
   background-size: 600% auto;
   background-position: 40% 0%; // default: middle house sprite
+  filter: v.$dropShadow2;
 
   .hex > & {
     position: absolute;

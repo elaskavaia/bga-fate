@@ -439,56 +439,6 @@ class Material {
         "create" => 1,
         "location" => "timetrack_1",
 ],
-// # hero miniatures (one per hero, start with 2 heroes)
-    "hero_1" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Bjorn"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "hex_8_9",
-],
-    "hero_2" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Alva"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "hex_8_10",
-],
-    "hero_3" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Embla"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "hex_10_8",
-],
-    "hero_4" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Boldur"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "hex_10_9",
-],
-// #expantions?
-    "hero_5" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Finkel"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "limbo",
-],
-    "hero_6" => [ 
-        "state" => 0,
-        "name" => clienttranslate("Sindra"),
-        "count" => 1,
-        "type" => "hero",
-        "create" => 1,
-        "location" => "limbo",
-],
 // # attack dice (20 total)
     "die_attack" => [ 
         "state" => 0,
@@ -512,13 +462,62 @@ class Material {
             /* --- gen php end token_material --- */
 
             /* --- gen php begin monster_material --- */
-// # Trollkin faction monsters
+// # Hero miniatures
+    "hero_1" => [ 
+        "name" => clienttranslate("Bjorn"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "hex_8_9",
+        "tc" => "#2e7d32",
+],
+    "hero_2" => [ 
+        "name" => clienttranslate("Alva"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "hex_8_10",
+        "tc" => "#1565c0",
+],
+    "hero_3" => [ 
+        "name" => clienttranslate("Embla"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "hex_10_8",
+        "tc" => "#bf360c",
+],
+    "hero_4" => [ 
+        "name" => clienttranslate("Boldur"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "hex_10_9",
+        "tc" => "#c62828",
+],
+// #expansions?|
+    "hero_5" => [ 
+        "name" => clienttranslate("Finkel"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "limbo",
+],
+    "hero_6" => [ 
+        "name" => clienttranslate("Sindra"),
+        "count" => 1,
+        "type" => "hero",
+        "create" => 1,
+        "location" => "limbo",
+],
+// # Trollkin faction monsters|
     "monster_goblin" => [ 
         "name" => clienttranslate("Goblin"),
         "count" => 20,
         "type" => "monster trollkin rank1",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#4a7a3a",
         "faction" => "trollkin",
         "rank" => 1,
         "strength" => 1,
@@ -532,6 +531,7 @@ class Material {
         "type" => "monster trollkin rank2",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#226622",
         "faction" => "trollkin",
         "rank" => 2,
         "strength" => 3,
@@ -544,19 +544,21 @@ class Material {
         "type" => "monster trollkin rank3",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#0a2202",
         "faction" => "trollkin",
         "rank" => 3,
         "strength" => 6,
         "health" => 7,
         "xp" => 3,
 ],
-// # Fire Horde faction monsters
+// # Fire Horde faction monsters|
     "monster_sprite" => [ 
         "name" => clienttranslate("Sprite"),
         "count" => 20,
         "type" => "monster firehorde rank1",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#c49a20",
         "faction" => "firehorde",
         "rank" => 1,
         "strength" => 1,
@@ -569,6 +571,7 @@ class Material {
         "type" => "monster firehorde rank2",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#c86020",
         "faction" => "firehorde",
         "rank" => 2,
         "strength" => 3,
@@ -581,19 +584,21 @@ class Material {
         "type" => "monster firehorde rank3",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#c94420",
         "faction" => "firehorde",
         "rank" => 3,
         "strength" => 5,
         "health" => 6,
         "xp" => 3,
 ],
-// # Dead faction monsters
+// # Dead faction monsters|
     "monster_imp" => [ 
         "name" => clienttranslate("Imp"),
         "count" => 20,
         "type" => "monster dead rank1",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#c0508a",
         "faction" => "dead",
         "rank" => 1,
         "strength" => 2,
@@ -606,6 +611,7 @@ class Material {
         "type" => "monster dead rank2",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#9b59b6",
         "faction" => "dead",
         "rank" => 2,
         "strength" => 4,
@@ -618,6 +624,7 @@ class Material {
         "type" => "monster dead rank3",
         "create" => 2,
         "location" => "supply_monster",
+        "tc" => "#6c3483",
         "faction" => "dead",
         "rank" => 3,
         "strength" => 6,
@@ -625,13 +632,14 @@ class Material {
         "xp" => 3,
         "armor" => 1,
 ],
-// # Legend monsters (6 legends, each has yellow and red level sides)
+// # Legend monsters (6 legends| each has yellow and red level sides)||||||||||||
     "monster_legend_grendel" => [ 
         "name" => clienttranslate("Grendel"),
         "count" => 1,
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#4a7a3a",
         "faction" => "trollkin",
 ],
     "monster_legend_nidhuggr" => [ 
@@ -640,6 +648,7 @@ class Material {
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#9b59b6",
         "faction" => "dead",
 ],
     "monster_legend_surt" => [ 
@@ -648,6 +657,7 @@ class Material {
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#c94420",
         "faction" => "firehorde",
 ],
     "monster_legend_queen" => [ 
@@ -656,6 +666,7 @@ class Material {
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#6c3483",
         "faction" => "dead",
 ],
     "monster_legend_hrungbald" => [ 
@@ -664,6 +675,7 @@ class Material {
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#226622",
         "faction" => "trollkin",
 ],
     "monster_legend_seer" => [ 
@@ -672,6 +684,7 @@ class Material {
         "type" => "monster legend",
         "create" => 0,
         "location" => "supply_monster",
+        "tc" => "#c86020",
         "faction" => "firehorde",
 ],
             /* --- gen php end monster_material --- */

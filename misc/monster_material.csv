@@ -1,4 +1,4 @@
-id|name|count|type|create|location|faction|rank|strength|health|xp|move|armor
+id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor
 #set _noquotes=create
 #set _noquotes=rank
 #set _noquotes=strength
@@ -7,25 +7,34 @@ id|name|count|type|create|location|faction|rank|strength|health|xp|move|armor
 #set _noquotes=move
 #set _noquotes=armor
 
-# Trollkin faction monsters
-monster_goblin|Goblin|20|monster trollkin rank1|2|supply_monster|trollkin|1|1|2|1|2
-monster_brute|Brute|15|monster trollkin rank2|2|supply_monster|trollkin|2|3|3|2
-monster_troll|Troll|10|monster trollkin rank3|2|supply_monster|trollkin|3|6|7|3
+# Hero miniatures
+hero_1|Bjorn|1|hero|1|hex_8_9|#2e7d32|||||||
+hero_2|Alva|1|hero|1|hex_8_10|#1565c0|||||||
+hero_3|Embla|1|hero|1|hex_10_8|#bf360c|||||||
+hero_4|Boldur|1|hero|1|hex_10_9|#c62828|||||||
+#expansions?|
+hero_5|Finkel|1|hero|1|limbo||||||||
+hero_6|Sindra|1|hero|1|limbo||||||||
 
-# Fire Horde faction monsters
-monster_sprite|Sprite|20|monster firehorde rank1|2|supply_monster|firehorde|1|1|2|1
-monster_elemental|Elemental|15|monster firehorde rank2|2|supply_monster|firehorde|2|3|4|2
-monster_jotunn|Jotunn|10|monster firehorde rank3|2|supply_monster|firehorde|3|5|6|3
+# Trollkin faction monsters|
+monster_goblin|Goblin|20|monster trollkin rank1|2|supply_monster|#4a7a3a|trollkin|1|1|2|1|2|
+monster_brute|Brute|15|monster trollkin rank2|2|supply_monster|#226622|trollkin|2|3|3|2||
+monster_troll|Troll|10|monster trollkin rank3|2|supply_monster|#0a2202|trollkin|3|6|7|3||
 
-# Dead faction monsters
-monster_imp|Imp|20|monster dead rank1|2|supply_monster|dead|1|2|2|1
-monster_skeleton|Skeleton|15|monster dead rank2|2|supply_monster|dead|2|4|3|2
-monster_draugr|Draugr|10|monster dead rank3|2|supply_monster|dead|3|6|5|3||1
+# Fire Horde faction monsters|
+monster_sprite|Sprite|20|monster firehorde rank1|2|supply_monster|#c49a20|firehorde|1|1|2|1||
+monster_elemental|Elemental|15|monster firehorde rank2|2|supply_monster|#c86020|firehorde|2|3|4|2||
+monster_jotunn|Jotunn|10|monster firehorde rank3|2|supply_monster|#c94420|firehorde|3|5|6|3||
 
-# Legend monsters (6 legends, each has yellow and red level sides)
-monster_legend_grendel|Grendel|1|monster legend|0|supply_monster|trollkin
-monster_legend_nidhuggr|Nidhuggr|1|monster legend|0|supply_monster|dead
-monster_legend_surt|Surt|1|monster legend|0|supply_monster|firehorde
-monster_legend_queen|Queen of the Dead|1|monster legend|0|supply_monster|dead
-monster_legend_hrungbald|Hrungbald|1|monster legend|0|supply_monster|trollkin
-monster_legend_seer|Seer of Odin|1|monster legend|0|supply_monster|firehorde
+# Dead faction monsters|
+monster_imp|Imp|20|monster dead rank1|2|supply_monster|#c0508a|dead|1|2|2|1||
+monster_skeleton|Skeleton|15|monster dead rank2|2|supply_monster|#9b59b6|dead|2|4|3|2||
+monster_draugr|Draugr|10|monster dead rank3|2|supply_monster|#6c3483|dead|3|6|5|3||1
+
+# Legend monsters (6 legends| each has yellow and red level sides)||||||||||||
+monster_legend_grendel|Grendel|1|monster legend|0|supply_monster|#4a7a3a|trollkin||||||
+monster_legend_nidhuggr|Nidhuggr|1|monster legend|0|supply_monster|#9b59b6|dead||||||
+monster_legend_surt|Surt|1|monster legend|0|supply_monster|#c94420|firehorde||||||
+monster_legend_queen|Queen of the Dead|1|monster legend|0|supply_monster|#6c3483|dead||||||
+monster_legend_hrungbald|Hrungbald|1|monster legend|0|supply_monster|#226622|trollkin||||||
+monster_legend_seer|Seer of Odin|1|monster legend|0|supply_monster|#c86020|firehorde||||||

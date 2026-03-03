@@ -35,19 +35,8 @@ crystal_yellow|Yellow Crystal|50||2|supply_crystal_yellow
 # rune stone - time track marker
 rune_stone|Rune Stone|1|rune_stone|1|timetrack_1|
 
-# hero miniatures (one per hero, start with 2 heroes)
-
-hero_1|Bjorn|1|hero|1|hex_8_9
-hero_2|Alva|1|hero|1|hex_8_10
-hero_3|Embla|1|hero|1|hex_10_8
-hero_4|Boldur|1|hero|1|hex_10_9
-#expantions?
-hero_5|Finkel|1|hero|1|limbo
-hero_6|Sindra|1|hero|1|limbo
-
 # attack dice (20 total)
 die_attack|Attack Die|20|die|2|supply_die_attack|"state"=>6
-
 
 # monster die (optional variant, 1 die)
 die_monster|Monster Die|1|die|1|supply_die_monster|"state"=>6

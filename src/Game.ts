@@ -235,6 +235,13 @@ export class Game extends GameMachine {
     }
   }
 
+  getTokenPresentaton(type: string, tokenKey: string, args: any = {}): string {
+    const res = super.getTokenPresentaton(type, tokenKey, args);
+    const tc = this.getRulesFor(tokenKey, "tc");
+    if (tc) return `<span style="color:${tc};font-weight:bold">${res}</span>`;
+    return res;
+  }
+
   updateTokenDisplayInfo(tokenInfo: TokenDisplayInfo) {
     // override to generate dynamic tooltips and such
     const mainType = tokenInfo.mainType;

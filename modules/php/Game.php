@@ -353,9 +353,9 @@ class Game extends Base {
      * @return int number of hits
      */
     function rollAttackDice(string $attackerId, string $defenderId, int $strength): int {
-        $this->notifyMessage(clienttranslate('${token_name} attacks ${token2_name} with strength ${strength}'), [
+        $this->notifyMessage(clienttranslate('${token_name} attacks ${token_name2} with strength ${strength}'), [
             "token_name" => $attackerId,
-            "token2_name" => $defenderId,
+            "token_name2" => $defenderId,
             "strength" => $strength,
         ]);
 
@@ -381,10 +381,10 @@ class Game extends Base {
                 $dieId,
                 "display_battle",
                 $roll,
-                clienttranslate('${token_name} attacks ${token2_name} - ${side_name}'),
+                clienttranslate('${token_name} attacks ${token_name2} - ${side_name}'),
                 [
                     "token_name" => $attackerId,
-                    "token2_name" => $defenderId,
+                    "token_name2" => $defenderId,
                     "side_name" => $sideName,
                     "anim_target" => $defenderId,
                 ]
@@ -434,8 +434,8 @@ class Game extends Base {
             $this->effect_moveCrystals("red", -$totalDamage, $monsterId, ["message" => ""]);
             // Remove monster from map
             $heroId = $this->getHeroTokenId($owner);
-            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token2_name} kills ${token_name}'), [
-                "token2_name" => $heroId,
+            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name2} kills ${token_name}'), [
+                "token_name2" => $heroId,
             ]);
             return true;
         }

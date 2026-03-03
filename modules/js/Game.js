@@ -803,6 +803,8 @@ class Game1Tokens extends Game0Basics {
         tokenNode.classList.add(...classes);
         if (displayInfo.name)
             tokenNode.dataset.name = this.getTr(displayInfo.name);
+        if (displayInfo.tc)
+            tokenNode.dataset.tc = displayInfo.tc;
         this.addListenerWithGuard(tokenNode, placeInfo.onClick);
     }
     addListenerWithGuard(tokenNode, handler) {
@@ -1173,7 +1175,7 @@ class Game1Tokens extends Game0Basics {
             return this.createTokenImage(tokenKey);
         if (tokenKey.includes("wicon"))
             return this.createTokenImage(tokenKey);
-        return this.getTokenName(tokenKey); // just a name for now
+        return this.getTokenName(tokenKey);
     }
     // override to generate dynamic tooltips and such
     updateTokenDisplayInfo(tokenDisplayInfo) { }
@@ -1210,6 +1212,7 @@ class Game1Tokens extends Game0Basics {
             if (log && args) {
                 var keys = [
                     "token_name",
+                    "token_name2",
                     "token2_name",
                     "token_divs",
                     "token_names",
@@ -1999,6 +2002,13 @@ class Game extends GameMachine {
             }
             bucket.dataset.count = String(count);
         }
+    }
+    getTokenPresentaton(type, tokenKey, args = {}) {
+        const res = super.getTokenPresentaton(type, tokenKey, args);
+        const tc = this.getRulesFor(tokenKey, "tc");
+        if (tc)
+            return `<span style="color:${tc};font-weight:bold">${res}</span>`;
+        return res;
     }
     updateTokenDisplayInfo(tokenInfo) {
         // override to generate dynamic tooltips and such
