@@ -218,10 +218,8 @@ class Op_turnMonster extends Operation {
             $this->queue("reinforcement", null, ["deck" => "deck_monster_yellow"]);
         } elseif ($spotType === "tm_red_axes") {
             $this->queue("reinforcement", null, ["deck" => "deck_monster_red"]);
-        } elseif ($spotType === "tm_red_skull") {
-            // Skull spots trigger red reinforcements AND charge (charge handled in moveAllMonsters)
-            $this->queue("reinforcement", null, ["deck" => "deck_monster_red"]);
         }
+        // Skull spots: charge only, no reinforcements (charge handled in moveAllMonsters)
     }
 
     private function queueNextRound(): void {

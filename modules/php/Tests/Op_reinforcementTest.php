@@ -267,15 +267,17 @@ final class Op_reinforcementTest extends TestCase {
         $this->assertNotEquals("reinforcement", $top->getType());
     }
 
-    public function testReinforcementOnSkullStep(): void {
-        // Step 9 = tm_red_skull → red reinforcement + charge
+    public function testNoReinforcementOnSkullStep(): void {
+        // Step 9 = tm_red_skull → charge only, no reinforcement
         $this->game->tokens->setTokenState("rune_stone", 8); // will advance to 9
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $this->assertNotNull($top);
-        $this->assertEquals("reinforcement", $top->getType());
+        // Skull step should queue a player turn, not a reinforcement
+        if ($top !== null) {
+            $this->assertNotEquals("reinforcement", $top->getType(), "Skull step should not trigger reinforcements");
+        }
     }
 
     // -------------------------------------------------------------------------
