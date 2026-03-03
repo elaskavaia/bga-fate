@@ -44,9 +44,11 @@ describe("LaAnimations.shrinkAndFade", () => {
 
   it("should resolve promise after duration", async () => {
     const promise = la.shrinkAndFade("target", 500);
-    clock.tick(500);
+    clock.tick(499);
+    expect($("target_shrink")).to.not.be.null; // clone still exists before 500ms
+    clock.tick(1);
     await promise;
-    // If we get here, the promise resolved after the timeout
+    expect($("target_shrink")).to.be.null; // clone removed after 500ms
   });
 
   it("should use default duration of 600ms when not specified", async () => {
