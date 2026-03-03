@@ -237,6 +237,14 @@ class Game extends Base {
         return $wellLoc === "hex_9_9";
     }
 
+    function handleEndOfGame(): void {
+        if ($this->isHeroesWin()) {
+            $this->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! Heroes win!"), []);
+        } else {
+            $this->notify->all("message", clienttranslate("The Heroes have failed. The Monsters win!"), []);
+        }
+    }
+
     function getUserPreference(int $player_id, int $code): int {
         return (int) $this->userPreferences->get($player_id, $code);
     }

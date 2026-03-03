@@ -273,6 +273,29 @@ final class MonsterMovementTest extends TestCase {
         $this->assertEquals($countBefore - 3, count($housesAfter), "Legend should destroy 3 houses");
     }
 
+    public function testGameEndsImmediatelyWhenLastHouseDestroyed(): void {
+        // Destroy all houses except Freyja's Well (house_0)
+        for ($i = 1; $i <= 9; $i++) {
+            $this->game->tokens->moveToken("house_$i", "limbo");
+        }
+
+        // Place two monsters: goblin_1 is closer (will destroy the last house),
+        // goblin_2 is farther (should NOT move after game ends)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // dist 1 — enters Grimheim
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7"); // dist 3 — should stay put
+
+        $this->game->tokens->setTokenState("rune_stone", 1);
+        $op = $this->createTurnMonsterOp();
+        $op->resolve();
+
+        // Freyja's Well should be destroyed
+        $this->assertEquals("limbo", $this->game->tokens->getTokenLocation("house_0"), "Well should be destroyed");
+        $this->assertTrue($this->game->isEndOfGame(), "Game should have ended");
+
+        // The second monster should NOT have moved — game ended before its turn
+        $this->assertEquals("hex_13_7", $this->game->tokens->getTokenLocation("monster_goblin_2"), "Remaining monsters should not move after game ends");
+    }
+
     public function testChargeOnSkullTurnAddsOneStep(): void {
         // Brute (move=1) at distance 3 from Grimheim — on a normal turn moves 1, on skull turn moves 2
         $this->game->tokens->moveToken("monster_brute_1", "hex_13_7"); // dist 3

@@ -33,6 +33,10 @@ class Op_turnMonster extends Operation {
         // TODO: Step 2 — Roll Monster Dice (variant rule for higher difficulty)
         // Effects: maneuver CW/CCW, attack +1, charge rank 1, push, ambush
         $this->moveAllMonsters($isChargeTurn);
+        if ($this->game->isEndOfGame()) {
+            $this->game->handleEndOfGame();
+            return;
+        }
         // TODO: Step 4 — Monsters Attack (all monsters adjacent to heroes attack)
         $this->queueReinforcements($spotType);
         $this->queueNextRound();
@@ -100,6 +104,11 @@ class Op_turnMonster extends Operation {
 
             // TODO: Charge rule A — Monster Dice may cause rank 1 monsters to charge
             $this->moveMonster($monsterId, $currentHex, $isChargeTurn);
+
+            // Stop immediately if the last house was destroyed
+            if ($this->game->isEndOfGame()) {
+                return;
+            }
         }
     }
 
@@ -217,12 +226,7 @@ class Op_turnMonster extends Operation {
 
     private function queueNextRound(): void {
         if ($this->game->isEndOfGame()) {
-            if ($this->game->isHeroesWin()) {
-                // Time track completed — players win!
-                $this->game->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! Heroes win!"), []);
-            } else {
-                $this->game->notify->all("message", clienttranslate("The Heroes have failed. The Monsters wins!"), []);
-            }
+            $this->game->handleEndOfGame();
             return;
         }
 
