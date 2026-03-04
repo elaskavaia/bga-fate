@@ -70,6 +70,7 @@ interface OpInfo {
 export class GameMachine extends Game1Tokens {
   opInfo: OpInfo;
   onEnteringState_PlayerTurn(opInfo: OpInfo) {
+    console.log("onEnteringState_PlayerTurn", opInfo);
     if (!this.bga.players.isCurrentPlayerActive()) {
       if (opInfo?.description) this.bga.statusBar.setTitle(this.getTr(opInfo.description, opInfo));
       this.setSubPrompt("");
@@ -82,13 +83,10 @@ export class GameMachine extends Game1Tokens {
       this.bga.statusBar.setTitle(this.getTr(opInfo.prompt, opInfo));
     }
     if (opInfo.subtitle) this.setSubPrompt(this.getTr(opInfo.subtitle, opInfo), opInfo);
-    else this.setSubPrompt(this.getReasonText(opInfo.data.reason));
-    if (opInfo.err) {
-      const button = this.bga.statusBar.addActionButton(this.getTr(opInfo.err, opInfo), () => {}, {
-        color: "alert",
-        id: "button_err"
-      });
-    }
+    else if (opInfo.err) {
+      this.setSubPrompt(_("Error: ") + this.getTr(opInfo.err, opInfo));
+    } else this.setSubPrompt(this.getReasonText(opInfo.data.reason));
+
     const multiselect = this.isMultiSelectArgs(opInfo);
 
     const sortedTargets = Object.keys(opInfo.info);
@@ -170,6 +168,7 @@ export class GameMachine extends Game1Tokens {
           }
         );
         button.dataset.targetId = target;
+        if (paramInfo.q) button.classList.add(this.classButtonDisabled);
       }
     }
 

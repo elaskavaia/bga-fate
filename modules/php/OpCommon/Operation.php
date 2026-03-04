@@ -24,6 +24,7 @@ use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\SystemException;
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\States\GameDispatch;
 use Bga\Games\Fate\States\PlayerTurn;
 use Bga\Games\Fate\OpCommon\OpExpression;
@@ -439,10 +440,21 @@ abstract class Operation {
     private function extractPossibleMoves(array &$res, array $details) {
         $targets = [];
         $error = "";
+        $errCode = 0;
         foreach ($details as $target => $info) {
             if ($target == "err") {
                 // top level error
                 $error = $info;
+                if ($errCode == 0) {
+                    $errCode = Material::ERR_PREREQ;
+                }
+                unset($details[$target]);
+                continue;
+            }
+            if ($target == "q") {
+                // top level error code
+                $errCode = (int) $info;
+                $error = $this->game->getRulesFor("err_$info", "name", "code $info");
                 unset($details[$target]);
                 continue;
             }
@@ -453,12 +465,7 @@ abstract class Operation {
                 unset($details[$target]);
                 continue;
             }
-            if ($target == "q") {
-                // top level error
-                $error = $this->game->getRulesFor("err_$info", "name", "code $info");
-                unset($details[$target]);
-                continue;
-            }
+
             if (is_array($info)) {
                 $q = $info["q"] ?? 0;
                 if ($q == 0) {
@@ -468,12 +475,19 @@ abstract class Operation {
                         continue;
                     }
                     $targets[] = $target;
+                } elseif ($errCode == 0) {
+                    // capture first per-entry error as fallback
+                    $errCode = (int) $q;
+                    $error = $info["err"] ?? $this->game->getRulesFor("err_$q", "name", "?$q");
                 }
             } elseif (is_numeric($info) && is_string($target)) {
                 // error code
                 $details[$target] = ["q" => $info];
                 if ($info == 0) {
                     $targets[] = $target;
+                } elseif ($errCode == 0) {
+                    $errCode = (int) $info;
+                    $error = $this->game->getRulesFor("err_$info", "name", "?$info");
                 }
             } elseif (is_string($info) && is_numeric($target)) {
                 // array value directly
@@ -488,17 +502,44 @@ abstract class Operation {
         }
 
         if (count($targets) == 0 && !$error) {
-            $error = $this->extractError($details);
+            $errCode = Material::ERR_PREREQ;
+            $error = $this->getNoValidTargetError();
         }
 
         $res[Operation::ARG_TARGET] = $targets;
         $res["info"] = $details;
+        if (count($targets) > 0) {
+            $errCode = 0;
+            $error = "";
+        }
         $res["err"] = $error ?? null;
+        $res["q"] = $errCode;
     }
 
     function getError(): mixed {
         $arg = $this->getArgs();
         return $arg["err"] ?? "";
+    }
+
+    function getErrorCode(): int {
+        $arg = $this->getArgs();
+        return (int) ($arg["q"] ?? 0);
+    }
+
+    function getErrorInfo(): array {
+        $q = $this->getErrorCode();
+        $err = $this->getError();
+        if ($q == 0) {
+            return ["q" => $q];
+        }
+        if ($err) {
+            $qerr = $this->game->getRulesFor("err_$q", "name", "?$q");
+            if ($qerr == $err) {
+                return ["q" => $q];
+            }
+        }
+
+        return ["q" => $q, "err" => $err];
     }
 
     function noValidTargets(): bool {
@@ -509,24 +550,6 @@ abstract class Operation {
     function isOneChoice(): bool {
         $args = $this->getArgs();
         return count($args[Operation::ARG_TARGET]) == 1;
-    }
-
-    function extractError(?array $possibleMovesInfo = null): string {
-        if (!$possibleMovesInfo || count($possibleMovesInfo) == 0) {
-            return $this->getNoValidTargetError();
-        }
-        foreach ($possibleMovesInfo as $target => $info) {
-            $err = $info["err"] ?? "";
-            if ($err) {
-                return $err;
-            }
-            $err = $info["q"] ?? 0;
-            if ($err) {
-                return $this->game->getRulesFor("err_$err", "name", "?$err");
-            }
-        }
-
-        return $this->getNoValidTargetError();
     }
 
     function getNoValidTargetError(): string {

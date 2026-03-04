@@ -81,20 +81,20 @@ class Op_turn extends Operation {
         if ($remaining > 0) {
             foreach ($this->getActionsByKind("main") as $action) {
                 if (in_array($action, $actionsTaken)) {
-                    // Cannot pick the same action twice
                     $res[$action] = ["q" => Material::ERR_NOT_APPLICABLE, "name" => $this->game->getTokenName("Op_$action")];
                 } else {
-                    $res[$action] = ["q" => 0, "name" => $this->game->getTokenName("Op_$action")];
+                    $op = $this->instanciateOperation($action);
+                    $res[$action] = $op->getErrorInfo() + ["name" => $this->game->getTokenName("Op_$action")];
                 }
             }
         }
 
         // Always offer free actions (they don't consume main action slots)
         // When main actions remain, free actions are secondary; when none remain, they become primary
-        // TODO: check actual availability of each free action (has equipment, has ability, has event cards, etc.)
         $sec = $remaining > 0;
         foreach ($this->getActionsByKind("free") as $action) {
-            $res[$action] = ["q" => 0, "sec" => $sec, "name" => $this->game->getTokenName("Op_$action")];
+            $op = $this->instanciateOperation($action);
+            $res[$action] = $op->getErrorInfo() + ["sec" => $sec, "name" => $this->game->getTokenName("Op_$action")];
         }
 
         return $res;

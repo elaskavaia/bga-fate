@@ -1346,6 +1346,7 @@ class Game1Tokens extends Game0Basics {
 /**  Generic processing related to Operation Machine */
 class GameMachine extends Game1Tokens {
     onEnteringState_PlayerTurn(opInfo) {
+        console.log("onEnteringState_PlayerTurn", opInfo);
         if (!this.bga.players.isCurrentPlayerActive()) {
             if (opInfo?.description)
                 this.bga.statusBar.setTitle(this.getTr(opInfo.description, opInfo));
@@ -1360,14 +1361,11 @@ class GameMachine extends Game1Tokens {
         }
         if (opInfo.subtitle)
             this.setSubPrompt(this.getTr(opInfo.subtitle, opInfo), opInfo);
+        else if (opInfo.err) {
+            this.setSubPrompt(_("Error: ") + this.getTr(opInfo.err, opInfo));
+        }
         else
             this.setSubPrompt(this.getReasonText(opInfo.data.reason));
-        if (opInfo.err) {
-            const button = this.bga.statusBar.addActionButton(this.getTr(opInfo.err, opInfo), () => { }, {
-                color: "alert",
-                id: "button_err"
-            });
-        }
         const multiselect = this.isMultiSelectArgs(opInfo);
         const sortedTargets = Object.keys(opInfo.info);
         sortedTargets.sort((a, b) => opInfo.info[a].o - opInfo.info[b].o);
@@ -1438,6 +1436,8 @@ class GameMachine extends Game1Tokens {
                     confirm: this.getTr(paramInfo.confirm)
                 });
                 button.dataset.targetId = target;
+                if (paramInfo.q)
+                    button.classList.add(this.classButtonDisabled);
             }
         }
         if (multiselect) {

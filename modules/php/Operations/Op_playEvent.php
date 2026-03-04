@@ -20,6 +20,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Play Event free action: hero plays an event card.
  */
 class Op_playEvent extends Operation {
+    public function getPossibleMoves() {
+        return ["err" => "Not impl"];
+    }
+
     function resolve(): void {
         $this->game->systemAssert("Op_playEvent is not implemented");
     }

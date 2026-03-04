@@ -20,6 +20,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Use Equipment free action: hero uses an equipped item.
  */
 class Op_useEquipment extends Operation {
+    public function getPossibleMoves() {
+        return ["err" => "Not impl"];
+    }
     function resolve(): void {
         $this->game->systemAssert("Op_useEquipment is not implemented");
     }

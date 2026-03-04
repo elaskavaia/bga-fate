@@ -20,6 +20,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Use Ability free action: hero activates a special ability.
  */
 class Op_useAbility extends Operation {
+    public function getPossibleMoves() {
+        return ["err" => "Not impl"];
+    }
     function resolve(): void {
         $this->game->systemAssert("Op_useAbility is not implemented");
     }
