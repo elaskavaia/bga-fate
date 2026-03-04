@@ -78,7 +78,7 @@ class Game extends Base {
             "rune_stone",
             "timetrack_1",
             1,
-            clienttranslate('Rune Stone: time advances to step ${new_state} of ${max}'),
+            clienttranslate('Rune Stone advances to step ${new_state} of ${max}'),
             [
                 "max" => Material::TIME_TRACK_SHORT_LENGTH,
             ]
@@ -298,39 +298,6 @@ class Game extends Base {
         }
     }
 
-    function effect_incVp(string $owner, int $inc, string $stat = "", string $target = "") {
-        $player_id = $this->custom_getPlayerIdByColor($owner);
-
-        if ($target) {
-            if ($inc < 0) {
-                $message = clienttranslate('${player_name} loses ${absInc} VP for ${token_name} ${reason}');
-            } else {
-                // if 0 print gain 0
-                $message = clienttranslate('${player_name} gains ${absInc} VP for ${token_name} ${reason}');
-            }
-        } else {
-            if ($inc < 0) {
-                $message = clienttranslate('${player_name} loses ${absInc} VP ${reason}');
-            } else {
-                // if 0 print gain 0
-                $message = clienttranslate('${player_name} gains ${absInc} VP ${reason}');
-            }
-        }
-
-        $this->playerScore->inc(
-            $player_id,
-            $inc,
-            new NotificationMessage($message, [
-                "reason" => $stat,
-                "target" => $target,
-                "token_name" => $target,
-            ])
-        );
-
-        if ($stat) {
-            $this->playerStats->inc($stat, $inc, $player_id);
-        }
-    }
 
     /**
      * Returns the total attack strength for a hero: base hero card + equipment + abilities on tableau.

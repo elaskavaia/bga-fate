@@ -103,7 +103,7 @@ class Op_reinforcement extends Operation {
             }
 
             foreach ($placements as $monsterId => $hex) {
-                $this->game->hexMap->moveCharacter($monsterId, $hex, clienttranslate('monsters move ${token_name} to ${place_name}'));
+                $this->game->hexMap->moveCharacter($monsterId, $hex);
             }
             return;
         }

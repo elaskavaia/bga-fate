@@ -47,7 +47,7 @@ class Op_actionMove extends Operation {
         }
 
         // TODO: do set location to individual hexes along the path to animate
-        $this->dbSetTokenLocation($heroId, $target, null, clienttranslate('${player_name} moves hero to ${place_name}'));
+        $this->game->hexMap->moveCharacter($heroId, $target);
     }
 
     public function getPrompt() {

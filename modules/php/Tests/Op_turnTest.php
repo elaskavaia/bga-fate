@@ -227,35 +227,36 @@ final class Op_turnTest extends TestCase {
     // resolve: free action
     // -------------------------------------------------------------------------
 
-    public function testResolveFreeActionQueuesIt(): void {
-        $this->markTestSkipped("Free actions (useAbility) not yet implemented");
-        // $op = $this->createOp();
-        // $op->action_resolve([Operation::ARG_TARGET => "useAbility"]);
-        //
-        // $top = $this->game->machine->createTopOperationFromDbForOwner(null);
-        // $this->assertNotNull($top, "useAbility should be queued");
-        // $this->assertEquals("useAbility", $top->getType());
-    }
+    // DO NOT REMOVE comment - waiting for impl
+    // public function testResolveFreeActionQueuesIt(): void {
+    //     $this->markTestSkipped("Free actions (useAbility) not yet implemented");
+    //     // $op = $this->createOp();
+    //     // $op->action_resolve([Operation::ARG_TARGET => "useAbility"]);
+    //     //
+    //     // $top = $this->game->machine->createTopOperationFromDbForOwner(null);
+    //     // $this->assertNotNull($top, "useAbility should be queued");
+    //     // $this->assertEquals("useAbility", $top->getType());
+    // }
 
-    public function testResolveFreeActionDoesNotConsumeMainAction(): void {
-        $this->markTestSkipped("Free actions (useAbility) not yet implemented");
-        // $op = $this->createOp();
-        // $op->action_resolve([Operation::ARG_TARGET => "useAbility"]);
-        //
-        // // Top op should be useAbility; behind it the turn op is re-queued
-        // $top = $this->game->machine->createTopOperationFromDbForOwner(null);
-        // $this->assertNotNull($top);
-        // $this->assertEquals("useAbility", $top->getType());
-        //
-        // // Remove useAbility so turn becomes top, then verify its state
-        // $top->destroy();
-        // $turnOp = $this->game->machine->createTopOperationFromDbForOwner(null);
-        // $this->assertNotNull($turnOp, "Turn op should be re-queued after free action");
-        // $this->assertEquals("turn", $turnOp->getType());
-        // $args = $turnOp->getExtraArgs();
-        // $this->assertEquals(2, $args["actions_remaining"]);
-        // $this->assertEmpty($args["actions_taken"]);
-    }
+    // public function testResolveFreeActionDoesNotConsumeMainAction(): void {
+    //     $this->markTestSkipped("Free actions (useAbility) not yet implemented");
+    //     // $op = $this->createOp();
+    //     // $op->action_resolve([Operation::ARG_TARGET => "useAbility"]);
+    //     //
+    //     // // Top op should be useAbility; behind it the turn op is re-queued
+    //     // $top = $this->game->machine->createTopOperationFromDbForOwner(null);
+    //     // $this->assertNotNull($top);
+    //     // $this->assertEquals("useAbility", $top->getType());
+    //     //
+    //     // // Remove useAbility so turn becomes top, then verify its state
+    //     // $top->destroy();
+    //     // $turnOp = $this->game->machine->createTopOperationFromDbForOwner(null);
+    //     // $this->assertNotNull($turnOp, "Turn op should be re-queued after free action");
+    //     // $this->assertEquals("turn", $turnOp->getType());
+    //     // $args = $turnOp->getExtraArgs();
+    //     // $this->assertEquals(2, $args["actions_remaining"]);
+    //     // $this->assertEmpty($args["actions_taken"]);
+    // }
 
     // -------------------------------------------------------------------------
     // skip (end turn early)

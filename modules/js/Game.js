@@ -2084,11 +2084,14 @@ class Game extends GameMachine {
                 const locname = this.getTokenName(tokenInfo.loc);
                 const areacolor = this.getTokenName(tokenInfo.c);
                 const terrainname = this.getTokenName(tokenInfo.terrain);
-                tokenInfo.name = _("Hex") + ` (${r},${q})`;
+                const coords = `(${r},${q})`;
+                tokenInfo.name = `${terrainname} ${coords}`;
                 tokenInfo.tooltip = this.ttSection(_("Terrain"), terrainname);
                 tokenInfo.tooltip += this.ttSection(_("Coords"), `(${r},${q})`);
-                if (tokenInfo.loc)
+                if (tokenInfo.loc) {
+                    tokenInfo.name = `${locname} - ${terrainname} ${coords}`;
                     tokenInfo.tooltip += this.ttSection(_("Location"), locname);
+                }
                 if (tokenInfo.c)
                     tokenInfo.tooltip += this.ttSection(_("Location Color"), areacolor);
             }

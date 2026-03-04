@@ -224,6 +224,9 @@ class HexMap {
     }
 
     function moveCharacter(string $charId, string $location, string $message = "*", array $args = []) {
+        if ($message == "*") {
+            $message = clienttranslate('${token_name} moves into ${place_name} ${reason}');
+        }
         $this->game->tokens->dbSetTokenLocation($charId, $location, 0, $message, $args);
         $this->moveCharacterOnMap($charId, $location);
     }

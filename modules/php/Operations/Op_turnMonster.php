@@ -72,7 +72,7 @@ class Op_turnMonster extends Operation {
             "rune_stone",
             "timetrack_1", // short track
             $nextStep,
-            clienttranslate('Rune Stone: time advances to step ${step} of ${max}'),
+            clienttranslate('Rune Stone advances to step ${step} of ${max}'),
             [
                 "step" => $nextStep,
                 "max" => $maxSteps,
@@ -140,7 +140,7 @@ class Op_turnMonster extends Operation {
     }
 
     /**
-     * Move a single monster one step toward Grimheim.
+     * Move a single monster one step toward Grimheim. No message by default so it does not pollute the log
      *
      * @return string|null The new hex the monster is on, or null if it couldn't move or entered Grimheim.
      */

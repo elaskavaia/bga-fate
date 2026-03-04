@@ -114,7 +114,10 @@ class Op_turn extends Operation {
             // Set the marker
             $owner = $this->getOwner();
             $x = 3 - $remaining;
-            $this->dbSetTokenLocation("marker_{$owner}_{$x}", "aslot_{$owner}_{$optype}", 0);
+            $heroId = $this->game->getHeroTokenId($owner);
+            $heroName = $this->game->getTokenName($heroId);
+            $actionName = $this->game->getTokenName("Op_$optype");
+            $this->dbSetTokenLocation("marker_{$owner}_{$x}", "aslot_{$owner}_{$optype}", 0, clienttranslate('${hero_name} selects ${action_name}'), ["hero_name" => $heroName, "action_name" => $actionName]);
 
             // Queue the selected action operation
             $this->queue($optype);
