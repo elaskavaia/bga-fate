@@ -2,6 +2,8 @@
 
 This document is a plan for the implementation of the game Fate: Defenders of Grimheim on Board Game Arena (BGA). It outlines the steps and tasks required to create a digital version of the game that can be played online.
 
+This document also refered as TODO list.
+
 ## Documents
 
 See misc/DESIGN.md for preliminary design
@@ -163,11 +165,11 @@ See CLAUDE.md for project overview
 [X] Attack action: highlight adjacent monsters, click to attack
 [X] Show dice results (text/simple display, no animation needed yet)
 [X] Show damage on monster tokens
-[ ] Show monster death
+[x] Show monster death
 
 ### Tests
-[ ] PHP tests for dice rolling and hit calculation
-[ ] PHP tests for damage and monster death
+[x] PHP tests for dice rolling and hit calculation
+[x] PHP tests for damage and monster death
 
 ---
 
@@ -181,7 +183,7 @@ See CLAUDE.md for project overview
 [ ] Trollkin faction bonus: +1 per adjacent trollkin
 [ ] Damage to hero (counter on hero card/token)
 [ ] Knocked out: damage >= health → hero to Grimheim, damage set to 5, remove 2 town pieces
-[ ] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
+[x] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
 
 ### Client
 [ ] Show monster attacks in log

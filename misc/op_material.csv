@@ -33,7 +33,7 @@ actionMove|Move
 actionAttack|Attack
 actionPrepare|Prepare|"notimpl"=>true
 actionFocus|Focus|"notimpl"=>true
-actionMend|Mend|"notimpl"=>true
+actionMend|Mend
 actionPractice|Practice
 
 # Free actions (can be done between/after main actions)

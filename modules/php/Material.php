@@ -269,7 +269,6 @@ class Material {
         "kind" => "main",
         "type" => "actionMend",
         "name" => clienttranslate("Mend"),
-        "notimpl"=>true,
 ],
     "Op_actionPractice" => [ 
         "kind" => "main",
