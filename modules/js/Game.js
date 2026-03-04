@@ -1846,23 +1846,26 @@ class Game extends GameMachine {
         <button id="layout_scale" class="layout_button active">\u2922</button>
         <button id="layout_scroll" class="layout_button">\u2194</button>
       </div>`, "limbo");
-        placeHtml(`<div id="supply" class="supply"></div>`, "thething");
+        // Players panels (left side in wide layout, top in narrow)
+        placeHtml(`<div id="players_panels"></div>`, "thething");
+        // Board area: map + monster turn display + supply (right side in wide layout)
+        placeHtml(`<div id="board_area"></div>`, "thething");
+        const mapWrapper = "map_wrapper";
+        placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "board_area");
+        this.createMap($(mapWrapper));
+        placeHtml(`<div id="timetrack_1" class="timetrack token timetrack_1"></div>`, mapWrapper);
+        placeHtml(`<div id="timetrack_2" class="timetrack token timetrack_2"></div>`, mapWrapper);
+        placeHtml(`<div id="display_battle"></div>`, mapWrapper);
+        placeHtml(`<div id="display_monsterturn"></div>`, "board_area");
+        placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
+        placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
+        placeHtml(`<div id="supply" class="supply"></div>`, "board_area");
         placeHtml(`<div id="supply_monster" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_crystal_green" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_crystal_red" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_crystal_yellow" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_die_attack" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_die_monster" class="supply"></div>`, "supply");
-        placeHtml(`<div id="players_panels"></div>`, "thething");
-        const mapWrapper = "map_wrapper";
-        placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "thething");
-        this.createMap($(mapWrapper));
-        placeHtml(`<div id="timetrack_1" class="timetrack token timetrack_1"></div>`, mapWrapper);
-        placeHtml(`<div id="timetrack_2" class="timetrack token timetrack_2"></div>`, mapWrapper);
-        placeHtml(`<div id="display_battle"></div>`, mapWrapper);
-        placeHtml(`<div id="display_monsterturn"></div>`, "thething");
-        placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
-        placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
         Object.values(gamedatas.players).forEach((player) => {
             const color = player.color;
             const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";

@@ -94,6 +94,8 @@
   flex-wrap: wrap;
   z-index: 0;
   position: relative;
+  container-type: inline-size;
+  container-name: fate_mainarea;
 }
 
 // Layout controls - moved to player board by setupLocalControls
@@ -167,6 +169,13 @@
   }
 }
 
+// --- Players panels: container for all player tableaux ---
+#players_panels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 // --- Player tableau: outer wrapper for hero card, pboard, etc. ---
 .tableau {
   display: flex;
@@ -174,6 +183,7 @@
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
+  max-width: 520px;
 }
 
 // --- Card area: played cards displayed next to the player board ---

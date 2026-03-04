@@ -73,11 +73,27 @@
   display: none;
 }
 
+// Default (narrow): stack panels on top of board area
 #thething {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Board area: map + monster turn + supply, stacked vertically
+#board_area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Wide layout: panels left, board area right
+@container fate_mainarea (min-width: 2100px) {
+  #thething {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
 }
 // BUTTONS
 
