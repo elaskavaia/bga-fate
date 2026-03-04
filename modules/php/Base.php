@@ -523,7 +523,7 @@ class Base extends Table {
                     is_string($value) &&
                     is_string($key) &&
                     (str_ends_with($key, "_tr") ||
-                        (str_ends_with($key, "_name") && $key != "player_name" && $key != "token_name" && $key != "place_name"))
+                        (str_ends_with($key, "_name") && $key != "player_name" && $key != "token_name" && $key != "place_name" && $key != "char_name"))
                 ) {
                     $i18n[] = $key;
                 }

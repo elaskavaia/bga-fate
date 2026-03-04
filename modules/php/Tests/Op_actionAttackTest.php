@@ -179,7 +179,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place damage crystals (crystal placement now happens in rollAttackDice)
-        $this->game->effect_moveCrystals("red", 2, "monster_goblin_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
 
         $killed = $this->game->effect_applyDamageMonster("monster_goblin_1", 2, PCOLOR);
         $this->assertTrue($killed);
@@ -196,7 +196,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place 1 damage crystal (crystal placement now happens in rollAttackDice)
-        $this->game->effect_moveCrystals("red", 1, "monster_goblin_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
 
         $killed = $this->game->effect_applyDamageMonster("monster_goblin_1", 1, PCOLOR);
         $this->assertFalse($killed);
@@ -213,14 +213,14 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // First attack: 3 damage — pre-place crystals
-        $this->game->effect_moveCrystals("red", 3, "monster_troll_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_troll_1", "red", 3, "monster_troll_1", ["message" => ""]);
         $killed = $this->game->effect_applyDamageMonster("monster_troll_1", 3, PCOLOR);
         $this->assertFalse($killed);
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(3, $crystals);
 
         // Second attack: 4 more damage — pre-place crystals, total 7, enough to kill
-        $this->game->effect_moveCrystals("red", 4, "monster_troll_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_troll_1", "red", 4, "monster_troll_1", ["message" => ""]);
         $killed = $this->game->effect_applyDamageMonster("monster_troll_1", 4, PCOLOR);
         $this->assertTrue($killed);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
@@ -252,7 +252,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place enough damage crystals to kill
-        $this->game->effect_moveCrystals("red", 2, "monster_goblin_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
@@ -267,7 +267,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place 1 damage crystal (not enough to kill goblin with health=2)
-        $this->game->effect_moveCrystals("red", 1, "monster_goblin_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
@@ -283,7 +283,7 @@ final class Op_actionAttackTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place enough damage crystals to kill
-        $this->game->effect_moveCrystals("red", 3, "monster_brute_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_brute_1", "red", 3, "monster_brute_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 

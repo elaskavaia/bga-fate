@@ -219,18 +219,6 @@ class Material {
         "type" => "seq",
         "name" => clienttranslate("Sequence"),
 ],
-    "Op_gain" => [ 
-        "type" => "gain",
-        "name" => clienttranslate("Gain"),
-],
-    "Op_pay" => [ 
-        "type" => "pay",
-        "name" => clienttranslate("Pay"),
-],
-    "Op_paygain" => [ 
-        "type" => "paygain",
-        "name" => clienttranslate("Trade"),
-],
     "Op_turn" => [ 
         "type" => "turn",
         "name" => clienttranslate("Turn"),

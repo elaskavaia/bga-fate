@@ -1210,14 +1210,14 @@ class Game1Tokens extends Game0Basics {
     bgaFormatText(log, args) {
         try {
             if (log && args) {
+                // if adding key here and it ends with _name make sure also exclude from rtr in dbSetTokenLocation
                 var keys = [
                     "token_name",
                     "token_name2",
-                    "token2_name",
+                    "char_name",
                     "token_divs",
                     "token_names",
                     "place_name",
-                    "card_type_name",
                     "token_div",
                     "token2_div",
                     "token3_div",
@@ -1241,9 +1241,6 @@ class Game1Tokens extends Game0Basics {
                         res = res.trim();
                         if (res)
                             args[key] = res;
-                        continue;
-                    }
-                    if (typeof arg_value == "string" && this.isMarkedForTranslation(key, args)) {
                         continue;
                     }
                     var res = this.getTokenPresentaton(key, arg_value, args);
@@ -1612,7 +1609,7 @@ class GameMachine extends Game1Tokens {
             .performAction("action_resolve", {
             data: JSON.stringify(args)
         })
-            .then((x) => {
+            ?.then((x) => {
             console.log("action complete", x);
         })
             .catch((e) => {
@@ -1625,7 +1622,7 @@ class GameMachine extends Game1Tokens {
                 .performAction("action_undo", [], {
                 checkAction: false
             })
-                .catch((e) => {
+                ?.catch((e) => {
                 this.setSubPrompt(e.message, e.args);
             }), {
                 color: "alert",

@@ -366,7 +366,7 @@ export class GameMachine extends Game1Tokens {
       .performAction("action_resolve", {
         data: JSON.stringify(args)
       })
-      .then((x) => {
+      ?.then((x) => {
         console.log("action complete", x);
       })
       .catch((e: any) => {
@@ -383,7 +383,7 @@ export class GameMachine extends Game1Tokens {
             .performAction("action_undo", [], {
               checkAction: false
             })
-            .catch((e: any) => {
+            ?.catch((e: any) => {
               this.setSubPrompt(e.message, e.args);
             }),
         {

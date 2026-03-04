@@ -9,9 +9,6 @@ savepoint|None
 or|Choice
 order|Choose Order
 seq|Sequence
-gain|Gain
-pay|Pay
-paygain|Trade
 
 
 turn|Turn

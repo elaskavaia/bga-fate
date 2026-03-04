@@ -253,28 +253,10 @@ class Game extends Base {
     //////////// Utility functions
     ////////////
 
-    function effect_incCount(string $color, string $type, int $inc = 1, string $reason, array $options = []) {
-        $message = array_get($options, "message", "*");
+    function effect_moveCrystals(string $charId, string $type, int $inc, string $location, array $options = []) {
+        $message = array_get($options, "message", clienttranslate('${char_name} gains ${count} ${token_name}'));
         unset($options["message"]);
-
-        $token_id = $this->tokens->getTrackerId($color, $type);
-
-        $value = $this->tokens->dbResourceInc(
-            $token_id,
-            $inc,
-            $message,
-            ["reason" => $reason, "place_from" => $reason] + $options,
-            $this->custom_getPlayerIdByColor($color)
-        );
-
-        if ($value < 0 && $inc < 0) {
-            $this->userAssert(clienttranslate("Insufficient resources to pay"));
-        }
-    }
-
-    function effect_moveCrystals(string $type, int $inc = 1, string $location, array $options = []) {
-        $message = array_get($options, "message", "*");
-        unset($options["message"]);
+        $options["char_name"] = $charId;
 
         if ($inc == 0) {
             return;
@@ -283,7 +265,7 @@ class Game extends Base {
         if ($inc > 0) {
             $tokens = $this->tokens->pickTokensForLocation($inc, "supply_crystal_$type", $location);
             // TODO: unlimited? create more if needed
-            $this->tokens->dbSetTokensLocation($tokens, $location, 0, $message);
+            $this->tokens->dbSetTokensLocation($tokens, $location, 0, $message, $options);
         } else {
             $needed = abs($inc);
             $tokens = $this->tokens->pickTokensForLocation($needed, $location, "supply_crystal_$type");
@@ -294,10 +276,9 @@ class Game extends Base {
                     ])
                 );
             }
-            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type", 0, $message);
+            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type", 0, $message, $options);
         }
     }
-
 
     /**
      * Returns the total attack strength for a hero: base hero card + equipment + abilities on tableau.
@@ -369,7 +350,7 @@ class Game extends Base {
                 $hits++;
 
                 // Place red crystals on the monster token
-                $this->effect_moveCrystals("red", 1, $defenderId, ["message" => ""]);
+                $this->effect_moveCrystals($defenderId, "red", 1, $defenderId, ["message" => ""]);
             }
             // TODO: handle rune effects (some cards trigger on rune)
             // TODO: handle armor (draugr — reduce hits)
@@ -406,7 +387,7 @@ class Game extends Base {
             $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
             $this->effect_gainXp($owner, $xp);
             // Remove red crystals from monster back to supply
-            $this->effect_moveCrystals("red", -$totalDamage, $monsterId, ["message" => ""]);
+            $this->effect_moveCrystals($monsterId, "red", -$totalDamage, $monsterId, ["message" => ""]);
             // Remove monster from map
             $heroId = $this->getHeroTokenId($owner);
             $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name2} kills ${token_name}'), [
@@ -424,7 +405,8 @@ class Game extends Base {
         if ($amount <= 0) {
             return;
         }
-        $this->effect_moveCrystals("yellow", $amount, "tableau_$owner");
+        $heroId = $this->getHeroTokenId($owner);
+        $this->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner");
     }
 
     function getVariantSoloBoard() {
