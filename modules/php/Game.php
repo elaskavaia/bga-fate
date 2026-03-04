@@ -409,6 +409,84 @@ class Game extends Base {
         $this->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner");
     }
 
+    /**
+     * Apply damage to a hero after monster attack.
+     * If total damage >= hero health, hero is knocked out:
+     * - Moved to Grimheim, damage set to 5, 2 town pieces destroyed.
+     * @return bool true if the hero was knocked out
+     */
+    function effect_applyDamageHero(string $heroId, int $amount): bool {
+        if ($amount <= 0) {
+            return false;
+        }
+        $owner = $this->getHeroOwner($heroId);
+        // Count total red crystals on hero
+        $totalDamage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
+        $heroCardKey = $this->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
+        $health = (int) $this->material->getRulesFor($heroCardKey, "health", 9);
+
+        $this->notifyMessage(clienttranslate('${char_name} takes ${amount} damage (${totalDamage}/${health})'), [
+            "char_name" => $heroId,
+            "amount" => $amount,
+            "totalDamage" => $totalDamage,
+            "health" => $health,
+        ]);
+
+        if ($totalDamage >= $health) {
+            // Adjust damage to exactly 5: remove excess or add missing
+            $diff = $totalDamage - 5;
+            if ($diff !== 0) {
+                $this->effect_moveCrystals($heroId, "red", -$diff, $heroId, ["message" => ""]);
+            }
+
+            // Move hero to their starting hex in Grimheim
+            $startHex = $this->getRulesFor($heroId, "location");
+            $this->hexMap->moveCharacter(
+                $heroId,
+                $startHex,
+                clienttranslate('${token_name} is knocked out and carried back to Grimheim. By their mother. She\'s not happy.')
+            );
+
+            // "Some villagers panic and flee, leaving their houses undefended"
+            $this->effect_destroyHouses(2, $heroId, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Destroy N town pieces (houses). Freyja's Well (house_0) is always destroyed last.
+     * @param string $charId token causing the destruction (for log messages and animation)
+     * @param string $message log message per house destroyed (use ${token_name} for causeTokenId)
+     */
+    function effect_destroyHouses(int $count, string $charId, string $message = ""): void {
+        if ($message === "") {
+            $message = clienttranslate('${char_name} destroys ${token_name}');
+        }
+        $houses = $this->tokens->getTokensOfTypeInLocation("house", "hex%");
+        // Skip animation move if char is already in Grimheim (e.g. knocked out hero)
+        $charInGrimheim = $this->hexMap->isInGrimheim($this->tokens->getTokenLocation($charId));
+
+        for ($i = 0; $i < $count; $i++) {
+            $targetHouseRec = array_shift($houses);
+            if ($targetHouseRec === null) {
+                break;
+            }
+            // Freyja's Well is destroyed last — push it back if others remain
+            if ($targetHouseRec["key"] === "house_0" && count($houses) > 0) {
+                $houses[$targetHouseRec["key"]] = $targetHouseRec;
+                $i--;
+                continue;
+            }
+            if (!$charInGrimheim) {
+                $this->tokens->dbSetTokenLocation($charId, $targetHouseRec["location"], null, "");
+            }
+            $this->tokens->dbSetTokenLocation($targetHouseRec["key"], "limbo", 0, $message, [
+                "char_name" => $charId,
+            ]);
+        }
+    }
+
     function getVariantSoloBoard() {
         return (int) $this->getGameStateValue("variant_solo_board");
     }
@@ -428,6 +506,19 @@ class Game extends Base {
      */
     function getHeroTokenId(string $owner): string {
         return "hero_" . $this->getHeroNumber($owner);
+    }
+
+    /**
+     * Returns the owner (player color) for a hero token id, e.g. "hero_1" → "6cd0f6".
+     */
+    function getHeroOwner(string $heroId): string {
+        foreach ($this->getPlayerColors() as $color) {
+            if ($this->getHeroTokenId($color) === $heroId) {
+                return $color;
+            }
+        }
+        $this->systemAssert("No owner found for hero $heroId");
+        return ""; // unreachable
     }
 
     function getRulesFor($token_id, $field = "r", $default = "") {

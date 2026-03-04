@@ -24,6 +24,9 @@ turnMonster|Monster Turn
 # Monster reinforcement (auto: draw monster cards, place monsters)
 reinforcement|Reinforcement
 
+# Monster attack (queued per monster adjacent to hero)
+monsterAttack|Monster Attack
+
 
 
 

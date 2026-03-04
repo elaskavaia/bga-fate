@@ -242,6 +242,11 @@ class Material {
         "type" => "reinforcement",
         "name" => clienttranslate("Reinforcement"),
 ],
+// # Monster attack (queued per monster adjacent to hero)
+    "Op_monsterAttack" => [ 
+        "type" => "monsterAttack",
+        "name" => clienttranslate("Monster Attack"),
+],
 // # Main actions (2 per turn, cannot repeat)
     "Op_actionMove" => [ 
         "kind" => "main",

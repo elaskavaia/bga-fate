@@ -37,7 +37,7 @@ class Op_turnMonster extends Operation {
             $this->game->handleEndOfGame();
             return;
         }
-        // TODO: Step 4 — Monsters Attack (all monsters adjacent to heroes attack)
+        $this->queueMonsterAttacks();
         $this->queueReinforcements($spotType);
         $this->queueNextRound();
     }
@@ -187,30 +187,27 @@ class Op_turnMonster extends Operation {
         $isLegend = str_contains($monsterId, "legend");
         $destroyCount = $isLegend ? 3 : 1;
 
-        // Build destroy queue: non-well houses first, well last
-        $houses = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
+        $this->game->effect_destroyHouses(
+            $destroyCount,
+            $monsterId,
+            clienttranslate('${token_name} tears down a house!')
+        );
 
-        for ($i = 0; $i < $destroyCount; $i++) {
-            $targetHouseRec = array_shift($houses);
-            if ($targetHouseRec === null) {
-                break; // no more town pieces to destroy
-            }
-            // Freyja's Well is destroyed last — push it back if others remain
-            if ($targetHouseRec["key"] === "house_0" && count($houses) > 0) {
-                $houses[$targetHouseRec["key"]] = $targetHouseRec;
-                $i--; // retry with next house
-                continue;
-            }
-            $this->game->tokens->dbSetTokenLocation(
-                $monsterId,
-                $targetHouseRec["location"], // to show animations on monster
-                null,
-                clienttranslate('${token_name} enters Grimheim and destroys the house!')
-            );
-            $this->game->tokens->dbSetTokenLocation($targetHouseRec["key"], "limbo", 0, "");
-        }
         // Remove monster from the map
         $this->game->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name} goes home happy'));
+    }
+
+    /**
+     * Queue a monsterAttack operation for each monster adjacent to a hero.
+     */
+    private function queueMonsterAttacks(): void {
+        $monsters = $this->game->hexMap->getMonstersOnMap();
+        foreach ($monsters as $m) {
+            $hex = $this->game->hexMap->getCharacterHex($m["id"]);
+            if ($hex !== null && $this->game->hexMap->isHeroAdjacentTo($hex)) {
+                $this->queue("monsterAttack", null, ["char" => $m["id"]]);
+            }
+        }
     }
 
     private function queueReinforcements(string $spotType): void {

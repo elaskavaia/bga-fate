@@ -137,6 +137,21 @@ These locations hold tokens that are not on the map. They should have a hidden o
 
 ---
 
+## Game Log Style
+
+Log messages use the hero name (e.g. `${token_name}`) instead of `${player_name}`. This matches the cooperative/thematic feel — the game narrates what characters do, not what players do.
+
+Pattern: **"Character" does "stuff"**
+- `${token_name} moves to ${place_name}`
+- `${token_name} attacks ${token_name2}`
+- `${token_name} gains ${count} gold`
+
+Use `char_name` (character name) instead of `token_name` when the subject is the hero but the token being moved is something else (e.g. crystals): `${char_name} gains ${count} gold`.
+
+Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = blue). The client wraps them in a `<span>` with the hero's color using `getTokenPresentaton()`.
+
+---
+
 ## Key Technical Decisions
 
 1. **Cooperative game**: All players win or lose together. No hidden scoring. The `is_coop: 1` flag is already set in gameinfos.

@@ -178,11 +178,11 @@ See CLAUDE.md for project overview
 **Goal**: After movement, monsters adjacent to heroes attack. Hero damage, knocked out heroes.
 
 ### Server
-[ ] Monster attack phase: all monsters adjacent to heroes attack
-[ ] Monster attack strength from monster data
-[ ] Trollkin faction bonus: +1 per adjacent trollkin
-[ ] Damage to hero (counter on hero card/token)
-[ ] Knocked out: damage >= health → hero to Grimheim, damage set to 5, remove 2 town pieces
+[x] Monster attack phase: all monsters adjacent to heroes attack
+[x] Monster attack strength from monster data
+[x] Trollkin faction bonus: +1 per adjacent trollkin
+[x] Damage to hero (counter on hero card/token)
+[x] Knocked out: damage >= health → hero to Grimheim, damage set to 5, remove 2 town pieces
 [x] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
 
 ### Client
@@ -192,8 +192,8 @@ See CLAUDE.md for project overview
 [ ] Mend action UI
 
 ### Tests
-[ ] PHP tests for monster attack resolution
-[ ] PHP tests for knocked out hero handling
+[x] PHP tests for monster attack resolution
+[x] PHP tests for knocked out hero handling
 
 ---
 
