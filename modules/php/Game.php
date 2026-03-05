@@ -449,6 +449,10 @@ class Game extends Base {
 
             // "Some villagers panic and flee, leaving their houses undefended"
             $this->effect_destroyHouses(2, $heroId, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
+
+            if ($this->isEndOfGame()) {
+                $this->handleEndOfGame();
+            }
             return true;
         }
         return false;

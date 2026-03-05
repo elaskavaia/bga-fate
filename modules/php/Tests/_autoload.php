@@ -6,9 +6,8 @@ spl_autoload_register(function ($class_name) {
         case "Notify":
         case "Bga\\GameFramework\\Notify":
         case "Bga\\GameFramework\\Table":
-            //var_dump($class_name);
-            //var_dump(APP_GAMEMODULE_PATH);
-            include APP_GAMEMODULE_PATH . "/module/table/table.game.php";
+            // contact on purpose
+            include APP_GAMEMODULE_PATH . "/module/table" . "/table.game.php";
             return;
         case "Deck":
             //var_dump($class_name);

@@ -226,6 +226,30 @@ final class Op_monsterAttackTest extends TestCase {
     // Queueing from turnMonster
     // -------------------------------------------------------------------------
 
+    public function testHeroKnockoutEndsGameWhenLastHouseDestroyed(): void {
+        // Destroy all houses except Freyja's Well and one other
+        for ($i = 2; $i <= 9; $i++) {
+            $this->game->tokens->moveToken("house_$i", "limbo");
+        }
+        // house_0 (Well) and house_1 remain — knockout destroys 2 → game over
+
+        // Pre-place 8 damage on Bjorn (health=9), goblin hits for 1 → knocked out
+        $this->game->effect_moveCrystals("hero_1", "red", 8, "hero_1", ["message" => ""]);
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->game->randQueue = [5]; // 1 hit
+        $this->resolveMonsterAttack("monster_goblin_1");
+
+        // Both houses destroyed → Freyja's Well gone → game over
+        $this->assertTrue($this->game->isEndOfGame(), "Game should end when knockout destroys last houses");
+        $this->assertFalse($this->game->isHeroesWin(), "Heroes should lose");
+    }
+
+    // -------------------------------------------------------------------------
+    // Queueing from turnMonster
+    // -------------------------------------------------------------------------
+
     public function testTurnMonsterQueuesAttacks(): void {
         // Place monster adjacent to hero — check that monsterAttack is queued
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");

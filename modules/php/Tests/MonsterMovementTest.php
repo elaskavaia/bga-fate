@@ -329,6 +329,17 @@ final class MonsterMovementTest extends TestCase {
         $this->assertEquals($distBefore - 1, $distAfter, "Monster should move only 1 step on shield turn");
     }
 
+    public function testWinConditionWhenTimeTrackEnds(): void {
+        // Set rune stone to last step — advanceTimeTrack will push it past the max
+        $this->game->tokens->setTokenState("rune_stone", 11); // TIME_TRACK_SHORT_LENGTH = 12
+
+        $op = $this->createTurnMonsterOp();
+        $op->resolve();
+
+        $this->assertTrue($this->game->isEndOfGame(), "Game should end when time track reaches the end");
+        $this->assertTrue($this->game->isHeroesWin(), "Heroes should win when time track ends with Well intact");
+    }
+
     public function testMonsterMovementOrderClosestFirst(): void {
         // Place monsters at different distances
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7"); // far

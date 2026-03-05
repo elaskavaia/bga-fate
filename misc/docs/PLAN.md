@@ -186,10 +186,10 @@ See CLAUDE.md for project overview
 [x] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
 
 ### Client
-[ ] Show monster attacks in log
-[ ] Show hero damage counter
-[ ] Show knocked out animation (hero moves to Grimheim)
-[ ] Mend action UI
+[x] Show monster attacks in log
+[x] Show hero damage counter
+[x] Show knocked out animation (hero moves to Grimheim)
+[x] Mend action UI
 
 ### Tests
 [x] PHP tests for monster attack resolution
@@ -204,19 +204,19 @@ See CLAUDE.md for project overview
 ### Server
 [ ] `Op_actionPrepare`: draw 1 event card (stub — just log "drew a card" if no cards yet)
 [ ] `Op_actionFocus`: add 1 mana to a card (stub — just log for now)
-[ ] Action selection: enforce "must pick 2 different actions" rule
-[ ] Charge: on skull time track spots, monsters move +1 extra
-[ ] Goblin special: moves 2 instead of 1
+[x] Action selection: enforce "must pick 2 different actions" rule
+[x] Charge: on skull time track spots, monsters move +1 extra
+[x] Goblin special: moves 2 instead of 1
 
 ### Client
-[ ] Action selection UI: show 6 action buttons, disable already-picked action
-[ ] End turn button
-[ ] Undo support for action selection
+[x] Action selection UI: show 6 action buttons, disable already-picked action
+[x] End turn button
+[xs] Undo support for action selection
 
 ### Tests
 [ ] Integration test: full round (all players turn + monster turn)
-[ ] Test win condition (survive time track)
-[ ] Test loss condition (all town pieces destroyed)
+[x] Test win condition (survive time track)
+[x] Test loss condition (all town pieces destroyed)
 
 ---
 
@@ -244,19 +244,19 @@ See CLAUDE.md for project overview
 
 ### Game Elements
 [x] Add hero card game element (all heroes) — card_material.csv, Cards.scss, Game.ts
-[ ] Add hero card sprite for first hero — img/<hero>_hero_cards.jpg
+[x] Add hero card sprite for first hero — img/<hero>_hero_cards.jpg
 
 ### Server
-[ ] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
+[x] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
 [ ] Hero card effect applies during relevant actions
 [ ] Equipment: attack strength bonus, once-per-turn activation
 [ ] Ability: once-per-turn activation, costs mana
 [ ] Focus action: actually adds mana to ability/equipment cards
 
 ### Client
-[ ] Player board: show hero card, active ability, active equipment
-[ ] Card tooltips with effects
-[ ] Activate equipment/ability buttons (free actions)
+[x] Player board: show hero card, active ability, active equipment
+[x] Card tooltips with effects
+[x] Activate equipment/ability buttons (free actions)
 
 ### Tests
 [ ] Test equipment attack bonus
