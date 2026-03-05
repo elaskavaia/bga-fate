@@ -198,13 +198,17 @@ class Op_turnMonster extends Operation {
     }
 
     /**
-     * Queue a monsterAttack operation for each monster adjacent to a hero.
+     * Queue a monsterAttack operation for each monster with a hero in attack range.
      */
     private function queueMonsterAttacks(): void {
         $monsters = $this->game->hexMap->getMonstersOnMap();
         foreach ($monsters as $m) {
             $hex = $this->game->hexMap->getCharacterHex($m["id"]);
-            if ($hex !== null && $this->game->hexMap->isHeroAdjacentTo($hex)) {
+            if ($hex === null) {
+                continue;
+            }
+            $range = $this->game->getAttackRange($m["id"]);
+            if ($this->game->hexMap->isCharacterTypeInRange($hex, $range, "hero")) {
                 $this->queue("monsterAttack", null, ["char" => $m["id"]]);
             }
         }

@@ -304,6 +304,30 @@ class Game extends Base {
     }
 
     /**
+     * Returns the attack range for any character (hero or monster). Default is 1.
+     */
+    function getAttackRange(string $characterId): int {
+        if (str_starts_with($characterId, "hero")) {
+            $owner = $this->getHeroOwner($characterId);
+            $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+            $maxRange = 1;
+            foreach ($cards as $card => $info) {
+                $range = (int) $this->material->getRulesFor($card, "attack_range", 0);
+                if ($range > $maxRange) {
+                    $maxRange = $range;
+                }
+            }
+            return $maxRange;
+        }
+        // Monster: Fire Horde faction has range 2
+        $faction = $this->getRulesFor($characterId, "faction", "");
+        if ($faction === "firehorde") {
+            return 2;
+        }
+        return 1;
+    }
+
+    /**
      * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
      * Used by both hero attacks and monster attacks.
      * @return int number of hits

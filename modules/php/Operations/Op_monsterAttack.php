@@ -33,15 +33,15 @@ class Op_monsterAttack extends Operation {
             return; // Monster was killed or removed
         }
 
-        // Find adjacent heroes
-        $adjacentHeroes = $this->getAdjacentHeroes($monsterHex);
-        if (empty($adjacentHeroes)) {
+        // Find heroes in attack range
+        $heroesInRange = $this->getHeroesInRange($monsterId, $monsterHex);
+        if (empty($heroesInRange)) {
             return; // No heroes to attack
         }
 
         // TODO: Hero selection — currently picks weakest (most damaged relative to health).
         // Rules may require different targeting logic (e.g. closest, random, player choice).
-        $heroId = $this->pickTarget($adjacentHeroes);
+        $heroId = $this->pickTarget($heroesInRange);
 
         // Calculate monster strength with faction bonus
         $strength = $this->getMonsterStrength($monsterId, $heroId);
@@ -56,17 +56,17 @@ class Op_monsterAttack extends Operation {
     }
 
     /**
-     * Find all heroes on hexes adjacent to the given hex.
+     * Find all heroes within attack range of the monster.
      * @return string[] array of hero token IDs (e.g. ["hero_1", "hero_2"])
      */
-    private function getAdjacentHeroes(string $monsterHex): array {
-        $occ = $this->game->hexMap->getOccupancyMap();
-        $adjacentHexes = $this->game->hexMap->getAdjacentHexes($monsterHex);
+    private function getHeroesInRange(string $monsterId, string $monsterHex): array {
+        $range = $this->game->getAttackRange($monsterId);
+        $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $range);
         $heroes = [];
-        foreach ($adjacentHexes as $hex) {
-            $char = $occ[$hex]["character"] ?? null;
-            if ($char !== null && getPart($char, 0) === "hero") {
-                $heroes[] = $char;
+        foreach ($hexesInRange as $hex) {
+            $heroId = $this->game->hexMap->isOccupiedByCharacterType($hex, "hero");
+            if ($heroId !== null) {
+                $heroes[] = $heroId;
             }
         }
         return $heroes;

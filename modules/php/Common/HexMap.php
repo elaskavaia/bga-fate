@@ -415,14 +415,58 @@ class HexMap {
      * Returns true if any hero is adjacent to the given hex (or on it).
      */
     function isHeroAdjacentTo(string $hexId): bool {
-        $occ = $this->getOccupancyMap();
-        $checkHexes = array_merge([$hexId], $this->getAdjacentHexes($hexId));
+        return $this->isCharacterTypeInRange($hexId, 1, "hero");
+    }
+
+    /**
+     * Returns true if any character of the given type is within range of the hex (or on it).
+     * @param string $type Character type prefix: "hero" or "monster"
+     */
+    function isCharacterTypeInRange(string $hexId, int $range, string $type): bool {
+        $checkHexes = array_merge([$hexId], $this->getHexesInRange($hexId, $range));
         foreach ($checkHexes as $hex) {
-            $char = $occ[$hex]["character"] ?? null;
-            if ($char !== null && getPart($char, 0) === "hero") {
+            if ($this->isOccupiedByCharacterType($hex, $type) !== null) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Returns all valid hexes within the given range of a hex (excluding the hex itself).
+     * For range >= 2, uses BFS so that Grimheim hexes block the path (cannot shoot over Grimheim).
+     * If the source hex is in Grimheim, Grimheim hexes are not blocked.
+     */
+    function getHexesInRange(string $hexId, int $range): array {
+        if ($range <= 1) {
+            return $this->getAdjacentHexes($hexId);
+        }
+        $sourceInGrimheim = $this->isInGrimheim($hexId);
+        $visited = [$hexId => 0];
+        $queue = [[$hexId, 0]];
+        $result = [];
+        while ($queue) {
+            [$current, $steps] = array_shift($queue);
+            if ($steps >= $range) {
+                continue;
+            }
+            foreach ($this->getAdjacentHexes($current) as $neighbor) {
+                if (isset($visited[$neighbor])) {
+                    continue;
+                }
+                // Grimheim blocks ranged attacks passing through (unless shooting from inside Grimheim)
+                $neighborInGrimheim = $this->isInGrimheim($neighbor);
+                if ($neighborInGrimheim && !$sourceInGrimheim) {
+                    // Can target Grimheim hexes but cannot pass through them
+                    $visited[$neighbor] = $steps + 1;
+                    $result[] = $neighbor;
+                    continue; // don't expand further through Grimheim
+                }
+                $visited[$neighbor] = $steps + 1;
+                $result[] = $neighbor;
+                $queue[] = [$neighbor, $steps + 1];
+            }
+        }
+        return $result;
     }
 }

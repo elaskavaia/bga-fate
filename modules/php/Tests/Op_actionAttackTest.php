@@ -47,10 +47,25 @@ final class Op_actionAttackTest extends TestCase {
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
-    public function testNonAdjacentMonsterNotTargetable(): void {
-        // hex_13_7 is 2 steps from hex_11_8
+    public function testRange2MonsterTargetableWithBow(): void {
+        // Bjorn has First Bow (attack_range=2), hex_13_7 is 2 steps from hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         $op = $this->createOp();
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_13_7", $moves);
+    }
+
+    public function testOutOfRangeMonsterNotTargetable(): void {
+        // Embla (hero_3) has Flimsy Blade (no attack_range), so range=1
+        $this->game->tokens->moveToken("card_hero_3_1", "tableau_" . BCOLOR);
+        $this->game->tokens->moveToken("card_equip_3_15", "tableau_" . BCOLOR); // Flimsy Blade, no range
+        $this->game->tokens->moveToken("hero_3", "hex_11_8");
+
+        // hex_13_7 is 2 steps away — out of range 1
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+
+        /** @var Op_actionAttack */
+        $op = $this->game->machine->instanciateOperation("actionAttack", BCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("hex_13_7", $moves);
     }

@@ -17,6 +17,10 @@ final class Op_monsterAttackTest extends TestCase {
         // Assign hero 1 (Bjorn) to PCOLOR: health=9
         $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        // Move other heroes off map so they don't interfere with ranged attacks
+        $this->game->tokens->moveToken("hero_2", "limbo");
+        $this->game->tokens->moveToken("hero_3", "limbo");
+        $this->game->tokens->moveToken("hero_4", "limbo");
     }
 
     private function resolveMonsterAttack(string $monsterId): void {
@@ -115,7 +119,7 @@ final class Op_monsterAttackTest extends TestCase {
     }
 
     public function testNonTrollkinNoFactionBonus(): void {
-        // Sprite (firehorde) + goblin (trollkin) adjacent — sprite gets no bonus
+        // Sprite (firehorde) + goblin (trollkin) adjacent to hero — sprite gets no trollkin bonus
         $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_11_7");
         $this->game->hexMap->invalidateOccupancy();
@@ -126,6 +130,34 @@ final class Op_monsterAttackTest extends TestCase {
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
         $this->assertCount(1, $crystals);
+    }
+
+    // -------------------------------------------------------------------------
+    // Ranged attacks (Fire Horde range 2)
+    // -------------------------------------------------------------------------
+
+    public function testFireHordeAttacksAtRange2(): void {
+        // Sprite (firehorde) has range 2, hero_1 at hex_11_8, sprite at hex_13_7 (distance 2)
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_13_7");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->game->randQueue = [5]; // 1 hit
+        $this->resolveMonsterAttack("monster_sprite_1");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(1, $crystals);
+    }
+
+    public function testTrollkinDoesNotAttackAtRange2(): void {
+        // Goblin (trollkin) has range 1, hero_1 at hex_11_8, goblin at hex_13_7 (distance 2)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->resolveMonsterAttack("monster_goblin_1");
+
+        // No damage — goblin can't reach hero at range 2
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(0, $crystals);
     }
 
     // -------------------------------------------------------------------------

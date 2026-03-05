@@ -337,6 +337,65 @@ final class HexMapTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
+    // getHexesInRange
+    // -------------------------------------------------------------------------
+
+    public function testGetHexesInRangeOne(): void {
+        // Range 1 should return adjacent hexes
+        $hexes = $this->game->hexMap->getHexesInRange("hex_11_8", 1);
+        $adjacent = $this->game->hexMap->getAdjacentHexes("hex_11_8");
+        $this->assertEquals(sort($adjacent), sort($hexes));
+    }
+
+    public function testGetHexesInRangeTwoIncludesDistTwo(): void {
+        $hexes = $this->game->hexMap->getHexesInRange("hex_11_8", 2);
+        // hex_13_7 is distance 2 from hex_11_8
+        $this->assertContains("hex_13_7", $hexes);
+        // hex_12_8 is distance 1 (also included)
+        $this->assertContains("hex_12_8", $hexes);
+    }
+
+    public function testGetHexesInRangeExcludesSelf(): void {
+        $hexes = $this->game->hexMap->getHexesInRange("hex_11_8", 2);
+        $this->assertNotContains("hex_11_8", $hexes);
+    }
+
+    public function testGetHexesInRangeGrimheimBlocksPassthrough(): void {
+        // hex_7_9 is west of Grimheim, hex_11_9 is east of Grimheim
+        // Straight distance is 4, but with range 7 and no blocking you'd reach hex_11_9.
+        // With Grimheim blocking, the BFS must go around Grimheim's borders,
+        // so hex_11_9 should be at a greater BFS distance than 4.
+        $hexesRange4 = $this->game->hexMap->getHexesInRange("hex_7_9", 4);
+        // hex_11_9 is straight distance 4 from hex_7_9, but all direct paths go through Grimheim
+        // BFS must detour around — it should NOT be reachable at range 4
+        $this->assertNotContains("hex_11_9", $hexesRange4, "hex_11_9 should not be reachable at range 4 due to Grimheim blocking");
+    }
+
+    public function testGetHexesInRangeGrimheimReachableAtHigherRange(): void {
+        // With enough range, the BFS can go around Grimheim and reach hex_11_9
+        $hexesRange7 = $this->game->hexMap->getHexesInRange("hex_7_9", 7);
+        $this->assertContains("hex_11_9", $hexesRange7, "hex_11_9 should be reachable at range 7 by going around Grimheim");
+    }
+
+    public function testGetHexesInRangeCanTargetGrimheimHex(): void {
+        // hex_7_9 is adjacent to hex_8_9 (Grimheim) — should be targetable
+        $hexes = $this->game->hexMap->getHexesInRange("hex_7_9", 2);
+        $this->assertContains("hex_8_9", $hexes, "Adjacent Grimheim hex should be targetable");
+        // hex_9_9 is also Grimheim, distance 2 — reachable through 8_9 but 8_9 is Grimheim so no expand
+        // Only reachable if there's a non-Grimheim path. 7_9->7_10->8_10(grim) = can target but no expand.
+        // 7_9->8_9(grim) = can target but no expand. So 9_9 is NOT reachable at range 2 from outside.
+        $this->assertNotContains("hex_9_9", $hexes, "Deeper Grimheim hex should not be reachable (cannot pass through Grimheim border)");
+    }
+
+    public function testGetHexesInRangeFromInsideGrimheimNotBlocked(): void {
+        // From inside Grimheim, Grimheim hexes should not block
+        $hexes = $this->game->hexMap->getHexesInRange("hex_9_9", 2);
+        // Should reach other Grimheim hexes and beyond
+        $this->assertContains("hex_10_9", $hexes, "Should reach adjacent Grimheim hex");
+        $this->assertContains("hex_11_9", $hexes, "Should reach hex beyond Grimheim (distance 2)");
+    }
+
+    // -------------------------------------------------------------------------
     // getMonstersOnMap
     // -------------------------------------------------------------------------
 

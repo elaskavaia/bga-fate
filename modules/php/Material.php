@@ -3940,6 +3940,7 @@ class Material {
         "strength" => +1,
         "effect" => "This is your Main Weapon. Attack range 2.",
         "flavour" => "Not something he's proud of. Still not bad for a five-year-old.",
+        "attack_range" => 2,
 ],
     "card_equip_1_20" => [ 
         "type" => "card card_equip hno_1 cnum_20 hcard",
@@ -3965,6 +3966,7 @@ class Material {
         "quest" => "<i>Spend a mend action on Nailfare</i> to bind the relics.",
         "effect" => "This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target.",
         "flavour" => "This bunch of bones, bound by braided bamboo became the bane of the banished breathless.",
+        "attack_range" => 2,
 ],
     "card_equip_1_21" => [ 
         "type" => "card card_equip hno_1 cnum_21 hcard",
@@ -4056,6 +4058,7 @@ class Material {
         "quest" => "<i>Collect 5 gold</i> [XP] <i>from killing trollkin</i> to get a fearsome reputation.",
         "effect" => "This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin.",
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",
+        "attack_range" => 2,
 ],
     "card_equip_2_23" => [ 
         "type" => "card card_equip hno_2 cnum_23 hcard",
@@ -4080,6 +4083,7 @@ class Material {
         "count" => 1,
         "strength" => +1,
         "effect" => "This is your Main Weapon. Attack range 2.",
+        "attack_range" => 2,
 ],
     "card_equip_2_22" => [ 
         "type" => "card card_equip hno_2 cnum_22 hcard",
@@ -4156,6 +4160,7 @@ class Material {
         "quest" => "<i>When you have rolled 10[DIE_ATTACK] in forests</i>, you have learned the songs of the trees.",
         "effect" => "This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card.",
         "flavour" => "Sings your swan song.",
+        "attack_range" => 2,
 ],
     "card_equip_2_17" => [ 
         "type" => "card card_equip hno_2 cnum_17 hcard",
@@ -4193,6 +4198,7 @@ class Material {
         "quest" => "<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.",
         "effect" => "This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].",
         "flavour" => "It anticipates your wishes.",
+        "attack_range" => 2,
 ],
     "card_equip_3_19" => [ 
         "type" => "card card_equip hno_3 cnum_19 hcard",
@@ -4565,6 +4571,7 @@ class Material {
         "quest" => "<i>Deal 3 damage to yourself in the Temple Ruins</i>.",
         "effect" => "This is your Main Weapon. Attack range 2.",
         "flavour" => "The hidden dungeon of the old ruin is not safe. At least not with Finkel there…",
+        "attack_range" => 2,
 ],
     "card_equip_5_16" => [ 
         "type" => "card card_equip hno_5 cnum_16 hcard",

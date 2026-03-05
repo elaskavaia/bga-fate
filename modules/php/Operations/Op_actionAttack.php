@@ -36,10 +36,10 @@ class Op_actionAttack extends Operation {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->getTokenLocation($heroId);
-        // TODO: support attack range 2+ from equipment (e.g. bow)
-        $adjacentHexes = $this->game->hexMap->getAdjacentHexes($currentHex);
+        $range = $this->game->getAttackRange($heroId);
+        $hexesInRange = $this->game->hexMap->getHexesInRange($currentHex, $range);
         $moves = [];
-        foreach ($adjacentHexes as $hexId) {
+        foreach ($hexesInRange as $hexId) {
             if ($this->game->hexMap->isOccupiedByCharacterType($hexId, "monster") !== null) {
                 $moves[$hexId] = ["q" => Material::RET_OK];
             }
