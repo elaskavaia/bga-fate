@@ -44,7 +44,7 @@ class Op_actionMend extends Operation {
 
         if ($amount > 0) {
             $this->game->effect_moveCrystals($heroId, "red", -$amount, $heroId, [
-                "message" => clienttranslate('${char_name} mends ${count} damage'),
+                "message" => clienttranslate('${char_name} removes ${count} damage from themselves'),
             ]);
         }
     }

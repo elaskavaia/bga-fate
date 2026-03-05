@@ -197,8 +197,8 @@ export class Game extends GameMachine {
         }
         result.location = bucketId;
 
-        // Crystal landing on a monster: suppress slide, pulse the crystal bucket instead
-        if (loc.startsWith("monster")) {
+        // Crystal landing on a monster or hero: suppress slide, pulse the crystal bucket instead
+        if (loc.startsWith("monster") || loc.startsWith("hero")) {
           result.noa = true;
           result.onEnd = () => {
             if (oldBucketId) this.updateBucketCount(oldBucketId);
@@ -207,13 +207,17 @@ export class Game extends GameMachine {
           };
         } else {
           result.onEnd = () => {
-            if (oldBucketId) {
-              // Crystal leaving a bucket (e.g. back to supply) — update old bucket after move
-              this.updateBucketCount(oldBucketId);
-            }
+            if (oldBucketId) this.updateBucketCount(oldBucketId);
             this.updateBucketCount(bucketId);
           };
         }
+      } else if (oldBucketId) {
+        // Crystal returning to supply — suppress slide, just pulse the old bucket
+        result.noa = true;
+        result.onEnd = () => {
+          this.updateBucketCount(oldBucketId);
+          this.animationLa.pulse(oldBucketId);
+        };
       }
     } else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
       // Dice landing on display_battle: show evaporate effect at the attack target
