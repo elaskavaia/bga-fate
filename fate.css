@@ -1089,6 +1089,21 @@
   order: 9;
 }
 
+.pile_monster.monster_legend {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  order: 10;
+  counter-reset: none;
+}
+.pile_monster.monster_legend > .monster {
+  position: relative;
+  visibility: visible;
+}
+.pile_monster.monster_legend::after {
+  display: none;
+}
+
 .timetrack {
   position: absolute;
   bottom: 5%;

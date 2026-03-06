@@ -11,13 +11,7 @@ display_monsterturn|Monster Cards|thething|global|hidden|public|
 # Battle display (dice rolled during attack)
 display_battle|Battle|thething|global|hidden|public|
 
-# Supply areas
-supply_monster|Monster Supply|supply|global|hidden|public|
-supply_crystal_green|Green Crystal Supply|supply|global|hidden|public|
-supply_crystal_red|Red Crystal Supply|supply|global|hidden|public|
-supply_crystal_yellow|Yellow Crystal Supply|supply|global|hidden|public|
-supply_die_attack|Attack Dice Supply|supply|global|hidden|public|
-supply_die_monster|Monster Die Supply|supply|global|hidden|public|
+
 
 # Player board sub-locations
 deck_ability|Abilities|tableau|player|public|hidden|
@@ -30,3 +24,11 @@ limbo|Limbo||global|hidden|hidden|
 tableau|Player Area|players_panels|player|hidden|public|
 hand|Player Hand|players_panels|player|hidden|private|
 supply|Supply|thething|global|hidden|public|
+
+# Supply areas
+supply_monster|Monster Supply|supply|global|hidden|public|
+supply_crystal_green|Green Crystal Supply|supply|global|hidden|public|
+supply_crystal_red|Red Crystal Supply|supply|global|hidden|public|
+supply_crystal_yellow|Yellow Crystal Supply|supply|global|hidden|public|
+supply_die_attack|Attack Dice Supply|supply|global|hidden|public|
+supply_die_monster|Monster Die Supply|supply|global|hidden|public|

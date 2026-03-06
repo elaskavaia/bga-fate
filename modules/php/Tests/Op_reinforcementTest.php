@@ -147,53 +147,49 @@ final class Op_reinforcementTest extends TestCase {
         $this->assertEquals(3, $monsterCount);
     }
 
-    public function testSkipsLegendCard(): void {
-        // Card 1 "Queen of the Dead": spawn=L (legend only, no regular monsters)
-        // Card 36 "Viral Trolls": T,T,T (regular card)
+    public function testPlacesLegendCard(): void {
+        // Card 1 "Queen of the Dead": spawn=,L at Nailfare (2 hexes: empty, legend)
         $this->game->tokens->moveToken("card_monster_1", "deck_monster_yellow");
         $this->game->tokens->setTokenState("card_monster_1", 999); // top
-        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
-        $this->game->tokens->setTokenState("card_monster_36", 998); // second
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
         $op->resolve();
 
-        // Legend card should be skipped (state=1)
+        // Legend card placed (state=0)
         $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_1"));
-        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_1"));
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_1"));
 
-        // Regular card should be placed
-        $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_36"));
-        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_36"));
-
-        // Trolls should be on DarkForest hexes
-        $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
-        $trollCount = 0;
-        foreach ($darkForestHexes as $hex) {
-            $tokens = $this->game->tokens->getTokensOfTypeInLocation("monster_troll", $hex);
-            $trollCount += count($tokens);
-        }
-        $this->assertEquals(3, $trollCount);
+        // Queen legend should be on Nailfare hex index 1
+        $nailfareHexes = $this->game->hexMap->getHexesInLocation("Nailfare");
+        $legendLoc = $this->game->tokens->getTokenLocation("monster_legend_1_1");
+        $this->assertEquals($nailfareHexes[1], $legendLoc);
     }
 
-    public function testSkipsLegendCardWithMixedSpawn(): void {
-        // Card 5 "Hrungbald": spawn=L,B,B,B (legend + regular monsters)
-        // Should still be skipped entirely since L is present
-        // Card 36 "Viral Trolls": T,T,T (fallback)
+    public function testPlacesLegendCardWithMixedSpawn(): void {
+        // Card 5 "Hrungbald": spawn=L,B,B,B at OgreValley
         $this->game->tokens->moveToken("card_monster_5", "deck_monster_yellow");
         $this->game->tokens->setTokenState("card_monster_5", 999); // top
-        $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
-        $this->game->tokens->setTokenState("card_monster_36", 998); // second
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
         $op->resolve();
 
-        // Legend card skipped
-        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_5"));
-        // Regular card placed
-        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_36"));
+        // Legend card placed (state=0)
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_5"));
+
+        // Hrungbald legend on OgreValley hex 0
+        $ogreValleyHexes = $this->game->hexMap->getHexesInLocation("OgreValley");
+        $legendLoc = $this->game->tokens->getTokenLocation("monster_legend_5_1");
+        $this->assertEquals($ogreValleyHexes[3], $legendLoc);
+
+        // 3 brutes on hexes 1-3
+        $bruteCount = 0;
+        for ($i = 0; $i < count($ogreValleyHexes); $i++) {
+            $tokens = $this->game->tokens->getTokensOfTypeInLocation("monster_brute", $ogreValleyHexes[$i]);
+            $bruteCount += count($tokens);
+        }
+        $this->assertEquals(3, $bruteCount);
     }
 
     public function testCardGoesToDisplay(): void {

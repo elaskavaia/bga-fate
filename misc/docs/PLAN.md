@@ -338,6 +338,7 @@ See CLAUDE.md for project overview
 [ ] Runes count as hits for Dead attacks
 [ ] Draugr armor (prevent 1 damage each time)
 [x] Legend monsters: unique stats, destroy 3 town pieces, swap movement — material + movement done in Iter 3/7
+[x] Legend reinforcement: legend cards spawn legend tokens + escort monsters — Op_reinforcement
 [x] All 54 monster cards defined — done in Iter 7
 
 ### Client
@@ -490,4 +491,5 @@ Source: https://en.doc.boardgamearena.com/Pre-release_checklist
 ## TODO
 
 * Fix stacked tooltips
+* Add hero stats to tooltip (health, attack strength from hero card on tableau)
 * Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
