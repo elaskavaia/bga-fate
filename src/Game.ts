@@ -166,11 +166,16 @@ export class Game extends GameMachine {
     // Stack monsters by type in supply: create sub-container per monster type
     if (loc === "supply_monster") {
       const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
-      const subId = "supply_" + monsterType;
-      if (!$(subId)) {
-        placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "supply_monster");
+      if (monsterType === "monster_legend") {
+        // Legends: place directly on map_wrapper, no piling
+        result.location = "map_wrapper";
+      } else {
+        const subId = "supply_" + monsterType;
+        if (!$(subId)) {
+          placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "map_wrapper");
+        }
+        result.location = subId;
       }
-      result.location = subId;
       // Shrink & fade at current position, then snap to supply
       if ($(tokenKey)?.parentElement?.id?.startsWith("hex_")) {
         result.noa = true;

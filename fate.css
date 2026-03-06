@@ -53,10 +53,21 @@
 }
 #map_area {
   position: absolute;
-  top: 5%;
-  left: 10%;
+  top: 0%;
+  left: 0%;
   aspect-ratio: 1.1324947588;
   height: 1040px;
+}
+#map_area::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url(img/EN_Game_Board_Map.webp);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .hex {
@@ -278,7 +289,7 @@
 }
 
 .monster.monster_troll {
-  background-position: 0% 50%;
+  background-position: 0% 51%;
 }
 
 .monster.monster_brute {
@@ -663,22 +674,22 @@
 }
 
 .hcard.hno_1 {
-  background-image: url("img/bjorn_hero_cards.jpg");
+  background-image: url("img/cards/bjorn_cards_hq.webp");
   background-size: 600% auto;
 }
 
 .hcard.hno_2 {
-  background-image: url("img/alva_hero_cards.jpg");
+  background-image: url("img/cards/alva_cards_hq.webp");
   background-size: 600% auto;
 }
 
 .hcard.hno_3 {
-  background-image: url("img/embla_hero_cards.jpg");
+  background-image: url("img/cards/embla_cards_hq.webp");
   background-size: 600% auto;
 }
 
 .hcard.hno_4 {
-  background-image: url("img/boldur_hero_cards.jpg");
+  background-image: url("img/cards/boldur_cards_hq.webp");
   background-size: 600% auto;
 }
 
@@ -836,7 +847,7 @@
 
 .tableau.hno_1 .deck_equip,
 .tableau.hno_1 .deck_event {
-  background-image: url("img/bjorn_hero_cards.jpg");
+  background-image: url("img/cards/bjorn_cards_hq.webp");
   background-size: 600% auto;
 }
 .tableau.hno_1 .deck_equip {
@@ -848,7 +859,7 @@
 
 .tableau.hno_2 .deck_equip,
 .tableau.hno_2 .deck_event {
-  background-image: url("img/alva_hero_cards.jpg");
+  background-image: url("img/cards/alva_cards_hq.webp");
   background-size: 600% auto;
 }
 .tableau.hno_2 .deck_equip {
@@ -860,7 +871,7 @@
 
 .tableau.hno_3 .deck_equip,
 .tableau.hno_3 .deck_event {
-  background-image: url("img/embla_hero_cards.jpg");
+  background-image: url("img/cards/embla_cards_hq.webp");
   background-size: 600% auto;
 }
 .tableau.hno_3 .deck_equip {
@@ -872,7 +883,7 @@
 
 .tableau.hno_4 .deck_equip,
 .tableau.hno_4 .deck_event {
-  background-image: url("img/boldur_hero_cards.jpg");
+  background-image: url("img/cards/boldur_cards_hq.webp");
   background-size: 600% auto;
 }
 .tableau.hno_4 .deck_equip {
@@ -1053,55 +1064,89 @@
   z-index: 10;
 }
 
+.map_wrapper > .pile_monster {
+  position: absolute;
+  z-index: 1;
+}
+
 .pile_monster.monster_goblin {
-  order: 1;
+  top: 0%;
+  left: 11%;
 }
 
 .pile_monster.monster_brute {
-  order: 2;
+  top: 9%;
+  left: 7%;
 }
 
 .pile_monster.monster_troll {
-  order: 3;
-}
-
-.pile_monster.monster_sprite {
-  order: 4;
-}
-
-.pile_monster.monster_elemental {
-  order: 5;
+  top: 20%;
+  left: 2%;
 }
 
 .pile_monster.monster_jotunn {
-  order: 6;
+  bottom: 26%;
+  left: 0%;
+}
+
+.pile_monster.monster_elemental {
+  bottom: 16%;
+  left: 4%;
+}
+
+.pile_monster.monster_sprite {
+  bottom: 6%;
+  left: 8%;
 }
 
 .pile_monster.monster_imp {
-  order: 7;
+  top: 0%;
+  right: 24%;
 }
 
 .pile_monster.monster_skeleton {
-  order: 8;
+  top: 9%;
+  right: 19%;
 }
 
 .pile_monster.monster_draugr {
-  order: 9;
+  top: 20%;
+  right: 14%;
 }
 
-.pile_monster.monster_legend {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  order: 10;
-  counter-reset: none;
+.map_wrapper > .monster.legend {
+  position: absolute;
+  z-index: 1;
 }
-.pile_monster.monster_legend > .monster {
-  position: relative;
-  visibility: visible;
+
+.map_wrapper > .monster_legend_1 {
+  bottom: 12%;
+  right: 14%;
 }
-.pile_monster.monster_legend::after {
-  display: none;
+
+.map_wrapper > .monster_legend_2 {
+  bottom: 12%;
+  right: 16%;
+}
+
+.map_wrapper > .monster_legend_3 {
+  bottom: 12%;
+  right: 11%;
+}
+
+.map_wrapper > .monster_legend_4 {
+  bottom: 2%;
+  right: 23%;
+}
+
+.map_wrapper > .monster_legend_5 {
+  bottom: 2%;
+  right: 17%;
+}
+
+.map_wrapper > .monster_legend_6 {
+  bottom: 2%;
+  right: 10%;
 }
 
 .timetrack {
@@ -1177,18 +1222,7 @@
 .map_wrapper {
   position: relative;
   aspect-ratio: 4096/3134;
-  width: 1514px;
-}
-.map_wrapper::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url(img/EN_Game_Board.jpg);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  pointer-events: none;
-  z-index: 0;
+  width: 1360px;
 }
 
 #players_panels {
@@ -1571,4 +1605,25 @@ button.bgabutton > * {
 .target_container:hover {
   background-color: #e0e0e0;
   cursor: pointer;
+}
+
+html {
+  background: none;
+  background-color: #b9ecbe;
+}
+
+html:before {
+  background-image: url(img/bg2.webp);
+  /* background-position: 50% 0%; */
+  /* background-repeat: no-repeat; */
+  background-size: auto 100%;
+  content: " ";
+  display: block;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0.7;
+  position: fixed;
+  z-index: -1;
 }

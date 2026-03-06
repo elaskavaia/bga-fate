@@ -13,11 +13,24 @@ $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 
 #map_area {
   position: absolute;
-  top: 5%;
-  left: 10%;
+  top: 0%;
+  left: 0%;
   // aspect ratio: width / height = sqrt(3)*17 / 26
   aspect-ratio: calc(sqrt(3) * $grid-cols / $grid-rows);
   height: $map-height;
+  //outline: 1px solid green; // debug
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url(img/EN_Game_Board_Map.webp);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .hex {

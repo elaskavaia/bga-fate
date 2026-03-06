@@ -30,8 +30,8 @@ describe("Game.getPlaceRedirect", () => {
   let game: Game;
 
   beforeEach(() => {
-    // Clean body, add a root container for supply_monster
-    document.body.innerHTML = '<div id="ebd-body"><div id="supply_monster"></div></div>';
+    // Clean body, add root containers
+    document.body.innerHTML = '<div id="ebd-body"><div id="map_wrapper"><div id="supply_monster"></div></div></div>';
     game = new Game(createMockBga());
     // Stub animationLa so onEnd callbacks don't blow up
     (game as any).animationLa = {

@@ -51,12 +51,12 @@ $hero-card-rows: 7;
 
 // Hero names mapped to hno for sprite filenames
 $hero-sprites: (
-  1: "bjorn_hero_cards.jpg",
-  2: "alva_hero_cards.jpg",
-  3: "embla_hero_cards.jpg",
-  4: "boldur_hero_cards.jpg",
-  // 5: "finkel_hero_cards.jpg",
-  // 6: "sindra_hero_cards.jpg",
+  1: "cards/bjorn_cards_hq.webp",
+  2: "cards/alva_cards_hq.webp",
+  3: "cards/embla_cards_hq.webp",
+  4: "cards/boldur_cards_hq.webp",
+  // 5: "cards/finkel_cards_hq.webp",
+  // 6: "cards/sindra_cards_hq.webp",
 );
 
 // Mixin: compute background-position for a 0-indexed slot in the hero sprite

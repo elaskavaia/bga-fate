@@ -45,53 +45,83 @@
   @include v.pile-counter(".die");
 }
 
-// Predefined display order for monster piles: trollkin, firehorde, dead
+// Monster supply piles positioned absolutely on map_wrapper by faction
+.map_wrapper > .pile_monster {
+  position: absolute;
+  z-index: 1;
+}
+
+// Trollkin: top-left, vertical stack (rank1 top, rank3 bottom)
 .pile_monster.monster_goblin {
-  order: 1;
+  top: 0%;
+  left: 11%;
 }
+
 .pile_monster.monster_brute {
-  order: 2;
+  top: 9%;
+  left: 7%;
 }
+
 .pile_monster.monster_troll {
-  order: 3;
+  top: 20%;
+  left: 2%;
 }
-.pile_monster.monster_sprite {
-  order: 4;
+// Fire Horde: bottom-left, vertical stack (rank3 top, rank1 bottom)
+.pile_monster.monster_jotunn {
+  bottom: 26%;
+  left: 0%;
 }
 .pile_monster.monster_elemental {
-  order: 5;
+  bottom: 16%;
+  left: 4%;
 }
-.pile_monster.monster_jotunn {
-  order: 6;
+.pile_monster.monster_sprite {
+  bottom: 6%;
+  left: 8%;
 }
+// Dead: right, vertical stack (rank1 top, rank3 bottom)
 .pile_monster.monster_imp {
-  order: 7;
+  top: 0%;
+  right: 24%;
 }
 .pile_monster.monster_skeleton {
-  order: 8;
+  top: 9%;
+  right: 19%;
 }
 .pile_monster.monster_draugr {
-  order: 9;
+  top: 20%;
+  right: 14%;
 }
 
-// Legends: show all individually (no stacking/counter), laid out in a row
-.pile_monster.monster_legend {
-  display: flex;
-  flex-direction: row;
-  gap: 4px;
-  order: 10;
-  counter-reset: none;
-
-  > .monster {
-    position: relative;
-    visibility: visible;
-  }
-
-  &::after {
-    display: none;
-  }
+// Legends: positioned individually on map_wrapper, 3x2 grid bottom-right
+.map_wrapper > .monster.legend {
+  position: absolute;
+  z-index: 1;
 }
-
+.map_wrapper > .monster_legend_1 {
+  bottom: 12%;
+  right: 14%;
+}
+.map_wrapper > .monster_legend_2 {
+  bottom: 12%;
+  right: 16%;
+}
+.map_wrapper > .monster_legend_3 {
+  bottom: 12%;
+  right: 11%;
+}
+.map_wrapper > .monster_legend_4 {
+  bottom: 2%;
+  right: 23%;
+}
+.map_wrapper > .monster_legend_5 {
+  bottom: 2%;
+  right: 17%;
+}
+.map_wrapper > .monster_legend_6 {
+  bottom: 2%;
+  right: 10%;
+}
 .timetrack {
   position: absolute;
   bottom: 5%;
@@ -172,19 +202,7 @@
 .map_wrapper {
   position: relative;
   aspect-ratio: 4096 / 3134;
-  width: 1514px;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url(img/EN_Game_Board.jpg);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    pointer-events: none;
-    z-index: 0;
-  }
+  width: 1360px;
 }
 
 // --- Players panels: container for all player tableaux ---
