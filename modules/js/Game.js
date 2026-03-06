@@ -2044,15 +2044,42 @@ class Game extends GameMachine {
             }
             case "monster": {
                 tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-                tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
-                tokenInfo.tooltip += this.ttSection(_("Strength"), tokenInfo.strength);
-                tokenInfo.tooltip += this.ttSection(_("Health"), tokenInfo.health);
+                if (tokenInfo.rank)
+                    tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
+                if (tokenInfo.strength)
+                    tokenInfo.tooltip += this.ttSection(_("Strength"), tokenInfo.strength);
+                if (tokenInfo.health)
+                    tokenInfo.tooltip += this.ttSection(_("Health"), tokenInfo.health);
                 if (tokenInfo.move)
                     tokenInfo.tooltip += this.ttSection(_("Move"), tokenInfo.move);
                 if (tokenInfo.armor)
                     tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
                 if (tokenInfo.xp)
                     tokenInfo.tooltip += this.ttSection(_("XP"), tokenInfo.xp);
+                // Flavor text: legends and factions
+                const legendFlavor = {
+                    "1": _("A chilling sight to behold, Hel brings the dead to the underworld at death. At least those who died of old age and sickness. Let's hope that's not you..."),
+                    "2": _("This unsettling figure may be blind, but still sees things of the past and future, acting as an advisor to the Asgaard gods. In this case Loki and his hordes."),
+                    "3": _("The strength of this colossal beast is matched only by his lack of intellect. He has heard the singing from the mead hall and can't bear it any longer. He is hungry..."),
+                    "4": _("The fire giant with his flaming sword is supposed to bring about Ragnarok, the apocalypse of the cosmos – if he makes it that long."),
+                    "5": _("This brute leader is fearless and collects battle scars as trophies of his invincibility. Naturally, his presence infuses the entire trollkin clan with confidence."),
+                    "6": _("While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches."),
+                };
+                const factionFlavor = {
+                    trollkin: _("The Trollkin are a savage clan of goblins, brutes, and trolls that roam the forests and valleys."),
+                    firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
+                    dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr."),
+                };
+                if (subType === "legend") {
+                    const legendNum = getPart(tokenId, 2);
+                    // Add parent prefix classes for CSS sprite targeting (create=1 tokens don't get these automatically)
+                    tokenInfo.imageTypes += ` monster_legend monster_legend_${legendNum}`;
+                    if (legendFlavor[legendNum])
+                        tokenInfo.tooltip += this.iiSection(legendFlavor[legendNum]);
+                }
+                else if (factionFlavor[tokenInfo.faction]) {
+                    tokenInfo.tooltip += this.iiSection(factionFlavor[tokenInfo.faction]);
+                }
                 break;
             }
             case "house": {

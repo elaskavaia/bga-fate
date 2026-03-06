@@ -253,7 +253,7 @@ final class MonsterMovementTest extends TestCase {
     }
 
     public function testLegendEnteringGrimheimDestroys3Houses(): void {
-        $this->game->tokens->moveToken("monster_legend_grendel", "hex_11_8"); // dist 1 from Grimheim
+        $this->game->tokens->moveToken("monster_legend_3_1", "hex_11_8"); // dist 1 from Grimheim
 
         // Count houses before
         $housesBefore = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
@@ -265,7 +265,7 @@ final class MonsterMovementTest extends TestCase {
         $op->resolve();
 
         // Legend should be removed
-        $loc = $this->game->tokens->getTokenLocation("monster_legend_grendel");
+        $loc = $this->game->tokens->getTokenLocation("monster_legend_3_1");
         $this->assertEquals("supply_monster", $loc);
 
         // Three fewer houses

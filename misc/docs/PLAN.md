@@ -249,8 +249,10 @@ See CLAUDE.md for project overview
 ### Server
 [x] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
 [ ] Hero card effect applies during relevant actions
-[ ] Equipment: attack strength bonus, once-per-turn activation
-[ ] Ability: once-per-turn activation, costs mana
+[x] Equipment: attack strength bonus
+[ ] Equipment: once-per-turn activation
+[ ] Ability: once-per-turn activation
+[ ] Ability: costs mana
 [ ] Focus action: actually adds mana to ability/equipment cards
 
 ### Client

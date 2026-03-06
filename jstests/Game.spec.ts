@@ -92,3 +92,63 @@ describe("Game.getPlaceRedirect", () => {
     expect(result.onEnd).to.be.undefined;
   });
 });
+
+describe("Game.updateTokenDisplayInfo", () => {
+  let game: Game;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="ebd-body"></div>';
+    game = new Game(createMockBga());
+    // Set up minimal token_types material for monsters
+    (game as any).gamedatas = {
+      tokens: {},
+      token_types: {
+        monster: { name: "Monster", type: "monster", create: 2 },
+        monster_goblin: { name: "Goblin", type: "monster trollkin rank1", faction: "trollkin", rank: 1, strength: 1, health: 2, xp: 1 },
+        monster_legend: { name: "Legend", type: "monster legend", create: 1 },
+        monster_legend_1: { name: "Queen of the Dead", type: "monster legend", faction: "dead" },
+        monster_legend_1_1: { name: "Queen of the Dead (I)", type: "monster legend", faction: "dead", create: 1, location: "supply_monster", strength: 7, health: 11, xp: 6 },
+        monster_legend_3: { name: "Grendel", type: "monster legend", faction: "trollkin" },
+        monster_legend_3_1: { name: "Grendel (I)", type: "monster legend", faction: "trollkin", create: 1, location: "supply_monster", strength: 7, health: 12, xp: 6 },
+        trollkin: { name: "Trollkin" },
+        firehorde: { name: "Fire Horde" },
+        dead: { name: "The Dead" },
+      },
+    };
+  });
+
+  it("should show legend flavor text for legend monsters", () => {
+    const info = game.getTokenDisplayInfo("monster_legend_1_1");
+    expect(info.tooltip).to.include("chilling sight to behold");
+  });
+
+  it("should show correct flavor text per legend number", () => {
+    const info = game.getTokenDisplayInfo("monster_legend_3_1");
+    expect(info.tooltip).to.include("colossal beast");
+    expect(info.tooltip).to.not.include("chilling sight");
+  });
+
+  it("should show faction flavor text for regular monsters", () => {
+    const info = game.getTokenDisplayInfo("monster_goblin_1");
+    expect(info.tooltip).to.include("Trollkin");
+    expect(info.tooltip).to.include("savage clan");
+  });
+
+  it("should show faction name in tooltip", () => {
+    const info = game.getTokenDisplayInfo("monster_legend_1_1");
+    expect(info.tooltip).to.include("The Dead");
+  });
+
+  it("should show stats for regular monsters", () => {
+    const info = game.getTokenDisplayInfo("monster_goblin_1");
+    expect(info.tooltip).to.include("Strength");
+    expect(info.tooltip).to.include("Health");
+  });
+
+  it("should show stats for legends with stats", () => {
+    const info = game.getTokenDisplayInfo("monster_legend_1_1");
+    expect(info.tooltip).to.include("Strength");
+    expect(info.tooltip).to.include("Health");
+    expect(info.tooltip).to.not.include("Rank");
+  });
+});

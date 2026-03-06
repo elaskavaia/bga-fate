@@ -713,6 +713,17 @@ class Game extends Base {
     //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     // }
 
+    function debug_legends() {
+        // Place all 6 legend miniatures on the map for visual testing
+        $this->tokens->dbSetTokenLocation("monster_legend_1_1", "hex_7_7");  // Queen of the Dead (I)
+        $this->tokens->dbSetTokenLocation("monster_legend_2_1", "hex_5_5");  // Seer of Odin (I)
+        $this->tokens->dbSetTokenLocation("monster_legend_3_1", "hex_12_6"); // Grendel (I)
+        $this->tokens->dbSetTokenLocation("monster_legend_4_1", "hex_8_3");  // Surt (I)
+        $this->tokens->dbSetTokenLocation("monster_legend_5_1", "hex_4_9");  // Hrungbald (I)
+        $this->tokens->dbSetTokenLocation("monster_legend_6_1", "hex_13_7"); // Nidhuggr (I)
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     // function debug_houses() {
     //     // Move a couple houses out of Grimheim to test removal visuals
     //     $this->tokens->dbSetTokenLocation("house_0", "hex_8_9");

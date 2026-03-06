@@ -59,7 +59,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
      - Whether it is player-specific (keyed by color) or global
      - Possible locations of these tokens (e.g. `supply`, `hex_X_Y`, `hand_<color>`, `tableau_<color>`)
      - Possible states and what they mean
-     - Whether it exists in the DB tokens table as a key, only as a location
+     - Whether it exists in the DB tokens table as a key, or only as a location
 
 **2. Material (CSV + genmat)**
    - Add or update the element type/supertype in the appropriate CSV file in misc/ (e.g. `token_material.csv`, `card_material.csv`)

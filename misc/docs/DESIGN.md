@@ -12,6 +12,7 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `card_equip_<hero>_<n>` — Equipment card (e.g. `card_equip_1_7`)
 - `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) - last <i> some even cards are duplicated, so it tell them apart
 - `marker_<color>_<n>` — Player marker (e.g. `marker_ff0000_1`)
+- `monster_legend_<n>_<level>` — Legend monster tile. 6 legends numbered 1–6 (1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr). `_1` = yellow (Level I), `_2` = red (Level II) — same two-sided pattern as ability cards. `_1` starts in `supply_monster`, `_2` starts in `limbo`. When a red legend card is drawn, swap `_1` out and place `_2` on the map. Stats in `monster_material.csv`. Legends destroy 3 town pieces on entering Grimheim and can swap places with blocking monsters during movement.
 - `crystal_green_<n>` — Mana crystal (individual tokens on cards)
 - `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
 - `crystal_red_<n>` — Damage crystal (individual tokens on cards and things)
@@ -57,9 +58,7 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `or` (player) — Player picks one branch from multiple choices
 - `order` (player) — Player picks execution order for a set of ops
 - `seq` (auto) — Runs sub-operations in sequence
-- `gain` (auto) — Awards resources/tokens to a player
-- `pay` (auto) — Spends resources from a player
-- `paygain` (auto) — Trade: pay one resource type, gain another
+
 
 ### Game Operations
 

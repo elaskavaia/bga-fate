@@ -4,7 +4,7 @@
 .hex > .hero,
 .hex > .monster {
   position: absolute;
-  top: 50%;
+  top: 45%;
   left: 50%;
   translate: -50% -50%;
   height: 100%;
@@ -113,6 +113,34 @@
 .monster.monster_sprite {
   background-position: 100% 100%;
 }
+
+// Legend miniatures (sprite sheet: 6 columns x 1 row)
+// Both _1 (yellow) and _2 (red) variants share the same miniature sprite
+.monster.monster_legend {
+  background-image: url(img/Legends.png);
+  background-size: 600% auto;
+}
+
+// Sprite order (L→R): Queen, Seer, Hrungbald, Nidhuggr, Surt, Grendel
+// Legend numbering follows card order: 1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr
+.monster.monster_legend_1 {
+  background-position: 0% 0%;
+} // Queen → slot 1
+.monster.monster_legend_2 {
+  background-position: 20% 0%;
+} // Seer → slot 2
+.monster.monster_legend_3 {
+  background-position: 100% 0%;
+} // Grendel → slot 6
+.monster.monster_legend_4 {
+  background-position: 80% 0%;
+} // Surt → slot 5
+.monster.monster_legend_5 {
+  background-position: 40% 0%;
+} // Hrungbald → slot 3
+.monster.monster_legend_6 {
+  background-position: 60% 0%;
+} // Nidhuggr → slot 4
 
 // House / town pieces
 .house {

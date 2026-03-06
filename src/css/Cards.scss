@@ -4,6 +4,7 @@
 // Card styles
 
 .card {
+  position: relative;
   height: v.$cardHeight;
   aspect-ratio: calc(v.$ratioW / v.$ratioH);
   //border: 1px solid black;
@@ -122,6 +123,16 @@ $hero-sprites: (
 #deck_monster_red {
   background-color: #a03030;
   border-color: #7a2020;
+}
+
+// Mana bucket: green badge, bottom-right corner of card
+.bucket_crystal_green {
+  bottom: 4%;
+  right: 4%;
+
+  &[data-count]:not([data-count="0"])::after {
+    background-color: #43a047;
+  }
 }
 
 // Display area for monster cards during reinforcement
