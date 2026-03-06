@@ -204,19 +204,26 @@ export class Game extends GameMachine {
             if (oldBucketId) this.updateBucketCount(oldBucketId);
             this.updateBucketCount(bucketId);
             this.animationLa.pulse(bucketId);
+            this.updateTooltip(loc, undefined, { force: true });
           };
         } else {
           result.onEnd = () => {
-            if (oldBucketId) this.updateBucketCount(oldBucketId);
+            if (oldBucketId) {
+              this.updateBucketCount(oldBucketId);
+              const oldCharId = oldBucketId.replace(/^bucket_crystal_\w+_/, "");
+              if ($(oldCharId)) this.updateTooltip(oldCharId, undefined, { force: true });
+            }
             this.updateBucketCount(bucketId);
           };
         }
       } else if (oldBucketId) {
         // Crystal returning to supply — suppress slide, just pulse the old bucket
+        const oldCharId = oldBucketId.replace(/^bucket_crystal_\w+_/, "");
         result.noa = true;
         result.onEnd = () => {
           this.updateBucketCount(oldBucketId);
           this.animationLa.pulse(oldBucketId);
+          if ($(oldCharId)) this.updateTooltip(oldCharId, undefined, { force: true });
         };
       }
     } else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
@@ -321,6 +328,7 @@ export class Game extends GameMachine {
         const q = getPart(tokenId, 1);
         const r = getPart(tokenId, 2);
         if (!r) return;
+        tokenInfo.imageTypes = "_nottimage";
         //             "hex_9_1" => [
         //         "location" => "map_hexes",
         //         "x" => 9,
@@ -344,6 +352,57 @@ export class Game extends GameMachine {
         if (tokenInfo.c) tokenInfo.tooltip += this.ttSection(_("Location Color"), areacolor);
       }
     }
+  }
+
+  /** Get crystal damage/gold/mana info for a character from its bucket children. */
+  getCrystalInfo(tokenId: string): string {
+    let info = "";
+    const dmgBucket = $(`bucket_crystal_red_${tokenId}`);
+    if (dmgBucket) {
+      const count = parseInt(dmgBucket.dataset.count ?? "0");
+      if (count > 0) info += this.ttSection(_("Damage"), String(count));
+    }
+    const manaBucket = $(`bucket_crystal_green_${tokenId}`);
+    if (manaBucket) {
+      const count = parseInt(manaBucket.dataset.count ?? "0");
+      if (count > 0) info += this.ttSection(_("Mana"), String(count));
+    }
+    const goldBucket = $(`bucket_crystal_yellow_${tokenId}`);
+    if (goldBucket) {
+      const count = parseInt(goldBucket.dataset.count ?? "0");
+      if (count > 0) info += this.ttSection(_("Gold"), String(count));
+    }
+    return info;
+  }
+
+  handleStackedTooltips(attachNode: HTMLElement) {
+    // Case 1: A hex that has children — remove hex tooltip, children own it
+    if (attachNode.classList.contains("hex")) {
+      if (attachNode.childElementCount > 0) {
+        this.removeTooltip(attachNode.id);
+      }
+      return;
+    }
+
+    // Case 2: A token (hero/monster/house) on a hex — combine hex + token tooltips on the token
+    const parentId = attachNode.parentElement?.id;
+    if (!parentId?.startsWith("hex")) return;
+
+    // Remove hex tooltip — the token on top will carry everything
+    this.removeTooltip(parentId);
+
+    // Rebuild token tooltip with crystal info injected into its tooltip text
+    const tokenToken = attachNode.dataset.tt ?? attachNode.id;
+    const tokenInfo = this.getTokenDisplayInfo(tokenToken, true);
+    const crystalInfo = this.getCrystalInfo(attachNode.id);
+    if (crystalInfo) tokenInfo.tooltip = (tokenInfo.tooltip ?? "") + crystalInfo;
+    let combined = this.getTooltipHtmlForTokenInfo(tokenInfo);
+    if (!combined) return;
+
+    const hexHtml = this.getTooltipHtmlForToken(parentId);
+    if (hexHtml) combined += hexHtml;
+
+    this.game.addTooltipHtml(attachNode.id, combined, this.game.defaultTooltipDelay);
   }
 
   setupNotifications() {

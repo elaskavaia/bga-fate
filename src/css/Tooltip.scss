@@ -56,6 +56,13 @@
   padding-left: 0em;
 }
 
+// Combined tooltips: when multiple tooltipcontainers are stacked (e.g. hero + hex)
+.tundra .dijitTooltipContainer {
+  .tooltipcontainer + .tooltipcontainer {
+    border-top: 1px solid #ccc;
+  }
+}
+
 // Hero cards in tooltips: 1.5x bigger for readability
 .tooltipimage.hcard {
   height: 300px;

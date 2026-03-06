@@ -1343,6 +1343,10 @@
   padding-left: 0em;
 }
 
+.tundra .dijitTooltipContainer .tooltipcontainer + .tooltipcontainer {
+  border-top: 1px solid #ccc;
+}
+
 .tooltipimage.hcard {
   height: 300px;
 }
