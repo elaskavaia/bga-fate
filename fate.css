@@ -1154,12 +1154,16 @@
   bottom: 5%;
   right: 8%;
   height: 40%;
-  width: 3%;
+  width: 2.5%;
+  background-image: url(img/timeline.webp);
+  background-position: 0 100%;
+  background-size: 225% auto;
 }
 
 .timetrack_2 {
   height: 53%;
   right: 4.5%;
+  background-position: 100% 0%;
 }
 
 #mainarea {
