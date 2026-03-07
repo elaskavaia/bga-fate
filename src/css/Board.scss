@@ -226,6 +226,18 @@
   max-width: 520px;
 }
 
+// --- Hand: current player's private hand of event cards ---
+.hand {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: v.$cardHeight;
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 // --- Card area: played cards displayed next to the player board ---
 .cardsarea {
   display: flex;

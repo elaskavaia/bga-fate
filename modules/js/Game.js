@@ -1887,6 +1887,11 @@ class Game extends GameMachine {
         <div id="cardsarea_${color}" class="cardsarea"></div>
         </div>`, "players_panels");
         });
+        // Create hand container for current player only (not spectators)
+        if (!this.bga.players.isCurrentPlayerSpectator()) {
+            const myColor = this.player_color;
+            placeHtml(`<div id="hand_${myColor}" class="hand"></div>`, `tableau_${myColor}`, "afterbegin");
+        }
         this.setupGame(gamedatas);
         this.setupLayoutControls();
         this.setupNotifications();

@@ -1244,6 +1244,17 @@
   max-width: 520px;
 }
 
+.hand {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 200px;
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .cardsarea {
   display: flex;
   flex-direction: row;
