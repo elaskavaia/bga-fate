@@ -149,7 +149,7 @@ class Op_reinforcement extends Operation {
         }
 
         foreach ($placements as $monsterId => $hex) {
-            $this->game->hexMap->moveCharacter($monsterId, $hex);
+            $this->game->getMonster($monsterId)->moveTo($hex);
         }
         return true;
     }

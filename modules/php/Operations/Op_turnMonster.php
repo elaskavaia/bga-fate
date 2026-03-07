@@ -173,7 +173,7 @@ class Op_turnMonster extends Operation {
             return null;
         }
 
-        $this->game->hexMap->moveCharacter($monsterId, $nextHex, $message);
+        $this->game->getMonster($monsterId)->moveTo($nextHex, $message);
         return $nextHex;
     }
 
@@ -190,7 +190,7 @@ class Op_turnMonster extends Operation {
         $this->game->effect_destroyHouses($destroyCount, $monsterId, clienttranslate('${token_name} tears down a house!'));
 
         // Remove monster from the map
-        $this->game->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name} goes home happy'));
+        $this->game->getMonster($monsterId)->moveTo("supply_monster", clienttranslate('${token_name} goes home happy'));
     }
 
     /**
@@ -203,8 +203,8 @@ class Op_turnMonster extends Operation {
             if ($hex === null) {
                 continue;
             }
-            $range = $this->game->getCharacterAttackRange($m["id"]);
-            if ($this->game->hexMap->isCharacterTypeInRange($hex, $range, "hero")) {
+            $monster = $this->game->getMonster($m["id"]);
+            if ($this->game->hexMap->isCharacterTypeInRange($hex, $monster->getAttackRange(), "hero")) {
                 $this->queue("monsterAttack", null, ["char" => $m["id"]]);
             }
         }

@@ -28,13 +28,14 @@ class Op_monsterAttack extends Operation {
         $this->game->systemAssert("Missing monster ID in monsterAttack", $monsterId);
 
         // Check monster is still alive (on the map)
-        $monsterHex = $this->game->hexMap->getCharacterHex($monsterId);
+        $monster = $this->game->getMonster($monsterId);
+        $monsterHex = $monster->getHex();
         if ($monsterHex === null) {
             return; // Monster was killed or removed
         }
 
         // Find heroes in attack range
-        $heroesInRange = $this->getHeroesInRange($monsterId, $monsterHex);
+        $heroesInRange = $this->getHeroesInRange($monster, $monsterHex);
         if (empty($heroesInRange)) {
             return; // No heroes to attack
         }
@@ -51,7 +52,8 @@ class Op_monsterAttack extends Operation {
 
         // Check if hero is knocked out
         if ($hits > 0) {
-            $this->game->effect_applyDamageHero($heroId, $hits);
+            $hero = $this->game->getHeroById($heroId);
+            $hero->applyDamageEffects($hits);
         }
     }
 
@@ -59,9 +61,8 @@ class Op_monsterAttack extends Operation {
      * Find all heroes within attack range of the monster.
      * @return string[] array of hero token IDs (e.g. ["hero_1", "hero_2"])
      */
-    private function getHeroesInRange(string $monsterId, string $monsterHex): array {
-        $range = $this->game->getCharacterAttackRange($monsterId);
-        $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $range);
+    private function getHeroesInRange(\Bga\Games\Fate\Model\Monster $monster, string $monsterHex): array {
+        $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $monster->getAttackRange());
         $heroes = [];
         foreach ($hexesInRange as $hex) {
             $heroId = $this->game->hexMap->isOccupiedByCharacterType($hex, "hero");
@@ -84,11 +85,9 @@ class Op_monsterAttack extends Operation {
         $weakest = null;
         $lowestEffectiveHp = PHP_INT_MAX;
         foreach ($heroes as $heroId) {
-            $owner = $this->game->getHeroOwner($heroId);
-            $heroCardKey = $this->game->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
-            $health = (int) $this->game->getRulesFor($heroCardKey, "health", 9);
+            $hero = $this->game->getHeroById($heroId);
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-            $effectiveHp = $health - $damage;
+            $effectiveHp = $hero->getMaxHealth() - $damage;
             if ($effectiveHp < $lowestEffectiveHp) {
                 $lowestEffectiveHp = $effectiveHp;
                 $weakest = $heroId;

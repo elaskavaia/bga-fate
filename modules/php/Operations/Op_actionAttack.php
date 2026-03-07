@@ -33,11 +33,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionAttack extends Operation {
     function getPossibleMoves(): array {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $currentHex = $this->game->tokens->getTokenLocation($heroId);
-        $range = $this->game->getCharacterAttackRange($heroId);
-        $hexesInRange = $this->game->hexMap->getHexesInRange($currentHex, $range);
+        $hero = $this->game->getHero($this->getOwner());
+        $currentHex = $this->game->tokens->getTokenLocation($hero->getId());
+        $hexesInRange = $this->game->hexMap->getHexesInRange($currentHex, $hero->getAttackRange());
         $moves = [];
         foreach ($hexesInRange as $hexId) {
             if ($this->game->hexMap->isOccupiedByCharacterType($hexId, "monster") !== null) {
@@ -65,12 +63,16 @@ class Op_actionAttack extends Operation {
 
         // Calculate attack strength
         // TODO: apply "this attack action" card effects (bonus strength, rerolls, etc.)
-        $heroId = $this->game->getHeroTokenId($owner);
-        $strength = $this->game->getHeroAttackStrength($heroId);
+        $hero = $this->game->getHero($owner);
+        $strength = $hero->getAttackStrength();
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
-        $hits = $this->game->rollAttackDice($heroId, $monsterId, $strength);
+        $hits = $this->game->rollAttackDice($hero->getId(), $monsterId, $strength);
 
         // Apply damage — dice stay on display_battle so the player can see them
-        $this->game->effect_applyDamageMonster($monsterId, $hits, $owner);
+        $monster = $this->game->getMonster($monsterId);
+        $killed = $monster->applyDamageEffects($hits, $hero->getId());
+        if ($killed) {
+            $hero->gainXp($monster->getXpReward());
+        }
     }
 }

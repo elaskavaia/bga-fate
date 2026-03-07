@@ -45,6 +45,32 @@ Shortening of words:
 
 
 
+## Model Classes (`modules/php/Model/`)
+
+Domain model objects for game characters. Created via factory methods on `Game`:
+- `$game->getHero($owner)` — Hero by player color
+- `$game->getHeroById($heroId)` — Hero by token id (e.g. `"hero_1"`)
+- `$game->getMonster($monsterId)` — Monster by token id
+- `$game->getCharacter($id)` — Returns Hero or Monster based on id prefix
+
+### Character (base)
+- `getId()`, `getHex()`, `getAttackRange()` (default 1), `moveCrystals()`, `getRulesFor()`
+
+### Hero extends Character
+- `getOwner()` — player color
+- `getAttackStrength()` — sum of hero card + equipment + ability strength on tableau
+- `getMaxHealth()` — from hero card on tableau
+- `getAttackRange()` — max attack_range from equipment cards (default 1)
+- `gainXp($amount)` — move yellow crystals from supply to tableau
+- `applyDamageEffects($amount)` — apply damage; if knocked out: reset to 5 damage, move to Grimheim, destroy 2 houses
+
+### Monster extends Character
+- `getFaction()`, `getHealth()`, `getXpReward()`
+- `getAttackRange()` — firehorde=2, others=1
+- `applyDamageEffects($amount, $attackerId)` — apply damage; if killed: remove crystals, move to supply, log kill with attacker name. Caller handles XP award separately.
+
+---
+
 ## Operation Catalog
 
 Operations are the building blocks of game flow. They are queued in the state machine and dispatched in order.
@@ -66,11 +92,11 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `turnconf` (player) — Confirm end of turn (undo checkpoint) — *stub*
 - `turnEnd` (auto) — Reset turn state, queue next player or monsterTurn — *implemented*
 - `turnMonster` (auto) — Advance time track; check win/loss; queue next round — *implemented*
-- `actionMove` (main) — Hero moves up to 3 hexes — *stub*
-- `actionAttack` (main) — Hero attacks adjacent monster — *notimpl*
+- `actionMove` (main) — Hero moves up to 3 hexes — *implemented*
+- `actionAttack` (main) — Hero attacks monster within range — *implemented*
 - `actionPrepare` (main) — Draw 1 event card — *notimpl*
-- `actionFocus` (main) — Add 1 mana to a card — *notimpl*
-- `actionMend` (main) — Remove 2 damage from hero — *notimpl*
+- `actionFocus` (main) — Add 1 mana to a card — *implemented*
+- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim) — *implemented*
 - `actionPractice` (main) — Gain 1 XP (yellow crystal) — *implemented*
 - `useEquipment` (free) — Activate an equipment card — *notimpl*
 - `useAbility` (free) — Activate an ability card (costs mana) — *notimpl*

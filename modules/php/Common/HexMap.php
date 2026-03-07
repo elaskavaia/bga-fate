@@ -223,14 +223,6 @@ class HexMap {
         return null;
     }
 
-    function moveCharacter(string $charId, string $location, string $message = "*", array $args = []) {
-        if ($message == "*") {
-            $message = clienttranslate('${token_name} moves into ${place_name} ${reason}');
-        }
-        $this->game->tokens->dbSetTokenLocation($charId, $location, 0, $message, $args);
-        $this->moveCharacterOnMap($charId, $location);
-    }
-
     function moveStuff(string $tokenId, string $location, string $message = "*") {
         $this->game->tokens->dbSetTokenLocation($tokenId, $location, 0, $message);
         $this->moveStuffOnMap($tokenId, $location);
@@ -241,7 +233,7 @@ class HexMap {
      * @param string $tokenId The token to move
      * @param string|null $hex Target hex, or null to remove from map entirely
      */
-    private function moveCharacterOnMap(string $tokenId, ?string $hex): void {
+    function moveCharacterOnMap(string $tokenId, ?string $hex): void {
         $fromHex = $this->getCharacterHex($tokenId);
         // Remove from current hex
         if ($fromHex !== null) {

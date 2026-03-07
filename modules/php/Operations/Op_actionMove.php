@@ -39,15 +39,15 @@ class Op_actionMove extends Operation {
     }
     function resolve(): void {
         $target = $this->getCheckedArg();
-        $heroId = $this->game->getHeroTokenId($this->getOwner());
+        $hero = $this->game->getHero($this->getOwner());
 
         // When entering Grimheim, place hero at their home hex (from material)
         if ($this->game->hexMap->isInGrimheim($target)) {
-            $target = $this->game->getRulesFor($heroId, "location", $target);
+            $target = $hero->getRulesFor("location", $target);
         }
 
         // TODO: do set location to individual hexes along the path to animate
-        $this->game->hexMap->moveCharacter($heroId, $target);
+        $hero->moveTo($target);
     }
 
     public function getPrompt() {

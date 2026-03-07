@@ -28,6 +28,9 @@ use Bga\Games\Fate\Db\DbTokens;
 use Bga\Games\Fate\OpCommon\AiOperation;
 use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\OpCommon\OpMachine;
+use Bga\Games\Fate\Model\Character;
+use Bga\Games\Fate\Model\Hero;
+use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\States\GameDispatch;
 
 class Game extends Base {
@@ -200,17 +203,18 @@ class Game extends Base {
             if ($heroNo === null) {
                 continue;
             }
-            $heroId = "hero_$heroNo";
+            $hero = $this->getHeroById("hero_$heroNo");
+            $heroId = $hero->getId();
             $result["counters"]["counter_strength_$heroId"] = [
-                "value" => $this->getHeroAttackStrength($heroId),
+                "value" => $hero->getAttackStrength(),
                 "name" => "counter_strength_$heroId",
             ];
             $result["counters"]["counter_health_$heroId"] = [
-                "value" => $this->getHeroMaxHealth($heroId),
+                "value" => $hero->getMaxHealth(),
                 "name" => "counter_health_$heroId",
             ];
             $result["counters"]["counter_range_$heroId"] = [
-                "value" => $this->getCharacterAttackRange($heroId),
+                "value" => $hero->getAttackRange(),
                 "name" => "counter_range_$heroId",
             ];
         }
@@ -303,70 +307,6 @@ class Game extends Base {
     }
 
     /**
-     * Returns the total attack strength for a hero: base hero card + equipment + abilities on tableau.
-     * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
-     */
-    function getHeroAttackStrength(string $heroId): int {
-        $owner = $this->getHeroOwner($heroId);
-        $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
-        $total = 0;
-        foreach ($cards as $card) {
-            $cardId = $card["key"];
-            $strength = $this->material->getRulesFor($cardId, "strength", "");
-            if ($strength === "" || $strength === null) {
-                continue;
-            }
-            $strength = (string) $strength;
-            if (str_starts_with($strength, "+")) {
-                $total += (int) substr($strength, 1);
-            } else {
-                $total += (int) $strength;
-            }
-        }
-        return max($total, 0);
-    }
-
-    /**
-     * Returns the max health for a hero based on hero card on tableau.
-     */
-    function getHeroMaxHealth(string $heroId): int {
-        $owner = $this->getHeroOwner($heroId);
-        $heroCardKey = $this->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
-        return (int) $this->material->getRulesFor($heroCardKey, "health", 9);
-    }
-
-    /**
-     * Returns the attack range for any character (hero or monster). Default is 1.
-     */
-    function getCharacterAttackRange(string $characterId): int {
-        if (str_starts_with($characterId, "hero")) {
-            return $this->getHeroAttackRange($characterId);
-        }
-        // Monster: Fire Horde faction has range 2
-        $faction = $this->getRulesFor($characterId, "faction", "");
-        if ($faction === "firehorde") {
-            return 2;
-        }
-        return 1;
-    }
-
-    /**
-     * Returns the attack range for any hero Default is 1.
-     */
-    function getHeroAttackRange(string $characterId): int {
-        $owner = $this->getHeroOwner($characterId);
-        $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
-        $maxRange = 1;
-        foreach ($cards as $card => $info) {
-            $range = (int) $this->material->getRulesFor($card, "attack_range", 0);
-            if ($range > $maxRange) {
-                $maxRange = $range;
-            }
-        }
-        return $maxRange;
-    }
-
-    /**
      * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
      * Used by both hero attacks and monster attacks.
      * @return int number of hits
@@ -419,106 +359,6 @@ class Game extends Base {
             // TODO: handle armor (draugr — reduce hits)
         }
         return $hits;
-    }
-
-    /**
-     * Apply damage to a monster:
-     * If total damage >= monster health, the monster is killed (moved to supply, XP awarded).
-     * @return bool true if the monster was killed
-     */
-    function effect_applyDamageMonster(string $monsterId, int $amount, string $owner): bool {
-        if ($amount <= 0) {
-            $this->notifyMessage(clienttranslate('${token_name} takes no damage'), ["token_name" => $monsterId]);
-            return false;
-        }
-
-        // Count total red crystals on this monster
-        $crystals = $this->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId);
-        $totalDamage = count($crystals);
-        $health = (int) $this->material->getRulesFor($monsterId, "health", 0);
-
-        $this->notifyMessage(clienttranslate('${token_name} takes ${amount} damage (${totalDamage}/${health})'), [
-            "token_name" => $monsterId,
-            "amount" => $amount,
-            "totalDamage" => $totalDamage,
-            "health" => $health,
-        ]);
-
-        // Check if monster is killed
-        if ($totalDamage >= $health) {
-            // Monster killed — award XP
-            $xp = (int) $this->material->getRulesFor($monsterId, "xp", 0);
-            $this->effect_gainXp($owner, $xp);
-            // Remove red crystals from monster back to supply
-            $this->effect_moveCrystals($monsterId, "red", -$totalDamage, $monsterId, ["message" => ""]);
-            // Remove monster from map
-            $heroId = $this->getHeroTokenId($owner);
-            $this->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name2} kills ${token_name}'), [
-                "token_name2" => $heroId,
-            ]);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Award XP (yellow crystals) to a hero by moving them from supply to their tableau.
-     */
-    function effect_gainXp(string $owner, int $amount): void {
-        if ($amount <= 0) {
-            return;
-        }
-        $heroId = $this->getHeroTokenId($owner);
-        $this->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner");
-    }
-
-    /**
-     * Apply damage to a hero after monster attack.
-     * If total damage >= hero health, hero is knocked out:
-     * - Moved to Grimheim, damage set to 5, 2 town pieces destroyed.
-     * @return bool true if the hero was knocked out
-     */
-    function effect_applyDamageHero(string $heroId, int $amount): bool {
-        if ($amount <= 0) {
-            return false;
-        }
-        $owner = $this->getHeroOwner($heroId);
-        // Count total red crystals on hero
-        $totalDamage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-        $heroCardKey = $this->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
-        $health = (int) $this->material->getRulesFor($heroCardKey, "health", 9);
-
-        $this->notifyMessage(clienttranslate('${char_name} takes ${amount} damage (${totalDamage}/${health})'), [
-            "char_name" => $heroId,
-            "amount" => $amount,
-            "totalDamage" => $totalDamage,
-            "health" => $health,
-        ]);
-
-        if ($totalDamage >= $health) {
-            // Adjust damage to exactly 5: remove excess or add missing
-            $diff = $totalDamage - 5;
-            if ($diff !== 0) {
-                $this->effect_moveCrystals($heroId, "red", -$diff, $heroId, ["message" => ""]);
-            }
-
-            // Move hero to their starting hex in Grimheim
-            $startHex = $this->getRulesFor($heroId, "location");
-            $this->hexMap->moveCharacter(
-                $heroId,
-                $startHex,
-                clienttranslate('${token_name} is knocked out and carried back to Grimheim. By their mother. She\'s not happy.')
-            );
-
-            // "Some villagers panic and flee, leaving their houses undefended"
-            $this->effect_destroyHouses(2, $heroId, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
-
-            if ($this->isEndOfGame()) {
-                $this->handleEndOfGame();
-            }
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -586,6 +426,29 @@ class Game extends Base {
         }
         $this->systemAssert("No owner found for hero $heroId");
         return ""; // unreachable
+    }
+
+    /** Factory: create a Hero model for a player color. */
+    function getHero(string $owner): Hero {
+        return new Hero($this, $this->getHeroTokenId($owner));
+    }
+
+    /** Factory: create a Hero model from a hero token id. */
+    function getHeroById(string $heroId): Hero {
+        return new Hero($this, $heroId);
+    }
+
+    /** Factory: create a Monster model from a monster token id. */
+    function getMonster(string $monsterId): Monster {
+        return new Monster($this, $monsterId);
+    }
+
+    /** Factory: create a Character model (Hero or Monster) from any character token id. */
+    function getCharacter(string $characterId): Character {
+        if (str_starts_with($characterId, "hero")) {
+            return $this->getHeroById($characterId);
+        }
+        return $this->getMonster($characterId);
     }
 
     function getRulesFor($token_id, $field = "r", $default = "") {
