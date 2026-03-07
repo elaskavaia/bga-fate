@@ -60,7 +60,7 @@ class Op_monsterAttack extends Operation {
      * @return string[] array of hero token IDs (e.g. ["hero_1", "hero_2"])
      */
     private function getHeroesInRange(string $monsterId, string $monsterHex): array {
-        $range = $this->game->getAttackRange($monsterId);
+        $range = $this->game->getCharacterAttackRange($monsterId);
         $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $range);
         $heroes = [];
         foreach ($hexesInRange as $hex) {

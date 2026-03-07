@@ -187,11 +187,7 @@ class Op_turnMonster extends Operation {
         $isLegend = str_contains($monsterId, "legend");
         $destroyCount = $isLegend ? 3 : 1;
 
-        $this->game->effect_destroyHouses(
-            $destroyCount,
-            $monsterId,
-            clienttranslate('${token_name} tears down a house!')
-        );
+        $this->game->effect_destroyHouses($destroyCount, $monsterId, clienttranslate('${token_name} tears down a house!'));
 
         // Remove monster from the map
         $this->game->hexMap->moveCharacter($monsterId, "supply_monster", clienttranslate('${token_name} goes home happy'));
@@ -207,7 +203,7 @@ class Op_turnMonster extends Operation {
             if ($hex === null) {
                 continue;
             }
-            $range = $this->game->getAttackRange($m["id"]);
+            $range = $this->game->getCharacterAttackRange($m["id"]);
             if ($this->game->hexMap->isCharacterTypeInRange($hex, $range, "hero")) {
                 $this->queue("monsterAttack", null, ["char" => $m["id"]]);
             }

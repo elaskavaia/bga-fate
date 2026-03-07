@@ -93,7 +93,7 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testAttackStrengthBjornStarting(): void {
         // Bjorn hero card: strength=2, starting equip (Bjorn's First Bow): +1, ability (Sure Shot I): no strength
-        $strength = $this->game->getHeroAttackStrength(PCOLOR);
+        $strength = $this->game->getHeroAttackStrength("hero_1");
         $this->assertEquals(3, $strength); // 2 + 1
     }
 
@@ -101,7 +101,7 @@ final class Op_actionAttackTest extends TestCase {
         // Remove equipment and ability
         $this->game->tokens->moveToken("card_equip_1_15", "limbo");
         $this->game->tokens->moveToken("card_ability_1_3", "limbo");
-        $strength = $this->game->getHeroAttackStrength(PCOLOR);
+        $strength = $this->game->getHeroAttackStrength("hero_1");
         $this->assertEquals(2, $strength); // hero card only
     }
 

@@ -2066,6 +2066,21 @@ class Game extends GameMachine {
                 }
                 break;
             }
+            case "hero": {
+                const heroId = tokenId;
+                const counters = this.gamedatas.counters ?? {};
+                const strength = counters[`counter_strength_${heroId}`]?.value;
+                const health = counters[`counter_health_${heroId}`]?.value;
+                const range = counters[`counter_range_${heroId}`]?.value;
+                tokenInfo.tooltip = "";
+                if (strength != null)
+                    tokenInfo.tooltip += this.ttSection(_("Strength"), String(strength));
+                if (health != null)
+                    tokenInfo.tooltip += this.ttSection(_("Health"), String(health));
+                if (range != null)
+                    tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
+                break;
+            }
             case "house": {
                 tokenInfo.tooltip = this.ttSection(_("Type"), this.getTr(tokenInfo.name));
                 break;

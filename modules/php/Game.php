@@ -194,6 +194,28 @@ class Game extends Base {
         }
         unset($pdata);
 
+        // Add derived hero stat counters (strength, health, range) for each hero in play
+        foreach ($result["players"] as $player_id => &$pdata2) {
+            $heroNo = $pdata2["heroNo"] ?? null;
+            if ($heroNo === null) {
+                continue;
+            }
+            $heroId = "hero_$heroNo";
+            $result["counters"]["counter_strength_$heroId"] = [
+                "value" => $this->getHeroAttackStrength($heroId),
+                "name" => "counter_strength_$heroId",
+            ];
+            $result["counters"]["counter_health_$heroId"] = [
+                "value" => $this->getHeroMaxHealth($heroId),
+                "name" => "counter_health_$heroId",
+            ];
+            $result["counters"]["counter_range_$heroId"] = [
+                "value" => $this->getCharacterAttackRange($heroId),
+                "name" => "counter_range_$heroId",
+            ];
+        }
+        unset($pdata2);
+
         $gameStage = $this->tokens->getTokenState(Game::GAME_STAGE);
         $isGameEnded = $gameStage >= 5;
         $result["gameEnded"] = $isGameEnded;
@@ -284,7 +306,8 @@ class Game extends Base {
      * Returns the total attack strength for a hero: base hero card + equipment + abilities on tableau.
      * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
      */
-    function getHeroAttackStrength(string $owner): int {
+    function getHeroAttackStrength(string $heroId): int {
+        $owner = $this->getHeroOwner($heroId);
         $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
         $total = 0;
         foreach ($cards as $card) {
@@ -304,20 +327,20 @@ class Game extends Base {
     }
 
     /**
+     * Returns the max health for a hero based on hero card on tableau.
+     */
+    function getHeroMaxHealth(string $heroId): int {
+        $owner = $this->getHeroOwner($heroId);
+        $heroCardKey = $this->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_$owner");
+        return (int) $this->material->getRulesFor($heroCardKey, "health", 9);
+    }
+
+    /**
      * Returns the attack range for any character (hero or monster). Default is 1.
      */
-    function getAttackRange(string $characterId): int {
+    function getCharacterAttackRange(string $characterId): int {
         if (str_starts_with($characterId, "hero")) {
-            $owner = $this->getHeroOwner($characterId);
-            $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
-            $maxRange = 1;
-            foreach ($cards as $card => $info) {
-                $range = (int) $this->material->getRulesFor($card, "attack_range", 0);
-                if ($range > $maxRange) {
-                    $maxRange = $range;
-                }
-            }
-            return $maxRange;
+            return $this->getHeroAttackRange($characterId);
         }
         // Monster: Fire Horde faction has range 2
         $faction = $this->getRulesFor($characterId, "faction", "");
@@ -325,6 +348,22 @@ class Game extends Base {
             return 2;
         }
         return 1;
+    }
+
+    /**
+     * Returns the attack range for any hero Default is 1.
+     */
+    function getHeroAttackRange(string $characterId): int {
+        $owner = $this->getHeroOwner($characterId);
+        $cards = $this->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+        $maxRange = 1;
+        foreach ($cards as $card => $info) {
+            $range = (int) $this->material->getRulesFor($card, "attack_range", 0);
+            if ($range > $maxRange) {
+                $maxRange = $range;
+            }
+        }
+        return $maxRange;
     }
 
     /**

@@ -36,7 +36,7 @@ class Op_actionAttack extends Operation {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->getTokenLocation($heroId);
-        $range = $this->game->getAttackRange($heroId);
+        $range = $this->game->getCharacterAttackRange($heroId);
         $hexesInRange = $this->game->hexMap->getHexesInRange($currentHex, $range);
         $moves = [];
         foreach ($hexesInRange as $hexId) {
@@ -65,10 +65,9 @@ class Op_actionAttack extends Operation {
 
         // Calculate attack strength
         // TODO: apply "this attack action" card effects (bonus strength, rerolls, etc.)
-        $strength = $this->game->getHeroAttackStrength($owner);
-        $this->game->systemAssert("Hero has no attack strength", $strength > 0);
-
         $heroId = $this->game->getHeroTokenId($owner);
+        $strength = $this->game->getHeroAttackStrength($heroId);
+        $this->game->systemAssert("Hero has no attack strength", $strength > 0);
         $hits = $this->game->rollAttackDice($heroId, $monsterId, $strength);
 
         // Apply damage — dice stay on display_battle so the player can see them

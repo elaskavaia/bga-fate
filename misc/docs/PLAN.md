@@ -491,5 +491,5 @@ Source: https://en.doc.boardgamearena.com/Pre-release_checklist
 ## TODO
 
 * Fix stacked tooltips
-* Add hero stats to tooltip (health, attack strength from hero card on tableau)
+* [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
 * Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
