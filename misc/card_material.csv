@@ -1,4 +1,6 @@
 num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment|attack_range
+#fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck, 
+#strength,durability - damage capacity, mana - mana generation per turn
 #set id=card_{ctype}_{hno}_{num}
 #set type=card card_{ctype} hno_{hno} cnum_{num} hcard
 #set create=0

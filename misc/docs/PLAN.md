@@ -17,8 +17,8 @@ See CLAUDE.md for project overview
 [x] Assets of the game including rulebook PDF located at ~/Develop/bga/bga-assets/
 [x] Main Board (jpg) — img/EN_Game_Board.jpg
 [ ] Player boards (jpg) one per hero
-[~] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards TODO
-[~] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites TODO
+[x] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards
+[x] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites
 [~] Other 3d pieces and iconography (png) — dice sprite done (img/dice.png), crystals TODO
 
 ## High level plan
@@ -28,11 +28,11 @@ See CLAUDE.md for project overview
 [x] Phase 1: Core game framework and board setup
 [x] Phase 2: Basic player turn with one hero (reduced rules)
 [x] Phase 3: Monster system with one monster type (spawning + movement done)
-[ ] Phase 4: Combat and damage system
+[x] Phase 4: Combat and damage system
 [ ] Phase 5: Equipment, quests, and upgrades
-[ ] Phase 6: Full monster turn (movement, attack, reinforcements)
+[x] Phase 6: Full monster turn (movement, attack, reinforcements)
 [x] Phase 7: Add remaining monster types and legends (all 3 factions done in Iter 2)
-[ ] Phase 8: Add remaining heroes
+[x] Phase 8: Add remaining heroes
 [ ] Phase 9: Polish, animations, and BGA compliance
 [ ] Phase 10: Testing and alpha release
 
@@ -89,7 +89,7 @@ See CLAUDE.md for project overview
 
 ### Client
 [x] Highlight reachable hexes when move action is active
-[ ] Show path preview - SKIP FOR NOW
+
 
 ### Tests
 [x] PHP unit tests for movement validation and reachability
@@ -114,7 +114,7 @@ See CLAUDE.md for project overview
 
 ### Client
 [x] Render monster tiles on map hexes — placeholder circles with faction color and name label
-[ ] Add proper monster sprite graphics (img/mini_monsters.png) and update css - SKIP FOR NOW
+[x] Add proper monster sprite graphics (img/mini_monsters.png) and update css 
 [ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)  - SKIP FOR NOW
 
 ### Tests
@@ -154,7 +154,7 @@ See CLAUDE.md for project overview
 
 ### Server
 [x] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
-[ ] `getAreasInRange($areaId, $range)` — for ranged attacks
+[x] `getAreasInRange($areaId, $range)` — for ranged attacks
 [X] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
 [X] Hero attack strength: just base hero value for now (no equipment/abilities)
 [X] Damage tracking on monsters (red crystals placed on monster/hero)

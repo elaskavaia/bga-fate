@@ -3229,6 +3229,8 @@ class Material {
 ],
             /* --- gen php end location_material --- */
             /* --- gen php begin card_material --- */
+// #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
+// #strength,durability - damage capacity, mana - mana generation per turn
 // # Abilities
     "card_ability_1_9" => [ 
         "type" => "card card_ability hno_1 cnum_9 hcard",
