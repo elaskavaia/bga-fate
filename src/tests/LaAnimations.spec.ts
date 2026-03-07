@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { LaAnimations } from "../src/LaAnimations";
+import { LaAnimations } from "../LaAnimations";
 
 describe("LaAnimations.shrinkAndFade", () => {
   let la: LaAnimations;

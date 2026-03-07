@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { Game } from "../src/Game";
+import { Game } from "../Game";
 
 /** Create a minimal mock Bga object sufficient to construct a Game instance. */
 function createMockBga(): any {

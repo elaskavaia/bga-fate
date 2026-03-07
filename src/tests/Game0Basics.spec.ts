@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { getPart, getIntPart, getFirstParts, getParentParts } from "../src/Game0Basics";
+import { getPart, getIntPart, getFirstParts, getParentParts } from "../Game0Basics";
 
 describe("Game0Basics utility functions", () => {
   describe("getPart", () => {

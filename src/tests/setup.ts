@@ -8,7 +8,7 @@ import path from "path";
 // Intercept require("./libs") from src/ to use our stub instead (libs.ts has top-level await which breaks CommonJS)
 const originalResolve = (Module as any)._resolveFilename;
 const libsStubPath = path.resolve(__dirname, "libs.stub.ts");
-const libsSrcPath = path.resolve(__dirname, "..", "src", "libs.ts");
+const libsSrcPath = path.resolve(__dirname, "..", "libs.ts");
 (Module as any)._resolveFilename = function (request: string, parent: any, ...args: any[]) {
   const resolved = originalResolve.call(this, request, parent, ...args);
   if (resolved === libsSrcPath) return libsStubPath;

@@ -24,7 +24,7 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - `npm run test -- modules/php/Tests/<TestFile>.php` - Run a single test file
 - `npm run test -- --filter testMethodName modules/php/Tests/<TestFile>.php` - Run a single test method
 - Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
-- `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in jstests/*.spec.ts)
+- `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
 
 ### Code Formatting
 
