@@ -55,6 +55,11 @@ Domain model objects for game characters. Created via factory methods on `Game`:
 
 ### Character (base)
 - `getId()`, `getHex()`, `getAttackRange()` (default 1), `moveCrystals()`, `getRulesFor()`
+- `getArmor()` — armor value from material (default 0, Draugr=1)
+- `hasCover()` — true if on a forest hex (blocks "hitcov" results)
+- `beginDefense()` — call before rolling dice against this character. Resets per-attack state (armor remaining). **Important**: Character instances carry attack state (`armorRemaining`), so the same instance must be used for `beginDefense()` + all `applyDamage()` calls within one attack.
+- `applyDamage($rule, $attackerId)` — process a single die result ("hit", "hitcov", "miss", "rune"). Handles cover, Dead faction rune-as-hit, and armor absorption. Places a red crystal if hit lands. Returns 1 (hit) or 0 (miss/absorbed).
+- `moveTo($location, $message, $args)` — move character token + update hex map cache
 
 ### Hero extends Character
 - `getOwner()` — player color
@@ -67,7 +72,11 @@ Domain model objects for game characters. Created via factory methods on `Game`:
 ### Monster extends Character
 - `getFaction()`, `getHealth()`, `getXpReward()`
 - `getAttackRange()` — firehorde=2, others=1
-- `applyDamageEffects($amount, $attackerId)` — apply damage; if killed: remove crystals, move to supply, log kill with attacker name. Caller handles XP award separately.
+- `applyDamageEffects($amount, $attackerId)` — check if killed: remove crystals, move to supply, log kill with attacker name. Caller handles XP award separately.
+
+**Faction effects** (handled in `Character::applyDamage`):
+- Dead: rune die results count as hits when Dead monsters attack
+- Draugr: armor=1, absorbs 1 hit per attack (via `beginDefense` + `armorRemaining` state)
 
 ---
 

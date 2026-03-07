@@ -318,10 +318,6 @@ class Game extends Base {
             "strength" => $strength,
         ]);
 
-        // Forest hex provides cover — "hitcov" results are blocked
-        $defenderHex = $this->hexMap->getCharacterHex($defenderId);
-        $hasCover = $defenderHex !== null && $this->hexMap->getHexTerrain($defenderHex) === "forest";
-
         // Clean up any leftover dice on display from a previous attack
         $leftover = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         if (count($leftover) > 0) {
@@ -330,6 +326,8 @@ class Game extends Base {
         }
 
         // Roll attack dice — pick from supply, then notify each with its roll result
+        $defender = $this->getCharacter($defenderId);
+        $defender->beginDefense();
         $hits = 0;
         $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
         foreach ($diceTokens as $die) {
@@ -349,14 +347,7 @@ class Game extends Base {
                 ]
             );
             $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
-            if ($rule === "hit" || ($rule === "hitcov" && !$hasCover)) {
-                $hits++;
-
-                // Place red crystals on the monster token
-                $this->effect_moveCrystals($defenderId, "red", 1, $defenderId, ["message" => ""]);
-            }
-            // TODO: handle rune effects (some cards trigger on rune)
-            // TODO: handle armor (draugr — reduce hits)
+            $hits += $defender->applyDamage($rule, $attackerId);
         }
         return $hits;
     }

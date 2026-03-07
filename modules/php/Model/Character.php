@@ -11,6 +11,8 @@ use Bga\Games\Fate\Game;
  * Provides common accessors for position, crystals, and attack range.
  */
 class Character {
+    private int $armorRemaining = 0;
+
     public function __construct(protected Game $game, protected string $id) {}
 
     function getId(): string {
@@ -23,6 +25,17 @@ class Character {
 
     function getAttackRange(): int {
         return 1;
+    }
+
+    function getArmor(): int {
+        return (int) $this->getRulesFor("armor", 0);
+    }
+
+    /**
+     * Reset armor for a new attack. Call before rolling dice.
+     */
+    function beginDefense(): void {
+        $this->armorRemaining = $this->getArmor();
     }
 
     /**
@@ -44,6 +57,44 @@ class Character {
         }
         $this->game->tokens->dbSetTokenLocation($this->id, $location, 0, $message, $args + ["char_name" => $this->id]);
         $this->game->hexMap->moveCharacterOnMap($this->id, $location);
+    }
+
+    /**
+     * Check if defender has cover (forest hex blocks "hitcov" results).
+     */
+    function hasCover(): bool {
+        $hex = $this->getHex();
+        return $hex !== null && $this->game->hexMap->getHexTerrain($hex) === "forest";
+    }
+
+    /**
+     * Apply a single die result as damage. Checks cover for "hitcov",
+     * and Dead faction rune-as-hit.
+     * Places a red crystal on this character if it's a hit.
+     * @param string $rule die result rule: "hit", "hitcov", "miss", "rune"
+     * @param string $attackerId token id of the attacker
+     * @return int 1 if hit, 0 if miss
+     */
+    function applyDamage(string $rule, string $attackerId): int {
+        $isHit = $rule === "hit" || ($rule === "hitcov" && !$this->hasCover());
+        // Dead faction: rune counts as hit
+        if ($rule === "rune") {
+            // TODO: handle other rune effects (some cards trigger on rune)
+            $attackerFaction = $this->game->material->getRulesFor($attackerId, "faction", "");
+            if ($attackerFaction === "dead") {
+                $isHit = true;
+            }
+        }
+        if ($isHit) {
+            // Armor absorbs hits (e.g. Draugr armor=1)
+            if ($this->armorRemaining > 0) {
+                $this->armorRemaining--;
+                return 0;
+            }
+            $this->moveCrystals("red", 1, $this->id, ["message" => ""]);
+            return 1;
+        }
+        return 0;
     }
 
     function getRulesFor(string $field, mixed $default = ""): mixed {
