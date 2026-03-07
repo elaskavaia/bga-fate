@@ -37,9 +37,25 @@ class Op_turnEnd extends Operation {
             $dieKeys = array_map(fn($d) => $d["key"], $dice);
             $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
         }
+        $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
         // 3. Add mana to cards with mana generation (green icon)
+
+        $cards = $hero->getTableauCards();
+        foreach ($cards as $card) {
+            $cardId = $card["key"];
+            $manaGen = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
+            if ($manaGen > 0) {
+                $hero->moveCrystals("green", $manaGen, $cardId, [
+                    "message" => clienttranslate('${place_name} generates ${inc} mana'),
+                ]);
+            }
+        }
         // 4. Draw 1 event card (if hand < 4, otherwise allow discard first)
+        // TODO: if hand >= 4, offer discard-then-draw choice instead of skipping
+        if ($hero->getHandSize() < 4) {
+            $hero->drawEventCard();
+        }
         // 5. Allow cycling top equipment or top ability card
     }
 }

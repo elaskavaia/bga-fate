@@ -130,10 +130,14 @@ class Game extends Base {
             $this->tokens->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
             $this->tokens->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
             $this->tokens->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
+            // Add 1 mana to starting ability card
+            $this->tokens->pickTokensForLocation(1, "supply_crystal_green", "card_ability_{$heroNo}_3");
             // Shuffle decks
             $this->tokens->shuffle("deck_ability_{$color}");
             $this->tokens->shuffle("deck_equip_{$color}");
             $this->tokens->shuffle("deck_event_{$color}");
+            // Draw 1 event card to hand
+            $this->tokens->pickTokensForLocation(1, "deck_event_{$color}", "hand_{$color}");
             // Hero already at starting hex from material, no move needed
         }
         // Move unused heroes to limbo
