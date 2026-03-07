@@ -21,12 +21,49 @@ class Hero extends Character {
         return $this->owner;
     }
 
+    function getPlayerId(): int {
+        return $this->game->custom_getPlayerIdByColor($this->owner);
+    }
+
+    /** Returns all cards on this hero's tableau. */
+    function getTableauCards(): array {
+        return $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_{$this->owner}");
+    }
+
+    /** Returns all cards in this hero's hand. */
+    function getHandCards(): array {
+        return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_{$this->owner}");
+    }
+
+    function getHandSize(): int {
+        return count($this->getHandCards());
+    }
+
+    /**
+     * Draw 1 event card from deck to hand.
+     * @return bool true if a card was drawn, false if deck is empty
+     */
+    function drawEventCard(): bool {
+        $deck = "deck_event_{$this->owner}";
+        $hand = "hand_{$this->owner}";
+        $topCard = $this->game->tokens->getTokenOnTop($deck);
+        if ($topCard === null) {
+            return false;
+        }
+        $cardId = $topCard["key"];
+        $this->game->tokens->dbSetTokenLocation($cardId, $hand, 0, clienttranslate('${char_name} draws an event card'), [
+            "char_name" => $this->id,
+        ]);
+        $this->game->customUndoSavepoint($this->getPlayerId(), 1, "draw");
+        return true;
+    }
+
     /**
      * Returns the total attack strength: base hero card + equipment + abilities on tableau.
      * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
      */
     function getAttackStrength(): int {
-        $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_{$this->owner}");
+        $cards = $this->getTableauCards();
         $total = 0;
         foreach ($cards as $card) {
             $cardId = $card["key"];
@@ -56,7 +93,7 @@ class Hero extends Character {
      * Returns attack range based on equipment cards. Default is 1.
      */
     function getAttackRange(): int {
-        $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_{$this->owner}");
+        $cards = $this->getTableauCards();
         $maxRange = 1;
         foreach ($cards as $card => $info) {
             $range = (int) $this->game->material->getRulesFor($card, "attack_range", 0);

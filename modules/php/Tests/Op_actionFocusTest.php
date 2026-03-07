@@ -44,26 +44,17 @@ final class Op_actionFocusTest extends TestCase {
         $this->assertArrayNotHasKey("card_hero_1_1", $moves);
     }
 
-    public function testFullManaCardNotTargetable(): void {
-        // Fill Sure Shot I to capacity (mana=1)
+    public function testManaCardStillTargetableWithExistingMana(): void {
+        // Mana is unlimited — card with existing mana should still be targetable
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_1_3");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
-        // Card is at capacity — should not be targetable
-        $this->assertArrayNotHasKey("card_ability_1_3", $moves);
+        $this->assertArrayHasKey("card_ability_1_3", $moves);
     }
 
     public function testNoManaCardsReturnsEmpty(): void {
         // Remove the mana card from tableau
         $this->game->tokens->moveToken("card_ability_1_3", "limbo");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
-    }
-
-    public function testAllCardsFullReturnsEmpty(): void {
-        // Fill Sure Shot I to capacity
-        $this->game->tokens->moveToken("crystal_green_1", "card_ability_1_3");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertEmpty($moves);

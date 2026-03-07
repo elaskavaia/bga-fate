@@ -18,9 +18,7 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Focus action: Add 1 mana (green) to one of your abilities or equipment that uses mana.
- * A card "uses mana" if it has a mana capacity (mana field > 0 in material).
- * A card can receive mana only if current green crystals on it < mana capacity.
+ * Focus action: Add 1 mana (green) to one of your cards ?
  */
 class Op_actionFocus extends Operation {
     function getPrompt() {
@@ -28,19 +26,18 @@ class Op_actionFocus extends Operation {
     }
 
     function getPossibleMoves() {
-        $owner = $this->getOwner();
-        $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+        $hero = $this->game->getHero($this->getOwner());
+        $cards = $hero->getTableauCards();
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
-            $manaCapacity = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
-            if ($manaCapacity <= 0) {
+            $mana = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
+            if ($mana <= 0) {
+                // TODO: approximation if cards produces mana it also uses it - to be verified later
                 continue;
             }
-            $currentMana = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
-            if ($currentMana < $manaCapacity) {
-                $targets[$cardId] = ["q" => Material::RET_OK];
-            }
+
+            $targets[$cardId] = ["q" => Material::RET_OK];
         }
         return $targets;
     }
