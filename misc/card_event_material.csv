@@ -1,0 +1,73 @@
+num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment|attack_range
+#fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck, 
+#strength,durability - damage capacity, mana - mana generation per turn
+#set id=card_{ctype}_{hno}_{num}
+#set type=card card_{ctype} hno_{hno} cnum_{num} hcard
+#set create=0
+#set _noquotes=create
+#set _noquotes=attack_range
+# Events
+29|1|Back Down|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
+28|1|Burning Arrows|event|4||||||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!|
+32|1|Limber Bow|event|2||||||You have attack range +2 this turn.|Twannng!|
+26|1|Master Shot|event|4||||||Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…|
+31|1|Perfect Aim|event|2||||||Reroll all misses.|Hitting where it hurts, not always in the head.|
+33|1|Piercing Arrows|event|2||||||Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!|
+25|1|Prey|event|2||||||mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.|
+27|1|Rest|event|2||||||Heal 2 damage from Bjorn.|Sea therapy, works every time...|
+34|1|Seek Shelter|event|1||||||Move up to 2 areas into a location. You may not move more this turn.|Phew, lucky there was a cave here… Who's snoring?|
+30|1|Sewing|event|2||||||Remove 1 damage from each of your cards.|Needles to say, sewing has been a common thread in Bjorn's crafts.|
+28|2|Agility|event|2||||||Move 2 areas. Just because you can.||
+35|2|Back Down!|event|2||||||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.|
+30|2|Inspire Defense|event|2||||||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!|
+27|2|Mastery|event|3||||||Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…|
+26|2|Multi-Shot|event|3||||||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.|
+34|2|Piercing Arrows|event|2||||||Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!|
+32|2|Popular|event|2||||||Play in Grimheim to gain 2 gold [XP].|I could get used to this…|
+36|2|Prey|event|1||||||mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.|
+31|2|Rest|event|2||||||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.|
+33|2|Speedy Attack|event|2||||||Discard another card from hand to perform an attack action.||
+29|2|Take a Knee|event|2||||||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.|
+30|3|Courage|event|2||||||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.|
+36|3|Durability|event|1||||||Remove all damage from an equipment card.||
+28|3|Kick|event|3||||||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.|
+34|3|Magic Runes|event|2||||||If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.|
+27|3|Maneuver|event|2||||||Move 1 area.|Embla has a way of tackling her problems from many angles.|
+37|3|Preparations|event|1||||||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?|
+35|3|Rest|event|2||||||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.|
+31|3|Retaliation|event|3||||||Play after an adjacent monster attacked you to deal 2 damage to it.||
+29|3|Sophisticated|event|2||||||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.|
+33|3|Speedy Attack|event|2||||||Discard another card from hand to perform an attack action.||
+32|3|Vigilance|event|2||||||Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.|
+32|4|Berserk|event|3||||||Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!|
+36|4|Boldur's Gate|event|1||||||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.|
+35|4|Dodge|event|1||||||Prevent up to 2 damage.|Did you miss me?|
+34|4|Durability|event|1||||||Remove all damage from an equipment card.|Can't even handle the mead?|
+33|4|Focus|event|2||||||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.|
+31|4|Kick|event|3||||||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.|
+29|4|Maneuver|event|2||||||Move 1 area.||
+27|4|Miner|event|2||||||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.|
+38|4|Portable Smithy|event|1||||||Spend 1 prepare action to complete your quest.|Travel-sized anvil. Check!|
+30|4|Rest|event|2||||||Heal 2 damage from Boldur.|I need a hospital… no, I need a tavern…|
+37|4|Seek Shelter|event|1||||||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.|
+28|4|Short Temper|event|3||||||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.|
+35|5|Blinding Flash|event|2||||||Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!|
+30|5|Blown Away|event|2||||||Move anyone within range 2 up to 2 areas.|His presence can do that to you.|
+36|5|Burning Aura|event|1||||||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.|
+28|5|Chain Lightning|event|3||||||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.|
+34|5|Durability|event|2||||||Remove all damage from an equipment card.||
+33|5|Heat Death|event|2||||||Play when you rolled any [RUNE] against a non-Legend monster to kill it.||
+31|5|Heat Stroke|event|2||||||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.|
+27|5|Lightning Bolt|event|3||||||Deal 1 damage to a monster within range 3.|You're in for a shock!|
+32|5|Power Surge|event|2||||||Add 2 mana [MANA] to 1 of your cards.||
+37|5|Quick Reflexes|event|1||||||After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?|
+29|5|Rain of Fire|event|2||||||Deal 1 damage to each adjacent monster.||
+35|6|Alchemy|event|1||||||Remove up to 5 mana [MANA] to gain that much gold [XP].|It is a golden opportunity.|
+32|6|Bowling|event|3||||||Choose an adjacent area and the area directly behind it. Any monsters there are dealt 1 damage and may be moved 1 area.|Spare no one.|
+34|6|Focus|event|1||||||Spend 1 focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|What was that recipe again?|
+29|6|Hard Rock|event|3||||||Roll 3[DIE_ATTACK] against a monster within range 2.|She will, she will, rock you!|
+33|6|Heavy Metal|event|2||||||Pay 1 or 2 gold [XP] and choose a monster within range 2. Deal 2 damage to it for each [XP] paid.|You want a ton of gold? You won't like it.|
+27|6|Lava Spike|event|3||||||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.|
+30|6|Petrify|event|3||||||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.|
+31|6|Power Surge|event|3||||||Add 2 mana [MANA] to 1 of your cards.||
+28|6|Stoneskin|event|3||||||Prevent up to 2 damage.|Sticks and stones can't break my bones…|

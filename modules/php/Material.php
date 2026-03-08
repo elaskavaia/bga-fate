@@ -3248,7 +3248,7 @@ class Material {
         "content" => "public",
 ],
             /* --- gen php end location_material --- */
-            /* --- gen php begin card_material --- */
+            /* --- gen php begin card_ability_material --- */
 // #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
 // #strength,durability - damage capacity, mana - mana generation per turn
 // # Abilities
@@ -3997,7 +3997,7 @@ class Material {
         "count" => 1,
         "mana" => 2,
         "effect" => "Freely move mana [MANA] between your cards.",
-        "flavour" => "Repeat until you reach enlightenment: ”Wah Tefu Layam”.",
+        "flavour" => 'Repeat until you reach enlightenment: "Wah Tefu Layam".',
 ],
     "card_ability_6_3" => [ 
         "type" => "card card_ability hno_6 cnum_3 hcard",
@@ -4047,6 +4047,10 @@ class Material {
         "effect" => "2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.",
         "flavour" => "She's completely stoned…",
 ],
+            /* --- gen php end card_ability_material --- */
+            /* --- gen php begin card_equip_material --- */
+// #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
+// #strength,durability - damage capacity, mana - mana generation per turn
 // # Equipment
     "card_equip_1_15" => [ 
         "type" => "card card_equip hno_1 cnum_15 hcard",
@@ -4110,7 +4114,7 @@ class Material {
         "count" => 1,
         "quest" => "<i>Spend 1 attack action when not adjacent to a monster.</i> Your very own fabrication.",
         "effect" => "Add 1 [MANA] here very time you roll a [RUNE].<br>2[MANA]: Move 1 area.<br>3[MANA]: Prevent 2 damage.",
-        "flavour" => "”Did Bjorn make this?”<br>”Sew it seams…”",
+        "flavour" => '"Did Bjorn make this?"<br>"Sew it seams…"',
 ],
     "card_equip_1_23" => [ 
         "type" => "card card_equip hno_1 cnum_23 hcard",
@@ -4292,7 +4296,7 @@ class Material {
         "durability" => 2,
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
         "effect" => "[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.",
-        "flavour" => "”I'm ready to try it blindfolded…”",
+        "flavour" => '"I\'m ready to try it blindfolded…"',
 ],
     "card_equip_2_16" => [ 
         "type" => "card card_equip hno_2 cnum_16 hcard",
@@ -4541,7 +4545,7 @@ class Material {
         "count" => 1,
         "strength" => +1,
         "quest" => "<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.",
-        "flavour" => "”Boldur, this is for you, so you know I would always pick you! X O X O”",
+        "flavour" => '"Boldur, this is for you, so you know I would always pick you! X O X O"',
 ],
     "card_equip_4_22" => [ 
         "type" => "card card_equip hno_4 cnum_22 hcard",
@@ -4921,6 +4925,10 @@ class Material {
         "quest" => "<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.",
         "flavour" => "Hatters gonna hat.",
 ],
+            /* --- gen php end card_equip_material --- */
+            /* --- gen php begin card_event_material --- */
+// #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
+// #strength,durability - damage capacity, mana - mana generation per turn
 // # Events
     "card_event_1_29" => [ 
         "type" => "card card_event hno_1 cnum_29 hcard",
@@ -5615,6 +5623,10 @@ class Material {
         "effect" => "Prevent up to 2 damage.",
         "flavour" => "Sticks and stones can't break my bones…",
 ],
+            /* --- gen php end card_event_material --- */
+            /* --- gen php begin card_hero_material --- */
+// #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
+// #strength,durability - damage capacity, mana - mana generation per turn
 // # Heroes
     "card_hero_1_1" => [ 
         "type" => "card card_hero hno_1 cnum_1 hcard",
@@ -5627,7 +5639,7 @@ class Material {
         "strength" => 2,
         "health" => 9,
         "effect" => "After any dice roll, you may spend 1 focus action to add 2 damage.",
-        "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain – he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
+        "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
 ],
     "card_hero_1_2" => [ 
         "type" => "card card_hero hno_1 cnum_2 hcard",
@@ -5653,7 +5665,7 @@ class Material {
         "strength" => 2,
         "health" => 9,
         "effect" => "End your move action in a forest to add 1 mana [MANA] to any card.",
-        "flavour" => "Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that – butterflies are pretty!",
+        "flavour" => "Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that - butterflies are pretty!",
 ],
     "card_hero_2_2" => [ 
         "type" => "card card_hero hno_2 cnum_2 hcard",
@@ -5666,7 +5678,7 @@ class Material {
         "strength" => 4,
         "health" => 10,
         "effect" => "End any movement in a forset to add 1 mana [MANA] to any card.",
-        "flavour" => "”I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.”",
+        "flavour" => '"I don\'t understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows."',
 ],
     "card_hero_3_1" => [ 
         "type" => "card card_hero hno_3 cnum_1 hcard",
@@ -5773,7 +5785,7 @@ class Material {
         "effect" => "3[MANA]: Spend ANY action to move to ANY area (even mountains).",
         "flavour" => "Sindra now uses her short fuse to ignite powerful explosions.",
 ],
-            /* --- gen php end card_material --- */
+            /* --- gen php end card_hero_material --- */
             /* --- gen php begin dice_material --- */
 // # Attack die (hit x 2, hit-with-cover, miss x 2, rune)
     "side_die_attack_1" => [ 

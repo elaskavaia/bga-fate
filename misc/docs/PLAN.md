@@ -253,7 +253,7 @@ See CLAUDE.md for project overview
 [ ] Equipment: once-per-turn activation
 [ ] Ability: once-per-turn activation
 [ ] Ability: costs mana
-[ ] Focus action: actually adds mana to ability/equipment cards
+[x] Focus action: actually adds mana to ability/equipment cards — Op_actionFocus, Op_actionFocusTest
 
 ### Client
 [x] Player board: show hero card, active ability, active equipment
@@ -318,7 +318,7 @@ See CLAUDE.md for project overview
 
 ### Server
 [x] Fire Horde monster data and tokens — done in Iter 7
-[ ] Range 2 attack for Fire Horde monsters
+[x] Range 2 attack for Fire Horde monsters — Monster::getAttackRange(), Op_monsterAttack uses getHexesInRange()
 [x] Monster cards that spawn Fire Horde monsters — done in Iter 7
 
 ### Client
@@ -326,7 +326,7 @@ See CLAUDE.md for project overview
 [ ] Range indicator for ranged monster attacks
 
 ### Tests
-[ ] Test range 2 attacks
+[x] Test range 2 attacks — MonsterTest, Op_monsterAttackTest, HeroTest, Op_actionAttackTest
 
 ---
 
@@ -336,8 +336,8 @@ See CLAUDE.md for project overview
 
 ### Server
 [x] Dead faction monster data — done in Iter 7
-[ ] Runes count as hits for Dead attacks
-[ ] Draugr armor (prevent 1 damage each time)
+[x] Runes count as hits for Dead attacks — Character::applyDamage() checks attacker faction
+[x] Draugr armor (prevent 1 damage each time) — Character::getArmor(), beginDefense(), armor absorbs in applyDamage()
 [x] Legend monsters: unique stats, destroy 3 town pieces, swap movement — material + movement done in Iter 3/7
 [x] Legend reinforcement: legend cards spawn legend tokens + escort monsters — Op_reinforcement
 [x] All 54 monster cards defined — done in Iter 7
@@ -347,8 +347,8 @@ See CLAUDE.md for project overview
 [ ] Legend monster special display
 
 ### Tests
-[ ] Test Dead faction effects
-[ ] Test Legend special rules
+[x] Test Dead faction effects — MonsterTest: rune-as-hit, draugr armor, armor absorb/reset
+[x] Test Legend special rules — MonsterMovementTest: legend destroys 3 houses, legend movement
 
 ---
 

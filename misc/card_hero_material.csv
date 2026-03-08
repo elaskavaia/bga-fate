@@ -1,0 +1,21 @@
+num|hno|name|ctype|count|strength|health|durability|mana|quest|effect|flavour|comment|attack_range
+#fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck, 
+#strength,durability - damage capacity, mana - mana generation per turn
+#set id=card_{ctype}_{hno}_{num}
+#set type=card card_{ctype} hno_{hno} cnum_{num} hcard
+#set create=0
+#set _noquotes=create
+#set _noquotes=attack_range
+# Heroes
+1|1|Bjorn|hero|1|2|9||||After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.|
+2|1|Bjorn|hero|1|4|10||||After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.|
+1|2|Alva|hero|1|2|9||||End your move action in a forest to add 1 mana [MANA] to any card.|Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that - butterflies are pretty!|
+2|2|Alva|hero|1|4|10||||End any movement in a forset to add 1 mana [MANA] to any card.|"I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows."|
+1|3|Embla|hero|1|3|9||||Move 4.|Embla is fast, really tough, and passionately competetive. She is inarguably the best defender of Grimheim... because you just don't argue with her.|[MANA], [XP], [DAMAGE], [DIE_ATTACK], [RUNE], <br> (line break)
+2|3|Embla|hero|1|5|10||||Move 4.|All creatures are precious to Embla. Their exact worth is determined by the bounty.|
+1|4|Boldur|hero|1|3|6||||Armor. (Always prevents 1 damage)|Ants can carry several times their own body weight. So can Boldur. He's forging his thick armor to prove this point, and promote heavy metal.|
+2|4|Boldur|hero|1|5|7||||Armor. (Always prevents 1 damage)|Going berserk at the local inn, Boldur spent a drunken evening challenging all visitors to arm-wrestling. He broke the tavern record as well as fifteen arms, earning him the nickname the Arm-y.|
+1|5|Finkel|hero|1|3|9||||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Newly graduated from the pyromaniac program of the Wizarding School for Elven Orphans Who Can't Read Good, Finkel sets out to cause the heat of battle. A warm welcome to everyone!|
+2|5|Finkel|hero|1|5|10||||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Today's forecast shows fire and brimstone over large parts of the countryside.|
+1|6|Sindra|hero|1|2|6||||3[MANA]: Spend a move action to move to ANY area (even mountains).|The friendly neighborhood grandma, suddenly appearing with surprises for all: milk and cookies for the kids, and hails of levitating rocks for her enemies.|
+2|6|Sindra|hero|1|3|8||||3[MANA]: Spend ANY action to move to ANY area (even mountains).|Sindra now uses her short fuse to ignite powerful explosions.|
