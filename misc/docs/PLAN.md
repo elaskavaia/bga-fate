@@ -6,8 +6,8 @@ This document also refered as TODO list.
 
 ## Documents
 
-See misc/DESIGN.md for preliminary design
-See misc/RULES.md for game rules
+See misc/docs/DESIGN.md for preliminary design
+See misc/docs/RULES.md for game rules
 See CLAUDE.md for project overview
 
 
@@ -424,69 +424,8 @@ See CLAUDE.md for project overview
 ## Pre-Alpha BGA Checklist
 
 Source: https://en.doc.boardgamearena.com/Pre-release_checklist
+See misc/docs/CHECKLIST.md
 
-### License
-[ ] BGA has a license for the game
-
-### Metadata and Graphics
-[ ] gameinfos.inc.php has correct, up-to-date info
-[ ] Box art: 3D game box, transparent background, correct publisher icon
-[ ] Game Metadata Manager images added
-[ ] Remove unused images from img/
-[ ] Images compressed into sprite sheets
-[ ] Individual images under 4MB, total under 15MB
-[ ] Freeware fonts only, with license docs
-
-### Server Side
-[ ] `giveExtraTime()` called during player turns
-[ ] `getGameProgression()` implemented
-[ ] `zombieTurn()` implemented
-[ ] Game statistics defined and coded
-[ ] Notification messages: helpful but not excessive
-[ ] Tiebreaking logic implemented
-[ ] No manual DB transaction management
-[ ] DB schema supports game completion
-
-### Client Side
-[ ] ajaxcall/bgaPerformAction only on player actions, never programmatic
-
-### User Interface
-[ ] BGA UI design guidelines compliance
-[ ] English text: punctuation, capitalization, present tense, gender neutrality
-[ ] Non-full-width elements centered
-[ ] Browser zoom doesn't blur/pixelate graphics
-[ ] Non-obvious elements have tooltips
-[ ] All strings translation-ready
-[ ] CSS class names use game-specific prefix
-[ ] Consider posting on developer forum for design feedback
-
-### Special Testing
-[ ] Minified JS/CSS tested via management page
-[ ] Spectator mode tested (public visible, private hidden)
-[ ] In-game replay from notification log works
-[ ] Complete game replay works start to end
-[ ] Works in Chrome and Firefox (Edge, Safari recommended)
-[ ] Mobile device / Chrome mobile mode tested
-[ ] Real-time mode tested with giveExtraTime()
-[ ] Waiting screen compatibility verified
-
-### Cleanup
-[ ] Remove unnecessary console.log statements
-[ ] Remove debug logging from PHP
-[ ] Copyright headers in all source files
-[ ] Remove unnecessary files from main folder (move to misc/)
-[ ] Delete unused graphics from img/
-
-### Static Analysis
-[ ] Run "Check project" from control panel
-
-### Move to Alpha
-[ ] Correct formal game name for project
-[ ] Build new release from "manage game" page
-[ ] Verify build log
-[ ] Click "Request ALPHA status"
-
----
 
 ## TODO
 
