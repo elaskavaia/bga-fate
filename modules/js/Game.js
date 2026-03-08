@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * GalacticCruise implementation : © Alena Laskavaia <laskava@gmail.com>
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -301,6 +301,16 @@ function getParentParts(word) {
     return getFirstParts(word, arr.length - 1);
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 class LaAnimations {
     constructor() {
         this.defaultAnimationDuration = 500;
@@ -618,8 +628,28 @@ function setStyleAttributes(element, attrs) {
     }
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 const BgaAnimations = (await globalThis.importEsmLib("bga-animations", "1.x"));
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 class Game1Tokens extends Game0Basics {
     constructor() {
         super(...arguments);
@@ -1333,7 +1363,7 @@ class Game1Tokens extends Game0Basics {
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * GalacticCruise implementation : © Alena Laskavaia <laskava@gmail.com>
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
