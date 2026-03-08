@@ -443,6 +443,7 @@
   height: 200px;
   aspect-ratio: 0.7328244275;
   border-radius: 5%;
+  box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.6901960784);
 }
 
 .card_monster {
@@ -1296,6 +1297,34 @@
   height: 59%;
   top: 36%;
 }
+.pboard .deck > .counter {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  padding: 0 4px;
+  z-index: 1;
+}
+.pboard .deck > .counter::after {
+  content: attr(data-state);
+}
+.pboard .deck > .counter[data-state="0"] {
+  display: none;
+}
+.pboard .card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
 .pboard .deck_ability {
   left: 3%;
 }
@@ -1307,6 +1336,12 @@
 }
 .pboard .discard {
   left: 75%;
+}
+.pboard .discard > .card {
+  display: none;
+}
+.pboard .discard > .card:not(:has(~ .card)) {
+  display: block;
 }
 
 .aslot {

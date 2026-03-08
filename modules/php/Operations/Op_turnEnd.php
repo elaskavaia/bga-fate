@@ -51,11 +51,8 @@ class Op_turnEnd extends Operation {
                 ]);
             }
         }
-        // 4. Draw 1 event card (if hand < 4, otherwise allow discard first)
-        // TODO: if hand >= 4, offer discard-then-draw choice instead of skipping
-        if ($hero->getHandSize() < 4) {
-            $hero->drawEventCard();
-        }
+        // 4. Draw 1 event card (handles hand limit internally)
+        $this->queue("drawEvent");
         // 5. Allow cycling top equipment or top ability card
     }
 }

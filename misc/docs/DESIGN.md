@@ -197,4 +197,9 @@ Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = bl
 7. **Card effects**: Implement as operations. Each unique card effect gets an operation class or a parameterized generic operation.
 8. **Undo support**: Use existing DbMultiUndo infrastructure. Allow undo within a turn (before confirming end of turn).
 9. **Monster AI**: Fully deterministic (no choices for monsters), so monster turn can be auto-resolved on server. Client just animates notifications.
-10. **Event deck exhaustion**: When event deck is empty, shuffle discard pile to form new deck (standard card game rule, verify with actual rules).
+10. ~~**Event deck exhaustion**~~: See Assumptions section.
+
+## Assumptions (to verify with game designer)
+
+1. **Event discard pile is face up (public)**: The rules don't specify whether the event discard pile is face up or face down. We assume face up, as is standard for card game discard piles. All players can see discarded event cards.
+2. **Event deck is not reshuffled when exhausted**: The rules don't mention reshuffling the discard pile when the event deck runs out. We assume the deck simply stays empty — no auto-reshuffle.

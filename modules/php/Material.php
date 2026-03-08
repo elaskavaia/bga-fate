@@ -291,6 +291,16 @@ class Material {
         "name" => clienttranslate("Practice"),
 ],
 // # Free actions (can be done between/after main actions)
+// # Event card operations
+    "Op_drawEvent" => [ 
+        "type" => "drawEvent",
+        "name" => clienttranslate("Draw Event"),
+],
+    "Op_discardEvent" => [ 
+        "type" => "discardEvent",
+        "name" => clienttranslate("Discard Event"),
+],
+// # Free actions (can be done between/after main actions)
     "Op_useEquipment" => [ 
         "kind" => "free",
         "type" => "useEquipment",
@@ -3121,7 +3131,7 @@ class Material {
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
-        "content" => "hidden",
+        "content" => 1,
 ],
     "deck_equip" => [ 
         "type" => "location",
@@ -3129,7 +3139,7 @@ class Material {
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
-        "content" => "hidden",
+        "content" => 1,
 ],
     "deck_event" => [ 
         "type" => "location",
@@ -3145,7 +3155,7 @@ class Material {
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
-        "content" => "hidden",
+        "content" => "public",
 ],
     "limbo" => [ 
         "type" => "location",

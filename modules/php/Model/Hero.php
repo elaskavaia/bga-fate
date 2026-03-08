@@ -69,6 +69,18 @@ class Hero extends Character {
     }
 
     /**
+     * Discard an event card from hand to the discard pile.
+     */
+    function discardEventCard(string $cardId): void {
+        $discard = "discard_{$this->owner}";
+        $top = $this->game->tokens->getTokenOnTop($discard);
+        $state = $top ? ((int) $top["state"]) + 1 : 0;
+        $this->game->tokens->dbSetTokenLocation($cardId, $discard, $state, clienttranslate('${char_name} discards ${token_name}'), [
+            "char_name" => $this->id,
+        ]);
+    }
+
+    /**
      * Returns the total attack strength: base hero card + equipment + abilities on tableau.
      * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
      */

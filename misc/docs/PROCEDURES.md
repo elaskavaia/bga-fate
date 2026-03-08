@@ -44,6 +44,7 @@ Prompt: add <name> operation. Read PROCEDURES.md for instructions
    - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
    - Test `getPossibleMoves()` returns expected valid/invalid targets
    - Test `resolve()` produces correct side effects (token moves, state changes)
+#. Add manual test entry, debug_Op_<name> in Game.php, it should have setup for test and push operation to machine so Human can test UI manually
 #. If new game elements are introduced, follow the "Adding New Game Element" checklist below
 
 ## Adding New Game Element

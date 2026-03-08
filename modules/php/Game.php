@@ -523,6 +523,26 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_drawEvent() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Fill hand to 4 cards to test the discard-or-skip choice
+        $deck = $this->tokens->getTokensOfTypeInLocation("card", "deck_event_{$color}");
+        $i = count($this->tokens->getTokensOfTypeInLocation("card", "hand_{$color}"));
+        foreach ($deck as $cardId => $info) {
+            if ($i >= 4) break;
+            $this->tokens->dbSetTokenLocation($cardId, "hand_{$color}");
+            $i++;
+        }
+        $this->machine->push("drawEvent", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_discardEvent() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $this->machine->push("discardEvent", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }

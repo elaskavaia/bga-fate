@@ -1010,6 +1010,10 @@ class DbTokens {
                     // content allowed for everyboady
                     return true;
                 }
+                if (is_numeric($content_type)) {
+                    // numeric content means show top N cards
+                    return (int) $content_type;
+                }
                 if ($content_type == "private" && $this->game->isRealPlayer($player_id)) {
                     // content allow only if location of same color
                     $color = $this->game->custom_getPlayerColorById($player_id);

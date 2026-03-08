@@ -22,7 +22,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionFocus extends Operation {
     function getPrompt() {
-        return clienttranslate('${you} must choose a card to add 1 mana to');
+        return clienttranslate("Choose a card to add 1 mana to");
     }
 
     function getPossibleMoves() {

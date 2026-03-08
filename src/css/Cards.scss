@@ -9,6 +9,7 @@
   aspect-ratio: calc(v.$ratioW / v.$ratioH);
   //border: 1px solid black;
   border-radius: 5%;
+  box-shadow: v.$boxShadowBlack;
 }
 
 // Monster cards — landscape, 6 columns x 9 rows sprite sheet
@@ -56,15 +57,14 @@ $hero-sprites: (
   3: "cards/embla_cards_hq.webp",
   4: "cards/boldur_cards_hq.webp",
   // 5: "cards/finkel_cards_hq.webp",
-  // 6: "cards/sindra_cards_hq.webp",
+   // 6: "cards/sindra_cards_hq.webp",
 );
 
 // Mixin: compute background-position for a 0-indexed slot in the hero sprite
 @mixin hero-card-pos($slot) {
   $col: $slot % $hero-card-cols;
   $row: math.floor(math.div($slot, $hero-card-cols));
-  background-position: math.div($col, $hero-card-cols - 1) * 100%
-    math.div($row, $hero-card-rows - 1) * 100%;
+  background-position: math.div($col, $hero-card-cols - 1) * 100% math.div($row, $hero-card-rows - 1) * 100%;
 }
 
 // Set sprite image per hero via hno_N class

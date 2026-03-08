@@ -14,10 +14,10 @@ display_battle|Battle|thething|global|hidden|public|
 
 
 # Player board sub-locations
-deck_ability|Abilities|tableau|player|public|hidden|
-deck_equip|Equipment|tableau|player|public|hidden|
+deck_ability|Abilities|tableau|player|public|1|
+deck_equip|Equipment|tableau|player|public|1|
 deck_event|Event Deck|tableau|player|public|hidden|
-discard|Discard|tableau|player|public|hidden|
+discard|Discard|tableau|player|public|public|
 
 #set showtooltip=0
 limbo|Limbo||global|hidden|hidden|

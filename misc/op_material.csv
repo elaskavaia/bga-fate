@@ -40,6 +40,12 @@ actionMend|Mend
 actionPractice|Practice
 
 # Free actions (can be done between/after main actions)
+# Event card operations
+#set kind=
+drawEvent|Draw Event
+discardEvent|Discard Event
+
+# Free actions (can be done between/after main actions)
 #set kind=free
 useEquipment|Use Equipment|"notimpl"=>true
 useAbility|Use Ability|"notimpl"=>true

@@ -202,8 +202,8 @@ See CLAUDE.md for project overview
 **Goal**: Complete playable game with Trollkin goblins only. All 6 actions work. Short time track. Win/loss conditions. This is the true MVP.
 
 ### Server
-[ ] `Op_actionPrepare`: draw 1 event card (stub — just log "drew a card" if no cards yet)
-[ ] `Op_actionFocus`: add 1 mana to a card (stub — just log for now)
+[x] `Op_actionPrepare`: draw 1 event card
+[x] `Op_actionFocus`: add 1 mana to a card 
 [x] Action selection: enforce "must pick 2 different actions" rule
 [x] Charge: on skull time track spots, monsters move +1 extra
 [x] Goblin special: moves 2 instead of 1
@@ -272,19 +272,20 @@ See CLAUDE.md for project overview
 
 ### Server
 [ ] Define first hero's event cards (start with 5-10 simplest ones)
-[ ] Event deck setup: shuffle at game start
-[ ] Prepare action: draw 1 event card, hand limit 4
-[ ] Play event: free action, apply effect, discard
-[ ] Event deck exhaustion: shuffle discard pile
+[x] Event deck setup: shuffle at game start
+[x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
+[x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
+[x] Op_discardEvent: discard a card from hand to discard pile
+[ ] Play event: select from hand, apply effect, discard
 
 ### Client
-[ ] Hand display (private to player)
+[x] Hand display (private to player)
 [ ] Play card from hand
-[ ] Discard interface when at hand limit
+[x] Discard interface when at hand limit — Op_drawEvent shows hand cards to pick
 
 ### Tests
-[ ] Test draw, play, discard cycle
-[ ] Test hand limit enforcement
+[x] Test draw, play, discard cycle — Op_drawEventTest, Op_discardEventTest, Op_actionPrepareTest
+[x] Test hand limit enforcement — Op_drawEventTest
 
 ---
 

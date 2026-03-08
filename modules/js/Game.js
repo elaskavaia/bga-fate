@@ -1984,10 +1984,15 @@ class Game extends GameMachine {
                 };
             }
         }
+        else if (loc.startsWith("hand_") && tokenKey.startsWith("card_")) {
+            // Cards in hand need click handlers for discard selection
+            result.onClick = (e) => this.onToken(e);
+        }
         else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
             // Redirect cards on tableau to the card area
             const color = loc.substring("tableau_".length);
             result.location = `cardsarea_${color}`;
+            result.onClick = (e) => this.onToken(e);
         }
         else if (tokenKey.startsWith("crystal_")) {
             // Bucket redirect: tokens placed on another token get a sub-container bucket

@@ -21,6 +21,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionPrepare extends Operation {
     function resolve(): void {
-        $this->game->systemAssert("Op_actionPrepare is not implemented");
+        $this->queue("drawEvent");
     }
 }
