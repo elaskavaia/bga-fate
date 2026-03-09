@@ -562,6 +562,26 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_dealDamage() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Place 2 goblins adjacent to hero for testing
+        $heroId = $this->getHeroTokenId($color);
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        $placed = 0;
+        $monsters = ["monster_goblin_1", "monster_goblin_2"];
+        foreach ($adjHexes as $hex) {
+            if ($placed >= 2) break;
+            if (!$this->hexMap->isOccupied($hex)) {
+                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
+                $placed++;
+            }
+        }
+        $this->hexMap->invalidateOccupancy();
+        $this->machine->push("2dealDamage", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_Op_gainMana() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("2gainMana", $color);

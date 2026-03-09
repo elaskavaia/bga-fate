@@ -130,12 +130,12 @@ from a filtered set. Common target filters:
 
 **Filter conditions** (quoted, appended to target): `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`
 
-**Chaining**: `;` separates multiple operations from one card, e.g. `1damage(adj);1moveMonster`
+**Chaining**: `;` separates multiple operations from one card, e.g. `dealDamage(adj);1moveMonster`
 
 **Costs**: `cost:effect` notation for activated effects:
-- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3damage(range)`
+- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3dealDamage(range)`
 - `gainDamage:effect` — spend 1 durability (take [DAMAGE] on card) to perform effect, e.g. `gainDamage:1preventDamage`
-- Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2damage(adj))`
+- Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2dealDamage(adj))`
 
 **`on` column** — timing trigger for when the card can be played:
 - (empty) — play anytime during your turn

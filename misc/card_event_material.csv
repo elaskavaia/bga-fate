@@ -30,24 +30,24 @@ num|hno|name|count|r|on|effect|flavour
 33|2|Speedy Attack|2|custom||Discard another card from hand to perform an attack action.|
 29|2|Take a Knee|2|custom||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.
 # Events - Embla (hno=3)
-30|3|Courage|2|2damage('adj && (rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
+30|3|Courage|2|2dealDamage('adj && (rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
 36|3|Durability|1|99repairCard||Remove all damage from an equipment card.|
-28|3|Kick|3|1damage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
+28|3|Kick|3|dealDamage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 34|3|Magic Runes|2|custom|roll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
 27|3|Maneuver|2|1moveHero||Move 1 area.|Embla has a way of tackling her problems from many angles.
 37|3|Preparations|1|custom||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.
-31|3|Retaliation|3|2damage(adj)|monsterAttack|Play after an adjacent monster attacked you to deal 2 damage to it.|
+31|3|Retaliation|3|2dealDamage(adj)|monsterAttack|Play after an adjacent monster attacked you to deal 2 damage to it.|
 29|3|Sophisticated|2|custom||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
 33|3|Speedy Attack|2|custom||Discard another card from hand to perform an attack action.|
-32|3|Vigilance|2|1damage(adj)|monsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
+32|3|Vigilance|2|dealDamage(adj)|monsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
 # Events - Boldur (hno=4)
 32|4|Berserk|3|custom|actionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
 36|4|Boldur's Gate|1|custom||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
-35|4|Dodge|1|2preventDamage|damage|Prevent up to 2 damage.|Did you miss me?
+35|4|Dodge|1|2preventDamage||Prevent up to 2 damage.|Did you miss me?
 34|4|Durability|1|99repairCard||Remove all damage from an equipment card.|Can't even handle the mead?
 33|4|Focus|2|custom||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
-31|4|Kick|3|1damage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
+31|4|Kick|3|dealDamage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 29|4|Maneuver|2|1moveHero||Move 1 area.|
 27|4|Miner|2|2gainXp||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.
 38|4|Portable Smithy|1|custom||Spend 1 prepare action to complete your quest.|Travel-sized anvil. Check!
@@ -62,7 +62,7 @@ num|hno|name|count|r|on|effect|flavour
 34|5|Durability|2|99repairCard||Remove all damage from an equipment card.|
 33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
 31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
-27|5|Lightning Bolt|3|1damage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
+27|5|Lightning Bolt|3|dealDamage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
 32|5|Power Surge|2|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
 37|5|Quick Reflexes|1|1moveHero|monsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
 29|5|Rain of Fire|2|custom||Deal 1 damage to each adjacent monster.|
@@ -75,4 +75,4 @@ num|hno|name|count|r|on|effect|flavour
 27|6|Lava Spike|3|custom||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.
 30|6|Petrify|3|custom||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.
 31|6|Power Surge|3|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
-28|6|Stoneskin|3|2preventDamage|damage|Prevent up to 2 damage.|Sticks and stones can't break my bones…
+28|6|Stoneskin|3|2preventDamage||Prevent up to 2 damage.|Sticks and stones can't break my bones…

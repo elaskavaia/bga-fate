@@ -133,7 +133,9 @@ class Hero extends Character {
         if ($amount <= 0) {
             return;
         }
-        $this->moveCrystals("yellow", $amount, "tableau_{$this->owner}");
+        $this->moveCrystals("yellow", $amount, "tableau_{$this->owner}", [
+            "message" => clienttranslate('${char_name} gains ${count} XP'),
+        ]);
     }
 
     /**

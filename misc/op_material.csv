@@ -52,6 +52,7 @@ playEvent|Play Event
 #set kind=
 
 # Card effect operations (building blocks for card effects)
+dealDamage|Deal Damage
 gainMana|Gain Mana
 heal|Heal
 moveHero|Move Hero

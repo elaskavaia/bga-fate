@@ -705,6 +705,7 @@ export class Game1Tokens extends Game0Basics {
           "token_name",
           "token_name2",
           "char_name",
+          "char_name2",
           "token_divs",
           "token_names",
           "place_name",

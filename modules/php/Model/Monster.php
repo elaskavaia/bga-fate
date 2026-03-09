@@ -51,11 +51,12 @@ class Monster extends Character {
         $totalDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
         $health = $this->getHealth();
 
-        $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} damage (${totalDamage}/${health})'), [
+        $remaining = $health - $totalDamage;
+        $this->game->notifyMessage(clienttranslate('${char_name2} deals ${amount} damage to ${char_name} (${remaining} left)'), [
             "char_name" => $this->id,
+            "char_name2" => $attackerId,
             "amount" => $amount,
-            "totalDamage" => $totalDamage,
-            "health" => $health,
+            "remaining" => $remaining,
         ]);
 
         if ($totalDamage >= $health) {

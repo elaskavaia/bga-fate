@@ -294,7 +294,7 @@ See CLAUDE.md for project overview
 **Goal**: Implement the generic parameterized operations that are building blocks for event/equipment/ability card effects. These are queued by `playEvent`/`useEquipment`/`useAbility` after a card is played. See DESIGN.md "Card Effect Operations" for full notation.
 
 ### Operations (new Op_ classes)
-- [ ] `damage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
+- [x] `dealDamage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
 - [x] `heal` (Countable) — Remove X damage from target hero. Used by: Rest, Stitching, Belt of Youth, etc.
 - [ ] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
 - [x] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes

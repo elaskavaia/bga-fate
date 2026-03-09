@@ -18,7 +18,7 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 8|1|Stitching II||||2heal(adj)||Remove a total of 2 damage from heroes and equipment within range 1.|
 5|1|Suppressive Fire I||||custom|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
 6|1|Suppressive Fire II||||custom|monsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
-3|1|Sure Shot I|||1|3spendMana:3damage(range)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
+3|1|Sure Shot I|||1|3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
 4|1|Sure Shot II|||2|custom||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
 13|2|Flexibility I|||1|custom||1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.|
@@ -42,15 +42,15 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 12|3|Queen of the Hill II||||custom||Deal 4 damage to an adjacent monster and switch places with it.|Another round? Ok!
 9|3|Reaper Swing I||||passive|actionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
 10|3|Reaper Swing II|3|||passive|actionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
-3|3|Riposte I|||1|custom|damage|2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.|
-4|3|Riposte II|||2|custom|damage|3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.
-13|3|Swift Kick I||||1damage('adj && !legend');1moveMonster||Deal 1 damage to an adjacent non-legend monster and move it 1 area.|
-14|3|Swift Kick II||||2damage('adj && !legend');2moveMonster||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.|
+3|3|Riposte I|||1|preventDamage|monsterAttack|2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.|
+4|3|Riposte II|||2|preventDamage|monsterAttack|3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.
+13|3|Swift Kick I||||dealDamage('adj && !legend');1moveMonster||Deal 1 damage to an adjacent non-legend monster and move it 1 area.|
+14|3|Swift Kick II||||2dealDamage('adj && !legend');2moveMonster||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.|
 # Abilities - Boldur (hno=4)
 9|4|Beefy Berserker I|1|||passive||Runes [RUNE] always count as hits for you. Because that's the way you roll.|
 10|4|Beefy Berserker II|3|||passive||Runes [RUNE] always count as hits for you. It runes in the family.|
-11|4|Dreadnought I|||1|1spendMana:1preventDamage|damage|1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.
-12|4|Dreadnought II|||1|custom|damage|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
+11|4|Dreadnought I|||1|1spendMana:1preventDamage|monsterAttack|1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.
+12|4|Dreadnought II|||1|preventDamage|monsterAttack|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
 13|4|Fortified I||||1heal(self)||Heal 1 damage from Boldur.|It's not hiding, it's strategic positioning.
 14|4|Fortified II|1|2||1heal(self)||Heal 1 damage from Boldur.|
 3|4|Rapid Strike I|||1|3spendMana:performAction(actionAttack)||3[MANA]: Perform an attack action.|
