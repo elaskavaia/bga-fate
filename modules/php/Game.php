@@ -542,7 +542,9 @@ class Game extends Base {
     function debug_setupPlayEvent() {
         // replace with other test code when testing operations in event cards
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Add damage to an equipment card so repairCard has a target
+        $heroId = $this->getHeroTokenId($color);
+        // Add damage to hero and an equipment card for mend testing
+        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
         $equip = $this->tokens->getTokensOfTypeInLocation("card_equip", "tableau_{$color}");
         $equipId = array_key_first($equip);
         if ($equipId) {

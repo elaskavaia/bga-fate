@@ -733,7 +733,11 @@ abstract class Operation {
         return $state;
     }
 
-    function isAutomaPlayer() {
-        return $this->getPlayerId() == Game::PLAYER_AUTOMA;
+    function getPossibleMovesDelegate(string $operationType) {
+        $moves = $this->instanciateOperation($operationType)->getPossibleMoves();
+        foreach ($moves as &$move) {
+            $move["delegate"] = $operationType;
+        }
+        return $moves;
     }
 }

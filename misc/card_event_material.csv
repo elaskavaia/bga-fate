@@ -31,7 +31,7 @@ num|hno|name|count|r|on|effect|flavour
 29|2|Take a Knee|2|custom||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.
 # Events - Embla (hno=3)
 30|3|Courage|2|2damage('adj && (rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
-36|3|Durability|1|repairCard||Remove all damage from an equipment card.|
+36|3|Durability|1|99repairCard||Remove all damage from an equipment card.|
 28|3|Kick|3|1damage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 34|3|Magic Runes|2|custom|roll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
 27|3|Maneuver|2|1moveHero||Move 1 area.|Embla has a way of tackling her problems from many angles.
@@ -45,7 +45,7 @@ num|hno|name|count|r|on|effect|flavour
 32|4|Berserk|3|custom|actionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
 36|4|Boldur's Gate|1|custom||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
 35|4|Dodge|1|2preventDamage|damage|Prevent up to 2 damage.|Did you miss me?
-34|4|Durability|1|repairCard||Remove all damage from an equipment card.|Can't even handle the mead?
+34|4|Durability|1|99repairCard||Remove all damage from an equipment card.|Can't even handle the mead?
 33|4|Focus|2|custom||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
 31|4|Kick|3|1damage(adj);1moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 29|4|Maneuver|2|1moveHero||Move 1 area.|
@@ -59,7 +59,7 @@ num|hno|name|count|r|on|effect|flavour
 30|5|Blown Away|2|custom||Move anyone within range 2 up to 2 areas.|His presence can do that to you.
 36|5|Burning Aura|1|custom||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.
 28|5|Chain Lightning|3|custom||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.
-34|5|Durability|2|repairCard||Remove all damage from an equipment card.|
+34|5|Durability|2|99repairCard||Remove all damage from an equipment card.|
 33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
 31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
 27|5|Lightning Bolt|3|1damage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!

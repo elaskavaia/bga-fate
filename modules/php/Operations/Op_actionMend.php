@@ -19,20 +19,41 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Mend action: remove 2 damage from hero (5 if in Grimheim).
+ * In Grimheim, damage may also be removed from equipment cards.
  */
 class Op_actionMend extends Operation {
-    function getPossibleMoves() {
-        // check if can heal at least 1 damage
-        return $this->instanciateOperation("heal")->getPossibleMoves();
+    function getPrompt() {
+        if ($this->isInGrimheim()) {
+            return clienttranslate("Choose a hero or equipment to repair (up to 5 damage)");
+        }
+        return clienttranslate("Choose a hero to heal (up to 2 damage)");
     }
 
-    function resolve(): void {
+    private function isInGrimheim(): bool {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->getTokenLocation($heroId);
-        $inGrimheim = $this->game->hexMap->isInGrimheim($currentHex);
-        $amount = $inGrimheim ? 5 : 2;
+        return $this->game->hexMap->isInGrimheim($currentHex);
+    }
 
-        $this->queue("{$amount}heal");
+    function getPossibleMoves() {
+        if (!$this->isInGrimheim()) {
+            $amount = 2;
+            return $this->getPossibleMovesDelegate("{$amount}heal");
+        }
+        $amount = 5;
+        return $this->getPossibleMovesDelegate("{$amount}heal") + $this->getPossibleMovesDelegate("{$amount}repairCard");
+    }
+
+    function resolve(): void {
+        $target = $this->getCheckedArg();
+        $args = $this->getArgs();
+        $delegate = $args["info"][$target]["delegate"] ?? null;
+        $this->game->systemAssert("ERR:actionMend:noDelegate", $delegate !== null);
+        $this->queue($delegate, $this->getOwner(), ["target" => $target]);
+    }
+
+    public function getUiArgs() {
+        return ["buttons" => false];
     }
 }

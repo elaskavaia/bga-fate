@@ -105,7 +105,7 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `actionAttack` (main) — Hero attacks monster within range — *implemented*
 - `actionPrepare` (main) — Draw 1 event card — *implemented*
 - `actionFocus` (main) — Add 1 mana to a card — *implemented*
-- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim) — *implemented*
+- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) — *implemented*
 - `actionPractice` (main) — Gain 1 XP (yellow crystal) — *implemented*
 - `useEquipment` (free) — Activate an equipment card — *notimpl*
 - `useAbility` (free) — Activate an ability card (costs mana) — *notimpl*
@@ -167,8 +167,9 @@ from a filtered set. Common target filters:
   Used by: Starsong, Discipline, Focus event
 - `preventDamage X` (auto) — Prevent up to X damage in current attack.
   Used by: Dodge, Stoneskin, Riposte, Dreadnought
-- `repairCard target` (player) — Remove all damage from target equipment card.
-  Used by: Durability, Sewing
+- `repairCard X target` (Countable) — Remove up to X damage from target card on tableau.
+  Use `99repairCard` for "remove all damage" (99 is effectively unlimited).
+  Used by: Durability (99repairCard), Mend in Grimheim (5repairCard)
 - `performAction type` (auto) — Queue an additional main action (attack/mend/focus/prepare/practice).
   Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket
 

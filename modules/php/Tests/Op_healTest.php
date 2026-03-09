@@ -40,37 +40,37 @@ final class Op_healTest extends TestCase {
     public function testHealSelfRemovesDamage(): void {
         $this->addDamage("hero_1", 4);
         $op = $this->createOp("2heal(self)");
-        $op->action_resolve(["target" => "hero_1"]);
+        $op->action_resolve(["target" => "hex_11_8"]);
         $this->assertEquals(2, $this->getDamage("hero_1"));
     }
 
     public function testHealSelfCapsAtCurrentDamage(): void {
         $this->addDamage("hero_1", 1);
         $op = $this->createOp("2heal(self)");
-        $op->action_resolve(["target" => "hero_1"]);
+        $op->action_resolve(["target" => "hex_11_8"]);
         $this->assertEquals(0, $this->getDamage("hero_1"));
     }
 
     public function testHealSelfNotApplicableWhenNoDamage(): void {
         $op = $this->createOp("2heal(self)");
         $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hero_1", $moves);
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["hero_1"]["q"]);
+        $this->assertArrayHasKey("hex_11_8", $moves);
+        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["hex_11_8"]["q"]);
     }
 
     public function testHealSelfTargetsWhenDamaged(): void {
         $this->addDamage("hero_1", 3);
         $op = $this->createOp("2heal(self)");
         $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hero_1", $moves);
-        $this->assertEquals(Material::RET_OK, $moves["hero_1"]["q"]);
+        $this->assertArrayHasKey("hex_11_8", $moves);
+        $this->assertEquals(Material::RET_OK, $moves["hex_11_8"]["q"]);
     }
 
     public function testHealAdjIncludesSelf(): void {
         $this->addDamage("hero_1", 2);
         $op = $this->createOp("1heal(adj)");
         $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hero_1", $moves);
+        $this->assertArrayHasKey("hex_11_8", $moves);
     }
 
     public function testHealAdjIncludesAdjacentHero(): void {
@@ -78,7 +78,7 @@ final class Op_healTest extends TestCase {
         $this->addDamage("hero_2", 3);
         $op = $this->createOp("1heal(adj)");
         $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hero_2", $moves);
+        $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
     public function testHealAdjExcludesDistantHero(): void {
@@ -87,20 +87,31 @@ final class Op_healTest extends TestCase {
         $this->addDamage("hero_2", 3);
         $op = $this->createOp("1heal(adj)");
         $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("hero_2", $moves);
+        $this->assertArrayNotHasKey("hex_8_5", $moves);
     }
 
     public function testHealAdjResolvesOnTarget(): void {
         $this->addDamage("hero_2", 4);
         $op = $this->createOp("2heal(adj)");
-        $op->action_resolve(["target" => "hero_2"]);
+        $op->action_resolve(["target" => "hex_12_8"]);
         $this->assertEquals(2, $this->getDamage("hero_2"));
     }
 
     public function testHealCountFromExpression(): void {
         $this->addDamage("hero_1", 5);
         $op = $this->createOp("3heal(self)");
-        $op->action_resolve(["target" => "hero_1"]);
+        $op->action_resolve(["target" => "hex_11_8"]);
         $this->assertEquals(2, $this->getDamage("hero_1"));
+    }
+
+    public function testHealPresetTargetUsesHexId(): void {
+        $this->addDamage("hero_1", 3);
+        /** @var Op_heal */
+        $op = $this->game->machine->instanciateOperation("2heal", PCOLOR, ["target" => "hex_11_8"]);
+        $moves = $op->getPossibleMoves();
+        $this->assertCount(1, $moves);
+        $this->assertArrayHasKey("hex_11_8", $moves);
+        $op->action_resolve(["target" => "hex_11_8"]);
+        $this->assertEquals(1, $this->getDamage("hero_1"));
     }
 }

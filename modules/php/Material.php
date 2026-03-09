@@ -5271,7 +5271,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Durability"),
         "count" => 1,
-        "r" => "repairCard",
+        "r" => "99repairCard",
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_3_28" => [ 
@@ -5430,7 +5430,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Durability"),
         "count" => 1,
-        "r" => "repairCard",
+        "r" => "99repairCard",
         "effect" => "Remove all damage from an equipment card.",
         "flavour" => "Can't even handle the mead?",
 ],
@@ -5587,7 +5587,7 @@ class Material {
         "hno" => 5,
         "name" => clienttranslate("Durability"),
         "count" => 2,
-        "r" => "repairCard",
+        "r" => "99repairCard",
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_5_33" => [ 

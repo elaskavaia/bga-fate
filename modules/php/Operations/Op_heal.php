@@ -49,23 +49,41 @@ class Op_heal extends CountableOperation {
     }
 
     function getPossibleMoves() {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget => ["q" => Material::RET_OK]];
+        }
         $targets = [];
         foreach ($this->getHeroCandidates() as $heroId) {
+            $hex = $this->game->hexMap->getCharacterHex($heroId);
+            if ($hex === null) {
+                continue;
+            }
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-            $targets[$heroId] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
+            $targets[$hex] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
         }
         return $targets;
     }
 
     function resolve(): void {
-        $heroId = $this->getCheckedArg();
+        $hexId = $this->getCheckedArg();
+        $heroId = $this->game->hexMap->getCharacterOnHex($hexId, "hero");
+        $this->game->systemAssert("ERR:heal:noHeroOnHex:$hexId", $heroId !== null);
+        $actingHeroId = $this->game->getHeroTokenId($this->getOwner());
         $amount = $this->getCount();
         $currentDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
         $amount = min($amount, $currentDamage);
         if ($amount > 0) {
-            $this->game->effect_moveCrystals($heroId, "red", -$amount, $heroId, [
-                "message" => clienttranslate('${char_name} heals ${count} damage'),
-            ]);
+            if ($heroId === $actingHeroId) {
+                $this->game->effect_moveCrystals($heroId, "red", -$amount, $heroId, [
+                    "message" => clienttranslate('${char_name} heals ${count} damage from themselves'),
+                ]);
+            } else {
+                $this->game->effect_moveCrystals($actingHeroId, "red", -$amount, $heroId, [
+                    "message" => clienttranslate('${char_name} heals ${count} damage from ${token_name}'),
+                    "token_name" => $heroId,
+                ]);
+            }
         }
     }
 }

@@ -15,19 +15,23 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
+use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
- * Remove all damage from a target card on the player's tableau.
- * Player selects a damaged card; all red crystals are removed.
- * Used by: Durability event cards.
+ * Remove up to X damage from a target card on the player's tableau.
+ * Count = max damage to remove (use 99 for "all").
+ * Used by: Durability (99repairCard), Mend in Grimheim (5repairCard).
  */
-class Op_repairCard extends Operation {
+class Op_repairCard extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Choose a card to repair");
     }
 
     function getPossibleMoves(): array {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget => ["q" => Material::RET_OK]];
+        }
         $owner = $this->getOwner();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
         $targets = [];
@@ -43,8 +47,9 @@ class Op_repairCard extends Operation {
         $cardId = $this->getCheckedArg();
         $heroId = $this->game->getHeroTokenId($this->getOwner());
         $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
-        if ($damage > 0) {
-            $this->game->effect_moveCrystals($heroId, "red", -$damage, $cardId, [
+        $amount = min($this->getCount(), $damage);
+        if ($amount > 0) {
+            $this->game->effect_moveCrystals($heroId, "red", -$amount, $cardId, [
                 "message" => clienttranslate('${char_name} repairs ${token_name}'),
                 "token_name" => $cardId,
             ]);

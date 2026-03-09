@@ -24,9 +24,9 @@ final class Op_repairCardTest extends TestCase {
         $this->game->tokens->moveToken("card_equip_1_23", "tableau_" . PCOLOR);
     }
 
-    private function createOp(): Op_repairCard {
+    private function createOp(string $expr = "99repairCard"): Op_repairCard {
         /** @var Op_repairCard */
-        $op = $this->game->machine->instanciateOperation("repairCard", PCOLOR);
+        $op = $this->game->machine->instanciateOperation($expr, PCOLOR);
         return $op;
     }
 
@@ -76,5 +76,23 @@ final class Op_repairCardTest extends TestCase {
         $op->action_resolve(["target" => "card_equip_1_21"]);
         // Other card should still have damage
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_23"));
+    }
+
+    public function testLimitedCountRemovesOnlyUpToCount(): void {
+        $this->addDamageToCard("card_equip_1_21", 3);
+        $op = $this->createOp("2repairCard");
+        $op->action_resolve(["target" => "card_equip_1_21"]);
+        // Should remove only 2 of 3 damage
+        $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
+    }
+
+    public function testPresetTargetReturnsOnlyThatTarget(): void {
+        $this->addDamageToCard("card_equip_1_21", 2);
+        $this->addDamageToCard("card_equip_1_23", 1);
+        /** @var Op_repairCard */
+        $op = $this->game->machine->instanciateOperation("5repairCard", PCOLOR, ["target" => "card_equip_1_21"]);
+        $moves = $op->getPossibleMoves();
+        $this->assertCount(1, $moves);
+        $this->assertArrayHasKey("card_equip_1_21", $moves);
     }
 }
