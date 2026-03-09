@@ -326,6 +326,10 @@ class Material {
         "type" => "heal",
         "name" => clienttranslate("Heal"),
 ],
+    "Op_moveHero" => [ 
+        "type" => "moveHero",
+        "name" => clienttranslate("Move Hero"),
+],
             /* --- gen php end op_material --- */
 
             /* --- gen php begin token_material --- */

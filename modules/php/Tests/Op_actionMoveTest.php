@@ -5,7 +5,6 @@ declare(strict_types=1);
 require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\Operations\Op_actionMove;
-use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Tests\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -27,8 +26,13 @@ final class Op_actionMoveTest extends TestCase {
         return $op;
     }
 
+    private function getQueuedOp(): ?array {
+        $ops = $this->game->machine->getTopOperations(PCOLOR);
+        return $ops ? reset($ops) : null;
+    }
+
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // getPossibleMoves (delegated to moveHero)
     // -------------------------------------------------------------------------
 
     public function testReachableHexesFromGrimheim(): void {
@@ -89,28 +93,19 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // resolve
+    // resolve (delegates to 3moveHero)
     // -------------------------------------------------------------------------
 
-    public function testResolveMovesHeroToTargetHex(): void {
+    public function testResolveQueuesMoveHero3(): void {
         $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
-
-        $location = $this->game->tokens->getTokenLocation("hero_1");
-        $this->assertEquals("hex_11_8", $location);
+        $op->resolve();
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("3moveHero", $queued["type"]);
     }
 
-    public function testResolveToCurrentHexThrows(): void {
+    public function testGetNumberOfMovesDefault3(): void {
         $op = $this->createOp();
-        $this->expectException(\Bga\GameFramework\UserException::class);
-        $this->expectOutputRegex("/./");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_9_9"]);
-    }
-
-    public function testResolveToUnreachableHexThrows(): void {
-        $op = $this->createOp();
-        $this->expectException(\Bga\GameFramework\UserException::class);
-        $this->expectOutputRegex("/./");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_9_1"]);
+        $this->assertEquals(3, $op->getNumberOfMoves());
     }
 }

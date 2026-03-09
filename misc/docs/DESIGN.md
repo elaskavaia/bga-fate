@@ -322,3 +322,4 @@ Less common but present in specialized hero builds, these change one outcome for
 
 1. **Event discard pile is face up (public)**: The rules don't specify whether the event discard pile is face up or face down. We assume face up, as is standard for card game discard piles. All players can see discarded event cards.
 2. **Event deck is not reshuffled when exhausted**: The rules don't mention reshuffling the discard pile when the event deck runs out. We assume the deck simply stays empty — no auto-reshuffle.
+3. **"Move X" means "move up to X areas"**: Card effects that say "Move X areas" allow the player to move fewer steps if desired.

@@ -297,7 +297,7 @@ See CLAUDE.md for project overview
 - [ ] `damage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
 - [x] `heal` (Countable) — Remove X damage from target hero. Used by: Rest, Stitching, Belt of Youth, etc.
 - [ ] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
-- [ ] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
+- [x] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
 - [ ] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
 - [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
 - [ ] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline

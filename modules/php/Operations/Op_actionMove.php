@@ -14,43 +14,26 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Move action: hero moves to a hex on the board
+ * Move action: hero moves up to 3 areas (some abilities may change this).
+ * Delegates to moveHero operation.
  */
 class Op_actionMove extends Operation {
+    function getNumberOfMoves(): int {
+        // Default 3 moves; abilities can override this later
+        // TODO: find cards that change this
+        return 3;
+    }
+
     function getPossibleMoves(): array {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $currentHex = $this->game->tokens->getTokenLocation($heroId);
-
-        $reachable = $this->game->hexMap->getReachableHexes($currentHex, 3);
-        $moves = [];
-        foreach (array_keys($reachable) as $hexId) {
-            $moves[$hexId] = ["q" => Material::RET_OK];
-        }
-        return $moves;
+        $steps = $this->getNumberOfMoves();
+        return $this->instanciateOperation("{$steps}moveHero")->getPossibleMoves();
     }
 
-    public function getUiArgs() {
-        return ["buttons" => false];
-    }
     function resolve(): void {
-        $target = $this->getCheckedArg();
-        $hero = $this->game->getHero($this->getOwner());
-
-        // When entering Grimheim, place hero at their home hex (from material)
-        if ($this->game->hexMap->isInGrimheim($target)) {
-            $target = $hero->getRulesFor("location", $target);
-        }
-
-        // TODO: do set location to individual hexes along the path to animate
-        $hero->moveTo($target);
-    }
-
-    public function getPrompt() {
-        return clienttranslate("Select where to move");
+        $steps = $this->getNumberOfMoves();
+        $this->queue("{$steps}moveHero");
     }
 }

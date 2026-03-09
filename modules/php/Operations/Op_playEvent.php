@@ -61,6 +61,8 @@ class Op_playEvent extends Operation {
             "token_name" => $target,
             "effect_text" => $effect,
         ]);
+        $r = $this->game->material->getRulesFor($target, "r", "nop");
+        $this->queue($r, $this->getOwner(), ["reason" => $target]);
     }
 
     public function getUiArgs() {
