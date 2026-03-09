@@ -330,6 +330,10 @@ class Material {
         "type" => "moveHero",
         "name" => clienttranslate("Move Hero"),
 ],
+    "Op_repairCard" => [ 
+        "type" => "repairCard",
+        "name" => clienttranslate("Repair Card"),
+],
             /* --- gen php end op_material --- */
 
             /* --- gen php begin token_material --- */
@@ -3653,7 +3657,7 @@ class Material {
         "num" => 13,
         "hno" => 3,
         "name" => clienttranslate("Swift Kick I"),
-        "r" => "1damage(adj,'!legend');1moveMonster",
+        "r" => "1damage('adj && !legend');1moveMonster",
         "effect" => "Deal 1 damage to an adjacent non-legend monster and move it 1 area.",
 ],
     "card_ability_3_14" => [ 
@@ -3663,7 +3667,7 @@ class Material {
         "num" => 14,
         "hno" => 3,
         "name" => clienttranslate("Swift Kick II"),
-        "r" => "2damage(adj,'!legend');2moveMonster",
+        "r" => "2damage('adj && !legend');2moveMonster",
         "effect" => "Deal 2 damage to an adjacent non-legend monster and move it 2 areas.",
 ],
 // # Abilities - Boldur (hno=4)
@@ -5267,7 +5271,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Durability"),
         "count" => 1,
-        "r" => "repairCard(equip)",
+        "r" => "repairCard",
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_3_28" => [ 
@@ -5426,7 +5430,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Durability"),
         "count" => 1,
-        "r" => "repairCard(equip)",
+        "r" => "repairCard",
         "effect" => "Remove all damage from an equipment card.",
         "flavour" => "Can't even handle the mead?",
 ],
@@ -5583,7 +5587,7 @@ class Material {
         "hno" => 5,
         "name" => clienttranslate("Durability"),
         "count" => 2,
-        "r" => "repairCard(equip)",
+        "r" => "repairCard",
         "effect" => "Remove all damage from an equipment card.",
 ],
     "card_event_5_33" => [ 

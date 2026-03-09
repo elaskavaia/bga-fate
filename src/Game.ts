@@ -212,8 +212,8 @@ export class Game extends GameMachine {
         }
         result.location = bucketId;
 
-        // Crystal landing on a monster or hero: suppress slide, pulse the crystal bucket instead
-        if (loc.startsWith("monster") || loc.startsWith("hero")) {
+        // Crystal landing on a monster, hero, or card: suppress slide, pulse the crystal bucket instead
+        if (loc.startsWith("monster") || loc.startsWith("hero") || loc.startsWith("card")) {
           result.noa = true;
           result.onEnd = () => {
             if (oldBucketId) this.updateBucketCount(oldBucketId);

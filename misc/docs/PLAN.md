@@ -305,7 +305,7 @@ See CLAUDE.md for project overview
 - [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
-- [ ] `repairCard` — Remove all damage from target equipment card. Used by: Durability, Sewing
+- [x] `repairCard` — Remove all damage from target card. Used by: Durability, Sewing
 - [ ] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
 - [ ] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 
@@ -336,6 +336,8 @@ See CLAUDE.md for project overview
 [ ] Mana generation at end of turn
 
 ### Client
+[ ] Show damage and mana on cards as crystal counters (unlike hero/monster damage buckets which are icons)
+[ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
 [ ] Quest progress display on equipment cards
 [ ] Upgrade prompt at end of turn
 [ ] Ability pile and equipment pile browsing

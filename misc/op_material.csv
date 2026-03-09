@@ -58,3 +58,4 @@ playEvent|Play Event
 # Card effect operations (building blocks for card effects)
 heal|Heal
 moveHero|Move Hero
+repairCard|Repair Card

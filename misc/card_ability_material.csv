@@ -44,8 +44,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 10|3|Reaper Swing II|3|||passive|actionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
 3|3|Riposte I|||1|custom|damage|2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.|
 4|3|Riposte II|||2|custom|damage|3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.
-13|3|Swift Kick I||||1damage(adj,'!legend');1moveMonster||Deal 1 damage to an adjacent non-legend monster and move it 1 area.|
-14|3|Swift Kick II||||2damage(adj,'!legend');2moveMonster||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.|
+13|3|Swift Kick I||||1damage('adj && !legend');1moveMonster||Deal 1 damage to an adjacent non-legend monster and move it 1 area.|
+14|3|Swift Kick II||||2damage('adj && !legend');2moveMonster||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.|
 # Abilities - Boldur (hno=4)
 9|4|Beefy Berserker I|1|||passive||Runes [RUNE] always count as hits for you. Because that's the way you roll.|
 10|4|Beefy Berserker II|3|||passive||Runes [RUNE] always count as hits for you. It runes in the family.|

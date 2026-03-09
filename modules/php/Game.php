@@ -542,11 +542,14 @@ class Game extends Base {
     function debug_setupPlayEvent() {
         // replace with other test code when testing operations in event cards
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $heroId = $this->getHeroTokenId($color);
-        // Add damage so there's something to heal
-        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
-        // Put Embla's Rest card in hand (2heal(self))
-        $this->tokens->dbSetTokenLocation("card_event_3_35_1", "hand_{$color}");
+        // Add damage to an equipment card so repairCard has a target
+        $equip = $this->tokens->getTokensOfTypeInLocation("card_equip", "tableau_{$color}");
+        $equipId = array_key_first($equip);
+        if ($equipId) {
+            $this->effect_moveCrystals($equipId, "red", 2, $equipId, ["message" => ""]);
+        }
+        // Put Embla's Durability card in hand (repairCard)
+        $this->tokens->dbSetTokenLocation("card_event_3_36_1", "hand_{$color}");
 
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
