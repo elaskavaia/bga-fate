@@ -31,53 +31,37 @@ final class Op_actionMendTest extends TestCase {
         $this->game->effect_moveCrystals("hero_1", "red", $amount, "hero_1", ["message" => ""]);
     }
 
-    private function getDamage(): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
+    private function getQueuedOp(): ?array {
+        $ops = $this->game->machine->getTopOperations(PCOLOR);
+        return $ops ? reset($ops) : null;
     }
 
-    public function testMendRemovesTwoDamage(): void {
+    public function testMendQueuesHeal2(): void {
         $this->addDamage(4);
-        $this->assertEquals(4, $this->getDamage());
-
         $op = $this->createOp();
-        $op->action_resolve([]);
-
-        $this->assertEquals(2, $this->getDamage());
+        $op->resolve();
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("2heal", $queued["type"]);
     }
 
-    public function testMendRemovesFiveInGrimheim(): void {
-        // Move hero to Grimheim
+    public function testMendQueuesHeal5InGrimheim(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage(5);
-        $this->assertEquals(5, $this->getDamage());
-
         $op = $this->createOp();
-        $op->action_resolve([]);
-
-        $this->assertEquals(0, $this->getDamage());
-    }
-
-    public function testMendCapsAtCurrentDamage(): void {
-        // Hero has only 1 damage, mend should remove only 1
-        $this->addDamage(1);
-        $this->assertEquals(1, $this->getDamage());
-
-        $op = $this->createOp();
-        $op->action_resolve([]);
-
-        $this->assertEquals(0, $this->getDamage());
+        $op->resolve();
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("5heal", $queued["type"]);
     }
 
     public function testMendNotAvailableWithZeroDamage(): void {
-        $this->assertEquals(0, $this->getDamage());
-
         $op = $this->createOp();
-        $this->assertEquals(Material::ERR_PREREQ, $op->getErrorCode());
+        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $op->getErrorCode());
     }
 
     public function testMendAvailableWithDamage(): void {
         $this->addDamage(2);
-
         $op = $this->createOp();
         $this->assertEquals(Material::RET_OK, $op->getErrorCode());
     }

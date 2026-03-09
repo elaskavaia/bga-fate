@@ -94,7 +94,7 @@ class Op_turn extends Operation {
         $sec = $remaining > 0;
         foreach ($this->getActionsByKind("free") as $action) {
             $op = $this->instanciateOperation($action);
-            $res[$action] = $op->getErrorInfo() + ["sec" => $sec, "name" => $this->game->getTokenName("Op_$action")];
+            $res[$action] = $op->getErrorInfo() + ["sec" => $sec, "call" => "resolve", "name" => $this->game->getTokenName("Op_$action")];
         }
 
         return $res;
@@ -116,7 +116,13 @@ class Op_turn extends Operation {
             $x = 3 - $remaining;
             $heroId = $this->game->getHeroTokenId($owner);
             $actionName = $this->game->getTokenName("Op_$optype");
-            $this->dbSetTokenLocation("marker_{$owner}_{$x}", "aslot_{$owner}_{$optype}", 0, clienttranslate('${char_name} selects ${action_name}'), ["char_name" => $heroId, "action_name" => $actionName]);
+            $this->dbSetTokenLocation(
+                "marker_{$owner}_{$x}",
+                "aslot_{$owner}_{$optype}",
+                0,
+                clienttranslate('${char_name} selects ${action_name}'),
+                ["char_name" => $heroId, "action_name" => $actionName]
+            );
 
             // Queue the selected action operation
             $this->queue($optype);

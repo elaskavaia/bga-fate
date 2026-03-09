@@ -9,6 +9,7 @@ savepoint|None
 or|Choice
 order|Choose Order
 seq|Sequence
+paygain|Pay: Gain
 
 
 turn|Turn
@@ -34,8 +35,8 @@ monsterAttack|Monster Attack
 #set kind=main
 actionMove|Move
 actionAttack|Attack
-actionPrepare|Prepare|"notimpl"=>true
-actionFocus|Focus|"notimpl"=>true
+actionPrepare|Prepare
+actionFocus|Focus
 actionMend|Mend
 actionPractice|Practice
 
@@ -49,7 +50,10 @@ discardEvent|Discard Event
 #set kind=free
 useEquipment|Use Equipment|"notimpl"=>true
 useAbility|Use Ability|"notimpl"=>true
-playEvent|Play Event|"notimpl"=>true
+playEvent|Play Event
 #shareGold|Share Gold|"notimpl"=>true
 
 #set kind=
+
+# Card effect operations (building blocks for card effects)
+heal|Heal

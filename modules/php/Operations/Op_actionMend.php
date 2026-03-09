@@ -22,13 +22,8 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionMend extends Operation {
     function getPossibleMoves() {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $currentDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-        if ($currentDamage == 0) {
-            return ["q" => Material::ERR_PREREQ];
-        }
-        return parent::getPossibleMoves();
+        // check if can heal at least 1 damage
+        return $this->instanciateOperation("heal")->getPossibleMoves();
     }
 
     function resolve(): void {
@@ -38,14 +33,6 @@ class Op_actionMend extends Operation {
         $inGrimheim = $this->game->hexMap->isInGrimheim($currentHex);
         $amount = $inGrimheim ? 5 : 2;
 
-        // Cap at actual damage on hero
-        $currentDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-        $amount = min($amount, $currentDamage);
-
-        if ($amount > 0) {
-            $this->game->effect_moveCrystals($heroId, "red", -$amount, $heroId, [
-                "message" => clienttranslate('${char_name} removes ${count} damage from themselves'),
-            ]);
-        }
+        $this->queue("{$amount}heal");
     }
 }

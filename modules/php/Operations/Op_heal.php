@@ -1,0 +1,71 @@
+<?php
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+
+declare(strict_types=1);
+
+namespace Bga\Games\Fate\Operations;
+
+use Bga\Games\Fate\Material;
+use Bga\Games\Fate\OpCommon\CountableOperation;
+
+/**
+ * Heal: Remove X damage (red crystals) from target hero.
+ * Count = amount of damage to remove.
+ * Target is determined by param: "self" = acting hero, "adj" = adjacent hero (including self).
+ * Used by: Rest (2heal(self)), Stitching (1heal(adj)), Belt of Youth, etc.
+ */
+class Op_heal extends CountableOperation {
+    function getPrompt() {
+        return clienttranslate("Choose a hero to heal");
+    }
+
+    private function getHeroCandidates(): array {
+        $owner = $this->getOwner();
+        $heroId = $this->game->getHeroTokenId($owner);
+        $target = $this->getParam(0, "self");
+        if ($target === "self") {
+            return [$heroId];
+        }
+        // adj: all heroes on same or adjacent hexes
+        $heroHex = $this->game->hexMap->getCharacterHex($heroId);
+        $hexes = array_merge([$heroHex], $this->game->hexMap->getHexesInRange($heroHex, 1));
+        $candidates = [];
+        foreach ($hexes as $hex) {
+            $otherHeroId = $this->game->hexMap->getCharacterOnHex($hex, "hero");
+            if ($otherHeroId) {
+                $candidates[] = $otherHeroId;
+            }
+        }
+        return $candidates;
+    }
+
+    function getPossibleMoves() {
+        $targets = [];
+        foreach ($this->getHeroCandidates() as $heroId) {
+            $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
+            $targets[$heroId] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
+        }
+        return $targets;
+    }
+
+    function resolve(): void {
+        $heroId = $this->getCheckedArg();
+        $amount = $this->getCount();
+        $currentDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
+        $amount = min($amount, $currentDamage);
+        if ($amount > 0) {
+            $this->game->effect_moveCrystals($heroId, "red", -$amount, $heroId, [
+                "message" => clienttranslate('${char_name} heals ${count} damage'),
+            ]);
+        }
+    }
+}

@@ -328,6 +328,24 @@ class HexMap {
         return null;
     }
 
+    /**
+     * Returns the token ID of the character on this hex
+     * @param string $hexId hex to check
+     */
+    function getCharacterOnHex(string $hexId, ?string $characterType): ?string {
+        $occ = $this->getOccupancyMap();
+        $char = $occ[$hexId]["character"] ?? null;
+        if ($char !== null) {
+            if (!$characterType) {
+                return $char;
+            }
+            if (getPart($char, 0) === $characterType) {
+                return $char;
+            }
+        }
+        return null;
+    }
+
     function canEnterHex(string $hexId, string $characterType): bool {
         if ($this->isImpassable($hexId, $characterType)) {
             return false;

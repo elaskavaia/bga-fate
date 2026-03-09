@@ -103,14 +103,84 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `turnMonster` (auto) — Advance time track; check win/loss; queue next round — *implemented*
 - `actionMove` (main) — Hero moves up to 3 hexes — *implemented*
 - `actionAttack` (main) — Hero attacks monster within range — *implemented*
-- `actionPrepare` (main) — Draw 1 event card — *notimpl*
+- `actionPrepare` (main) — Draw 1 event card — *implemented*
 - `actionFocus` (main) — Add 1 mana to a card — *implemented*
 - `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim) — *implemented*
 - `actionPractice` (main) — Gain 1 XP (yellow crystal) — *implemented*
 - `useEquipment` (free) — Activate an equipment card — *notimpl*
 - `useAbility` (free) — Activate an ability card (costs mana) — *notimpl*
-- `playEvent` (free) — Play an event card from hand — *notimpl*
+- `playEvent` (free) — Play an event card from hand — *stub: logs effect, no execution*
 - `shareGold` (free) — Give gold to another hero — *notimpl*
+
+
+### Card Effect Operations (building blocks for card effects)
+
+These are **generic parameterized operations** used as building blocks to implement card effects.
+They are queued by `playEvent`/`useEquipment`/`useAbility` after the card is played.
+Most are Countable (X = count) and take a target that is either pre-seeded or player-chosen.
+
+**Targeting**: target can be pre-set when queuing (e.g. "self") or left for the player to pick
+from a filtered set. Common target filters:
+- `self` — the acting hero
+- `adj` — adjacent character (monster or hero depending on action content, including self)
+- `range` — monster within hero's attack range
+- `range2`, `range3` — monster within fixed range N (not hero's attack range)
+- `any` — any card on hero's tableau
+- `equip` — equipment card on hero's tableau
+
+**Filter conditions** (quoted, appended to target): `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`
+
+**Chaining**: `;` separates multiple operations from one card, e.g. `1damage(adj);1moveMonster`
+
+**Costs**: `cost:effect` notation for activated effects:
+- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3damage(range)`
+- `gainDamage:effect` — spend 1 durability (take [DAMAGE] on card) to perform effect, e.g. `gainDamage:1preventDamage`
+- Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2damage(adj))`
+
+**`on` column** — timing trigger for when the card can be played:
+- (empty) — play anytime during your turn
+- `actionAttack` — play during/after an attack action
+- `roll` — play after a dice roll
+- `damage` — play when receiving damage
+- `monsterMove` — play after the Monsters Move step
+- `monsterAttack` — play after a monster attacks you
+
+- `damage X target` (Countable) — Deal X damage to target character (no dice).
+  Used by: Kick, Courage, Lightning Bolt, Rain of Fire, etc.
+- `heal X target` (Countable) — Remove X damage from target hero.
+  Used by: Rest, Belt of Youth, Healing Potion, etc.
+- `roll X target` (Countable) — Roll X attack dice against target (uses existing dice/combat system).
+  Used by: Snipe, Hard Rock, Chain Lightning, Heat Stroke, etc.
+- `moveHero X` (Countable) — Move hero up to X areas (subset of actionMove logic).
+  Used by: Agility, Maneuver, Fleetfoot, Blown Away
+- `moveMonster target X` (auto) — Move target monster X areas (away from hero or specified direction).
+  Used by: Kick, Swift Kick, Bowling
+- `killMonster target` (player) — Kill target monster (with filter: rank, health, range).
+  Used by: Back Down, Short Temper, Heat Death, In Charge
+- `gainXp X` (auto) — Gain X gold/XP (move yellow crystals to tableau).
+  Used by: Miner, Popular, Discipline
+- `gainMana X target` (player) — Add X mana to target card.
+  Used by: Power Surge, Elementary Student, Focus event
+- `spendMana X source` (player) — Remove X mana from source card (cost/prerequisite).
+  Used by: precondition for mana-activated abilities
+- `drawEvent X` (auto) — Draw X event cards
+  Used by: Starsong, Discipline, Focus event
+- `preventDamage X` (auto) — Prevent up to X damage in current attack.
+  Used by: Dodge, Stoneskin, Riposte, Dreadnought
+- `repairCard target` (player) — Remove all damage from target equipment card.
+  Used by: Durability, Sewing
+- `performAction type` (auto) — Queue an additional main action (attack/mend/focus/prepare/practice).
+  Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket
+
+**Not separate operations** (handled as modifiers/hooks on existing operations):
+- "Add X damage to this attack" — modifier applied in `actionAttack` resolve
+- "Attack range +X this turn" — temporary stat modifier
+- "Reroll all misses" — modifier on dice result in `actionAttack`
+- "Add damage for each [RUNE]" — modifier on dice result
+- "Prevent monster from moving" — flag on monster during `turnMonster`
+- Static/persistent effects (strength bonus, armor, mana regen) — read from card data during relevant ops
+- Equipment [DAMAGE] effects — consume durability, separate activation system
+- Quest completion — specific quest logic, not a generic operation
 
 ---
 

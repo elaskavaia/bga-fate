@@ -276,7 +276,7 @@ See CLAUDE.md for project overview
 [x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
 [x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
 [x] Op_discardEvent: discard a card from hand to discard pile
-[ ] Play event: select from hand, discard, apply effect
+[~] Play event: select from hand, discard, apply effect — Op_playEvent stub (logs effect text, no execution)
 
 ### Client
 [x] Hand display (private to player)
@@ -289,7 +289,41 @@ See CLAUDE.md for project overview
 
 ---
 
-## Iteration 10: Quest and Upgrade System
+## Iteration 9.5: Card Effect Operations
+
+**Goal**: Implement the generic parameterized operations that are building blocks for event/equipment/ability card effects. These are queued by `playEvent`/`useEquipment`/`useAbility` after a card is played. See DESIGN.md "Card Effect Operations" for full notation.
+
+### Operations (new Op_ classes)
+- [ ] `damage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
+- [x] `heal` (Countable) — Remove X damage from target hero. Used by: Rest, Stitching, Belt of Youth, etc.
+- [ ] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
+- [ ] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
+- [ ] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
+- [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
+- [ ] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
+- [ ] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
+- [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
+- [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
+- [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
+- [ ] `repairCard` — Remove all damage from target equipment card. Used by: Durability, Sewing
+- [ ] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
+- [ ] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
+
+### Integration
+- [ ] `playEvent` resolve: parse `r` column notation, queue corresponding operations
+- [ ] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
+- [ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
+- [x] Operation parser: target params `(adj)`, `(self)`, `(range)` — already supported via `getParam()`
+- [x] Operation parser: chaining with `;` and cost notation with `:` — already supported
+
+### Tests
+- [ ] Unit tests for each new operation
+- [ ] Integration tests: play event card → effect executes
+- [ ] Integration tests: use equipment with durability cost → effect executes
+
+---
+
+
 
 **Goal**: Equipment cards have quests. Completing quests unlocks new equipment. Upgrade system (spend XP to gain abilities or improve cards).
 
