@@ -209,6 +209,12 @@ abstract class Operation {
         if ($owner === null) {
             $owner = $this->getOwner();
         }
+        if ($data === null) {
+            $data = [];
+        }
+        if (!isset($data["reason"])) {
+            $data["reason"] = $this->getOpId();
+        }
         return $this->game->machine->instanciateOperation($type, $owner, $data);
     }
     function queue($type, $owner = null, $data = null) {

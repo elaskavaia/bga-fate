@@ -47,11 +47,24 @@ final class Op_moveHeroTest extends TestCase {
         $this->assertArrayNotHasKey("hex_13_7", $moves);
     }
 
-    public function testMoveHero2ReachesDistance2(): void {
+    public function testMoveHero2MandatoryOnlyDistance2(): void {
+        // 2moveHero is mandatory: must move exactly 2 steps
         $op = $this->createOp("2moveHero");
         $moves = $op->getPossibleMoves();
-        // Should reach hexes 2 steps away
-        $this->assertTrue(count($moves) > count($this->game->hexMap->getAdjacentHexes("hex_11_8")));
+        $this->assertNotEmpty($moves);
+        // hex_12_8 is adjacent (distance 1) — should NOT be offered for mandatory 2-step move
+        $this->assertArrayNotHasKey("hex_12_8", $moves);
+        // hex_13_7 is distance 2 — should be offered
+        $this->assertArrayHasKey("hex_13_7", $moves);
+    }
+
+    public function testMoveHeroOptionalShowsAllDistances(): void {
+        // [0,2]moveHero is optional: show all reachable hexes
+        $op = $this->createOp("[0,2]moveHero");
+        $moves = $op->getPossibleMoves();
+        // Should include both distance 1 and distance 2
+        $this->assertArrayHasKey("hex_12_8", $moves); // distance 1
+        $this->assertArrayHasKey("hex_13_7", $moves); // distance 2
     }
 
     public function testResolveMovesHero(): void {

@@ -93,15 +93,15 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // resolve (delegates to 3moveHero)
+    // resolve (delegates to [1,3]moveHero)
     // -------------------------------------------------------------------------
 
-    public function testResolveQueuesMoveHero3(): void {
+    public function testResolveQueuesMoveHero(): void {
         $op = $this->createOp();
         $op->resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
-        $this->assertEquals("3moveHero", $queued["type"]);
+        $this->assertEquals("[1,3]moveHero", $queued["type"]);
     }
 
     public function testGetNumberOfMovesDefault3(): void {

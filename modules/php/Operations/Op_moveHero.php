@@ -18,8 +18,16 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
- * Move hero up to X areas (count = max steps).
+ * Move hero X areas (count = max steps, mcount = min steps).
  * Reuses getReachableHexes() from HexMap with count as maxSteps.
+ *
+ * Mandatory movement (mcount == count, e.g. "2moveHero"): hero must move exactly
+ * count steps if possible. If no hex at that distance is reachable, falls back to
+ * the farthest reachable distance. If completely blocked, returns empty.
+ *
+ * Optional movement (mcount < count, e.g. "[0,3]moveHero"): hero may move any
+ * number of steps from mcount to count.
+ *
  * Used by: Agility (2moveHero), Maneuver (1moveHero), Fleetfoot (1moveHero), Quick Reflexes (1moveHero)
  */
 class Op_moveHero extends CountableOperation {
@@ -31,8 +39,18 @@ class Op_moveHero extends CountableOperation {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->getTokenLocation($heroId);
-        $steps = (int) $this->getCount();
-        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $steps);
+        $maxSteps = (int) $this->getCount();
+        $minSteps = (int) $this->getMinCount();
+        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $maxSteps);
+
+        // For mandatory movement (minSteps == maxSteps), only offer hexes at the
+        // required distance. If none exist, fall back to farthest reachable.
+        if ($minSteps > 0 && $minSteps == $maxSteps && count($reachable) > 0) {
+            $maxReachableDist = max($reachable);
+            $requiredDist = min($maxSteps, $maxReachableDist);
+            $reachable = array_filter($reachable, fn($dist) => $dist == $requiredDist);
+        }
+
         $moves = [];
         foreach (array_keys($reachable) as $hexId) {
             $moves[$hexId] = ["q" => Material::RET_OK];

@@ -27,13 +27,17 @@ class Op_actionMove extends Operation {
         return 3;
     }
 
-    function getPossibleMoves(): array {
+    function getDelegateOperation() {
         $steps = $this->getNumberOfMoves();
-        return $this->instanciateOperation("{$steps}moveHero")->getPossibleMoves();
+        return "[1,{$steps}]moveHero";
+    }
+
+    function getPossibleMoves(): array {
+        return $this->instanciateOperation($this->getDelegateOperation())->getPossibleMoves();
     }
 
     function resolve(): void {
         $steps = $this->getNumberOfMoves();
-        $this->queue("{$steps}moveHero");
+        $this->queue($this->getDelegateOperation());
     }
 }
