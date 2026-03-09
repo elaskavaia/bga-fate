@@ -5,7 +5,6 @@ declare(strict_types=1);
 require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_actionFocus;
 use Bga\Games\Fate\Tests\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -23,72 +22,27 @@ final class Op_actionFocusTest extends TestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
-    private function createOp(): Op_actionFocus {
-        /** @var Op_actionFocus */
+    private function getQueuedOp(): ?array {
+        $ops = $this->game->machine->getTopOperations(PCOLOR);
+        return $ops ? reset($ops) : null;
+    }
+
+    public function testFocusQueuesGainMana(): void {
         $op = $this->game->machine->instanciateOperation("actionFocus", PCOLOR);
-        return $op;
+        $op->action_resolve([]);
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("gainMana", $queued["type"]);
     }
 
-    // -------------------------------------------------------------------------
-    // getPossibleMoves
-    // -------------------------------------------------------------------------
-
-    public function testOnlyManaCardsAreTargets(): void {
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        // Sure Shot I has mana capacity — should be a target
-        $this->assertArrayHasKey("card_ability_1_3", $moves);
-        // First Bow has no mana capacity — should not be a target
-        $this->assertArrayNotHasKey("card_equip_1_15", $moves);
-        // Hero card has no mana — should not be a target
-        $this->assertArrayNotHasKey("card_hero_1_1", $moves);
-    }
-
-    public function testManaCardStillTargetableWithExistingMana(): void {
-        // Mana is unlimited — card with existing mana should still be targetable
-        $this->game->tokens->moveToken("crystal_green_1", "card_ability_1_3");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("card_ability_1_3", $moves);
-    }
-
-    public function testNoManaCardsReturnsEmpty(): void {
-        // Remove the mana card from tableau
-        $this->game->tokens->moveToken("card_ability_1_3", "limbo");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
-    }
-
-    public function testMultipleManaCardsAllTargetable(): void {
-        // Add Sure Shot II (mana=2) to tableau as well
-        $this->game->tokens->moveToken("card_ability_1_4", "tableau_" . PCOLOR);
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("card_ability_1_3", $moves);
-        $this->assertArrayHasKey("card_ability_1_4", $moves);
-    }
-
-    // -------------------------------------------------------------------------
-    // resolve
-    // -------------------------------------------------------------------------
-
-    public function testResolveAddsManaToCard(): void {
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
-
+    public function testFocusGainManaAddsManaToCard(): void {
+        $op = $this->game->machine->instanciateOperation("actionFocus", PCOLOR);
+        $op->action_resolve([]);
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $gainManaOp = $this->game->machine->instanciateOperation($queued["type"], PCOLOR);
+        $gainManaOp->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
         $mana = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
         $this->assertCount(1, $mana);
     }
-
-    public function testResolveTakesFromSupply(): void {
-        $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "supply_crystal_green"));
-
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
-
-        $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "supply_crystal_green"));
-        $this->assertEquals($supplyBefore - 1, $supplyAfter);
-    }
-
 }

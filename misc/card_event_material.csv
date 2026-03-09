@@ -63,7 +63,7 @@ num|hno|name|count|r|on|effect|flavour
 33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
 31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
 27|5|Lightning Bolt|3|1damage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
-32|5|Power Surge|2|2gainMana(any)||Add 2 mana [MANA] to 1 of your cards.|
+32|5|Power Surge|2|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
 37|5|Quick Reflexes|1|1moveHero|monsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
 29|5|Rain of Fire|2|custom||Deal 1 damage to each adjacent monster.|
 # Events - Sindra (hno=6)
@@ -74,5 +74,5 @@ num|hno|name|count|r|on|effect|flavour
 33|6|Heavy Metal|2|custom||Pay 1 or 2 gold [XP] and choose a monster within range 2. Deal 2 damage to it for each [XP] paid.|You want a ton of gold? You won't like it.
 27|6|Lava Spike|3|custom||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.
 30|6|Petrify|3|custom||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.
-31|6|Power Surge|3|2gainMana(any)||Add 2 mana [MANA] to 1 of your cards.|
+31|6|Power Surge|3|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
 28|6|Stoneskin|3|2preventDamage|damage|Prevent up to 2 damage.|Sticks and stones can't break my bones…

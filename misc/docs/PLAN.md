@@ -301,7 +301,7 @@ See CLAUDE.md for project overview
 - [ ] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
 - [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
 - [ ] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
-- [ ] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
+- [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought

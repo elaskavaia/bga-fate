@@ -33,11 +33,10 @@ class Op_actionMove extends Operation {
     }
 
     function getPossibleMoves(): array {
-        return $this->instanciateOperation($this->getDelegateOperation())->getPossibleMoves();
+        return $this->getPossibleMovesDelegate($this->getDelegateOperation());
     }
 
     function resolve(): void {
-        $steps = $this->getNumberOfMoves();
         $this->queue($this->getDelegateOperation());
     }
 }

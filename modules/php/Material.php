@@ -293,16 +293,6 @@ class Material {
         "name" => clienttranslate("Practice"),
 ],
 // # Free actions (can be done between/after main actions)
-// # Event card operations
-    "Op_drawEvent" => [ 
-        "type" => "drawEvent",
-        "name" => clienttranslate("Draw Event"),
-],
-    "Op_discardEvent" => [ 
-        "type" => "discardEvent",
-        "name" => clienttranslate("Discard Event"),
-],
-// # Free actions (can be done between/after main actions)
     "Op_useEquipment" => [ 
         "kind" => "free",
         "type" => "useEquipment",
@@ -322,6 +312,10 @@ class Material {
 ],
 // #shareGold|Share Gold|"notimpl"=>true
 // # Card effect operations (building blocks for card effects)
+    "Op_gainMana" => [ 
+        "type" => "gainMana",
+        "name" => clienttranslate("Gain Mana"),
+],
     "Op_heal" => [ 
         "type" => "heal",
         "name" => clienttranslate("Heal"),
@@ -337,6 +331,14 @@ class Material {
     "Op_repairCard" => [ 
         "type" => "repairCard",
         "name" => clienttranslate("Repair Card"),
+],
+    "Op_drawEvent" => [ 
+        "type" => "drawEvent",
+        "name" => clienttranslate("Draw Event"),
+],
+    "Op_discardEvent" => [ 
+        "type" => "discardEvent",
+        "name" => clienttranslate("Discard Event"),
 ],
             /* --- gen php end op_material --- */
 
@@ -3840,7 +3842,7 @@ class Material {
         "num" => 13,
         "hno" => 5,
         "name" => clienttranslate("Elementary Student I"),
-        "r" => "1gainMana(any)",
+        "r" => "gainMana",
         "effect" => "Add 1 mana [MANA] to any card.",
         "flavour" => "Finkel is on fire today!",
 ],
@@ -4156,6 +4158,7 @@ class Material {
         "num" => 24,
         "hno" => 1,
         "name" => clienttranslate("Home Sewn Cape"),
+        "durability" => 0,
         "r" => "custom",
         "quest" => "<i>Spend 1 attack action when not adjacent to a monster.</i> Your very own fabrication.",
         "effect" => "Add 1 [MANA] here very time you roll a [RUNE].<br>2[MANA]: Move 1 area.<br>3[MANA]: Prevent 2 damage.",
@@ -4807,7 +4810,7 @@ class Material {
         "name" => clienttranslate("Wand"),
         "strength" => 1,
         "durability" => 2,
-        "r" => "gainDamage:1gainMana(any)",
+        "r" => "gainDamage:gainMana",
         "quest" => "<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.",
         "effect" => "[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.",
         "flavour" => "Now extra long, to support wand-ering.",
@@ -4977,7 +4980,7 @@ class Material {
         "name" => clienttranslate("Wand"),
         "strength" => 1,
         "durability" => 2,
-        "r" => "gainDamage:1gainMana(any)",
+        "r" => "gainDamage:gainMana",
         "quest" => "<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.",
         "effect" => "[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.",
         "flavour" => "Now extra long, to support wand-ering.",
@@ -5638,7 +5641,7 @@ class Material {
         "hno" => 5,
         "name" => clienttranslate("Power Surge"),
         "count" => 2,
-        "r" => "2gainMana(any)",
+        "r" => "2gainMana",
         "effect" => "Add 2 mana [MANA] to 1 of your cards.",
 ],
     "card_event_5_37" => [ 
@@ -5758,7 +5761,7 @@ class Material {
         "hno" => 6,
         "name" => clienttranslate("Power Surge"),
         "count" => 3,
-        "r" => "2gainMana(any)",
+        "r" => "2gainMana",
         "effect" => "Add 2 mana [MANA] to 1 of your cards.",
 ],
     "card_event_6_28" => [ 
