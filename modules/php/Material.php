@@ -330,6 +330,10 @@ class Material {
         "type" => "moveHero",
         "name" => clienttranslate("Move Hero"),
 ],
+    "Op_performAction" => [ 
+        "type" => "performAction",
+        "name" => clienttranslate("Perform Action"),
+],
     "Op_repairCard" => [ 
         "type" => "repairCard",
         "name" => clienttranslate("Repair Card"),
@@ -3473,7 +3477,7 @@ class Material {
         "num" => 7,
         "hno" => 2,
         "name" => clienttranslate("Starsong I"),
-        "r" => "1drawEvent",
+        "r" => "passive",
         "on" => "turnEnd",
         "effect" => "At the end of your turn, draw 1 additional card.",
 ],
@@ -3484,7 +3488,7 @@ class Material {
         "num" => 8,
         "hno" => 2,
         "name" => clienttranslate("Starsong II"),
-        "r" => "2drawEvent",
+        "r" => "passive",
         "on" => "turnEnd",
         "effect" => "At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.",
 ],

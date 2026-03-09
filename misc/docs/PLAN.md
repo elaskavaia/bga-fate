@@ -305,8 +305,8 @@ See CLAUDE.md for project overview
 - [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
-- [x] `repairCard` — Remove all damage from target card. Used by: Durability, Sewing
-- [ ] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
+- [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
+- [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
 - [ ] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 
 ### Integration

@@ -27,8 +27,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 4|2|Hail of Arrows II|||2|custom||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.|
 11|2|Snipe I||||2roll(range)||Roll 2[DIE_ATTACK] against a monster within attack range.|
 12|2|Snipe II||||5roll(range)||Roll 5[DIE_ATTACK] against a monster within attack range.|
-7|2|Starsong I||||1drawEvent|turnEnd|At the end of your turn, draw 1 additional card.|
-8|2|Starsong II||||2drawEvent|turnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
+7|2|Starsong I||||passive|turnEnd|At the end of your turn, draw 1 additional card.|
+8|2|Starsong II||||passive|turnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
 9|2|Suppressive Fire I||||custom|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
 10|2|Suppressive Fire II||||custom|monsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
 5|2|Treetreader I||2||custom||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
