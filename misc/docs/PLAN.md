@@ -276,7 +276,7 @@ See CLAUDE.md for project overview
 [x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
 [x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
 [x] Op_discardEvent: discard a card from hand to discard pile
-[ ] Play event: select from hand, apply effect, discard
+[ ] Play event: select from hand, discard, apply effect
 
 ### Client
 [x] Hand display (private to player)

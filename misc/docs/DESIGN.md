@@ -199,6 +199,55 @@ Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = bl
 9. **Monster AI**: Fully deterministic (no choices for monsters), so monster turn can be auto-resolved on server. Client just animates notifications.
 10. ~~**Event deck exhaustion**~~: See Assumptions section.
 
+
+## Overview of card effects
+
+In Fate: Defenders of Grimheim, card effects are tightly integrated into the hero's development and the "tower defense" rhythm of the game. They are primarily categorized by the type of card (Ability, Equipment, or Event) and how they interact with the game's action economy. [1, 2] 
+1. Activated / Free Action Effects (Abilities & Equipment)
+Most character-specific benefits fall into this category. They are generally treated as Free Actions that can be used at any time during your turn, but not during a main action unless specified. [3] 
+
+* Once-Per-Turn Limit: Standard Equipment and Ability cards can only be used once per turn.
+* Mana-Activated: Some cards require spending Mana to trigger their effect (e.g., "Spend 2 Mana to add 2 damage").
+* Action Modifiers: These are used within the context of another action, such as adding damage to an Attack Action after the dice are rolled. [3, 4, 5, 6] 
+
+2. Triggered / Reactive Effects
+These effects occur automatically or can be played in response to specific game states, particularly during the Monster Turn. [7, 8] 
+
+* Damage Prevention: A major exception to the "once per turn" rule. Cards that prevent damage can be used once each time you receive damage, allowing multiple uses per round if attacked multiple times.
+* Reaction Events: Certain Event cards are specifically designated as Reaction cards, which can be played during the monster turn to deal damage or defend. [5, 7, 9] 
+
+3. Static / Persistent Effects
+These are "always-on" rules or modifications that don't require activation but change your hero's base stats or rules. [10] 
+
+* Rule Changes: For example, a card might state your hero moves 4 spaces instead of the standard 3, or provide a permanent Strength Bonus to every attack action you take.
+* Mana Regeneration: Static effects at the end of the turn that automatically add mana to specific cards. [3, 8, 10] 
+
+4. Instant / One-Time Effects (Events)
+These are found on Event Cards, which are drawn into your hand rather than placed in your tableau. [2] 
+
+* Immediate Resolution: You play them, resolve the text (e.g., "Move 2 steps" or "Deal damage"), and then discard them.
+* Flexibility: You can play any number of event cards during your turn as long as they don't interrupt a main action. [3, 7, 11] 
+* Conditional: Some of them can only be played during some other events which is similar to Triggered ability 
+
+5. Replacement Effects
+Less common but present in specialized hero builds, these change one outcome for another. [10] 
+
+* Example: Syndra's "Circle of Life" allows damage that would be dealt to her to be placed on the card instead, where it can later be repaired. [4] 
+
+[1] [https://www.youtube.com](https://www.youtube.com/watch?v=_6XfamMLPQ8&t=2)
+[2] RULES
+[3] [https://www.youtube.com](https://www.youtube.com/watch?v=ZPvuN_9b9L8&t=16)
+[4] [https://www.youtube.com](https://www.youtube.com/watch?v=v-2_QiLx9y8&t=540)
+[5] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3650916/abilities)
+[6] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3556712/timing-of-attack-rolls-and-abilities-and-more-ques)
+[7] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3636742/questions-after-1st-play)
+[8] RULES
+[9] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3650916/abilities)
+[10] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3541771/2-newbie-questions-on-abilities)
+[11] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3497389/move-towards-grimheim-plus-end-movement-question)
+
+
+
 ## Assumptions (to verify with game designer)
 
 1. **Event discard pile is face up (public)**: The rules don't specify whether the event discard pile is face up or face down. We assume face up, as is standard for card game discard piles. All players can see discarded event cards.
