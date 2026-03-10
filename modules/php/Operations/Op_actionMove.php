@@ -39,4 +39,12 @@ class Op_actionMove extends Operation {
     function resolve(): void {
         $this->queue($this->getDelegateOperation());
     }
+
+    public function getUiArgs() {
+        return ["buttons" => false];
+    }
+
+    function getPrompt() {
+        return clienttranslate("Select where to move");
+    }
 }
