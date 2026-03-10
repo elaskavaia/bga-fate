@@ -586,8 +586,13 @@ abstract class Operation {
     }
 
     /**
-     * Return either array of targets, or annotated assoc array.
-     * When annotaget the key is the target and value is assoc array of type ParamInfo which you can find in typescript
+     * Return possible move targets. Accepted formats:
+     * - Flat array: `string[]` of target IDs (e.g. `["hex_12_8", "hex_11_7"]`)
+     *   — normalized to `["q" => 0]` by `extractPossibleMoves()`
+     * - Annotated assoc array: `[target => ["q" => int, ...]]`
+     *   where `"q"` is `Material::RET_OK` (0) for valid or an error code to disable
+     *   Value is of type `ParamInfo` (see TypeScript definition)
+     * - Special top-level keys: `"err"`, `"q"`, `"prompt"` are meta-data, not targets
      */
     function getPossibleMoves() {
         return ["confirm"];
@@ -727,7 +732,7 @@ abstract class Operation {
             $state = $this->skip();
         } else {
             // TODO: support multi-select
-            $state = $this->resolve([Operation::ARG_TARGET => $targets[bga_rand(0, $num - 1)]]);
+            $state = $this->resolve([Operation::ARG_TARGET => $targets[$this->game->bgaRand(0, $num - 1)]]);
         }
         return $state;
     }

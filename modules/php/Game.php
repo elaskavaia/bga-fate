@@ -325,11 +325,10 @@ class Game extends Base {
     }
 
     /**
-     * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
-     * Used by both hero attacks and monster attacks.
-     * @return int number of hits
+     * Roll attack dice onto display_battle. Does NOT count hits — that's done later by effect_resolveHits.
+     * Cleans up leftover dice, announces the attack, picks dice from supply and rolls them.
      */
-    function rollAttackDice(string $attackerId, string $defenderId, int $strength): int {
+    function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength): void {
         $this->notifyMessage(clienttranslate('${token_name} attacks ${token_name2} with strength ${strength}'), [
             "token_name" => $attackerId,
             "token_name2" => $defenderId,
@@ -344,9 +343,6 @@ class Game extends Base {
         }
 
         // Roll attack dice — pick from supply, then notify each with its roll result
-        $defender = $this->getCharacter($defenderId);
-        $defender->beginDefense();
-        $hits = 0;
         $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
         foreach ($diceTokens as $die) {
             $dieId = $die["key"];
@@ -364,10 +360,34 @@ class Game extends Base {
                     "anim_target" => $defenderId,
                 ]
             );
+        }
+    }
+
+    /**
+     * Resolve dice on display_battle: count hits (applying cover, armor, rune rules) and return hit count.
+     * Dice remain on display_battle so the player can see them.
+     * @return int number of hits
+     */
+    function effect_resolveHits(string $attackerId, string $defenderId): int {
+        $defender = $this->getCharacter($defenderId);
+        $hits = 0;
+        $diceOnDisplay = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        foreach ($diceOnDisplay as $die) {
+            $roll = (int) $die["state"];
             $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
-            $hits += $defender->applyDamage($rule, $attackerId);
+            $hits += $defender->countHit($rule, $attackerId);
         }
         return $hits;
+    }
+
+    /**
+     * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
+     * Used by Op_actionAttack and Op_monsterAttack (monolithic flow).
+     * @return int number of hits
+     */
+    function rollAttackDice(string $attackerId, string $defenderId, int $strength): int {
+        $this->effect_rollAttackDice($attackerId, $defenderId, $strength);
+        return $this->effect_resolveHits($attackerId, $defenderId);
     }
 
     /**

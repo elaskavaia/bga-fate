@@ -313,7 +313,7 @@ See CLAUDE.md for project overview
 - [ ] `playEvent` resolve: parse `r` column notation, queue corresponding operations
 - [ ] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
 - [ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
-- [x] Operation parser: target params `(adj)`, `(self)`, `(range)` — already supported via `getParam()`
+- [x] Operation parser: target params `(adj)`, `(self)`, `(inRange)` — already supported via `getParam()`
 - [x] Operation parser: chaining with `;` and cost notation with `:` — already supported
 
 ### Tests

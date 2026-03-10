@@ -130,55 +130,32 @@ final class MonsterTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // applyDamage (die result → crystal placement)
+    // countHit (die result → hit count, no crystals)
     // -------------------------------------------------------------------------
 
-    public function testApplyDamageHit(): void {
+    public function testCountHitHit(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $monster = $this->game->getMonster("monster_goblin_1");
-        $result = $monster->applyDamage("hit", "hero_1");
-        $this->assertEquals(1, $result);
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
-        $this->assertCount(1, $crystals);
+        $this->assertEquals(1, $monster->countHit("hit", "hero_1"));
     }
 
-    public function testApplyDamageMiss(): void {
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
-
+    public function testCountHitMiss(): void {
         $monster = $this->game->getMonster("monster_goblin_1");
-        $result = $monster->applyDamage("miss", "hero_1");
-        $this->assertEquals(0, $result);
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
-        $this->assertCount(0, $crystals);
+        $this->assertEquals(0, $monster->countHit("miss", "hero_1"));
     }
 
-    public function testApplyDamageRuneNotHitForNonDead(): void {
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
-
+    public function testCountHitRuneNotHitForNonDead(): void {
         // Goblin is trollkin — rune should miss
         $monster = $this->game->getMonster("monster_goblin_1");
-        $result = $monster->applyDamage("rune", "hero_1");
-        $this->assertEquals(0, $result);
+        $this->assertEquals(0, $monster->countHit("rune", "hero_1"));
     }
 
-    public function testApplyDamageRuneCountsAsHitForDeadAttacker(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_12_8");
-        $this->game->tokens->moveToken("monster_imp_1", "hex_11_8");
-        $this->game->hexMap->invalidateOccupancy();
-
-        // Imp is dead faction — rune should count as hit on hero
+    public function testCountHitRuneCountsAsHitForDeadAttacker(): void {
+        // Imp is dead faction — rune should count as hit
         $hero = $this->game->getHeroById("hero_1");
-        $result = $hero->applyDamage("rune", "monster_imp_1");
-        $this->assertEquals(1, $result);
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
-        $this->assertCount(1, $crystals);
+        $this->assertEquals(1, $hero->countHit("rune", "monster_imp_1"));
     }
 
     // -------------------------------------------------------------------------
@@ -195,61 +172,24 @@ final class MonsterTest extends TestCase {
         $this->assertEquals(0, $monster->getArmor());
     }
 
-    public function testArmorAbsorbsFirstHit(): void {
+    public function testCountHitReturnsHits(): void {
         $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
         $monster = $this->game->getMonster("monster_draugr_1");
-        $monster->beginDefense();
 
-        // First hit absorbed by armor
-        $result = $monster->applyDamage("hit", "hero_1");
-        $this->assertEquals(0, $result);
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1");
-        $this->assertCount(0, $crystals);
-
-        // Second hit goes through
-        $result = $monster->applyDamage("hit", "hero_1");
-        $this->assertEquals(1, $result);
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1");
-        $this->assertCount(1, $crystals);
+        $this->assertEquals(1, $monster->countHit("hit", "hero_1"));
+        $this->assertEquals(0, $monster->countHit("miss", "hero_1"));
     }
 
-    public function testArmorResetsPerAttack(): void {
-        $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
-
+    public function testApplyArmorReducesHits(): void {
         $monster = $this->game->getMonster("monster_draugr_1");
 
-        // First attack: armor absorbs 1st hit, 2nd goes through
-        $monster->beginDefense();
-        $monster->applyDamage("hit", "hero_1"); // absorbed
-        $monster->applyDamage("hit", "hero_1"); // goes through
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1");
-        $this->assertCount(1, $crystals);
-
-        // Second attack: armor resets, absorbs 1st hit again
-        $monster->beginDefense();
-        $monster->applyDamage("hit", "hero_1"); // absorbed
-        $monster->applyDamage("hit", "hero_1"); // goes through
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1");
-        $this->assertCount(2, $crystals);
-    }
-
-    public function testArmorDoesNotAbsorbMiss(): void {
-        $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
-
-        $monster = $this->game->getMonster("monster_draugr_1");
-        $monster->beginDefense();
-
-        // Miss doesn't consume armor
-        $monster->applyDamage("miss", "hero_1");
-        // Next hit should still be absorbed
-        $result = $monster->applyDamage("hit", "hero_1");
-        $this->assertEquals(0, $result);
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1");
-        $this->assertCount(0, $crystals);
+        // Draugr has armor=1, so 2 hits → 1 effective damage
+        $this->assertEquals(1, $monster->applyArmor(2));
+        // 1 hit → 0 effective damage
+        $this->assertEquals(0, $monster->applyArmor(1));
+        // 0 hits → 0
+        $this->assertEquals(0, $monster->applyArmor(0));
     }
 }

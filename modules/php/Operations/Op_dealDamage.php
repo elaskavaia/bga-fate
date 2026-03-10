@@ -15,6 +15,8 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Hero;
+use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -30,19 +32,8 @@ class Op_dealDamage extends CountableOperation {
     }
 
     private function getRange(): int {
-        $param = $this->getParam(0, "adj");
-        if ($param === "adj") {
-            return 1;
-        }
-        if ($param === "inRange") {
-            $hero = $this->game->getHero($this->getOwner());
-            return $hero->getAttackRange();
-        }
-        // inRangeN — extract N
-        if (str_starts_with($param, "inRange")) {
-            return (int) substr($param, 7);
-        }
-        return 1;
+        $hero = $this->game->getHero($this->getOwner());
+        return $hero->getRangeFromParam($this->getParam(0, "adj"));
     }
 
     private function matchesFilter(string $monsterId): bool {
@@ -56,39 +47,40 @@ class Op_dealDamage extends CountableOperation {
         if ($presetTarget) {
             return [$presetTarget => ["q" => Material::RET_OK]];
         }
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $heroHex = $this->game->hexMap->getCharacterHex($heroId);
-        $this->game->systemAssert("ERR:dealDamage:heroNotOnMap:$heroId", $heroHex !== null);
-        $hexesInRange = $this->game->hexMap->getHexesInRange($heroHex, $this->getRange());
+        $hero = $this->game->getHero($this->getOwner());
+        $hexes = $hero->getMonsterHexesInRange($this->getRange(), fn($mId) => $this->matchesFilter($mId));
         $targets = [];
-        foreach ($hexesInRange as $hexId) {
-            $monsterId = $this->game->hexMap->isOccupiedByCharacterType($hexId, "monster");
-            if ($monsterId !== null && $this->matchesFilter($monsterId)) {
-                $targets[$hexId] = ["q" => Material::RET_OK];
-            }
+        foreach ($hexes as $hexId) {
+            $targets[$hexId] = ["q" => Material::RET_OK];
         }
         return $targets;
     }
 
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
-        $monsterId = $this->game->hexMap->isOccupiedByCharacterType($targetHex, "monster");
-        $this->game->systemAssert("ERR:dealDamage:noMonsterOnHex:$targetHex", $monsterId !== null);
-
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
+        $attackerId = $this->getDataField("attacker");
+        if ($attackerId === null) {
+            $attackerId = $this->game->getHeroTokenId($this->getOwner());
+        }
         $amount = (int) $this->getCount();
 
-        $this->game->effect_moveCrystals($heroId, "red", $amount, $monsterId, [
+        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null);
+        $this->game->systemAssert("ERR:dealDamage:noCharacterOnHex:$targetHex", $defenderId !== null);
+
+        $this->game->effect_moveCrystals($attackerId, "red", $amount, $defenderId, [
             "message" => "",
         ]);
 
-        $monster = $this->game->getMonster($monsterId);
-        $killed = $monster->applyDamageEffects($amount, $heroId);
-        if ($killed) {
-            $hero = $this->game->getHero($owner);
-            $hero->gainXp($monster->getXpReward());
+        $defender = $this->game->getCharacter($defenderId);
+        if ($defender instanceof Monster) {
+            $killed = $defender->applyDamageEffects($amount, $attackerId);
+            if ($killed) {
+                $hero = $this->game->getHero($this->getOwner());
+                $hero->gainXp($defender->getXpReward());
+            }
+        } else {
+            /** @var Hero $defender */
+            $defender->applyDamageEffects($amount);
         }
     }
 

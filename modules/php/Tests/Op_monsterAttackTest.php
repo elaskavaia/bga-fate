@@ -26,6 +26,8 @@ final class Op_monsterAttackTest extends TestCase {
     private function resolveMonsterAttack(string $monsterId): void {
         $op = $this->game->machine->instanciateOperation("monsterAttack", null, ["char" => $monsterId]);
         $op->resolve();
+        // Run the queued roll → resolveHits → dealDamage pipeline
+        $this->game->machine->dispatchAll();
     }
 
     // -------------------------------------------------------------------------

@@ -112,6 +112,47 @@ class Hero extends Character {
     }
 
     /**
+     * Returns hex IDs occupied by monsters within the given range of this hero.
+     * @param int $range max distance in hexes
+     * @param callable|null $filter optional filter — receives monsterId, returns bool
+     * @return string[] array of hex IDs
+     */
+    function getMonsterHexesInRange(int $range, ?callable $filter = null): array {
+        $heroHex = $this->game->hexMap->getCharacterHex($this->id);
+        $this->game->systemAssert("ERR:heroNotOnMap:{$this->id}", $heroHex !== null);
+        $hexesInRange = $this->game->hexMap->getHexesInRange($heroHex, $range);
+        $targets = [];
+        foreach ($hexesInRange as $hexId) {
+            $monsterId = $this->game->hexMap->isOccupiedByCharacterType($hexId, "monster");
+            if ($monsterId !== null && ($filter === null || $filter($monsterId))) {
+                $targets[] = $hexId;
+            }
+        }
+        return $targets;
+    }
+
+    /**
+     * Resolve a range parameter string to an integer range value.
+     * "adj" → 1, "inRange" → hero's attack range, "inRangeN" → N.
+     */
+    function getRangeFromParam(string $param): int {
+        if ($param === "adj") {
+            return 1;
+        }
+        if ($param === "inRange") {
+            return $this->getAttackRange();
+        }
+        if (str_starts_with($param, "inRange")) {
+            return (int) substr($param, 7);
+        }
+
+        if (is_numeric($param)) {
+            return (int) $param;
+        }
+        return 1;
+    }
+
+    /**
      * Returns attack range based on equipment cards. Default is 1.
      */
     function getAttackRange(): int {

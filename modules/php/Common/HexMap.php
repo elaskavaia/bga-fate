@@ -332,7 +332,7 @@ class HexMap {
      * Returns the token ID of the character on this hex
      * @param string $hexId hex to check
      */
-    function getCharacterOnHex(string $hexId, ?string $characterType): ?string {
+    function getCharacterOnHex(string $hexId, ?string $characterType = null): ?string {
         $occ = $this->getOccupancyMap();
         $char = $occ[$hexId]["character"] ?? null;
         if ($char !== null) {

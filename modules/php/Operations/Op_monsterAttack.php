@@ -44,17 +44,14 @@ class Op_monsterAttack extends Operation {
         // Rules may require different targeting logic (e.g. closest, random, player choice).
         $heroId = $this->pickTarget($heroesInRange);
 
-        // Calculate monster strength with faction bonus
+        // Calculate monster strength with faction bonus and queue roll pipeline
         $strength = $this->getMonsterStrength($monsterId, $heroId);
+        $heroHex = $this->game->hexMap->getCharacterHex($heroId);
 
-        // Roll attack dice (places red crystals on hero)
-        $hits = $this->game->rollAttackDice($monsterId, $heroId, $strength);
-
-        // Check if hero is knocked out
-        if ($hits > 0) {
-            $hero = $this->game->getHeroById($heroId);
-            $hero->applyDamageEffects($hits);
-        }
+        $this->queue("{$strength}roll", null, [
+            "attacker" => $monsterId,
+            "target" => $heroHex,
+        ]);
     }
 
     /**

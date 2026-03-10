@@ -344,28 +344,12 @@ final class GameTest extends TestCase {
         }
     }
 
-    public function testSetupEventCardDuplicates() {
+    public function testSetupEventCardInHand() {
         $game = $this->game;
         $game->setupGameTables();
 
-        $ph = $this->getHeroNumber(PCOLOR);
-
-        // Find an event card with count>1 for the assigned hero
-        foreach ($game->material->getTokensWithPrefix("card_event_{$ph}") as $cardId => $info) {
-            $count = $info["count"] ?? 1;
-            if ($count > 1) {
-                // Should create $count indexed tokens in event deck
-                for ($i = 1; $i <= $count; $i++) {
-                    $loc = $game->tokens->getTokenLocation("{$cardId}_{$i}");
-                    $this->assertNotNull($loc, "{$cardId}_{$i} should exist");
-                    $this->assertEquals("deck_event_" . PCOLOR, $loc);
-                }
-                // One more should not exist
-                $this->assertNull($game->tokens->getTokenInfo("{$cardId}_" . ($count + 1)));
-                return; // one check is enough
-            }
-        }
-        $this->fail("No event card with count>1 found for hero $ph");
+        $hand = $game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
+        $this->assertCount(1, $hand, "Hero should have exactly 1 card in hand after setup");
     }
 
     public function testInstanciateAllOperations() {

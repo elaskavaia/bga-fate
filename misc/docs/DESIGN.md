@@ -133,7 +133,7 @@ from a filtered set. Common target filters:
 **Chaining**: `;` separates multiple operations from one card, e.g. `dealDamage(adj);1moveMonster`
 
 **Costs**: `cost:effect` notation for activated effects:
-- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3dealDamage(range)`
+- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3dealDamage(inRange)`
 - `gainDamage:effect` — spend 1 durability (take [DAMAGE] on card) to perform effect, e.g. `gainDamage:1preventDamage`
 - Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2dealDamage(adj))`
 

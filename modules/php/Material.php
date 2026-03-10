@@ -320,6 +320,14 @@ class Material {
         "type" => "gainMana",
         "name" => clienttranslate("Gain Mana"),
 ],
+    "Op_roll" => [ 
+        "type" => "roll",
+        "name" => clienttranslate("Roll Dice"),
+],
+    "Op_resolveHits" => [ 
+        "type" => "resolveHits",
+        "name" => clienttranslate("Resolve Hits"),
+],
     "Op_heal" => [ 
         "type" => "heal",
         "name" => clienttranslate("Heal"),
@@ -3463,7 +3471,7 @@ class Material {
         "num" => 11,
         "hno" => 2,
         "name" => clienttranslate("Snipe I"),
-        "r" => "2roll(range)",
+        "r" => "2roll(inRange)",
         "effect" => "Roll 2[DIE_ATTACK] against a monster within attack range.",
 ],
     "card_ability_2_12" => [ 
@@ -3473,7 +3481,7 @@ class Material {
         "num" => 12,
         "hno" => 2,
         "name" => clienttranslate("Snipe II"),
-        "r" => "5roll(range)",
+        "r" => "5roll(inRange)",
         "effect" => "Roll 5[DIE_ATTACK] against a monster within attack range.",
 ],
     "card_ability_2_7" => [ 
