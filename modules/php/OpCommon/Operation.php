@@ -27,7 +27,6 @@ use Bga\Games\Fate\OpCommon\OpParser;
 use Bga\Games\Fate\States\MultiPlayerTurnPrivate;
 use Exception;
 
-use function Bga\Games\Fate\array_get;
 use function Bga\Games\Fate\toJson;
 
 abstract class Operation {
@@ -160,8 +159,8 @@ abstract class Operation {
         return $this->withDataField("params", $params);
     }
 
-    function getParams() {
-        return $this->getDataField("params", null);
+    function getParams(): ?string {
+        return (string) $this->getDataField("params", null);
     }
 
     function getParam(int $index = 0, ?string $default = "") {
@@ -170,7 +169,7 @@ abstract class Operation {
             return $default;
         }
         $pargs = explode(",", $params);
-        return array_get($pargs, $index, $default);
+        return $pargs[$index] ?? $default;
     }
 
     final function isTrancient() {

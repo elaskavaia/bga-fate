@@ -30,13 +30,25 @@ class Op_dealDamage extends CountableOperation {
     }
 
     private function getRange(): int {
-        // TODO: parse range from param (e.g. "adj"=1, "inRange"=hero attack range, "inRange3"=3)
+        $param = $this->getParam(0, "adj");
+        if ($param === "adj") {
+            return 1;
+        }
+        if ($param === "inRange") {
+            $hero = $this->game->getHero($this->getOwner());
+            return $hero->getAttackRange();
+        }
+        // inRangeN — extract N
+        if (str_starts_with($param, "inRange")) {
+            return (int) substr($param, 7);
+        }
         return 1;
     }
 
     private function matchesFilter(string $monsterId): bool {
-        // TODO: parse monster filter from param (e.g. "!legend", "rank==3 or legend")
-        return true;
+        $filter = $this->getParam(1, "true");
+        $filter = trim($filter, "'");
+        return !!$this->game->evaluateExpression($filter, $this->getOwner(), $monsterId);
     }
 
     function getPossibleMoves(): array {

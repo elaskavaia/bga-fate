@@ -66,6 +66,87 @@ final class Op_dealDamageTest extends TestCase {
         $this->assertCount(2, $moves);
     }
 
+    public function testInRangeUsesHeroAttackRange(): void {
+        // Bjorn has First Bow (attack_range=2), hex_13_7 is 2 hexes away
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(inRange)", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_13_7", $moves);
+    }
+
+    public function testInRange3ReachesDistance3(): void {
+        // hex_14_6 is 3 hexes from hex_11_8
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_14_6");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(inRange3)", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_14_6", $moves);
+    }
+
+    public function testAdjDoesNotReachDistance2(): void {
+        // hex_13_7 is 2 hexes away — adj should not reach it
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertEmpty($moves);
+    }
+
+    // -------------------------------------------------------------------------
+    // matchesFilter
+    // -------------------------------------------------------------------------
+
+    public function testFilterTrueMatchesAll(): void {
+        // Default filter is "true" — should match any monster
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $op = $this->createOp(); // dealDamage with no filter param
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_12_8", $moves);
+    }
+
+    public function testFilterNotLegendExcludesLegend(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj,'not_legend')", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertEmpty($moves);
+    }
+
+    public function testFilterNotLegendIncludesNonLegend(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj,'not_legend')", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_12_8", $moves);
+    }
+
+    public function testFilterRank3OrLegendMatchesRank3(): void {
+        // Troll is rank 3
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_12_8", $moves);
+    }
+
+    public function testFilterRank3OrLegendMatchesLegend(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("hex_12_8", $moves);
+    }
+
+    public function testFilterRank3OrLegendExcludesRank1(): void {
+        // Goblin is rank 1
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        /** @var Op_dealDamage */
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
+        $moves = $op->getPossibleMoves();
+        $this->assertEmpty($moves);
+    }
+
     public function testAdjacentHeroNotTarget(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
         $op = $this->createOp();

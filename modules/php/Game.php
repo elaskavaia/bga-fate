@@ -304,6 +304,26 @@ class Game extends Base {
         }
     }
 
+    function evaluateTerm($x, $owner, $context = null, ?array $options = null) {
+        if ($x === "true") {
+            return 1;
+        }
+        if ($context === null) {
+            return 0;
+        }
+        if ($x === "legend") {
+            // monster_legend_1
+            return (int) (getPart($context, 1) == "legend");
+        }
+        if ($x === "not_legend") {
+            return (int) (getPart($context, 1) != "legend");
+        }
+
+        //id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor
+
+        return $this->getRulesFor($context, $x, 0);
+    }
+
     /**
      * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
      * Used by both hero attacks and monster attacks.
@@ -571,7 +591,9 @@ class Game extends Base {
         $placed = 0;
         $monsters = ["monster_goblin_1", "monster_goblin_2"];
         foreach ($adjHexes as $hex) {
-            if ($placed >= 2) break;
+            if ($placed >= 2) {
+                break;
+            }
             if (!$this->hexMap->isOccupied($hex)) {
                 $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
                 $placed++;

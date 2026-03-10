@@ -329,34 +329,40 @@ class MathExpressionParser {
 
         return $args;
     }
-    function parseExpression($stopTokens = []) {
-        $left = $this->parseTerm();
-        $lookup = $this->peek();
-
-        if ($lookup === null || $lookup === ")" || in_array($lookup, $stopTokens)) {
-            return $left;
-        }
-
-        // Check for ternary operator
-        if ($lookup === "?") {
-            return $this->parseTernary($left, $stopTokens);
-        }
-
-        $op = $this->pop();
+    private function resolveOperator(string $op): string {
         $tt = $this->lexer->getTerminalName($op);
-        if ($tt == "T_IDENTIFIER" || $tt == "T_NUMBER") {
+        if ($tt == "T_IDENTIFIER") {
+            if ($op === "or") {
+                return "||";
+            } elseif ($op === "and") {
+                return "&&";
+            }
             throw new Exception("Unexpected token $op");
         }
-        $right = $this->parseTerm();
-        $result = new MathBinaryExpression($op, $left, $right);
-
-        // Check for ternary operator after binary expression
-        $lookup = $this->peek();
-        if ($lookup === "?") {
-            return $this->parseTernary($result, $stopTokens);
+        if ($tt == "T_NUMBER") {
+            throw new Exception("Unexpected token $op");
         }
+        return $op;
+    }
 
-        return $result;
+    function parseExpression($stopTokens = []) {
+        $left = $this->parseTerm();
+
+        while (true) {
+            $lookup = $this->peek();
+
+            if ($lookup === null || $lookup === ")" || in_array($lookup, $stopTokens)) {
+                return $left;
+            }
+
+            if ($lookup === "?") {
+                return $this->parseTernary($left, $stopTokens);
+            }
+
+            $op = $this->resolveOperator($this->pop());
+            $right = $this->parseTerm();
+            $left = new MathBinaryExpression($op, $left, $right);
+        }
     }
 
     function parseTernary($condition, $stopTokens = []) {
