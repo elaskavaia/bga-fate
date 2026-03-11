@@ -130,13 +130,25 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
          $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
      }
      ```
-2. Run the harness:
+2. Run the harness in two steps so you can diff before/after:
    ```bash
+   # Step 1: baseline — run setup scenario, save snapshot as before.html
+   npm run play --scenario=setup
+   cp staging/snapshot.html staging/before.html
+
+   # Step 2: apply the operation on top of the setup state
    npm run play --debug=debug_Op_<name> --scenario=setup
+   # staging/snapshot.html now reflects the operation state
    ```
-3. Read `staging/snapshot.html`
+3. Compare `staging/before.html` and `staging/snapshot.html` to see what changed
 
 ### What to check
+
+**For automated operations** (no user input), skip the buttons/clickable-tokens checks. Instead focus on:
+- Token positions and states changed as expected (diff `before.html` vs `snapshot.html`, look for elements that moved or changed class/state)
+- Game log entries in `#logs` (right column of snapshot) show the expected messages with correct token/place names substituted
+
+**For user-facing operations**, check all of the following:
 
 **Action buttons (`#generalactions`)**
 - Buttons should appear for each valid target returned by `getPossibleMoves()` unless buttons=>false in getUiArgs
