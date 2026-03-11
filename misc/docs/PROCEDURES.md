@@ -110,7 +110,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
       # Then read staging/snapshot.html
       ```
     - Check: tokens appear in correct locations, action buttons render with correct labels
-    - Check tooltips: `snapshot.html` includes a `#harness-tooltip-registry` section at the bottom listing all registered tooltips — verify each entry has the expected HTML content
+    - Check tooltips: `snapshot.html` includes a `#harness-tooltip-registry` section at the bottom listing all registered tooltips. Read `staging/snapshot.html` and search for the token ID or tooltip text to verify the expected content is present. Each entry shows the node ID and the rendered tooltip HTML.
     - If the operation requires player input, the buttons in `#generalactions` should appear with `data-action` attributes showing the correct `action_resolve` payload
 
 ## Adding New Game Material Element
