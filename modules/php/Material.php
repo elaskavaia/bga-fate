@@ -5149,7 +5149,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Back Down!"),
         "count" => 2,
-        "r" => "killMonster(inRange,rank<=2)",
+        "r" => "killMonster(inRange,'rank<=2')",
         "effect" => "Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.",
         "flavour" => "Let's call it a warning shot.",
 ],

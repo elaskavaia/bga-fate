@@ -9,6 +9,11 @@ use Bga\Games\Fate\Operations\Op_playEvent;
 use Bga\Games\Fate\Tests\GameUT;
 use PHPUnit\Framework\TestCase;
 
+// Hero 1 (Bjorn) is always assigned to PCOLOR in a 1-player setup.
+// Use a specific known Bjorn event card to avoid relying on deck order.
+// card_event_1_27 = "Rest" (r: 2heal(self)) — simple, no expression args.
+const EVENT_CARD = "card_event_1_27";
+
 final class Op_playEventTest extends TestCase {
     private GameUT $game;
 
@@ -16,6 +21,9 @@ final class Op_playEventTest extends TestCase {
         $this->game = new GameUT();
         $this->game->init();
         $this->game->setupGameTables();
+        // Clear the hand and place only the card we want to test with
+        $this->clearHand();
+        $this->putInHand(EVENT_CARD);
     }
 
     private function createOp(): Op_playEvent {
@@ -24,20 +32,22 @@ final class Op_playEventTest extends TestCase {
         return $op;
     }
 
+    /** Move all event cards from hand back to deck */
+    private function clearHand(): void {
+        $handCards = $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
+        foreach ($handCards as $cardId => $info) {
+            $this->game->tokens->moveToken($cardId, "deck_event_" . PCOLOR);
+        }
+    }
+
+    /** Move a specific card to hand (from wherever it is) */
+    private function putInHand(string $cardId): void {
+        $this->game->tokens->moveToken($cardId, "hand_" . PCOLOR);
+    }
+
     /** Helper: get event cards in hand for PCOLOR */
     private function getHandCards(): array {
         return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
-    }
-
-    /** Helper: move N event cards from deck to hand */
-    private function fillHand(int $count): void {
-        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
-        $i = 0;
-        foreach ($deck as $cardId => $info) {
-            if ($i >= $count) break;
-            $this->game->tokens->moveToken($cardId, "hand_" . PCOLOR);
-            $i++;
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -47,37 +57,24 @@ final class Op_playEventTest extends TestCase {
     public function testHandEventCardsAreTargets(): void {
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
-        $handCards = $this->getHandCards();
-        $this->assertNotEmpty($handCards);
-        foreach ($handCards as $cardId => $info) {
-            if (str_starts_with($cardId, "card_event_")) {
-                $this->assertArrayHasKey($cardId, $moves);
-            }
-        }
+        $this->assertArrayHasKey(EVENT_CARD, $moves);
     }
 
     public function testEmptyHandReturnsNoMoves(): void {
-        $handCards = $this->getHandCards();
-        foreach ($handCards as $cardId => $info) {
-            $this->game->tokens->moveToken($cardId, "deck_event_" . PCOLOR);
-        }
+        $this->clearHand();
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertEmpty($moves);
     }
 
     public function testMultipleHandCardsAllTargetable(): void {
-        $this->fillHand(2);
+        $second = "card_event_1_30"; // Bjorn "Sewing"
+        $this->putInHand($second);
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
-        $handCards = $this->getHandCards();
-        $eventCount = 0;
-        foreach ($handCards as $cardId => $info) {
-            if (str_starts_with($cardId, "card_event_")) {
-                $eventCount++;
-            }
-        }
-        $this->assertCount($eventCount, $moves);
+        $this->assertArrayHasKey(EVENT_CARD, $moves);
+        $this->assertArrayHasKey($second, $moves);
+        $this->assertCount(2, $moves);
     }
 
     // -------------------------------------------------------------------------
@@ -85,22 +82,16 @@ final class Op_playEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveMovesCardToDiscard(): void {
-        $handCards = $this->getHandCards();
-        $cardId = array_key_first($handCards);
-
         $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardId]);
+        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
 
-        $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation($cardId));
+        $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation(EVENT_CARD));
     }
 
     public function testResolveRemovesCardFromHand(): void {
-        $handBefore = count($this->getHandCards());
-        $cardId = array_key_first($this->getHandCards());
-
         $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardId]);
+        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
 
-        $this->assertEquals($handBefore - 1, count($this->getHandCards()));
+        $this->assertArrayNotHasKey(EVENT_CARD, $this->getHandCards());
     }
 }
