@@ -18,12 +18,29 @@ if (!defined("CCOLOR")) define("CCOLOR", "ff0000");
 if (!defined("ACOLOR")) define("ACOLOR", "ffffff"); // automa
 if (!defined("PCOLOR_ID")) define("PCOLOR_ID", 10);
 
-class FakeNotify extends Notify {
-    public function all(string $notifName, string|NotificationMessage $message = "", array $args = []): void {
-        //echo "Notify all: $notifName : $message\n";
+class RecordingNotify extends Notify {
+    public array $log = [];
+    private array $decorators = [];
+
+    public function addDecorator(callable $fn): void {
+        $this->decorators[] = $fn;
     }
+
+    private function applyDecorators(string $message, array $args): array {
+        foreach ($this->decorators as $fn) {
+            $args = $fn($message, $args);
+        }
+        return $args;
+    }
+
+    public function all(string $notifName, string|NotificationMessage $message = "", array $args = []): void {
+        $args = $this->applyDecorators((string)$message, $args);
+        $this->log[] = ["type" => $notifName, "log" => (string)$message, "args" => $args, "channel" => "broadcast"];
+    }
+
     public function player(int $playerId, string $notifName, string|NotificationMessage $message = "", array $args = []): void {
-        //echo "Notify player $playerId: $notifName : $message\n";
+        $args = $this->applyDecorators((string)$message, $args);
+        $this->log[] = ["type" => $notifName, "log" => (string)$message, "args" => $args, "channel" => "player", "player_id" => $playerId];
     }
 }
 
@@ -45,14 +62,13 @@ class GameUT extends Game {
 
     function __construct() {
         parent::__construct();
-        //$this->gamestate = new GameStateInMem();
+        $this->notify = new RecordingNotify();
+        $this->registerNotifyDecorators(); // re-register on RecordingNotify (parent::__construct set a stub Notify)
 
-        //$this->tokens = new TokensInMem($this);
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
         $this->curid = 1;
         $this->_colors = [PCOLOR, BCOLOR];
-        $this->notify = new FakeNotify();
 
         $this->tokens = new TokensInMem($this);
     }

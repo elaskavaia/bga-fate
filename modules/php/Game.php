@@ -50,6 +50,10 @@ class Game extends Base {
         $this->hexMap = new HexMap($this);
         $this->dbMultiUndo = new DbMultiUndo($this, "restorePlayerTables");
 
+        $this->registerNotifyDecorators();
+    }
+
+    public function registerNotifyDecorators(): void {
         $this->notify->addDecorator(function (string $message, array $args) {
             if (str_contains($message, '${reason}') && !isset($args["reason"])) {
                 $args["reason"] = "";

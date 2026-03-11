@@ -22,20 +22,7 @@ require_once __DIR__ . "/GameHarness.php";
 
 use Bga\GameFramework\Notify;
 use Bga\Games\Fate\Tests\GameUT;
-
-// ── Recording notify ──────────────────────────────────────────────────────────
-
-class RecordingNotify extends Notify {
-    public array $log = [];
-
-    public function all(string $notifName, string|\Bga\GameFramework\NotificationMessage $message = "", array $args = []): void {
-        $this->log[] = ["type" => $notifName, "log" => (string)$message, "args" => $args, "channel" => "broadcast"];
-    }
-
-    public function player(int $playerId, string $notifName, string|\Bga\GameFramework\NotificationMessage $message = "", array $args = []): void {
-        $this->log[] = ["type" => $notifName, "log" => (string)$message, "args" => $args, "channel" => "player", "player_id" => $playerId];
-    }
-}
+use Bga\Games\Fate\Tests\RecordingNotify;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -150,10 +137,7 @@ if ($debugFunction) {
 // Boot GameUT
 $game = new GameHarness();
 $game->curid = $currentPlayerId;
-
-// Install recording notify
-$recording = new RecordingNotify();
-$game->notify = $recording;
+$recording = $game->notify; // RecordingNotify is set up by GameUT constructor (decorators already registered)
 
 // Load db state if present (skipped when reset=true)
 $db = $reset ? null : loadJson("$stateDir/db.json");
@@ -205,7 +189,7 @@ function runDispatchLoop(GameHarness $game): void {
     }
 }
 
-function emitGameStateChange(GameHarness $game, RecordingNotify $recording, int $currentPlayerId): void {
+function emitGameStateChange(GameHarness $game, Notify $recording, int $currentPlayerId): void {
     // Emit a synthetic gameStateChange notification so the JS renderer can call onEnteringState.
     // Shape mirrors the real BGA gameStateChange push message:
     //   args: { id, name, active_player, type, args: { description, _private: <unwrapped opInfo> } }

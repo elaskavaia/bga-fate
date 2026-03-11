@@ -123,9 +123,58 @@ const tooltipRegistry = new Map<string, string>();
 (global as any).gameui = {
   player_id: currentPlayerId,
   on_client_state: false,
-  format_string_recursive: (str: string, args: any) => {
-    if (!str || !args) return str;
-    return str.replace(/\$\{(\w+)\}/g, (_m: string, key: string) => args[key] ?? `\${${key}}`);
+  format_string_recursive_sub_logs: function(args: any): void {
+    const gm = (global as any).gameui;
+    for (const key in args) {
+      if (key === "i18n") continue;
+      const val = args[key];
+      if (val === null || typeof val !== "object" || Array.isArray(val) || (typeof Node !== "undefined" && val instanceof Node)) continue;
+      if (val.log !== undefined && val.args !== undefined) {
+        args[key] = gm.format_string_recursive(val.log, val.args);
+      } else {
+        gm.format_string_recursive_sub_logs(val);
+      }
+    }
+  },
+  format_string_recursive: function(str: string, args: any): string {
+    if (str === null) { console.error("format_string_recursive called with null string", args); return "null_tr_string"; }
+    const gm = (global as any).gameui;
+    // Allow game to pre-process log via bgaFormatText
+    if (typeof gm.bgaFormatText === "function") {
+      try {
+        const r = gm.bgaFormatText(str, args);
+        if (r) { str = r.log ?? str; args = r.args ?? args; }
+      } catch (e: any) { console.error(str, args, "bgaFormatText threw", e.stack); }
+    }
+    if (!str) return "";
+    // Translate i18n fields
+    if (args?.i18n) {
+      for (const key of Object.values(args.i18n) as string[]) {
+        if (Array.isArray(args[key])) {
+          args[key] = args[key].map((v: string) => gm.clienttranslate_string(v));
+        } else if (args[key]) {
+          args[key] = gm.clienttranslate_string(args[key]);
+        }
+      }
+    }
+    // Recursively format nested {log, args} objects
+    gm.format_string_recursive_sub_logs(args);
+    // Join array args with separator if specified
+    if (args?.separator && typeof args.separator === "object") {
+      for (const key of Object.keys(args.separator)) {
+        if (Array.isArray(args[key]) && args[key].length > 1) {
+          const sep = args.separator[key];
+          if (sep === "and" || sep === "or") {
+            const arr = args[key];
+            args[key] = `${arr.slice(0, -1).join(", ")} ${sep} ${arr[arr.length - 1]}`;
+          } else {
+            args[key] = args[key].join(sep);
+          }
+        }
+      }
+    }
+    // Substitute ${key} placeholders (dojo string.substitute style)
+    return str.replace(/\$\{(\w+)\}/g, (_m: string, key: string) => args?.[key] ?? `\${${key}}`);
   },
   addTooltipHtml: (nodeId: string, html: string, _delay?: number) => {
     tooltipRegistry.set(nodeId, html);
@@ -259,6 +308,8 @@ import { Game } from "../../src/Game";
 async function main() {
   log("Instantiating Game...");
   const game = new Game(mockBga);
+  // Wire bgaFormatText so format_string_recursive can call it
+  (global as any).gameui.bgaFormatText = (str: string, args: any) => (game as any).bgaFormatText(str, args);
 
   log("Calling game.setup()...");
   game.setup(gamedatas);
