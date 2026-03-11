@@ -381,14 +381,14 @@ class Base extends Table {
 
     function loadPlayersBasicInfosWithBots($bots = true) {
         $infos = parent::loadPlayersBasicInfos();
-        if ($bots && $this->isSolo()) {
-            $infos[self::PLAYER_AUTOMA]["player_id"] = self::PLAYER_AUTOMA;
-            $infos[self::PLAYER_AUTOMA]["player_no"] = 2;
-            $infos[self::PLAYER_AUTOMA]["player_color"] = $this->getAutomaColor();
-            $infos[self::PLAYER_AUTOMA]["player_name"] = "Monsters";
-            $infos[self::PLAYER_AUTOMA]["player_ai"] = 1;
-            $infos[self::PLAYER_AUTOMA]["player_score"] = 0;
-        }
+        // if ($bots && $this->isSolo()) {
+        //     $infos[self::PLAYER_AUTOMA]["player_id"] = self::PLAYER_AUTOMA;
+        //     $infos[self::PLAYER_AUTOMA]["player_no"] = 2;
+        //     $infos[self::PLAYER_AUTOMA]["player_color"] = $this->getAutomaColor();
+        //     $infos[self::PLAYER_AUTOMA]["player_name"] = "Monsters";
+        //     $infos[self::PLAYER_AUTOMA]["player_ai"] = 1;
+        //     $infos[self::PLAYER_AUTOMA]["player_score"] = 0;
+        // }
         return $infos;
     }
     public function getPlayerColors() {
@@ -521,7 +521,11 @@ class Base extends Table {
                     is_string($value) &&
                     is_string($key) &&
                     (str_ends_with($key, "_tr") ||
-                        (str_ends_with($key, "_name") && $key != "player_name" && $key != "token_name" && $key != "place_name" && $key != "char_name"))
+                        (str_ends_with($key, "_name") &&
+                            $key != "player_name" &&
+                            $key != "token_name" &&
+                            $key != "place_name" &&
+                            $key != "char_name"))
                 ) {
                     $i18n[] = $key;
                 }

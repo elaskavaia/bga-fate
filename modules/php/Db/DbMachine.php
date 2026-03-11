@@ -30,9 +30,6 @@ class DbMachine {
     public function __construct() {
         $this->game = Game::$instance;
     }
-    function _($text) {
-        return $this->game->_($text);
-    }
 
     function getTableFields() {
         return ["id", "rank", "type", "owner", "data"];

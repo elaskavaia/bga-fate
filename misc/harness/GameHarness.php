@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\States\GameState;
 use Bga\Games\Fate\StateConstants;
 use Bga\Games\Fate\Tests\GameUT;
 
@@ -30,49 +31,45 @@ class GameHarness extends GameUT {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    /** @return array<int, GameState> map of state id => state instance */
+    private function buildStateNameMap(): array {
+        $map = [];
+        $statesDir = __DIR__ . "/../../modules/php/States";
+        foreach (glob("$statesDir/*.php") as $file) {
+            $className = "Bga\\Games\\Fate\\States\\" . basename($file, ".php");
+            if (!class_exists($className)) {
+                continue;
+            }
+            $inst = new $className($this);
+            $map[$inst->id] = $inst;
+        }
+        return $map;
+    }
+
     public function getAllDatas(): array {
         $result = parent::getAllDatas();
 
         $stateId = $this->gamestate->state_id();
-        $activePlayer = (int) $this->gamestate->getPlayerActiveThisTurn() ?: $this->curid;
+        $activePlayer = (int) $this->getActivePlayerId();
 
-        $stateNameMap = [
-            StateConstants::STATE_PLAYER_TURN              => "PlayerTurn",
-            StateConstants::STATE_GAME_DISPATCH            => "GameDispatch",
-            StateConstants::STATE_MULTI_PLAYER_TURN_PRIVATE => "MultiPlayerTurnPrivate",
-            StateConstants::STATE_PLAYER_TURN_CONF         => "PlayerTurnConfirm",
-            StateConstants::STATE_GAME_DISPATCH_FORCED     => "GameDispatchForced",
-            StateConstants::STATE_MULTI_PLAYER_MASTER      => "MultiPlayerMaster",
-            StateConstants::STATE_MULTI_PLAYER_WAIT_PRIVATE => "MultiPlayerWaitPrivate",
-            StateConstants::STATE_MACHINE_HALTED           => "MachineHalted",
-            StateConstants::STATE_END_GAME                 => "EndScore",
-        ];
-        $stateName = $stateNameMap[$stateId] ?? "Unknown";
+        $stateNameMap = $this->buildStateNameMap();
+        /** @var GameState */
+        $stateInst = $stateNameMap[$stateId];
+        $this->systemAssert("state not found $stateId", $stateInst);
+        $stateName = $stateInst->name;
 
         $stateArgs = [];
         try {
-            if ($stateId === StateConstants::STATE_PLAYER_TURN) {
-                $args = $this->machine->getArgs($activePlayer);
-                // PHP empty arrays serialize as JSON [], but client expects {} for data field
-                if (isset($args["data"]) && $args["data"] === []) {
-                    $args["data"] = new \stdClass();
-                }
-                $stateArgs = [
-                    "description" => $args["description"] ?? "",
-                    "_private"    => [$activePlayer => $args],
-                ];
-            } elseif ($stateId === StateConstants::STATE_PLAYER_TURN_CONF) {
-                $stateArgs = ["description" => "Confirm your action"];
-            }
+            $stateArgs = $stateInst->getArgs($activePlayer);
         } catch (\Throwable $e) {
             echo "Warning: getArgs for state $stateName failed: " . $e->getMessage() . "\n";
         }
 
         $result["gamestate"] = [
-            "id"            => $stateId,
-            "name"          => $stateName,
+            "id" => $stateId,
+            "name" => $stateName,
             "active_player" => $activePlayer,
-            "args"          => $stateArgs,
+            "args" => $stateArgs,
         ];
 
         return $result;
