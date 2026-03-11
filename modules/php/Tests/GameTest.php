@@ -1,125 +1,16 @@
 <?php
 
 declare(strict_types=1);
-namespace Bga\Games\Fate\Tests;
 
-use Bga\GameFramework\NotificationMessage;
-use Bga\GameFramework\Notify;
-use Bga\GameFramework\UserException;
-use Bga\Games\Fate\Game;
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\OpCommon\OpMachine;
-use Bga\Games\Fate\StateConstants;
+require_once __DIR__ . "/GameUT.php";
+
+use Bga\Games\Fate\Tests\GameUT;
 use Bga\Games\Fate\States\GameDispatch;
 use PHPUnit\Framework\TestCase;
 
 use function Bga\Games\Fate\array_get;
 use function Bga\Games\Fate\getPart;
 use function Bga\Games\Fate\toJson;
-
-//       "player_colors" => ["ff0000", "ffcc02", "6cd0f6", "982fff"],
-define("PCOLOR", "6cd0f6");
-define("BCOLOR", "982fff");
-define("CCOLOR", "ff0000");
-define("ACOLOR", "ffffff"); // automa
-define("PCOLOR_ID", 10);
-
-class FakeNotify extends Notify {
-    public function all(string $notifName, string|NotificationMessage $message = "", array $args = []): void {
-        //echo "Notify all: $notifName : $message\n";
-    }
-    public function player(int $playerId, string $notifName, string|NotificationMessage $message = "", array $args = []): void {
-        //echo "Notify player $playerId: $notifName : $message\n";
-    }
-}
-
-class GameUT extends Game {
-    var $multimachine;
-    var $xtable;
-    var $gameap_number = 0;
-    var $var_colonies = 0;
-    var $_colors = [];
-    /** @var int[] Predetermined values for bgaRand(). Consumed in order; falls back to $min when empty. */
-    public array $randQueue = [];
-
-    function bgaRand(int $min, int $max): int {
-        if ($this->randQueue) {
-            return array_shift($this->randQueue);
-        }
-        return $min;
-    }
-
-    function __construct() {
-        parent::__construct();
-        //$this->gamestate = new GameStateInMem();
-
-        //$this->tokens = new TokensInMem($this);
-        $this->xtable = [];
-        $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->curid = 1;
-        $this->_colors = [PCOLOR, BCOLOR];
-        $this->notify = new FakeNotify();
-
-        $this->tokens = new TokensInMem($this);
-    }
-
-    function setPlayersNumber(int $num) {
-        switch ($num) {
-            case 1:
-                $this->_colors = [PCOLOR];
-                break;
-            case 2:
-                $this->_colors = [PCOLOR, BCOLOR];
-                break;
-            case 3:
-                $this->_colors = [PCOLOR, BCOLOR, CCOLOR];
-                break;
-            case 4:
-                $this->_colors = [PCOLOR, BCOLOR, CCOLOR, "ef58a2"];
-                break;
-            default:
-                throw new UserException("Invalid number of players");
-        }
-    }
-
-    function getUserPreference(int $player_id, int $code): int {
-        return 0;
-    }
-
-    function init(int $x = 0) {
-        //$this->adjustedMaterial(true);
-        //$this->createAllTokens();
-        $this->gamestate->changeActivePlayer(10);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-        return $this;
-    }
-
-    function clean_cache() {}
-
-    function getMultiMachine() {
-        return $this->multimachine;
-    }
-
-    public $curid;
-
-    function _getCurrentPlayerId() {
-        return $this->curid;
-    }
-
-    function _getColors() {
-        return $this->_colors;
-    }
-
-    function fakeUserAction(Operation $op, $target = null) {
-        return $op->action_resolve([Operation::ARG_TARGET => $target]);
-    }
-
-    public function setupGameTables() {
-        return parent::setupGameTables();
-    }
-
-    // override/stub methods here that access db and stuff
-}
 
 final class GameTest extends TestCase {
     private GameUT $game;
@@ -433,7 +324,7 @@ final class GameTest extends TestCase {
         $game->tokens->createAllTokens();
 
         // Tableau starts empty — paying should throw
-        $this->expectException(UserException::class);
+        $this->expectException(\Bga\GameFramework\UserException::class);
         $game->effect_moveCrystals("hero_1", "green", -1, "tableau_" . PCOLOR);
     }
 
@@ -444,7 +335,7 @@ final class GameTest extends TestCase {
             return;
         }
 
-        /** @var Operation */
+        /** @var \Bga\Games\Fate\OpCommon\Operation */
         $op = $this->game->machine->instanciateOperation($type, PCOLOR);
 
         $args = $op->getArgs();

@@ -856,7 +856,7 @@ class DbTokens {
         //$color = $this->getPlayerColor($current_player_id);
         foreach ($locs as $location => $count) {
             $sort = $this->getRulesFor($location, "sort", null);
-            $this->game->debugLog("$location sort=$sort");
+            //$this->game->debugLog("$location sort=$sort");
             if ($this->isCounterAllowedForLocation($current_player_id, $location)) {
                 $this->fillCounters($result["counters"], [$location => $count]);
             }

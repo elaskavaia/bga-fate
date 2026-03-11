@@ -589,7 +589,7 @@ abstract class Operation {
      * Return possible move targets. Accepted formats:
      * - Flat array: `string[]` of target IDs (e.g. `["hex_12_8", "hex_11_7"]`)
      *   — normalized to `["q" => 0]` by `extractPossibleMoves()`
-     * - Annotated assoc array: `[target => ["q" => int, ...]]`
+     * - Annotated assoc array, i.e `["hex_12_8" => ["q" => 0, ...]]`
      *   where `"q"` is `Material::RET_OK` (0) for valid or an error code to disable
      *   Value is of type `ParamInfo` (see TypeScript definition)
      * - Special top-level keys: `"err"`, `"q"`, `"prompt"` are meta-data, not targets

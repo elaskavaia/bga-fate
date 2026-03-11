@@ -668,6 +668,10 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function sendReloadAllNotification() {
+        $this->notify->all("undoRestorePoint", "");
+    }
+
     function debug_setupGameTables() {
         $this->DbQuery("DELETE FROM token");
         $this->DbQuery("DELETE FROM machine");
@@ -679,7 +683,7 @@ class Game extends Base {
         //$newGameDatas = $this->getAllTableDatas(); // this is framework function
         //$this->notify->player($this->getActivePlayerId(), "resetInterfaceWithAllDatas", "", $newGameDatas); // this is notification to reset all data
         $this->notify->all("message", "setup is done", []);
-        $this->notify->all("undoRestorePoint", "", []);
+        $this->sendReloadAllNotification();
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
