@@ -139,15 +139,17 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
 ### What to check
 
 **Action buttons (`#generalactions`)**
-- Buttons should appear for each valid target returned by `getPossibleMoves()`
+- Buttons should appear for each valid target returned by `getPossibleMoves()` unless buttons=>false in getUiArgs
 - Each button must have a `data-action` attribute — search for `data-action` in the HTML
 - The payload should be `{"endpoint":"action_resolve","data":{"target":"<targetId>"}}`
 - If no buttons appear, check `getPrompt()` returns non-empty and `getPossibleMoves()` returns valid targets
+- If operation is skippable it should be Skip button or similar
 
 **Highlighted / clickable tokens**
 - The `#harness-click-registry` section lists all elements with click handlers (`_lis` attribute) and all `data-action` elements
 - Verify the expected tokens (e.g. hex tiles, cards) appear in this list
 - The "action" column shows either `onToken` (generic handler) or the full `action_resolve` payload
+- Clickable elements also have the `active_slot` class
 
 **Tooltips**
 - The `#harness-tooltip-registry` section lists all registered tooltips
