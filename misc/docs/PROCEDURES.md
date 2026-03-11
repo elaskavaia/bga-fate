@@ -125,8 +125,8 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
    - Example:
      ```php
      public function debug_Op_move(): void {
-         $playerId = 10;
-         $this->machine->instanciateOperation("move", $playerId, []);
+         $playerId = $this->getCurrentPlayerId();
+         $this->machine->push("move", $playerId, []);
          $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
      }
      ```
