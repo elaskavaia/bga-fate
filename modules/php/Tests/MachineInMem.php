@@ -20,6 +20,14 @@ class MachineInMem extends DbMachine {
         }
     }
 
+    /** Replace the internal table in-place, preserving any external reference to $this->xtable. */
+    public function loadRows(array $rows): void {
+        array_splice($this->xtable, 0);
+        foreach ($rows as $row) {
+            $this->xtable[] = $row;
+        }
+    }
+
     function _($text) {
         return $text;
     }

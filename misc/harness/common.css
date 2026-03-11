@@ -1,0 +1,58 @@
+/* Minimal BGA layout rules for local harness snapshot. */
+
+/* Page layout */
+#leftright_page_wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+#left-side-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+#right-side {
+  flex-shrink: 0;
+  width: 240px;
+}
+
+/* Action bar */
+#page-title {
+  background-color: white;
+  height: 76px;
+  padding: 5px;
+  text-align: center;
+}
+#maintitlebar_content {
+  min-height: 42px;
+}
+#pagemaintitle_wrap {
+  height: 42px;
+  overflow: hidden;
+}
+#generalactions {
+  display: inline;
+}
+#page-title .action-button {
+  display: inline-block;
+}
+
+/* Player panels */
+#player_boards {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.player_panel_content {
+  clear: both;
+}
+.player-board {
+  padding: 5px 3px;
+}
+
+/* Disabled buttons */
+button.disabled,
+.action-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

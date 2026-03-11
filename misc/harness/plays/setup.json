@@ -1,0 +1,6 @@
+{
+  "current_player_id": 10,
+  "steps": [
+    { "endpoint": "debug_setupGameTables", "reload": true }
+  ]
+}

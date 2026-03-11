@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fate - Local Harness Snapshot</title>
+    <!-- CSS injected by render.ts: common.css, gameserver.css, fate.css -->
+    <!-- Harness overrides: undo fate.css rules that cause layout issues in static snapshots -->
+    <style>
+      /* fate.css forces gameaction_status_wrap visible to prevent flicker on real site;
+         in static snapshots it's empty and just adds dead height — hide it */
+      #gameaction_status_wrap { display: none !important; }
+    </style>
+  </head>
+  <body id="ebd-body" class="desktop_version">
+    <div id="overall-content">
+
+      <!-- Top flex wrapper: left (game area) + right (player panels) -->
+      <div id="leftright_page_wrapper">
+
+        <!-- Left column: title bar + game area -->
+        <div id="left-side-wrapper">
+          <div id="left-side">
+
+            <!-- Page title / action status bar -->
+            <div id="page-title" class="roundedbox">
+              <div id="pagemaintitle_wrap" class="roundedboxinner">
+                <div id="maintitlebar_content">
+                  <span id="pagemaintitletext">&nbsp;</span>
+                  <div id="generalactions"></div>
+                </div>
+              </div>
+              <div id="gameaction_status_wrap" class="roundedboxinner" style="display:none">
+                <span id="gameaction_status"></span>
+              </div>
+            </div>
+
+            <!-- Game play area: gameArea.getElement() returns this -->
+            <div id="game_play_area_wrap">
+              <div id="game_play_area">
+                <div id="game_play_area_background"></div>
+                <!-- game.setup() injects mainarea, limbo, etc. here -->
+              </div>
+            </div>
+
+          </div><!-- left-side -->
+        </div><!-- left-side-wrapper -->
+
+        <!-- Right column: player panels (240px, injected by render.ts) -->
+        <div id="right-side">
+          <div id="right-side-first-part">
+            <div id="player_boards">
+              <!-- render.ts generates one overall_player_board_{id} per player -->
+            </div>
+            <div id="spectatorbox_wrapper">
+              <div id="spectatorbox" class="player-board" style="display:none">
+                <div class="player_board_inner"><div id="spectatorlist"></div></div>
+              </div>
+            </div>
+          </div><!-- right-side-first-part -->
+        </div><!-- right-side -->
+
+      </div><!-- leftright_page_wrapper -->
+    </div><!-- overall-content -->
+  </body>
+</html>

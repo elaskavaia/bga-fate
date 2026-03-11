@@ -16,7 +16,8 @@
     "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./modules/php/Tests/_autoload.php  --colors=always",
     "tests": "npm run test -- modules/php/Tests",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --coverage-text",
-    "jstests": "TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts"
+    "jstests": "TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts",
+    "play": "php8.4 misc/harness/play.php ${npm_config_debug:+-debug $npm_config_debug} ${npm_config_reset:+-reset} ${npm_config_scenario:-} && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts ${npm_config_scenario:-}"
   },
   "author": "Alena Laskavaia",
   "license": "EPL2.0",

@@ -120,6 +120,15 @@ class TokensInMem extends DbTokens {
         return $result;
     }
 
+    function countTokensInLocations() {
+        $result = [];
+        foreach ($this->keyindex as $rec) {
+            $loc = $rec["location"];
+            $result[$loc] = ($result[$loc] ?? 0) + 1;
+        }
+        return $result;
+    }
+
     function countTokensInLocation($location, $state = null) {
         return count($this->getTokensOfTypeInLocation(null, $location, $state));
     }
@@ -136,7 +145,7 @@ class TokensInMem extends DbTokens {
     function getTokensOnTop($nbr, $location) {
         $tokens = $this->getTokensOfTypeInLocation(null, $location);
         uasort($tokens, fn($a, $b) => $b["state"] <=> $a["state"]);
-        return array_slice(array_values($tokens), 0, $nbr);
+        return array_slice(array_values($tokens), 0, (int)$nbr);
     }
 
     function pickTokensForLocation($nbr, $from_location, $to_location, $state = 0, $no_deck_reform = false, &$was_reshuffled = null) {
@@ -167,5 +176,29 @@ class TokensInMem extends DbTokens {
             $this->keyindex[$key]["state"] = $n;
             $n++;
         }
+    }
+
+    function deleteAll() {
+        throw new \Exception("TokensInMem::deleteAll() called — add in-memory stub if needed");
+    }
+
+    function insertToken($token_key, $location, $state = 0) {
+        throw new \Exception("TokensInMem::insertToken() called — add in-memory stub if needed");
+    }
+
+    function insertTokenOnExtremePosition($token_key, $location, $bOnTop) {
+        throw new \Exception("TokensInMem::insertTokenOnExtremePosition() called — add in-memory stub if needed");
+    }
+
+    function moveAllTokensInLocation($from_location, $to_location, $from_state = null, $to_state = 0) {
+        throw new \Exception("TokensInMem::moveAllTokensInLocation() called — add in-memory stub if needed");
+    }
+
+    function moveAllTokensInLocationKeepOrder($from_location, $to_location) {
+        throw new \Exception("TokensInMem::moveAllTokensInLocationKeepOrder() called — add in-memory stub if needed");
+    }
+
+    public function getAllTokens(): array {
+        return array_values($this->keyindex);
     }
 }

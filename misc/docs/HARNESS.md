@@ -93,20 +93,15 @@ In `package.json`:
 Bootstraps same autoloader as PHPUnit tests (`modules/php/Tests/_autoload.php`), then:
 
 1. Accept scenario name as CLI arg (e.g. `php play.php hero_move`); defaults to `setup` if omitted
-2. Load `misc/harness/plays/<name>/db.json` into `GameUT` (`tokens->keyindex`, `machine->xtable`, `gamestate`, `players`, `curid`)
-3. Load `misc/harness/plays/<name>/script.json` to get `current_player_id` and `steps`
-4. Replace `$game->notify` with a `RecordingNotify` that stores all calls:
-   ```php
-   class RecordingNotify extends Notify {
-       public array $log = [];
-       public function all($name, $msg='', $args=[]) { $this->log[] = ['type'=>'all','name'=>$name,'msg'=>$msg,'args'=>$args]; }
-       public function player($pid, $name, $msg='', $args=[]) { $this->log[] = ['type'=>'player','pid'=>$pid,'name'=>$name,'msg'=>$msg,'args'=>$args]; }
-   }
-   ```
-5. Run `reload` (calls `$game->getAllDatas()`) — add this to `GameUT` to assemble from test infra
+2. Read `staging/plays/<name>/script.js` to get `current_player_id` and `steps`
+3. Load `staging/plays/<name>/db.json` into `GameUT` if present (`tokens->keyindex`, `machine->xtable`, `gamestate`, `players`, `curid`)
+4. Replace `$game->notify` with a `RecordingNotify` that stores all calls
+5. Run `reload` (calls `$game->getAllDatas()`) — implemented in `GameUT` ([modules/php/Tests/GameUT.php](modules/php/Tests/GameUT.php))
 6. For each step, dispatch to the matching PHP method via reflection, passing `data` as named params; collect notifications
 7. Write `staging/gamedatas.json` and `staging/notifications.json`
-8. Always write final db state to `misc/harness/plays/<name>/db.json` — can be reused as starting point for another play
+8. Write final db state to `staging/plays/<name>/db.json`
+
+Example scripts to copy into `staging/plays/<name>/` are in `misc/harness/plays/` (source-controlled).
 
 ## Part 2: Node.js renderer — `misc/harness/render.ts`
 
@@ -129,7 +124,7 @@ Needs `misc/harness/tsconfig.json` extending the test tsconfig:
 
 ## DB state format
 
-The harness needs reproducible initial state. Rather than re-running setup (which involves random shuffling), state is serialized to `misc/harness/plays/<name>/db.json` and loaded before each run.
+The harness needs reproducible initial state. Rather than re-running setup (which involves random shuffling), state is serialized to `staging/plays/<name>/db.json` and loaded before each run.
 
 State captures everything in the in-memory "db":
 
@@ -153,13 +148,13 @@ State captures everything in the in-memory "db":
 }
 ```
 
-`db.json` is optional — if absent, the harness starts with a fresh `GameUT` (empty state). If present, it is loaded as the starting point. It is always written at the end of a run, so it can be copied to a new play folder to branch off from that state.
+`db.json` is optional — if absent, the harness starts with a fresh `GameUT` (empty state). If present, it is loaded as the starting point. It is always written at the end of a run to `staging/plays/<name>/db.json` (gitignored), so it can be used as the starting point for subsequent runs or copied to seed another play.
 
-To generate an initial `db.json`: run a play with `debug_setupGameTables` as the first step (with a fixed `randQueue` for reproducibility), then copy the output `db.json` into the play folder.
+To generate an initial `db.json`: run the `setup` play (which calls `debug_setupGameTables`). The output lands in `staging/plays/setup/db.json`. To start a new play from that state, copy it to `staging/plays/<new_play>/db.json`.
 
 ## Scenario format
 
-A scenario is a JSON file (`misc/harness/plays/<name>/script.json`) — metadata plus a sequence of requests mirroring real client calls. The harness loads the matching `<name>.state.json`, then runs `reload`, then executes the steps in order:
+A scenario is a JS file (`staging/plays/<name>/script.js`) — JSON with a `.js` extension for editor syntax highlighting. It contains metadata plus a sequence of requests mirroring real client calls. The harness loads `db.json` from the same directory if present, then runs `reload`, then executes the steps in order:
 
 ```json
 {
@@ -190,10 +185,13 @@ A scenario is a JSON file (`misc/harness/plays/<name>/script.json`) — metadata
 
 ## Scenario variations
 
-Example plays to create in `misc/harness/plays/`:
-- `setup/` — `script.json` with `debug_setupGameTables`, no `db.json`; produces initial `db.json`
-- `hero_move/` — `script.json` with `action_resolve` move, `db.json` from setup
-- `full_turn/` — `script.json` with full player turn, `db.json` from setup
+All play files live in `staging/plays/<name>/` (gitignored):
+- `script.js` — the scenario to run (copy from `misc/harness/plays/` examples)
+- `db.json` — saved game state (written after each run, optional to seed from)
+
+Example scripts in `misc/harness/plays/` (source-controlled, copy to staging to use):
+- `setup.js` — calls `debug_setupGameTables`; no db needed; produces `staging/plays/setup/db.json`
+- For `hero_move`: copy `staging/plays/setup/db.json` → `staging/plays/hero_move/db.json`, write `script.js` with `action_resolve` steps
 
 ## Future: Screenshots via Playwright
 
@@ -216,15 +214,16 @@ Before implementing, these one-time setup steps are needed:
    ```
 3. Add `play` script to `package.json`
 
-## Status
+## Status / TODO
 
-- [ ] One-time setup steps above
-- [ ] Write `play.php` with `RecordingNotify`
-- [ ] Add `getAllDatas()` to `GameUT` (or BGA stub)
-- [ ] Write `misc/harness/template.html` (BGA HTML skeleton)
-- [ ] Extract shared BGA JS stubs into `src/tests/shared-stubs.ts`
-- [ ] Write `misc/harness/tsconfig.json`
-- [ ] Write `misc/harness/render.ts` with notification replay
-- [ ] Test Flow 1: initial setup snapshot
-- [ ] Test Flow 2: action + notification replay
+- [x] One-time setup steps (staging/, .gitignore, package.json play script)
+- [x] Extract `GameUT` into `modules/php/Tests/GameUT.php` (no PHPUnit dependency)
+- [x] Write `play.php` with `RecordingNotify`
+- [x] Add `getAllDatas()` to `GameUT`
+- [x] Write `misc/harness/plays/setup/script.json`
+- [x] Write `misc/harness/template.html` (BGA HTML skeleton)
+- [x] Write `misc/harness/tsconfig.json`
+- [x] Write `misc/harness/render.ts` with notification replay
+- [x] Test Flow 1: initial setup snapshot (`npm run play` → staging/snapshot.html ✓)
+- [x] Test Flow 2: action + notification replay (PlayerTurn state + buttons render ✓)
 - [ ] (Optional) Add Playwright screenshot step
