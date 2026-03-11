@@ -123,7 +123,10 @@ const tooltipRegistry = new Map<string, string>();
 (global as any).gameui = {
   player_id: currentPlayerId,
   on_client_state: false,
-  format_string_recursive: (log: string, _args: any) => log,
+  format_string_recursive: (str: string, args: any) => {
+    if (!str || !args) return str;
+    return str.replace(/\$\{(\w+)\}/g, (_m: string, key: string) => args[key] ?? `\${${key}}`);
+  },
   addTooltipHtml: (nodeId: string, html: string, _delay?: number) => {
     tooltipRegistry.set(nodeId, html);
   },
@@ -299,8 +302,31 @@ async function main() {
     enterState(gamedatas.gamestate);
   }
 
+  const logsEl = document.getElementById("logs");
+  let logCounter = 0;
+
+  function appendLogEntry(text: string) {
+    if (!logsEl || !text.trim()) return;
+    const entry = document.createElement("div");
+    entry.className = "log log_replayable";
+    entry.id = `log_${++logCounter}`;
+    const box = document.createElement("div");
+    box.className = "roundedbox";
+    box.innerHTML = text;
+    entry.appendChild(box);
+    logsEl.appendChild(entry);
+  }
+
   log(`Replaying ${notifications.length} notification(s)...`);
   for (const notif of notifications) {
+    // Append game log entry for any notification with a non-empty log string
+    const logStr: string = notif.log ?? "";
+    if (logStr.trim()) {
+      const args = Array.isArray(notif.args) ? {} : (notif.args ?? {});
+      const text = (global as any).gameui.format_string_recursive(logStr, args);
+      appendLogEntry(text);
+    }
+
     if (notif.type === "gameStateChange") {
       // Framework-level: call onLeavingState for old state, onEnteringState for new state.
       // notif.args = { id, name, active_player, type, args } — _private already unwrapped by PHP.
