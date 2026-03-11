@@ -118,12 +118,18 @@ buildPlayerPanels(gamedatas, currentPlayerId);
   return str;
 };
 
+const tooltipRegistry = new Map<string, string>();
+
 (global as any).gameui = {
   player_id: currentPlayerId,
   on_client_state: false,
   format_string_recursive: (log: string, _args: any) => log,
-  addTooltipHtml: () => {},
-  removeTooltip: () => {},
+  addTooltipHtml: (nodeId: string, html: string, _delay?: number) => {
+    tooltipRegistry.set(nodeId, html);
+  },
+  removeTooltip: (nodeId: string) => {
+    tooltipRegistry.delete(nodeId);
+  },
   bgaAnimationsActive: () => false,
   restoreServerGameState: () => {},
   updatePageTitle: () => {},
@@ -334,18 +340,12 @@ async function main() {
 
   const harnessScript = document.createElement("script");
   harnessScript.textContent = `
-    // Harness: intercept clicks on action buttons and log the action payload
+    // Harness: intercept clicks on action buttons and log the action payload to console
     (function() {
-      var log = document.createElement("div");
-      log.id = "harness-action-log";
-      log.style.cssText = "position:fixed;bottom:0;left:0;right:0;background:#222;color:#0f0;font:13px monospace;padding:8px;max-height:120px;overflow-y:auto;z-index:9999;";
-      log.innerHTML = "<b>Action log</b> (click buttons to see payloads):<br>";
-      document.body.appendChild(log);
       document.addEventListener("click", function(e) {
         var btn = e.target.closest("[data-action]");
         if (!btn) return;
         var raw = btn.getAttribute("data-action");
-        // Decode to script.json-compatible format: decode data.data JSON string if present
         var display = raw;
         try {
           var parsed = JSON.parse(raw);
@@ -354,13 +354,27 @@ async function main() {
           }
           display = JSON.stringify(parsed);
         } catch(_) {}
-        log.innerHTML += display + "<br>";
-        log.scrollTop = log.scrollHeight;
         console.log("ACTION:", display);
       });
     })();
   `;
   document.body.appendChild(harnessScript);
+
+  // ── Tooltip registry section ─────────────────────────────────────────────────
+
+  if (tooltipRegistry.size > 0) {
+    const section = document.createElement("div");
+    section.id = "harness-tooltip-registry";
+    section.style.cssText = "margin:16px;font:12px monospace;";
+    let inner = `<details><summary style="cursor:pointer;padding:4px;background:#ddd;border:1px solid #aaa;"><b>Tooltip registry (${tooltipRegistry.size} entries)</b></summary><div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px;border:1px solid #aaa;background:#f9f9f9;">`;
+    for (const [nodeId, html] of tooltipRegistry) {
+      inner += `<div style="width:fit-content;max-width:500px;padding:6px;border:1px solid #ccc;background:#fff;"><div style="color:#666;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${nodeId}">${nodeId}</div><div>${html}</div></div>`;
+    }
+    inner += `</div></details>`;
+    section.innerHTML = inner;
+    document.body.appendChild(section);
+    log(`Tooltip registry: ${tooltipRegistry.size} entries`);
+  }
 
   // ── Write snapshot ────────────────────────────────────────────────────────────
 

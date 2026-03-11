@@ -94,8 +94,7 @@ class Game extends Base {
         }
 
         // Player setup — heroes randomly assigned
-        $heroNos = range(1, 4);
-        shuffle($heroNos);
+        $heroNos = $this->getHeroOrder();
         $heroIdx = 0;
         foreach ($players as $player_id => $player) {
             $heroNo = $heroNos[$heroIdx++];
@@ -146,6 +145,12 @@ class Game extends Base {
         $this->machine->queue("turn", $color);
         $this->customUndoSavepoint($startingPlayer, 1);
         return GameDispatch::class;
+    }
+
+    protected function getHeroOrder() {
+        $heroNos = range(1, 4);
+        shuffle($heroNos);
+        return $heroNos;
     }
 
     public function getDefaultStatValue(string $key, string $type): ?int {

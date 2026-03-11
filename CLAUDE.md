@@ -27,6 +27,30 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - `npm run tests:cov` - Run PHPUnit tests with code coverage report (requires Xdebug)
 - `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
 
+### Local UI Harness
+
+The harness runs PHP server logic locally and renders a client snapshot for visual inspection — no real BGA server needed.
+
+- `npm run play` - Run default `setup` scenario (h1 game) → `staging/snapshot.html`
+- `npm run play --scenario=<name>` - Run a named play from `staging/plays/<name>/`
+- `npm run play --debug=<function>` - Call a single `debug_*` function against `staging/plays/debug/db.json`
+- `npm run play --debug=<function> --scenario=<name>` - Call debug function against a specific play's db.json (read-only, writes to `debug/`)
+- `npm run play --reset` - Start fresh, ignore existing db.json
+- `HARNESS_VERBOSE=1 npm run play` - Show full game console output
+
+**Key files:**
+- `misc/harness/play.php` — PHP runner (scenarios + debug functions)
+- `misc/harness/render.ts` — Node.js renderer (JSDOM, BGA stubs, notification replay)
+- `misc/harness/GameHarness.php` — Extends `GameUT`; add all `debug_*` harness functions here (not in `Game.php`)
+- `misc/harness/plays/<name>.json` — Source-controlled example scripts; auto-seeded to `staging/plays/<name>/script.json`
+- `staging/plays/<name>/db.json` — Saved game state (gitignored); written after each run, used as starting point for next
+
+**Typical workflow:**
+1. Add a `debug_*` function in `GameHarness.php` that sets up the state to test
+2. Run `npm run play --debug=debug_<name>`
+3. Read `staging/snapshot.html` to inspect layout, tokens, and action buttons
+4. Action buttons have `data-action` attributes showing the `action_resolve` payload
+
 ### Code Formatting
 
 - Prettier is configured with PHP plugin (see package.json)

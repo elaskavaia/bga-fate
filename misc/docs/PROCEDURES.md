@@ -44,7 +44,11 @@ Prompt: add <name> operation. Read PROCEDURES.md for instructions
    - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
    - Test `getPossibleMoves()` returns expected valid/invalid targets
    - Test `resolve()` produces correct side effects (token moves, state changes)
-#. Add manual test entry, debug_Op_<name> in Game.php, it should have setup for test and push operation to machine so Human can test UI manually
+#. Add a `debug_Op_<name>` function in `GameHarness.php` (not `Game.php`) that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:
+   ```bash
+   npm run play --debug=debug_Op_<name> --scenario=setup
+   # Then read staging/snapshot.html to verify layout, buttons, and tooltips
+   ```
 #. If new game elements are introduced, follow the "Adding New Game Element" checklist below
 
 ## Adding New Game Element
@@ -97,10 +101,17 @@ Every physical game piece leaves footprints in multiple places: database, materi
      - Enrich `tokenInfo.imageTypes` with extra CSS classes
    - Check all locations token can be in. If a new location container is needed, create it in `setup(gamedatas: CustomGamedatas)()` . Dynamic containers can also be created on-demand in `getPlaceRedirect` using `placeHtml()`
 
-**7. Ask user to validate in browser**
-    - **Important**: Always do this step proactively — create the debug function and tell the user to run it, don't ask whether they want it.
-    - Create or update php function with debug_ prefix to create some of the elements (or move around)
-    - Ask user to validate how it looks and check tooltips
+**7. Validate in harness**
+    - **Important**: Always do this step proactively — create the debug function and run the harness, don't ask whether the user wants it.
+    - Create or update a `debug_` function in `GameHarness.php` (not `Game.php`) to place/move the relevant elements into a testable state
+    - Run the harness and read `staging/snapshot.html` to inspect layout, token placement, and CSS:
+      ```bash
+      npm run play --debug=debug_<name> --scenario=setup
+      # Then read staging/snapshot.html
+      ```
+    - Check: tokens appear in correct locations, action buttons render with correct labels
+    - Check tooltips: `snapshot.html` includes a `#harness-tooltip-registry` section at the bottom listing all registered tooltips — verify each entry has the expected HTML content
+    - If the operation requires player input, the buttons in `#generalactions` should appear with `data-action` attributes showing the correct `action_resolve` payload
 
 ## Adding New Game Material Element
 

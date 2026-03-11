@@ -119,15 +119,28 @@ $writeDir   = $debugFunction ? "$stagingDir/plays/debug" : $stateDir;
 
 echo "Running play: $playName" . ($debugFunction ? " (debug: $debugFunction)" : "") . "\n";
 
+// Auto-seed staging script from misc/harness/plays/<name>.json if staging copy is missing or older
+$exampleScript = __DIR__ . "/plays/$playName.json";
+$stagingScript = "$stateDir/script.json";
+if (file_exists($exampleScript)) {
+    $exampleMtime = filemtime($exampleScript);
+    $stagingMtime = file_exists($stagingScript) ? filemtime($stagingScript) : 0;
+    if ($stagingMtime < $exampleMtime) {
+        if (!is_dir($stateDir)) mkdir($stateDir, 0777, true);
+        copy($exampleScript, $stagingScript);
+        echo "Seeded $stagingScript from example.\n";
+    }
+}
+
 // Load script (not needed in debug mode)
 if ($debugFunction) {
     $currentPlayerId = 10;
     $steps           = [];
     $reset           = $resetFlag;
 } else {
-    $script = loadJson("$stateDir/script.json");
+    $script = loadJson($stagingScript);
     if ($script === null) {
-        die("No script.json found at $stateDir/script.json\n");
+        die("No script.json found at $stagingScript\n");
     }
     $currentPlayerId = (int)($script["current_player_id"] ?? 10);
     $steps = $script["steps"] ?? [];

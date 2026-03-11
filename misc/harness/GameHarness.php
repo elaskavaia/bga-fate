@@ -10,6 +10,26 @@ use Bga\Games\Fate\Tests\GameUT;
  * (the real BGA framework adds this automatically on reload).
  */
 class GameHarness extends GameUT {
+    /** When set, getHeroOrder() returns this fixed list instead of shuffling. */
+    private ?array $heroOrder = null;
+
+    protected function getHeroOrder(): array {
+        return $this->heroOrder ?? parent::getHeroOrder();
+    }
+
+    /** Reset and set up a 1-player game with hero 1 (Bjorn). */
+    public function debug_setupGame_h1(): void {
+        $this->setPlayersNumber(1);
+        $this->heroOrder = [1, 2, 3, 4];
+        $this->tokens->deleteAll();
+        $this->machine->db->loadRows([]);
+        $this->setupGameTables();
+        $this->heroOrder = null;
+        $this->notify->all("message", "setup h1 done", []);
+        $this->sendReloadAllNotification();
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     public function getAllDatas(): array {
         $result = parent::getAllDatas();
 

@@ -179,7 +179,7 @@ class TokensInMem extends DbTokens {
     }
 
     function deleteAll() {
-        throw new \Exception("TokensInMem::deleteAll() called — add in-memory stub if needed");
+        $this->keyindex = [];
     }
 
     function insertToken($token_key, $location, $state = 0) {
