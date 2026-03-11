@@ -1,229 +1,196 @@
-## Premise
+## Overview
 
-Client-Server feedback loop: the game is client-server. We have PHP server logic and TypeScript client code. The real BGA server cannot be accessed locally (authorization/cookie issues). Goal: run server logic locally, produce realistic game state, render it in a simulated browser environment so Claude can inspect the result.
+The local harness lets you develop and validate game UI without a real BGA server. You set up a specific game state, run one command, and get a static HTML snapshot showing how the game looks — tokens, buttons, tooltips, and game log — all rendered by the real client code.
 
-## Constraints
+**Goal**: catch UI bugs (wrong tokens, missing buttons, broken tooltips, bad log text) locally before deploying to BGA.
 
-- No access to real BGA server or its framework source (only stubs)
-- Cannot capture/replay real browser sessions (cookies fail)
-- PHP test infrastructure (`GameUT`, `TokensInMem`, `MachineInMem`) already exists and works
-- JS test infrastructure (JSDOM + stubs in `src/tests/setup.ts`) already exists and works
-- `parent::getAllDatas()` is **not** in the BGA stub yet — add it to `GameUT` or the stub so it assembles gamedatas from test infra
+## Problem
 
-## Client-Server Interaction Points
+The game is client-server. Server logic (PHP) and client logic (TypeScript) are tightly coupled: the server drives the game state and emits notifications; the client renders them. The real BGA server is not accessible locally, so there is no way to test the two together without deploying.
 
-There are exactly two directions and three message types:
+## Design
 
-### Client → Server
-1. **Action** — player does something (e.g. move hero). Client calls `bga.actions.performAction("action_resolve", args)`. Server runs the operation, mutates state, sends notifications back.
+The key insight is that the client-server contract is narrow: two JSON payloads.
 
-### Server → Client
-1. **Reload (getAllDatas)** — triggered on page load or F5. Server returns full game state as `gamedatas`. Client calls `game.setup(gamedatas)` which builds the entire DOM from scratch.
-2. **Notifications** — sent by server during action processing (token moves, counter updates, messages). Client receives them sequentially and calls the matching `notif_xxx(args)` method (e.g. `notif_tokenMoved`, `notif_counter`).
+- **Game state** (`gamedatas`) — a full snapshot returned on page load; client calls `game.setup(gamedatas)` to build the DOM
+- **Notifications** — a sequence of events emitted during an action; client calls `notif_xxx(args)` for each one in order
 
-Action reply itself is just success/error — the actual state change is always communicated via notifications.
+We can produce both payloads locally using the existing PHP test infrastructure (same in-memory stubs as unit tests), then feed them to the real client code running in a simulated browser (JSDOM).
 
-## Flows to Support in Local Test Harness
+Two parts run in sequence:
 
-### Flow 1: Reload
+1. **PHP runner** — sets up game state via a scenario or debug function, captures the resulting game state and notifications as JSON
+2. **JS renderer** — loads that JSON into a simulated browser, runs the client code (`setup` + notification replay), and writes a static HTML snapshot
+
+The snapshot has the game CSS inlined and extra inspection sections appended: a click-handler registry, a tooltip registry, and a game log — so it can be read as a file without running a browser.
+
+## What we had to stub
+
+The BGA framework does a lot of work that normally only runs on their servers or in their browser environment. To run locally we had to replicate or stub everything the game code depends on.
+
+**Server side (PHP):**
+- **Database** — all token and machine state normally lives in MySQL; replaced with in-memory implementations (`TokensInMem`, `MachineInMem`) that mirror the real DB API
+- **Framework base class** (`Table`) — the BGA `Table` class wires up DB connections, player data, notifications, game state transitions; replaced with stubs in `bga-sharedcode` that provide the same interface without a real server
+- **Notify** — `$this->notify->all(...)` normally pushes to BGA's real-time channel; replaced with `RecordingNotify` that captures all calls as a plain array
+- **Game state machine** — `gamestate->jumpToState()`, `changeActivePlayer()`, etc. are normally server-side BGA infra; stubbed to track current state in memory
+- **Harness extension** (`GameHarness`) — adds `getAllDatas()` with a `gamestate` field (real BGA appends this automatically on reload, our stub does not)
+
+**Client side (JS):**
+- **HTML template** — the real BGA page is served by their platform; we provide a minimal `template.html` with the same element IDs the client expects (`#game_play_area`, `#generalactions`, `#pagemaintitletext`, `#player_boards`, `#logs`, etc.)
+- **Minimal CSS** — BGA's own layout CSS is not available; `common.css` provides just enough structural rules (flex layout, action bar, player panels, log) for the snapshot to be readable
+- **Framework globals** — `$`, `_`, `gameui`, `ebg` and other globals the client code calls; stubbed with enough behaviour to let `game.setup()` and notification handlers run without errors
+- **`format_string_recursive`** — BGA's log formatting function; fully reimplemented including i18n, nested log objects, separator joining, and `bgaFormatText` hook for token/place name resolution
+- **Tooltip capture** — `addTooltipHtml` normally registers tooltips with a real dijit widget; intercepted to collect them in a registry that is appended to the snapshot
+- **Player panels** — normally injected into the page by BGA's server-side rendering; built from `gamedatas.players` in the renderer
+
+## Saved state
+
+To avoid re-running setup (which involves shuffling) on every run, the harness persists the full in-memory DB to a JSON file after each run and reloads it at the start of the next. This makes runs fast and reproducible.
+
+## Scenarios and debug functions
+
+Two ways to drive the server:
+
+- **Scenario** — a script of sequential actions (same endpoints as the real client: `action_resolve`, `action_skip`, etc.), used to build up a saved state incrementally
+- **Debug function** — a single PHP function that sets up a specific state in one shot, used for inspecting a particular operation or UI state without replaying history
+
+---
+
+## Usage
+
 ```
-PHP: setupGameTables() + optional actions → assemble gamedatas → gamedatas.json
-JS:  game.setup(gamedatas) → snapshot.html
-```
-This is the "page load" view. Shows initial board or any saved state.
-
-### Flow 2: Action + Notifications
-```
-PHP: game is in some state → call action (e.g. action_resolve with target)
-     → capture notifications emitted during that call → notifications.json
-JS:  (after setup) call game.notif_tokenMoved(args), game.notif_counter(args), etc.
-     in sequence → snapshot.html
-```
-This lets us test: "after player moves hero, does the token appear on the right hex?"
-
-### Flow 3: Full Round-Trip
-```
-PHP: setup → action → capture notifications + new gamedatas
-JS:  setup → replay notifications → snapshot
-```
-Simulates a complete player turn cycle end-to-end.
-
-## Architecture
-
-```
-┌──────────────────────────────────┐
-│  PHP CLI script                  │
-│  misc/harness/play.php│
-│  Uses GameUT + test infra        │
-│  Runs a scenario (setup + moves) │
-│  Captures notifications via      │
-│  RecordingNotify wrapper         │
-│  Outputs:                        │
-│    gamedatas.json                │
-│    notifications.json            │
-└──────────────┬───────────────────┘
-               │ JSON files
-┌──────────────▼───────────────────┐
-│  Node.js CLI script              │
-│  misc/harness/render.ts          │
-│  JSDOM + setup.ts stubs          │
-│  game.setup(gamedatas)           │
-│  await game.notif_xxx(args) ...  │  ← replay notifications in order
-│  Inlines fate.css into HTML      │
-│  Writes: snapshot.html           │
-└──────────────────────────────────┘
+npm run play                                         # default 'setup' scenario
+npm run play --scenario=hero_move                    # named scenario
+npm run play --debug=debug_Op_move                   # debug function, persists to debug/ state
+npm run play --debug=debug_Op_move --scenario=setup  # debug function against scenario state (read-only)
+npm run play --reset                                 # ignore saved state, start fresh
+HARNESS_VERBOSE=1 npm run play                       # show full server console output
 ```
 
-Run both with one npm script:
-```
-npm run play            # runs default 'setup' play
-npm run play -- hero_move  # runs a specific play
-```
-Then open `staging/snapshot.html` in browser (has compiled CSS inlined), or Claude reads the raw HTML structure.
+Then read `staging/snapshot.html`.
 
-## npm script
+## Snapshot inspection
 
-In `package.json`:
-```json
-"play": "php8.4 misc/harness/play.php $npm_config_scenario && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts"
-```
+| Section | What it shows |
+|---|---|
+| `#pagemaintitletext` | Prompt from `getPrompt()` for the current operation |
+| `#generalactions` | Action buttons with `data-action` attributes |
+| `#logs` | Formatted game log entries |
+| `#harness-click-registry` | All clickable elements with id, class, and action payload |
+| `#harness-tooltip-registry` | All registered tooltips |
 
-## Part 1: PHP dumper — `misc/harness/play.php`
+## Adding debug functions
 
-Bootstraps same autoloader as PHPUnit tests (`modules/php/Tests/_autoload.php`), then:
+All `debug_*` functions go in `misc/harness/GameHarness.php` (not `Game.php`).
 
-1. Accept scenario name as CLI arg (e.g. `php play.php hero_move`); defaults to `setup` if omitted
-2. Read `staging/plays/<name>/script.js` to get `current_player_id` and `steps`
-3. Load `staging/plays/<name>/db.json` into `GameUT` if present (`tokens->keyindex`, `machine->xtable`, `gamestate`, `players`, `curid`)
-4. Replace `$game->notify` with a `RecordingNotify` that stores all calls
-5. Run `reload` (calls `$game->getAllDatas()`) — implemented in `GameUT` ([modules/php/Tests/GameUT.php](modules/php/Tests/GameUT.php))
-6. For each step, dispatch to the matching PHP method via reflection, passing `data` as named params; collect notifications
-7. Write `staging/gamedatas.json` and `staging/notifications.json`
-8. Write final db state to `staging/plays/<name>/db.json`
-
-Example scripts to copy into `staging/plays/<name>/` are in `misc/harness/plays/` (source-controlled).
-
-## Part 2: Node.js renderer — `misc/harness/render.ts`
-
-Needs `misc/harness/tsconfig.json` extending the test tsconfig:
-```json
-{
-  "extends": "../../src/tests/tsconfig.json",
-  "include": ["./**/*.ts", "../../src/**/*.ts", "../../src/types/**/*.d.ts"]
+Typical pattern:
+```php
+public function debug_Op_move(): void {
+    $this->debug_setupGame_h1(); // or assume --scenario=setup state
+    $playerId = $this->getCurrentPlayerId();
+    $this->machine->push("move", $playerId, []);
+    $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
 }
 ```
+
+See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the full before/after diff workflow.
+
+---
+
+## Implementation details
+
+### npm script
+
+```json
+"play": "php8.4 misc/harness/play.php ${npm_config_debug:+-debug $npm_config_debug} ${npm_config_reset:+-reset} ${npm_config_scenario:-} && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts ${npm_config_scenario:-}"
+```
+
+### PHP runner — `misc/harness/play.php`
+
+Bootstraps the same autoloader as PHPUnit tests, instantiates `GameHarness`, then:
+
+1. Parse CLI flags: `-debug <fn>`, `-reset`, and optional play name (default: `setup`; debug default: `debug`)
+2. Auto-seed `staging/plays/<name>/script.json` from `misc/harness/plays/<name>.json` if the example is newer
+3. Load `staging/plays/<name>/db.json` into `GameHarness` if present (tokens, machine, gamestate, players, curid)
+4. `RecordingNotify` is already set up by `GameUT::__construct()` — no extra swap needed
+5. For each step in `script.json`, dispatch to `action_resolve / action_skip / action_whatever / action_undo` or any `debug_*` method via reflection
+6. After each step: run the dispatch loop (if in `GameDispatch` state), then emit a synthetic `gameStateChange` notification
+7. In `--debug` mode: call the single named `debug_*` function, run dispatch loop, emit `gameStateChange`
+8. Write `staging/gamedatas.json`, `staging/notifications.json`, and `staging/plays/<name>/db.json`
+
+Debug mode always writes to `staging/plays/debug/` to avoid corrupting source scenario state.
+
+### JS renderer — `misc/harness/render.ts`
 
 1. Read `staging/gamedatas.json` and `staging/notifications.json`
-2. Load `misc/harness/template.html` as the JSDOM base document — this is the BGA-provided HTML skeleton that exists before `setup()` runs (editable, committed to source control)
-3. Set up JSDOM globals and BGA framework stubs (`$`, `_`, `gameui`, `ebg`, etc.) — extract shared stubs from `src/tests/setup.ts` into `src/tests/shared-stubs.ts` so both `setup.ts` and `render.ts` can import them
-4. Instantiate `Game` with mock `Bga` (same as `Game.spec.ts`)
-5. Call `game.setup(gamedatas)` — builds initial DOM (Flow 1)
-6. For each notification in order, call `await (game as any)['notif_' + n.name](n.args)` — replays state changes (Flow 2)
-7. Read `fate.css`, inject as `<style>` into `<head>`
-8. Write `document.documentElement.outerHTML` → `staging/snapshot.html`
+2. Load `misc/harness/template.html` as the JSDOM base document
+3. Build player panels from `gamedatas.players` (framework normally generates these server-side)
+4. Set up JSDOM globals and BGA framework stubs (`$`, `_`, `gameui`, `ebg`, etc.)
+   - `gameui.addTooltipHtml(nodeId, html)` — captured in a tooltip registry
+   - `gameui.format_string_recursive(str, args)` — full implementation: null handling, i18n, nested `{log,args}` recursion, separator joining, `${key}` substitution; calls `gameui.bgaFormatText` hook
+   - `gameui.bgaFormatText` — wired to `game.bgaFormatText(str, args)` so token/place names resolve correctly in the log
+5. Instantiate `Game`; wire `bgaFormatText`
+6. Call `game.setup(gamedatas)` — builds initial DOM
+7. Call `enterState(gamedatas.gamestate)` — triggers `onEnteringState` (sets title + buttons)
+8. For each notification:
+   - If `notif.log` is non-empty: format and append to `#logs`
+   - If `type === "gameStateChange"`: re-enter state (clears + re-renders title/buttons)
+   - Otherwise: call `await game.notif_<type>(notif.args)` if handler exists
+9. Inline `common.css` + `fate.css` into `<head>`
+10. Append `#harness-click-registry`, `#harness-tooltip-registry`, and a click-logging script
+11. Write `staging/snapshot.html`
 
-## DB state format
+### RecordingNotify
 
-The harness needs reproducible initial state. Rather than re-running setup (which involves random shuffling), state is serialized to `staging/plays/<name>/db.json` and loaded before each run.
+Lives in `modules/php/Tests/GameUT.php`, used by both harness and unit tests.
 
-State captures everything in the in-memory "db":
+- Implements `addDecorator(callable $fn)` so all notify decorators actually run
+- `GameUT::__construct` installs it after `parent::__construct()`, then calls `registerNotifyDecorators()` to re-register decorators on the new instance
+- Decorator chain: **Base** fills in `player_name`/`you`; **Game** fills in `reason = ""`
 
-```json
-{
-  "tokens": [
-    { "key": "hero_1", "location": "hex_5_5", "state": 0 },
-    { "key": "card_hero_1_1", "location": "tableau_6cd0f6", "state": 0 }
-  ],
-  "machine": [
-    { "id": 1, "rank": 1, "type": "actionMove", "owner": "6cd0f6", "pool": "main", "data": null }
-  ],
-  "gamestate": {
-    "state_id": 10,
-    "active_player": 10
-  },
-  "players": [
-    { "player_id": 10, "player_no": 1, "player_color": "6cd0f6", "player_name": "player1", "player_zombie": 0, "player_eliminated": 0 },
-    { "player_id": 11, "player_no": 2, "player_color": "982fff", "player_name": "player2", "player_zombie": 0, "player_eliminated": 0 }
-  ]
-}
-```
+### Scenario format
 
-`db.json` is optional — if absent, the harness starts with a fresh `GameUT` (empty state). If present, it is loaded as the starting point. It is always written at the end of a run to `staging/plays/<name>/db.json` (gitignored), so it can be used as the starting point for subsequent runs or copied to seed another play.
-
-To generate an initial `db.json`: run the `setup` play (which calls `debug_setupGameTables`). The output lands in `staging/plays/setup/db.json`. To start a new play from that state, copy it to `staging/plays/<new_play>/db.json`.
-
-## Scenario format
-
-A scenario is a JS file (`staging/plays/<name>/script.js`) — JSON with a `.js` extension for editor syntax highlighting. It contains metadata plus a sequence of requests mirroring real client calls. The harness loads `db.json` from the same directory if present, then runs `reload`, then executes the steps in order:
+`staging/plays/<name>/script.json`:
 
 ```json
 {
   "current_player_id": 10,
   "steps": [
-    { "endpoint": "action_resolve", "data": {"target": "actionMove"} },
-    { "endpoint": "action_resolve", "data": {"target": "hex_5_5"} },
-    { "endpoint": "debug_reinforcement", "data": {"cardId": "card_monster_2"} }
+    { "endpoint": "action_resolve", "data": { "target": "move" } },
+    { "endpoint": "action_resolve", "data": { "target": "hex_5_5" } }
   ]
 }
 ```
 
-`current_player_id` identifies who is making the requests (the "logged in" player for this run).
+Optional per-step: `"reload": true` — writes `gamedatas.json` after that step.
 
-`endpoint` is required. All other fields (`data`, `noerrortracking`, etc.) are optional GET/POST parameters passed as-is to the PHP handler.
+Available endpoints — **actions**: `action_resolve`, `action_skip`, `action_undo`, `action_whatever`; **debug**: any `debug_*` method on `GameHarness`, params matched by name via reflection.
 
-### Available endpoints
+### DB state format
 
-**Actions** (state-dependent, mirror real player interactions):
-- `action_resolve` — submit chosen target (data: `{"target": "..."}`)
-- `action_skip` — skip current operation
-- `action_undo` — undo last move (data: `{"move_id": N}`)
-- `action_whatever` — execute random valid action (for testing/zombie mode)
+```json
+{
+  "tokens":    [ { "key": "hero_1", "location": "hex_5_5", "state": 0 } ],
+  "machine":   [ { "id": 1, "rank": 1, "type": "move", "owner": "6cd0f6", "pool": "main", "data": null } ],
+  "gamestate": { "state_id": 10, "active_player": 10 },
+  "players":   [ { "player_id": 10, "player_no": 1, "player_color": "6cd0f6", "player_name": "player1", "player_zombie": 0, "player_eliminated": 0 } ]
+}
+```
 
-**Debug** (available in BGA studio mode):
-- `debug_xxx` — any `debug_*` method on `Game.php` or its parent; `data` keys map to PHP function parameter names via reflection
+---
 
-
-## Scenario variations
-
-All play files live in `staging/plays/<name>/` (gitignored):
-- `script.js` — the scenario to run (copy from `misc/harness/plays/` examples)
-- `db.json` — saved game state (written after each run, optional to seed from)
-
-Example scripts in `misc/harness/plays/` (source-controlled, copy to staging to use):
-- `setup.js` — calls `debug_setupGameTables`; no db needed; produces `staging/plays/setup/db.json`
-- For `hero_move`: copy `staging/plays/setup/db.json` → `staging/plays/hero_move/db.json`, write `script.js` with `action_resolve` steps
-
-## Future: Screenshots via Playwright
-
-If HTML inspection is not enough, add Playwright to take PNG screenshots:
-- Install: `npm install --save-dev playwright`
-- After writing `snapshot.html`, load it in headless Chromium
-- Take screenshot → `staging/snapshot.png`
-- Claude can read PNG via the `Read` tool (multimodal)
-
-This is optional — the HTML snapshot covers most structural debugging needs.
-
-## Setup Steps (manual)
-
-Before implementing, these one-time setup steps are needed:
-
-1. Create directory `staging/`
-2. Add generated output files to `.gitignore`:
-   ```
-   staging/
-   ```
-3. Add `play` script to `package.json`
-
-## Status / TODO
+## Status
 
 - [x] One-time setup steps (staging/, .gitignore, package.json play script)
 - [x] Extract `GameUT` into `modules/php/Tests/GameUT.php` (no PHPUnit dependency)
-- [x] Write `play.php` with `RecordingNotify`
-- [x] Add `getAllDatas()` to `GameUT`
-- [x] Write `misc/harness/plays/setup/script.json`
+- [x] Write `play.php` with scenario + debug mode
+- [x] Add `getAllDatas()` to `GameUT`; `GameHarness` extends it with `gamestate` field
+- [x] Write `misc/harness/plays/setup.json`
 - [x] Write `misc/harness/template.html` (BGA HTML skeleton)
 - [x] Write `misc/harness/tsconfig.json`
-- [x] Write `misc/harness/render.ts` with notification replay
+- [x] Write `misc/harness/render.ts` with notification replay, game log, click/tooltip registries
+- [x] `RecordingNotify` with decorator support (in `GameUT.php`, used by both harness and unit tests)
+- [x] `format_string_recursive` with `bgaFormatText` delegation for token/place name resolution
 - [x] Test Flow 1: initial setup snapshot (`npm run play` → staging/snapshot.html ✓)
 - [x] Test Flow 2: action + notification replay (PlayerTurn state + buttons render ✓)
 - [ ] (Optional) Add Playwright screenshot step
