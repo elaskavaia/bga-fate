@@ -113,6 +113,60 @@ Every physical game piece leaves footprints in multiple places: database, materi
     - Check tooltips: `snapshot.html` includes a `#harness-tooltip-registry` section at the bottom listing all registered tooltips. Read `staging/snapshot.html` and search for the token ID or tooltip text to verify the expected content is present. Each entry shows the node ID and the rendered tooltip HTML.
     - If the operation requires player input, the buttons in `#generalactions` should appear with `data-action` attributes showing the correct `action_resolve` payload
 
+## Validating Operation UI in Harness
+
+After implementing an operation, run the harness and inspect `staging/snapshot.html` to confirm the client-side UI is correct. This replaces manual browser testing.
+
+### Setup
+
+1. Add a `debug_Op_<name>` function in `GameHarness.php` that:
+   - Calls `debug_setupGame_h1()` (or assumes `setup` scenario state)
+   - Pushes the operation onto the machine for the active player
+   - Example:
+     ```php
+     public function debug_Op_move(): void {
+         $playerId = 10;
+         $this->machine->instanciateOperation("move", $playerId, []);
+     }
+     ```
+2. Run the harness:
+   ```bash
+   npm run play --debug=debug_Op_<name> --scenario=setup
+   ```
+3. Read `staging/snapshot.html`
+
+### What to check
+
+**Action buttons (`#generalactions`)**
+- Buttons should appear for each valid target returned by `getPossibleMoves()`
+- Each button must have a `data-action` attribute — search for `data-action` in the HTML
+- The payload should be `{"endpoint":"action_resolve","data":{"target":"<targetId>"}}`
+- If no buttons appear, check `getPrompt()` returns non-empty and `getPossibleMoves()` returns valid targets
+
+**Highlighted / clickable tokens**
+- The `#harness-click-registry` section lists all elements with click handlers (`_lis` attribute) and all `data-action` elements
+- Verify the expected tokens (e.g. hex tiles, cards) appear in this list
+- The "action" column shows either `onToken` (generic handler) or the full `action_resolve` payload
+
+**Tooltips**
+- The `#harness-tooltip-registry` section lists all registered tooltips
+- Search for the token ID or expected tooltip text to confirm it was registered
+- Each card shows the node ID and the rendered tooltip HTML
+
+**Title bar**
+- The `#pagemaintitletext` element should contain the prompt from `getPrompt()`
+- Search for the prompt text in the HTML to confirm it appears
+
+### Common problems
+
+| Symptom | Likely cause |
+|---|---|
+| No buttons in `#generalactions` | `getPossibleMoves()` returns empty or all errors, or `getPrompt()` returns empty |
+| Button missing `data-action` | Button id doesn't start with `button_` — check `getUiArgs()` target key |
+| Token not in click registry | `getPlaceRedirect()` not setting `result.onClick` for this token type/location |
+| Tooltip missing | `updateTokenDisplayInfo()` not setting `tokenInfo.tooltip` or `tokenInfo.name` for this token |
+| Wrong state shown | Machine halted — check `staging/plays/debug/notifications.json` for error messages |
+
 ## Adding New Game Material Element
 
 Prompt: add new material file <name>. Read PROCEDURES.md for instructions.

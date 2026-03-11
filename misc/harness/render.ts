@@ -362,6 +362,40 @@ async function main() {
 
   // ── Tooltip registry section ─────────────────────────────────────────────────
 
+  // ── Click handler registry section ──────────────────────────────────────────
+
+  const clickableEls = Array.from(document.querySelectorAll("[_lis], [data-action]")) as HTMLElement[];
+  if (clickableEls.length > 0) {
+    const section = document.createElement("div");
+    section.id = "harness-click-registry";
+    section.style.cssText = "margin:16px;font:12px monospace;";
+    let inner = `<details><summary style="cursor:pointer;padding:4px;background:#ddd;border:1px solid #aaa;"><b>Click handlers (${clickableEls.length} elements)</b></summary><div style="display:flex;flex-wrap:wrap;gap:8px;padding:8px;border:1px solid #aaa;background:#f9f9f9;">`;
+    for (const el of clickableEls) {
+      const id = el.id || "(no id)";
+      const classes = Array.from(el.classList).join(" ") || "(no class)";
+      const action = el.getAttribute("data-action");
+      let actionLabel = "onToken";
+      if (action) {
+        try {
+          const parsed = JSON.parse(action);
+          if (parsed.data && typeof parsed.data.data === "string") parsed.data = JSON.parse(parsed.data.data);
+          actionLabel = JSON.stringify(parsed);
+        } catch (_) {
+          actionLabel = action;
+        }
+      }
+      inner += `<div style="width:fit-content;max-width:500px;padding:6px;border:1px solid #ccc;background:#fff;">`;
+      inner += `<div style="color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${id}">${id}</div>`;
+      inner += `<div style="color:#888;font-size:11px;margin-bottom:2px;">${classes}</div>`;
+      inner += `<div>${actionLabel}</div>`;
+      inner += `</div>`;
+    }
+    inner += `</div></details>`;
+    section.innerHTML = inner;
+    document.body.appendChild(section);
+    log(`Click handler registry: ${clickableEls.length} elements`);
+  }
+
   if (tooltipRegistry.size > 0) {
     const section = document.createElement("div");
     section.id = "harness-tooltip-registry";
