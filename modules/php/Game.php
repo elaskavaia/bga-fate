@@ -54,6 +54,7 @@ class Game extends Base {
     }
 
     public function registerNotifyDecorators(): void {
+        parent::registerNotifyDecorators();
         $this->notify->addDecorator(function (string $message, array $args) {
             if (str_contains($message, '${reason}') && !isset($args["reason"])) {
                 $args["reason"] = "";

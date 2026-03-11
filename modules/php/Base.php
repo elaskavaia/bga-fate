@@ -50,6 +50,10 @@ class Base extends Table {
         //    "my_second_game_variant" => 101,
         //      ...
         //]);
+        $this->registerNotifyDecorators();
+    }
+
+    public function registerNotifyDecorators(): void {
         $this->notify->addDecorator(function (string $message, array $args) {
             if (!isset($args["player_id"]) && str_contains($message, '${player_name}')) {
                 $args["player_id"] = $this->getMostlyActivePlayerId();
