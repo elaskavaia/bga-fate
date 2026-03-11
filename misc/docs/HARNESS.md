@@ -31,7 +31,7 @@ The BGA framework does a lot of work that normally only runs on their servers or
 **Server side (PHP):**
 - **Database** — all token and machine state normally lives in MySQL; replaced with in-memory implementations (`TokensInMem`, `MachineInMem`) that mirror the real DB API
 - **Framework base class** (`Table`) — the BGA `Table` class wires up DB connections, player data, notifications, game state transitions; replaced with stubs in `bga-sharedcode` that provide the same interface without a real server
-- **Notify** — `$this->notify->all(...)` normally pushes to BGA's real-time channel; replaced with `RecordingNotify` that captures all calls as a plain array
+- **Notify** — `$this->notify->all(...)` normally pushes to BGA's real-time channel; the `Notify` stub in `bga-sharedcode` records all calls to `$this->notify->log` and supports `addDecorator`, so no replacement is needed
 - **Game state machine** — `gamestate->jumpToState()`, `changeActivePlayer()`, etc. are normally server-side BGA infra; stubbed to track current state in memory
 - **Harness extension** (`GameHarness`) — adds `getAllDatas()` with a `gamestate` field (real BGA appends this automatically on reload, our stub does not)
 
@@ -112,7 +112,7 @@ Bootstraps the same autoloader as PHPUnit tests, instantiates `GameHarness`, the
 1. Parse CLI flags: `-debug <fn>`, `-reset`, and optional play name (default: `setup`; debug default: `debug`)
 2. Auto-seed `staging/plays/<name>/script.json` from `misc/harness/plays/<name>.json` if the example is newer
 3. Load `staging/plays/<name>/db.json` into `GameHarness` if present (tokens, machine, gamestate, players, curid)
-4. `RecordingNotify` is already set up by `GameUT::__construct()` — no extra swap needed
+4. `$game->notify` is already a recording `Notify` instance (from `bga-sharedcode` stub) — no swap needed
 5. For each step in `script.json`, dispatch to `action_resolve / action_skip / action_whatever / action_undo` or any `debug_*` method via reflection
 6. After each step: run the dispatch loop (if in `GameDispatch` state), then emit a synthetic `gameStateChange` notification
 7. In `--debug` mode: call the single named `debug_*` function, run dispatch loop, emit `gameStateChange`
@@ -140,13 +140,11 @@ Debug mode always writes to `staging/plays/debug/` to avoid corrupting source sc
 10. Append `#harness-click-registry`, `#harness-tooltip-registry`, and a click-logging script
 11. Write `staging/snapshot.html`
 
-### RecordingNotify
+### Notify recording and decorators
 
-Lives in `modules/php/Tests/GameUT.php`, used by both harness and unit tests.
+The `Notify` stub in `bga-sharedcode` records all calls to `$this->notify->log` and supports `addDecorator` — the same interface used by `Base` and `Game` to register arg-transform functions. This means no swap or subclass is needed; the stub works directly.
 
-- Implements `addDecorator(callable $fn)` so all notify decorators actually run
-- `GameUT::__construct` installs it after `parent::__construct()`, then calls `registerNotifyDecorators()` to re-register decorators on the new instance
-- Decorator chain: **Base** fills in `player_name`/`you`; **Game** fills in `reason = ""`
+Decorator chain registered by `registerNotifyDecorators()`: **Base** fills in `player_name`/`you`; **Game** fills in `reason = ""`.
 
 ### Scenario format
 
@@ -189,7 +187,7 @@ Available endpoints — **actions**: `action_resolve`, `action_skip`, `action_un
 - [x] Write `misc/harness/template.html` (BGA HTML skeleton)
 - [x] Write `misc/harness/tsconfig.json`
 - [x] Write `misc/harness/render.ts` with notification replay, game log, click/tooltip registries
-- [x] `RecordingNotify` with decorator support (in `GameUT.php`, used by both harness and unit tests)
+- [x] `Notify` stub in `bga-sharedcode` supports recording + decorators — no custom subclass needed
 - [x] `format_string_recursive` with `bgaFormatText` delegation for token/place name resolution
 - [x] Test Flow 1: initial setup snapshot (`npm run play` → staging/snapshot.html ✓)
 - [x] Test Flow 2: action + notification replay (PlayerTurn state + buttons render ✓)

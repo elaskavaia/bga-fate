@@ -22,7 +22,6 @@ require_once __DIR__ . "/GameHarness.php";
 
 use Bga\GameFramework\Notify;
 use Bga\Games\Fate\Tests\GameUT;
-use Bga\Games\Fate\Tests\RecordingNotify;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -137,7 +136,7 @@ if ($debugFunction) {
 // Boot GameUT
 $game = new GameHarness();
 $game->curid = $currentPlayerId;
-$recording = $game->notify; // RecordingNotify is set up by GameUT constructor (decorators already registered)
+$recording = $game->notify; // Notify records all calls and supports decorators (see bga-sharedcode stub)
 
 // Load db state if present (skipped when reset=true)
 $db = $reset ? null : loadJson("$stateDir/db.json");

@@ -69,7 +69,7 @@ class Game extends Base {
         init all game tables (players and stats init in base class)
         called from setupNewGame
     */
-    protected function setupGameTables() {
+    function setupGameTables() {
         $this->tokens->createAllTokens();
         // setup
         $pnum = $this->getPlayersNumber();
