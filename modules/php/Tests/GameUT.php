@@ -90,10 +90,14 @@ class GameUT extends Game {
         return $this->multimachine;
     }
 
-    public $curid;
+    public int $curid;
 
     public function _getCurrentPlayerId() {
         return $this->curid;
+    }
+
+    public function _setCurrentPlayerId(int $playerId) {
+        $this->curid = $playerId;
     }
 
     function fakeUserAction(Operation $op, $target = null) {
