@@ -13,9 +13,32 @@ use Bga\Games\Fate\Tests\GameUT;
 class GameHarness extends GameUT {
     /** When set, getHeroOrder() returns this fixed list instead of shuffling. */
     private ?array $heroOrder = null;
+    public array $states;
+
+    public function __construct() {
+        parent::__construct();
+        $this->states = $this->buildStateNameMap();
+    }
 
     protected function getHeroOrder(): array {
         return $this->heroOrder ?? parent::getHeroOrder();
+    }
+
+    function debugLog($info, $args = []) {
+        echo "{$info}\n";
+    }
+
+    public function debug_Op_roll(): void {
+        $this->debug_setupGame_h1();
+        // scenario specific setup
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_9");
+        $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_8_8");
+        $this->tokens->dbSetTokenLocation("hero_1", "hex_8_9");
+        $this->hexMap->invalidateOccupancy();
+        $this->systemAssert("bad setup", !$this->machine->instanciateOperation("roll", $this->getCurrentPlayerColor())->isVoid());
+        $this->machine->push("3roll", PCOLOR, []);
+        $this->gamestate->changeActivePlayer(PCOLOR_ID);
+        $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
     }
 
     /** Reset and set up a 1-player game with hero 1 (Bjorn). */
@@ -29,10 +52,14 @@ class GameHarness extends GameUT {
         $this->notify->all("message", "setup h1 done", []);
         $this->sendReloadAllNotification();
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+        // we have to manually dispatch this because we call it manually
+        $this->machine->dispatchAll();
+        // that is fine, it will pick right stack on dispatch
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
     /** @return array<int, GameState> map of state id => state instance */
-    private function buildStateNameMap(): array {
+    public function buildStateNameMap(): array {
         $map = [];
         $statesDir = __DIR__ . "/../../modules/php/States";
         foreach (glob("$statesDir/*.php") as $file) {
@@ -52,7 +79,7 @@ class GameHarness extends GameUT {
         $stateId = $this->gamestate->state_id();
         $activePlayer = (int) $this->getActivePlayerId();
 
-        $stateNameMap = $this->buildStateNameMap();
+        $stateNameMap = $this->states;
         /** @var GameState */
         $stateInst = $stateNameMap[$stateId];
         $this->systemAssert("state not found $stateId", $stateInst);

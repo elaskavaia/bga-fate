@@ -28,4 +28,8 @@ class GameDispatch extends GameState {
         $state = $this->game->machine->dispatchAll();
         return $state;
     }
+
+    public function getArgs(): array {
+        return [];
+    }
 }

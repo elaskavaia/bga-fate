@@ -126,7 +126,7 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
      ```php
      public function debug_Op_move(): void {
          $playerId = $this->getCurrentPlayerId();
-         $this->machine->push("move", $playerId, []);
+         $this->machine->push("move", $this->getPlayerColorById($playerId ), []);
          $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
      }
      ```
@@ -171,6 +171,33 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
 **Title bar**
 - The `#pagemaintitletext` element should contain the prompt from `getPrompt()`
 - Search for the prompt text in the HTML to confirm it appears
+
+### Simulate user click (resolve step)
+
+After verifying the prompt snapshot above, simulate the user clicking a target:
+
+1. Save the prompt snapshot for comparison:
+   ```bash
+   cp staging/snapshot.html staging/prompt.html
+   ```
+2. Find the action payload: look in the snapshot for `data-action` on buttons, or for `active_slot` hexes/tokens in the `#harness-click-registry`. The payload for clicking an active slot is `{"target":"<tokenId>"}`.
+3. Create a scenario `misc/harness/plays/op_<name>.json` that calls the debug function then resolves:
+   ```json
+   {
+     "current_player_id": 10,
+     "reset": true,
+     "steps": [
+       { "endpoint": "debug_Op_<name>", "reload": true },
+       { "endpoint": "action_resolve", "data": { "target": "<targetId>" }, "reload": true }
+     ]
+   }
+   ```
+4. Run the scenario:
+   ```bash
+   npm run play --scenario=op_<name>
+   ```
+5. Compare `staging/prompt.html` and `staging/snapshot.html` to see what changed — verify tokens moved, dice appeared, game log updated, etc.
+
 
 ### Common problems
 

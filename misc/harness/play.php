@@ -20,9 +20,6 @@ require_once __DIR__ . "/../../modules/php/Tests/TokensInMem.php";
 require_once __DIR__ . "/../../modules/php/Tests/GameUT.php";
 require_once __DIR__ . "/GameHarness.php";
 
-use Bga\GameFramework\Notify;
-use Bga\Games\Fate\Tests\GameUT;
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function loadJson(string $path): mixed {
@@ -44,24 +41,44 @@ function saveJson(string $path, mixed $data): void {
     file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
 
-function dispatchEndpoint(GameUT $game, string $endpoint, array $data): void {
-    if (str_starts_with($endpoint, "action_")) {
-        // Dispatch to the current state handler
-        $state = $game->gamestate->state();
-        $stateClass = $state["name"] ?? null;
-        // Try calling directly on the game's state object via machine
-        $methodName = $endpoint;
-        if ($endpoint === "action_resolve") {
-            $game->machine->action_resolve((int) $game->_getCurrentPlayerId(), $data);
-        } elseif ($endpoint === "action_skip") {
-            $game->machine->action_skip((int) $game->_getCurrentPlayerId());
-        } elseif ($endpoint === "action_whatever") {
-            $game->machine->action_whatever((int) $game->_getCurrentPlayerId());
-        } elseif ($endpoint === "action_undo") {
-            $game->machine->action_undo((int) $game->_getCurrentPlayerId(), (int) ($data["move_id"] ?? 0));
+function matchArgs(ReflectionMethod $ref, array $data): array {
+    $args = [];
+    foreach ($ref->getParameters() as $param) {
+        $name = $param->getName();
+        if (array_key_exists($name, $data)) {
+            $args[] = $data[$name];
+        } elseif ($param->isDefaultValueAvailable()) {
+            $args[] = $param->getDefaultValue();
         } else {
-            die("Unknown action endpoint: $endpoint\n");
+            $endpoint = $ref->getName();
+            die("Missing required param '$name' for $endpoint\n");
         }
+    }
+
+    return $args;
+}
+
+function getStateId(GameHarness $game, mixed $targetClass) {
+    if ($targetClass instanceof \Bga\GameFramework\States\GameState) {
+        $stateId = $targetClass->id;
+    } elseif (is_numeric($targetClass)) {
+        $stateId = $targetClass;
+    } else {
+        $ref = new ReflectionClass($targetClass);
+        $inst = $ref->newInstance($game);
+        $stateId = $inst->id;
+    }
+    return $stateId;
+}
+
+function dispatchEndpoint(GameHarness $game, string $endpoint, array $data): void {
+    $states = $game->states;
+    if (str_starts_with($endpoint, "action_")) {
+        $stateId = $game->gamestate->getCurrentMainStateId();
+        $stateInst = $states[$stateId];
+        $ref = new ReflectionMethod($stateInst, $endpoint);
+        $state = $ref->invokeArgs($stateInst, matchArgs($ref, $data));
+        $game->gamestate->jumpToState(getStateId($game, $state));
     } elseif (str_starts_with($endpoint, "debug_")) {
         // Call debug method on game via reflection with named params
         $methodName = $endpoint;
@@ -69,18 +86,8 @@ function dispatchEndpoint(GameUT $game, string $endpoint, array $data): void {
             die("Unknown debug endpoint: $endpoint\n");
         }
         $ref = new ReflectionMethod($game, $methodName);
-        $args = [];
-        foreach ($ref->getParameters() as $param) {
-            $name = $param->getName();
-            if (array_key_exists($name, $data)) {
-                $args[] = $data[$name];
-            } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } else {
-                die("Missing required param '$name' for $endpoint\n");
-            }
-        }
-        $ref->invokeArgs($game, $args);
+
+        $ref->invokeArgs($game, matchArgs($ref, $data));
     } else {
         die("Unknown endpoint: $endpoint\n");
     }
@@ -133,6 +140,7 @@ if ($debugFunction) {
     $reset = $resetFlag;
 } else {
     $script = loadJson($stagingScript);
+    echo "Loading $stagingScript\n";
     if ($script === null) {
         die("No script.json found at $stagingScript\n");
     }
@@ -144,7 +152,6 @@ if ($debugFunction) {
 // Boot GameUT
 $game = new GameHarness();
 $game->curid = $currentPlayerId;
-$recording = $game->notify; // Notify records all calls and supports decorators (see bga-sharedcode stub)
 
 // Load db state if present (skipped when reset=true)
 $db = $reset ? null : loadJson("$stateDir/db.json");
@@ -177,28 +184,12 @@ if ($reset) {
 // ── Helpers that run after each dispatched step ───────────────────────────────
 
 function runDispatchLoop(GameHarness $game): void {
-    if (
-        $game->gamestate->state_id() === \Bga\Games\Fate\StateConstants::STATE_GAME_DISPATCH ||
-        $game->gamestate->state_id() === \Bga\Games\Fate\StateConstants::STATE_GAME_DISPATCH_FORCED
-    ) {
-        $targetClass = $game->machine->dispatchAll();
-        $classToState = [
-            \Bga\Games\Fate\States\PlayerTurn::class => \Bga\Games\Fate\StateConstants::STATE_PLAYER_TURN,
-            \Bga\Games\Fate\States\PlayerTurnConfirm::class => \Bga\Games\Fate\StateConstants::STATE_PLAYER_TURN_CONF,
-            \Bga\Games\Fate\States\MultiPlayerMaster::class => \Bga\Games\Fate\StateConstants::STATE_MULTI_PLAYER_MASTER,
-        ];
-        if ($targetClass && isset($classToState[$targetClass])) {
-            $game->gamestate->jumpToState($classToState[$targetClass]);
-        } elseif ($targetClass === \Bga\Games\Fate\StateConstants::STATE_MACHINE_HALTED) {
-            $game->gamestate->jumpToState(\Bga\Games\Fate\StateConstants::STATE_MACHINE_HALTED);
-        } else {
-            echo "  → Warning: unrecognised dispatch target: " . var_export($targetClass, true) . "\n";
-        }
-        echo "  → Dispatched → state: " . $game->gamestate->state_id() . " ($targetClass)\n";
-    }
+    $state = $game->machine->dispatchAll();
+    $game->gamestate->jumpToState(getStateId($game, $state));
+    echo "  → Dispatched → state: " . $game->gamestate->getCurrentMainStateId() . " ($state)\n";
 }
 
-function emitGameStateChange(GameHarness $game, Notify $recording, int $currentPlayerId): void {
+function emitGameStateChange(GameHarness $game, int $currentPlayerId): void {
     // Emit a synthetic gameStateChange notification so the JS renderer can call onEnteringState.
     // Shape mirrors the real BGA gameStateChange push message:
     //   args: { id, name, active_player, type, args: { description, _private: <unwrapped opInfo> } }
@@ -209,53 +200,47 @@ function emitGameStateChange(GameHarness $game, Notify $recording, int $currentP
         $activeKey = (string) ($newGamestate["active_player"] ?? $currentPlayerId);
         $gsArgs["_private"] = $gsArgs["_private"][$activeKey] ?? ($gsArgs["_private"][$currentPlayerId] ?? reset($gsArgs["_private"]));
     }
-    $recording->log[] = [
-        "type" => "gameStateChange",
-        "log" => "",
-        "args" => [
-            "id" => $newGamestate["id"] ?? 0,
-            "name" => $newGamestate["name"] ?? "",
-            "active_player" => (string) ($newGamestate["active_player"] ?? $currentPlayerId),
-            "type" => "activeplayer",
-            "args" => $gsArgs,
-        ],
-        "channel" => "broadcast",
-    ];
+
+    $game->notify->all("gameStateChange", "", [
+        "id" => $newGamestate["id"] ?? 0,
+        "name" => $newGamestate["name"] ?? "",
+        "active_player" => (string) ($newGamestate["active_player"] ?? $currentPlayerId),
+        "type" => "activeplayer",
+        "args" => $gsArgs,
+    ]);
 }
 
 // ── Run steps ─────────────────────────────────────────────────────────────────
 
+$x = count($steps);
+echo "Loading $x steps\n";
+
 foreach ($steps as $i => $step) {
     $endpoint = $step["endpoint"] ?? "";
-    $data = $step["data"] ?? [];
     echo "Step " . ($i + 1) . ": $endpoint\n";
-    dispatchEndpoint($game, $endpoint, $data);
+    $op = $game->machine->createTopOperationFromDbForOwner(null); // null means any
+    $game->debugLog("  → Starting step op " . ($op ? $op->getType() : "EMPTY"));
+    dispatchEndpoint($game, $endpoint, $step);
     runDispatchLoop($game);
-    emitGameStateChange($game, $recording, $currentPlayerId);
+    emitGameStateChange($game, $currentPlayerId);
 
     if ($step["reload"] ?? false) {
         $gamedatas = $game->getAllDatas();
         saveJson("$stagingDir/gamedatas.json", $gamedatas);
         echo "  → Wrote staging/gamedatas.json (reload after step)\n";
     }
+
+    $op = $game->machine->createTopOperationFromDbForOwner(null); // null means any
+    $game->debugLog("  → Final step op " . $op->getType());
 }
 
 // ── Debug mode: run a single function and capture state ───────────────────────
 
 if ($debugFunction) {
     echo "Calling: $debugFunction\n";
-    // Snapshot state before the call in case dispatch finds nothing to do
-    $stateBeforeDebug = $game->gamestate->state_id();
-    $activeBeforeDebug = (int) $game->gamestate->getPlayerActiveThisTurn() ?: $currentPlayerId;
     dispatchEndpoint($game, $debugFunction, []);
     runDispatchLoop($game);
-    // If dispatch left us in MachineHalted (empty queue), restore the pre-call state
-    if ($game->gamestate->state_id() === \Bga\Games\Fate\StateConstants::STATE_MACHINE_HALTED) {
-        echo "  → Machine halted after debug call; restoring state $stateBeforeDebug\n";
-        $game->gamestate->changeActivePlayer($activeBeforeDebug);
-        $game->gamestate->jumpToState($stateBeforeDebug);
-    }
-    emitGameStateChange($game, $recording, $currentPlayerId);
+    emitGameStateChange($game, $currentPlayerId);
 }
 
 // Always write gamedatas.json (debug mode doesn't have a reload step)
@@ -264,15 +249,15 @@ saveJson("$stagingDir/gamedatas.json", $gamedatas);
 echo "Wrote staging/gamedatas.json\n";
 
 // Save notifications
-saveJson("$stagingDir/notifications.json", $recording->log);
-echo "Wrote staging/notifications.json (" . count($recording->log) . " notifications)\n";
+saveJson("$stagingDir/notifications.json", $game->notify->log);
+echo "Wrote staging/notifications.json (" . count($game->notify->log) . " notifications)\n";
 
 // Save final db state back to play dir
 $finalDb = [
     "tokens" => $game->tokens->getAllTokens(),
     "machine" => array_values($game->machine->db->all()),
     "gamestate" => [
-        "state_id" => $game->gamestate->state_id(),
+        "state_id" => $game->gamestate->getCurrentMainStateId(),
         "active_player" => (int) $game->getActivePlayerId(),
     ],
     "players" => array_values($game->loadPlayersBasicInfos()),

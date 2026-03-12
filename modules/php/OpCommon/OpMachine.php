@@ -237,12 +237,12 @@ class OpMachine {
         return PlayerTurnConfirm::class;
     }
     function dispatchOne() {
-        //$this->game->debugLog("- SINGLE: machine top: ", array_values($this->getTopOperations(null)));
+        //$this->game->debugLog("- SINGLE: machine top: " . toJson(array_values($this->getTopOperations(null))));
         $op = $this->createTopOperationFromDbForOwner(null); // null means any
         if (!$op) {
             return StateConstants::STATE_MACHINE_HALTED;
         }
-        //$this->game->notify->all("message", "starting op " . $op->getType());
+        // $this->game->debugLog("starting op " . $op->getType());
         return $op->onEnteringGameState();
     }
 

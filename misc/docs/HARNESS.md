@@ -2,7 +2,9 @@
 
 The local harness lets you develop and validate game UI without a real BGA server. You set up a specific game state, run one command, and get a static HTML snapshot showing how the game looks — tokens, buttons, tooltips, and game log — all rendered by the real client code.
 
-**Goal**: catch UI bugs (wrong tokens, missing buttons, broken tooltips, bad log text) locally before deploying to BGA.
+**Goal**: 
+- catch UI bugs (wrong tokens, missing buttons, broken tooltips, bad log text) locally before deploying to BGA.
+- ability to debug server code with local php debugger
 
 ## Problem
 

@@ -1,0 +1,8 @@
+{
+  "current_player_id": 10,
+  "reset": true,
+  "steps": [
+    { "endpoint": "debug_Op_roll", "reload": true },
+    { "endpoint": "action_resolve", "data": { "target": "hex_7_9" }, "reload": true }
+  ]
+}
