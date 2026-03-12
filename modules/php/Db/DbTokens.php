@@ -1308,4 +1308,11 @@ class DbTokens {
         }
         return $tokens;
     }
+
+    public function toJson(): array {
+        return [];
+    }
+
+    public function fromJson(array $rows): void {
+    }
 }

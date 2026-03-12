@@ -79,7 +79,7 @@ if ($debugFunction) {
 
 // ── Run ──────────────────────────────────────────────────────────────────────
 
-$driver = new GameDriver($stagingDir, $writeDir, $currentPlayerId);
+$driver = new GameDriver("Fate", $stagingDir, $writeDir, $currentPlayerId);
 
 if ($reset) {
     echo "Reset mode: starting fresh.\n";

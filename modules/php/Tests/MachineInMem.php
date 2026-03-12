@@ -233,4 +233,12 @@ class MachineInMem extends DbMachine {
             }
         }
     }
+
+    public function toJson(): array {
+        return array_values($this->xtable);
+    }
+
+    public function fromJson(array $rows): void {
+        $this->loadRows($rows);
+    }
 }

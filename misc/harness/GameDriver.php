@@ -12,15 +12,16 @@ class GameDriver {
     public GameHarness $game;
     private string $stagingDir;
     private string $writeDir;
-    private int $currentPlayerId;
     public array $states;
 
-    public function __construct(string $stagingDir, string $writeDir, int $currentPlayerId = 10) {
+    private string $gameName;
+
+    public function __construct(string $gameName, string $stagingDir, string $writeDir, int $currentPlayerId = 10) {
+        $this->gameName = $gameName;
         $this->stagingDir = $stagingDir;
         $this->writeDir = $writeDir;
-        $this->currentPlayerId = $currentPlayerId;
         $this->game = new GameHarness();
-        $this->game->curid = $currentPlayerId;
+        $this->game->_setCurrentPlayerId($currentPlayerId);
         $this->states = $this->buildStateNameMap();
     }
 
@@ -29,7 +30,7 @@ class GameDriver {
         $map = [];
         $statesDir = __DIR__ . "/../../modules/php/States";
         foreach (glob("$statesDir/*.php") as $file) {
-            $className = "Bga\\Games\\Fate\\States\\" . basename($file, ".php"); // XXX namespace ref
+            $className = "Bga\\Games\\{$this->gameName}\\States\\" . basename($file, ".php");
             if (!class_exists($className)) {
                 continue;
             }
@@ -48,10 +49,8 @@ class GameDriver {
             return;
         }
         echo "Loading db.json...\n";
-        foreach ($db["tokens"] ?? [] as $rec) {
-            $this->game->tokens->DbCreateTokens([[$rec["key"], $rec["location"], $rec["state"]]]);
-        }
-        $this->game->machine->db->loadRows($db["machine"] ?? []);
+        $this->game->tokens->fromJson($db["tokens"] ?? []);
+        $this->game->machine->db->fromJson($db["machine"] ?? []);
         if (isset($db["gamestate"]["active_player"])) {
             $this->game->gamestate->changeActivePlayer($db["gamestate"]["active_player"]);
         }
@@ -61,13 +60,12 @@ class GameDriver {
         if (isset($db["players"])) {
             $this->game->_colors = array_column($db["players"], "player_color");
         }
-        $this->game->curid = $this->currentPlayerId;
     }
 
     public function saveState(): void {
         $finalDb = [
-            "tokens" => $this->game->tokens->getAllTokens(),
-            "machine" => array_values($this->game->machine->db->all()),
+            "tokens" => $this->game->tokens->toJson(),
+            "machine" => $this->game->machine->db->toJson(),
             "gamestate" => [
                 "state_id" => $this->game->gamestate->getCurrentMainStateId(),
                 "active_player" => (int) $this->game->getActivePlayerId(),
@@ -83,36 +81,46 @@ class GameDriver {
         echo "Wrote staging/gamedatas.json\n";
     }
 
-    public function game_getAllDatas() {
+    public function getGameStateArgs() {
         $stateId = $this->game->gamestate->getCurrentMainStateId();
         $activePlayer = (int) $this->game->getActivePlayerId();
 
         $stateNameMap = $this->states;
         /** @var GameState */
         $stateInst = $stateNameMap[$stateId];
-        $this->game->systemAssert("state not found $stateId", $stateInst);
+        if (!$stateInst) {
+            die("State not found: $stateId\n");
+        }
         $stateName = $stateInst->name;
 
         $stateArgs = [];
-        try {
-            $stateArgs = $stateInst->getArgs($activePlayer);
-        } catch (\Throwable $e) {
-            echo "Warning: getArgs for state $stateName failed: " . $e->getMessage() . "\n";
+        if (method_exists($stateInst, "getArgs")) {
+            try {
+                $stateArgs = $stateInst->getArgs($activePlayer);
+            } catch (\Throwable $e) {
+                echo "Warning: getArgs for state $stateName failed: " . $e->getMessage() . "\n";
+            }
         }
 
-        $gamedatas = $this->game->getAllDatas();
-        $gamedatas["gamestate"] = [
-            "id" => $stateId,
-            "name" => $stateName,
-            "active_player" => $activePlayer,
-            "args" => $stateArgs,
+        return [
+            "gamestate" => [
+                "id" => $stateId,
+                "name" => $stateName,
+                "active_player" => $activePlayer,
+                "args" => $stateArgs,
+            ],
         ];
+    }
+
+    public function game_getAllDatas() {
+        $gamedatas = $this->getGameStateArgs();
+        $gamedatas += $this->game->getAllDatas();
         return $gamedatas;
     }
 
     public function saveNotifications(): void {
-        self::saveJson("$this->stagingDir/notifications.json", $this->game->notify->log);
-        echo "Wrote staging/notifications.json (" . count($this->game->notify->log) . " notifications)\n";
+        self::saveJson("$this->stagingDir/notifications.json", $this->game->notify->_getNotifications());
+        echo "Wrote staging/notifications.json (" . count($this->game->notify->_getNotifications()) . " notifications)\n";
     }
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
@@ -137,24 +145,66 @@ class GameDriver {
     }
 
     public function runDispatchLoop(): void {
-        $state = $this->game->machine->dispatchAll();
-        $this->game->gamestate->jumpToState($this->getStateId($state));
-        echo "  → Dispatched → state: " . $this->game->gamestate->getCurrentMainStateId() . " ($state)\n";
+        $stateId = $this->game->gamestate->getCurrentMainStateId();
+        $nextState = $this->runStateClassOnEnteringState($stateId, (int) $this->game->getCurrentPlayerId());
+        if (!$nextState) {
+            // state did not change
+            $nextState = $stateId;
+        } else {
+            $nextState = $this->getStateId($nextState);
+            $this->game->gamestate->jumpToState($nextState);
+        }
+
+        echo "  → Dispatched → state:  $nextState\n";
+    }
+
+    public function runStateClassOnEnteringState(int $stateId, ?int $privateStatePlayerId = null): mixed {
+        $state = $this->states[$stateId];
+        $reflection = new \ReflectionClass($state);
+
+        $functionName = "onEnteringState";
+
+        if (!$reflection->hasMethod($functionName)) {
+            return null;
+        }
+
+        $method = $reflection->getMethod($functionName);
+        $parameters = $method->getParameters();
+
+        $functionParameters = [];
+        foreach ($parameters as $index => $parameter) {
+            $paramName = $parameter->getName();
+            $paramType = $parameter->getType()->getName();
+            if (in_array($paramName, ["arg", "args"]) && $paramType === "array") {
+                $functionParameters[] = []; // ?
+            } elseif (in_array($paramName, ["playerId", "player_id", "currentPlayerId", "current_player_id"]) && $paramType === "int") {
+                $functionParameters[] = $privateStatePlayerId;
+            } elseif (in_array($paramName, ["activePlayerId", "active_player_id"]) && $paramType === "int") {
+                $functionParameters[] = (int) $this->game->getActivePlayerId();
+            } else {
+                die("Unknown $paramType $paramName for $functionName");
+            }
+        }
+
+        $result = $state->$functionName(...$functionParameters);
+
+        return $result;
     }
 
     public function emitGameStateChange(): void {
-        $newGamestate = $this->game_getAllDatas()["gamestate"] ?? []; // XXX bad
+        $currentPlayerId = $this->game->_getCurrentPlayerId();
+        $gamedatas = $this->getGameStateArgs();
+        $newGamestate = $gamedatas["gamestate"];
         $gsArgs = $newGamestate["args"] ?? [];
         if (isset($gsArgs["_private"]) && is_array($gsArgs["_private"])) {
-            $activeKey = (string) ($newGamestate["active_player"] ?? $this->currentPlayerId);
-            $gsArgs["_private"] =
-                $gsArgs["_private"][$activeKey] ?? ($gsArgs["_private"][$this->currentPlayerId] ?? reset($gsArgs["_private"]));
+            $activeKey = (string) $newGamestate["active_player"];
+            $gsArgs["_private"] = $gsArgs["_private"][$activeKey] ?? ($gsArgs["_private"][$currentPlayerId] ?? reset($gsArgs["_private"]));
         }
 
         $this->game->notify->all("gameStateChange", "", [
             "id" => $newGamestate["id"] ?? 0,
             "name" => $newGamestate["name"] ?? "",
-            "active_player" => (string) ($newGamestate["active_player"] ?? $this->currentPlayerId),
+            "active_player" => (string) $newGamestate["active_player"],
             "type" => "activeplayer",
             "args" => $gsArgs,
         ]);

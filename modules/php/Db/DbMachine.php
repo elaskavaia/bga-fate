@@ -283,4 +283,11 @@ class DbMachine {
         $result = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK | JSON_THROW_ON_ERROR);
         return $result;
     }
+
+    public function toJson(): array {
+        return [];
+    }
+
+    public function fromJson(array $rows): void {
+    }
 }
