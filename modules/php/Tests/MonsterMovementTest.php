@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\Operations\Op_turnMonster;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 final class MonsterMovementTest extends TestCase {
@@ -293,7 +293,11 @@ final class MonsterMovementTest extends TestCase {
         $this->assertTrue($this->game->isEndOfGame(), "Game should have ended");
 
         // The second monster should NOT have moved — game ended before its turn
-        $this->assertEquals("hex_13_7", $this->game->tokens->getTokenLocation("monster_goblin_2"), "Remaining monsters should not move after game ends");
+        $this->assertEquals(
+            "hex_13_7",
+            $this->game->tokens->getTokenLocation("monster_goblin_2"),
+            "Remaining monsters should not move after game ends"
+        );
     }
 
     public function testChargeOnSkullTurnAddsOneStep(): void {

@@ -6,7 +6,7 @@ require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Operations\Op_drawEvent;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 final class Op_drawEventTest extends TestCase {
@@ -32,7 +32,9 @@ final class Op_drawEventTest extends TestCase {
         $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
         $i = 0;
         foreach ($deck as $cardId => $info) {
-            if ($i >= $count) break;
+            if ($i >= $count) {
+                break;
+            }
             $this->game->tokens->moveToken($cardId, "hand_" . PCOLOR);
             $i++;
         }

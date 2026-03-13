@@ -20,9 +20,9 @@ declare(strict_types=1);
 
 // Bootstrap — same autoloader as PHPUnit tests
 require_once __DIR__ . "/../../modules/php/Tests/_autoload.php";
-require_once __DIR__ . "/../../modules/php/Tests/MachineInMem.php";
-require_once __DIR__ . "/../../modules/php/Tests/TokensInMem.php";
-require_once __DIR__ . "/../../modules/php/Tests/GameUT.php";
+require_once __DIR__ . "/../../modules/php/Tests/Stubs/MachineInMem.php";
+require_once __DIR__ . "/../../modules/php/Tests/Stubs/TokensInMem.php";
+require_once __DIR__ . "/../../modules/php/Tests/Stubs/GameUT.php";
 require_once __DIR__ . "/GameHarness.php";
 require_once __DIR__ . "/GameDriver.php";
 

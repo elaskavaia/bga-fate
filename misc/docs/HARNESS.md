@@ -184,7 +184,7 @@ Available endpoints — **actions**: `action_resolve`, `action_skip`, `action_un
 ## Status
 
 - [x] One-time setup steps (staging/, .gitignore, package.json play script)
-- [x] Extract `GameUT` into `modules/php/Tests/GameUT.php` (no PHPUnit dependency)
+- [x] Extract `GameUT` into `modules/php/Tests/Stubs/GameUT.php` (no PHPUnit dependency)
 - [x] Write `play.php` with scenario + debug mode
 - [x] Add `getAllDatas()` to `GameUT`; `GameDriver` appends `gamestate` field
 - [x] Write `misc/harness/plays/setup.json`

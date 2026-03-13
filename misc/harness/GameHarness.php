@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Bga\GameFramework\States\GameState;
 use Bga\Games\Fate\StateConstants;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 
 /**
  * Extends GameUT with harness-specific getAllDatas() that includes gamestate

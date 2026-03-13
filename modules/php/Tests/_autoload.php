@@ -10,8 +10,6 @@ spl_autoload_register(function ($class_name) {
             include APP_GAMEMODULE_PATH . "/module/table" . "/table.game.php";
             return;
         case "Deck":
-            //var_dump($class_name);
-            //var_dump(APP_GAMEMODULE_PATH);
             include APP_GAMEMODULE_PATH . "/module/common/deck.game.php";
             return;
     }
@@ -30,7 +28,7 @@ spl_autoload_register(function ($class_name) {
 
         // Include the file if it exists
         if (file_exists($filePath)) {
-            require $filePath;
+            require_once $filePath;
             return;
         }
     }

@@ -6,7 +6,7 @@ require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Operations\Op_playEvent;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 // Hero 1 (Bjorn) is always assigned to PCOLOR in a 1-player setup.

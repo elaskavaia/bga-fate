@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\Operations\Op_actionPrepare;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 final class Op_actionPrepareTest extends TestCase {

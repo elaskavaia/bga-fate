@@ -1,14 +1,15 @@
 <?php
 
 declare(strict_types=1);
-namespace Bga\Games\Fate\Tests;
+namespace Bga\Games\Fate\Tests\Stubs;
 
-use Bga\GameFramework\Notify;
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\StateConstants;
+use Bga\Games\Fate\Tests\Stubs\MachineInMem;
+use Bga\Games\Fate\Tests\Stubs\TokensInMem;
 
 //       "player_colors" => ["ff0000", "ffcc02", "6cd0f6", "982fff"],
 if (!defined("PCOLOR")) {
@@ -47,7 +48,6 @@ class GameUT extends Game {
         parent::__construct();
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->curid = 1;
         $this->_colors = [PCOLOR, BCOLOR];
 
         $this->tokens = new TokensInMem($this);
@@ -84,20 +84,8 @@ class GameUT extends Game {
         return $this;
     }
 
-    function clean_cache() {}
-
     function getMultiMachine() {
         return $this->multimachine;
-    }
-
-    public int $curid;
-
-    public function _getCurrentPlayerId() {
-        return $this->curid;
-    }
-
-    public function _setCurrentPlayerId(int $playerId) {
-        $this->curid = $playerId;
     }
 
     function fakeUserAction(Operation $op, $target = null) {

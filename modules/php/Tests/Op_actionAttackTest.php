@@ -6,7 +6,7 @@ require_once __DIR__ . "/GameTest.php";
 
 use Bga\Games\Fate\Operations\Op_actionAttack;
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 final class Op_actionAttackTest extends TestCase {
@@ -99,7 +99,7 @@ final class Op_actionAttackTest extends TestCase {
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         foreach ($ops as $o) {
             if (str_contains($o["type"], "roll")) {
-                $data = is_string($o["data"]) ? json_decode($o["data"], true) : ($o["data"] ?? []);
+                $data = is_string($o["data"]) ? json_decode($o["data"], true) : $o["data"] ?? [];
                 $this->assertEquals("hex_12_8", $data["target"]);
                 return;
             }

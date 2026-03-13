@@ -2,15 +2,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/GameUT.php";
-
-use Bga\Games\Fate\Tests\GameUT;
+use Bga\Games\Fate\Tests\Stubs\GameUT;
 use Bga\Games\Fate\States\GameDispatch;
 use PHPUnit\Framework\TestCase;
-
-use function Bga\Games\Fate\array_get;
-use function Bga\Games\Fate\getPart;
-use function Bga\Games\Fate\toJson;
 
 final class GameTest extends TestCase {
     private GameUT $game;
@@ -339,7 +333,7 @@ final class GameTest extends TestCase {
         $op = $this->game->machine->instanciateOperation($type, PCOLOR);
 
         $args = $op->getArgs();
-        $ttype = array_get($args, "ttype");
+        $ttype = $args["ttype"] ?? "";
         $this->assertTrue($ttype != "", "empty ttype for $key");
 
         $this->assertFalse(str_contains($op->getOpName(), "?"), $op->getOpName());

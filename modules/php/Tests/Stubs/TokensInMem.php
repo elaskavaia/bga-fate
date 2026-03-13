@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bga\Games\Fate\Tests;
+namespace Bga\Games\Fate\Tests\Stubs;
 
 use Bga\Games\Fate\Db\DbTokens;
 use Exception;
@@ -145,7 +145,7 @@ class TokensInMem extends DbTokens {
     function getTokensOnTop($nbr, $location) {
         $tokens = $this->getTokensOfTypeInLocation(null, $location);
         uasort($tokens, fn($a, $b) => $b["state"] <=> $a["state"]);
-        return array_slice(array_values($tokens), 0, (int)$nbr);
+        return array_slice(array_values($tokens), 0, (int) $nbr);
     }
 
     function pickTokensForLocation($nbr, $from_location, $to_location, $state = 0, $no_deck_reform = false, &$was_reshuffled = null) {

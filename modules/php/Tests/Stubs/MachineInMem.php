@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Bga\Games\Fate\Tests;
+namespace Bga\Games\Fate\Tests\Stubs;
 
 use Bga\Games\Fate\Db\DbMachine;
 
