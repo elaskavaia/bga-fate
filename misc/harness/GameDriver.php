@@ -11,15 +11,13 @@ use Bga\GameFramework\States\GameState;
 class GameDriver {
     public GameHarness $game;
     private string $stagingDir;
-    private string $writeDir;
     public array $states;
 
     private string $gameName;
 
-    public function __construct(string $gameName, string $stagingDir, string $writeDir, int $currentPlayerId = 10) {
+    public function __construct(string $gameName, string $stagingDir, int $currentPlayerId = 10) {
         $this->gameName = $gameName;
         $this->stagingDir = $stagingDir;
-        $this->writeDir = $writeDir;
         $this->game = new GameHarness();
         $this->game->_setCurrentPlayerId($currentPlayerId);
         $this->states = $this->buildStateNameMap();
@@ -42,13 +40,12 @@ class GameDriver {
 
     // ── State persistence ────────────────────────────────────────────────────
 
-    public function loadState(string $stateDir): void {
-        $db = self::loadJson("$stateDir/db.json");
+    public function loadState(string $dbPath): void {
+        $db = self::loadJson($dbPath);
         if ($db === null) {
-            echo "No db.json found, starting fresh.\n";
-            return;
+            die("db.json not found: $dbPath\n");
         }
-        echo "Loading db.json...\n";
+        echo "Loading $dbPath\n";
         $this->game->tokens->fromJson($db["tokens"] ?? []);
         $this->game->machine->db->fromJson($db["machine"] ?? []);
         if (isset($db["gamestate"]["active_player"])) {
@@ -72,7 +69,7 @@ class GameDriver {
             ],
             "players" => array_values($this->game->loadPlayersBasicInfos()),
         ];
-        self::saveJson("$this->writeDir/db.json", $finalDb);
+        self::saveJson("$this->stagingDir/db.json", $finalDb);
     }
 
     public function saveGamedatas(): void {
@@ -93,14 +90,7 @@ class GameDriver {
         }
         $stateName = $stateInst->name;
 
-        $stateArgs = [];
-        if (method_exists($stateInst, "getArgs")) {
-            try {
-                $stateArgs = $stateInst->getArgs($activePlayer);
-            } catch (\Throwable $e) {
-                echo "Warning: getArgs for state $stateName failed: " . $e->getMessage() . "\n";
-            }
-        }
+        $stateArgs = $this->runStateClass_getArgs($stateId, (int) $this->game->getCurrentPlayerId());
 
         return [
             "gamestate" => [
@@ -146,7 +136,7 @@ class GameDriver {
 
     public function runDispatchLoop(): void {
         $stateId = $this->game->gamestate->getCurrentMainStateId();
-        $nextState = $this->runStateClassOnEnteringState($stateId, (int) $this->game->getCurrentPlayerId());
+        $nextState = $this->runStateClass_onEnteringState($stateId, (int) $this->game->getCurrentPlayerId());
         if (!$nextState) {
             // state did not change
             $nextState = $stateId;
@@ -158,37 +148,61 @@ class GameDriver {
         echo "  → Dispatched → state:  $nextState\n";
     }
 
-    public function runStateClassOnEnteringState(int $stateId, ?int $privateStatePlayerId = null): mixed {
+    public function runStateClass_getArgs(int $stateId, ?int $privateStatePlayerId = null): mixed {
+        return $this->runStateMethod($stateId, "getArgs", $privateStatePlayerId) ?? [];
+    }
+
+    public function runStateClass_onEnteringState(int $stateId, ?int $privateStatePlayerId = null): mixed {
+        return $this->runStateMethod($stateId, "onEnteringState", $privateStatePlayerId);
+    }
+
+    private function runStateMethod(int $stateId, string $methodName, ?int $privateStatePlayerId): mixed {
         $state = $this->states[$stateId];
         $reflection = new \ReflectionClass($state);
 
-        $functionName = "onEnteringState";
-
-        if (!$reflection->hasMethod($functionName)) {
+        if (!$reflection->hasMethod($methodName)) {
             return null;
         }
 
-        $method = $reflection->getMethod($functionName);
-        $parameters = $method->getParameters();
+        $method = $reflection->getMethod($methodName);
+        $args = $this->matchStateMethodArgs($method, $privateStatePlayerId);
+        return $state->$methodName(...$args);
+    }
 
+    private function matchStateMethodArgs(\ReflectionMethod $method, ?int $privateStatePlayerId): array {
         $functionParameters = [];
-        foreach ($parameters as $index => $parameter) {
+        foreach ($method->getParameters() as $parameter) {
             $paramName = $parameter->getName();
             $paramType = $parameter->getType()->getName();
             if (in_array($paramName, ["arg", "args"]) && $paramType === "array") {
-                $functionParameters[] = []; // ?
+                $functionParameters[] = [];
             } elseif (in_array($paramName, ["playerId", "player_id", "currentPlayerId", "current_player_id"]) && $paramType === "int") {
                 $functionParameters[] = $privateStatePlayerId;
             } elseif (in_array($paramName, ["activePlayerId", "active_player_id"]) && $paramType === "int") {
                 $functionParameters[] = (int) $this->game->getActivePlayerId();
             } else {
-                die("Unknown $paramType $paramName for $functionName");
+                $functionName = $method->getName();
+                $stateName = $method->getDeclaringClass()->getName();
+                die("Unknown $paramType $paramName for $stateName::$functionName\n");
             }
         }
+        return $functionParameters;
+    }
 
-        $result = $state->$functionName(...$functionParameters);
-
-        return $result;
+    private static function matchArgs(ReflectionMethod $ref, array $data): array {
+        $args = [];
+        foreach ($ref->getParameters() as $param) {
+            $name = $param->getName();
+            if (array_key_exists($name, $data)) {
+                $args[] = $data[$name];
+            } elseif ($param->isDefaultValueAvailable()) {
+                $args[] = $param->getDefaultValue();
+            } else {
+                $endpoint = $ref->getName();
+                die("Missing required param '$name' for $endpoint\n");
+            }
+        }
+        return $args;
     }
 
     public function emitGameStateChange(): void {
@@ -262,22 +276,6 @@ class GameDriver {
             mkdir($dir, 0777, true);
         }
         file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
-    private static function matchArgs(ReflectionMethod $ref, array $data): array {
-        $args = [];
-        foreach ($ref->getParameters() as $param) {
-            $name = $param->getName();
-            if (array_key_exists($name, $data)) {
-                $args[] = $data[$name];
-            } elseif ($param->isDefaultValueAvailable()) {
-                $args[] = $param->getDefaultValue();
-            } else {
-                $endpoint = $ref->getName();
-                die("Missing required param '$name' for $endpoint\n");
-            }
-        }
-        return $args;
     }
 
     public function getStateId(mixed $targetClass): int {

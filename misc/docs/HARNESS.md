@@ -35,7 +35,7 @@ The BGA framework does a lot of work that normally only runs on their servers or
 - **Framework base class** (`Table`) — the BGA `Table` class wires up DB connections, player data, notifications, game state transitions; replaced with stubs in `bga-sharedcode` that provide the same interface without a real server
 - **Notify** — `$this->notify->all(...)` normally pushes to BGA's real-time channel; the `Notify` stub in `bga-sharedcode` records all calls to `$this->notify->log` and supports `addDecorator`, so no replacement is needed
 - **Game state machine** — `gamestate->jumpToState()`, `changeActivePlayer()`, etc. are normally server-side BGA infra; stubbed to track current state in memory
-- **Harness extension** (`GameHarness`) — adds `getAllDatas()` with a `gamestate` field (real BGA appends this automatically on reload, our stub does not)
+- **Harness driver** (`GameDriver`) — appends the `gamestate` field to `getAllDatas()` (real BGA adds this automatically on reload, our stub does not); also handles state persistence via `toJson`/`fromJson` and endpoint dispatch via reflection
 
 **Client side (JS):**
 - **HTML template** — the real BGA page is served by their platform; we provide a minimal `template.html` with the same element IDs the client expects (`#game_play_area`, `#generalactions`, `#pagemaintitletext`, `#player_boards`, `#logs`, etc.)
@@ -61,12 +61,16 @@ Two ways to drive the server:
 ## Usage
 
 ```
-npm run play                                         # default 'setup' scenario
-npm run play --scenario=hero_move                    # named scenario
-npm run play --debug=debug_Op_move                   # debug function, persists to debug/ state
-npm run play --debug=debug_Op_move --scenario=setup  # debug function against scenario state (read-only)
-npm run play --reset                                 # ignore saved state, start fresh
-HARNESS_VERBOSE=1 npm run play                       # show full server console output
+npm run play                                                              # default setup scenario + render
+php8.4 misc/harness/play.php --script misc/harness/plays/op_roll.json    # named script
+php8.4 misc/harness/play.php --debug debug_Op_move                       # debug function
+php8.4 misc/harness/play.php --debug debug_Op_roll --db staging/db.json  # debug against saved state
+php8.4 misc/harness/play.php --output /tmp/out                           # custom output directory
+```
+
+`npm run play` runs the default setup scenario and the JS renderer. For other options, call `play.php` directly, then run the renderer separately if needed:
+```
+ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
 ```
 
 Then read `staging/snapshot.html`.
@@ -104,23 +108,21 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
 ### npm script
 
 ```json
-"play": "php8.4 misc/harness/play.php ${npm_config_debug:+-debug $npm_config_debug} ${npm_config_reset:+-reset} ${npm_config_scenario:-} && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts ${npm_config_scenario:-}"
+"play": "php8.4 misc/harness/play.php && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts"
 ```
 
-### PHP runner — `misc/harness/play.php`
+### PHP runner — `misc/harness/play.php` + `GameDriver`
 
-Bootstraps the same autoloader as PHPUnit tests, instantiates `GameHarness`, then:
+`play.php` is a thin CLI entry point that parses `--debug`, `--script`, `--db`, `--output` flags and delegates to `GameDriver`. With no flags, defaults to `misc/harness/plays/setup.json`. A bare positional argument is treated as a script path.
 
-1. Parse CLI flags: `-debug <fn>`, `-reset`, and optional play name (default: `setup`; debug default: `debug`)
-2. Auto-seed `staging/plays/<name>/script.json` from `misc/harness/plays/<name>.json` if the example is newer
-3. Load `staging/plays/<name>/db.json` into `GameHarness` if present (tokens, machine, gamestate, players, curid)
-4. `$game->notify` is already a recording `Notify` instance (from `bga-sharedcode` stub) — no swap needed
-5. For each step in `script.json`, dispatch to `action_resolve / action_skip / action_whatever / action_undo` or any `debug_*` method via reflection
-6. After each step: run the dispatch loop (if in `GameDispatch` state), then emit a synthetic `gameStateChange` notification
-7. In `--debug` mode: call the single named `debug_*` function, run dispatch loop, emit `gameStateChange`
-8. Write `staging/gamedatas.json`, `staging/notifications.json`, and `staging/plays/<name>/db.json`
+`GameDriver` orchestrates the harness run:
 
-Debug mode always writes to `staging/plays/debug/` to avoid corrupting source scenario state.
+1. Constructor takes game name (`"Fate"`), output dir, and current player ID; builds a state name map by scanning `modules/php/States/` via the `Bga\Games\{name}\States\` namespace
+2. `loadState(dbPath)` — deserializes a db.json file via `tokens->fromJson()`, `machine->db->fromJson()`, and restores gamestate/players
+3. `runSteps()` — for each step: dispatch the endpoint (action or debug), run `runStateClass_onEnteringState()` on the resulting state, emit a synthetic `gameStateChange` notification
+4. `runDebug()` — calls a single `debug_*` function, then dispatch + emit
+5. `saveState()` — serializes via `tokens->toJson()`, `machine->db->toJson()` to `<output>/db.json`
+6. `saveGamedatas()` / `saveNotifications()` — writes JSON for the JS renderer
 
 ### JS renderer — `misc/harness/render.ts`
 
@@ -184,7 +186,7 @@ Available endpoints — **actions**: `action_resolve`, `action_skip`, `action_un
 - [x] One-time setup steps (staging/, .gitignore, package.json play script)
 - [x] Extract `GameUT` into `modules/php/Tests/GameUT.php` (no PHPUnit dependency)
 - [x] Write `play.php` with scenario + debug mode
-- [x] Add `getAllDatas()` to `GameUT`; `GameHarness` extends it with `gamestate` field
+- [x] Add `getAllDatas()` to `GameUT`; `GameDriver` appends `gamestate` field
 - [x] Write `misc/harness/plays/setup.json`
 - [x] Write `misc/harness/template.html` (BGA HTML skeleton)
 - [x] Write `misc/harness/tsconfig.json`
