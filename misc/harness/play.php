@@ -96,7 +96,7 @@ if ($scriptPath) {
 $driver = new GameDriver("Fate", $stagingDir, $currentPlayerId);
 
 if ($dbPath) {
-    $driver->loadState($dbPath);
+    $driver->loadDbFromJson($dbPath);
 }
 
 $driver->runSteps($steps);
@@ -107,6 +107,6 @@ if ($debugFunction) {
 
 $driver->saveGamedatas();
 $driver->saveNotifications();
-$driver->saveState();
+$driver->saveDbToJson();
 
 echo "Done.\n";

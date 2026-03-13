@@ -118,10 +118,10 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
 `GameDriver` orchestrates the harness run:
 
 1. Constructor takes game name (`"Fate"`), output dir, and current player ID; builds a state name map by scanning `modules/php/States/` via the `Bga\Games\{name}\States\` namespace
-2. `loadState(dbPath)` — deserializes a db.json file via `tokens->fromJson()`, `machine->db->fromJson()`, and restores gamestate/players
+2. `loadDbFromJson(dbPath)` — deserializes a db.json file via `tokens->fromJson()`, `machine->db->fromJson()`, and restores gamestate/players
 3. `runSteps()` — for each step: dispatch the endpoint (action or debug), run `runStateClass_onEnteringState()` on the resulting state, emit a synthetic `gameStateChange` notification
 4. `runDebug()` — calls a single `debug_*` function, then dispatch + emit
-5. `saveState()` — serializes via `tokens->toJson()`, `machine->db->toJson()` to `<output>/db.json`
+5. `saveDbToJson()` — serializes via `tokens->toJson()`, `machine->db->toJson()` to `<output>/db.json`
 6. `saveGamedatas()` / `saveNotifications()` — writes JSON for the JS renderer
 
 ### JS renderer — `misc/harness/render.ts`
@@ -140,15 +140,10 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
    - If `notif.log` is non-empty: format and append to `#logs`
    - If `type === "gameStateChange"`: re-enter state (clears + re-renders title/buttons)
    - Otherwise: call `await game.notif_<type>(notif.args)` if handler exists
-9. Inline `common.css` + `fate.css` into `<head>`
+9. Inline `common.css` + `<game>.css` into `<head>`
 10. Append `#harness-click-registry`, `#harness-tooltip-registry`, and a click-logging script
 11. Write `staging/snapshot.html`
 
-### Notify recording and decorators
-
-The `Notify` stub in `bga-sharedcode` records all calls to `$this->notify->log` and supports `addDecorator` — the same interface used by `Base` and `Game` to register arg-transform functions. This means no swap or subclass is needed; the stub works directly.
-
-Decorator chain registered by `registerNotifyDecorators()`: **Base** fills in `player_name`/`you`; **Game** fills in `reason = ""`.
 
 ### Scenario format
 
@@ -166,7 +161,7 @@ Decorator chain registered by `registerNotifyDecorators()`: **Base** fills in `p
 
 Optional per-step: `"reload": true` — writes `gamedatas.json` after that step.
 
-Available endpoints — **actions**: `action_resolve`, `action_skip`, `action_undo`, `action_whatever`; **debug**: any `debug_*` method on `GameHarness`, params matched by name via reflection.
+Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method on `GameHarness`, params matched by name via reflection.
 
 ### DB state format
 

@@ -40,12 +40,12 @@ class GameDriver {
 
     // ── State persistence ────────────────────────────────────────────────────
 
-    public function loadState(string $dbPath): void {
+    public function loadDbFromJson(string $dbPath): void {
         $db = self::loadJson($dbPath);
         if ($db === null) {
             die("db.json not found: $dbPath\n");
         }
-        echo "Loading $dbPath\n";
+        $this->debugLog("Loading $dbPath");
         $this->game->tokens->fromJson($db["tokens"] ?? []);
         $this->game->machine->db->fromJson($db["machine"] ?? []);
         if (isset($db["gamestate"]["active_player"])) {
@@ -59,7 +59,7 @@ class GameDriver {
         }
     }
 
-    public function saveState(): void {
+    public function saveDbToJson(): void {
         $finalDb = [
             "tokens" => $this->game->tokens->toJson(),
             "machine" => $this->game->machine->db->toJson(),
@@ -75,7 +75,7 @@ class GameDriver {
     public function saveGamedatas(): void {
         $gamedatas = $this->game_getAllDatas();
         self::saveJson("$this->stagingDir/gamedatas.json", $gamedatas);
-        echo "Wrote staging/gamedatas.json\n";
+        $this->debugLog("Wrote staging/gamedatas.json");
     }
 
     public function getGameStateArgs() {
@@ -110,7 +110,7 @@ class GameDriver {
 
     public function saveNotifications(): void {
         self::saveJson("$this->stagingDir/notifications.json", $this->game->notify->_getNotifications());
-        echo "Wrote staging/notifications.json (" . count($this->game->notify->_getNotifications()) . " notifications)\n";
+        $this->debugLog("Wrote staging/notifications.json (" . count($this->game->notify->_getNotifications()) . " notifications)");
     }
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ class GameDriver {
             $this->game->gamestate->jumpToState($nextState);
         }
 
-        echo "  → Dispatched → state:  $nextState\n";
+        $this->debugLog("  → Dispatched → state:  $nextState");
     }
 
     public function runStateClass_getArgs(int $stateId, ?int $privateStatePlayerId = null): mixed {
@@ -224,36 +224,40 @@ class GameDriver {
         ]);
     }
 
+    private function debugLog($loc) {
+        echo "$loc\n";
+    }
+
     // ── Run ──────────────────────────────────────────────────────────────────
 
     public function runStep(string $endpoint, array $data): void {
         $op = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $this->game->debugLog("  → Starting step op " . ($op ? $op->getType() : "EMPTY"));
+        $this->debugLog("  → Starting step op " . ($op ? $op->getType() : "EMPTY"));
         $this->dispatchEndpoint($endpoint, $data);
         $this->runDispatchLoop();
         $this->emitGameStateChange();
     }
 
     public function runSteps(array $steps): void {
-        echo "Loading " . count($steps) . " steps\n";
+        $this->debugLog("Loading " . count($steps) . " steps");
         foreach ($steps as $i => $step) {
             $endpoint = $step["endpoint"] ?? "";
-            echo "Step " . ($i + 1) . ": $endpoint\n";
+            $this->debugLog("Step " . ($i + 1) . ": $endpoint");
             $this->runStep($endpoint, $step);
 
             if ($step["reload"] ?? false) {
                 $gamedatas = $this->game_getAllDatas();
                 self::saveJson("$this->stagingDir/gamedatas.json", $gamedatas);
-                echo "  → Wrote staging/gamedatas.json (reload after step)\n";
+                $this->debugLog("  → Wrote staging/gamedatas.json (reload after step)");
             }
 
             $op = $this->game->machine->createTopOperationFromDbForOwner(null);
-            $this->game->debugLog("  → Final step op " . ($op ? $op->getType() : "EMPTY"));
+            $this->debugLog("  → Final step op " . ($op ? $op->getType() : "EMPTY"));
         }
     }
 
     public function runDebug(string $debugFunction): void {
-        echo "Calling: $debugFunction\n";
+        $this->debugLog("Calling: $debugFunction");
         $this->runStep($debugFunction, []);
     }
 
