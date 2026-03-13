@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/GameTest.php";
-
 use Bga\Games\Fate\Operations\Op_turnMonster;
 use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
