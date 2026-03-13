@@ -33,11 +33,15 @@ class Op_actionMove extends Operation {
     }
 
     function getPossibleMoves(): array {
+        $target = $this->getDataField("target", "");
+        if ($target) {
+            return [$target];
+        }
         return $this->getPossibleMovesDelegate($this->getDelegateOperation());
     }
 
     function resolve(): void {
-        $this->queue($this->getDelegateOperation());
+        $this->queue($this->getDelegateOperation(), null, ["target" => $this->getDataField("target", "")]);
     }
 
     public function getUiArgs() {

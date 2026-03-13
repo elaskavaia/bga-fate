@@ -271,6 +271,13 @@ export class Game extends GameMachine {
     return res;
   }
 
+  onTokenNonActive(event: Event, fromMethod?: string) {
+    event.stopPropagation();
+    event.preventDefault();
+    // TODO: show error if this was error condition node
+    return false;
+  }
+
   updateTokenDisplayInfo(tokenInfo: TokenDisplayInfo) {
     // override to generate dynamic tooltips and such
     const mainType = tokenInfo.mainType;

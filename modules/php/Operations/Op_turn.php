@@ -40,8 +40,8 @@ class Op_turn extends Operation {
     }
 
     function canSkip() {
-        // Player can end turn early (skip remaining actions)
-        return true;
+        $remaining = $this->getActionsRemaining();
+        return $remaining === 0; //only can skip if no mandatory actions
     }
 
     function getSkipName() {
@@ -80,11 +80,20 @@ class Op_turn extends Operation {
         // Offer main actions if the player still has actions remaining
         if ($remaining > 0) {
             foreach ($this->getActionsByKind("main") as $action) {
+                $res[$action] = ["q" => 0, "name" => $this->game->getTokenName("Op_$action")];
                 if (in_array($action, $actionsTaken)) {
-                    $res[$action] = ["q" => Material::ERR_NOT_APPLICABLE, "name" => $this->game->getTokenName("Op_$action")];
+                    $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
                 } else {
                     $op = $this->instanciateOperation($action);
-                    $res[$action] = $op->getErrorInfo() + ["name" => $this->game->getTokenName("Op_$action")];
+                    $res[$action] = array_merge($res[$action], $op->getErrorInfo());
+                    if ($res[$action]["q"] == 0) {
+                        // action is available, shortcut - send action parameters also
+                        $info = $op->getArgs()["info"];
+                        foreach ($info as $key => $value) {
+                            $res[$key] = $value;
+                            $res[$key]["action"] = $action;
+                        }
+                    }
                 }
             }
         }
@@ -98,6 +107,10 @@ class Op_turn extends Operation {
         }
 
         return $res;
+    }
+
+    public function getUiArgs() {
+        return ["buttons" => false];
     }
 
     function resolve(): void {
@@ -139,6 +152,35 @@ class Op_turn extends Operation {
             // Queue the free action, then come back to this turn operation
             $this->queue($optype);
             // Re-queue turn (same state, free actions don't consume main actions)
+            $this->saveToDb(2, true);
+        } elseif ($kind === "") {
+            // delegate: user picked a sub-target directly (e.g. a hex), resolve via parent action
+            $argInfo = $this->getArgs()["info"][$optype];
+            $action = $argInfo["action"] ?? "";
+            $this->game->userAssert(clienttranslate("Invalid action selection"), $action !== "");
+
+            // Same bookkeeping as the main action branch
+            $this->game->userAssert(clienttranslate("You already performed this action this turn"), !in_array($action, $actionsTaken));
+            $this->game->userAssert(clienttranslate("No actions remaining"), $remaining > 0);
+
+            $owner = $this->getOwner();
+            $x = 3 - $remaining;
+            $heroId = $this->game->getHeroTokenId($owner);
+            $actionName = $this->game->getTokenName("Op_$action");
+            $this->dbSetTokenLocation(
+                "marker_{$owner}_{$x}",
+                "aslot_{$owner}_{$action}",
+                0,
+                clienttranslate('${char_name} selects ${action_name}'),
+                ["char_name" => $heroId, "action_name" => $actionName]
+            );
+
+            $this->queue($action, null, ["target" => $optype]);
+
+            $actionsTaken[] = $action;
+            $remaining--;
+            $this->withDataField("actions_taken", $actionsTaken);
+            $this->withDataField("actions_remaining", $remaining);
             $this->saveToDb(2, true);
         } else {
             $this->game->userAssert(clienttranslate("Invalid action selection"));

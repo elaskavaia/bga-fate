@@ -23,6 +23,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionAttack extends Operation {
     function getPossibleMoves(): array {
+        $target = $this->getDataField("target", "");
+        if ($target) {
+            return [$target];
+        }
         $hero = $this->game->getHero($this->getOwner());
         return $hero->getMonsterHexesInRange($hero->getAttackRange());
     }
@@ -36,7 +40,8 @@ class Op_actionAttack extends Operation {
     }
 
     function resolve(): void {
-        $targetHex = $this->getCheckedArg();
+        $target = $this->getDataField("target", "");
+        $targetHex = $target ?: $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
         $strength = $hero->getAttackStrength();
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);

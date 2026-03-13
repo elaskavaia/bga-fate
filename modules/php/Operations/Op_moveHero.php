@@ -36,6 +36,10 @@ class Op_moveHero extends CountableOperation {
     }
 
     function getPossibleMoves(): array {
+        $target = $this->getDataField("target", "");
+        if ($target) {
+            return [$target];
+        }
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $currentHex = $this->game->tokens->getTokenLocation($heroId);
@@ -59,7 +63,7 @@ class Op_moveHero extends CountableOperation {
     }
 
     function resolve(): void {
-        $target = $this->getCheckedArg();
+        $target = $this->getDataField("target", "") ?: $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
         // When entering Grimheim, place hero at their home hex
         if ($this->game->hexMap->isInGrimheim($target)) {

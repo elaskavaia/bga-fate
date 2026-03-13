@@ -272,13 +272,13 @@ export class GameMachine extends Game1Tokens {
     event.stopPropagation();
     event.preventDefault();
     const ttype = this.opInfo?.ttype;
-    if (ttype) {
+    if (!this.isActiveSlot(id)) {
+      return this.onTokenNonActive(event);
+    } else if (ttype) {
       var methodName = "onToken_" + ttype;
       let ret = this.callfn(methodName, id, event.currentTarget as HTMLElement);
       if (ret === undefined) return false;
       return true;
-    } else if (!this.isActiveSlot(id)) {
-      return this.onTokenNonActive(event);
     }
     console.error("no handler for ", ttype);
     return false;

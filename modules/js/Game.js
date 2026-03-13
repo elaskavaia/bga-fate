@@ -1564,15 +1564,15 @@ class GameMachine extends Game1Tokens {
         event.stopPropagation();
         event.preventDefault();
         const ttype = this.opInfo?.ttype;
-        if (ttype) {
+        if (!this.isActiveSlot(id)) {
+            return this.onTokenNonActive(event);
+        }
+        else if (ttype) {
             var methodName = "onToken_" + ttype;
             let ret = this.callfn(methodName, id, event.currentTarget);
             if (ret === undefined)
                 return false;
             return true;
-        }
-        else if (!this.isActiveSlot(id)) {
-            return this.onTokenNonActive(event);
         }
         console.error("no handler for ", ttype);
         return false;
@@ -2070,6 +2070,12 @@ class Game extends GameMachine {
         if (tc)
             return `<span style="color:${tc};font-weight:bold">${res}</span>`;
         return res;
+    }
+    onTokenNonActive(event, fromMethod) {
+        event.stopPropagation();
+        event.preventDefault();
+        // TODO: show error if this was error condition node
+        return false;
     }
     updateTokenDisplayInfo(tokenInfo) {
         // override to generate dynamic tooltips and such

@@ -17,6 +17,8 @@ namespace Bga\Games\Fate\Operations;
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
+use function Bga\Games\Fate\getPart;
+
 /**
  * roll: Roll X attack dice against a target monster.
  * Count = number of dice to roll.
@@ -37,11 +39,36 @@ class Op_roll extends CountableOperation {
     function getPossibleMoves(): array {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget => ["q" => Material::RET_OK]];
+            return [$presetTarget];
         }
-        $hero = $this->game->getHero($this->getOwner());
-        $hexes = $hero->getMonsterHexesInRange($this->getRange());
-        return $hexes;
+
+        // Monster attacking: find hero hexes in range (excluding Grimheim)
+        $attackerId = $this->getDataField("attacker") ?? $this->game->getHeroTokenId($this->getOwner());
+        if ($attackerId && getPart($attackerId, 0) === "monster") {
+            $monster = $this->game->getMonster($attackerId);
+            $monsterHex = $monster->getHex();
+            if ($monsterHex === null) {
+                return [];
+            }
+            $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $monster->getAttackRange());
+            $targets = [];
+            foreach ($hexesInRange as $hex) {
+                if ($this->game->hexMap->isInGrimheim($hex)) {
+                    continue;
+                }
+                if ($this->game->hexMap->isOccupiedByCharacterType($hex, "hero") !== null) {
+                    $targets[$hex] = ["q" => Material::RET_OK];
+                }
+            }
+            return $targets;
+        }
+
+        // Hero attacking: find monster hexes in range
+        $hero = $this->game->getHeroById($attackerId);
+        if ($this->game->hexMap->isInGrimheim($hero->getHex())) {
+            return [];
+        }
+        return $hero->getMonsterHexesInRange($this->getRange());
     }
 
     function resolve(): void {

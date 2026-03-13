@@ -126,15 +126,15 @@ final class Op_turnTest extends TestCase {
 
     public function testCannotSkipAtStart(): void {
         $op = $this->createOp();
-        $this->assertTrue($op->canSkip());
+        $this->assertFalse($op->canSkip());
     }
 
-    public function testCanSkipAfterFirstAction(): void {
+    public function testCannotSkipWithOneActionRemaining(): void {
         $op = $this->createOp(["actions_taken" => ["actionPractice"], "actions_remaining" => 1]);
-        $this->assertTrue($op->canSkip());
+        $this->assertFalse($op->canSkip());
     }
 
-    public function testCannotSkipWhenNoActionsRemaining(): void {
+    public function testCanSkipWhenNoActionsRemaining(): void {
         $op = $this->createOp(["actions_taken" => ["actionPractice", "actionMove"], "actions_remaining" => 0]);
         $this->assertTrue($op->canSkip());
     }
@@ -257,11 +257,72 @@ final class Op_turnTest extends TestCase {
     // }
 
     // -------------------------------------------------------------------------
+    // getPossibleMoves: delegate sub-targets
+    // -------------------------------------------------------------------------
+
+    public function testPossibleMovesIncludesDelegateTargets(): void {
+        $op = $this->createOp();
+        $moves = $op->getPossibleMoves();
+
+        // actionMove is available and hero_1 is on hex_9_9 (Grimheim),
+        // so adjacent Grimheim hexes should appear as delegate targets
+        $hasDelegateTarget = false;
+        foreach ($moves as $key => $value) {
+            if (str_starts_with($key, "hex_") && isset($value["action"])) {
+                $hasDelegateTarget = true;
+                $this->assertEquals("actionMove", $value["action"]);
+                $this->assertEquals(0, $value["q"]);
+                break;
+            }
+        }
+        $this->assertTrue($hasDelegateTarget, "Expected at least one hex delegate target from actionMove");
+    }
+
+    public function testDelegateTargetsNotPresentWhenNoActionsRemaining(): void {
+        $op = $this->createOp(["actions_taken" => ["actionPractice", "actionMove"], "actions_remaining" => 0]);
+        $moves = $op->getPossibleMoves();
+
+        foreach ($moves as $key => $value) {
+            $this->assertFalse(
+                str_starts_with($key, "hex_") && isset($value["action"]),
+                "Delegate targets should not appear when no actions remaining"
+            );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // resolve: delegate target
+    // -------------------------------------------------------------------------
+
+    public function testResolveDelegateTargetQueuesAction(): void {
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
+
+        $op = $this->createOp();
+        $moves = $op->getPossibleMoves();
+
+        // Find a hex delegate target from actionMove
+        $hexTarget = null;
+        foreach ($moves as $key => $value) {
+            if (str_starts_with($key, "hex_") && ($value["action"] ?? "") === "actionMove") {
+                $hexTarget = $key;
+                break;
+            }
+        }
+        $this->assertNotNull($hexTarget, "Expected a hex delegate target");
+
+        $op->action_resolve([Operation::ARG_TARGET => $hexTarget]);
+
+        $top = $this->game->machine->createTopOperationFromDbForOwner(null);
+        $this->assertNotNull($top);
+        $this->assertEquals("actionMove", $top->getType());
+    }
+
+    // -------------------------------------------------------------------------
     // skip (end turn early)
     // -------------------------------------------------------------------------
 
     public function testSkipQueuesEndOfTurn(): void {
-        $op = $this->createOp(["actions_taken" => ["actionPractice"], "actions_remaining" => 1]);
+        $op = $this->createOp(["actions_taken" => ["actionPractice"], "actions_remaining" => 0]);
         $op->skip();
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);

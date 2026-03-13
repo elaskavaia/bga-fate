@@ -104,10 +104,10 @@ final class Op_monsterAttackTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testTrollkinFactionBonus(): void {
-        // Two trollkin monsters adjacent to hero: goblin (strength=1) + brute
-        // Goblin attacks → gets +1 for the adjacent trollkin brute = strength 2
+        // Two trollkin monsters: goblin on hex_12_8 (adjacent to hero on hex_11_8),
+        // brute on hex_12_7 (adjacent to goblin). Goblin attacks → +1 for adjacent trollkin brute = strength 2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_7");
         $this->game->hexMap->invalidateOccupancy();
 
         // Seed 2 dice (strength 1 + 1 bonus): hit, hit → 2 damage
