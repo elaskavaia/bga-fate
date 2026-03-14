@@ -20,6 +20,7 @@ class GameDriver {
         $this->stagingDir = $stagingDir;
         $this->game = new GameHarness();
         $this->game->_setCurrentPlayerId($currentPlayerId);
+        $this->game->init();
         $this->states = $this->buildStateNameMap();
     }
 

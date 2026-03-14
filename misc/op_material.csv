@@ -61,6 +61,7 @@ moveHero|Move Hero
 moveMonster|Move Monster
 performAction|Perform Action
 repairCard|Repair Card
+gainXp|Gain XP
 
 drawEvent|Draw Event
 discardEvent|Discard Event

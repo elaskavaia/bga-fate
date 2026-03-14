@@ -348,6 +348,10 @@ class Material {
         "type" => "repairCard",
         "name" => clienttranslate("Repair Card"),
 ],
+    "Op_gainXp" => [ 
+        "type" => "gainXp",
+        "name" => clienttranslate("Gain XP"),
+],
     "Op_drawEvent" => [ 
         "type" => "drawEvent",
         "name" => clienttranslate("Draw Event"),
@@ -5215,7 +5219,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Popular"),
         "count" => 2,
-        "r" => "2gainXp",
+        "r" => "2gainXp(grimheim)",
         "effect" => "Play in Grimheim to gain 2 gold [XP].",
         "flavour" => "I could get used to this…",
 ],
@@ -5492,7 +5496,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Miner"),
         "count" => 2,
-        "r" => "2gainXp",
+        "r" => "2gainXp(adjMountain)",
         "effect" => "Gain 2 gold [XP] if you are adjacent to a mountain area.",
         "flavour" => "All dwarves are minors until they turn fifty.",
 ],

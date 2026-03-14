@@ -158,8 +158,9 @@ from a filtered set. Common target filters:
   Used by: Kick, Swift Kick, Bowling
 - `killMonster target` (player) — Kill target monster (with filter: rank, health, range).
   Used by: Back Down, Short Temper, Heat Death, In Charge
-- `gainXp X` (auto) — Gain X gold/XP (move yellow crystals to tableau).
-  Used by: Miner, Popular, Discipline
+- `gainXp X(condition)` (auto) — Gain X gold/XP (move yellow crystals to tableau).
+  Optional condition: `grimheim` (hero in Grimheim), `adjMountain` (hero adjacent to mountain).
+  Used by: Miner (`2gainXp(adjMountain)`), Popular (`2gainXp(grimheim)`), Discipline, actionPractice
 - `gainMana X target` (player) — Add X mana to target card.
   Used by: Power Surge, Elementary Student, Focus event
 - `spendMana X source` (player) — Remove X mana from source card (cost/prerequisite).

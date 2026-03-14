@@ -16,7 +16,6 @@ See CLAUDE.md for project overview
 [x] Read the rulebook of Fate: Defenders of Grimheim and create RULES.md.
 [x] Assets of the game including rulebook PDF located at ~/Develop/bga/bga-assets/
 [x] Main Board (jpg) — img/EN_Game_Board.jpg
-[ ] Player boards (jpg) one per hero
 [x] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards
 [x] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites
 [~] Other 3d pieces and iconography (png) — dice sprite done (img/dice.png), crystals TODO
@@ -300,7 +299,7 @@ See CLAUDE.md for project overview
 - [x] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
 - [x] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
 - [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
-- [ ] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
+- [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects

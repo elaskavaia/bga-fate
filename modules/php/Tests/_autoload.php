@@ -1,19 +1,7 @@
 <?php
 define("APP_GAMEMODULE_PATH", getenv("APP_GAMEMODULE_PATH"));
+require_once APP_GAMEMODULE_PATH . "/php/stubs/BgaFrameworkStubs.php";
 spl_autoload_register(function ($class_name) {
-    switch ($class_name) {
-        case "Table":
-        case "Notify":
-        case "Bga\\GameFramework\\Notify":
-        case "Bga\\GameFramework\\Table":
-            // contact on purpose
-            include APP_GAMEMODULE_PATH . "/module/table" . "/table.game.php";
-            return;
-        case "Deck":
-            include APP_GAMEMODULE_PATH . "/module/common/deck.game.php";
-            return;
-    }
-
     // Define your base namespace and its corresponding base directory
     $namespacePrefix = "Bga\\Games\\Fate\\";
     $baseDirectory = __DIR__ . "/..";

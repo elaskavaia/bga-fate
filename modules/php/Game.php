@@ -633,6 +633,12 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_gainXp() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $this->machine->push("2gainXp", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }
