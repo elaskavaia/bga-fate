@@ -51,6 +51,9 @@ Prompt: add <name> operation. Read PROCEDURES.md for instructions
    ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
    ```
 #. If new game elements are introduced, follow the "Adding New Game Element" checklist below
+#. Update DESIGN.md if needed
+#. Update PLAN.md if needed
+#. If you learned anything new update CLAUDE.md
 
 ## Adding New Game Element
 

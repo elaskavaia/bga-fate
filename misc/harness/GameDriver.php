@@ -3,33 +3,38 @@
 declare(strict_types=1);
 
 use Bga\GameFramework\States\GameState;
+use Bga\GameFramework\Table;
 
 /**
- * Drives a GameHarness through scenario steps and debug functions.
- * Handles loading/saving state, dispatching endpoints, and emitting notifications.
+ * Generic harness driver for BGA games.
+ * Handles scenario execution, state persistence, endpoint dispatch, and notifications.
+ *
+ * The game instance must provide:
+ *   getGameName(): string — namespace name (e.g. "Fate")
+ *   saveDbState(): array — serialize all custom DB tables
+ *   loadDbState(array $db): void — restore custom DB tables
+ *   getAllDatas(): array — game data for client
  */
 class GameDriver {
-    public GameHarness $game;
+    public Table $game;
     private string $stagingDir;
     public array $states;
 
-    private string $gameName;
-
-    public function __construct(string $gameName, string $stagingDir, int $currentPlayerId = 10) {
-        $this->gameName = $gameName;
+    public function __construct(Table $game, string $stagingDir, int $currentPlayerId = 10) {
+        $this->game = $game;
         $this->stagingDir = $stagingDir;
-        $this->game = new GameHarness();
         $this->game->_setCurrentPlayerId($currentPlayerId);
-        $this->game->init();
+        $this->game->gamestate->changeActivePlayer($currentPlayerId);
         $this->states = $this->buildStateNameMap();
     }
 
     /** @return array<int, GameState> map of state id => state instance */
     public function buildStateNameMap(): array {
+        $gameName = $this->game->getGameName();
         $map = [];
         $statesDir = __DIR__ . "/../../modules/php/States";
         foreach (glob("$statesDir/*.php") as $file) {
-            $className = "Bga\\Games\\{$this->gameName}\\States\\" . basename($file, ".php");
+            $className = "Bga\\Games\\{$gameName}\\States\\" . basename($file, ".php");
             if (!class_exists($className)) {
                 continue;
             }
@@ -47,8 +52,7 @@ class GameDriver {
             die("db.json not found: $dbPath\n");
         }
         $this->debugLog("Loading $dbPath");
-        $this->game->tokens->fromJson($db["tokens"] ?? []);
-        $this->game->machine->db->fromJson($db["machine"] ?? []);
+        $this->game->loadDbState($db);
         if (isset($db["gamestate"]["active_player"])) {
             $this->game->gamestate->changeActivePlayer($db["gamestate"]["active_player"]);
         }
@@ -61,9 +65,7 @@ class GameDriver {
     }
 
     public function saveDbToJson(): void {
-        $finalDb = [
-            "tokens" => $this->game->tokens->toJson(),
-            "machine" => $this->game->machine->db->toJson(),
+        $finalDb = $this->game->saveDbState() + [
             "gamestate" => [
                 "state_id" => $this->game->gamestate->getCurrentMainStateId(),
                 "active_player" => (int) $this->game->getActivePlayerId(),
@@ -104,9 +106,42 @@ class GameDriver {
     }
 
     public function game_getAllDatas() {
-        $gamedatas = $this->getGameStateArgs();
-        $gamedatas += $this->game->getAllDatas();
-        return $gamedatas;
+        /** @var int */
+        $currentPlayerId = (int) $this->game->getCurrentPlayerId();
+        $result = $this->getGameStateArgs();
+        // Add players information
+        $players = $this->game->loadPlayersBasicInfos();
+        foreach ($players as $player_id => $player) {
+            $result["players"][$player_id]["color"] = $player["player_color"];
+            // $result["players"][$player_id]["color_back"] = color_to_color_back($player["player_color"]);
+            $result["players"][$player_id]["name"] = $player["player_name"];
+            $result["players"][$player_id]["avatar"] = $player["player_avatar"];
+            $result["players"][$player_id]["zombie"] = $player["player_zombie"];
+            $result["players"][$player_id]["eliminated"] = $player["player_eliminated"];
+            $result["players"][$player_id]["is_ai"] = $player["player_ai"];
+            $result["players"][$player_id]["beginner"] = $player["player_beginner"] !== null;
+        }
+
+        // Player ordering
+
+        $nextPlayer = $this->game->createNextPlayerTable(array_keys($players));
+        if (isset($players[$currentPlayerId])) {
+            // Is part of the game
+            $player_order = [$currentPlayerId];
+            $current_player = $currentPlayerId;
+            $current_player = $nextPlayer[$current_player];
+            while ($current_player != $currentPlayerId) {
+                $player_order[] = $current_player;
+                $current_player = $nextPlayer[$current_player];
+            }
+        } else {
+            // Is a spectator
+            $player_order = array_keys($players);
+        }
+        $result["playerorder"] = $player_order;
+
+        $result += $this->game->getAllDatas();
+        return $result;
     }
 
     public function saveNotifications(): void {
@@ -232,8 +267,6 @@ class GameDriver {
     // ── Run ──────────────────────────────────────────────────────────────────
 
     public function runStep(string $endpoint, array $data): void {
-        $op = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $this->debugLog("  → Starting step op " . ($op ? $op->getType() : "EMPTY"));
         $this->dispatchEndpoint($endpoint, $data);
         $this->runDispatchLoop();
         $this->emitGameStateChange();
@@ -251,15 +284,100 @@ class GameDriver {
                 self::saveJson("$this->stagingDir/gamedatas.json", $gamedatas);
                 $this->debugLog("  → Wrote staging/gamedatas.json (reload after step)");
             }
-
-            $op = $this->game->machine->createTopOperationFromDbForOwner(null);
-            $this->debugLog("  → Final step op " . ($op ? $op->getType() : "EMPTY"));
         }
     }
 
     public function runDebug(string $debugFunction): void {
         $this->debugLog("Calling debug: $debugFunction");
         $this->runStep($debugFunction, []);
+    }
+
+    // ── CLI entry point ────────────────────────────────────────────────────
+
+    /**
+     * Run the harness from CLI arguments.
+     * @param array $argv CLI arguments (from $argv global)
+     * @param string $baseDir Directory containing plays/ subdirectory (for default scenario)
+     * @param string $defaultStagingDir Default output directory
+     */
+    public static function main(Table $game, array $argv, string $baseDir, string $defaultStagingDir): void {
+        $debugFunction = null;
+        $scriptPath = null;
+        $dbPath = null;
+        $outputDir = null;
+
+        $args = array_slice($argv, 1);
+        for ($i = 0; $i < count($args); $i++) {
+            switch ($args[$i]) {
+                case "--debug":
+                    $debugFunction = $args[++$i] ?? null;
+                    if (!$debugFunction) {
+                        die("Usage: --debug <function_name>\n");
+                    }
+                    break;
+                case "--script":
+                case "--scenario":
+                    $scriptPath = $args[++$i] ?? null;
+                    if (!$scriptPath) {
+                        die("Usage: --script <path.json>\n");
+                    }
+                    break;
+                case "--db":
+                    $dbPath = $args[++$i] ?? null;
+                    if (!$dbPath) {
+                        die("Usage: --db <path.json>\n");
+                    }
+                    break;
+                case "--output":
+                    $outputDir = $args[++$i] ?? null;
+                    if (!$outputDir) {
+                        die("Usage: --output <dir>\n");
+                    }
+                    break;
+                default:
+                    if (!$scriptPath && !str_starts_with($args[$i], "-")) {
+                        $scriptPath = $args[$i];
+                    } else {
+                        die("Unknown option: {$args[$i]}\n");
+                    }
+            }
+        }
+
+        if (!$scriptPath && !$debugFunction) {
+            $scriptPath = "$baseDir/plays/setup.json";
+        }
+
+        $stagingDir = $outputDir ?? $defaultStagingDir;
+        $currentPlayerId = 10;
+        $steps = [];
+
+        if ($scriptPath) {
+            $script = self::loadJson($scriptPath);
+            if ($script === null) {
+                die("Script not found: $scriptPath\n");
+            }
+            echo "Loading script: $scriptPath\n";
+            $currentPlayerId = (int) ($script["current_player_id"] ?? 10);
+            $steps = $script["steps"] ?? [];
+        }
+
+        $driver = new self($game, $stagingDir, $currentPlayerId);
+
+        if ($dbPath) {
+            $driver->loadDbFromJson($dbPath);
+        }
+
+        $driver->runSteps($steps);
+
+        if ($debugFunction) {
+            $driver->runDebug($debugFunction);
+        }
+
+        $driver->saveGamedatas();
+        $driver->saveNotifications();
+        $driver->saveDbToJson();
+
+        echo "Done.\n";
     }
 
     // ── Static helpers ───────────────────────────────────────────────────────

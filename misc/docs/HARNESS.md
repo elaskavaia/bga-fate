@@ -118,18 +118,21 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
 "play": "php8.4 misc/harness/play.php && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts"
 ```
 
-### PHP runner — `misc/harness/play.php` + `GameDriver`
+### PHP runner — `misc/harness/play.php` + `GameDriver` + `GameWrapper`
 
-`play.php` is a thin CLI entry point that parses `--debug`, `--script`, `--db`, `--output` flags and delegates to `GameDriver`. With no flags, defaults to `misc/harness/plays/setup.json`. A bare positional argument is treated as a script path.
+**`play.php`** is a thin bootstrap: requires the autoloader, `GameWrapper`, and `GameDriver`, then calls `GameDriver::main(new GameWrapper(), $argv, ...)`.
 
-`GameDriver` orchestrates the harness run:
+**`GameDriver`** is fully generic (no game-specific imports). It orchestrates the harness run:
 
-1. Constructor takes game name (`"Fate"`), output dir, and current player ID; builds a state name map by scanning `modules/php/States/` via the `Bga\Games\{name}\States\` namespace
-2. `loadDbFromJson(dbPath)` — deserializes a db.json file via `tokens->fromJson()`, `machine->db->fromJson()`, and restores gamestate/players
-3. `runSteps()` — for each step: dispatch the endpoint (action or debug), run `runStateClass_onEnteringState()` on the resulting state, emit a synthetic `gameStateChange` notification
-4. `runDebug()` — calls a single `debug_*` function, then dispatch + emit
-5. `saveDbToJson()` — serializes via `tokens->toJson()`, `machine->db->toJson()` to `<output>/db.json`
-6. `saveGamedatas()` / `saveNotifications()` — writes JSON for the JS renderer
+1. `main(game, argv, baseDir, stagingDir)` — static entry point: parses CLI args (`--debug`, `--scenario`, `--db`, `--output`), constructs the driver, runs steps/debug, saves output
+2. Constructor takes a `Table` instance, output dir, and current player ID; gets game name from `$game->getGameName()`; builds a state name map by scanning `modules/php/States/` via the `Bga\Games\{name}\States\` namespace
+3. `loadDbFromJson(dbPath)` — calls `$game->loadDbState($db)` + restores gamestate/players (framework-level)
+4. `runSteps()` — for each step: dispatch the endpoint, run `onEnteringState()`, emit a synthetic `gameStateChange` notification
+5. `runDebug()` — calls a single `debug_*` function, then dispatch + emit
+6. `saveDbToJson()` — calls `$game->saveDbState()` + saves gamestate/players to `<output>/db.json`
+7. `saveGamedatas()` / `saveNotifications()` — writes JSON for the JS renderer
+
+**`GameWrapper`** is the game-specific part. It extends `Game` directly (not `GameUT`) and implements the harness contract. See "GameWrapper contract" section below.
 
 ### JS renderer — `misc/harness/render.ts`
 
@@ -168,7 +171,7 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
 
 Optional per-step: `"reload": true` — writes `gamedatas.json` after that step.
 
-Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method on `Game` (or `GameHarness`), params matched by name via reflection.
+Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method on `Game` (or `GameWrapper`), params matched by name via reflection.
 
 ### DB state format
 
@@ -180,6 +183,79 @@ Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method
   "players":   [ { "player_id": 10, "player_no": 1, "player_color": "6cd0f6", "player_name": "player1", "player_zombie": 0, "player_eliminated": 0 } ]
 }
 ```
+
+---
+
+## GameWrapper contract
+
+`GameDriver` is fully generic — it has no game-specific imports. It communicates with the game through the `GameWrapper` class, which must implement these methods:
+
+### Required methods
+
+| Method | Purpose |
+|---|---|
+| `getGameName(): string` | Namespace name (e.g. `"Fate"`). Used by GameDriver to discover state classes via `Bga\Games\{name}\States\*` |
+| `saveDbState(): array` | Serialize all custom DB tables to an associative array. GameDriver persists this as part of `db.json` |
+| `loadDbState(array $db): void` | Restore custom DB tables from the array produced by `saveDbState()` |
+| `getAllDatas(): array` | Return game data for the client (must be `public` — BGA framework declares it `protected`) |
+
+### Required from BGA framework (inherited from `Table`)
+
+These are called by GameDriver but already provided by `BgaFrameworkStubs.php` — no implementation needed:
+
+- `$game->gamestate` — state machine (`jumpToState()`, `changeActivePlayer()`, `getCurrentMainStateId()`)
+- `$game->notify` — notifications (`all()`, `_getNotifications()`)
+- `$game->getActivePlayerId()`, `$game->getCurrentPlayerId()`, `$game->loadPlayersBasicInfos()`
+- `$game->_setCurrentPlayerId()`, `$game->_getCurrentPlayerId()`, `$game->_colors`
+
+### Fate implementation (`misc/harness/GameWrapper.php`)
+
+```php
+class GameWrapper extends Game {
+    // Constructor: swap MySQL-backed tables with in-memory stubs
+    function __construct() {
+        parent::__construct();
+        $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
+        $this->tokens = new TokensInMem($this);
+    }
+
+    // Harness contract
+    public function getGameName(): string { return "Fate"; }
+
+    public function saveDbState(): array {
+        return [
+            "tokens" => $this->tokens->toJson(),
+            "machine" => $this->machine->db->toJson(),
+        ];
+    }
+
+    public function loadDbState(array $db): void {
+        $this->tokens->fromJson($db["tokens"] ?? []);
+        $this->machine->db->fromJson($db["machine"] ?? []);
+    }
+
+    // Widen visibility (if declared protected in game)
+    public function getAllDatas(): array { return parent::getAllDatas(); }
+
+    // Game-specific debug functions
+    public function debug_setupGame_h1(): void { /* ... */ }
+}
+```
+
+### Reusing for another game
+
+To use the harness for a different BGA game:
+
+1. **`GameWrapper`** — extend your `Game` class, swap in-memory DB stubs in constructor, implement the 4 contract methods
+2. **`play.php`** — bootstrap: require autoloader + stubs + `GameWrapper` + `GameDriver`, call `GameDriver::main(new GameWrapper(), $argv, ...)`
+3. **`GameDriver.php`** — use as-is (no edits needed)
+4. **State classes** in `modules/php/States/` following `Bga\Games\{name}\States\` namespace
+5. **`render.ts`** — adjust CSS filename for your game
+
+### Not yet decided
+
+- Whether to extract `GameDriver` + render into a shared package (e.g. `bga-harness/`) or keep it as copy-paste-and-adapt per game
+- How to share `TokensInMem` / `MachineInMem` if multiple games use the same tokens+machine pattern
 
 ---
 

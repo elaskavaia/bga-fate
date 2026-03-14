@@ -193,7 +193,7 @@ class Game extends Base {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas(): array {
+    public function getAllDatas(): array {
         $result = [];
         $result = parent::getAllDatas();
 
@@ -553,7 +553,7 @@ class Game extends Base {
     }
 
     public function customUndoSavepoint(int $player_id, int $barrier = 0, string $label = "undo"): void {
-        $this->debugLog("customUndoSavepoint $player_id bar= $barrier");
+        //$this->debugLog("customUndoSavepoint $player_id bar= $barrier");
         if ($this->isMultiActive()) {
             $this->dbMultiUndo->doSaveUndoSnapshot(["barrier" => $barrier, "label" => $label], $player_id, true);
         } else {

@@ -201,7 +201,7 @@ class Base extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas(): array {
+    public function getAllDatas(): array {
         $result = ["players" => []];
 
         // Get information about players
