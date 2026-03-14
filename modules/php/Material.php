@@ -320,6 +320,10 @@ class Material {
         "type" => "gainMana",
         "name" => clienttranslate("Gain Mana"),
 ],
+    "Op_spendMana" => [ 
+        "type" => "spendMana",
+        "name" => clienttranslate("Spend Mana"),
+],
     "Op_roll" => [ 
         "type" => "roll",
         "name" => clienttranslate("Roll Dice"),

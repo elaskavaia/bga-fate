@@ -301,7 +301,7 @@ See CLAUDE.md for project overview
 - [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
 - [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
-- [ ] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
+- [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing

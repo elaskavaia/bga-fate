@@ -54,6 +54,7 @@ playEvent|Play Event
 # Card effect operations (building blocks for card effects)
 dealDamage|Deal Damage
 gainMana|Gain Mana
+spendMana|Spend Mana
 roll|Roll Dice
 resolveHits|Resolve Hits
 heal|Heal
