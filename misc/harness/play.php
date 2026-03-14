@@ -43,6 +43,7 @@ for ($i = 0; $i < count($args); $i++) {
             }
             break;
         case "--script":
+        case "--scenario":
             $scriptPath = $args[++$i] ?? null;
             if (!$scriptPath) {
                 die("Usage: --script <path.json>\n");

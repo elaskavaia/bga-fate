@@ -87,16 +87,23 @@ Then read `staging/snapshot.html`.
 
 ## Adding debug functions
 
-All `debug_*` functions go in `misc/harness/GameHarness.php` (not `Game.php`).
+All `debug_*` functions go in `Game.php`. They assume the game state is already set up (via `--scenario`).
 
 Typical pattern:
 ```php
 public function debug_Op_move(): void {
-    $this->debug_setupGame_h1(); // or assume --scenario=setup state
     $playerId = $this->getCurrentPlayerId();
-    $this->machine->push("move", $playerId, []);
+    $color = $this->getPlayerColorById((int) $playerId);
+    $this->machine->push("move", $color, []);
+    $this->gamestate->changeActivePlayer($playerId);
     $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
 }
+```
+
+Run with:
+```bash
+php8.4 misc/harness/play.php --debug debug_Op_move --scenario misc/harness/plays/setup.json
+ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
 ```
 
 See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the full before/after diff workflow.
@@ -161,7 +168,7 @@ See [PROCEDURES.md](PROCEDURES.md#validating-operation-ui-in-harness) for the fu
 
 Optional per-step: `"reload": true` — writes `gamedatas.json` after that step.
 
-Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method on `GameHarness`, params matched by name via reflection.
+Available endpoints — **actions**: `action_*`; **debug**: any `debug_*` method on `Game` (or `GameHarness`), params matched by name via reflection.
 
 ### DB state format
 

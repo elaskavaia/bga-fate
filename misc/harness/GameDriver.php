@@ -257,7 +257,7 @@ class GameDriver {
     }
 
     public function runDebug(string $debugFunction): void {
-        $this->debugLog("Calling: $debugFunction");
+        $this->debugLog("Calling debug: $debugFunction");
         $this->runStep($debugFunction, []);
     }
 

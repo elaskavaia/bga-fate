@@ -336,6 +336,10 @@ class Material {
         "type" => "moveHero",
         "name" => clienttranslate("Move Hero"),
 ],
+    "Op_moveMonster" => [ 
+        "type" => "moveMonster",
+        "name" => clienttranslate("Move Monster"),
+],
     "Op_performAction" => [ 
         "type" => "performAction",
         "name" => clienttranslate("Perform Action"),
@@ -3675,7 +3679,7 @@ class Material {
         "num" => 13,
         "hno" => 3,
         "name" => clienttranslate("Swift Kick I"),
-        "r" => "dealDamage(adj,'not_legend');1moveMonster",
+        "r" => "dealDamage(adj,'not_legend');moveMonster",
         "effect" => "Deal 1 damage to an adjacent non-legend monster and move it 1 area.",
 ],
     "card_ability_3_14" => [ 
@@ -5294,7 +5298,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Kick"),
         "count" => 3,
-        "r" => "dealDamage(adj);1moveMonster",
+        "r" => "dealDamage(adj);moveMonster",
         "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
         "flavour" => "I get a kick out of you.",
 ],
@@ -5465,7 +5469,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Kick"),
         "count" => 3,
-        "r" => "dealDamage(adj);1moveMonster",
+        "r" => "dealDamage(adj);moveMonster",
         "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
         "flavour" => "I get a kick out of you.",
 ],

@@ -589,26 +589,19 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_setupPlayEvent() {
-        // replace with other test code when testing operations in event cards
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $heroId = $this->getHeroTokenId($color);
-        // Add damage to hero and an equipment card for mend testing
-        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
-        $equip = $this->tokens->getTokensOfTypeInLocation("card_equip", "tableau_{$color}");
-        $equipId = array_key_first($equip);
-        if ($equipId) {
-            $this->effect_moveCrystals($equipId, "red", 2, $equipId, ["message" => ""]);
-        }
-        // Put Embla's Durability card in hand (repairCard)
-        $this->tokens->dbSetTokenLocation("card_event_3_36_1", "hand_{$color}");
-
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    public function debug_Op_moveMonster(): void {
+        // Place hero with two adjacent monsters so phase 1 doesn't auto-resolve
+        $this->tokens->dbSetTokenLocation("hero_1", "hex_11_8");
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_12_8");
+        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_11_7");
+        $this->hexMap->invalidateOccupancy();
+        $this->machine->push("1moveMonster", $this->getCurrentPlayerColor(), []);
+        $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
     }
 
-    function debug_moveHero() {
+    function debug_draw(string $card) {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $this->machine->push("2moveHero", $color);
+        $this->tokens->dbSetTokenLocation($card, "hand_{$color}");
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
