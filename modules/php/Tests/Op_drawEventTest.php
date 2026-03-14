@@ -77,6 +77,30 @@ final class Op_drawEventTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
+    // hand limit — Starsong II raises limit to 5
+    // -------------------------------------------------------------------------
+
+    public function testStarsongIIAutoDrawsAtHandSize4(): void {
+        // Place Starsong II on tableau
+        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
+        $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
+        $this->assertCount(4, $this->getHandCards());
+        $op = $this->createOp();
+        $result = $op->auto();
+        $this->assertTrue($result); // auto-draws, no discard prompt
+        $this->assertCount(5, $this->getHandCards());
+    }
+
+    public function testStarsongIIPromtsDiscardAtHandSize5(): void {
+        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
+        $this->fillHandFromDeck(4); // 1 from setup + 4 = 5
+        $this->assertCount(5, $this->getHandCards());
+        $op = $this->createOp();
+        $result = $op->auto();
+        $this->assertFalse($result); // enters discard prompt
+    }
+
+    // -------------------------------------------------------------------------
     // getPossibleMoves — when hand is full
     // -------------------------------------------------------------------------
 

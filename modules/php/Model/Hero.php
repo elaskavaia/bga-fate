@@ -49,6 +49,15 @@ class Hero extends Character {
         return count($this->getHandCards());
     }
 
+    function getHandLimit(): int {
+        // Starsong II: "You may have 5 cards in hand."
+        $loc = $this->game->tokens->getTokenLocation("card_ability_2_8");
+        if ($loc === "tableau_{$this->owner}") {
+            return 5;
+        }
+        return 4;
+    }
+
     /**
      * Draw 1 event card from deck to hand.
      * @return bool true if a card was drawn, false if deck is empty

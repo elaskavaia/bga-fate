@@ -25,7 +25,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 class Op_drawEvent extends Operation {
     function auto(): bool {
         $hero = $this->game->getHero($this->getOwner());
-        if ($hero->getHandSize() >= 4) {
+        if ($hero->getHandSize() >= $hero->getHandLimit()) {
             return false; // enter player state to choose discard or skip
         }
         if (!$hero->drawEventCard()) {
