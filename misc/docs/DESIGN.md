@@ -165,8 +165,14 @@ from a filtered set. Common target filters:
   Used by: Power Surge, Elementary Student, Focus event
 - `spendMana X source` (player) — Remove X mana from source card (cost/prerequisite).
   Used by: precondition for mana-activated abilities
-- `drawEvent X` (auto) — Draw X event cards
-  Used by: Starsong, Discipline, Focus event
+- `drawEvent X` (Countable, confirm) — Draw X event cards. If hand is at limit, prompts discard first.
+  Param: `max` — draw until hand is full (no discard prompt).
+  Used by: actionPrepare (drawEvent), Starsong (2drawEvent), Preparations (drawEvent(max))
+- `spendAction type` (auto) — Consume a main action slot without performing the action.
+  Param(0): action type to spend (e.g. "actionPrepare").
+  Used by: event cards that cost an action (e.g. Preparations)
+- `addTownPiece` (auto) — Add 1 Town Piece back to Grimheim (returns a destroyed house to its hex).
+  Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
 - `preventDamage X` (auto) — Prevent up to X damage in current attack.
   Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - `repairCard X target` (Countable) — Remove up to X damage from target card on tableau.
