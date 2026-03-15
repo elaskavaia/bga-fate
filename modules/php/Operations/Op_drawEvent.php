@@ -18,13 +18,24 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
- * Draw event card(s) from deck to hand.
- * - param(0) "max": draw until hand is full (handLimit - handSize draws); skips discard prompt.
- * - No param: draw getCount() cards; if hand fills mid-draw, re-queues with remaining count.
- * - Hand full (non-max): asks player to discard a card first, then re-queues remaining.
- * - Deck empty: auto-skips.
+ * drawEvent: Draw event card(s) from deck to hand.
+ *
+ * Params:
+ * - param(0) "max": draw until hand is full (handLimit - handSize draws); skips discard prompt
+ *
+ * Behaviour:
+ * - Deck empty: returns error, auto-skips
+ * - Hand under limit: offers confirm target, draws getCount() cards on resolve
+ * - Hand at limit (non-max): delegates to discardEvent for card selection, then draws and re-queues remaining
+ * - Max mode: draws (handLimit - handSize) cards in one resolve, no discard prompt
+ *
+ * Used by: actionPrepare (drawEvent), Starsong (2drawEvent), Preparations (drawEvent(max)).
  */
 class Op_drawEvent extends CountableOperation {
+    private function isMax(): bool {
+        return $this->getParam(0) === "max";
+    }
+
     function getPrompt() {
         return clienttranslate("Choose a card to discard to make room, or skip the draw");
     }
@@ -46,22 +57,6 @@ class Op_drawEvent extends CountableOperation {
                 "q" => 0,
             ],
         ];
-    }
-
-    function requireConfirmation() {
-        return $this->game->getHero($this->getOwner())->getCountOfCardsInEventDeck() > 0;
-    }
-
-    function canSkip() {
-        return true;
-    }
-
-    function getSkipName() {
-        return clienttranslate("Skip Draw");
-    }
-
-    function isMax(): bool {
-        return $this->getParam(0) === "max";
     }
 
     function resolve(): void {
@@ -97,7 +92,19 @@ class Op_drawEvent extends CountableOperation {
         }
     }
 
+    function canSkip() {
+        return true;
+    }
+
+    function getSkipName() {
+        return clienttranslate("Skip Draw");
+    }
+
     public function getUiArgs() {
         return ["buttons" => false];
+    }
+
+    function requireConfirmation() {
+        return $this->game->getHero($this->getOwner())->getCountOfCardsInEventDeck() > 0;
     }
 }

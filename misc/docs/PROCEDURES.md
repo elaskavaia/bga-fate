@@ -23,22 +23,21 @@ Prompt: add <name> operation. Read PROCEDURES.md for instructions
    - **Automated** — no user choice (e.g. reinforcement, turn end)
    - **User-facing** — player selects a target (e.g. move, attack)
    - **Countable** — repeatable N times (e.g. gain X gold) → switch base class to `CountableOperation`
-#. For **user-facing** operations, implement:
-   - `getPrompt()` — prompt text shown to the player (use `clienttranslate()`)
+#. For **user-facing** operations, start from the Operation Template below (copy `Op_xxx` and rename). Implement:
    - `getPossibleMoves()` — valid targets as assoc array
      - Keys are token IDs so the client can highlight them for clicking
      - Valid: `["q" => Material::RET_OK]`, invalid: `["q" => ERR_CODE]`
    - `canSkip()` — return `true` if action is optional
-#. Ask user to code review before moving to next step
+   - `getPrompt()` — prompt text shown to the player (use `clienttranslate()`)
 #. Implement `resolve()` — executes the game logic
    - Use `$this->getCheckedArg()` to get the validated user selection
    - Use `$this->dbSetTokenLocation()` to move tokens with notifications
    - Use `$this->queue()` to chain sub-operations
    - For multi-step operations, the operation may re-queue itself with extra data
    - For **automated** operations, `resolve()` may be the only required method
-#. Ask user what do for ui choices
-   - `getUiArgs()` — optional UI hints (e.g. `["buttons" => false]` for map-only selection)
-   - `getExtraArgs()` — optional extra data for client (e.g. `["token_div" => $id]`)
+#. If the operation needs custom client-side behavior, override:
+   - `getUiArgs()` — UI hints (e.g. `["buttons" => false]` when player clicks map/tokens instead of buttons)
+   - `getExtraArgs()` — extra data sent to client (e.g. `["token_div" => $id]`)
 #. Ask user to code review before moving to next step
 #. Add tests in `modules/php/Tests/`
    - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
@@ -80,11 +79,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Behaviour:
  * - Normal case: describe what getPossibleMoves() offers and what resolve() does
  * - Edge case / precondition failure: describe error return and whether it auto-skips
+ *
+ * Used by: CardName (r-column-expression).
  */
 class Op_xxx extends Operation {
-    // -------------------------------------------------------------------------
-    // Data fields and Parameters access
-    // -------------------------------------------------------------------------
 
     // Params are baked into the operation type string at queue time, e.g. "drawEvent(max)" or "heal(self)".
     // They are static for the lifetime of the operation.
@@ -97,9 +95,11 @@ class Op_xxx extends Operation {
     //     return $this->getDataField("card");
     // }
 
-    // -------------------------------------------------------------------------
-    // Possible Moves
-    // -------------------------------------------------------------------------
+
+    // If operation is fully automated prompt is not needed
+    function getPrompt() {
+        return clienttranslate("Prompt shown to the player");
+    }
 
     function getPossibleMoves() {
         // Precondition failure — return error, op will auto-skip if canSkip()
@@ -120,10 +120,6 @@ class Op_xxx extends Operation {
         // return $targets;
     }
 
-    // -------------------------------------------------------------------------
-    // Execution
-    // -------------------------------------------------------------------------
-
     function resolve(): void {
         $target = $this->getCheckedArg(); // validated selection from getPossibleMoves()
         $hero = $this->game->getHero($this->getOwner());
@@ -135,13 +131,9 @@ class Op_xxx extends Operation {
         // $this->queue("otherOp");
     }
 
-    // -------------------------------------------------------------------------
-    // UI
-    // -------------------------------------------------------------------------
-
-    function getPrompt() {
-        return clienttranslate("Prompt shown to the player");
-    }
+    // function canSkip() {
+    //     return true; // normally operation cannot be skipped
+    // }
 
     // function getSkipName() {
     //     return clienttranslate("End Turn"); // only needed if button is not "Skip"
@@ -159,9 +151,7 @@ class Op_xxx extends Operation {
     //     return true; // if cannot be auto-skipped and auto-executed, for example dangerous operation or that cannot be undone
     // }
 
-    // function canSkip() {
-    //     return true; // normally operation cannot be skipped
-    // }
+
 }
 ```
 
