@@ -106,7 +106,6 @@ See CLAUDE.md for project overview
 ### Server
 [x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
 [x] Monster card data: define a few yellow monster cards with goblin placement
-[ ] Fix spawn locations in monster cards — current data is not correct - SKIP FOR NOW
 [x] `Op_reinforcement`: draw monster card, place goblins at specified locations
 [x] Trigger reinforcement on time track spots marked with crossed axes
 [x] Heroes can't move into hexes occupied by monsters — done in Iteration 1
@@ -114,7 +113,7 @@ See CLAUDE.md for project overview
 ### Client
 [x] Render monster tiles on map hexes — placeholder circles with faction color and name label
 [x] Add proper monster sprite graphics (img/mini_monsters.png) and update css 
-[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)  - SKIP FOR NOW
+
 
 ### Tests
 [X] PHP tests for monster placement from cards
@@ -135,7 +134,7 @@ See CLAUDE.md for project overview
 ### Client
 [x] Animate monster movement (snap-to-position is fine)
 [x] Show town piece removal
-[ ] Show win/loss end screen — BGA default end screen works, custom UI deferred
+
 
 ### Tests
 [x] PHP tests for monster pathfinding — 8 tests in MonsterMovementTest.php
@@ -219,7 +218,9 @@ See CLAUDE.md for project overview
 
 ---
 
-## Iteration 7: Add Brutes and Trolls
+
+
+## Monsters: Brutes and Trolls
 
 **Goal**: Full Trollkin faction. Brutes (rank 2) and Trolls (rank 3) with higher stats.
 
@@ -235,11 +236,48 @@ See CLAUDE.md for project overview
 ### Tests
 [x] Test mixed monster spawning and movement — Op_reinforcementTest covers brutes/trolls
 
+
+## Monster Faction (Fire Horde)
+
+### Server
+[x] Fire Horde monster data and tokens — done in Iter 7
+[x] Range 2 attack for Fire Horde monsters — Monster::getAttackRange(), Op_monsterAttack uses getHexesInRange()
+[x] Monster cards that spawn Fire Horde monsters — done in Iter 7
+
+### Client
+[x] Fire Horde visual styling — done in Iter 7
+
+
+### Tests
+[x] Test range 2 attacks — MonsterTest, Op_monsterAttackTest, HeroTest, Op_actionAttackTest
+
 ---
 
-## Iteration 8: Hero Cards and Equipment (1 Hero)
+## Monsters: Dead + Legends
 
-**Goal**: Pick simplest hero. Implement hero card, starting equipment, starting ability. Equipment gives attack bonus. Ability can be activated.
+### Server
+[x] Dead faction monster data — done in Iter 7
+[x] Runes count as hits for Dead attacks — Character::applyDamage() checks attacker faction
+[x] Draugr armor (prevent 1 damage each time) — Character::getArmor(), beginDefense(), armor absorbs in applyDamage()
+[x] Legend monsters: unique stats, destroy 3 town pieces, swap movement — material + movement done in Iter 3/7
+[x] Legend reinforcement: legend cards spawn legend tokens + escort monsters — Op_reinforcement
+[x] All 54 monster cards defined — done in Iter 7
+
+### Client
+[x] Dead faction visual styling — done in Iter 7
+
+
+### Tests
+[x] Test Dead faction effects — MonsterTest: rune-as-hit, draugr armor, armor absorb/reset
+[x] Test Legend special rules — MonsterMovementTest: legend destroys 3 houses, legend movement
+
+---
+
+---
+
+## Iteration 8: Hero Cards (1 Hero)
+
+**Goal**: Pick simplest hero. Implement hero card, starting equipment, starting ability. Equipment gives attack bonus.
 
 ### Game Elements
 [x] Add hero card game element (all heroes) — card_material.csv, Cards.scss, Game.ts
@@ -247,11 +285,7 @@ See CLAUDE.md for project overview
 
 ### Server
 [x] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
-[ ] Hero card effect applies during relevant actions
 [x] Equipment: attack strength bonus
-[ ] Equipment: once-per-turn activation
-[ ] Ability: once-per-turn activation
-[ ] Ability: costs mana
 [x] Focus action: actually adds mana to ability/equipment cards — Op_actionFocus, Op_actionFocusTest
 
 ### Client
@@ -260,8 +294,7 @@ See CLAUDE.md for project overview
 [x] Activate equipment/ability buttons (free actions)
 
 ### Tests
-[ ] Test equipment attack bonus
-[ ] Test ability activation and mana spending
+
 
 ---
 
@@ -270,7 +303,6 @@ See CLAUDE.md for project overview
 **Goal**: Event card deck works. Prepare action draws cards. Cards can be played as free actions.
 
 ### Server
-[ ] Define first hero's event cards (start with 5-10 simplest ones)
 [x] Event deck setup: shuffle at game start
 [x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
 [x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
@@ -279,7 +311,7 @@ See CLAUDE.md for project overview
 
 ### Client
 [x] Hand display (private to player)
-[ ] Play card from hand
+[x] Play card from hand
 [x] Discard interface when at hand limit — Op_drawEvent shows hand cards to pick
 
 ### Tests
@@ -312,19 +344,33 @@ See CLAUDE.md for project overview
 
 ### Integration
 - [x] `playEvent` resolve: parse `r` column notation, queue corresponding operations
-- [ ] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
-- [ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 - [x] Operation parser: target params `(adj)`, `(self)`, `(inRange)` — already supported via `getParam()`
 - [x] Operation parser: chaining with `;` and cost notation with `:` — already supported
 
 ### Tests
 - [ ] Unit tests for each new operation
 - [ ] Integration tests: play event card → effect executes
-- [ ] Integration tests: use equipment with durability cost → effect executes
 
 ---
 
+## Iteration 10: Equipment and Ability Activation
 
+**Goal**: Equipment and abilities can be activated as free actions. Equipment has durability cost. Abilities cost mana. Hero card effect applies during relevant actions.
+
+### Server
+[ ] Equipment: once-per-turn activation
+[ ] Ability: once-per-turn activation
+[ ] Ability: costs mana
+[ ] Hero card effect applies during relevant actions
+[ ] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
+[ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
+
+### Tests
+[ ] Test ability activation and mana spending
+[ ] Integration tests: use equipment with durability cost → effect executes
+[ ] Test equipment attack bonus
+
+---
 
 **Goal**: Equipment cards have quests. Completing quests unlocks new equipment. Upgrade system (spend XP to gain abilities or improve cards).
 
@@ -349,43 +395,7 @@ See CLAUDE.md for project overview
 
 ---
 
-## Iteration 11: Second Monster Faction (Fire Horde)
 
-**Superseded by Iteration 7** — all 3 factions (trollkin, firehorde, dead) with 3 ranks each already defined.
-
-### Server
-[x] Fire Horde monster data and tokens — done in Iter 7
-[x] Range 2 attack for Fire Horde monsters — Monster::getAttackRange(), Op_monsterAttack uses getHexesInRange()
-[x] Monster cards that spawn Fire Horde monsters — done in Iter 7
-
-### Client
-[x] Fire Horde visual styling — done in Iter 7
-[ ] Range indicator for ranged monster attacks
-
-### Tests
-[x] Test range 2 attacks — MonsterTest, Op_monsterAttackTest, HeroTest, Op_actionAttackTest
-
----
-
-## Iteration 12: Third Monster Faction (Dead) + Legends
-
-**Superseded by Iteration 7** — all factions and legends already defined in material.
-
-### Server
-[x] Dead faction monster data — done in Iter 7
-[x] Runes count as hits for Dead attacks — Character::applyDamage() checks attacker faction
-[x] Draugr armor (prevent 1 damage each time) — Character::getArmor(), beginDefense(), armor absorbs in applyDamage()
-[x] Legend monsters: unique stats, destroy 3 town pieces, swap movement — material + movement done in Iter 3/7
-[x] Legend reinforcement: legend cards spawn legend tokens + escort monsters — Op_reinforcement
-[x] All 54 monster cards defined — done in Iter 7
-
-### Client
-[x] Dead faction visual styling — done in Iter 7
-[ ] Legend monster special display
-
-### Tests
-[x] Test Dead faction effects — MonsterTest: rune-as-hit, draugr armor, armor absorb/reset
-[x] Test Legend special rules — MonsterMovementTest: legend destroys 3 houses, legend movement
 
 ---
 
@@ -470,3 +480,8 @@ See misc/docs/CHECKLIST.md
 * Fix stacked tooltips
 * [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
 * Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
+[ ] Fix spawn locations in monster cards — current data is not correct 
+[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders) 
+[ ] Show win/loss end screen — BGA default end screen works, custom UI 
+[ ] Range indicator for ranged monster attacks
+[ ] Legend monster special display
