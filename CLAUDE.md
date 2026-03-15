@@ -53,7 +53,7 @@ The harness runs PHP server logic locally and renders a client snapshot for visu
 **Typical workflow:**
 1. Add a `debug_*` function in `Game.php` that sets up the state to test
 2. Run `php8.4 tests/Harness/play.php --debug debug_<name> --scenario tests/Harness/plays/setup.json`
-3. Run `ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts` to generate `staging/snapshot.html`
+3. Run `npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts` to generate `staging/snapshot.html`
 4. Read `staging/snapshot.html` to inspect layout, tokens, and action buttons
 5. Action buttons have `data-action` attributes showing the `action_resolve` payload
 

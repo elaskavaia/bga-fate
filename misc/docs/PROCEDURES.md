@@ -47,7 +47,7 @@ Prompt: create <name> operation. Read PROCEDURES.md for instructions. Create pla
    ```bash
    php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json
    # Then run the renderer and read staging/snapshot.html to verify layout, buttons, and tooltips
-   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
+   npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    ```
 #. If new game elements are introduced, follow the "Adding New Game Element" checklist below
 #. Update DESIGN.md if needed
@@ -211,7 +211,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
     - Run the harness and read `staging/snapshot.html` to inspect layout, token placement, and CSS:
       ```bash
       php8.4 tests/Harness/play.php --debug debug_<name> --scenario tests/Harness/plays/setup.json
-      ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
+      npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
       # Then read staging/snapshot.html
       ```
     - Check: tokens appear in correct locations, action buttons render with correct labels
@@ -240,12 +240,12 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
    ```bash
    # Step 1: baseline — run setup scenario, save snapshot as before.html
    php8.4 tests/Harness/play.php --scenario tests/Harness/plays/setup.json
-   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
+   npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    cp staging/snapshot.html staging/before.html
 
    # Step 2: apply the operation on top of the setup state
    php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json
-   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
+   npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    # staging/snapshot.html now reflects the operation state
    ```
 3. Compare `staging/before.html` and `staging/snapshot.html` to see what changed
@@ -303,7 +303,7 @@ After verifying the prompt snapshot above, simulate the user clicking a target:
 4. Run the scenario:
    ```bash
    php8.4 tests/Harness/play.php --scenario tests/Harness/plays/op_<name>.json
-   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
+   npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    ```
 5. Compare `staging/prompt.html` and `staging/snapshot.html` to see what changed — verify tokens moved, dice appeared, game log updated, etc.
 
