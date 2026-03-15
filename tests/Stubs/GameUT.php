@@ -11,15 +11,15 @@ use Bga\Games\Fate\StateConstants;
 use Bga\Games\Fate\Stubs\MachineInMem;
 use Bga\Games\Fate\Stubs\TokensInMem;
 
-//       "player_colors" => ["ff0000", "ffcc02", "6cd0f6", "982fff"],
+// Hero colors: Bjorn=green, Alva=blue, Embla=orange, Boldur=red
 if (!defined("PCOLOR")) {
-    define("PCOLOR", "6cd0f6");
+    define("PCOLOR", "2e7d32");
 }
 if (!defined("BCOLOR")) {
-    define("BCOLOR", "982fff");
+    define("BCOLOR", "1565c0");
 }
 if (!defined("CCOLOR")) {
-    define("CCOLOR", "ff0000");
+    define("CCOLOR", "bf360c");
 }
 if (!defined("ACOLOR")) {
     define("ACOLOR", "ffffff");
@@ -65,7 +65,7 @@ class GameUT extends Game {
                 $this->_colors = [PCOLOR, BCOLOR, CCOLOR];
                 break;
             case 4:
-                $this->_colors = [PCOLOR, BCOLOR, CCOLOR, "ef58a2"];
+                $this->_colors = [PCOLOR, BCOLOR, CCOLOR, "c62828"];
                 break;
             default:
                 throw new UserException("Invalid number of players");
@@ -74,6 +74,16 @@ class GameUT extends Game {
 
     function getUserPreference(int $player_id, int $code): int {
         return 0;
+    }
+
+    private ?array $heroOrder = [1, 2, 3, 4]; // deterministic by default in tests
+
+    public function setHeroOrder(array $order): void {
+        $this->heroOrder = $order;
+    }
+
+    protected function getHeroOrder(): array {
+        return $this->heroOrder ?? parent::getHeroOrder();
     }
 
     function init(int $x = 0) {
@@ -90,6 +100,13 @@ class GameUT extends Game {
 
     function fakeUserAction(Operation $op, $target = null) {
         return $op->action_resolve([Operation::ARG_TARGET => $target]);
+    }
+
+    function setPlayerColor(int $playerId, string $color): void {
+        $idx = $playerId - 10; // player IDs are 10, 11, 12, ...
+        if (isset($this->_colors[$idx])) {
+            $this->_colors[$idx] = $color;
+        }
     }
 
     // override/stub methods here that access db and stuff

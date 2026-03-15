@@ -70,7 +70,20 @@ class Game extends Base {
         called from setupNewGame
     */
     function setupGameTables() {
+        // Player setup — heroes randomly assigned, reassign colors before creating tokens
+        $heroNos = $this->getHeroOrder();
+        $heroColors = $this->getAvailColors();
+        $players = $this->loadPlayersBasicInfos();
+        $heroIdx = 0;
+        foreach ($players as $player_id => $player) {
+            $heroNo = $heroNos[$heroIdx++];
+            $color = $heroColors[$heroNo - 1];
+            $this->setPlayerColor((int) $player_id, $color);
+        }
+        $this->reloadPlayersBasicInfos();
+
         $this->tokens->createAllTokens();
+
         // setup
         $pnum = $this->getPlayersNumber();
         $startingPlayer = $this->getFirstPlayer();
@@ -98,12 +111,11 @@ class Game extends Base {
             $this->tokens->moveToken("house_$i", "limbo");
         }
 
-        // Player setup — heroes randomly assigned
-        $heroNos = $this->getHeroOrder();
+        // Second pass: create tokens with correct colors
         $heroIdx = 0;
         foreach ($players as $player_id => $player) {
             $heroNo = $heroNos[$heroIdx++];
-            $color = $player["player_color"];
+            $color = $heroColors[$heroNo - 1];
             $this->tokens->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
 
             // Create all cards for this hero and place in appropriate decks

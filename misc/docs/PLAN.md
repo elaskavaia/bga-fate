@@ -213,7 +213,7 @@ See CLAUDE.md for project overview
 [xs] Undo support for action selection
 
 ### Tests
-[ ] Integration test: full round (all players turn + monster turn)
+[x] Integration test: full round (all players turn + monster turn) — Campaign_BjornSoloTest
 [x] Test win condition (survive time track)
 [x] Test loss condition (all town pieces destroyed)
 

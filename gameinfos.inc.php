@@ -73,23 +73,15 @@ $gameinfos = [
 
     // Colors attributed to players
     "player_colors" => [
-        "ff0000",
-        "008000",
-        "0000ff",
-        "ffa500",
-        "e94190",
-        "982fff",
-        "72c3b1",
-        "f07f16",
-        "bdd002",
-        "7b7b7b",
-        "000000",
-        "ffffff",
+        "2e7d32", // green (Bjorn)
+        "1565c0", // blue (Alva)
+        "bf360c", // orange (Embla)
+        "c62828", // red (Boldur)
     ],
 
     // Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
     // NB: this parameter is used only to flag games supporting this feature; you must use (or not use) reattributeColorsBasedOnPreferences PHP method to actually enable or disable the feature.
-    "favorite_colors_support" => true,
+    "favorite_colors_support" => false,
 
     // When doing a rematch, the player order is swapped using a "rotation" so the starting player is not the same
     // If you want to disable this, set this to true

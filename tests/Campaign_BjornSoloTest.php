@@ -31,7 +31,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testMoveAttackMendKill(): void {
-        $this->driver->setVerbose(1);
+        //$this->driver->setVerbose(1);
         $goblin = "monster_goblin_20";
         $heroHexTurn1 = "hex_5_9";
         $goblinHexTurn1 = "hex_5_8";

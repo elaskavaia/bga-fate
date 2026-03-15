@@ -14,8 +14,6 @@ use Bga\Games\Fate\Stubs\TokensInMem;
  * and the harness contract (getGameName, saveDbState, loadDbState, getAllDatas).
  */
 class GameWrapper extends Game implements HarnessGameInterface {
-    private const PLAYER_COLORS = ["6cd0f6", "982fff", "ff0000", "ef58a2"];
-
     var $xtable;
     var $_colors = [];
 
@@ -26,7 +24,7 @@ class GameWrapper extends Game implements HarnessGameInterface {
         parent::__construct();
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->_colors = array_slice(self::PLAYER_COLORS, 0, 2);
+        $this->_colors = array_slice($this->getAvailColors(), 0, 2);
         $this->tokens = new TokensInMem($this);
     }
 
@@ -39,8 +37,15 @@ class GameWrapper extends Game implements HarnessGameInterface {
         return $min;
     }
 
+    function setPlayerColor(int $playerId, string $color): void {
+        $idx = $playerId - 10;
+        if (isset($this->_colors[$idx])) {
+            $this->_colors[$idx] = $color;
+        }
+    }
+
     function setPlayersNumber(int $num) {
-        $this->_colors = array_slice(self::PLAYER_COLORS, 0, $num);
+        $this->_colors = array_slice($this->getAvailColors(), 0, $num);
     }
 
     public function setHeroOrder(array $order): void {

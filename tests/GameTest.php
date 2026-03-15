@@ -229,6 +229,26 @@ final class GameTest extends TestCase {
         }
     }
 
+    public function testSetupTokensUseHeroColor() {
+        $game = $this->game;
+        $heroColors = $game->getAvailColors();
+        // Start with colors in default order (as BGA assigns them)
+        $game->_colors = [$heroColors[0], $heroColors[1]];
+        // Assign hero 2 to player 1 — player 1 should get Alva's blue, not Bjorn's green
+        $game->setHeroOrder([2, 1, 3, 4]);
+        $game->setupGameTables();
+
+        $alvaColor = $heroColors[1]; // hero 2 = Alva blue
+        // Player 1 got hero 2, so their color is now Alva's blue
+        // getHeroTokenId and getActionsTaken should work with the reassigned color
+        $heroId = $game->getHeroTokenId($alvaColor);
+        $this->assertEquals("hero_2", $heroId, "Player 1 should have hero_2 (Alva)");
+        $hero = $game->getHeroById($heroId);
+        // getActionsTaken reads marker tokens — must not crash (the BGA bug was null here)
+        $taken = $hero->getActionsTaken();
+        $this->assertIsArray($taken);
+    }
+
     public function testSetupEventCardInHand() {
         $game = $this->game;
         $game->setupGameTables();

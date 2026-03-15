@@ -68,12 +68,9 @@ class Base extends Table {
         });
     }
 
-    function getAvailColors($players) {
+    function getAvailColors() {
         $gameinfos = self::getGameinfos();
         $default_colors = $gameinfos["player_colors"];
-        if (count($players) == 1) {
-            unset($default_colors[count($default_colors) - 1]); // last one will be reserved to automa
-        }
         return $default_colors;
     }
     /*
@@ -88,31 +85,19 @@ class Base extends Table {
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
 
-        $default_colors = $this->getAvailColors($players);
-        shuffle($default_colors);
-
+        $default_colors = $this->getAvailColors();
+        $query_values = [];
+        //shuffle($default_colors); // not needed we will override them later
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = [];
         foreach ($players as $player_id => $player) {
-            $color = array_shift($default_colors);
-            $values[] =
-                "('" .
-                $player_id .
-                "','$color','" .
-                $player["player_canal"] .
-                "','" .
-                addslashes($player["player_name"]) .
-                "','" .
-                addslashes($player["player_avatar"]) .
-                "')";
+            $query_values[] = vsprintf("(%s, '%s', '%s')", [$player_id, array_shift($default_colors), addslashes($player["player_name"])]);
         }
-        $sql .= implode(",", $values);
-        $this->DbQuery($sql);
-        $default_colors = $this->getAvailColors($players);
-        self::reattributeColorsBasedOnPreferences($players, $default_colors);
-        self::reloadPlayersBasicInfos();
+        static::DbQuery(
+            sprintf("INSERT INTO `player` (`player_id`, `player_color`, `player_name`) VALUES %s", implode(",", $query_values))
+        );
+        //$this->reattributeColorsBasedOnPreferences($players, $default_colors); // not used in this game
+        $this->reloadPlayersBasicInfos();
 
         /************ Start the game initialization *****/
 
@@ -282,7 +267,7 @@ class Base extends Table {
     }
 
     function getAutomaColor() {
-        return "ffffff"; // different color for php but in UI it will be purple 982fff
+        return "ffffff"; // automa color (shared base class, not used in Fate)
     }
 
     function custom_getPlayerColorById(int $p): string {
@@ -297,6 +282,10 @@ class Base extends Table {
             return "Monsters";
         }
         return $this->getPlayerNameById($p);
+    }
+
+    function setPlayerColor(int $playerId, string $color): void {
+        static::DbQuery("UPDATE `player` SET `player_color` = '$color' WHERE `player_id` = $playerId");
     }
 
     function custom_getPlayerNoById(int $p): int {

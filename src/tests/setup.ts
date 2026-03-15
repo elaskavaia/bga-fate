@@ -4,11 +4,15 @@
 import { JSDOM } from "jsdom";
 import Module from "module";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename2 = typeof __filename !== "undefined" ? __filename : fileURLToPath(import.meta.url);
+const __dirname2 = path.dirname(__filename2);
 
 // Intercept require("./libs") from src/ to use our stub instead (libs.ts has top-level await which breaks CommonJS)
 const originalResolve = (Module as any)._resolveFilename;
-const libsStubPath = path.resolve(__dirname, "libs.stub.ts");
-const libsSrcPath = path.resolve(__dirname, "..", "libs.ts");
+const libsStubPath = path.resolve(__dirname2, "libs.stub.ts");
+const libsSrcPath = path.resolve(__dirname2, "..", "libs.ts");
 (Module as any)._resolveFilename = function (request: string, parent: any, ...args: any[]) {
   const resolved = originalResolve.call(this, request, parent, ...args);
   if (resolved === libsSrcPath) return libsStubPath;

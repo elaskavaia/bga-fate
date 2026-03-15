@@ -189,7 +189,7 @@ class Hero extends Character {
         foreach ([1, 2] as $i) {
             $loc = $this->game->tokens->getTokenLocation("marker_{$this->owner}_{$i}");
             $prefix = "aslot_{$this->owner}_";
-            if (str_starts_with($loc, $prefix) && !str_contains($loc, "_empty_")) {
+            if ($loc !== null && str_starts_with($loc, $prefix) && !str_contains($loc, "_empty_")) {
                 $taken[] = str_replace($prefix, "", $loc);
             }
         }
