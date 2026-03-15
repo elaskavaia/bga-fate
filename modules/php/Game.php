@@ -589,6 +589,17 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_drawEvent_empty() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Empty the deck to test the no-cards-left case
+        $deck = $this->tokens->getTokensOfTypeInLocation("card", "deck_event_{$color}");
+        foreach ($deck as $cardId => $info) {
+            $this->tokens->dbSetTokenLocation($cardId, "limbo");
+        }
+        $this->machine->push("drawEvent", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     public function debug_Op_moveMonster(): void {
         // Place hero with two adjacent monsters so phase 1 doesn't auto-resolve
         $this->tokens->dbSetTokenLocation("hero_1", "hex_11_8");

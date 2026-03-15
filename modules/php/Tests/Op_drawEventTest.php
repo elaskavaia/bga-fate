@@ -39,56 +39,38 @@ final class Op_drawEventTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // auto() — hand < 4
+    // getPossibleMoves — hand < limit: confirm target
     // -------------------------------------------------------------------------
 
-    public function testAutoDrawsWhenHandNotFull(): void {
-        // Setup gives 1 card in hand, so hand < 4
-        $handBefore = count($this->getHandCards());
+    public function testConfirmOfferedWhenHandNotFull(): void {
         $op = $this->createOp();
-        $result = $op->auto();
-        $this->assertTrue($result);
-        $this->assertCount($handBefore + 1, $this->getHandCards());
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("confirm", $moves);
+        $this->assertEquals(0, $moves["confirm"]["q"]);
     }
 
-    public function testAutoDoesNothingWhenDeckEmpty(): void {
-        // Empty the deck
+    public function testDeckEmptyReturnsError(): void {
         $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
         foreach ($deck as $cardId => $info) {
             $this->game->tokens->moveToken($cardId, "limbo");
         }
-        $handBefore = count($this->getHandCards());
         $op = $this->createOp();
-        $result = $op->auto();
-        $this->assertTrue($result);
-        $this->assertCount($handBefore, $this->getHandCards());
-    }
-
-    // -------------------------------------------------------------------------
-    // auto() — hand >= 4, enters player state
-    // -------------------------------------------------------------------------
-
-    public function testAutoReturnsFalseWhenHandFull(): void {
-        $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
-        $this->assertGreaterThanOrEqual(4, count($this->getHandCards()));
-        $op = $this->createOp();
-        $result = $op->auto();
-        $this->assertFalse($result);
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayNotHasKey("confirm", $moves);
+        $this->assertNotEquals(0, $moves["q"]);
     }
 
     // -------------------------------------------------------------------------
     // hand limit — Starsong II raises limit to 5
     // -------------------------------------------------------------------------
 
-    public function testStarsongIIAutoDrawsAtHandSize4(): void {
-        // Place Starsong II on tableau
+    public function testStarsongIIOffersConfirmAtHandSize4(): void {
         $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
         $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
         $this->assertCount(4, $this->getHandCards());
         $op = $this->createOp();
-        $result = $op->auto();
-        $this->assertTrue($result); // auto-draws, no discard prompt
-        $this->assertCount(5, $this->getHandCards());
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey("confirm", $moves); // still under limit of 5
     }
 
     public function testStarsongIIPromtsDiscardAtHandSize5(): void {
@@ -96,8 +78,8 @@ final class Op_drawEventTest extends TestCase {
         $this->fillHandFromDeck(4); // 1 from setup + 4 = 5
         $this->assertCount(5, $this->getHandCards());
         $op = $this->createOp();
-        $result = $op->auto();
-        $this->assertFalse($result); // enters discard prompt
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayNotHasKey("confirm", $moves); // at limit, offers discard
     }
 
     // -------------------------------------------------------------------------
@@ -137,6 +119,13 @@ final class Op_drawEventTest extends TestCase {
         $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation($cardToDiscard));
         // Hand size should stay the same (discarded 1, drew 1)
         $this->assertCount($handBefore, $this->getHandCards());
+    }
+
+    public function testResolveConfirmDrawsCard(): void {
+        $handBefore = count($this->getHandCards());
+        $op = $this->createOp();
+        $op->action_resolve([Operation::ARG_TARGET => "confirm"]);
+        $this->assertCount($handBefore + 1, $this->getHandCards());
     }
 
     public function testResolveDrawsNewCard(): void {

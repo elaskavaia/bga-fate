@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Operations\Op_actionPrepare;
 use Bga\Games\Fate\Tests\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
@@ -28,9 +29,11 @@ final class Op_actionPrepareTest extends TestCase {
     public function testResolveQueuesDrawEvent(): void {
         $op = $this->createOp();
         $op->resolve();
-        // drawEvent should be queued — dispatch it and check hand grew
         $handBefore = count($this->getHandCards());
-        $this->game->machine->dispatchAll();
+        // drawEvent now requires player confirmation — resolve it
+        $drawOp = $this->game->machine->createTopOperationFromDbForOwner(null);
+        $this->assertEquals("drawEvent", $drawOp->getType());
+        $drawOp->action_resolve([Operation::ARG_TARGET => "confirm"]);
         $this->assertCount($handBefore + 1, $this->getHandCards());
     }
 

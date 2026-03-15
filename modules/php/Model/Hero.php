@@ -77,6 +77,11 @@ class Hero extends Character {
         return true;
     }
 
+    function getCountOfCardsInEventDeck() {
+        $deck = "deck_event_{$this->owner}";
+        return count($this->game->tokens->getTokensOfTypeInLocation("card", $deck));
+    }
+
     /**
      * Discard an event card from hand to the discard pile.
      */

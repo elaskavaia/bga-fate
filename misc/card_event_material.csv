@@ -35,7 +35,7 @@ num|hno|name|count|r|on|effect|flavour
 28|3|Kick|3|dealDamage(adj);moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 34|3|Magic Runes|2|custom|roll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
 27|3|Maneuver|2|1moveHero||Move 1 area.|Embla has a way of tackling her problems from many angles.
-37|3|Preparations|1|custom||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
+37|3|Preparations|1|spendAction(actionPrepare):drawEvent(max)||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.
 31|3|Retaliation|3|2dealDamage(adj)|monsterAttack|Play after an adjacent monster attacked you to deal 2 damage to it.|
 29|3|Sophisticated|2|custom||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
@@ -46,7 +46,7 @@ num|hno|name|count|r|on|effect|flavour
 36|4|Boldur's Gate|1|custom||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
 35|4|Dodge|1|2preventDamage||Prevent up to 2 damage.|Did you miss me?
 34|4|Durability|1|99repairCard||Remove all damage from an equipment card.|Can't even handle the mead?
-33|4|Focus|2|custom||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
+33|4|Focus|2|spendAction(actionFocus):gainXp:gainMana(1):drawEvent||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
 31|4|Kick|3|dealDamage(adj);moveMonster||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 29|4|Maneuver|2|1moveHero||Move 1 area.|
 27|4|Miner|2|2gainXp(adjMountain)||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.
