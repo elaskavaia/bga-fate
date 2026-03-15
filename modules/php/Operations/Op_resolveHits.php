@@ -34,6 +34,10 @@ class Op_resolveHits extends Operation {
 
         $hits = $this->game->effect_resolveHits($attackerId, $defenderId);
 
+        // Armor absorbs hits (e.g. Draugr armor=1)
+        $defender = $this->game->getCharacter($defenderId);
+        $hits = $defender->applyArmor($hits);
+
         if ($hits > 0) {
             $this->queue("{$hits}dealDamage", null, [
                 "attacker" => $attackerId,
