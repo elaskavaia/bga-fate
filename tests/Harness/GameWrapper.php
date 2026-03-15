@@ -15,7 +15,6 @@ use Bga\Games\Fate\Stubs\TokensInMem;
  */
 class GameWrapper extends Game implements HarnessGameInterface {
     var $xtable;
-    var $_colors = [];
 
     /** When set, getHeroOrder() returns this fixed list instead of shuffling. */
     private ?array $heroOrder = null;
@@ -24,8 +23,11 @@ class GameWrapper extends Game implements HarnessGameInterface {
         parent::__construct();
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->_colors = array_slice($this->getAvailColors(), 0, 2);
         $this->tokens = new TokensInMem($this);
+    }
+
+    function _getAvailColors() {
+        return $this->getAvailColors();
     }
 
     public array $randQueue = [];
@@ -38,14 +40,16 @@ class GameWrapper extends Game implements HarnessGameInterface {
     }
 
     function setPlayerColor(int $playerId, string $color): void {
-        $idx = $playerId - 10;
-        if (isset($this->_colors[$idx])) {
-            $this->_colors[$idx] = $color;
+        $players = $this->loadPlayersBasicInfos();
+        if (isset($players[$playerId])) {
+            $players[$playerId]["player_color"] = $color;
+            $this->_setPlayerBasicInfo($players);
         }
     }
 
     function setPlayersNumber(int $num) {
-        $this->_colors = array_slice($this->getAvailColors(), 0, $num);
+        $colors = array_slice($this->getAvailColors(), 0, $num);
+        $this->_setPlayerBasicInfoFromColors($colors);
     }
 
     public function setHeroOrder(array $order): void {

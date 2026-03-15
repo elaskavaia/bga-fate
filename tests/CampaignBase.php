@@ -82,9 +82,9 @@ abstract class CampaignBaseTest extends TestCase {
         $this->assertNotContains($target, $args["target"] ?? [], $message ?: "$target should not be a valid target");
     }
 
-    /** Get the color of the Nth player (0-based) */
-    protected function playerColor(int $index = 0): string {
-        return $this->game->_colors[$index];
+    /** Get the color of the current player */
+    protected function playerColor(): string {
+        return $this->game->getPlayerColorById((int) $this->game->getCurrentPlayerId());
     }
 
 
@@ -103,9 +103,9 @@ abstract class CampaignBaseTest extends TestCase {
         return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $charId));
     }
 
-    /** Count XP (yellow crystals) on a player's tableau */
-    protected function countXp(int $playerIndex = 0): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->playerColor($playerIndex)));
+    /** Count XP (yellow crystals) on current player's tableau */
+    protected function countXp(): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->playerColor()));
     }
 
     /** Place specific cards on top of a deck (first in array = top of deck) */

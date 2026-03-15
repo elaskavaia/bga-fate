@@ -61,7 +61,8 @@ class GameDriver {
             $this->game->gamestate->jumpToState($db["gamestate"]["state_id"]);
         }
         if (isset($db["players"])) {
-            $this->game->_colors = array_column($db["players"], "player_color");
+            $colors = array_column($db["players"], "player_color");
+            $this->game->_setPlayerBasicInfoFromColors($colors);
         }
     }
 

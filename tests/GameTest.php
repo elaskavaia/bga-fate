@@ -233,7 +233,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
         $heroColors = $game->getAvailColors();
         // Start with colors in default order (as BGA assigns them)
-        $game->_colors = [$heroColors[0], $heroColors[1]];
+        $game->_setPlayerBasicInfoFromColors([$heroColors[0], $heroColors[1]]);
         // Assign hero 2 to player 1 — player 1 should get Alva's blue, not Bjorn's green
         $game->setHeroOrder([2, 1, 3, 4]);
         $game->setupGameTables();

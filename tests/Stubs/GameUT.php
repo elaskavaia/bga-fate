@@ -33,7 +33,6 @@ class GameUT extends Game {
     var $xtable;
     var $gameap_number = 0;
     var $var_colonies = 0;
-    var $_colors = []; // redeclaration of same variable in Game stub
     /** @var int[] Predetermined values for bgaRand(). Consumed in order; falls back to $min when empty. */
     public array $randQueue = [];
 
@@ -48,28 +47,17 @@ class GameUT extends Game {
         parent::__construct();
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->_colors = [PCOLOR, BCOLOR];
-
         $this->tokens = new TokensInMem($this);
+        $this->setPlayersNumber(2);
+    }
+
+    function _getAvailColors() {
+        return $this->getAvailColors();
     }
 
     function setPlayersNumber(int $num) {
-        switch ($num) {
-            case 1:
-                $this->_colors = [PCOLOR];
-                break;
-            case 2:
-                $this->_colors = [PCOLOR, BCOLOR];
-                break;
-            case 3:
-                $this->_colors = [PCOLOR, BCOLOR, CCOLOR];
-                break;
-            case 4:
-                $this->_colors = [PCOLOR, BCOLOR, CCOLOR, "c62828"];
-                break;
-            default:
-                throw new UserException("Invalid number of players");
-        }
+        $colors = array_slice($this->_getAvailColors(), 0, $num);
+        $this->_setPlayerBasicInfoFromColors($colors);
     }
 
     function getUserPreference(int $player_id, int $code): int {
@@ -103,9 +91,10 @@ class GameUT extends Game {
     }
 
     function setPlayerColor(int $playerId, string $color): void {
-        $idx = $playerId - 10; // player IDs are 10, 11, 12, ...
-        if (isset($this->_colors[$idx])) {
-            $this->_colors[$idx] = $color;
+        $players = $this->loadPlayersBasicInfos();
+        if (isset($players[$playerId])) {
+            $players[$playerId]["player_color"] = $color;
+            $this->_setPlayerBasicInfo($players);
         }
     }
 
