@@ -82,4 +82,34 @@ final class Op_spendManaTest extends TestCase {
         $this->expectException(\Bga\GameFramework\UserException::class);
         $op->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
     }
+
+    // -------------------------------------------------------------------------
+    // condition: grimheim
+    // -------------------------------------------------------------------------
+
+    public function testGrimheimConditionPassesInGrimheim(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("2spendMana(grimheim)");
+        $this->assertEquals(0, $op->getErrorCode());
+    }
+
+    public function testGrimheimConditionFailsOutsideGrimheim(): void {
+        // hero_1 is on hex_11_8 (not Grimheim)
+        $op = $this->createOp("2spendMana(grimheim)");
+        $this->assertNotEquals(0, $op->getErrorCode());
+    }
+
+    public function testGrimheimConditionResolves(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_9_9");
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("2spendMana(grimheim)");
+        $op->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
+        $this->assertEquals(1, $this->getMana("card_ability_1_3"));
+    }
+
+    public function testNoConditionAlwaysValid(): void {
+        $op = $this->createOp("2spendMana");
+        $this->assertEquals(0, $op->getErrorCode());
+    }
 }

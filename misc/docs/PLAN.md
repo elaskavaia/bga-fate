@@ -303,6 +303,7 @@ See CLAUDE.md for project overview
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [ ] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
+- [ ] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
 - [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
 - [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated

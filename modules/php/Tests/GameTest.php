@@ -322,6 +322,26 @@ final class GameTest extends TestCase {
         $game->effect_moveCrystals("hero_1", "green", -1, "tableau_" . PCOLOR);
     }
 
+    public function testInstanciateAllEventCardOperations() {
+        $this->game();
+        $this->game->setupGameTables();
+        $heroId = $this->game->getHeroTokenId(PCOLOR);
+        $this->game->tokens->moveToken($heroId, "hex_9_9");
+
+        foreach ($this->game->material->get() as $key => $info) {
+            if (!str_starts_with($key, "card_event_")) {
+                continue;
+            }
+            $r = $info["r"] ?? "";
+            if ($r === "" || $r === "custom") {
+                continue;
+            }
+            echo "testing event card $key r=$r\n";
+            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
+        }
+    }
+
     function subTestOp($key, $info = []) {
         $type = substr($key, 3);
         $this->assertTrue(!!$type);

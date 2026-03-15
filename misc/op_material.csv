@@ -63,6 +63,9 @@ moveMonster|Move Monster
 performAction|Perform Action
 repairCard|Repair Card
 gainXp|Gain XP
+killMonster|Kill Monster
+preventDamage|Prevent Damage
+addTownPiece|Add Town Piece
 
 drawEvent|Draw Event
 discardEvent|Discard Event

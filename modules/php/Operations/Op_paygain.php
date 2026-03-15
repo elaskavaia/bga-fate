@@ -20,7 +20,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\fate\Operations\Op_seq;
+use Bga\Games\Fate\Operations\Op_seq;
 
 /** Sequence of operations, no user choice. Usually pay/gain that is shown diffrently then sequence */
 class Op_paygain extends Op_seq {

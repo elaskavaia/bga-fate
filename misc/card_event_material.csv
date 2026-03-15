@@ -20,7 +20,7 @@ num|hno|name|count|r|on|effect|flavour
 # Events - Alva (hno=2)
 28|2|Agility|2|2moveHero||Move 2 areas. Just because you can.|
 35|2|Back Down!|2|killMonster(inRange,'rank<=2')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
-30|2|Inspire Defense|2|custom||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
+30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
 27|2|Mastery|3|custom|actionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
 26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
 34|2|Piercing Arrows|2|custom|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
@@ -54,25 +54,25 @@ num|hno|name|count|r|on|effect|flavour
 30|4|Rest|2|2heal(self)||Heal 2 damage from Boldur.|I need a hospital… no, I need a tavern…
 37|4|Seek Shelter|1|custom||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.
 28|4|Short Temper|3|killMonster('adj && healthRem<=2')||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.
-# Events - Finkel (hno=5)
-35|5|Blinding Flash|2|custom|monsterAttack|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
-30|5|Blown Away|2|custom||Move anyone within range 2 up to 2 areas.|His presence can do that to you.
-36|5|Burning Aura|1|custom||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.
-28|5|Chain Lightning|3|custom||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.
-34|5|Durability|2|99repairCard||Remove all damage from an equipment card.|
-33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
-31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
-27|5|Lightning Bolt|3|dealDamage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
-32|5|Power Surge|2|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
-37|5|Quick Reflexes|1|1moveHero|monsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
-29|5|Rain of Fire|2|custom||Deal 1 damage to each adjacent monster.|
-# Events - Sindra (hno=6)
-35|6|Alchemy|1|custom||Remove up to 5 mana [MANA] to gain that much gold [XP].|It is a golden opportunity.
-32|6|Bowling|3|custom||Choose an adjacent area and the area directly behind it. Any monsters there are dealt 1 damage and may be moved 1 area.|Spare no one.
-34|6|Focus|1|custom||Spend 1 focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|What was that recipe again?
-29|6|Hard Rock|3|3roll(inRange3)||Roll 3[DIE_ATTACK] against a monster within range 2.|She will, she will, rock you!
-33|6|Heavy Metal|2|custom||Pay 1 or 2 gold [XP] and choose a monster within range 2. Deal 2 damage to it for each [XP] paid.|You want a ton of gold? You won't like it.
-27|6|Lava Spike|3|custom||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.
-30|6|Petrify|3|custom||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.
-31|6|Power Surge|3|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
-28|6|Stoneskin|3|2preventDamage||Prevent up to 2 damage.|Sticks and stones can't break my bones…
+# Events - Finkel (hno=5) - expansion, not implemented
+#35|5|Blinding Flash|2|custom|monsterAttack|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
+#30|5|Blown Away|2|custom||Move anyone within range 2 up to 2 areas.|His presence can do that to you.
+#36|5|Burning Aura|1|custom||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.
+#28|5|Chain Lightning|3|custom||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.
+#34|5|Durability|2|99repairCard||Remove all damage from an equipment card.|
+#33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
+#31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
+#27|5|Lightning Bolt|3|dealDamage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
+#32|5|Power Surge|2|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
+#37|5|Quick Reflexes|1|1moveHero|monsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
+#29|5|Rain of Fire|2|custom||Deal 1 damage to each adjacent monster.|
+# Events - Sindra (hno=6) - expansion, not implemented
+#35|6|Alchemy|1|custom||Remove up to 5 mana [MANA] to gain that much gold [XP].|It is a golden opportunity.
+#32|6|Bowling|3|custom||Choose an adjacent area and the area directly behind it. Any monsters there are dealt 1 damage and may be moved 1 area.|Spare no one.
+#34|6|Focus|1|custom||Spend 1 focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|What was that recipe again?
+#29|6|Hard Rock|3|3roll(inRange3)||Roll 3[DIE_ATTACK] against a monster within range 2.|She will, she will, rock you!
+#33|6|Heavy Metal|2|custom||Pay 1 or 2 gold [XP] and choose a monster within range 2. Deal 2 damage to it for each [XP] paid.|You want a ton of gold? You won't like it.
+#27|6|Lava Spike|3|custom||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.
+#30|6|Petrify|3|custom||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.
+#31|6|Power Surge|3|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
+#28|6|Stoneskin|3|2preventDamage||Prevent up to 2 damage.|Sticks and stones can't break my bones…
