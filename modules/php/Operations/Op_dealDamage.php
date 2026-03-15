@@ -64,16 +64,21 @@ class Op_dealDamage extends CountableOperation {
         return $targets;
     }
 
+    protected function getDamageAmount(string $defenderId): int {
+        return (int) $this->getCount();
+    }
+
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
         $attackerId = $this->getDataField("attacker");
         if ($attackerId === null) {
             $attackerId = $this->game->getHeroTokenId($this->getOwner());
         }
-        $amount = (int) $this->getCount();
 
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null);
         $this->game->systemAssert("ERR:dealDamage:noCharacterOnHex:$targetHex", $defenderId !== null);
+
+        $amount = $this->getDamageAmount($defenderId);
 
         $this->game->effect_moveCrystals($attackerId, "red", $amount, $defenderId, [
             "message" => "",

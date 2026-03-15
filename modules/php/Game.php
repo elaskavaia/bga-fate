@@ -336,9 +336,17 @@ class Game extends Base {
         if ($x === "legend") {
             // monster_legend_1
             return (int) (getPart($context, 1) == "legend");
-        }
-        if ($x === "not_legend") {
+        } elseif ($x === "not_legend") {
             return (int) (getPart($context, 1) != "legend");
+        } elseif ($x === "adj") {
+            $heroId = $this->getHeroTokenId($owner);
+            $heroHex = $this->hexMap->getCharacterHex($heroId);
+            $contextHex = $this->tokens->getTokenLocation($context);
+            return (int) ($heroHex !== null && $contextHex !== null && $this->hexMap->getMoveDistance($heroHex, $contextHex) === 1);
+        } elseif ($x === "healthRem") {
+            $health = (int) $this->getRulesFor($context, "health", 0);
+            $damage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $context));
+            return $health - $damage;
         }
 
         //id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor
@@ -647,6 +655,28 @@ class Game extends Base {
         }
         $this->hexMap->invalidateOccupancy();
         $this->machine->push("2dealDamage", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_killMonster() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        // Place a goblin (rank 1) and a brute (rank 2) adjacent to hero
+        $placed = 0;
+        $monsters = ["monster_goblin_1", "monster_brute_1"];
+        foreach ($adjHexes as $hex) {
+            if ($placed >= 2) {
+                break;
+            }
+            if (!$this->hexMap->isOccupied($hex)) {
+                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
+                $placed++;
+            }
+        }
+        $this->hexMap->invalidateOccupancy();
+        $this->machine->push("killMonster(adj,'rank<=2')", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

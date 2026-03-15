@@ -4962,7 +4962,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Short Temper"),
         "count" => 3,
-        "r" => "killMonster('adj && healthRem<=2')",
+        "r" => "killMonster(adj,'healthRem<=2')",
         "effect" => "Kill an adjacent monster with no more than 2 remaining health.",
         "flavour" => "Beware! Boldur's brutal blows bring bad bruises.",
 ],

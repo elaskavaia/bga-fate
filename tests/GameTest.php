@@ -380,4 +380,64 @@ final class GameTest extends TestCase {
         $this->assertFalse($op->getOpName() == $op->getType(), "No name set for operation $key");
         return $op;
     }
+
+    // -------------------------------------------------------------------------
+    // evaluateExpression — healthRem, adj terms
+    // -------------------------------------------------------------------------
+
+    private function setupHeroAndTokens(): void {
+        $this->game->tokens->createAllTokens();
+        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+    }
+
+    public function testHealthRemFullHealth(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // Goblin health=2, no damage → healthRem=2
+        $result = $this->game->evaluateExpression("healthRem", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(2, $result);
+    }
+
+    public function testHealthRemWithDamage(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("crystal_red_1", "monster_brute_1");
+        // Brute health=3, 1 damage → healthRem=2
+        $result = $this->game->evaluateExpression("healthRem", PCOLOR, "monster_brute_1");
+        $this->assertEquals(2, $result);
+    }
+
+    public function testHealthRemExpression(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("crystal_red_1", "monster_brute_1");
+        // healthRem<=2 should be true (2<=2)
+        $result = $this->game->evaluateExpression("healthRem<=2", PCOLOR, "monster_brute_1");
+        $this->assertEquals(1, $result);
+    }
+
+    public function testHealthRemExpressionFalse(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+        // Brute health=3, no damage → healthRem=3, 3<=2 is false
+        $result = $this->game->evaluateExpression("healthRem<=2", PCOLOR, "monster_brute_1");
+        $this->assertEquals(0, $result);
+    }
+
+    public function testAdjTermTrue(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // hero_1 at hex_11_8, hex_12_8 is adjacent
+        $result = $this->game->evaluateExpression("adj", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(1, $result);
+    }
+
+    public function testAdjTermFalse(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        // hero_1 at hex_11_8, hex_13_7 is 2 hexes away
+        $result = $this->game->evaluateExpression("adj", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(0, $result);
+    }
 }

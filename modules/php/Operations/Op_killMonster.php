@@ -14,17 +14,28 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\OpCommon\Operation;
-
 /**
- * killMonster: Kill a target monster matching a filter condition (rank, health, range).
- * Used by: Back Down (killMonster(inRange,'rank<=2')), Short Temper, Heat Death, In Charge.
+ * killMonster: Instantly kill a target monster matching a filter condition.
+ * Extends dealDamage — same target selection (range + filter), but deals enough
+ * damage to guarantee a kill (monster's full health).
  *
- * param(0): range filter — "inRange", "adj"
- * param(1): condition filter — e.g. 'rank<=2', 'adj && healthRem<=2'
+ * Params:
+ * - param(0): range specifier — "adj", "inRange", "inRangeN" (default "adj")
+ * - param(1): filter expression — e.g. "'rank<=2'", "'healthRem<=2'" (default "true")
+ *
+ * Used by: Back Down (killMonster(inRange,'rank<=2')), Short Temper (killMonster(adj,'healthRem<=2')).
  */
-class Op_killMonster extends Operation {
-    function resolve(): void {
-        // TODO: implement
+class Op_killMonster extends Op_dealDamage {
+    function getPrompt() {
+        return clienttranslate('Choose a monster to kill');
+    }
+
+    function canSkip() {
+        return true;
+    }
+
+    protected function getDamageAmount(string $defenderId): int {
+        $monster = $this->game->getMonster($defenderId);
+        return $monster->getHealth();
     }
 }

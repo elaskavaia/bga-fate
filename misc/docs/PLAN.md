@@ -330,7 +330,7 @@ See CLAUDE.md for project overview
 - [x] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
 - [x] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
 - [x] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
-- [ ] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
+- [x] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
 - [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
@@ -347,9 +347,7 @@ See CLAUDE.md for project overview
 - [x] Operation parser: target params `(adj)`, `(self)`, `(inRange)` — already supported via `getParam()`
 - [x] Operation parser: chaining with `;` and cost notation with `:` — already supported
 
-### Tests
-- [ ] Unit tests for each new operation
-- [ ] Integration tests: play event card → effect executes
+
 
 ---
 
