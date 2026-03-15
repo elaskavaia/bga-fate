@@ -236,7 +236,7 @@ class Hero extends Character {
      * - Moved to Grimheim, damage set to 5, 2 town pieces destroyed.
      * @return bool true if the hero was knocked out
      */
-    function applyDamageEffects(int $amount): bool {
+    function applyDamageEffects(int $amount, $attackerId): bool {
         $this->game->systemAssert("cannot be negative amount", $amount >= 0);
         $totalDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
         $health = $this->getMaxHealth();

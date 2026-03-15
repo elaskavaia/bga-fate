@@ -15,8 +15,6 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Hero;
-use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -82,16 +80,7 @@ class Op_dealDamage extends CountableOperation {
         ]);
 
         $defender = $this->game->getCharacter($defenderId);
-        if ($defender instanceof Monster) {
-            $killed = $defender->applyDamageEffects($amount, $attackerId);
-            if ($killed) {
-                $hero = $this->game->getHero($this->getOwner());
-                $hero->gainXp($defender->getXpReward());
-            }
-        } else {
-            /** @var Hero $defender */
-            $defender->applyDamageEffects($amount);
-        }
+        $defender->applyDamageEffects($amount, $attackerId);
     }
 
     public function getUiArgs() {

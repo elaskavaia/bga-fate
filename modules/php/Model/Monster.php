@@ -42,8 +42,8 @@ class Monster extends Character {
 
     /**
      * Apply damage to this monster.
-     * If total damage >= health, the monster is killed and removed from map.
-     * @param string $attackerId token id of whoever killed it (for log message)
+     * If total damage >= health, the monster is killed, removed from map, and the attacker gains XP.
+     * @param string $attackerId hero token id of whoever killed it (for log message and XP award)
      * @return bool true if the monster was killed
      */
     function applyDamageEffects(int $amount, string $attackerId): bool {
@@ -64,6 +64,8 @@ class Monster extends Character {
             $this->moveCrystals("red", -$totalDamage, $this->id, ["message" => ""]);
             // Remove monster from map
             $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
+            // Award XP to the attacker
+            $this->game->getHeroById($attackerId)->gainXp($this->getXpReward());
             return true;
         }
         return false;

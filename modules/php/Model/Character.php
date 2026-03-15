@@ -100,4 +100,9 @@ class Character {
     function getRulesFor(string $field, mixed $default = ""): mixed {
         return $this->game->material->getRulesFor($this->id, $field, $default);
     }
+
+    function applyDamageEffects(int $amount, $attackerId): bool {
+        // Base character has no damage effects; overridden in Hero and Monster
+        return false;
+    }
 }

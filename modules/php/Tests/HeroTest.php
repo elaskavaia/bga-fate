@@ -54,8 +54,6 @@ final class HeroTest extends TestCase {
         $monster = $this->game->getMonster("monster_goblin_1");
         $killed = $monster->applyDamageEffects(2, "hero_1");
         $this->assertTrue($killed);
-        $hero = $this->game->getHero(PCOLOR);
-        $hero->gainXp($monster->getXpReward());
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 1, $xpAfter);
@@ -92,8 +90,6 @@ final class HeroTest extends TestCase {
         $monster = $this->game->getMonster("monster_brute_1");
         $killed = $monster->applyDamageEffects(3, "hero_1");
         $this->assertTrue($killed);
-        $hero = $this->game->getHero(PCOLOR);
-        $hero->gainXp($monster->getXpReward());
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 2, $xpAfter);
