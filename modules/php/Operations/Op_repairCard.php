@@ -35,8 +35,7 @@ class Op_repairCard extends CountableOperation {
         $owner = $this->getOwner();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
         $targets = [];
-        foreach ($cards as $card) {
-            $cardId = $card["key"];
+        foreach ($cards as $cardId => $card) {
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
             $targets[$cardId] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
         }

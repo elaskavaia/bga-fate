@@ -55,6 +55,116 @@ Prompt: add <name> operation. Read PROCEDURES.md for instructions
 #. Update PLAN.md if needed
 #. If you learned anything new update CLAUDE.md
 
+## Operation Template
+
+When creating a new user-facing operation, use this as the starting template for `modules/php/Operations/Op_<name>.php`:
+
+```php
+<?php
+declare(strict_types=1);
+
+namespace Bga\Games\Fate\Operations;
+
+use Bga\Games\Fate\Material;
+use Bga\Games\Fate\OpCommon\Operation;
+
+/**
+ * One-line summary of what this operation does.
+ *
+ * Params:
+ * - param(0): description of first param, if any (e.g. "max", "self", a location name)
+ *
+ * Data Fields:
+ * - card - seeded value of context
+ *
+ * Behaviour:
+ * - Normal case: describe what getPossibleMoves() offers and what resolve() does
+ * - Edge case / precondition failure: describe error return and whether it auto-skips
+ */
+class Op_xxx extends Operation {
+    // -------------------------------------------------------------------------
+    // Data fields and Parameters access
+    // -------------------------------------------------------------------------
+
+    // Params are baked into the operation type string at queue time, e.g. "drawEvent(max)" or "heal(self)".
+    // They are static for the lifetime of the operation.
+    // private function getLocation(): string {
+    //     return $this->getParam(0, "default"); // getParam(index, default)
+    // }
+
+    // Data fields are values seeded by the caller at queue time, e.g. queue("xxx", null, ["card" => $cardId]).
+    // private function getCard(): ?string {
+    //     return $this->getDataField("card");
+    // }
+
+    // -------------------------------------------------------------------------
+    // Possible Moves
+    // -------------------------------------------------------------------------
+
+    function getPossibleMoves() {
+        // Precondition failure — return error, op will auto-skip if canSkip()
+        // return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("...")];
+
+        // Token targets: keys are token IDs, client highlights them for clicking
+        // return array_keys($data);
+
+        // One explicit confirm target (no map/card selection needed)
+        return parent::getPossibleMoves();
+
+        // More elaborate reply when individual error codes
+        // $targets = [];
+        // foreach ($cards as $cardId => $card) {
+        //     $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+        //     $targets[$cardId] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
+        // }
+        // return $targets;
+    }
+
+    // -------------------------------------------------------------------------
+    // Execution
+    // -------------------------------------------------------------------------
+
+    function resolve(): void {
+        $target = $this->getCheckedArg(); // validated selection from getPossibleMoves()
+        $hero = $this->game->getHero($this->getOwner());
+
+        // Move tokens
+        // $this->game->tokens->dbSetTokenLocation($tokenId, $location, $state, clienttranslate('...'), [...]);
+
+        // Queue follow-up operations
+        // $this->queue("otherOp");
+    }
+
+    // -------------------------------------------------------------------------
+    // UI
+    // -------------------------------------------------------------------------
+
+    function getPrompt() {
+        return clienttranslate("Prompt shown to the player");
+    }
+
+    // function getSkipName() {
+    //     return clienttranslate("End Turn"); // only needed if button is not "Skip"
+    // }
+
+    // function getUiArgs() {
+    //     return ["buttons" => false]; // suppress action buttons; player clicks map/tokens directly
+    // }
+
+    // function getExtraArgs() {
+    //     return ["token_div" => $someId]; // extra data sent to client with getArgs()
+    // }
+
+    // function requireConfirmation() {
+    //     return true; // if cannot be auto-skipped and auto-executed, for example dangerous operation or that cannot be undone
+    // }
+
+    // function canSkip() {
+    //     return true; // normally operation cannot be skipped
+    // }
+}
+```
+
 ## Adding New Game Element
 
 Prompt: add <name> location. Read PROCEDURES.md for instructions.
