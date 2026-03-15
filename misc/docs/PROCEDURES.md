@@ -39,15 +39,15 @@ Prompt: create <name> operation. Read PROCEDURES.md for instructions. Create pla
    - `getUiArgs()` — UI hints (e.g. `["buttons" => false]` when player clicks map/tokens instead of buttons)
    - `getExtraArgs()` — extra data sent to client (e.g. `["token_div" => $id]`)
 #. Ask user to code review before moving to next step
-#. Add tests in `modules/php/Tests/`
+#. Add tests in `tests/`
    - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
    - Test `getPossibleMoves()` returns expected valid/invalid targets
    - Test `resolve()` produces correct side effects (token moves, state changes)
 #. Add a `debug_Op_<name>` function in `Game.php` that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:
    ```bash
-   php8.4 misc/harness/play.php --debug debug_Op_<name> --scenario misc/harness/plays/setup.json
+   php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json
    # Then run the renderer and read staging/snapshot.html to verify layout, buttons, and tooltips
-   ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
+   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    ```
 #. If new game elements are introduced, follow the "Adding New Game Element" checklist below
 #. Update DESIGN.md if needed
@@ -210,8 +210,8 @@ Every physical game piece leaves footprints in multiple places: database, materi
     - Create or update a `debug_` function in `Game.php` to place/move the relevant elements into a testable state
     - Run the harness and read `staging/snapshot.html` to inspect layout, token placement, and CSS:
       ```bash
-      php8.4 misc/harness/play.php --debug debug_<name> --scenario misc/harness/plays/setup.json
-      ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
+      php8.4 tests/Harness/play.php --debug debug_<name> --scenario tests/Harness/plays/setup.json
+      ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
       # Then read staging/snapshot.html
       ```
     - Check: tokens appear in correct locations, action buttons render with correct labels
@@ -239,13 +239,13 @@ After implementing an operation, run the harness and inspect `staging/snapshot.h
 2. Run the harness in two steps so you can diff before/after:
    ```bash
    # Step 1: baseline — run setup scenario, save snapshot as before.html
-   php8.4 misc/harness/play.php --scenario misc/harness/plays/setup.json
-   ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
+   php8.4 tests/Harness/play.php --scenario tests/Harness/plays/setup.json
+   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    cp staging/snapshot.html staging/before.html
 
    # Step 2: apply the operation on top of the setup state
-   php8.4 misc/harness/play.php --debug debug_Op_<name> --scenario misc/harness/plays/setup.json
-   ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
+   php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json
+   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    # staging/snapshot.html now reflects the operation state
    ```
 3. Compare `staging/before.html` and `staging/snapshot.html` to see what changed
@@ -289,7 +289,7 @@ After verifying the prompt snapshot above, simulate the user clicking a target:
    cp staging/snapshot.html staging/prompt.html
    ```
 2. Find the action payload: look in the snapshot for `data-action` on buttons, or for `active_slot` hexes/tokens in the `#harness-click-registry`. The payload for clicking an active slot is `{"target":"<tokenId>"}`.
-3. Create a scenario `misc/harness/plays/op_<name>.json` that calls the debug function then resolves:
+3. Create a scenario `tests/Harness/plays/op_<name>.json` that calls the debug function then resolves:
    ```json
    {
      "current_player_id": 10,
@@ -302,8 +302,8 @@ After verifying the prompt snapshot above, simulate the user clicking a target:
    ```
 4. Run the scenario:
    ```bash
-   php8.4 misc/harness/play.php --scenario misc/harness/plays/op_<name>.json
-   ts-node --project misc/harness/tsconfig.json misc/harness/render.ts
+   php8.4 tests/Harness/play.php --scenario tests/Harness/plays/op_<name>.json
+   ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
    ```
 5. Compare `staging/prompt.html` and `staging/snapshot.html` to see what changed — verify tokens moved, dice appeared, game log updated, etc.
 

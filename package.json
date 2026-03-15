@@ -13,11 +13,11 @@
     "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests",
     "genmat": "php8.4 misc/other/genmat.php misc/*.csv",
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
-    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./modules/php/Tests/_autoload.php  --colors=always",
-    "tests": "npm run test -- modules/php/Tests",
+    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./tests/_autoload.php  --colors=always",
+    "tests": "npm run test -- tests",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --coverage-text",
     "jstests": "TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts",
-    "play": "php8.4 misc/harness/play.php && ts-node --project misc/harness/tsconfig.json misc/harness/render.ts"
+    "play": "php8.4 tests/Harness/play.php && ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts"
   },
   "author": "Alena Laskavaia",
   "license": "EPL2.0",

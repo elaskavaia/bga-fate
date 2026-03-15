@@ -101,7 +101,7 @@ class Character {
         return $this->game->material->getRulesFor($this->id, $field, $default);
     }
 
-    function applyDamageEffects(int $amount, $attackerId): bool {
+    function applyDamageEffects(int $amount, string $attackerId): bool {
         // Base character has no damage effects; overridden in Hero and Monster
         return false;
     }
