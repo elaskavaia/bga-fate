@@ -70,6 +70,24 @@ abstract class CampaignBaseTest extends TestCase {
         return $state["args"] ?? [];
     }
 
+    /** Assert that a target is valid (appears in target list with q=0) */
+    protected function assertValidTarget(string $target, string $message = ""): void {
+        $args = $this->getOpArgs();
+        $this->assertContains($target, $args["target"] ?? [], $message ?: "$target should be a valid target");
+    }
+
+    /** Assert that a target is NOT valid (not in target list) */
+    protected function assertNotValidTarget(string $target, string $message = ""): void {
+        $args = $this->getOpArgs();
+        $this->assertNotContains($target, $args["target"] ?? [], $message ?: "$target should not be a valid target");
+    }
+
+    /** Get the color of the Nth player (0-based) */
+    protected function playerColor(int $index = 0): string {
+        return $this->game->_colors[$index];
+    }
+
+
     /** Get token location */
     protected function tokenLocation(string $tokenId): string {
         return $this->game->tokens->getTokenLocation($tokenId);
@@ -78,6 +96,16 @@ abstract class CampaignBaseTest extends TestCase {
     /** Count tokens of type at location */
     protected function countTokens(string $type, string $location): int {
         return count($this->game->tokens->getTokensOfTypeInLocation($type, $location));
+    }
+
+    /** Count damage (red crystals) on a character */
+    protected function countDamage(string $charId): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $charId));
+    }
+
+    /** Count XP (yellow crystals) on a player's tableau */
+    protected function countXp(int $playerIndex = 0): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->playerColor($playerIndex)));
     }
 
     /** Place specific cards on top of a deck (first in array = top of deck) */

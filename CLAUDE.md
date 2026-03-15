@@ -27,6 +27,16 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - `npm run tests:cov` - Run PHPUnit tests with code coverage report (requires Xdebug)
 - `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
 
+### Debugging PHP tests (phpdbg)
+
+Requires `php8.4-phpdbg` (`sudo apt install php8.4-phpdbg`).
+
+```bash
+APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpdbg8.4 -e -qrr ~/php-composer/vendor/bin/phpunit --bootstrap ./tests/_autoload.php --filter testMethodName tests/TestFile.php
+```
+
+Key commands: `b file.php:line` (breakpoint), `r` (run), `c` (continue), `s` (step into), `n` (step over), `p $var` (print), `ev expr` (evaluate), `bt` (backtrace), `q` (quit).
+
 ### Local UI Harness
 
 The harness runs PHP server logic locally and renders a client snapshot for visual inspection — no real BGA server needed.
