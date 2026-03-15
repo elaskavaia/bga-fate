@@ -34,7 +34,7 @@ class Op_gainXp extends CountableOperation {
     function getPossibleMoves(): array {
         $condition = $this->getParam(0, "");
         if ($condition !== "" && !$this->checkCondition($condition)) {
-            return ["q" => Material::ERR_PREREQ, "err" => clienttranslate("Condition not met")];
+            return ["q" => Material::ERR_PREREQ];
         }
         return parent::getPossibleMoves();
     }
