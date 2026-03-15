@@ -145,7 +145,7 @@ class Game extends Base {
                 $this->tokens->moveToken("hero_$i", "limbo");
             }
         }
-        $color = $this->custom_getPlayerColorById($startingPlayer);
+        $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
         $this->machine->queue("turn", $color);
         $this->customUndoSavepoint($startingPlayer, 1);

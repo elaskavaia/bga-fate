@@ -30,12 +30,21 @@ class GameWrapper extends Game implements HarnessGameInterface {
         $this->tokens = new TokensInMem($this);
     }
 
+    public array $randQueue = [];
+
     function bgaRand(int $min, int $max): int {
+        if ($this->randQueue) {
+            return array_shift($this->randQueue);
+        }
         return $min;
     }
 
     function setPlayersNumber(int $num) {
         $this->_colors = array_slice(self::PLAYER_COLORS, 0, $num);
+    }
+
+    public function setHeroOrder(array $order): void {
+        $this->heroOrder = $order;
     }
 
     protected function getHeroOrder(): array {
@@ -76,7 +85,11 @@ class GameWrapper extends Game implements HarnessGameInterface {
         ];
     }
 
-    public function loadDbState(array $db): void {
+    public function loadDbState(array $db, bool $reset = true): void {
+        if ($reset) {
+            $this->tokens->deleteAll();
+            $this->machine->db->loadRows([]);
+        }
         $this->tokens->fromJson($db["tokens"] ?? []);
         $this->machine->db->fromJson($db["machine"] ?? []);
     }

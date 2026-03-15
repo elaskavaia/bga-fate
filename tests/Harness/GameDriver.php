@@ -19,6 +19,7 @@ class GameDriver {
     public Table&HarnessGameInterface $game;
     private string $stagingDir;
     public array $states;
+    private int $verbose = 1;
 
     public function __construct(Table&HarnessGameInterface $game, string $stagingDir, int $currentPlayerId = 10) {
         $this->game = $game;
@@ -256,8 +257,14 @@ class GameDriver {
         ]);
     }
 
+    public function setVerbose(int $level): void {
+        $this->verbose = $level;
+    }
+
     private function debugLog($loc) {
-        echo "$loc\n";
+        if ($this->verbose > 0) {
+            echo "$loc\n";
+        }
     }
 
     // ── Run ──────────────────────────────────────────────────────────────────

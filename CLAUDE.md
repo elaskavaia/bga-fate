@@ -151,6 +151,13 @@ Detailed step-by-step checklists are in separate files — read them when perfor
 - BGA framework stub files are in `/home/elaskavaia/git/bga-sharedcode/misc/module/table/table.game.php` — tests use these stubs instead of the real framework (which we have no access to). Look here when fixing framework class issues (e.g. `UserException`, `Table`, `Notify`)
 - use `npm run tests` to run tests
 
+### Integration / Campaign Tests
+
+- Campaign tests use `GameDriver` in-process (no CLI subprocess, no renderer)
+- Base class: `tests/CampaignBase.php` — provides `setupGame()`, `respond()`, `skip()`, `seedDeck()`, `seedHand()`
+- Tests extend `CampaignBase`, call `setupGame([heroNos])` in setUp, then script player actions with `respond(target)` and `skip()`
+- Example: `tests/Campaign_BjornSoloTest.php`
+
 
 ## BGA-Specific Considerations
 
