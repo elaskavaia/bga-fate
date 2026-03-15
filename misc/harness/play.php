@@ -6,6 +6,7 @@ declare(strict_types=1);
 require_once __DIR__ . "/../../modules/php/Tests/_autoload.php";
 require_once __DIR__ . "/../../modules/php/Tests/Stubs/MachineInMem.php";
 require_once __DIR__ . "/../../modules/php/Tests/Stubs/TokensInMem.php";
+require_once __DIR__ . "/HarnessGameInterface.php";
 require_once __DIR__ . "/GameWrapper.php";
 require_once __DIR__ . "/GameDriver.php";
 

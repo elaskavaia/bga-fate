@@ -13,7 +13,7 @@ use Bga\Games\Fate\Tests\Stubs\TokensInMem;
  * Extends Game with in-memory DB stubs, debug setup functions,
  * and the harness contract (getGameName, saveDbState, loadDbState, getAllDatas).
  */
-class GameWrapper extends Game {
+class GameWrapper extends Game implements HarnessGameInterface {
     private const PLAYER_COLORS = ["6cd0f6", "982fff", "ff0000", "ef58a2"];
 
     var $xtable;

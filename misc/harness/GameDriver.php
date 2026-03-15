@@ -16,11 +16,11 @@ use Bga\GameFramework\Table;
  *   getAllDatas(): array — game data for client
  */
 class GameDriver {
-    public Table $game;
+    public Table&HarnessGameInterface $game;
     private string $stagingDir;
     public array $states;
 
-    public function __construct(Table $game, string $stagingDir, int $currentPlayerId = 10) {
+    public function __construct(Table&HarnessGameInterface $game, string $stagingDir, int $currentPlayerId = 10) {
         $this->game = $game;
         $this->stagingDir = $stagingDir;
         $this->game->_setCurrentPlayerId($currentPlayerId);
@@ -81,8 +81,7 @@ class GameDriver {
         $this->debugLog("Wrote staging/gamedatas.json");
     }
 
-    public function getGameStateArgs() {
-        $stateId = $this->game->gamestate->getCurrentMainStateId();
+    public function getGameState(int $stateId) {
         $activePlayer = (int) $this->game->getActivePlayerId();
 
         $stateNameMap = $this->states;
@@ -96,50 +95,51 @@ class GameDriver {
         $stateArgs = $this->runStateClass_getArgs($stateId, (int) $this->game->getCurrentPlayerId());
 
         return [
-            "gamestate" => [
-                "id" => $stateId,
-                "name" => $stateName,
-                "active_player" => $activePlayer,
-                "args" => $stateArgs,
-            ],
+            "id" => $stateId,
+            "name" => $stateName,
+            "active_player" => $activePlayer,
+            "args" => $stateArgs,
         ];
     }
 
+    private function privateFilter(array &$state, int $currentPlayerId) {
+        $private = $state["args"]["_private"] ?? null;
+        if ($private === null) {
+            return;
+        }
+        $forPlayer = $private[$currentPlayerId]
+            ?? ($this->game->gamestate->isPlayerActive($currentPlayerId) ? ($private["active"] ?? null) : null);
+        unset($state["args"]["_private"]);
+        if ($forPlayer !== null) {
+            $state["args"]["_private"] = $forPlayer;
+        }
+    }
     public function game_getAllDatas() {
         /** @var int */
         $currentPlayerId = (int) $this->game->getCurrentPlayerId();
-        $result = $this->getGameStateArgs();
-        // Add players information
+        $result = [];
+        $stateId = $this->game->gamestate->getCurrentMainStateId();
+        $state = $this->getGameState($stateId);
+        $this->privateFilter($state, $currentPlayerId);
+        $result["gamestate"] = $state;
+        $result["gamestate"]["updateGameProgression"] = $stateId === 99 ? 100 : round((float) $this->game->getGameProgression());
+
+        // Players info, aliases
         $players = $this->game->loadPlayersBasicInfos();
         foreach ($players as $player_id => $player) {
-            $result["players"][$player_id]["color"] = $player["player_color"];
-            // $result["players"][$player_id]["color_back"] = color_to_color_back($player["player_color"]);
-            $result["players"][$player_id]["name"] = $player["player_name"];
-            $result["players"][$player_id]["avatar"] = $player["player_avatar"];
-            $result["players"][$player_id]["zombie"] = $player["player_zombie"];
-            $result["players"][$player_id]["eliminated"] = $player["player_eliminated"];
-            $result["players"][$player_id]["is_ai"] = $player["player_ai"];
+            foreach (["color", "name", "avatar", "zombie", "eliminated"] as $field) {
+                $result["players"][$player_id][$field] = $player["player_$field"];
+            }
             $result["players"][$player_id]["beginner"] = $player["player_beginner"] !== null;
         }
 
         // Player ordering
+        $player_ids = array_keys($players);
+        $pos = array_search($currentPlayerId, $player_ids);
+        $result["playerorder"] =
+            $pos !== false ? array_merge(array_slice($player_ids, $pos), array_slice($player_ids, 0, $pos)) : $player_ids;
 
-        $nextPlayer = $this->game->createNextPlayerTable(array_keys($players));
-        if (isset($players[$currentPlayerId])) {
-            // Is part of the game
-            $player_order = [$currentPlayerId];
-            $current_player = $currentPlayerId;
-            $current_player = $nextPlayer[$current_player];
-            while ($current_player != $currentPlayerId) {
-                $player_order[] = $current_player;
-                $current_player = $nextPlayer[$current_player];
-            }
-        } else {
-            // Is a spectator
-            $player_order = array_keys($players);
-        }
-        $result["playerorder"] = $player_order;
-
+        // assume this is blackbox, we don't know what game did the data
         $result += $this->game->getAllDatas();
         return $result;
     }
@@ -243,20 +243,16 @@ class GameDriver {
 
     public function emitGameStateChange(): void {
         $currentPlayerId = $this->game->_getCurrentPlayerId();
-        $gamedatas = $this->getGameStateArgs();
-        $newGamestate = $gamedatas["gamestate"];
-        $gsArgs = $newGamestate["args"] ?? [];
-        if (isset($gsArgs["_private"]) && is_array($gsArgs["_private"])) {
-            $activeKey = (string) $newGamestate["active_player"];
-            $gsArgs["_private"] = $gsArgs["_private"][$activeKey] ?? ($gsArgs["_private"][$currentPlayerId] ?? reset($gsArgs["_private"]));
-        }
+        $stateId = $this->game->gamestate->getCurrentMainStateId();
+        $newGamestate = $this->getGameState($stateId);
+        $this->privateFilter($newGamestate, $currentPlayerId);
 
         $this->game->notify->all("gameStateChange", "", [
             "id" => $newGamestate["id"] ?? 0,
             "name" => $newGamestate["name"] ?? "",
             "active_player" => (string) $newGamestate["active_player"],
             "type" => "activeplayer",
-            "args" => $gsArgs,
+            "args" => $newGamestate["args"] ?? [],
         ]);
     }
 
@@ -300,7 +296,7 @@ class GameDriver {
      * @param string $baseDir Directory containing plays/ subdirectory (for default scenario)
      * @param string $defaultStagingDir Default output directory
      */
-    public static function main(Table $game, array $argv, string $baseDir, string $defaultStagingDir): void {
+    public static function main(Table&HarnessGameInterface $game, array $argv, string $baseDir, string $defaultStagingDir): void {
         $debugFunction = null;
         $scriptPath = null;
         $dbPath = null;
