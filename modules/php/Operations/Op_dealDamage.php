@@ -20,10 +20,20 @@ use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
- * dealDamage: Deal X direct damage (red crystals, no dice) to target monster.
- * Count = amount of damage to deal (default 1).
- * Parameter: target filter — for this iteration we assume "adj" (adjacent monsters only).
- * If total damage >= health, monster is killed and hero gains XP.
+ * dealDamage: Deal X direct damage (red crystals, no dice) to target character.
+ *
+ * Params:
+ * - param(0): range specifier passed to getRangeFromParam() — e.g. "adj", "inRange", "inRange3" (default "adj")
+ * - param(1): optional filter expression evaluated per monster — e.g. "'rank<=2'", "'rank==3 or legend'" (default "true")
+ *
+ * Data Fields:
+ * - target: preset hex target (skips getPossibleMoves() selection)
+ * - attacker: token id of the attacker (defaults to the owner's hero)
+ *
+ * Behaviour:
+ * - Normal case: player selects a monster hex in range matching the filter; deal count damage; if killed, hero gains XP.
+ * - Can target heroes too (attacker field set by caller).
+ *
  * Used by: Kick, Courage, Lightning Bolt, Retaliation, Vigilance, Heels, etc.
  */
 class Op_dealDamage extends CountableOperation {

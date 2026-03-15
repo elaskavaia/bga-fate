@@ -18,17 +18,15 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Play Event free action: play an event card from hand.
+ * playEvent: Play an event card from hand as a free action.
  *
- * Rules:
- * "Play an event card from your hand. Perform its effect, then place it
- *  in your discard pile. You may not play event cards while performing an
- *  action, such as in the middle of your movement. However, if the card
- *  says 'this attack action', it may be played after the dice roll in an
- *  attack action to alter the results. You may not play cards outside your
- *  turn unless the card specifically tells you to do so or prevents damage."
+ * Behaviour:
+ * - Normal case: player selects an event card from hand; card is discarded, then its
+ *   `r` column effect expression is queued as sub-operations (e.g. "2heal(self)", "dealDamage(adj);moveMonster").
+ * - No event cards in hand: getPossibleMoves() returns empty — op auto-skips or is not offered.
  *
- * Current implementation is a stub: effect text is logged but not executed.
+ * Rules: cards may not be played mid-action (except attack-action cards after the dice roll),
+ * and not outside the player's turn unless the card specifies otherwise.
  */
 class Op_playEvent extends Operation {
     function getPrompt() {
@@ -54,8 +52,8 @@ class Op_playEvent extends Operation {
         $hero = $this->game->getHero($this->getOwner());
         // discard first so a) other player see it b) its not in hard for other effects that follow
         $hero->discardEventCard($target);
+        // TODO: remove effect printing - temp for development
         $effect = $this->game->material->getRulesFor($target, "effect", "");
-        // TODO: execute the actual card effect
         $this->game->notifyMessage(clienttranslate('${char_name} plays ${token_name}: ${effect_text}'), [
             "char_name" => $hero->getId(),
             "token_name" => $target,

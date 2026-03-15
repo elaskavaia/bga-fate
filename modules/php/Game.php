@@ -650,6 +650,17 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_playEvent(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Put the Rest card (2heal(self)) in hand for easy testing
+        $this->tokens->dbSetTokenLocation("card_event_1_27", "hand_{$color}");
+        // Add 3 damage to hero so heal has something to remove
+        $heroId = $this->getHeroTokenId($color);
+        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
+        $this->machine->push("playEvent", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }

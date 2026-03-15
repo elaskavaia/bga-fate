@@ -4,7 +4,7 @@ Step-by-step checklists for common development tasks. Referenced from CLAUDE.md.
 
 ## Adding a New Operation
 
-Prompt: add <name> operation. Read PROCEDURES.md for instructions
+Prompt: create <name> operation. Read PROCEDURES.md for instructions. Create plan first with all items from this list. Follow this plan exactly.
 
 #. Create `modules/php/Operations/Op_<name>.php` with a **minimal empty template**
    - Extend `Operation` (default choice)

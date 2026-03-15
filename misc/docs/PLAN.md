@@ -275,7 +275,7 @@ See CLAUDE.md for project overview
 [x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
 [x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
 [x] Op_discardEvent: discard a card from hand to discard pile
-[~] Play event: select from hand, discard, apply effect — Op_playEvent stub (logs effect text, no execution)
+[x] Play event: select from hand, discard, apply effect — Op_playEvent queues effect operations from `r` column
 
 ### Client
 [x] Hand display (private to player)
@@ -311,7 +311,7 @@ See CLAUDE.md for project overview
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 
 ### Integration
-- [ ] `playEvent` resolve: parse `r` column notation, queue corresponding operations
+- [x] `playEvent` resolve: parse `r` column notation, queue corresponding operations
 - [ ] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
 - [ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 - [x] Operation parser: target params `(adj)`, `(self)`, `(inRange)` — already supported via `getParam()`

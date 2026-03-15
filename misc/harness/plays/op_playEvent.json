@@ -1,0 +1,9 @@
+{
+  "current_player_id": 10,
+  "reset": true,
+  "steps": [
+    { "endpoint": "debug_setupGame_h1", "reload": true },
+    { "endpoint": "debug_Op_playEvent", "reload": true },
+    { "endpoint": "action_resolve", "data": { "target": "card_event_1_27" }, "reload": true }
+  ]
+}

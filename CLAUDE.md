@@ -137,9 +137,10 @@ SCSS files in src/css/ compile to fate.css with GameXBody.scss as the entry poin
 
 Detailed step-by-step checklists are in separate files — read them when performing these tasks:
 
-- **Adding a new operation** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-a-new-operation)
+- **Adding a new operation** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-a-new-operation). Use the **Operation Template** (`Op_xxx`) in the same file as the starting point for new operation files.
 - **Adding a new game element** (token, location, card) — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-new-game-element)
 - **Adding a new material CSV file** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#adding-new-game-material-element)
+- **Validating operation UI in harness** — see [misc/docs/PROCEDURES.md](misc/docs/PROCEDURES.md#validating-operation-ui-in-harness)
 - **Graphics assets** (PDF sources, sprite conversion) — see [misc/docs/GRAPHICS.md](misc/docs/GRAPHICS.md)
 
 ### Working with Tests

@@ -75,6 +75,18 @@ final class Op_playEventTest extends TestCase {
         $this->assertCount(2, $moves);
     }
 
+    /** Setup needed for integration tests that require hero on map.
+     *  Creates a fresh game with createAllTokens (no setupGameTables), then
+     *  places hero 1 and the test event card for use. */
+    private function setupHeroOnMap(): void {
+        $this->game = new GameUT();
+        $this->game->init();
+        $this->game->tokens->createAllTokens();
+        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken(EVENT_CARD, "hand_" . PCOLOR);
+    }
+
     // -------------------------------------------------------------------------
     // resolve
     // -------------------------------------------------------------------------
@@ -91,5 +103,35 @@ final class Op_playEventTest extends TestCase {
         $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
 
         $this->assertArrayNotHasKey(EVENT_CARD, $this->getHandCards());
+    }
+
+    public function testResolveQueuesSubOperation(): void {
+        $this->setupHeroOnMap();
+        $op = $this->createOp();
+        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+
+        $queued = $this->game->machine->getTopOperations(PCOLOR);
+        $this->assertNotEmpty($queued);
+        $top = reset($queued);
+        $this->assertStringContainsString("heal", $top["type"]);
+    }
+
+    public function testPlayRestCardHealsHero(): void {
+        $this->setupHeroOnMap();
+        // Add 4 damage to hero_1
+        $this->game->effect_moveCrystals("hero_1", "red", 4, "hero_1", ["message" => ""]);
+
+        $op = $this->createOp();
+        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+
+        // Get and resolve the queued heal operation
+        $queued = $this->game->machine->getTopOperations(PCOLOR);
+        $this->assertNotEmpty($queued);
+        $top = reset($queued);
+        $healOp = $this->game->machine->instanciateOperation($top["type"], PCOLOR);
+        $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
+
+        $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
+        $this->assertEquals(2, $damage);
     }
 }
