@@ -12,9 +12,9 @@ hero_1|Bjorn|1|hero|1|hex_8_9|#2e7d32|||||||
 hero_2|Alva|1|hero|1|hex_8_10|#1565c0|||||||
 hero_3|Embla|1|hero|1|hex_10_8|#bf360c|||||||
 hero_4|Boldur|1|hero|1|hex_10_9|#c62828|||||||
-#expansions?|
-hero_5|Finkel|1|hero|1|limbo||||||||
-hero_6|Sindra|1|hero|1|limbo||||||||
+# Expansion heroes - not implemented
+#hero_5|Finkel|1|hero|1|limbo||||||||
+#hero_6|Sindra|1|hero|1|limbo||||||||
 
 # Trollkin faction monsters|
 monster_goblin|Goblin|20|monster trollkin rank1|2|supply_monster|#4a7a3a|trollkin|1|1|2|1|2|

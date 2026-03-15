@@ -56,29 +56,29 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 26|4|Precision Axes|||3||gainDamage:dealDamage(adj)||<i>Spend 1 practice action in a forest</i> to get access to these.|[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster.|Boldur is not happy until he can fell a tree in one throw.|
 16|4|Shield|||2||gainDamage:2preventDamage||<i>Enter the Ogre Valley or skip the gold [XP] from killing a troll.</i>|[DAMAGE]: Prevent 2 damage.|Breaking off one side of a troll breastplate should do the trick|
 21|4|Smiterbiter|1||||custom||<i>End your movementin the Marsh of Sorrow</i>, covered to the beard in yuck.|This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action.|I axed your first.|
-# Equipment - Finkel (hno=5)
-15|5|Cane|||2||gainDamage:1moveHero||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Move 1 area.|His cane is comforting – it makes him quite hopful.|
-26|5|Drink of the Tides|||||1heal(adj)||<i>End your movement next to water</i> to gather the seaweed.|Heal 1 damage from Finkel or an adjacent hero.||
-19|5|Element Ring|||||passive|actionAttack|<i>Spend a mend action adjacent to mountain, plains, and forest.</i>|Add 1 damage to each attack action.|Forged where the elements meet, this ring rules them all.|
-21|5|Lightning Rod|||||custom|actionAttack|<i>Spend a prepare action and 4 experience</i> [XP] to install it.|Each time you damage a monster, you may spend 1 mana [MANA] from any card to deal 1 additional damage.|Magic well grounded.|
-18|5|Magic Cape|||||passive||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|A fashion accessory to display your cape-abilities. It's got you covered.||
-22|5|Power Staff|2||||passive||<i>Deal 3 damage to yourself in the Temple Ruins</i>.|This is your Main Weapon. Attack range 2.|The hidden dungeon of the old ruin is not safe. At least not with Finkel there…|2
-16|5|Ring of Au|||3||gainDamage:(2heal(adj))/(2dealDamage(adj))||<i>Remove 7 [MANA] from your cards</i> to make the magical inscriptions.|[DAMAGE]: Heal 2 damage from yourself or any adjacent hero.<br>[DAMAGE]: Deal 2 damage to an adjacent monster.|Ow, ow, ow!|
-24|5|Rune Scroll|||2||gainDamage:1drawEvent||<i>Spend 2 practice actions</i> to study the runes.|[DAMAGE]: Draw 1 card.||
-23|5|Sacred Scroll|||2||gainDamage:1drawEvent||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
-17|5|Wand|1||2||gainDamage:gainMana||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
-25|5|Wand of Excessive Power|2||||passive|actionAttack|<i>Discard 3 cards from hand</i> to hotwire it.|This is your Main Weapon. After each attack action, add 1 mana [MANA] to any card.|It's definitely not free of charge.|
-20|5|Wizard's Hat|||||passive||<i>Spend 4 mana</i> [MANA] to conjure a… groundhog!? I bet you didn't expect that! |When you roll any number of [DIE_ATTACK], roll 1 additional [DIE_ATTACK].|Hatters gonna hat.|
-# Equipment - Sindra (hno=6)
-18|6|Blessed Staff|3||||passive||<i>Spend 1 attack action in Dead Plains</i> to unearth it.|This is your Main Weapon. All [RUNE] count as hits for you.|Buried with its hopefully still-dead owner, it radiates power.|
-15|6|Circle of Life|||3||custom||<i>Equip this for free</i>, if you dare.|Damage dealt to Sindra may be placed on Circle of Life instead. Each time you use a mend action, repair 1 damage from Circle of Life.||
-23|6|Cursed Heirloom||1|||custom||<i>Equip this for free</i>, if you dare.|Before your first action each turn, you must take 1 damage. Then draw a card if possible.|This ancient hand-me-down has claimed the lives of 3 of Sindra's kin.|
-20|6|Element Staff|2||||custom||<i>Play 6 cards</i> to get attuned to its powers.|This is your Main Weapon. After each attack action, add 1[MANA] here. You may remove up to 3[MANA] from here to add that much damage to your attack action.|It's elemental stuff.|
-22|6|Healing Potion|||4||gainDamage:1heal(adj)||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|Life in a botle.|
-26|6|Magic Cape|||||passive||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|You always have cover.|Natural camouflage.|
-21|6|Mana Crystal||||1|preventDamage|monsterAttack|<i>Enter a plains area in the Spewing Mountain</i> to search the lava flows.|Remove any number of mana [MANA] from here to prevent that much damage against you or another hero within range 2.|At the slopes of the Spewing Mountain, where ancient rocks hide arcane stones.|
-16|6|Sacred Scroll|||2||gainDamage:1drawEvent||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
-24|6|Sindra's Amulet|||2||gainDamage:custom||<i>Enter Nailfare. Place a card from your discard pile under this card.</i>|[DAMAGE]: Perform the effect of the card under this.|Ritual magic, trapped in a crystal.|
-19|6|Trinket||||1|custom||<i>Use 5 mana [MANA] in a single turn</i> to conjure it accidentally.|3[MANA]: If you have used your 2 actions this turn, perform one of the 4 remaining actions.|It is the little things in life that inspire.|
-25|6|Wand|1||2||gainDamage:gainMana||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
-17|6|Wizard's Hat|||||custom||<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.||Hatters gonna hat.|
+# Equipment - Finkel (hno=5) - expansion, not implemented
+#15|5|Cane|||2||gainDamage:1moveHero||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Move 1 area.|His cane is comforting – it makes him quite hopful.|
+#26|5|Drink of the Tides|||||1heal(adj)||<i>End your movement next to water</i> to gather the seaweed.|Heal 1 damage from Finkel or an adjacent hero.||
+#19|5|Element Ring|||||passive|actionAttack|<i>Spend a mend action adjacent to mountain, plains, and forest.</i>|Add 1 damage to each attack action.|Forged where the elements meet, this ring rules them all.|
+#21|5|Lightning Rod|||||custom|actionAttack|<i>Spend a prepare action and 4 experience</i> [XP] to install it.|Each time you damage a monster, you may spend 1 mana [MANA] from any card to deal 1 additional damage.|Magic well grounded.|
+#18|5|Magic Cape|||||passive||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|A fashion accessory to display your cape-abilities. It's got you covered.||
+#22|5|Power Staff|2||||passive||<i>Deal 3 damage to yourself in the Temple Ruins</i>.|This is your Main Weapon. Attack range 2.|The hidden dungeon of the old ruin is not safe. At least not with Finkel there…|2
+#16|5|Ring of Au|||3||gainDamage:(2heal(adj))/(2dealDamage(adj))||<i>Remove 7 [MANA] from your cards</i> to make the magical inscriptions.|[DAMAGE]: Heal 2 damage from yourself or any adjacent hero.<br>[DAMAGE]: Deal 2 damage to an adjacent monster.|Ow, ow, ow!|
+#24|5|Rune Scroll|||2||gainDamage:1drawEvent||<i>Spend 2 practice actions</i> to study the runes.|[DAMAGE]: Draw 1 card.||
+#23|5|Sacred Scroll|||2||gainDamage:1drawEvent||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
+#17|5|Wand|1||2||gainDamage:gainMana||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
+#25|5|Wand of Excessive Power|2||||passive|actionAttack|<i>Discard 3 cards from hand</i> to hotwire it.|This is your Main Weapon. After each attack action, add 1 mana [MANA] to any card.|It's definitely not free of charge.|
+#20|5|Wizard's Hat|||||passive||<i>Spend 4 mana</i> [MANA] to conjure a… groundhog!? I bet you didn't expect that! |When you roll any number of [DIE_ATTACK], roll 1 additional [DIE_ATTACK].|Hatters gonna hat.|
+# Equipment - Sindra (hno=6) - expansion, not implemented
+#18|6|Blessed Staff|3||||passive||<i>Spend 1 attack action in Dead Plains</i> to unearth it.|This is your Main Weapon. All [RUNE] count as hits for you.|Buried with its hopefully still-dead owner, it radiates power.|
+#15|6|Circle of Life|||3||custom||<i>Equip this for free</i>, if you dare.|Damage dealt to Sindra may be placed on Circle of Life instead. Each time you use a mend action, repair 1 damage from Circle of Life.||
+#23|6|Cursed Heirloom||1|||custom||<i>Equip this for free</i>, if you dare.|Before your first action each turn, you must take 1 damage. Then draw a card if possible.|This ancient hand-me-down has claimed the lives of 3 of Sindra's kin.|
+#20|6|Element Staff|2||||custom||<i>Play 6 cards</i> to get attuned to its powers.|This is your Main Weapon. After each attack action, add 1[MANA] here. You may remove up to 3[MANA] from here to add that much damage to your attack action.|It's elemental stuff.|
+#22|6|Healing Potion|||4||gainDamage:1heal(adj)||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|Life in a botle.|
+#26|6|Magic Cape|||||passive||<i>Spend a prepare action in the Wyrm Lair</i> to gather the shed skin.|You always have cover.|Natural camouflage.|
+#21|6|Mana Crystal||||1|preventDamage|monsterAttack|<i>Enter a plains area in the Spewing Mountain</i> to search the lava flows.|Remove any number of mana [MANA] from here to prevent that much damage against you or another hero within range 2.|At the slopes of the Spewing Mountain, where ancient rocks hide arcane stones.|
+#16|6|Sacred Scroll|||2||gainDamage:1drawEvent||<i>Enter the Highlands</i> to stumble upon it.|[DAMAGE]: Draw 1 card.|Arcane letters, archaic language, but beyond that, new spells to be learned.|
+#24|6|Sindra's Amulet|||2||gainDamage:custom||<i>Enter Nailfare. Place a card from your discard pile under this card.</i>|[DAMAGE]: Perform the effect of the card under this.|Ritual magic, trapped in a crystal.|
+#19|6|Trinket||||1|custom||<i>Use 5 mana [MANA] in a single turn</i> to conjure it accidentally.|3[MANA]: If you have used your 2 actions this turn, perform one of the 4 remaining actions.|It is the little things in life that inspire.|
+#25|6|Wand|1||2||gainDamage:gainMana||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Add 1 mana [MANA] to 1 of your cards.|Now extra long, to support wand-ering.|
+#17|6|Wizard's Hat|||||custom||<i>Spend 4 mana</i> [MANA] to conjure a rabbit. Only then will you be worthy of this hat.||Hatters gonna hat.|

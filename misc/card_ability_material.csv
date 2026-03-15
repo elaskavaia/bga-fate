@@ -59,29 +59,29 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 6|4|Sweeping Strike II||||passive|actionAttack|Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
 7|4|Wrecking Ball I||||custom||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area.|He's on a roll!
 8|4|Wrecking Ball II||||custom||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1.|
-# Abilities - Finkel (hno=5)
-11|5|Déjà Vu I||||custom||Once per turn, when playing a card, perform its effect twice.|Wait a minute, didn't you just do that?
-12|5|Déjà Vu II||||custom||Once per turn, when playing a card, perform its effect twice, then return it to hand.|Wait a minute, didn't you just read that?
-13|5|Elementary Student I||||gainMana||Add 1 mana [MANA] to any card.|Finkel is on fire today!
-14|5|Elementary Student II||||custom||Add 1 mana [MANA] to each card that generates [MANA].|Finkel is on FIRE today!
-3|5|Fireball I|||1|custom||3-5[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action.|Goodness gracious
-4|5|Fireball II|||2|custom||4-8[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action. Alsodeal 1 damage to each character adjacent to the target.|...great balls of fire!
-5|5|Fire Spark I|||1|2spendMana:3roll(adj)||2[MANA]: Roll 3[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|The light at the end of the tunnel is coming toward you.
-6|5|Fire Spark II|||2|2spendMana:4roll(adj)||2[MANA]: Roll 4[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|Inventing spectacular new fireworks.
-7|5|Melt I|||1|custom||1-2[MANA]: Kill an adjacent monster with that much remaining health.|I'm melting! I'm melting!
-8|5|Melt II|||2|custom||1-4[MANA]: Kill an adjacent monster with that much remaining health.|Blub blub blub…
-9|5|Twister I|||1|custom||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas.|I got carried away…
-10|5|Twister II|||2|custom||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas. May be used once per character.|Relocates houses, little girls, and even their dogs.
-# Abilities - Sindra (hno=6)
-5|6|Chain Reaction I|||1|custom||3[MANA]: Roll 3[DIE_ATTACK], 2[DIE_ATTACK], and 1[DIE_ATTACK] against 3 monsters (respectively) within range 2.|A cascade of calamity.
-6|6|Chain Reaction II|||2|custom||4[MANA]: Roll 3, 2, and 1 damage to 3 monsters (respectively) within range 2.|
-7|6|Confusion I|||1|custom||2[MANA]: Attack with a non-legend monster within range 2.|
-8|6|Confusion II|||2|custom||2[MANA]: Attack with a non-legend monster within range 3. May be used several times per turn with different monsters.|
-13|6|Discipline I||||custom||Add 1 mana [MANA] to any card or gain 1 experience [XP].|
-14|6|Discipline II||||custom||Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.|
-11|6|Meditation I|||1|custom||Freely move mana [MANA] from Meditation to other cards.|Meditating? Sleeping? Both do wonders for you.
-12|6|Meditation II|||2|custom||Freely move mana [MANA] between your cards.|"Repeat until you reach enlightenment: ""Wah Tefu Layam""."
-3|6|Spark I|||1|2spendMana:custom|actionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
-4|6|Spark II|||2|custom|actionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
-9|6|Stonesoul I|||1|custom||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.
-10|6|Stonesoul II|||2|custom||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…
+# Abilities - Finkel (hno=5) - expansion, not implemented
+#11|5|Déjà Vu I||||custom||Once per turn, when playing a card, perform its effect twice.|Wait a minute, didn't you just do that?
+#12|5|Déjà Vu II||||custom||Once per turn, when playing a card, perform its effect twice, then return it to hand.|Wait a minute, didn't you just read that?
+#13|5|Elementary Student I||||gainMana||Add 1 mana [MANA] to any card.|Finkel is on fire today!
+#14|5|Elementary Student II||||custom||Add 1 mana [MANA] to each card that generates [MANA].|Finkel is on FIRE today!
+#3|5|Fireball I|||1|custom||3-5[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action.|Goodness gracious
+#4|5|Fireball II|||2|custom||4-8[MANA]: Get attack range +1 and add that many [DIE_ATTACK] to your next attack action. Alsodeal 1 damage to each character adjacent to the target.|...great balls of fire!
+#5|5|Fire Spark I|||1|2spendMana:3roll(adj)||2[MANA]: Roll 3[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|The light at the end of the tunnel is coming toward you.
+#6|5|Fire Spark II|||2|2spendMana:4roll(adj)||2[MANA]: Roll 4[DIE_ATTACK] against an adjacent monster where runes [RUNE] count as hits.|Inventing spectacular new fireworks.
+#7|5|Melt I|||1|custom||1-2[MANA]: Kill an adjacent monster with that much remaining health.|I'm melting! I'm melting!
+#8|5|Melt II|||2|custom||1-4[MANA]: Kill an adjacent monster with that much remaining health.|Blub blub blub…
+#9|5|Twister I|||1|custom||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas.|I got carried away…
+#10|5|Twister II|||2|custom||2[MANA]: Move any character (except Legends) within range 2 up to 2 areas. May be used once per character.|Relocates houses, little girls, and even their dogs.
+# Abilities - Sindra (hno=6) - expansion, not implemented
+#5|6|Chain Reaction I|||1|custom||3[MANA]: Roll 3[DIE_ATTACK], 2[DIE_ATTACK], and 1[DIE_ATTACK] against 3 monsters (respectively) within range 2.|A cascade of calamity.
+#6|6|Chain Reaction II|||2|custom||4[MANA]: Roll 3, 2, and 1 damage to 3 monsters (respectively) within range 2.|
+#7|6|Confusion I|||1|custom||2[MANA]: Attack with a non-legend monster within range 2.|
+#8|6|Confusion II|||2|custom||2[MANA]: Attack with a non-legend monster within range 3. May be used several times per turn with different monsters.|
+#13|6|Discipline I||||custom||Add 1 mana [MANA] to any card or gain 1 experience [XP].|
+#14|6|Discipline II||||custom||Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.|
+#11|6|Meditation I|||1|custom||Freely move mana [MANA] from Meditation to other cards.|Meditating? Sleeping? Both do wonders for you.
+#12|6|Meditation II|||2|custom||Freely move mana [MANA] between your cards.|"Repeat until you reach enlightenment: ""Wah Tefu Layam""."
+#3|6|Spark I|||1|2spendMana:custom|actionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
+#4|6|Spark II|||2|custom|actionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
+#9|6|Stonesoul I|||1|custom||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.
+#10|6|Stonesoul II|||2|custom||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…

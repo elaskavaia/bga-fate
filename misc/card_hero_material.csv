@@ -16,7 +16,8 @@ num|hno|name|strength|health|r|on|effect|flavour
 2|3|Embla|5|10|||Move 4.|All creatures are precious to Embla. Their exact worth is determined by the bounty.
 1|4|Boldur|3|6|||Armor. (Always prevents 1 damage)|Ants can carry several times their own body weight. So can Boldur. He's forging his thick armor to prove this point, and promote heavy metal.
 2|4|Boldur|5|7|||Armor. (Always prevents 1 damage)|Going berserk at the local inn, Boldur spent a drunken evening challenging all visitors to arm-wrestling. He broke the tavern record as well as fifteen arms, earning him the nickname the Arm-y.
-1|5|Finkel|3|9|||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Newly graduated from the pyromaniac program of the Wizarding School for Elven Orphans Who Can't Read Good, Finkel sets out to cause the heat of battle. A warm welcome to everyone!
-2|5|Finkel|5|10|||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Today's forecast shows fire and brimstone over large parts of the countryside.
-1|6|Sindra|2|6|||3[MANA]: Spend a move action to move to ANY area (even mountains).|The friendly neighborhood grandma, suddenly appearing with surprises for all: milk and cookies for the kids, and hails of levitating rocks for her enemies.
-2|6|Sindra|3|8|||3[MANA]: Spend ANY action to move to ANY area (even mountains).|Sindra now uses her short fuse to ignite powerful explosions.
+# Expansion heroes - not implemented
+#1|5|Finkel|3|9|||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Newly graduated from the pyromaniac program of the Wizarding School for Elven Orphans Who Can't Read Good, Finkel sets out to cause the heat of battle. A warm welcome to everyone!
+#2|5|Finkel|5|10|||For each [RUNE] you roll, add 1 mana [MANA] to Fireball.|Today's forecast shows fire and brimstone over large parts of the countryside.
+#1|6|Sindra|2|6|||3[MANA]: Spend a move action to move to ANY area (even mountains).|The friendly neighborhood grandma, suddenly appearing with surprises for all: milk and cookies for the kids, and hails of levitating rocks for her enemies.
+#2|6|Sindra|3|8|||3[MANA]: Spend ANY action to move to ANY area (even mountains).|Sindra now uses her short fuse to ignite powerful explosions.
