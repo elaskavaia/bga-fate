@@ -55,6 +55,7 @@ playEvent|Play Event
 dealDamage|Deal Damage
 gainMana|Gain Mana
 spendMana|Spend Mana
+spendAction|Spend Action
 roll|Roll Dice
 resolveHits|Resolve Hits
 heal|Heal

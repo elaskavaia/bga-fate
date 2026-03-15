@@ -74,8 +74,9 @@ class Op_turn extends Operation {
     }
     public function getPossibleMoves() {
         $res = [];
-        $actionsTaken = $this->getActionsTaken();
-        $remaining = $this->getActionsRemaining();
+        $hero = $this->game->getHero($this->getOwner());
+        $actionsTaken = $hero->getActionsTaken();
+        $remaining = $hero->getActionsRemaining();
 
         // Offer main actions if the player still has actions remaining
         if ($remaining > 0) {
@@ -115,75 +116,36 @@ class Op_turn extends Operation {
 
     function resolve(): void {
         $optype = $this->getCheckedArg();
-        $actionsTaken = $this->getActionsTaken();
-        $remaining = $this->getActionsRemaining();
+        $hero = $this->game->getHero($this->getOwner());
+        $actionsTaken = $hero->getActionsTaken();
+        $remaining = $hero->getActionsRemaining();
         $kind = $this->getActionKind($optype);
 
         if ($kind === "main") {
             // Enforce: cannot pick same action twice
-            $this->game->userAssert(clienttranslate("You already performed this action this turn"), !in_array($optype, $actionsTaken));
+            $this->game->userAssert(clienttranslate("Action already taken this turn"), !in_array($optype, $actionsTaken));
             $this->game->userAssert(clienttranslate("No actions remaining"), $remaining > 0);
 
-            // Set the marker
-            $owner = $this->getOwner();
-            $x = 3 - $remaining;
-            $heroId = $this->game->getHeroTokenId($owner);
-            $actionName = $this->game->getTokenName("Op_$optype");
-            $this->dbSetTokenLocation(
-                "marker_{$owner}_{$x}",
-                "aslot_{$owner}_{$optype}",
-                0,
-                clienttranslate('${char_name} selects ${action_name}'),
-                ["char_name" => $heroId, "action_name" => $actionName]
-            );
-
-            // Queue the selected action operation
+            $hero->placeActionMarker($optype);
             $this->queue($optype);
-
-            // Update tracking: record action taken and decrement remaining
-            $actionsTaken[] = $optype;
-            $remaining--;
-
-            // Re-queue this turn operation with updated state for the next action pick, even there is no remaining to pick free actions
-            $this->withDataField("actions_taken", $actionsTaken);
-            $this->withDataField("actions_remaining", $remaining);
-            $this->saveToDb(2, true);
+            $this->queue("turn");
         } elseif ($kind === "free") {
-            // Queue the free action, then come back to this turn operation
             $this->queue($optype);
-            // Re-queue turn (same state, free actions don't consume main actions)
-            $this->saveToDb(2, true);
+            $this->queue("turn");
         } elseif ($kind === "") {
             // delegate: user picked a sub-target directly (e.g. a hex), resolve via parent action
             $argInfo = $this->getArgs()["info"][$optype];
             $action = $argInfo["action"] ?? "";
-            $this->game->userAssert(clienttranslate("Invalid action selection"), $action !== "");
+            $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action !== "");
 
-            // Same bookkeeping as the main action branch
-            $this->game->userAssert(clienttranslate("You already performed this action this turn"), !in_array($action, $actionsTaken));
+            $this->game->userAssert(clienttranslate("Action already taken this turn"), !in_array($action, $actionsTaken));
             $this->game->userAssert(clienttranslate("No actions remaining"), $remaining > 0);
 
-            $owner = $this->getOwner();
-            $x = 3 - $remaining;
-            $heroId = $this->game->getHeroTokenId($owner);
-            $actionName = $this->game->getTokenName("Op_$action");
-            $this->dbSetTokenLocation(
-                "marker_{$owner}_{$x}",
-                "aslot_{$owner}_{$action}",
-                0,
-                clienttranslate('${char_name} selects ${action_name}'),
-                ["char_name" => $heroId, "action_name" => $actionName]
-            );
-
+            $hero->placeActionMarker($action);
             $this->queue($action, null, ["target" => $optype]);
-
-            $actionsTaken[] = $action;
-            $remaining--;
-            $this->withDataField("actions_taken", $actionsTaken);
-            $this->withDataField("actions_remaining", $remaining);
-            $this->saveToDb(2, true);
+            $this->queue("turn");
         } else {
-            $this->game->userAssert(clienttranslate("Invalid action selection"));
+            $this->game->systemAssert("ERR:turn:invalidDelegateAction3");
         }
     }
 
@@ -192,12 +154,12 @@ class Op_turn extends Operation {
         $this->game->queueNextTurnOrEnd($this->getPlayerId());
     }
 
-    private function getActionsTaken(): array {
-        return $this->getDataField("actions_taken", []);
+    public function getActionsTaken(): array {
+        return $this->game->getHero($this->getOwner())->getActionsTaken();
     }
 
-    private function getActionsRemaining(): int {
-        return (int) $this->getDataField("actions_remaining", self::ACTIONS_PER_TURN);
+    public function getActionsRemaining(): int {
+        return $this->game->getHero($this->getOwner())->getActionsRemaining();
     }
 
     public function getPrompt() {

@@ -177,6 +177,43 @@ class Hero extends Character {
     }
 
     /**
+     * Returns the list of main action types taken this turn, derived from marker token locations.
+     */
+    function getActionsTaken(): array {
+        $taken = [];
+        foreach ([1, 2] as $i) {
+            $loc = $this->game->tokens->getTokenLocation("marker_{$this->owner}_{$i}");
+            $prefix = "aslot_{$this->owner}_";
+            if (str_starts_with($loc, $prefix) && !str_contains($loc, "_empty_")) {
+                $taken[] = str_replace($prefix, "", $loc);
+            }
+        }
+        return $taken;
+    }
+
+    /**
+     * Returns the number of main actions still available this turn.
+     */
+    function getActionsRemaining(): int {
+        return 2 - count($this->getActionsTaken());
+    }
+
+    /**
+     * Place the next free action marker on the given action slot.
+     */
+    function placeActionMarker(string $actionType): void {
+        $x = count($this->getActionsTaken()) + 1;
+        $actionName = $this->game->getTokenName("Op_$actionType");
+        $this->game->tokens->dbSetTokenLocation(
+            "marker_{$this->owner}_{$x}",
+            "aslot_{$this->owner}_{$actionType}",
+            0,
+            clienttranslate('${char_name} takes ${action_name} action'),
+            ["char_name" => $this->id, "action_name" => $actionName]
+        );
+    }
+
+    /**
      * Award XP (yellow crystals) from supply to tableau.
      */
     function gainXp(int $amount): void {

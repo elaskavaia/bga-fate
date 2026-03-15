@@ -324,6 +324,10 @@ class Material {
         "type" => "spendMana",
         "name" => clienttranslate("Spend Mana"),
 ],
+    "Op_spendAction" => [ 
+        "type" => "spendAction",
+        "name" => clienttranslate("Spend Action"),
+],
     "Op_roll" => [ 
         "type" => "roll",
         "name" => clienttranslate("Roll Dice"),
