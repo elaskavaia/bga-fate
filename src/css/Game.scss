@@ -37,13 +37,6 @@
 .subtitle {
   font-size: x-small;
 }
-#page-title {
-  min-height: 76px !important;
-  line-height: 24px;
-}
-#pagemaintitle_wrap {
-  min-height: 42px !important;
-}
 
 #oversurface {
   position: absolute;
@@ -262,7 +255,7 @@ html {
   background-color: #b9ecbe;
 }
 html:before {
-  background-image: url(img/bg2.webp);
+  background-image: url(img/banner.webp);
   /* background-position: 50% 0%; */
   /* background-repeat: no-repeat; */
   background-size: auto 100%;
@@ -275,4 +268,43 @@ html:before {
   opacity: 0.7;
   position: fixed;
   z-index: -1;
+}
+
+$logsBgColor: #bce7d5;
+
+#logs {
+  // background-image: url(img/bg2.webp);
+  background-position-y: 8%;
+
+  .roundedbox {
+    background-color: $logsBgColor;
+  }
+}
+
+#right-side-first-part {
+  // background-image: url(img/bg2.webp);
+  background-position-y: 8%;
+
+  .player-board {
+    background-color: $logsBgColor;
+  }
+}
+
+#page-title {
+  min-height: 76px !important;
+  line-height: 24px;
+  background-color: $logsBgColor !important;
+  // &::before {
+  //   content: "";
+  //   width: 100%;
+  //   height: 100%;
+  //   top: 0;
+  //   left: 0;
+  //   position: absolute;
+  //   background-image: url(img/bg2.webp);
+  //   opacity: 0.6;
+  // }
+}
+#pagemaintitle_wrap {
+  min-height: 42px !important;
 }

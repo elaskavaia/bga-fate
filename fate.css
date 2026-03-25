@@ -977,8 +977,8 @@
 .pile_monster::after {
   content: counter(pile);
   position: absolute;
-  /* bottom: -10%; */
-  /* right: -10%; */
+  bottom: 2px;
+  right: 2px;
   /* min-width: 1.2em; */
   /* height: 1.2em; */
   /* background-color: #333; */
@@ -1015,8 +1015,8 @@
 .supply_crystal_yellow::after {
   content: counter(pile);
   position: absolute;
-  /* bottom: -10%; */
-  /* right: -10%; */
+  bottom: 2px;
+  right: 2px;
   /* min-width: 1.2em; */
   /* height: 1.2em; */
   /* background-color: #333; */
@@ -1049,8 +1049,8 @@
 #supply_die_monster::after {
   content: counter(pile);
   position: absolute;
-  /* bottom: -10%; */
-  /* right: -10%; */
+  bottom: 2px;
+  right: 2px;
   /* min-width: 1.2em; */
   /* height: 1.2em; */
   /* background-color: #333; */
@@ -1122,7 +1122,7 @@
 
 .map_wrapper > .monster_legend_1 {
   bottom: 12%;
-  right: 14%;
+  right: 22%;
 }
 
 .map_wrapper > .monster_legend_2 {
@@ -1388,6 +1388,30 @@
   left: 61%;
 }
 
+.hand_wrapper {
+  background-color: rgba(245, 222, 179, 0.4901960784);
+  padding-left: 20px;
+  position: relative;
+}
+
+.hand_wrapper::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  content: attr(data-name);
+  z-index: 20;
+  color: black;
+  text-shadow: #fff -1px -1px, #fff 1px 1px, #fff -1px 1px, #fff 1px -1px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+}
+
 /* tooltips */
 .tundra .dijitTooltipContainer,
 .tooltipcontainer {
@@ -1459,15 +1483,6 @@
 
 .subtitle {
   font-size: x-small;
-}
-
-#page-title {
-  min-height: 76px !important;
-  line-height: 24px;
-}
-
-#pagemaintitle_wrap {
-  min-height: 42px !important;
 }
 
 #oversurface {
@@ -1663,7 +1678,7 @@ html {
 }
 
 html:before {
-  background-image: url(img/bg2.webp);
+  background-image: url(img/banner.webp);
   /* background-position: 50% 0%; */
   /* background-repeat: no-repeat; */
   background-size: auto 100%;
@@ -1676,4 +1691,28 @@ html:before {
   opacity: 0.7;
   position: fixed;
   z-index: -1;
+}
+
+#logs {
+  background-position-y: 8%;
+}
+#logs .roundedbox {
+  background-color: #bce7d5;
+}
+
+#right-side-first-part {
+  background-position-y: 8%;
+}
+#right-side-first-part .player-board {
+  background-color: #bce7d5;
+}
+
+#page-title {
+  min-height: 76px !important;
+  line-height: 24px;
+  background-color: #bce7d5 !important;
+}
+
+#pagemaintitle_wrap {
+  min-height: 42px !important;
 }

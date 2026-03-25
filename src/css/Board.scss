@@ -100,7 +100,7 @@
 }
 .map_wrapper > .monster_legend_1 {
   bottom: 12%;
-  right: 14%;
+  right: 22%;
 }
 .map_wrapper > .monster_legend_2 {
   bottom: 12%;
@@ -372,4 +372,27 @@
 .aslot_actionPractice {
   top: 22%;
   left: 61%;
+}
+
+.hand_wrapper {
+  background-color: #f5deb37d;
+  padding-left: 20px;
+  position: relative;
+}
+.hand_wrapper::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  content: attr(data-name);
+  z-index: 20;
+  color: black;
+  text-shadow: v.$textShadowWhite;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
 }

@@ -115,7 +115,12 @@ export class Game extends GameMachine {
     // Create hand container for current player only (not spectators)
     if (!this.bga.players.isCurrentPlayerSpectator()) {
       const myColor = this.player_color;
-      placeHtml(`<div id="hand_${myColor}" class="hand"></div>`, `tableau_${myColor}`, "afterbegin");
+      const name = _("Hand (Events)");
+      placeHtml(
+        `<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`,
+        `tableau_${myColor}`,
+        "afterbegin"
+      );
     }
 
     this.setupGame(gamedatas);
