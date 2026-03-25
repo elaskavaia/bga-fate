@@ -82,15 +82,15 @@
 // Dead: right, vertical stack (rank1 top, rank3 bottom)
 .pile_monster.monster_imp {
   top: 0%;
-  right: 24%;
+  right: 12%;
 }
 .pile_monster.monster_skeleton {
   top: 9%;
-  right: 19%;
+  right: 7%;
 }
 .pile_monster.monster_draugr {
   top: 20%;
-  right: 14%;
+  right: 1%;
 }
 
 // Legends: positioned individually on map_wrapper, 3x2 grid bottom-right
@@ -99,44 +99,95 @@
   z-index: 1;
 }
 .map_wrapper > .monster_legend_1 {
-  bottom: 12%;
-  right: 22%;
+  right: 1%;
+  top: 1%;
 }
 .map_wrapper > .monster_legend_2 {
-  bottom: 12%;
-  right: 16%;
+  bottom: 20%;
+  right: 1%;
 }
 .map_wrapper > .monster_legend_3 {
-  bottom: 12%;
-  right: 11%;
+  top: 1%;
+  left: 1%;
 }
 .map_wrapper > .monster_legend_4 {
-  bottom: 2%;
-  right: 23%;
+  bottom: 1%;
+  left: 1%;
 }
 .map_wrapper > .monster_legend_5 {
-  bottom: 2%;
-  right: 17%;
+  bottom: 11%;
+  right: 7%;
 }
 .map_wrapper > .monster_legend_6 {
   bottom: 2%;
-  right: 10%;
+  right: 1%;
 }
+// Horizontal timetrack bar above the map
 .timetrack {
-  position: absolute;
-  bottom: 5%;
-  right: 8%;
-  height: 40%;
-  width: 2.5%;
-  // outline: 1px solid red;
-  background-image: url(img/timeline.webp);
-  background-position: 0 100%;
-  background-size: 225% auto;
+  position: relative;
+  display: inline-block;
 }
-.timetrack_2 {
-  height: 53%;
-  right: 4.5%;
-  background-position: 100% 0%;
+
+.tt_slot {
+  width: 64px;
+  height: 64px;
+  position: relative;
+  display: inline-block;
+  background-image: url(img/tokens.webp);
+  background-repeat: no-repeat;
+  background-size: 600% 300%;
+
+  // Step number overlay
+  &::after {
+    content: attr(data-step);
+    font-size: 10px;
+    font-weight: bold;
+    position: absolute;
+    bottom: 1px;
+    right: 3px;
+    color: white;
+    text-shadow: 0 0 2px black;
+  }
+}
+
+// Phase background colors — narrow band in the middle (60% height)
+.tm_phase_yellow::before,
+.tm_phase_red::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  z-index: -1;
+}
+.tm_phase_yellow::before {
+  background-color: #c8a82080;
+}
+.tm_phase_red::before {
+  background-color: #981c0796;
+}
+
+// Icon sprite positions from tokens.webp (5 cols x 3 rows)
+// Skull icon: col 3/6, row 2/3
+.tm_red_skull {
+  background-position: 40% 50%;
+}
+
+// col 4/6, row 2/3
+.tm_red_axes {
+  background-position: 60% 50%;
+}
+//  col 5/6, row 2/3
+.tm_yellow_axes {
+  background-position: 80% 50%;
+}
+
+.tm_red_shield {
+  background-position: 60% 102%;
+}
+.tm_yellow_shield {
+  background-position: 80% 102%;
 }
 
 #mainarea {
@@ -205,8 +256,8 @@
 
 .map_wrapper {
   position: relative;
-  aspect-ratio: 4096 / 3134;
-  width: 1360px;
+  width: 1176px;
+  height: 1042px;
 }
 
 // --- Players panels: container for all player tableaux ---

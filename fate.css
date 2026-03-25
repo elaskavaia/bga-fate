@@ -383,53 +383,13 @@
   background-size: 600% auto;
   background-position: 100% 0%;
 }
-.timetrack .rune_stone {
+.tt_slot .rune_stone {
   position: absolute;
-  top: 30%;
-  left: 0%;
-}
-.timetrack_1 .rune_stone[data-state="1"] {
-  top: -2%;
-}
-.timetrack_1 .rune_stone[data-state="2"] {
-  top: 6.1818181818%;
-}
-.timetrack_1 .rune_stone[data-state="3"] {
-  top: 14.3636363636%;
-}
-.timetrack_1 .rune_stone[data-state="4"] {
-  top: 22.5454545455%;
-}
-.timetrack_1 .rune_stone[data-state="5"] {
-  top: 30.7272727273%;
-}
-.timetrack_1 .rune_stone[data-state="6"] {
-  top: 38.9090909091%;
-}
-.timetrack_1 .rune_stone[data-state="7"] {
-  top: 47.0909090909%;
-}
-.timetrack_1 .rune_stone[data-state="8"] {
-  top: 55.2727272727%;
-}
-.timetrack_1 .rune_stone[data-state="9"] {
-  top: 63.4545454545%;
-}
-.timetrack_1 .rune_stone[data-state="10"] {
-  top: 71.6363636364%;
-}
-.timetrack_1 .rune_stone[data-state="11"] {
-  top: 79.8181818182%;
-}
-.timetrack_1 .rune_stone[data-state="12"] {
-  top: 88%;
-}
-.rune_stone::after {
-  position: absolute;
-  content: attr(data-state);
-  z-index: 3;
-  top: 30%;
-  left: 40%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  z-index: 2;
+  filter: drop-shadow(0 0 6px white) drop-shadow(0 0 3px white);
 }
 
 /**
@@ -1102,17 +1062,17 @@
 
 .pile_monster.monster_imp {
   top: 0%;
-  right: 24%;
+  right: 12%;
 }
 
 .pile_monster.monster_skeleton {
   top: 9%;
-  right: 19%;
+  right: 7%;
 }
 
 .pile_monster.monster_draugr {
   top: 20%;
-  right: 14%;
+  right: 1%;
 }
 
 .map_wrapper > .monster.legend {
@@ -1121,50 +1081,97 @@
 }
 
 .map_wrapper > .monster_legend_1 {
-  bottom: 12%;
-  right: 22%;
+  right: 1%;
+  top: 1%;
 }
 
 .map_wrapper > .monster_legend_2 {
-  bottom: 12%;
-  right: 16%;
+  bottom: 20%;
+  right: 1%;
 }
 
 .map_wrapper > .monster_legend_3 {
-  bottom: 12%;
-  right: 11%;
+  top: 1%;
+  left: 1%;
 }
 
 .map_wrapper > .monster_legend_4 {
-  bottom: 2%;
-  right: 23%;
+  bottom: 1%;
+  left: 1%;
 }
 
 .map_wrapper > .monster_legend_5 {
-  bottom: 2%;
-  right: 17%;
+  bottom: 11%;
+  right: 7%;
 }
 
 .map_wrapper > .monster_legend_6 {
   bottom: 2%;
-  right: 10%;
+  right: 1%;
 }
 
 .timetrack {
-  position: absolute;
-  bottom: 5%;
-  right: 8%;
-  height: 40%;
-  width: 2.5%;
-  background-image: url(img/timeline.webp);
-  background-position: 0 100%;
-  background-size: 225% auto;
+  position: relative;
+  display: inline-block;
 }
 
-.timetrack_2 {
-  height: 53%;
-  right: 4.5%;
-  background-position: 100% 0%;
+.tt_slot {
+  width: 64px;
+  height: 64px;
+  position: relative;
+  display: inline-block;
+  background-image: url(img/tokens.webp);
+  background-repeat: no-repeat;
+  background-size: 600% 300%;
+}
+.tt_slot::after {
+  content: attr(data-step);
+  font-size: 10px;
+  font-weight: bold;
+  position: absolute;
+  bottom: 1px;
+  right: 3px;
+  color: white;
+  text-shadow: 0 0 2px black;
+}
+
+.tm_phase_yellow::before,
+.tm_phase_red::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  z-index: -1;
+}
+
+.tm_phase_yellow::before {
+  background-color: rgba(200, 168, 32, 0.5019607843);
+}
+
+.tm_phase_red::before {
+  background-color: rgba(152, 28, 7, 0.5882352941);
+}
+
+.tm_red_skull {
+  background-position: 40% 50%;
+}
+
+.tm_red_axes {
+  background-position: 60% 50%;
+}
+
+.tm_yellow_axes {
+  background-position: 80% 50%;
+}
+
+.tm_red_shield {
+  background-position: 60% 102%;
+}
+
+.tm_yellow_shield {
+  background-position: 80% 102%;
 }
 
 #mainarea {
@@ -1226,8 +1233,8 @@
 
 .map_wrapper {
   position: relative;
-  aspect-ratio: 4096/3134;
-  width: 1360px;
+  width: 1176px;
+  height: 1042px;
 }
 
 #players_panels {

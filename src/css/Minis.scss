@@ -183,21 +183,12 @@
   background-size: 600% auto;
   background-position: 100% 0%;
 
-  .timetrack & {
+  .tt_slot & {
     position: absolute;
-    top: 30%;
-    left: 0%;
-  }
-  @for $n from 1 through 12 {
-    .timetrack_1 &[data-state="#{$n}"] {
-      top: calc(-2% + 90% / 11 * ($n - 1));
-    }
-  }
-  &::after {
-    position: absolute;
-    content: attr(data-state);
-    z-index: 3;
-    top: 30%;
-    left: 40%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    z-index: 2;
+    filter: drop-shadow(0 0 6px white) drop-shadow(0 0 3px white);
   }
 }

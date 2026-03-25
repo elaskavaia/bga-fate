@@ -1878,11 +1878,10 @@ class Game extends GameMachine {
         placeHtml(`<div id="players_panels"></div>`, "thething");
         // Board area: map + monster turn display + supply (right side in wide layout)
         placeHtml(`<div id="board_area"></div>`, "thething");
+        placeHtml(`<div id="timetrack_area"></div>`, "board_area");
         const mapWrapper = "map_wrapper";
         placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "board_area");
         this.createMap($(mapWrapper));
-        placeHtml(`<div id="timetrack_1" class="timetrack token timetrack_1"></div>`, mapWrapper);
-        placeHtml(`<div id="timetrack_2" class="timetrack token timetrack_2"></div>`, mapWrapper);
         placeHtml(`<div id="display_battle"></div>`, mapWrapper);
         placeHtml(`<div id="display_monsterturn"></div>`, "board_area");
         placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
@@ -1928,6 +1927,21 @@ class Game extends GameMachine {
         this.setupLayoutControls();
         this.setupNotifications();
         console.log("Ending game setup");
+    }
+    /** Populate timetrack slots inside the timetrack container (created by token system). */
+    createTimetrack(trackId) {
+        // Build slots programmatically from material data
+        for (let step = 1; step <= 20; step++) {
+            const slotId = `slot_${trackId}_${step}`;
+            if ($(slotId))
+                continue;
+            const spotType = this.getRulesFor(slotId, "r", null);
+            if (spotType === null)
+                break;
+            const phase = spotType.startsWith("tm_yellow") ? "tm_phase_yellow" : "tm_phase_red";
+            placeHtml(`<div id="${slotId}" class="tt_slot ${spotType} ${phase}" data-step="${step}"></div>`, trackId);
+            this.updateTooltip(slotId);
+        }
     }
     createMap(parent) {
         // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
@@ -2044,6 +2058,15 @@ class Game extends GameMachine {
                 };
             }
         }
+        else if (tokenKey.startsWith("timetrack_")) {
+            // Redirect timetrack container to timetrack_area (above the map) and populate slots
+            result.location = "timetrack_area";
+            result.onEnd = () => this.createTimetrack(tokenKey);
+        }
+        else if (tokenKey === "rune_stone" && loc.startsWith("timetrack_")) {
+            // Redirect rune_stone to the specific timetrack slot based on its state (step number)
+            result.location = `slot_${loc}_${tokenInfo.state}`;
+        }
         else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
             // Dice landing on display_battle: show evaporate effect at the attack target
             const target = args.anim_target;
@@ -2142,6 +2165,26 @@ class Game extends GameMachine {
                     const sideInfo = this.getRulesFor(sideKey, "name", "");
                     if (sideInfo)
                         tokenInfo.tooltip = this.ttSection(_("Result"), this.getTr(sideInfo));
+                }
+                break;
+            }
+            case "slot": {
+                if (tokenId.startsWith("slot_timetrack")) {
+                    // Timetrack slots: show step number and effect name
+                    const spotType = this.getRulesFor(tokenId, "r", null);
+                    if (spotType) {
+                        const stepNum = getPart(tokenId, -1);
+                        const effectName = this.getTokenName(spotType);
+                        tokenInfo.name = `${_("Step")} ${stepNum}: ${effectName}`;
+                        const spotDescriptions = {
+                            tm_yellow_axes: _("Reinforcements: each player draws 1 yellow monster card and places monsters accordingly"),
+                            tm_red_axes: _("Reinforcements: each player draws 1 red monster card and places monsters accordingly"),
+                            tm_yellow_shield: _("No reinforcements and no charge this turn"),
+                            tm_red_shield: _("No reinforcements and no charge this turn"),
+                            tm_red_skull: _("Charge: all monsters move 1 additional area toward Grimheim")
+                        };
+                        tokenInfo.tooltip = this.ttSection(_("Effect"), spotDescriptions[spotType] ?? effectName);
+                    }
                 }
                 break;
             }
