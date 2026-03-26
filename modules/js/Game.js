@@ -897,6 +897,8 @@ class Game1Tokens extends Game0Basics {
     }
     isActiveSlot(id) {
         const node = $(id);
+        if (!node)
+            return false;
         if (node.classList.contains(this.classActiveSlot)) {
             return true;
         }
@@ -1564,10 +1566,11 @@ class GameMachine extends Game1Tokens {
         event.stopPropagation();
         event.preventDefault();
         const ttype = this.opInfo?.ttype;
-        if (!this.isActiveSlot(id)) {
+        let targetId = event.currentTarget.id;
+        if (!targetId.startsWith("button_") && !this.checkActiveSlot(targetId)) {
             return this.onTokenNonActive(event);
         }
-        else if (ttype) {
+        if (ttype) {
             var methodName = "onToken_" + ttype;
             let ret = this.callfn(methodName, id, event.currentTarget);
             if (ret === undefined)
@@ -1912,8 +1915,6 @@ class Game extends GameMachine {
           <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
           <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
-        </div>
-        <div id="cardsarea_${color}" class="cardsarea"></div>
         </div>`, `tableau_${color}`);
         });
         // Create hand container for current player only (not spectators)
@@ -2004,9 +2005,6 @@ class Game extends GameMachine {
             result.onClick = (e) => this.onToken(e);
         }
         else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
-            // Redirect cards on tableau to the card area
-            const color = loc.substring("tableau_".length);
-            result.location = `cardsarea_${color}`;
             result.onClick = (e) => this.onToken(e);
         }
         else if (tokenKey.startsWith("crystal_")) {

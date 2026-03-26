@@ -65,20 +65,23 @@ final class Op_turnTest extends TestCase {
     }
 
     public function testFreeActionsOfferedAtStart(): void {
+        $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        $this->assertArrayHasKey("useEquipment", $moves);
-        $this->assertArrayHasKey("useAbility", $moves);
-        $this->assertArrayHasKey("playEvent", $moves);
+        // Free actions are inlined — individual cards appear with "action" => "playEvent"
+        $this->assertArrayHasKey("card_event_1_27", $moves);
+        $this->assertEquals("playEvent", $moves["card_event_1_27"]["action"]);
     }
 
-    public function testFreeActionsHaveSecFlag(): void {
+    public function testFreeActionsStillOfferedAfterBothMainActionsTaken(): void {
+        $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
+        $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
-        $this->assertTrue($moves["useEquipment"]["sec"] ?? false);
-        $this->assertTrue($moves["playEvent"]["sec"] ?? false);
+        $this->assertArrayHasKey("card_event_1_27", $moves);
+        $this->assertEquals("playEvent", $moves["card_event_1_27"]["action"]);
     }
 
     public function testAlreadyTakenActionIsNotApplicable(): void {
@@ -106,15 +109,6 @@ final class Op_turnTest extends TestCase {
         $this->assertArrayNotHasKey("actionPractice", $moves);
         $this->assertArrayNotHasKey("actionMove", $moves);
         $this->assertArrayNotHasKey("actionAttack", $moves);
-    }
-
-    public function testFreeActionsStillOfferedAfterBothMainActionsTaken(): void {
-        $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-
-        $this->assertArrayHasKey("useEquipment", $moves);
-        $this->assertArrayHasKey("playEvent", $moves);
     }
 
     // -------------------------------------------------------------------------

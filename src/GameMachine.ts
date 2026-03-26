@@ -272,9 +272,11 @@ export class GameMachine extends Game1Tokens {
     event.stopPropagation();
     event.preventDefault();
     const ttype = this.opInfo?.ttype;
-    if (!this.isActiveSlot(id)) {
+    let targetId = (event.currentTarget as HTMLElement).id;
+    if (!targetId.startsWith("button_") && !this.checkActiveSlot(targetId)) {
       return this.onTokenNonActive(event);
-    } else if (ttype) {
+    }
+    if (ttype) {
       var methodName = "onToken_" + ttype;
       let ret = this.callfn(methodName, id, event.currentTarget as HTMLElement);
       if (ret === undefined) return false;

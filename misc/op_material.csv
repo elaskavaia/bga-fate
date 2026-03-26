@@ -33,23 +33,26 @@ monsterAttack|Monster Attack
 
 # Main actions (2 per turn, cannot repeat)
 #set kind=main
+#set inline=1
 actionMove|Move
 actionAttack|Attack
 actionPrepare|Prepare
+
+#set inline=
 actionFocus|Focus
 actionMend|Mend
 actionPractice|Practice
 
-
-
 # Free actions (can be done between/after main actions)
 #set kind=free
+#set inline=1
 useEquipment|Use Equipment|"notimpl"=>true
 useAbility|Use Ability|"notimpl"=>true
 playEvent|Play Event
 #shareGold|Share Gold|"notimpl"=>true
 
 #set kind=
+#set inline=
 
 # Card effect operations (building blocks for card effects)
 dealDamage|Deal Damage

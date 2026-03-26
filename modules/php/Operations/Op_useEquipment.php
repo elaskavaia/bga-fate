@@ -21,7 +21,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useEquipment extends Operation {
     public function getPossibleMoves() {
-        return ["err" => "Not impl"];
+        return [];
     }
     function resolve(): void {
         $this->game->systemAssert("Op_useEquipment is not implemented");

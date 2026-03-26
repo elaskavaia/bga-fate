@@ -106,8 +106,6 @@ export class Game extends GameMachine {
           <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
           <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
-        </div>
-        <div id="cardsarea_${color}" class="cardsarea"></div>
         </div>`,
         `tableau_${color}`
       );
@@ -214,9 +212,6 @@ export class Game extends GameMachine {
       // Cards in hand need click handlers for discard selection
       result.onClick = (e) => this.onToken(e);
     } else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
-      // Redirect cards on tableau to the card area
-      const color = loc.substring("tableau_".length);
-      result.location = `cardsarea_${color}`;
       result.onClick = (e) => this.onToken(e);
     } else if (tokenKey.startsWith("crystal_")) {
       // Bucket redirect: tokens placed on another token get a sub-container bucket

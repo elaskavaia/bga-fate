@@ -332,6 +332,7 @@ export class Game1Tokens extends Game0Basics {
   }
   isActiveSlot(id: ElementOrId): boolean {
     const node = $(id);
+    if (!node) return false;
     if (node.classList.contains(this.classActiveSlot)) {
       return true;
     }

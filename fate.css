@@ -400,8 +400,8 @@
 /********* You can start writing your CSS below this line: **********/
 .card {
   position: relative;
-  height: 160px;
-  aspect-ratio: 0.7328244275;
+  height: 200px;
+  aspect-ratio: 0.730964467;
   border-radius: 5%;
   box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.6901960784);
 }
@@ -830,14 +830,15 @@
   background-position: 100% 100%;
 }
 
-.deck_monster {
+.deck.deck_monster {
   width: 196px;
   height: 144px;
   border: 2px solid;
   border-radius: 6px;
   display: inline-block;
+  background-image: none;
 }
-.deck_monster > * {
+.deck.deck_monster > * {
   display: none;
 }
 
@@ -1225,20 +1226,12 @@
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.cardsarea {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   gap: 4px;
-  min-width: 117.2519083969px;
-  min-height: 160px;
 }
 
 .pboard {
   position: relative;
-  width: 160px;
+  width: 200px;
   aspect-ratio: 1;
   background-image: url(img/EN_Player_Board.jpg);
   background-size: 571% auto;
@@ -1259,11 +1252,12 @@
 
 .deck {
   position: relative;
-  height: 166px;
-  width: 123.2519083969px;
+  height: 206px;
+  width: 152.192893401px;
   border-radius: 5%;
   background-image: url(img/EN_Player_Board.jpg);
   background-size: 456%;
+  pointer-events: none;
 }
 .deck > .counter {
   position: absolute;
@@ -1295,9 +1289,11 @@
 }
 .deck > .card {
   display: none;
+  pointer-events: none;
 }
 .deck > .card:not(:has(~ .card)) {
   display: block;
+  pointer-events: all;
 }
 
 .deck_ability {
@@ -1310,28 +1306,11 @@
 
 .deck_event {
   background-position: 65% 87%;
+  pointer-events: all;
 }
 
 .discard {
   background-position: 96% 87%;
-}
-
-.pboard .deck {
-  width: 22%;
-  height: 59%;
-  top: 36%;
-}
-.pboard .deck_ability {
-  left: 3%;
-}
-.pboard .deck_equip {
-  left: 27%;
-}
-.pboard .deck_event {
-  left: 51%;
-}
-.pboard .discard {
-  left: 75%;
 }
 
 .deck_wrapper {
@@ -1403,8 +1382,8 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 4px;
-  min-height: 160px;
-  min-width: 492px;
+  min-height: 200px;
+  min-width: 20px;
   padding: 4px;
   width: 100%;
   box-sizing: border-box;

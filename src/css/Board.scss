@@ -274,16 +274,7 @@
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-// --- Card area: played cards displayed next to the player board ---
-.cardsarea {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
   gap: 4px;
-  min-width: v.$cardWidth;
-  min-height: v.$cardHeight;
 }
 
 // --- Player board (pboard): background image with positioned slots ---
@@ -316,6 +307,7 @@
 
   background-image: url(img/EN_Player_Board.jpg);
   background-size: 456%;
+  pointer-events: none;
 
   > .counter {
     @include v.counter-badge;
@@ -329,9 +321,11 @@
   // Stack cards, only show the top (last) card face up
   > .card {
     display: none;
+    pointer-events: none;
   }
   > .card:not(:has(~ .card)) {
     display: block;
+    pointer-events: all;
   }
 }
 .deck_ability {
@@ -342,32 +336,10 @@
 }
 .deck_event {
   background-position: 65% 87%;
+  pointer-events: all;
 }
 .discard {
   background-position: 96% 87%;
-}
-
-// Card stone areas — positioned over the 4 stone illustrations
-// Abilities, Equipment, Event Deck, Discard (left to right)
-.pboard {
-  .deck {
-    width: 22%;
-    height: 59%;
-    top: 36%;
-  }
-
-  .deck_ability {
-    left: 3%;
-  }
-  .deck_equip {
-    left: 27%;
-  }
-  .deck_event {
-    left: 51%;
-  }
-  .discard {
-    left: 75%;
-  }
 }
 
 .deck_wrapper {
@@ -422,7 +394,7 @@
   flex-wrap: wrap;
   gap: 4px;
   min-height: v.$cardHeight;
-  min-width: calc(520px - 20px - 8px);
+  min-width: 20px;
   padding: 4px;
   width: 100%;
   box-sizing: border-box;

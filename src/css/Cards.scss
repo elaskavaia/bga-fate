@@ -97,12 +97,13 @@ $hero-sprites: (
 }
 
 // Monster card deck (face-down pile)
-.deck_monster {
+.deck.deck_monster {
   width: 196px;
   height: 144px;
   border: 2px solid;
   border-radius: 6px;
   display: inline-block;
+  background-image: none; // TODO
 
   & > * {
     display: none;

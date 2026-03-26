@@ -264,16 +264,19 @@ class Material {
 // # Main actions (2 per turn, cannot repeat)
     "Op_actionMove" => [ 
         "kind" => "main",
+        "inline" => 1,
         "type" => "actionMove",
         "name" => clienttranslate("Move"),
 ],
     "Op_actionAttack" => [ 
         "kind" => "main",
+        "inline" => 1,
         "type" => "actionAttack",
         "name" => clienttranslate("Attack"),
 ],
     "Op_actionPrepare" => [ 
         "kind" => "main",
+        "inline" => 1,
         "type" => "actionPrepare",
         "name" => clienttranslate("Prepare"),
 ],
@@ -295,18 +298,21 @@ class Material {
 // # Free actions (can be done between/after main actions)
     "Op_useEquipment" => [ 
         "kind" => "free",
+        "inline" => 1,
         "type" => "useEquipment",
         "name" => clienttranslate("Use Equipment"),
         "notimpl"=>true,
 ],
     "Op_useAbility" => [ 
         "kind" => "free",
+        "inline" => 1,
         "type" => "useAbility",
         "name" => clienttranslate("Use Ability"),
         "notimpl"=>true,
 ],
     "Op_playEvent" => [ 
         "kind" => "free",
+        "inline" => 1,
         "type" => "playEvent",
         "name" => clienttranslate("Play Event"),
 ],
@@ -3176,7 +3182,8 @@ class Material {
 // # Player board sub-locations
     "deck_ability" => [ 
         "type" => "location",
-        "name" => clienttranslate("Abilities"),
+        "showtooltip" => 0,
+        "name" => clienttranslate("Abilities Deck"),
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
@@ -3184,27 +3191,30 @@ class Material {
 ],
     "deck_equip" => [ 
         "type" => "location",
-        "name" => clienttranslate("Equipment"),
+        "showtooltip" => 0,
+        "name" => clienttranslate("Equipment Deck"),
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
         "content" => 1,
 ],
+    "discard" => [ 
+        "type" => "location",
+        "showtooltip" => 0,
+        "name" => clienttranslate("Event Discard"),
+        "location" => "tableau",
+        "scope" => "player",
+        "counter" => "public",
+        "content" => "public",
+],
     "deck_event" => [ 
         "type" => "location",
+        "showtooltip" => 1,
         "name" => clienttranslate("Event Deck"),
         "location" => "tableau",
         "scope" => "player",
         "counter" => "public",
         "content" => "hidden",
-],
-    "discard" => [ 
-        "type" => "location",
-        "name" => clienttranslate("Discard"),
-        "location" => "tableau",
-        "scope" => "player",
-        "counter" => "public",
-        "content" => "public",
 ],
     "limbo" => [ 
         "type" => "location",

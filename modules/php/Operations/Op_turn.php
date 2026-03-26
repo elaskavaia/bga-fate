@@ -57,13 +57,19 @@ class Op_turn extends Operation {
         return $this->game->getRulesFor("Op_$action", "kind", "");
     }
 
-    private function getActionsByKind(string $kind): array {
+    private function getTurnOperations(): array {
         $result = [];
         $token_types = $this->game->material->get();
         foreach ($token_types as $key => $data) {
-            if (($data["kind"] ?? "") === $kind && str_starts_with($key, "Op_")) {
-                $optype = str_replace("Op_", "", $key);
-                $result[] = $optype;
+            $kind = $data["kind"] ?? "";
+            if (str_starts_with($key, "Op_")) {
+                if ($kind == "main" || $kind == "free") {
+                    $optype = str_replace("Op_", "", $key);
+                    $result[$optype] = $data + [
+                        "name" => $this->game->getTokenName($key),
+                        "key" => $key,
+                    ];
+                }
             }
         }
         return $result;
@@ -77,34 +83,34 @@ class Op_turn extends Operation {
         $hero = $this->game->getHero($this->getOwner());
         $actionsTaken = $hero->getActionsTaken();
         $remaining = $hero->getActionsRemaining();
+        $allops = $this->getTurnOperations();
 
         // Offer main actions if the player still has actions remaining
-        if ($remaining > 0) {
-            foreach ($this->getActionsByKind("main") as $action) {
-                $res[$action] = ["q" => 0, "name" => $this->game->getTokenName("Op_$action")];
-                if (in_array($action, $actionsTaken)) {
-                    $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
-                } else {
-                    $op = $this->instanciateOperation($action);
-                    $res[$action] = array_merge($res[$action], $op->getErrorInfo());
-                    if ($res[$action]["q"] == 0) {
-                        // action is available, shortcut - send action parameters also
-                        $info = $op->getArgs()["info"];
-                        foreach ($info as $key => $value) {
-                            $res[$key] = $value;
-                            $res[$key]["action"] = $action;
-                        }
+
+        foreach ($allops as $action => $actionInfo) {
+            $res[$action] = ["q" => 0, "name" => $actionInfo["name"]];
+            $inline = $actionInfo["inline"] ?? 0;
+            $kind = $actionInfo["kind"] ?? "main";
+            if (in_array($action, $actionsTaken)) {
+                $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
+            } else {
+                $op = $this->instanciateOperation($action);
+                $res[$action] = array_merge($res[$action], $op->getErrorInfo());
+                if ($res[$action]["q"] == 0 && $inline) {
+                    // action is available, shortcut - send action parameters also
+                    $info = $op->getArgs()["info"];
+                    foreach ($info as $key => $value) {
+                        $res[$key] = $value;
+                        $res[$key]["action"] = $action;
                     }
                 }
             }
-        }
-
-        // Always offer free actions (they don't consume main action slots)
-        // When main actions remain, free actions are secondary; when none remain, they become primary
-        $sec = $remaining > 0;
-        foreach ($this->getActionsByKind("free") as $action) {
-            $op = $this->instanciateOperation($action);
-            $res[$action] = $op->getErrorInfo() + ["sec" => $sec, "call" => "resolve", "name" => $this->game->getTokenName("Op_$action")];
+            if ($kind == "free") {
+                // free action only offered via its inlined possible moves
+                unset($res[$action]);
+            } elseif ($remaining == 0) {
+                unset($res[$action]);
+            }
         }
 
         return $res;
