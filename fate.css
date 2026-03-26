@@ -400,7 +400,7 @@
 /********* You can start writing your CSS below this line: **********/
 .card {
   position: relative;
-  height: 200px;
+  height: 160px;
   aspect-ratio: 0.7328244275;
   border-radius: 5%;
   box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.6901960784);
@@ -806,51 +806,27 @@
   background-position: 20% 100%;
 }
 
-.tableau.hno_1 .deck_equip,
 .tableau.hno_1 .deck_event {
   background-image: url("img/cards/bjorn_cards_hq.webp");
   background-size: 600% auto;
-}
-.tableau.hno_1 .deck_equip {
-  background-position: 80% 100%;
-}
-.tableau.hno_1 .deck_event {
   background-position: 100% 100%;
 }
 
-.tableau.hno_2 .deck_equip,
 .tableau.hno_2 .deck_event {
   background-image: url("img/cards/alva_cards_hq.webp");
   background-size: 600% auto;
-}
-.tableau.hno_2 .deck_equip {
-  background-position: 80% 100%;
-}
-.tableau.hno_2 .deck_event {
   background-position: 100% 100%;
 }
 
-.tableau.hno_3 .deck_equip,
 .tableau.hno_3 .deck_event {
   background-image: url("img/cards/embla_cards_hq.webp");
   background-size: 600% auto;
-}
-.tableau.hno_3 .deck_equip {
-  background-position: 80% 100%;
-}
-.tableau.hno_3 .deck_event {
   background-position: 100% 100%;
 }
 
-.tableau.hno_4 .deck_equip,
 .tableau.hno_4 .deck_event {
   background-image: url("img/cards/boldur_cards_hq.webp");
   background-size: 600% auto;
-}
-.tableau.hno_4 .deck_equip {
-  background-position: 80% 100%;
-}
-.tableau.hno_4 .deck_event {
   background-position: 100% 100%;
 }
 
@@ -1249,18 +1225,6 @@
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-  max-width: 520px;
-}
-
-.hand {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 4px;
-  min-height: 200px;
-  padding: 4px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .cardsarea {
@@ -1268,24 +1232,18 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 4px;
-  min-width: 146.5648854962px;
-  min-height: 200px;
+  min-width: 117.2519083969px;
+  min-height: 160px;
 }
 
 .pboard {
   position: relative;
-  width: 520px;
-  aspect-ratio: 1024/531;
+  width: 160px;
+  aspect-ratio: 1;
   background-image: url(img/EN_Player_Board.jpg);
-  background-size: contain;
+  background-size: 571% auto;
+  background-position: 58% 0%;
   background-repeat: no-repeat;
-}
-
-.pboard_slot {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .bucket_crystal_yellow {
@@ -1299,12 +1257,15 @@
   color: black;
 }
 
-.pboard .deck {
-  width: 22%;
-  height: 59%;
-  top: 36%;
+.deck {
+  position: relative;
+  height: 166px;
+  width: 123.2519083969px;
+  border-radius: 5%;
+  background-image: url(img/EN_Player_Board.jpg);
+  background-size: 456%;
 }
-.pboard .deck > .counter {
+.deck > .counter {
   position: absolute;
   bottom: 2px;
   right: 2px;
@@ -1320,17 +1281,45 @@
   padding: 0 4px;
   z-index: 1;
 }
-.pboard .deck > .counter::after {
+.deck > .counter::after {
   content: attr(data-state);
 }
-.pboard .deck > .counter[data-state="0"] {
+.deck > .counter[data-state="0"] {
   display: none;
 }
-.pboard .card {
+.deck .card {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
+}
+.deck > .card {
+  display: none;
+}
+.deck > .card:not(:has(~ .card)) {
+  display: block;
+}
+
+.deck_ability {
+  background-position: 4% 87%;
+}
+
+.deck_equip {
+  background-position: 35% 87%;
+}
+
+.deck_event {
+  background-position: 65% 87%;
+}
+
+.discard {
+  background-position: 96% 87%;
+}
+
+.pboard .deck {
+  width: 22%;
+  height: 59%;
+  top: 36%;
 }
 .pboard .deck_ability {
   left: 3%;
@@ -1344,63 +1333,88 @@
 .pboard .discard {
   left: 75%;
 }
-.pboard .discard > .card {
-  display: none;
+
+.deck_wrapper {
+  position: relative;
+  padding-left: 20px;
 }
-.pboard .discard > .card:not(:has(~ .card)) {
-  display: block;
+.deck_wrapper::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 20px;
+  content: attr(data-name);
+  z-index: 20;
+  color: black;
+  text-shadow: #fff -1px -1px, #fff 1px 1px, #fff -1px 1px, #fff 1px -1px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
 }
 
 .aslot {
-  height: 8%;
+  position: absolute;
+  height: 24%;
   aspect-ratio: 1;
+  outline: 1px solid red;
 }
 
 .aslot_empty {
-  top: 12%;
-  left: 69%;
-}
-
-.aslot_empty + .aslot_empty {
-  top: 22%;
+  top: 2%;
+  left: 73%;
 }
 
 .aslot_actionMove {
-  top: 12%;
-  left: 48%;
+  top: 36%;
+  left: 3%;
 }
 
 .aslot_actionAttack {
-  top: 12%;
-  left: 55%;
+  top: 36%;
+  left: 40%;
 }
 
 .aslot_actionPrepare {
-  top: 12%;
-  left: 61%;
+  top: 36%;
+  left: 73%;
 }
 
 .aslot_actionFocus {
-  top: 22%;
-  left: 48%;
+  top: 63%;
+  left: 3%;
 }
 
 .aslot_actionMend {
-  top: 22%;
-  left: 55%;
+  top: 63%;
+  left: 40%;
 }
 
 .aslot_actionPractice {
-  top: 22%;
-  left: 61%;
+  top: 63%;
+  left: 73%;
+}
+
+.hand {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 160px;
+  min-width: 492px;
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .hand_wrapper {
   background-color: rgba(245, 222, 179, 0.4901960784);
-  padding-left: 20px;
   position: relative;
+  padding-left: 20px;
 }
-
 .hand_wrapper::after {
   position: absolute;
   top: 0;
@@ -1532,7 +1546,7 @@
   align-items: center;
 }
 
-@container fate_mainarea (min-width: 2100px) {
+@container fate_mainarea (min-width: 1696px) {
   #thething {
     flex-direction: row;
     align-items: flex-start;

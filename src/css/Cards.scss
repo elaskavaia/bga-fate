@@ -88,15 +88,9 @@ $hero-sprites: (
 // Tableau gets hno_N class from JS setup, so .tableau.hno_1 .deck_equip uses Bjorn's sprite
 @each $hno, $file in $hero-sprites {
   .tableau.hno_#{$hno} {
-    .deck_equip,
     .deck_event {
       background-image: url("img/#{$file}");
       background-size: ($hero-card-cols * 100%) auto;
-    }
-    .deck_equip {
-      @include hero-card-pos(40);
-    }
-    .deck_event {
       @include hero-card-pos(41);
     }
   }

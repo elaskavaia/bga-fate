@@ -86,28 +86,30 @@ export class Game extends GameMachine {
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
       const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
+      placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
+      ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
+        const name = this.getRulesFor(d, "name");
+        placeHtml(
+          `<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`,
+          `tableau_${color}`
+        );
+      });
       placeHtml(
-        `<div id="tableau_${color}" class="tableau ${hnoClass}">
-
+        `
         <div id="pboard_${color}" class="pboard">
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
-          <div id="deck_ability_${color}" class="pboard_slot deck deck_ability"></div>
-          <div id="deck_equip_${color}" class="pboard_slot deck deck_equip"></div>
-          <div id="deck_event_${color}" class="pboard_slot deck deck_event"></div>
-          <div id="discard_${color}" class="pboard_slot deck discard"></div>
-
           <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
           <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
           <div id="aslot_${color}_actionPrepare" class="pboard_slot aslot aslot_actionPrepare"></div>
           <div id="aslot_${color}_actionFocus" class="pboard_slot aslot aslot_actionFocus"></div>
           <div id="aslot_${color}_actionMend" class="pboard_slot aslot aslot_actionMend"></div>
           <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
-                    <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
+          <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
-           </div>
+        </div>
         <div id="cardsarea_${color}" class="cardsarea"></div>
         </div>`,
-        "players_panels"
+        `tableau_${color}`
       );
     });
 

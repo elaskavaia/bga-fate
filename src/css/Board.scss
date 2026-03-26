@@ -274,19 +274,6 @@
   align-items: flex-start;
   justify-content: center;
   flex-wrap: wrap;
-  max-width: 520px;
-}
-
-// --- Hand: current player's private hand of event cards ---
-.hand {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 4px;
-  min-height: v.$cardHeight;
-  padding: 4px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 // --- Card area: played cards displayed next to the player board ---
@@ -302,19 +289,12 @@
 // --- Player board (pboard): background image with positioned slots ---
 .pboard {
   position: relative;
-  width: 520px;
-  aspect-ratio: 1024 / 531;
+  width: v.$cardHeight;
+  aspect-ratio: 1;
   background-image: url(img/EN_Player_Board.jpg);
-  background-size: contain;
+  background-size: 571% auto;
+  background-position: 58% 0%;
   background-repeat: no-repeat;
-}
-
-.pboard_slot {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  //outline: 2px dashed red;
 }
 
 // Experience / Gold slot — top-left corner of player board
@@ -328,6 +308,44 @@
     color: black;
   }
 }
+.deck {
+  position: relative;
+  height: calc(v.$cardHeight + 6px);
+  width: calc(v.$cardWidth + 6px);
+  border-radius: 5%;
+
+  background-image: url(img/EN_Player_Board.jpg);
+  background-size: 456%;
+
+  > .counter {
+    @include v.counter-badge;
+  }
+  .card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+  }
+  // Stack cards, only show the top (last) card face up
+  > .card {
+    display: none;
+  }
+  > .card:not(:has(~ .card)) {
+    display: block;
+  }
+}
+.deck_ability {
+  background-position: 4% 87%;
+}
+.deck_equip {
+  background-position: 35% 87%;
+}
+.deck_event {
+  background-position: 65% 87%;
+}
+.discard {
+  background-position: 96% 87%;
+}
 
 // Card stone areas — positioned over the 4 stone illustrations
 // Abilities, Equipment, Event Deck, Discard (left to right)
@@ -336,35 +354,8 @@
     width: 22%;
     height: 59%;
     top: 36%;
-    > .counter {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      font-size: 12px;
-      font-weight: bold;
-      min-width: 18px;
-      height: 18px;
-      line-height: 18px;
-      text-align: center;
-      border-radius: 9px;
-      padding: 0 4px;
-      z-index: 1;
-      &::after {
-        content: attr(data-state);
-      }
-    }
-    > .counter[data-state="0"] {
-      display: none;
-    }
   }
-  .card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-  }
+
   .deck_ability {
     left: 3%;
   }
@@ -376,74 +367,70 @@
   }
   .discard {
     left: 75%;
-    // Stack cards, only show the top (last) card face up
-    > .card {
-      display: none;
-    }
-    > .card:not(:has(~ .card)) {
-      display: block;
-    }
   }
+}
+
+.deck_wrapper {
+  position: relative;
+
+  @include v.vertical-title;
 }
 
 // Action slots — positioned over the action icons on the player board
 // Top row: Move, Attack, Prepare
 // Bottom row: Focus, Mend, Practice
 .aslot {
-  height: 8%;
+  position: absolute;
+  height: 24%;
   aspect-ratio: 1;
+  outline: 1px solid red;
 }
 .aslot_empty {
-  top: 12%;
-  left: 69%;
+  top: 2%;
+  left: 73%;
 }
-.aslot_empty + .aslot_empty {
-  top: 22%;
-}
+
 .aslot_actionMove {
-  top: 12%;
-  left: 48%;
+  top: 36%;
+  left: 3%;
 }
 .aslot_actionAttack {
-  top: 12%;
-  left: 55%;
+  top: 36%;
+  left: 40%;
 }
 .aslot_actionPrepare {
-  top: 12%;
-  left: 61%;
+  top: 36%;
+  left: 73%;
 }
 .aslot_actionFocus {
-  top: 22%;
-  left: 48%;
+  top: 63%;
+  left: 3%;
 }
 .aslot_actionMend {
-  top: 22%;
-  left: 55%;
+  top: 63%;
+  left: 40%;
 }
 .aslot_actionPractice {
-  top: 22%;
-  left: 61%;
+  top: 63%;
+  left: 73%;
+}
+
+// --- Hand: current player's private hand of event cards ---
+.hand {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: v.$cardHeight;
+  min-width: calc(520px - 20px - 8px);
+  padding: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .hand_wrapper {
   background-color: #f5deb37d;
-  padding-left: 20px;
   position: relative;
-}
-.hand_wrapper::after {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 20px;
-  content: attr(data-name);
-  z-index: 20;
-  color: black;
-  text-shadow: v.$textShadowWhite;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 0;
+
+  @include v.vertical-title;
 }

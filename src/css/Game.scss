@@ -81,7 +81,7 @@
 }
 
 // Wide layout: panels left, board area right
-@container fate_mainarea (min-width: 2100px) {
+@container fate_mainarea (min-width: 1696px) {
   #thething {
     flex-direction: row;
     align-items: flex-start;
