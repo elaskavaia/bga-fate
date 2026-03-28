@@ -2196,18 +2196,20 @@ class Game extends GameMachine {
                 break;
             }
             case "hero": {
-                const heroId = tokenId;
-                const counters = this.gamedatas.counters ?? {};
-                const strength = counters[`counter_strength_${heroId}`]?.value;
-                const health = counters[`counter_health_${heroId}`]?.value;
-                const range = counters[`counter_range_${heroId}`]?.value;
+                const heroNo = parseInt(getPart(tokenId, 1));
+                const player = Object.values(this.gamedatas.players).find((p) => p.heroNo === heroNo);
                 tokenInfo.tooltip = "";
-                if (strength != null)
-                    tokenInfo.tooltip += this.ttSection(_("Strength"), String(strength));
-                if (health != null)
-                    tokenInfo.tooltip += this.ttSection(_("Health"), String(health));
-                if (range != null)
-                    tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
+                if (!player)
+                    break;
+                const color = player.color;
+                const strength = this.getTokenState(`tracker_strength_${color}`) ?? 0;
+                const health = this.getTokenState(`tracker_health_${color}`) ?? 0;
+                const range = this.getTokenState(`tracker_range_${color}`) ?? 0;
+                const move = this.getTokenState(`tracker_move_${color}`) ?? 0;
+                tokenInfo.tooltip += this.ttSection(_("Strength"), String(strength));
+                tokenInfo.tooltip += this.ttSection(_("Health"), String(health));
+                tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
+                tokenInfo.tooltip += this.ttSection(_("Move"), String(move));
                 break;
             }
             case "house": {

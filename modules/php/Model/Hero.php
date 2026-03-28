@@ -16,15 +16,49 @@ namespace Bga\Games\Fate\Model;
 
 use Bga\Games\Fate\Game;
 
+use function Bga\Games\Fate\getPart;
+
 /**
  * Hero character: has an owner (player color), tableau with cards, and derived stats.
  */
 class Hero extends Character {
     private string $owner;
+    private int $heroNum;
 
-    public function __construct(Game $game, string $heroId) {
+    public function __construct(Game $game, string $heroId, ?string $owner = null) {
         parent::__construct($game, $heroId);
-        $this->owner = $this->game->getHeroOwner($heroId);
+        $this->heroNum = (int) getPart($heroId, 1);
+        $this->owner = $owner == null ? $this->game->getHeroOwner($heroId) : $owner;
+    }
+
+    function createHeroCards() {
+        $color = $this->owner;
+        // Create all cards for this hero and place in appropriate decks
+        $deckMap = [
+            "hero" => "limbo",
+            "ability" => "deck_ability_{$color}",
+            "equip" => "deck_equip_{$color}",
+            "event" => "deck_event_{$color}",
+        ];
+
+        foreach ($this->game->material->getTokensWithPrefix("card_") as $cardId => $info) {
+            if (($info["hno"] ?? 0) != $this->heroNum) {
+                continue;
+            }
+            $ctype = $info["ctype"];
+            $location = $deckMap[$ctype] ?? "limbo";
+            $count = $info["count"] ?? 1;
+            $info["location"] = $location;
+            $info["create"] = $count > 1 ? 2 : 1;
+            $this->game->tokens->createTokenFromInfo($cardId, $info);
+        }
+    }
+
+    function createHeroTrackers() {
+        $color = $this->owner;
+        foreach ($this->game->material->getTokensWithPrefix("tracker_") as $trackerId => $info) {
+            $this->game->tokens->createToken("{$trackerId}_{$color}", "tableau_{$color}", 0);
+        }
     }
 
     function getOwner(): string {
@@ -94,11 +128,46 @@ class Hero extends Character {
         ]);
     }
 
+    // --- Attribute trackers: stored in DB as tracker_{type}_{color} ---
+
+    /** Recompute all attribute trackers from base card values. Call at setup and end of turn. */
+    function recalcTrackers(): void {
+        $this->game->tokens->dbSetTokenState("tracker_strength_{$this->owner}", $this->calcBaseStrength());
+        $this->game->tokens->dbSetTokenState("tracker_range_{$this->owner}", $this->calcBaseRange());
+        $this->game->tokens->dbSetTokenState("tracker_move_{$this->owner}", $this->calcBaseMove());
+        $this->game->tokens->dbSetTokenState("tracker_health_{$this->owner}", $this->calcBaseHealth());
+    }
+
+    /** Increment a tracker value mid-turn (e.g. card effect: move +1). */
+    function incTrackerValue(string $type, int $delta): void {
+        $this->game->tokens->incTrackerValue($this->owner, $type, $delta);
+    }
+
+    /** Returns the current attack strength from tracker. */
+    function getAttackStrength(): int {
+        return $this->game->tokens->getTrackerValue($this->owner, "strength");
+    }
+
+    /** Returns the current attack range from tracker. */
+    function getAttackRange(): int {
+        return $this->game->tokens->getTrackerValue($this->owner, "range");
+    }
+
+    /** Returns the current max health from tracker. */
+    function getMaxHealth(): int {
+        return $this->game->tokens->getTrackerValue($this->owner, "health");
+    }
+
+    /** Returns the current number of moves from tracker. */
+    function getNumberOfMoves(): int {
+        return $this->game->tokens->getTrackerValue($this->owner, "move");
+    }
+
     /**
-     * Returns the total attack strength: base hero card + equipment + abilities on tableau.
+     * Compute base attack strength from tableau cards.
      * Hero card has an integer strength (e.g. 2), equipment/abilities use "+N" format.
      */
-    function getAttackStrength(): int {
+    function calcBaseStrength(): int {
         $cards = $this->getTableauCards();
         $total = 0;
         foreach ($cards as $card) {
@@ -117,12 +186,28 @@ class Hero extends Character {
         return max($total, 0);
     }
 
-    /**
-     * Returns the max health from the hero card on tableau.
-     */
-    function getMaxHealth(): int {
+    /** Compute base max health from the hero card on tableau. */
+    function calcBaseHealth(): int {
         $heroCardKey = $this->game->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_{$this->owner}");
         return (int) $this->game->material->getRulesFor($heroCardKey, "health", 9);
+    }
+
+    /** Compute base attack range from equipment cards. Default is 1. */
+    function calcBaseRange(): int {
+        $cards = $this->getTableauCards();
+        $maxRange = 1;
+        foreach ($cards as $card => $info) {
+            $range = (int) $this->game->material->getRulesFor($card, "attack_range", 0);
+            if ($range > $maxRange) {
+                $maxRange = $range;
+            }
+        }
+        return $maxRange;
+    }
+
+    /** Compute base move range. Default is 3, Embla (hero 3) has 4. */
+    function calcBaseMove(): int {
+        return $this->heroNum === 3 ? 4 : 3;
     }
 
     /**
@@ -164,21 +249,6 @@ class Hero extends Character {
             return (int) $param;
         }
         return 1;
-    }
-
-    /**
-     * Returns attack range based on equipment cards. Default is 1.
-     */
-    function getAttackRange(): int {
-        $cards = $this->getTableauCards();
-        $maxRange = 1;
-        foreach ($cards as $card => $info) {
-            $range = (int) $this->game->material->getRulesFor($card, "attack_range", 0);
-            if ($range > $maxRange) {
-                $maxRange = $range;
-            }
-        }
-        return $maxRange;
     }
 
     /**

@@ -12,12 +12,7 @@ final class Op_actionAttackTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR: strength 2, starting ability (Sure Shot, no +str), starting equip (+1)
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
+        $this->game->initWithHero(1);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -53,16 +48,15 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testOutOfRangeMonsterNotTargetable(): void {
-        // Embla (hero_3) has Flimsy Blade (no attack_range), so range=1
-        $this->game->tokens->moveToken("card_hero_3_1", "tableau_" . BCOLOR);
-        $this->game->tokens->moveToken("card_equip_3_15", "tableau_" . BCOLOR);
-        $this->game->tokens->moveToken("hero_3", "hex_12_5");
+        // Remove bow so Bjorn has range=1
+        $this->game->tokens->moveToken("card_equip_1_15", "limbo");
+        $hero = $this->game->getHeroById("hero_1");
+        $hero->recalcTrackers();
 
-        // hex_13_7 is more than 1 hex from hex_12_5 — out of range
+        // hex_13_7 is 2 hexes from hex_11_8 — out of range with range=1
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
 
-        /** @var Op_actionAttack */
-        $op = $this->game->machine->instanciateOperation("actionAttack", BCOLOR);
+        $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertNotContains("hex_13_7", $moves);
     }

@@ -41,4 +41,9 @@ die_attack|Attack Die|20|die|2|supply_die_attack|"state"=>6
 # monster die (optional variant, 1 die)
 die_monster|Monster Die|1|die|1|supply_die_monster|"state"=>6
 
+# hero attribute trackers (created per hero in setupGameTables, not auto-created)
+tracker_strength|Strength|0|tracker|4|tableau_{COLOR}
+tracker_range|Attack Range|0|tracker|4|tableau_{COLOR}
+tracker_move|Move|0|tracker|4|tableau_{COLOR}
+tracker_health|Health|0|tracker|4|tableau_{COLOR}
 

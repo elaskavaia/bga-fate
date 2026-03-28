@@ -11,10 +11,7 @@ final class Op_actionMoveTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 to PCOLOR player
-        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->initWithHero(1);
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
     }
 

@@ -540,6 +540,39 @@ class Material {
         "location" => "supply_die_monster",
         "state"=>6,
 ],
+// # hero attribute trackers (created per hero in setupGameTables, not auto-created)
+    "tracker_strength" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Strength"),
+        "count" => 0,
+        "type" => "tracker",
+        "create" => 4,
+        "location" => "tableau_{COLOR}",
+],
+    "tracker_range" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Attack Range"),
+        "count" => 0,
+        "type" => "tracker",
+        "create" => 4,
+        "location" => "tableau_{COLOR}",
+],
+    "tracker_move" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Move"),
+        "count" => 0,
+        "type" => "tracker",
+        "create" => 4,
+        "location" => "tableau_{COLOR}",
+],
+    "tracker_health" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Health"),
+        "count" => 0,
+        "type" => "tracker",
+        "create" => 4,
+        "location" => "tableau_{COLOR}",
+],
             /* --- gen php end token_material --- */
 
             /* --- gen php begin monster_material --- */

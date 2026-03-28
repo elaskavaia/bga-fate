@@ -117,25 +117,10 @@ class Game extends Base {
             $heroNo = $heroNos[$heroIdx++];
             $color = $heroColors[$heroNo - 1];
             $this->tokens->pickTokensForLocation(2, "supply_crystal_yellow", "tableau_{$color}");
+            $hero = new Hero($this, "hero_$heroNo", $color);
+            $hero->createHeroCards();
+            $hero->createHeroTrackers();
 
-            // Create all cards for this hero and place in appropriate decks
-            $deckMap = [
-                "hero" => "limbo",
-                "ability" => "deck_ability_{$color}",
-                "equip" => "deck_equip_{$color}",
-                "event" => "deck_event_{$color}",
-            ];
-            foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
-                if (($info["hno"] ?? null) != $heroNo) {
-                    continue;
-                }
-                $ctype = $info["ctype"];
-                $location = $deckMap[$ctype] ?? "limbo";
-                $count = $info["count"] ?? 1;
-                $info["location"] = $location;
-                $info["create"] = $count > 1 ? 2 : 1;
-                $this->tokens->createTokenFromInfo($cardId, $info);
-            }
             // Move starting cards to tableau
             $this->tokens->moveToken("card_hero_{$heroNo}_1", "tableau_{$color}");
             $this->tokens->moveToken("card_ability_{$heroNo}_3", "tableau_{$color}");
@@ -149,6 +134,10 @@ class Game extends Base {
             // Draw 1 event card to hand
             $this->tokens->pickTokensForLocation(1, "deck_event_{$color}", "hand_{$color}");
             // Hero already at starting hex from material, no move needed
+
+            // Create attribute trackers for this hero and set initial values
+
+            $hero->recalcTrackers();
         }
         // Move unused heroes to limbo
         $usedHeros = array_slice($heroNos, 0, $heroIdx);
@@ -217,28 +206,7 @@ class Game extends Base {
         }
         unset($pdata);
 
-        // Add derived hero stat counters (strength, health, range) for each hero in play
-        foreach ($result["players"] as $player_id => &$pdata2) {
-            $heroNo = $pdata2["heroNo"] ?? null;
-            if ($heroNo === null) {
-                continue;
-            }
-            $hero = $this->getHeroById("hero_$heroNo");
-            $heroId = $hero->getId();
-            $result["counters"]["counter_strength_$heroId"] = [
-                "value" => $hero->getAttackStrength(),
-                "name" => "counter_strength_$heroId",
-            ];
-            $result["counters"]["counter_health_$heroId"] = [
-                "value" => $hero->getMaxHealth(),
-                "name" => "counter_health_$heroId",
-            ];
-            $result["counters"]["counter_range_$heroId"] = [
-                "value" => $hero->getAttackRange(),
-                "name" => "counter_range_$heroId",
-            ];
-        }
-        unset($pdata2);
+        // Hero attribute trackers (tracker_strength_{color}, etc.) are sent automatically via tokens->getAllDatas()
 
         $gameStage = $this->tokens->getTokenState(Game::GAME_STAGE);
         $isGameEnded = $gameStage >= 5;
@@ -262,7 +230,7 @@ class Game extends Base {
     function getGameProgression() {
         $currentStep = $this->tokens->getTokenState("rune_stone");
         $maxSteps = $this->getTimeTrackLength();
-        return min(100, (int) round($currentStep / $maxSteps * 100));
+        return min(100, (int) round(($currentStep / $maxSteps) * 100));
     }
 
     function isEndOfGame() {

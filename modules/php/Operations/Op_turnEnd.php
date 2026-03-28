@@ -54,5 +54,8 @@ class Op_turnEnd extends Operation {
         // 4. Draw 1 event card (handles hand limit internally)
         $this->queue("drawEvent");
         // 5. Allow cycling top equipment or top ability card
+
+        // Reset attribute trackers to base values
+        $hero->recalcTrackers();
     }
 }

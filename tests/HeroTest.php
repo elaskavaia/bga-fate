@@ -10,13 +10,7 @@ final class HeroTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR: strength 2, starting ability (Sure Shot), starting equip (+1)
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->initWithHero(1);
     }
 
     // -------------------------------------------------------------------------
@@ -34,6 +28,7 @@ final class HeroTest extends TestCase {
         $this->game->tokens->moveToken("card_equip_1_15", "limbo");
         $this->game->tokens->moveToken("card_ability_1_3", "limbo");
         $hero = $this->game->getHeroById("hero_1");
+        $hero->recalcTrackers();
         $this->assertEquals(2, $hero->getAttackStrength()); // hero card only
     }
 
@@ -100,6 +95,8 @@ final class HeroTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testHeroKnockedOutWhenDamageReachesHealth(): void {
+        // Move hero out of Grimheim so knockout moves him back
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Bjorn health=9. Pre-place 8 damage, then 1 more → total 9 = knocked out
         $this->game->effect_moveCrystals("hero_1", "red", 9, "hero_1", ["message" => ""]);
 
@@ -114,12 +111,14 @@ final class HeroTest extends TestCase {
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
         $this->assertCount(5, $crystals);
 
-        // 2 houses destroyed
+        // 2 houses destroyed (1-player setup has 4 houses)
         $houses = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
-        $this->assertCount(8, $houses); // 10 - 2
+        $this->assertCount(2, $houses); // 4 - 2
     }
 
     public function testHeroNotKnockedOutBelowHealth(): void {
+        // Move hero out of Grimheim
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Bjorn health=9. Pre-place 7 damage, then 1 more → total 8 < 9
         $this->game->effect_moveCrystals("hero_1", "red", 8, "hero_1", ["message" => ""]);
 
@@ -135,20 +134,18 @@ final class HeroTest extends TestCase {
     }
 
     public function testHeroKnockedOutExcessDamageCapsAt5(): void {
-        // Boldur health=6. Pre-place 5 damage, then 3 more → total 8 >= 6, knocked out, capped at 5
-        $this->game->tokens->moveToken("card_hero_4_1", "tableau_" . BCOLOR);
-        $this->game->tokens->moveToken("hero_4", "hex_11_7");
-        $this->game->effect_moveCrystals("hero_4", "red", 8, "hero_4", ["message" => ""]);
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->effect_moveCrystals("hero_1", "red", 11, "hero_1", ["message" => ""]);
 
-        $hero = $this->game->getHeroById("hero_4");
+        $hero = $this->game->getHeroById("hero_1");
         $knocked = $hero->applyDamageEffects(3, "monster_goblin_1");
         $this->assertTrue($knocked);
 
-        $heroLoc = $this->game->tokens->getTokenLocation("hero_4");
+        $heroLoc = $this->game->tokens->getTokenLocation("hero_1");
         $this->assertTrue($this->game->hexMap->isInGrimheim($heroLoc), "Hero should be in Grimheim, got $heroLoc");
 
         // Damage set to exactly 5
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_4");
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
         $this->assertCount(5, $crystals);
     }
 
@@ -161,10 +158,27 @@ final class HeroTest extends TestCase {
         $this->assertEquals(2, $hero->getAttackRange());
     }
 
+    // -------------------------------------------------------------------------
+    // getNumberOfMoves
+    // -------------------------------------------------------------------------
+
+    public function testBjornHasDefaultMoves3(): void {
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(3, $hero->getNumberOfMoves());
+    }
+
+    public function testEmblaHasMoves4(): void {
+        $game = new GameUT();
+        $game->initWithHero(3);
+        $hero = $game->getHeroById("hero_3");
+        $this->assertEquals(4, $hero->getNumberOfMoves());
+    }
+
     public function testHeroWithoutBowHasRange1(): void {
         // Remove bow
         $this->game->tokens->moveToken("card_equip_1_15", "limbo");
         $hero = $this->game->getHeroById("hero_1");
+        $hero->recalcTrackers();
         $this->assertEquals(1, $hero->getAttackRange());
     }
 }

@@ -10,10 +10,8 @@ final class Op_monsterAttackTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR: health=9
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+
+        $this->game->initWithHero(1);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Move other heroes off map so they don't interfere with ranged attacks
         $this->game->tokens->moveToken("hero_2", "limbo");

@@ -183,13 +183,27 @@ from a filtered set. Common target filters:
 
 **Not separate operations** (handled as modifiers/hooks on existing operations):
 - "Add X damage to this attack" — modifier applied in `actionAttack` resolve
-- "Attack range +X this turn" — temporary stat modifier
+- "Attack range +X this turn" — temporary attribute modifier via tracker (see Hero Attribute Trackers below)
 - "Reroll all misses" — modifier on dice result in `actionAttack`
 - "Add damage for each [RUNE]" — modifier on dice result
 - "Prevent monster from moving" — flag on monster during `turnMonster`
 - Static/persistent effects (strength bonus, armor, mana regen) — read from card data during relevant ops
 - Equipment [DAMAGE] effects — consume durability, separate activation system
 - Quest completion — specific quest logic, not a generic operation
+
+### Hero Attribute Trackers
+
+Hero attributes (strength, range, move, health) are stored as tracker tokens in the DB: `tracker_{attr}_{color}`.
+
+**Token IDs:** `tracker_strength_{color}`, `tracker_range_{color}`, `tracker_move_{color}`, `tracker_health_{color}`
+
+**How it works:**
+- `Hero::recalcTrackers()` — recomputes all trackers from base card values (tableau cards). Called at setup and end of turn.
+- `Hero::incTrackerValue($type, $delta)` — bumps a tracker mid-turn (e.g. Flexibility: `$hero->incTrackerValue("move", 1)`)
+- Public getters (`getAttackStrength()`, `getAttackRange()`, `getMaxHealth()`, `getNumberOfMoves()`) read from trackers
+- Base computation methods (`calcBaseStrength()`, `calcBaseRange()`, `calcBaseMove()`, `calcBaseHealth()`) derive values from tableau cards
+
+**Lifecycle:** trackers are created per hero in `setupGameTables`, set to base values via `recalcTrackers()`, may be bumped mid-turn by card effects, and reset at end of turn in `Op_turnEnd`.
 
 ---
 

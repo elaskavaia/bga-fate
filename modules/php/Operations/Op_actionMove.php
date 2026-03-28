@@ -22,9 +22,8 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionMove extends Operation {
     function getNumberOfMoves(): int {
-        // Default 3 moves; abilities can override this later
-        // TODO: find cards that change this
-        return 3;
+        $hero = $this->game->getHero($this->getOwner());
+        return $hero->getNumberOfMoves();
     }
 
     function getDelegateOperation() {

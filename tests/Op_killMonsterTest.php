@@ -12,12 +12,7 @@ final class Op_killMonsterTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR: attack_range=2 (First Bow)
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
+        $this->game->initWithHero(1);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 

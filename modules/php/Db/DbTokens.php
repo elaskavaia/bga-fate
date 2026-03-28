@@ -1283,6 +1283,11 @@ class DbTokens {
         return [$id, $value];
     }
 
+    function incTrackerValue(string $color, string $type, int $delta): int {
+        $id = $this->getTrackerId($color, $type);
+        return $this->dbResourceInc($id, $delta);
+    }
+
     function getTrackerId(string $color, string $type) {
         if ($color === "") {
             $token_id = "tracker_{$type}";

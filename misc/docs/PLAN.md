@@ -28,6 +28,7 @@ See CLAUDE.md for project overview
 [x] Phase 2: Basic player turn with one hero (reduced rules)
 [x] Phase 3: Monster system with one monster type (spawning + movement done)
 [x] Phase 4: Combat and damage system
+[x] Phase 5a: Hero attribute trackers (strength, range, move, health)
 [ ] Phase 5: Equipment, quests, and upgrades
 [x] Phase 6: Full monster turn (movement, attack, reinforcements)
 [x] Phase 7: Add remaining monster types and legends (all 3 factions done in Iter 2)
@@ -394,6 +395,26 @@ See CLAUDE.md for project overview
 ---
 
 
+
+---
+
+## Hero Attribute Trackers
+
+**Goal**: Store hero attributes (strength, range, move, health) as persistent tracker tokens in the DB so card effects can temporarily modify them mid-turn. Trackers are recomputed from base card values at end of turn.
+
+### Server
+[x] Add tracker token definitions to token_material.csv (tracker_strength, tracker_range, tracker_move, tracker_health)
+[x] Hero.php: `recalcTrackers()` computes base values from tableau cards, `incTrackerValue()` bumps mid-turn
+[x] Hero.php: `calcBaseStrength()`, `calcBaseRange()`, `calcBaseMove()`, `calcBaseHealth()` — base computation methods
+[x] Hero.php: `getAttackStrength()`, `getAttackRange()`, `getMaxHealth()`, `getNumberOfMoves()` — read from trackers
+[x] DbTokens.php: `incTrackerValue()` convenience method
+[x] setupGameTables: create tracker tokens per hero, call `recalcTrackers()`
+[x] Op_turnEnd: call `recalcTrackers()` to reset at end of turn
+[x] Op_actionMove: read move count from `hero->getNumberOfMoves()` instead of hardcoded 3
+[x] getAllDatas: removed manual counter blocks (trackers sent automatically)
+
+### Client
+[x] Game.ts: hero tooltips read from tracker tokens instead of manual counters; added Move attribute
 
 ---
 
