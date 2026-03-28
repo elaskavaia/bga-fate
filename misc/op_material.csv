@@ -47,7 +47,7 @@ actionPractice|Practice
 #set kind=free
 #set inline=1
 useEquipment|Use Equipment
-useAbility|Use Ability|"notimpl"=>true
+useAbility|Use Ability
 playEvent|Play Event
 #shareGold|Share Gold|"notimpl"=>true
 

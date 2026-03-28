@@ -62,7 +62,7 @@ class Op_useEquipment extends Operation {
             "effect_text" => $effect,
         ]);
         $r = $this->game->material->getRulesFor($cardId, "r", "nop");
-        $this->queue($r, $this->getOwner(), ["card" => $cardId]);
+        $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
     }
 
     public function getUiArgs() {

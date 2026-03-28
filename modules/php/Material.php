@@ -306,7 +306,6 @@ class Material {
         "inline" => 1,
         "type" => "useAbility",
         "name" => clienttranslate("Use Ability"),
-        "notimpl"=>true,
 ],
     "Op_playEvent" => [ 
         "kind" => "free",
