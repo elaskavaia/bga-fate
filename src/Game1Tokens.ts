@@ -285,10 +285,10 @@ export class Game1Tokens extends Game0Basics {
   }
 
   /**
-   * This is convenient function to be called when processing click events, it - remembers id of object - stops propagation - logs to
-   * console - the if checkActive is set to true check if element has active_slot class
+   * Click handler helper: resolves the clicked element's id (walking up to an active parent if inside "thething"),
+   * checks for help-mode intercept, and returns whether the click is blocked (no active_slot) or actionable.
    */
-  onClickSanity(event: Event, checkActiveSlot?: boolean, checkActivePlayer?: boolean): string {
+  onClickSanity(event: Event): { targetId: string; targetNode: HTMLElement; blocked: boolean; active: boolean } {
     let id = (event.currentTarget as HTMLElement).id;
     let target = event.target as HTMLElement;
     if (id == "thething") {
@@ -297,20 +297,24 @@ export class Game1Tokens extends Game0Basics {
       target = node;
     }
 
-    console.log("on slot " + id, target?.id || target);
-    if (!id) return null;
-    if (this.showHelp(id)) return null;
+    const result = {
+      targetId: id,
+      targetNode: target,
+      blocked: true,
+      active: false
+    };
 
-    if (checkActiveSlot && !id.startsWith("button_") && !this.checkActiveSlot(id)) {
-      return null;
+    console.log("on slot " + id, result);
+    if (!id) return result;
+    if (this.showHelp(id)) return result;
+
+    if (!this.checkActiveSlot(id, false)) {
+      result.blocked = false;
+      return result;
     }
-    if (checkActivePlayer && !this.checkActivePlayer()) {
-      return null;
-    }
-    if (target.dataset.targetId) return target.dataset.targetId;
-    id = id.replace("tmp_", "");
-    id = id.replace("button_", "");
-    return id;
+    if (target?.dataset.targetId) result.targetId = target.dataset.targetId;
+    result.active = true;
+    return result;
   }
 
   // override to hook the help
@@ -337,6 +341,9 @@ export class Game1Tokens extends Game0Basics {
       return true;
     }
     if (node.classList.contains(this.classActiveSlotHidden)) {
+      return true;
+    }
+    if (node.id.startsWith("button_")) {
       return true;
     }
 
@@ -760,6 +767,44 @@ export class Game1Tokens extends Game0Basics {
     if (delay) await gameui.wait(delay);
     this.animationLa.phantomMove(token, finalPlace, duration, mobileStyle, onEnd);
     return gameui.wait(duration);
+  }
+
+  showHiddenContent(id: ElementOrId, title: string, selectedId?: string | number, sort?: any) {
+    let dialog = new ebg.popindialog();
+    dialog.create("pile");
+    dialog.setTitle(title);
+    const node = this.cloneAndFixIds(id, "_tt", true);
+    node.removeAttribute("_lis");
+    const cards_htm = node.innerHTML;
+    const html = `
+    <div id="card_pile_selector" class="card_pile_selector"></div>
+    <div id="card_pile_help" class="card_pile_help">${_("Click on element below to see details")}</div>
+    <div id="pile_content" class="pile_content">${cards_htm}</div>`;
+    dialog.setContent(html);
+    const parent = $("pile_content");
+
+    let children = Array.from(parent.children);
+    if (sort) {
+      children.sort(sort);
+      parent.replaceChildren(...children);
+    }
+    children.forEach((node: HTMLElement, index) => {
+      const origId = node.id.replace("_tt", "");
+      node.addEventListener("click", (e) => {
+        const selected_html = this.getTooltipHtmlForToken(origId);
+        $("card_pile_selector").innerHTML = selected_html;
+      });
+      if (index === selectedId) selectedId = origId;
+    });
+    if (children.length == 0) {
+      $("card_pile_help").remove();
+    }
+    if (selectedId && typeof selectedId === "string") {
+      const selected_html = this.getTooltipHtmlForToken(selectedId);
+      $("card_pile_selector").innerHTML = selected_html;
+    }
+    dialog.show();
+    return dialog;
   }
 
   async notif_animate(args: any) {

@@ -396,13 +396,15 @@
   min-height: v.$cardHeight;
   min-width: 20px;
   padding: 4px;
-  width: 100%;
   box-sizing: border-box;
 }
 
 .hand_wrapper {
   background-color: #f5deb37d;
   position: relative;
-
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
   @include v.vertical-title;
 }

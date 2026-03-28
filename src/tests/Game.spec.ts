@@ -165,3 +165,98 @@ describe("Game.updateTokenDisplayInfo", () => {
     expect(info.tooltip).to.not.include("Rank");
   });
 });
+
+describe("Game.onClickSanity", () => {
+  let game: Game;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="ebd-body"><div id="thething"></div></div>';
+    game = new Game(createMockBga());
+  });
+
+  function makeClickEvent(currentTarget: HTMLElement, target?: HTMLElement): Event {
+    return { currentTarget, target: target ?? currentTarget } as unknown as Event;
+  }
+
+  it("should return blocked=true and active=false when element has no active_slot class", () => {
+    const el = document.createElement("div");
+    el.id = "some_token";
+    document.body.appendChild(el);
+
+    const result = game.onClickSanity(makeClickEvent(el));
+    expect(result.targetId).to.equal("some_token");
+    expect(result.blocked).to.be.false;
+    expect(result.active).to.be.false;
+  });
+
+  it("should return active=true when element has active_slot class", () => {
+    const el = document.createElement("div");
+    el.id = "some_token";
+    el.classList.add("active_slot");
+    document.body.appendChild(el);
+
+    const result = game.onClickSanity(makeClickEvent(el));
+    expect(result.targetId).to.equal("some_token");
+    expect(result.blocked).to.be.true;
+    expect(result.active).to.be.true;
+  });
+
+  it("should return active=true for button_ prefixed ids without active_slot class", () => {
+    const el = document.createElement("div");
+    el.id = "button_confirm";
+    document.body.appendChild(el);
+
+    const result = game.onClickSanity(makeClickEvent(el));
+    expect(result.targetId).to.equal("button_confirm");
+    expect(result.active).to.be.true;
+  });
+
+  it("should use data-targetId when present on active element", () => {
+    const el = document.createElement("div");
+    el.id = "some_token";
+    el.classList.add("active_slot");
+    el.dataset.targetId = "real_target";
+    document.body.appendChild(el);
+
+    const result = game.onClickSanity(makeClickEvent(el));
+    expect(result.targetId).to.equal("real_target");
+    expect(result.active).to.be.true;
+  });
+
+  it("should return blocked=true with no id when clicking thething with no active parent", () => {
+    const thething = $("thething");
+    const child = document.createElement("span");
+    thething.appendChild(child);
+
+    const result = game.onClickSanity(makeClickEvent(thething, child));
+    expect(result.targetId).to.be.undefined;
+    expect(result.blocked).to.be.true;
+    expect(result.active).to.be.false;
+  });
+
+  it("should walk up to active parent when clicking inside thething", () => {
+    const thething = $("thething");
+    const parent = document.createElement("div");
+    parent.id = "hex_5_5";
+    parent.classList.add("active_slot");
+    thething.appendChild(parent);
+    const child = document.createElement("span");
+    parent.appendChild(child);
+
+    const result = game.onClickSanity(makeClickEvent(thething, child));
+    expect(result.targetId).to.equal("hex_5_5");
+    expect(result.active).to.be.true;
+  });
+
+  it("should return blocked=true when showHelp intercepts", () => {
+    const el = document.createElement("div");
+    el.id = "some_token";
+    el.classList.add("active_slot");
+    document.body.appendChild(el);
+
+    (game as any).showHelp = sinon.stub().returns(true);
+    const result = game.onClickSanity(makeClickEvent(el));
+    expect(result.blocked).to.be.true;
+    expect(result.active).to.be.false;
+  });
+});

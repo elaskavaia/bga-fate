@@ -852,10 +852,10 @@ class Game1Tokens extends Game0Basics {
         return this.findActiveParent(parent);
     }
     /**
-     * This is convenient function to be called when processing click events, it - remembers id of object - stops propagation - logs to
-     * console - the if checkActive is set to true check if element has active_slot class
+     * Click handler helper: resolves the clicked element's id (walking up to an active parent if inside "thething"),
+     * checks for help-mode intercept, and returns whether the click is blocked (no active_slot) or actionable.
      */
-    onClickSanity(event, checkActiveSlot, checkActivePlayer) {
+    onClickSanity(event) {
         let id = event.currentTarget.id;
         let target = event.target;
         if (id == "thething") {
@@ -863,22 +863,25 @@ class Game1Tokens extends Game0Basics {
             id = node?.id;
             target = node;
         }
-        console.log("on slot " + id, target?.id || target);
+        const result = {
+            targetId: id,
+            targetNode: target,
+            blocked: true,
+            active: false
+        };
+        console.log("on slot " + id, result);
         if (!id)
-            return null;
+            return result;
         if (this.showHelp(id))
-            return null;
-        if (checkActiveSlot && !id.startsWith("button_") && !this.checkActiveSlot(id)) {
-            return null;
+            return result;
+        if (!this.checkActiveSlot(id, false)) {
+            result.blocked = false;
+            return result;
         }
-        if (checkActivePlayer && !this.checkActivePlayer()) {
-            return null;
-        }
-        if (target.dataset.targetId)
-            return target.dataset.targetId;
-        id = id.replace("tmp_", "");
-        id = id.replace("button_", "");
-        return id;
+        if (target?.dataset.targetId)
+            result.targetId = target.dataset.targetId;
+        result.active = true;
+        return result;
     }
     // override to hook the help
     showHelp(id) {
@@ -903,6 +906,9 @@ class Game1Tokens extends Game0Basics {
             return true;
         }
         if (node.classList.contains(this.classActiveSlotHidden)) {
+            return true;
+        }
+        if (node.id.startsWith("button_")) {
             return true;
         }
         return false;
@@ -1301,6 +1307,43 @@ class Game1Tokens extends Game0Basics {
         this.animationLa.phantomMove(token, finalPlace, duration, mobileStyle, onEnd);
         return gameui.wait(duration);
     }
+    showHiddenContent(id, title, selectedId, sort) {
+        let dialog = new ebg.popindialog();
+        dialog.create("pile");
+        dialog.setTitle(title);
+        const node = this.cloneAndFixIds(id, "_tt", true);
+        node.removeAttribute("_lis");
+        const cards_htm = node.innerHTML;
+        const html = `
+    <div id="card_pile_selector" class="card_pile_selector"></div>
+    <div id="card_pile_help" class="card_pile_help">${_("Click on element below to see details")}</div>
+    <div id="pile_content" class="pile_content">${cards_htm}</div>`;
+        dialog.setContent(html);
+        const parent = $("pile_content");
+        let children = Array.from(parent.children);
+        if (sort) {
+            children.sort(sort);
+            parent.replaceChildren(...children);
+        }
+        children.forEach((node, index) => {
+            const origId = node.id.replace("_tt", "");
+            node.addEventListener("click", (e) => {
+                const selected_html = this.getTooltipHtmlForToken(origId);
+                $("card_pile_selector").innerHTML = selected_html;
+            });
+            if (index === selectedId)
+                selectedId = origId;
+        });
+        if (children.length == 0) {
+            $("card_pile_help").remove();
+        }
+        if (selectedId && typeof selectedId === "string") {
+            const selected_html = this.getTooltipHtmlForToken(selectedId);
+            $("card_pile_selector").innerHTML = selected_html;
+        }
+        dialog.show();
+        return dialog;
+    }
     async notif_animate(args) {
         return gameui.wait(args.time ?? 1);
     }
@@ -1557,8 +1600,8 @@ class GameMachine extends Game1Tokens {
     /** default click processor */
     onToken(event, fromMethod) {
         console.log(event);
-        let id = this.onClickSanity(event);
-        if (!id) {
+        let result = this.onClickSanity(event);
+        if (!result.targetId) {
             return true;
         }
         if (!fromMethod)
@@ -1566,13 +1609,12 @@ class GameMachine extends Game1Tokens {
         event.stopPropagation();
         event.preventDefault();
         const ttype = this.opInfo?.ttype;
-        let targetId = event.currentTarget.id;
-        if (!targetId.startsWith("button_") && !this.checkActiveSlot(targetId)) {
-            return this.onTokenNonActive(event);
+        if (!result.active) {
+            return this.onToken_nonActive(result.targetId, result.targetNode);
         }
         if (ttype) {
             var methodName = "onToken_" + ttype;
-            let ret = this.callfn(methodName, id, event.currentTarget);
+            let ret = this.callfn(methodName, result.targetId, result.targetNode);
             if (ret === undefined)
                 return false;
             return true;
@@ -1580,9 +1622,7 @@ class GameMachine extends Game1Tokens {
         console.error("no handler for ", ttype);
         return false;
     }
-    onTokenNonActive(event, fromMethod) {
-        event.stopPropagation();
-        event.preventDefault();
+    onToken_nonActive(target, node) {
         return false;
     }
     onToken_token(target) {
@@ -1881,11 +1921,10 @@ class Game extends GameMachine {
         placeHtml(`<div id="players_panels"></div>`, "thething");
         // Board area: map + monster turn display + supply (right side in wide layout)
         placeHtml(`<div id="board_area"></div>`, "thething");
-        placeHtml(`<div id="timetrack_area"></div>`, "board_area");
+        placeHtml(`<div id="display_battle"></div>`, "board_area");
         const mapWrapper = "map_wrapper";
         placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "board_area");
         this.createMap($(mapWrapper));
-        placeHtml(`<div id="display_battle"></div>`, mapWrapper);
         placeHtml(`<div id="display_monsterturn"></div>`, "board_area");
         placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
         placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
@@ -1896,6 +1935,7 @@ class Game extends GameMachine {
         placeHtml(`<div id="supply_crystal_yellow" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_die_attack" class="supply"></div>`, "supply");
         placeHtml(`<div id="supply_die_monster" class="supply"></div>`, "supply");
+        placeHtml(`<div id="timetrack_area"></div>`, "board_area");
         Object.values(gamedatas.players).forEach((player) => {
             const color = player.color;
             const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
@@ -2056,7 +2096,7 @@ class Game extends GameMachine {
             }
         }
         else if (tokenKey.startsWith("timetrack_")) {
-            // Redirect timetrack container to timetrack_area (above the map) and populate slots
+            // Redirect timetrack container to timetrack_area and populate slots
             result.location = "timetrack_area";
             result.onEnd = () => this.createTimetrack(tokenKey);
         }
@@ -2092,11 +2132,26 @@ class Game extends GameMachine {
             return `<span style="color:${tc};font-weight:bold">${res}</span>`;
         return res;
     }
-    onTokenNonActive(event, fromMethod) {
-        event.stopPropagation();
-        event.preventDefault();
-        // TODO: show error if this was error condition node
-        return false;
+    onToken_nonActive(target, node) {
+        if (!target)
+            return false;
+        const mainType = getPart(target, 0);
+        switch (mainType) {
+            case "card": {
+                const cardType = getPart(target, 1);
+                const container = $(target).parentElement?.id;
+                if (container?.startsWith("discard") || container?.startsWith("deck")) {
+                    this.showHiddenContent(container, _("Pile contents"), 0, function (a, b) {
+                        const orderA = parseInt(a.dataset.state);
+                        const orderB = parseInt(b.dataset.state);
+                        return -orderA + orderB; // descending
+                    });
+                    return false;
+                }
+                break;
+            }
+        }
+        return true;
     }
     updateTokenDisplayInfo(tokenInfo) {
         // override to generate dynamic tooltips and such

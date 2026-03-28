@@ -180,9 +180,7 @@
 }
 
 #display_battle {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   z-index: 10;
   display: flex;
   flex-direction: row;
@@ -1385,13 +1383,16 @@
   min-height: 200px;
   min-width: 20px;
   padding: 4px;
-  width: 100%;
   box-sizing: border-box;
 }
 
 .hand_wrapper {
   background-color: rgba(245, 222, 179, 0.4901960784);
   position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
   padding-left: 20px;
 }
 .hand_wrapper::after {
@@ -1416,6 +1417,7 @@
 .tundra .dijitTooltipContainer,
 .tooltipcontainer {
   background: white;
+  background-image: url(img/bg1.jpg);
   color: black;
   border: unset;
   border-radius: unset;
@@ -1471,7 +1473,7 @@
 }
 
 .tooltipimage.hcard {
-  height: 300px;
+  height: 400px;
 }
 
 #gameaction_status_wrap {

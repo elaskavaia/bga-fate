@@ -252,13 +252,7 @@ final class Op_turnTest extends TestCase {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
-
-        foreach ($moves as $key => $value) {
-            $this->assertFalse(
-                str_starts_with($key, "hex_") && isset($value["action"]),
-                "Delegate targets should not appear when no actions remaining"
-            );
-        }
+        $this->assertEquals(0, count($moves));
     }
 
     // -------------------------------------------------------------------------

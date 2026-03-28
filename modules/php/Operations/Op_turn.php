@@ -16,6 +16,7 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
+use Exception;
 
 /**
  * Main player turn operation.

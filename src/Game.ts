@@ -67,11 +67,10 @@ export class Game extends GameMachine {
     placeHtml(`<div id="players_panels"></div>`, "thething");
     // Board area: map + monster turn display + supply (right side in wide layout)
     placeHtml(`<div id="board_area"></div>`, "thething");
-    placeHtml(`<div id="timetrack_area"></div>`, "board_area");
+    placeHtml(`<div id="display_battle"></div>`, "board_area");
     const mapWrapper = "map_wrapper";
     placeHtml(`<div id="${mapWrapper}" class="map_wrapper"></div>`, "board_area");
     this.createMap($(mapWrapper));
-    placeHtml(`<div id="display_battle"></div>`, mapWrapper);
     placeHtml(`<div id="display_monsterturn"></div>`, "board_area");
     placeHtml(`<div id="deck_monster_yellow" class="deck deck_monster"></div>`, "display_monsterturn");
     placeHtml(`<div id="deck_monster_red" class="deck deck_monster"></div>`, "display_monsterturn");
@@ -82,6 +81,8 @@ export class Game extends GameMachine {
     placeHtml(`<div id="supply_crystal_yellow" class="supply"></div>`, "supply");
     placeHtml(`<div id="supply_die_attack" class="supply"></div>`, "supply");
     placeHtml(`<div id="supply_die_monster" class="supply"></div>`, "supply");
+
+    placeHtml(`<div id="timetrack_area"></div>`, "board_area");
 
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
@@ -258,7 +259,7 @@ export class Game extends GameMachine {
         };
       }
     } else if (tokenKey.startsWith("timetrack_")) {
-      // Redirect timetrack container to timetrack_area (above the map) and populate slots
+      // Redirect timetrack container to timetrack_area and populate slots
       result.location = "timetrack_area";
       result.onEnd = () => this.createTimetrack(tokenKey);
     } else if (tokenKey === "rune_stone" && loc.startsWith("timetrack_")) {
@@ -294,11 +295,25 @@ export class Game extends GameMachine {
     return res;
   }
 
-  onTokenNonActive(event: Event, fromMethod?: string) {
-    event.stopPropagation();
-    event.preventDefault();
-    // TODO: show error if this was error condition node
-    return false;
+  onToken_nonActive(target: string, node: HTMLElement) {
+    if (!target) return false;
+    const mainType = getPart(target, 0);
+    switch (mainType) {
+      case "card": {
+        const cardType = getPart(target, 1);
+        const container = $(target).parentElement?.id;
+        if (container?.startsWith("discard") || container?.startsWith("deck")) {
+          this.showHiddenContent(container, _("Pile contents"), 0, function (a: HTMLElement, b: HTMLElement) {
+            const orderA = parseInt(a.dataset.state);
+            const orderB = parseInt(b.dataset.state);
+            return -orderA + orderB; // descending
+          });
+          return false;
+        }
+        break;
+      }
+    }
+    return true;
   }
 
   updateTokenDisplayInfo(tokenInfo: TokenDisplayInfo) {

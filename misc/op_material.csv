@@ -36,9 +36,9 @@ monsterAttack|Monster Attack
 #set inline=1
 actionMove|Move
 actionAttack|Attack
-actionPrepare|Prepare
 
 #set inline=
+actionPrepare|Prepare
 actionFocus|Focus
 actionMend|Mend
 actionPractice|Practice

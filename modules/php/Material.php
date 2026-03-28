@@ -276,7 +276,6 @@ class Material {
 ],
     "Op_actionPrepare" => [ 
         "kind" => "main",
-        "inline" => 1,
         "type" => "actionPrepare",
         "name" => clienttranslate("Prepare"),
 ],

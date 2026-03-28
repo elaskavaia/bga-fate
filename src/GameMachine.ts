@@ -264,21 +264,20 @@ export class GameMachine extends Game1Tokens {
   /** default click processor */
   onToken(event: Event, fromMethod?: string) {
     console.log(event);
-    let id: string = this.onClickSanity(event);
-    if (!id) {
+    let result = this.onClickSanity(event);
+    if (!result.targetId) {
       return true;
     }
     if (!fromMethod) fromMethod = "onToken";
     event.stopPropagation();
     event.preventDefault();
     const ttype = this.opInfo?.ttype;
-    let targetId = (event.currentTarget as HTMLElement).id;
-    if (!targetId.startsWith("button_") && !this.checkActiveSlot(targetId)) {
-      return this.onTokenNonActive(event);
+    if (!result.active) {
+      return this.onToken_nonActive(result.targetId, result.targetNode);
     }
     if (ttype) {
       var methodName = "onToken_" + ttype;
-      let ret = this.callfn(methodName, id, event.currentTarget as HTMLElement);
+      let ret = this.callfn(methodName, result.targetId, result.targetNode);
       if (ret === undefined) return false;
       return true;
     }
@@ -286,9 +285,7 @@ export class GameMachine extends Game1Tokens {
     return false;
   }
 
-  onTokenNonActive(event: Event, fromMethod?: string) {
-    event.stopPropagation();
-    event.preventDefault();
+  onToken_nonActive(target: string, node: HTMLElement) {
     return false;
   }
 
