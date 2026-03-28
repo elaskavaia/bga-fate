@@ -129,10 +129,6 @@ class Op_turn extends Operation {
         $kind = $this->getActionKind($optype);
 
         if ($kind === "main") {
-            // Enforce: cannot pick same action twice
-            $this->game->userAssert(clienttranslate("Action already taken this turn"), !in_array($optype, $actionsTaken));
-            $this->game->userAssert(clienttranslate("No actions remaining"), $remaining > 0);
-
             $hero->placeActionMarker($optype);
             $this->queue($optype);
             $this->queue("turn");
@@ -144,9 +140,6 @@ class Op_turn extends Operation {
             $argInfo = $this->getArgs()["info"][$optype];
             $action = $argInfo["action"] ?? "";
             $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action !== "");
-
-            $this->game->userAssert(clienttranslate("Action already taken this turn"), !in_array($action, $actionsTaken));
-            $this->game->userAssert(clienttranslate("No actions remaining"), $remaining > 0);
 
             $hero->placeActionMarker($action);
             $this->queue($action, null, ["target" => $optype]);

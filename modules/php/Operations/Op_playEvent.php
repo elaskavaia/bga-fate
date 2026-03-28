@@ -34,6 +34,10 @@ class Op_playEvent extends Operation {
     }
 
     function getPossibleMoves() {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget];
+        }
         $hero = $this->game->getHero($this->getOwner());
         $cards = $hero->getHandCards();
         $targets = [];

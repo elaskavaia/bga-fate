@@ -17,13 +17,55 @@ namespace Bga\Games\Fate\Operations;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Use Equipment free action: hero uses an equipped item.
+ * useEquipment: Free action — hero activates an equipped item's effect.
+ *
+ * Behaviour:
+ * - Player selects an equipment card from their tableau
+ * - The card's `r` column expression is queued (e.g. "gainDamage:1preventDamage")
+ * - The `r` expression handles costs (gainDamage) and effects (preventDamage) via paygain
+ *
+ * Rules: "Use Equipment" is a free action. Equipment effects cost [DAMAGE] (durability).
+ *        Cards that prevent damage may be used once each time you receive damage.
  */
 class Op_useEquipment extends Operation {
-    public function getPossibleMoves() {
-        return [];
+    function getPrompt() {
+        return clienttranslate("Choose an equipment card to use");
     }
+
+    function getPossibleMoves() {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget];
+        }
+        $owner = $this->getOwner();
+        $cards = $this->game->tokens->getTokensOfTypeInLocation("card_equip", "tableau_$owner");
+        $targets = [];
+        foreach ($cards as $card) {
+            $cardId = $card["key"];
+            $r = $this->game->material->getRulesFor($cardId, "r", "");
+            if ($r === "" || $r === "passive") {
+                continue;
+            }
+            $op = $this->game->machine->instanciateOperation($r, $owner, ["card" => $cardId]);
+            $targets[$cardId] = $op->getErrorInfo();
+        }
+        return $targets;
+    }
+
     function resolve(): void {
-        $this->game->systemAssert("Op_useEquipment is not implemented");
+        $cardId = $this->getCheckedArg();
+        $hero = $this->game->getHero($this->getOwner());
+        $effect = $this->game->material->getRulesFor($cardId, "effect", "");
+        $this->game->notifyMessage(clienttranslate('${char_name} uses ${token_name}: ${effect_text}'), [
+            "char_name" => $hero->getId(),
+            "token_name" => $cardId,
+            "effect_text" => $effect,
+        ]);
+        $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+        $this->queue($r, $this->getOwner(), ["card" => $cardId]);
+    }
+
+    public function getUiArgs() {
+        return ["buttons" => false];
     }
 }

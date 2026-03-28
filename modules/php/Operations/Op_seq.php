@@ -34,9 +34,11 @@ class Op_seq extends ComplexOperation {
         $c = $this->getCount();
         foreach ($this->delegates as $sub) {
             $sub->destroy();
-            $sub->withDataField("reason", $this->getReason());
-            $sub->withDataField("count", $sub->getDataField("count", 1) * $c);
-            $sub->withDataField("mcount", $sub->getDataField("mcount", 1) * $c);
+            $max = $sub->getDataField("count", 1);
+            $min = $sub->getDataField("mcount", 1);
+            $sub->withData($this->getData());
+            $sub->withDataField("count", $max * $c);
+            $sub->withDataField("mcount", $min * $c);
             $sub->saveToDb($rank, false);
             $rank++;
         }

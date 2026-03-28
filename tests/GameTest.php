@@ -356,7 +356,27 @@ final class GameTest extends TestCase {
             if ($r === "" || $r === "custom") {
                 continue;
             }
-            echo "testing event card $key r=$r\n";
+            //echo "testing event card $key r=$r\n";
+            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
+        }
+    }
+
+    public function testInstanciateAllEquipCardOperations() {
+        $this->game();
+        $this->game->setupGameTables();
+        $heroId = $this->game->getHeroTokenId(PCOLOR);
+        $this->game->tokens->moveToken($heroId, "hex_9_9");
+
+        foreach ($this->game->material->get() as $key => $info) {
+            if (!str_starts_with($key, "card_equip_")) {
+                continue;
+            }
+            $r = $info["r"] ?? "";
+            if ($r === "" || str_contains($r, "custom") || str_contains($r, "passive")) {
+                continue;
+            }
+            echo "testing equip card $key r=$r\n";
             $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }

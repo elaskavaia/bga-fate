@@ -21,6 +21,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useAbility extends Operation {
     public function getPossibleMoves() {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget];
+        }
         return [];
     }
     function resolve(): void {

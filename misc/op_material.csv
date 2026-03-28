@@ -46,7 +46,7 @@ actionPractice|Practice
 # Free actions (can be done between/after main actions)
 #set kind=free
 #set inline=1
-useEquipment|Use Equipment|"notimpl"=>true
+useEquipment|Use Equipment
 useAbility|Use Ability|"notimpl"=>true
 playEvent|Play Event
 #shareGold|Share Gold|"notimpl"=>true
@@ -58,6 +58,7 @@ playEvent|Play Event
 dealDamage|Deal Damage
 gainMana|Gain Mana
 spendMana|Spend Mana
+gainDamage|Gain Damage
 spendAction|Spend Action
 roll|Roll Dice
 resolveHits|Resolve Hits

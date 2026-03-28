@@ -703,6 +703,35 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_gainDamage(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Place Helmet (durability 3) on tableau
+        $cardId = "card_equip_1_21";
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_{$color}");
+        // Add 1 existing damage so we can see it accumulate
+        $heroId = $this->getHeroTokenId($color);
+        $this->effect_moveCrystals($heroId, "red", 1, $cardId, ["message" => ""]);
+        $this->machine->push("gainDamage", $color, ["card" => $cardId]);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_useEquipment(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        // Place Leather Purse (dur 3, gainDamage:2heal(adj)) and Throwing Axes (dur 2, gainDamage:3roll(adj))
+        $this->tokens->dbSetTokenLocation("card_equip_1_19", "tableau_{$color}");
+        $this->tokens->dbSetTokenLocation("card_equip_1_17", "tableau_{$color}");
+        // Add damage to hero so heal(adj) is not void
+        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
+        // Place a goblin adjacent so roll(adj) has a target
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", $adjHexes[0]);
+        $this->hexMap->invalidateOccupancy();
+        //$this->machine->push("useEquipment", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }

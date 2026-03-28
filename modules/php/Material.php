@@ -300,7 +300,6 @@ class Material {
         "inline" => 1,
         "type" => "useEquipment",
         "name" => clienttranslate("Use Equipment"),
-        "notimpl"=>true,
 ],
     "Op_useAbility" => [ 
         "kind" => "free",
@@ -328,6 +327,10 @@ class Material {
     "Op_spendMana" => [ 
         "type" => "spendMana",
         "name" => clienttranslate("Spend Mana"),
+],
+    "Op_gainDamage" => [ 
+        "type" => "gainDamage",
+        "name" => clienttranslate("Gain Damage"),
 ],
     "Op_spendAction" => [ 
         "type" => "spendAction",
