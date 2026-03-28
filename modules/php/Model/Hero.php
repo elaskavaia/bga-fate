@@ -83,8 +83,8 @@ class Hero extends Character {
         return count($this->getHandCards());
     }
 
-    function getHandLimit(): int {
-        // Starsong II: "You may have 5 cards in hand."
+    /** Compute base hand limit. Default 4, Starsong II raises to 5. */
+    function calcBaseHand(): int {
         $loc = $this->game->tokens->getTokenLocation("card_ability_2_8");
         if ($loc === "tableau_{$this->owner}") {
             return 5;
@@ -136,6 +136,7 @@ class Hero extends Character {
         $this->game->tokens->dbSetTokenState("tracker_range_{$this->owner}", $this->calcBaseRange());
         $this->game->tokens->dbSetTokenState("tracker_move_{$this->owner}", $this->calcBaseMove());
         $this->game->tokens->dbSetTokenState("tracker_health_{$this->owner}", $this->calcBaseHealth());
+        $this->game->tokens->dbSetTokenState("tracker_hand_{$this->owner}", $this->calcBaseHand());
     }
 
     /** Increment a tracker value mid-turn (e.g. card effect: move +1). */
@@ -161,6 +162,11 @@ class Hero extends Character {
     /** Returns the current number of moves from tracker. */
     function getNumberOfMoves(): int {
         return $this->game->tokens->getTrackerValue($this->owner, "move");
+    }
+
+    /** Returns the current hand limit from tracker. */
+    function getHandLimit(): int {
+        return $this->game->tokens->getTrackerValue($this->owner, "hand");
     }
 
     /**

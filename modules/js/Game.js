@@ -2202,14 +2202,16 @@ class Game extends GameMachine {
                 if (!player)
                     break;
                 const color = player.color;
-                const strength = this.getTokenState(`tracker_strength_${color}`) ?? 0;
-                const health = this.getTokenState(`tracker_health_${color}`) ?? 0;
-                const range = this.getTokenState(`tracker_range_${color}`) ?? 0;
-                const move = this.getTokenState(`tracker_move_${color}`) ?? 0;
+                const strength = this.getTokenState(`tracker_strength_${color}`) || 0;
+                const health = this.getTokenState(`tracker_health_${color}`) || 0;
+                const range = this.getTokenState(`tracker_range_${color}`) || 0;
+                const move = this.getTokenState(`tracker_move_${color}`) || 0;
+                const hand = this.getTokenState(`tracker_hand_${color}`) || 0;
                 tokenInfo.tooltip += this.ttSection(_("Strength"), String(strength));
                 tokenInfo.tooltip += this.ttSection(_("Health"), String(health));
                 tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
                 tokenInfo.tooltip += this.ttSection(_("Move"), String(move));
+                tokenInfo.tooltip += this.ttSection(_("Hand Limit"), String(hand));
                 break;
             }
             case "house": {

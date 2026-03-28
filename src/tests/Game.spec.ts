@@ -166,6 +166,56 @@ describe("Game.updateTokenDisplayInfo", () => {
   });
 });
 
+describe("Game.updateTokenDisplayInfo hero tooltip", () => {
+  let game: Game;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="ebd-body"></div>';
+    game = new Game(createMockBga());
+    (game as any).gamedatas = {
+      tokens: {
+        tracker_strength_ff0000: { key: "tracker_strength_ff0000", location: "tableau_ff0000", state: 3 },
+        tracker_health_ff0000: { key: "tracker_health_ff0000", location: "tableau_ff0000", state: 9 },
+        tracker_range_ff0000: { key: "tracker_range_ff0000", location: "tableau_ff0000", state: 2 },
+        tracker_move_ff0000: { key: "tracker_move_ff0000", location: "tableau_ff0000", state: 3 },
+        tracker_hand_ff0000: { key: "tracker_hand_ff0000", location: "tableau_ff0000", state: 4 },
+      },
+      token_types: {
+        hero: { name: "Hero", type: "hero", create: 1 },
+      },
+      players: {
+        1: { id: 1, color: "ff0000", heroNo: 1 },
+      },
+    };
+  });
+
+  it("should show all attributes in hero tooltip", () => {
+    const info = game.getTokenDisplayInfo("hero_1");
+    expect(info.tooltip).to.include("Strength");
+    expect(info.tooltip).to.include("3");
+    expect(info.tooltip).to.include("Health");
+    expect(info.tooltip).to.include("9");
+    expect(info.tooltip).to.include("Range");
+    expect(info.tooltip).to.include("2");
+    expect(info.tooltip).to.include("Move");
+    expect(info.tooltip).to.include("Hand Limit");
+    expect(info.tooltip).to.include("4");
+  });
+
+  it("should show zero values when trackers are missing", () => {
+    (game as any).gamedatas.tokens = {};
+    const info = game.getTokenDisplayInfo("hero_1");
+    expect(info.tooltip).to.include("Strength");
+    expect(info.tooltip).to.include("0");
+  });
+
+  it("should return empty tooltip when no matching player", () => {
+    (game as any).gamedatas.players = {};
+    const info = game.getTokenDisplayInfo("hero_1");
+    expect(info.tooltip).to.equal("");
+  });
+});
+
 describe("Game.onClickSanity", () => {
   let game: Game;
 

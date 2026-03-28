@@ -573,6 +573,14 @@ class Material {
         "create" => 4,
         "location" => "tableau_{COLOR}",
 ],
+    "tracker_hand" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Hand Limit"),
+        "count" => 0,
+        "type" => "tracker",
+        "create" => 4,
+        "location" => "tableau_{COLOR}",
+],
             /* --- gen php end token_material --- */
 
             /* --- gen php begin monster_material --- */

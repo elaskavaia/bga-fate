@@ -46,4 +46,5 @@ tracker_strength|Strength|0|tracker|4|tableau_{COLOR}
 tracker_range|Attack Range|0|tracker|4|tableau_{COLOR}
 tracker_move|Move|0|tracker|4|tableau_{COLOR}
 tracker_health|Health|0|tracker|4|tableau_{COLOR}
+tracker_hand|Hand Limit|0|tracker|4|tableau_{COLOR}
 

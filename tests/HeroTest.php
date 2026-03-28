@@ -174,6 +174,25 @@ final class HeroTest extends TestCase {
         $this->assertEquals(4, $hero->getNumberOfMoves());
     }
 
+    // -------------------------------------------------------------------------
+    // getHandLimit
+    // -------------------------------------------------------------------------
+
+    public function testDefaultHandLimit4(): void {
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(4, $hero->getHandLimit());
+    }
+
+    public function testStarsongIIRaisesHandLimitTo5(): void {
+        $game = new GameUT();
+        $game->initWithHero(2);
+        $hero = $game->getHeroById("hero_2");
+        $color = $hero->getOwner();
+        $game->tokens->moveToken("card_ability_2_8", "tableau_{$color}");
+        $hero->recalcTrackers();
+        $this->assertEquals(5, $hero->getHandLimit());
+    }
+
     public function testHeroWithoutBowHasRange1(): void {
         // Remove bow
         $this->game->tokens->moveToken("card_equip_1_15", "limbo");

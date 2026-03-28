@@ -66,6 +66,7 @@ final class Op_drawEventTest extends TestCase {
 
     public function testStarsongIIOffersConfirmAtHandSize4(): void {
         $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
+        $this->game->getHero(PCOLOR)->recalcTrackers();
         $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
         $this->assertCount(4, $this->getHandCards());
         $op = $this->createOp();
@@ -75,6 +76,7 @@ final class Op_drawEventTest extends TestCase {
 
     public function testStarsongIIPromtsDiscardAtHandSize5(): void {
         $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
+        $this->game->getHero(PCOLOR)->recalcTrackers();
         $this->fillHandFromDeck(4); // 1 from setup + 4 = 5
         $this->assertCount(5, $this->getHandCards());
         $op = $this->createOp();
