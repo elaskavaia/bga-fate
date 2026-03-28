@@ -381,16 +381,6 @@ class Game extends Base {
     }
 
     /**
-     * Roll attack dice: announce the attack, clean up previous dice, roll, count hits and return hit count.
-     * Used by Op_actionAttack and Op_monsterAttack (monolithic flow).
-     * @return int number of hits
-     */
-    function rollAttackDice(string $attackerId, string $defenderId, int $strength): int {
-        $this->effect_rollAttackDice($attackerId, $defenderId, $strength);
-        return $this->effect_resolveHits($attackerId, $defenderId);
-    }
-
-    /**
      * Destroy N town pieces (houses). Freyja's Well (house_0) is always destroyed last.
      * @param string $charId token causing the destruction (for log messages and animation)
      * @param string $message log message per house destroyed (use ${token_name} for causeTokenId)

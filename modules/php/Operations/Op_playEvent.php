@@ -33,20 +33,29 @@ class Op_playEvent extends Operation {
         return clienttranslate("Choose an Event card to play");
     }
 
+    function getTrigger() {
+        return $this->getDataField("on", "");
+    }
+
     function getPossibleMoves() {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
             return [$presetTarget];
         }
         $hero = $this->game->getHero($this->getOwner());
+        $trigger = $this->getTrigger();
         $cards = $hero->getHandCards();
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
-            // Only event cards can be played
-            if (str_starts_with($cardId, "card_event_")) {
-                $targets[$cardId] = ["q" => Material::RET_OK];
+            if (!str_starts_with($cardId, "card_event_")) {
+                continue;
             }
+            $on = $this->game->material->getRulesFor($cardId, "on", "");
+            if ($on !== $trigger) {
+                continue;
+            }
+            $targets[$cardId] = ["q" => Material::RET_OK];
         }
         return $targets;
     }

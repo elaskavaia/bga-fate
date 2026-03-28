@@ -37,6 +37,7 @@ class Op_turnEnd extends Operation {
             $dieKeys = array_map(fn($d) => $d["key"], $dice);
             $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
         }
+        $this->queueTrigger();
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
         // 3. Add mana to cards with mana generation (green icon)

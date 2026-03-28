@@ -82,6 +82,10 @@ class Op_roll extends CountableOperation {
         // Roll dice onto display_battle
         $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount);
 
+        // Only trigger on player rolls (hero is attacker), not monster rolls
+        if (str_starts_with($attackerId, "hero_")) {
+            $this->queueTrigger();
+        }
         // Queue resolveHits to convert dice into dealDamage
         $this->queue("resolveHits", null, [
             "attacker" => $attackerId,

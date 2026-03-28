@@ -122,6 +122,15 @@ abstract class CampaignBaseTest extends TestCase {
         $this->game->tokens->moveToken($cardId, "hand_$color");
     }
 
+    /** Skip any pending trigger operations (e.g. on=roll reactions) */
+    protected function skipTriggers(): void {
+        $args = $this->getOpArgs();
+        while (($args["type"] ?? "") === "trigger") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+    }
+
     /** Seed upcoming bgaRand results (e.g. dice rolls: 5=hit, 1=miss) */
     protected function seedRand(array $values): void {
         $this->game->randQueue = array_merge($this->game->randQueue, $values);

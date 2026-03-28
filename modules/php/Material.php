@@ -388,6 +388,11 @@ class Material {
         "type" => "discardEvent",
         "name" => clienttranslate("Discard Event"),
 ],
+// # Trigger (automatic, fires in response to game events)
+    "Op_trigger" => [ 
+        "type" => "trigger",
+        "name" => clienttranslate("Trigger"),
+],
             /* --- gen php end op_material --- */
 
             /* --- gen php begin token_material --- */
@@ -3363,6 +3368,7 @@ class Material {
         "name" => clienttranslate("Eagle Eye I"),
         "strength" => 1,
         "r" => "passive",
+        "effect" => "You have attack range +1",
         "flavour" => "If I can see it, I can hit it.",
 ],
     "card_ability_1_10" => [ 
@@ -3374,6 +3380,7 @@ class Material {
         "name" => clienttranslate("Eagle Eye II"),
         "strength" => 2,
         "r" => "passive",
+        "effect" => "You have attack range +2. Always ignore the armor",
         "flavour" => "Yeah, why shoot the armor?",
 ],
     "card_ability_1_11" => [ 
@@ -3383,7 +3390,7 @@ class Material {
         "num" => 11,
         "hno" => 1,
         "name" => clienttranslate("Long Shot I"),
-        "r" => "passive",
+        "r" => "custom",
         "on" => "actionAttack",
         "effect" => "Add 2 damage to your attack action if target is at range 2 or more.",
         "flavour" => "Sure, it's a long shot. But Bjorn enjoys a challenge.",
@@ -3395,9 +3402,9 @@ class Material {
         "num" => 12,
         "hno" => 1,
         "name" => clienttranslate("Long Shot II"),
-        "r" => "passive",
+        "r" => "custom",
         "on" => "actionAttack",
-        "effect" => "Add damage to wach attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.",
+        "effect" => "Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.",
 ],
     "card_ability_1_13" => [ 
         "ctype" => "ability",
@@ -3406,7 +3413,7 @@ class Material {
         "num" => 13,
         "hno" => 1,
         "name" => clienttranslate("Nailed Together I"),
-        "r" => "passive",
+        "r" => "custom",
         "on" => "actionAttack",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).",
 ],
@@ -3418,7 +3425,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Nailed Together II"),
         "strength" => 2,
-        "r" => "passive",
+        "r" => "custom",
         "on" => "actionAttack",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.",
 ],
@@ -5033,6 +5040,8 @@ class Material {
         "name" => clienttranslate("Bjorn"),
         "strength" => 2,
         "health" => 9,
+        "r" => "spendAction(actionFocus):2dealDamage",
+        "on" => "roll",
         "effect" => "After any dice roll, you may spend 1 focus action to add 2 damage.",
         "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
 ],
@@ -5045,6 +5054,8 @@ class Material {
         "name" => clienttranslate("Bjorn"),
         "strength" => 4,
         "health" => 10,
+        "r" => "spendAction(actionFocus):3dealDamage",
+        "on" => "roll",
         "effect" => "After any dice roll, you may spend 1 focus action to add 3 damage.",
         "flavour" => "Bjorn can solve any problem, including the problems caused by his previous solutions.",
 ],

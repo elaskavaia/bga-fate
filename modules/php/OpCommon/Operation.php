@@ -232,6 +232,13 @@ abstract class Operation {
         //$this->game->debugConsole("queue $type");
     }
 
+    function queueTrigger(?string $optype = null) {
+        if ($optype == null) {
+            $optype = $this->getType();
+        }
+        $this->queue("trigger($optype)", $this->getOwner());
+    }
+
     /**
      * wrapper for dbSetTokenLocation to pass proper player that owns the action
      */

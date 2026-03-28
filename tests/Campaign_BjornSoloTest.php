@@ -55,6 +55,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Attack goblin — all dice miss (bgaRand returns 1=miss by default)
         $this->respond($goblinHexTurn1);
+        $this->skipTriggers(); // Bjorn hero card triggers on roll
 
         // Goblin should still be alive (no damage from misses)
         $this->assertEquals($goblinHexTurn1, $this->tokenLocation($goblin));
@@ -94,6 +95,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertValidTarget($goblinHexTurn1);
 
         $this->respond($goblinHexTurn1);
+        $this->skipTriggers(); // Bjorn hero card triggers on roll
 
         // Goblin is dead (health=2, took 2 hits)
         $this->assertNotEquals($goblinHexTurn1, $this->tokenLocation($goblin));

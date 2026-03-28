@@ -46,8 +46,9 @@ class Op_actionAttack extends Operation {
         $strength = $hero->getAttackStrength();
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
 
-        $this->queue("{$strength}roll", null, [
+        $this->queue("roll", null, [
             "target" => $targetHex,
+            "count" => $strength,
         ]);
     }
 }

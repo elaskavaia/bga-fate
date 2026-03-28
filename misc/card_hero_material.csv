@@ -8,8 +8,8 @@ num|hno|name|strength|health|r|on|effect|flavour
 #set _noquotes=create
 #set _noquotes=attack_range
 # Heroes
-1|1|Bjorn|2|9|||After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.
-2|1|Bjorn|4|10|||After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.
+1|1|Bjorn|2|9|spendAction(actionFocus):2dealDamage|roll|After any dice roll, you may spend 1 focus action to add 2 damage.|Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.
+2|1|Bjorn|4|10|spendAction(actionFocus):3dealDamage|roll|After any dice roll, you may spend 1 focus action to add 3 damage.|Bjorn can solve any problem, including the problems caused by his previous solutions.
 1|2|Alva|2|9|||End your move action in a forest to add 1 mana [MANA] to any card.|Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that - butterflies are pretty!
 2|2|Alva|4|10|||End any movement in a forset to add 1 mana [MANA] to any card.|I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.
 1|3|Embla|3|9|||Move 4.|Embla is fast, really tough, and passionately competetive. She is inarguably the best defender of Grimheim... because you just don't argue with her.

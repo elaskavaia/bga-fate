@@ -1281,6 +1281,18 @@
   flex-wrap: wrap;
   gap: 4px;
 }
+.tableau .card {
+  order: 10;
+}
+.tableau .card_hero {
+  order: 1;
+}
+.tableau .card_equip {
+  order: 2;
+}
+.tableau .card_ability {
+  order: 3;
+}
 
 .pboard {
   position: relative;
@@ -1754,20 +1766,20 @@ html:before {
   background-position-y: 8%;
 }
 #logs .roundedbox {
-  background-color: #bce7d5;
+  background-color: #b5e6e3;
 }
 
 #right-side-first-part {
   background-position-y: 8%;
 }
 #right-side-first-part .player-board {
-  background-color: #bce7d5;
+  background-color: #b5e6e3;
 }
 
 #page-title {
   min-height: 76px !important;
   line-height: 24px;
-  background-color: #bce7d5 !important;
+  background-color: #b5e6e3 !important;
 }
 
 #pagemaintitle_wrap {

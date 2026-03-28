@@ -32,12 +32,17 @@ class Op_useEquipment extends Operation {
         return clienttranslate("Choose an equipment card to use");
     }
 
+    function getTrigger() {
+        return $this->getDataField("on", "");
+    }
+
     function getPossibleMoves() {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
             return [$presetTarget];
         }
         $owner = $this->getOwner();
+        $trigger = $this->getTrigger();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card_equip", "tableau_$owner");
         $targets = [];
         foreach ($cards as $card) {
@@ -46,6 +51,12 @@ class Op_useEquipment extends Operation {
             if ($r === "" || $r === "passive") {
                 continue;
             }
+
+            $on = $this->game->material->getRulesFor($cardId, "on", "");
+            if ($on !== $trigger) {
+                continue;
+            }
+
             $op = $this->game->machine->instanciateOperation($r, $owner, ["card" => $cardId]);
             $targets[$cardId] = $op->getErrorInfo();
         }

@@ -41,6 +41,7 @@ class Op_actionMove extends Operation {
 
     function resolve(): void {
         $this->queue($this->getDelegateOperation(), null, ["target" => $this->getDataField("target", "")]);
+        $this->queueTrigger();
     }
 
     public function getUiArgs() {

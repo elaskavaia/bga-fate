@@ -275,6 +275,19 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px;
+
+  .card {
+    order: 10;
+  }
+  .card_hero {
+    order: 1;
+  }
+  .card_equip {
+    order: 2;
+  }
+  .card_ability {
+    order: 3;
+  }
 }
 
 // --- Player board (pboard): background image with positioned slots ---

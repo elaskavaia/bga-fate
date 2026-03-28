@@ -80,7 +80,7 @@ final class Op_actionAttackTest extends TestCase {
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("3roll", $opTypes);
+        $this->assertContains("roll", $opTypes);
     }
 
     public function testResolveRollHasTargetData(): void {

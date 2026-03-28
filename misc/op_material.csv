@@ -74,3 +74,6 @@ addTownPiece|Add Town Piece
 
 drawEvent|Draw Event
 discardEvent|Discard Event
+
+# Trigger (automatic, fires in response to game events)
+trigger|Trigger
