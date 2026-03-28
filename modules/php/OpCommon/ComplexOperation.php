@@ -21,6 +21,18 @@ abstract class ComplexOperation extends CountableOperation {
     /** @var Operation[] */
     public array $delegates = [];
 
+    function withData($data) {
+        parent::withData($data);
+        foreach ($this->delegates as $sub) {
+            $count = $sub->getDataField("count");
+            $mcount = $sub->getDataField("mcount");
+            $sub->withData($data);
+            if ($count !== null) $sub->withDataField("count", $count);
+            if ($mcount !== null) $sub->withDataField("mcount", $mcount);
+        }
+        return $this;
+    }
+
     function getDataForDb() {
         $data = $this->getData() ?? [];
         $data["args"] = [];
@@ -35,7 +47,8 @@ abstract class ComplexOperation extends CountableOperation {
         }
         $data = $this->getDataForDb();
         $data["count"] = $count;
-        $data["mcount"] = $count;
+        $data["mcount"] = $mcount;
+        return $data;
     }
 
     function canSkip() {
