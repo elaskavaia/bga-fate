@@ -62,15 +62,14 @@ class Op_turnMonster extends Operation {
         }
     }
 
-    // TODO: support long time track (timetrack_2) based on game option
     private function advanceTimeTrack(): void {
         $currentStep = $this->game->tokens->getTokenState("rune_stone");
         $nextStep = $currentStep + 1;
-        $maxSteps = Material::TIME_TRACK_SHORT_LENGTH;
+        $maxSteps = $this->game->getTimeTrackLength();
 
         $this->game->tokens->dbSetTokenLocation(
             "rune_stone",
-            "timetrack_1", // short track
+            "timetrack_1", // TODO: support timetrack_2 for long track variant
             $nextStep,
             clienttranslate('Rune Stone advances to step ${step} of ${max}'),
             [

@@ -95,7 +95,7 @@ class Game extends Base {
             1,
             clienttranslate('Rune Stone advances to step ${new_state} of ${max}'),
             [
-                "max" => Material::TIME_TRACK_SHORT_LENGTH,
+                "max" => $this->getTimeTrackLength(),
             ]
         );
 
@@ -260,12 +260,14 @@ class Game extends Base {
         (see states.inc.php)
     */
     function getGameProgression() {
-        return 0; // TODO impement
+        $currentStep = $this->tokens->getTokenState("rune_stone");
+        $maxSteps = $this->getTimeTrackLength();
+        return min(100, (int) round($currentStep / $maxSteps * 100));
     }
 
     function isEndOfGame() {
         $currentStep = $this->tokens->getTokenState("rune_stone");
-        $maxSteps = Material::TIME_TRACK_SHORT_LENGTH;
+        $maxSteps = $this->getTimeTrackLength();
 
         if ($currentStep >= $maxSteps) {
             return true;
@@ -455,6 +457,11 @@ class Game extends Base {
 
     function getVariantSoloBoard() {
         return (int) $this->getGameStateValue("variant_solo_board");
+    }
+
+    function getTimeTrackLength(): int {
+        // TODO: check game option for long track variant
+        return Material::TIME_TRACK_SHORT_LENGTH;
     }
 
     /**

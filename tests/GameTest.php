@@ -460,4 +460,25 @@ final class GameTest extends TestCase {
         $result = $this->game->evaluateExpression("adj", PCOLOR, "monster_goblin_1");
         $this->assertEquals(0, $result);
     }
+
+    // -------------------------------------------------------------------------
+    // getGameProgression
+    // -------------------------------------------------------------------------
+
+    public function testGameProgressionAtStart(): void {
+        $this->game->tokens->createAllTokens();
+        $this->assertEquals(0, $this->game->getGameProgression());
+    }
+
+    public function testGameProgressionMidGame(): void {
+        $this->game->tokens->createAllTokens();
+        $this->game->tokens->moveToken("rune_stone", "timetrack_1", 6);
+        $this->assertEquals(50, $this->game->getGameProgression());
+    }
+
+    public function testGameProgressionAtEnd(): void {
+        $this->game->tokens->createAllTokens();
+        $this->game->tokens->moveToken("rune_stone", "timetrack_1", 12);
+        $this->assertEquals(100, $this->game->getGameProgression());
+    }
 }

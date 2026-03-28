@@ -358,15 +358,15 @@ See CLAUDE.md for project overview
 ### Server
 [ ] Equipment: once-per-turn activation
 [ ] Ability: once-per-turn activation
-[ ] Ability: costs mana
+[X] Ability: costs mana
 [ ] Hero card effect applies during relevant actions
 [x] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
-[ ] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
+[x] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 
 ### Tests
-[ ] Test ability activation and mana spending
-[ ] Integration tests: use equipment with durability cost → effect executes
-[ ] Test equipment attack bonus
+[x] Test ability activation and mana spending
+[x] Integration tests: use equipment with durability cost → effect executes
+[x] Test equipment attack bonus
 
 ---
 
@@ -450,7 +450,7 @@ See CLAUDE.md for project overview
 [ ] Visual indicators (current turn, threats, quest progress)
 
 ### BGA Requirements
-[ ] `getGameProgression()` based on time track
+[x] `getGameProgression()` based on time track
 [ ] `zombieTurn()` for disconnected players
 [ ] Game statistics in stats.json
 [ ] All strings translatable

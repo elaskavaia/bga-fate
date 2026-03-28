@@ -27,6 +27,7 @@ class Material {
     const MA_PREF_CONFIRM_TURN = 101;
 
     const TIME_TRACK_SHORT_LENGTH = 12;
+    const TIME_TRACK_LONG_LENGTH = 16;
 
     const SPAWN_FACTION = [
         "DarkForest" => "trollkin",
