@@ -127,7 +127,7 @@
 .die {
   background-image: url("img/dice.png");
   aspect-ratio: 1;
-  height: 64px;
+  height: 32px;
   background-size: 600% auto;
 }
 
@@ -841,13 +841,14 @@
 }
 
 #deck_monster_yellow {
-  background-color: #c9a83a;
-  border-color: #a08520;
+  background-image: url(img/Events_Backs.webp);
+  background-size: 200% auto;
 }
 
 #deck_monster_red {
-  background-color: #a03030;
-  border-color: #7a2020;
+  background-image: url(img/Events_Backs.webp);
+  background-size: 200% auto;
+  background-position: 100% 0%;
 }
 
 .bucket_crystal_green {

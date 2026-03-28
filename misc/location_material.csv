@@ -9,7 +9,7 @@ deck_monster_red|Red Monster Deck|display_monsterturn|global|public|hidden|
 display_monsterturn|Monster Cards|thething|global|hidden|public|
 
 # Battle display (dice rolled during attack)
-display_battle|Battle|thething|global|hidden|public|
+display_battle|Battle|board_area|global|hidden|public|
 
 
 

@@ -3173,7 +3173,7 @@ class Material {
     "display_battle" => [ 
         "type" => "location",
         "name" => clienttranslate("Battle"),
-        "location" => "thething",
+        "location" => "board_area",
         "scope" => "global",
         "counter" => "hidden",
         "content" => "public",
