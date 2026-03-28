@@ -132,11 +132,11 @@ class Hero extends Character {
 
     /** Recompute all attribute trackers from base card values. Call at setup and end of turn. */
     function recalcTrackers(): void {
-        $this->game->tokens->dbSetTokenState("tracker_strength_{$this->owner}", $this->calcBaseStrength());
-        $this->game->tokens->dbSetTokenState("tracker_range_{$this->owner}", $this->calcBaseRange());
-        $this->game->tokens->dbSetTokenState("tracker_move_{$this->owner}", $this->calcBaseMove());
-        $this->game->tokens->dbSetTokenState("tracker_health_{$this->owner}", $this->calcBaseHealth());
-        $this->game->tokens->dbSetTokenState("tracker_hand_{$this->owner}", $this->calcBaseHand());
+        $this->game->tokens->dbSetTokenState("tracker_strength_{$this->owner}", $this->calcBaseStrength(), "");
+        $this->game->tokens->dbSetTokenState("tracker_range_{$this->owner}", $this->calcBaseRange(), "");
+        $this->game->tokens->dbSetTokenState("tracker_move_{$this->owner}", $this->calcBaseMove(), "");
+        $this->game->tokens->dbSetTokenState("tracker_health_{$this->owner}", $this->calcBaseHealth(), "");
+        $this->game->tokens->dbSetTokenState("tracker_hand_{$this->owner}", $this->calcBaseHand(), "");
     }
 
     /** Increment a tracker value mid-turn (e.g. card effect: move +1). */

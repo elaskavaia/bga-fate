@@ -61,8 +61,18 @@ class Op_reinforcement extends Operation {
 
     /** Map card number to legend number. Yellow 1-6, Red 37-42. */
     const CARD_LEGEND_MAP = [
-        1 => [1, 1], 2 => [2, 1], 3 => [3, 1], 4 => [4, 1], 5 => [5, 1], 6 => [6, 1],
-        37 => [1, 2], 38 => [2, 2], 39 => [3, 2], 40 => [4, 2], 41 => [5, 2], 42 => [6, 2],
+        1 => [1, 1],
+        2 => [2, 1],
+        3 => [3, 1],
+        4 => [4, 1],
+        5 => [5, 1],
+        6 => [6, 1],
+        37 => [1, 2],
+        38 => [2, 2],
+        39 => [3, 2],
+        40 => [4, 2],
+        41 => [5, 2],
+        42 => [6, 2],
     ];
 
     /** Place monsters from a specific card. Returns true on success, false if skipped. */
@@ -82,12 +92,7 @@ class Op_reinforcement extends Operation {
         if ($isLegendCard) {
             $legendTokenId = $this->getLegendTokenId($cardId);
             if ($legendTokenId === null) {
-                $this->dbSetTokenLocation(
-                    $cardId,
-                    "display_monsterturn",
-                    1,
-                    clienttranslate('${token_name}: unknown legend — skipping')
-                );
+                $this->dbSetTokenLocation($cardId, "display_monsterturn", 1, clienttranslate('${token_name}: unknown legend — skipping'));
                 return false;
             }
         }
@@ -149,7 +154,7 @@ class Op_reinforcement extends Operation {
         }
 
         foreach ($placements as $monsterId => $hex) {
-            $this->game->getMonster($monsterId)->moveTo($hex);
+            $this->game->getMonster($monsterId)->moveTo($hex, "");
         }
         return true;
     }

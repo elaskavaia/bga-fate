@@ -69,3 +69,56 @@
 //     background-color: $color;
 //   }
 // }
+
+// Miniboard in BGA player panel
+.miniboard {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 4px 0;
+}
+
+// wicon base: icon from tokens.webp sprite
+.wicon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url(img/tokens.webp);
+  background-size: 600% 300%;
+  background-repeat: no-repeat;
+}
+
+// Tracker value display
+.miniboard .tracker::after {
+  content: attr(data-state);
+  position: relative;
+  left: 12px;
+  top: 9px;
+  font-family: var(--accent-game-font);
+  font-weight: bold;
+  font-size: 14px;
+  color: white;
+  text-shadow: v.$textShadowBlack;
+}
+
+.wicon_strength {
+  background-position: 0% 50%;
+  order: 1;
+}
+.wicon_health {
+  background-position: 0% 100%;
+  order: 2;
+}
+.wicon_range {
+  background-position: 20% 100%;
+  order: 3;
+}
+.wicon_move {
+  background-position: 20% 50%;
+  order: 4;
+}
+.wicon_hand {
+  background-position: 100% 100%;
+  order: 5;
+}

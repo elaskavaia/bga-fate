@@ -1947,6 +1947,7 @@ class Game extends GameMachine {
                 const name = this.getRulesFor(d, "name");
                 placeHtml(`<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`, `tableau_${color}`);
             });
+            placeHtml(`<div id="miniboard_${color}" class="miniboard"></div>`, this.bga.playerPanels.getElement(Number(player.id)));
             placeHtml(`
         <div id="pboard_${color}" class="pboard">
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
@@ -2021,6 +2022,12 @@ class Game extends GameMachine {
         const result = { ...tokenInfo };
         const loc = tokenInfo.location;
         const tokenKey = tokenInfo.key;
+        // Redirect tracker tokens to miniboard in player panel
+        if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
+            const color = loc.replace("tableau_", "");
+            result.location = `miniboard_${color}`;
+            result.noa = true;
+        }
         // Stack monsters by type in supply: create sub-container per monster type
         if (loc === "supply_monster") {
             const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"

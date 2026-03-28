@@ -1,8 +1,7 @@
 /* tooltips */
 .tundra .dijitTooltipContainer,
 .tooltipcontainer {
-  background: white;
-  background-image: url(img/bg1.jpg);
+  background-color: unset;
   color: black;
   border: unset;
   border-radius: unset;
@@ -12,6 +11,7 @@
 
 .tundra .dijitTooltipContainer {
   box-shadow: 1px 1px 2px 2px #00000080;
+  background-image: url(img/bg1.jpg);
 }
 
 .tooltipcontainer {

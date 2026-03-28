@@ -101,6 +101,7 @@ export class Game extends GameMachine {
           `tableau_${color}`
         );
       });
+      placeHtml(`<div id="miniboard_${color}" class="miniboard"></div>`, this.bga.playerPanels.getElement(Number(player.id)));
       placeHtml(
         `
         <div id="pboard_${color}" class="pboard">
@@ -194,6 +195,13 @@ export class Game extends GameMachine {
     const result = { ...tokenInfo } as TokenMoveInfo;
     const loc = tokenInfo.location;
     const tokenKey = tokenInfo.key;
+
+    // Redirect tracker tokens to miniboard in player panel
+    if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
+      const color = loc.replace("tableau_", "");
+      result.location = `miniboard_${color}`;
+      result.noa = true;
+    }
 
     // Stack monsters by type in supply: create sub-container per monster type
     if (loc === "supply_monster") {

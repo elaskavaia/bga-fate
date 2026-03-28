@@ -67,8 +67,7 @@ function buildPlayerPanels(gamedatas: any, currentPlayerId: number): void {
   const playerBoards = document.getElementById("player_boards");
   if (!playerBoards) return;
 
-  Object.values(gamedatas.players as Record<string, any>).forEach((player: any) => {
-    const id = player.player_id;
+  Object.entries(gamedatas.players as Record<string, any>).forEach(([id, player]: [string, any]) => {
     const color = player.player_color ?? player.color;
     const name = player.player_name ?? "Player";
     const isCurrent = id == currentPlayerId;
@@ -98,6 +97,11 @@ function buildPlayerPanels(gamedatas: any, currentPlayerId: number): void {
 // current_player_id from script.json; fall back to first player in gamedatas
 const currentPlayerId: number = script.current_player_id ?? parseInt(Object.keys(gamedatas.players)[0], 10);
 buildPlayerPanels(gamedatas, currentPlayerId);
+
+// Populate player.id from key (real BGA framework sets this; harness gamedatas may omit it)
+Object.entries(gamedatas.players as Record<string, any>).forEach(([id, player]) => {
+  if (!player.id) player.id = id;
+});
 
 // ── Expose DOM globals ─────────────────────────────────────────────────────────
 
@@ -294,7 +298,11 @@ const mockBga: any = {
   },
   notifications: { setupPromiseNotifications: () => {} },
   gameArea: { getElement: () => gameArea },
-  playerPanels: {},
+  playerPanels: {
+    getElement: (playerId: number) => {
+      return document.getElementById(`player_board_${playerId}`);
+    }
+  },
   dialogs: { showMessage: () => {}, showMoveUnauthorized: () => {} },
   states
 };
