@@ -50,10 +50,13 @@ class Op_monsterAttack extends Operation {
         // Rules may require different targeting logic (e.g. closest, random, player choice).
         $heroHex = $this->pickTarget($hexes);
 
-        $this->queue("{$strength}roll", null, [
+        $this->game->tokens->dbSetTokenLocation("marker_attack", $heroHex, 0, "");
+        $this->queue("roll", null, [
             "attacker" => $monsterId,
             "target" => $heroHex,
+            "count" => $strength,
         ]);
+        $this->queue("endOfAttack");
     }
 
     /**

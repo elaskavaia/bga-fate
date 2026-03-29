@@ -470,6 +470,12 @@ class Game extends Base {
         return new Hero($this, $this->getHeroTokenId($owner));
     }
 
+    /** Return the hex targeted by the current attack, or null if no attack in progress. */
+    function getAttackHex(): ?string {
+        $loc = $this->tokens->getTokenLocation("marker_attack");
+        return ($loc !== null && $loc !== "limbo") ? $loc : null;
+    }
+
     /** Factory: create a Hero model from a hero token id. */
     function getHeroById(string $heroId): Hero {
         return new Hero($this, $heroId);

@@ -425,4 +425,31 @@ final class HexMapTest extends TestCase {
         $this->assertCount(1, $monsters);
         $this->assertEquals("monster_goblin_1", $monsters[0]["id"]);
     }
+
+    // -------------------------------------------------------------------------
+    // getHexesBehind
+    // -------------------------------------------------------------------------
+
+    public function testHexesBehindReturnsHexesFartherFromOrigin(): void {
+        // Hero at hex_8_9 (Grimheim edge), target at hex_7_9 (adjacent, 1 away)
+        // Behind hexes: adjacent to hex_7_9 AND farther from hex_8_9 than 1
+        $behind = $this->game->hexMap->getHexesBehind("hex_8_9", "hex_7_9");
+        // All results should be distance > 1 from hero
+        foreach ($behind as $hex) {
+            $this->assertGreaterThan(1, $this->game->hexMap->getHexDistance("hex_8_9", $hex), "$hex should be farther from hero");
+        }
+        $this->assertNotEmpty($behind);
+    }
+
+    public function testHexesBehindExcludesCloserHexes(): void {
+        $behind = $this->game->hexMap->getHexesBehind("hex_8_9", "hex_7_9");
+        // hex_8_9 is the hero hex itself (distance 0) — should not be in results
+        $this->assertNotContains("hex_8_9", $behind);
+    }
+
+    public function testHexesBehindMultipleResults(): void {
+        // From hex_9_9 through hex_8_9 — multiple hexes could be behind
+        $behind = $this->game->hexMap->getHexesBehind("hex_9_9", "hex_8_9");
+        $this->assertGreaterThanOrEqual(1, count($behind));
+    }
 }

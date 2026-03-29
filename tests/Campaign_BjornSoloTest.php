@@ -95,7 +95,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertValidTarget($goblinHexTurn1);
 
         $this->respond($goblinHexTurn1);
-        $this->skipTriggers(); // Bjorn hero card triggers on roll
+        $this->skipTriggers(); // Bjorn hero card triggers on roll — no actions left to spend
 
         // Goblin is dead (health=2, took 2 hits)
         $this->assertNotEquals($goblinHexTurn1, $this->tokenLocation($goblin));
@@ -105,6 +105,186 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Skip free actions → end turn
         $this->skip();
+    }
+
+    public function testBjornIHeroCardSpendsFocusAndDealsDamage(): void {
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9"; // adjacent to hero start (hex_8_9), not in Grimheim
+
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        // First action: attack adjacent troll (health=5)
+        // actionAttack auto-resolves (single monster in range)
+        $this->seedRand([5, 5, 5]); // 3 hits from roll
+        $this->respond("actionAttack");
+
+        // Trigger fires — Bjorn I hero card offered (1 action remaining, focus not taken)
+        $this->assertValidTarget("card_hero_1_1");
+        $this->respond("card_hero_1_1");
+        // paygain expands: spendAction(actionFocus) + 2dealDamage both auto-resolve (single targets)
+
+        // Troll took 2 damage from hero card + 3 hits from roll = 5 total (health=7, alive)
+        $this->assertEquals($trollHex, $this->tokenLocation($troll));
+        $this->assertEquals(5, $this->countDamage($troll));
+
+        // Focus action was spent
+        $hero = $this->game->getHero($this->playerColor());
+        $this->assertContains("actionFocus", $hero->getActionsTaken());
+    }
+
+    public function testEagleEyeIAddsStrength(): void {
+        $color = $this->playerColor();
+        // Place Eagle Eye I on tableau
+        $this->game->tokens->moveToken("card_ability_1_9", "tableau_$color");
+        $hero = $this->game->getHero($color);
+        $hero->recalcTrackers();
+
+        // Starting strength 3 (hero=2 + bow=1) + Eagle Eye I (str=1) = 4
+        $this->assertEquals(4, $hero->getAttackStrength());
+
+        // Not offered as a free action (r is empty)
+        $op = $this->game->machine->instanciateOperation("useAbility", $color);
+        $targets = $op->getArgs()["target"];
+        $this->assertNotContains("card_ability_1_9", $targets);
+    }
+
+    public function testEagleEyeIIAddsStrength(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->moveToken("card_ability_1_10", "tableau_$color");
+        $hero = $this->game->getHero($color);
+        $hero->recalcTrackers();
+
+        // Starting strength 3 + Eagle Eye II (str=2) = 5
+        $this->assertEquals(5, $hero->getAttackStrength());
+    }
+
+    public function testLongShotINotOfferedAtRange1(): void {
+        $color = $this->playerColor();
+        // Place both Long Shot cards on tableau — II ensures trigger isn't void
+        $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
+        $this->game->tokens->moveToken("card_ability_1_12", "tableau_$color");
+        // Place goblin adjacent (range 1)
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+        $goblinHex = "hex_7_9"; // adjacent to hero start hex_8_9
+        $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
+
+        // Attack adjacent goblin
+        $this->seedRand([5, 5, 5]);
+        $this->respond("actionAttack");
+
+        // trigger(roll) — hero card offered; skip to reach trigger(actionAttack)
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("roll", $args["data"]["params"] ?? "");
+        $this->skip();
+
+        // trigger(actionAttack) — Long Shot II (dist) is offered, Long Shot I (range 2+) is NOT
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $targets = $args["target"] ?? [];
+        $this->assertNotContains("card_ability_1_11", $targets, "Long Shot I should not be offered at range 1");
+        $this->assertContains("card_ability_1_12", $targets, "Long Shot II should be offered at range 1");
+    }
+
+    public function testLongShotIOfferedAtRange2(): void {
+        $color = $this->playerColor();
+        // Place Long Shot I on tableau
+        $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
+        // Use both action markers
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+        // Place goblin at range 2
+        $goblinHex = "hex_6_9"; // 2 hexes from hero start hex_8_9
+        $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
+
+        // Attack goblin at range 2
+        $this->seedRand([5, 5, 5]);
+        $this->respond("actionAttack");
+
+        // Skip trigger(roll) if it appears, then check trigger(actionAttack)
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        if (($args["data"]["params"] ?? "") === "roll") {
+            $this->skip();
+            $args = $this->getOpArgs();
+            $this->assertEquals("trigger", $args["type"] ?? "");
+        }
+        $this->assertEquals("actionAttack", $args["data"]["params"] ?? "");
+        $targets = $args["target"] ?? [];
+        $this->assertContains("card_ability_1_11", $targets, "Long Shot I should be offered at range 2");
+    }
+
+    public function testNailedTogetherIPiercesDamage(): void {
+        $color = $this->playerColor();
+        // Place Nailed Together I on tableau
+        $this->game->tokens->moveToken("card_ability_1_13", "tableau_$color");
+        // Use both action markers so only attack is available
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+
+        // Hero at hex_8_9 (default). Goblin at hex_7_9 (adjacent, range 1).
+        // Brute at hex_6_9 (behind goblin, range 2 from hero).
+        $goblin = "monster_goblin_20";
+        $brute = "monster_brute_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_9", "");
+        $this->game->getMonster($brute)->moveTo("hex_6_9", "");
+
+        // Bjorn strength=3, goblin health=2 → 3 hits = kill + 1 overkill
+        $this->seedRand([5, 5, 5]); // 3 hits
+        $this->respond("actionAttack");
+        $this->respond("hex_7_9"); // pick the goblin as attack target
+        // Skip trigger(roll) and trigger(actionAttack), wait for trigger(monsterKilled)
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("roll", $args["data"]["params"] ?? "");
+        $this->skip();
+
+        // trigger(actionAttack) may appear — skip if so
+        $args = $this->getOpArgs();
+        if (($args["data"]["params"] ?? "") === "actionAttack") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // trigger(monsterKilled) — Nailed Together I offered
+        $this->assertEquals("trigger", $args["type"] ?? "", "Expected monsterKilled trigger");
+        $this->assertEquals("monsterKilled", $args["data"]["params"] ?? "");
+        $this->assertValidTarget("card_ability_1_13");
+
+        // Use Nailed Together I — auto-resolves since only one monster behind
+        $this->respond("card_ability_1_13");
+
+        // Brute should have 1 damage (overkill from goblin)
+        $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 overkill damage");
+        // Goblin should be dead
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+    }
+
+    public function testBjornIIHeroCardDeals3Damage(): void {
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+
+        // Upgrade hero card: swap level I for level II
+        $color = $this->playerColor();
+        $this->game->tokens->moveToken("card_hero_1_1", "limbo");
+        $this->game->tokens->moveToken("card_hero_1_2", "tableau_$color");
+
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->seedRand([5, 5, 5]); // 3 hits
+        $this->respond("actionAttack");
+
+        // Trigger fires — Bjorn II hero card offered
+        $this->assertValidTarget("card_hero_1_2");
+        $this->respond("card_hero_1_2");
+
+        // Troll took 3 damage from hero card + 3 hits from roll = 6 total (health=7, alive)
+        $this->assertEquals($trollHex, $this->tokenLocation($troll));
+        $this->assertEquals(6, $this->countDamage($troll));
+
+        $hero = $this->game->getHero($this->playerColor());
+        $this->assertContains("actionFocus", $hero->getActionsTaken());
     }
 
     public function testFirstTurnMoveAndPrepare(): void {

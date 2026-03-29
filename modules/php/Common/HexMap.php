@@ -84,6 +84,21 @@ class HexMap {
         return (int) ((abs($dq) + abs($dr) + abs($dq + $dr)) / 2);
     }
 
+    /**
+     * Get valid hexes "behind" a target relative to an origin.
+     * Returns hexes adjacent to $throughHex that are farther from $fromHex than $throughHex is.
+     */
+    function getHexesBehind(string $fromHex, string $throughHex): array {
+        $baseDist = $this->getHexDistance($fromHex, $throughHex);
+        $result = [];
+        foreach ($this->getAdjacentHexes($throughHex) as $hex) {
+            if ($this->getHexDistance($fromHex, $hex) > $baseDist) {
+                $result[] = $hex;
+            }
+        }
+        return $result;
+    }
+
     function getMoveDistance(string $hexId, string $otherHexId): int {
         if (!$this->isValidHex($hexId) || !$this->isValidHex($otherHexId)) {
             return -1;

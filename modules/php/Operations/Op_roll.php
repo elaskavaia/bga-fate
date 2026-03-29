@@ -86,6 +86,11 @@ class Op_roll extends CountableOperation {
         if (str_starts_with($attackerId, "hero_")) {
             $this->queueTrigger();
         }
+
+        if ($this->getReason() == "Op_actionAttack") {
+            $this->queueTrigger("actionAttack");
+        }
+
         // Queue resolveHits to convert dice into dealDamage
         $this->queue("resolveHits", null, [
             "attacker" => $attackerId,

@@ -344,6 +344,14 @@ class Material {
         "type" => "resolveHits",
         "name" => clienttranslate("Resolve Hits"),
 ],
+    "Op_endOfAttack" => [ 
+        "type" => "endOfAttack",
+        "name" => clienttranslate("End of Attack"),
+],
+    "Op_nailedTogether" => [ 
+        "type" => "nailedTogether",
+        "name" => clienttranslate("Nailed Together"),
+],
     "Op_heal" => [ 
         "type" => "heal",
         "name" => clienttranslate("Heal"),
@@ -496,6 +504,15 @@ class Material {
         "count" => 3,
         "type" => "marker",
         "create" => 3,
+        "location" => "limbo",
+],
+// # attack target marker (placed on hex during attack pipeline)
+    "marker_attack" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Attack Target"),
+        "count" => 1,
+        "type" => "marker_attack",
+        "create" => 1,
         "location" => "limbo",
 ],
 // #resources
@@ -3392,7 +3409,7 @@ class Material {
         "num" => 11,
         "hno" => 1,
         "name" => clienttranslate("Long Shot I"),
-        "r" => "2addDamage(inRange)",
+        "r" => "2addDamage(2)",
         "on" => "actionAttack",
         "effect" => "Add 2 damage to your attack action if target is at range 2 or more.",
         "flavour" => "Sure, it's a long shot. But Bjorn enjoys a challenge.",
@@ -3407,7 +3424,7 @@ class Material {
         "r" => "addDamage(dist)",
         "on" => "actionAttack",
         "effect" => "Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).",
-        "flavour" => "Oh, and always ignore cover.|",
+        "flavour" => "Oh, and always ignore cover.",
 ],
     "card_ability_1_13" => [ 
         "ctype" => "ability",
@@ -3416,8 +3433,8 @@ class Material {
         "num" => 13,
         "hno" => 1,
         "name" => clienttranslate("Nailed Together I"),
-        "r" => "custom",
-        "on" => "actionAttack",
+        "r" => "nailedTogether",
+        "on" => "monsterKilled",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).",
 ],
     "card_ability_1_14" => [ 
@@ -3428,8 +3445,8 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Nailed Together II"),
         "strength" => 2,
-        "r" => "custom",
-        "on" => "actionAttack",
+        "r" => "nailedTogether(chain)",
+        "on" => "monsterKilled",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.",
 ],
     "card_ability_1_7" => [ 

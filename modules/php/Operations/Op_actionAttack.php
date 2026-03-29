@@ -46,9 +46,11 @@ class Op_actionAttack extends Operation {
         $strength = $hero->getAttackStrength();
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
 
+        $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, 0, "");
         $this->queue("roll", null, [
             "target" => $targetHex,
             "count" => $strength,
         ]);
+        $this->queue("endOfAttack");
     }
 }

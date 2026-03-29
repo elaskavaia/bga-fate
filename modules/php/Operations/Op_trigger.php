@@ -29,6 +29,10 @@ class Op_trigger extends Operation {
         return true;
     }
 
+    function requireConfirmation() {
+        return !$this->noValidTargets();
+    }
+
     function getPossibleMoves() {
         $triggerType = $this->getTriggerType();
         if ($triggerType === "") {
@@ -38,8 +42,9 @@ class Op_trigger extends Operation {
         $targets = [];
         foreach (["useEquipment", "useAbility", "playEvent"] as $action) {
             $op = $this->game->machine->instanciateOperation($action, $owner, ["on" => $triggerType]);
-            $delegateMoves = $op->getArgs()["info"] ?? [];
-            foreach ($delegateMoves as $cardId => $info) {
+            $delegateArgs = $op->getArgs();
+            $delegateInfo = $delegateArgs["info"] ?? [];
+            foreach ($delegateInfo as $cardId => $info) {
                 $info["action"] = $action;
                 $targets[$cardId] = $info;
             }

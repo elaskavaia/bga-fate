@@ -26,6 +26,7 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 - Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
 - `npm run tests:cov` - Run PHPUnit tests with code coverage report (requires Xdebug)
 - `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
+- **Important**: When running full test suite, redirect output to a temp file (`npm run tests > /tmp/test_output.txt 2>&1`) and read from it instead of re-running multiple times — tests are slow!
 
 ### Debugging PHP tests (phpdbg)
 

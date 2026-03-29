@@ -101,8 +101,9 @@ class Character {
         return $this->game->material->getRulesFor($this->id, $field, $default);
     }
 
-    function applyDamageEffects(int $amount, string $attackerId): bool {
+    /** @return int health - totalDamage: positive if survived, <= 0 if killed (abs = overkill) */
+    function applyDamageEffects(int $amount, string $attackerId): int {
         // Base character has no damage effects; overridden in Hero and Monster
-        return false;
+        return 1;
     }
 }

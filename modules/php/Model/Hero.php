@@ -310,12 +310,13 @@ class Hero extends Character {
      * Apply damage to this hero after monster attack.
      * If total damage >= health, hero is knocked out:
      * - Moved to Grimheim, damage set to 5, 2 town pieces destroyed.
-     * @return bool true if the hero was knocked out
+     * @return int health - totalDamage: positive if survived, <= 0 if knocked out
      */
-    function applyDamageEffects(int $amount, string $attackerId): bool {
+    function applyDamageEffects(int $amount, string $attackerId): int {
         $this->game->systemAssert("cannot be negative amount", $amount >= 0);
         $totalDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
         $health = $this->getMaxHealth();
+        $remaining = $health - $totalDamage;
 
         $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} damage (${totalDamage}/${health})'), [
             "char_name" => $this->id,
@@ -344,8 +345,7 @@ class Hero extends Character {
             if ($this->game->isEndOfGame()) {
                 $this->game->handleEndOfGame();
             }
-            return true;
         }
-        return false;
+        return $remaining;
     }
 }

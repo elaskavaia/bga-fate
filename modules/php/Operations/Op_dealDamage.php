@@ -85,7 +85,14 @@ class Op_dealDamage extends CountableOperation {
         ]);
 
         $defender = $this->game->getCharacter($defenderId);
-        $defender->applyDamageEffects($amount, $attackerId);
+        $remaining = $defender->applyDamageEffects($amount, $attackerId);
+
+        if ($remaining <= 0 && str_starts_with($defenderId, "monster_")) {
+            $overkill = abs($remaining);
+            // Store overkill on marker_attack state for nailedTogether to read
+            $this->game->tokens->dbSetTokenState("marker_attack", $overkill, "");
+            $this->queueTrigger("monsterKilled");
+        }
     }
 
     public function getUiArgs() {

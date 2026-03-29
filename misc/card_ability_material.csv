@@ -10,10 +10,10 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 # Abilities - Bjorn (hno=1)
 9|1|Eagle Eye I|1|||||You have attack range +1|If I can see it, I can hit it.
 10|1|Eagle Eye II|2|||||You have attack range +2. Always ignore the armor|Yeah, why shoot the armor?
-11|1|Long Shot I||||custom|actionAttack|Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.
-12|1|Long Shot II||||custom|actionAttack|Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.|
-13|1|Nailed Together I||||custom|actionAttack|If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).|
-14|1|Nailed Together II|2|||custom|actionAttack|If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.|
+11|1|Long Shot I||||2addDamage(2)|actionAttack|Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.
+12|1|Long Shot II||||addDamage(dist)|actionAttack|Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).|Oh, and always ignore cover.
+13|1|Nailed Together I||||nailedTogether|monsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).|
+14|1|Nailed Together II|2|||nailedTogether(chain)|monsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.|
 7|1|Stitching I||||1heal(adj)||Remove 1 damage from any hero or equipment within range 1.|If you're in a pinch, Bjorn can patch.
 8|1|Stitching II||||2heal(adj)||Remove a total of 2 damage from heroes and equipment within range 1.|
 5|1|Suppressive Fire I||||custom|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|

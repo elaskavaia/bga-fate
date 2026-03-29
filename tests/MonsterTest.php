@@ -30,8 +30,8 @@ final class MonsterTest extends TestCase {
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
 
         $monster = $this->game->getMonster("monster_goblin_1");
-        $killed = $monster->applyDamageEffects(2, "hero_1");
-        $this->assertTrue($killed);
+        $remaining = $monster->applyDamageEffects(2, "hero_1");
+        $this->assertLessThanOrEqual(0, $remaining);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         // No red crystals should remain on monster
@@ -47,8 +47,8 @@ final class MonsterTest extends TestCase {
         // Pre-place 1 damage crystal
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
 
-        $killed = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(1, "hero_1");
-        $this->assertFalse($killed);
+        $remaining = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(1, "hero_1");
+        $this->assertGreaterThan(0, $remaining);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         // 1 red crystal should be on monster
@@ -63,15 +63,15 @@ final class MonsterTest extends TestCase {
 
         // First attack: 3 damage
         $this->game->effect_moveCrystals("monster_troll_1", "red", 3, "monster_troll_1", ["message" => ""]);
-        $killed = $this->game->getMonster("monster_troll_1")->applyDamageEffects(3, "hero_1");
-        $this->assertFalse($killed);
+        $remaining = $this->game->getMonster("monster_troll_1")->applyDamageEffects(3, "hero_1");
+        $this->assertGreaterThan(0, $remaining);
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
         $this->assertCount(3, $crystals);
 
         // Second attack: 4 more damage — total 7, enough to kill
         $this->game->effect_moveCrystals("monster_troll_1", "red", 4, "monster_troll_1", ["message" => ""]);
-        $killed = $this->game->getMonster("monster_troll_1")->applyDamageEffects(4, "hero_1");
-        $this->assertTrue($killed);
+        $remaining = $this->game->getMonster("monster_troll_1")->applyDamageEffects(4, "hero_1");
+        $this->assertLessThanOrEqual(0, $remaining);
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
 
         // All red crystals returned to supply
@@ -83,8 +83,8 @@ final class MonsterTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
-        $killed = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(0, "hero_1");
-        $this->assertFalse($killed);
+        $remaining = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(0, "hero_1");
+        $this->assertGreaterThan(0, $remaining);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");

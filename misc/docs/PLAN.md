@@ -494,6 +494,59 @@ Source: https://en.doc.boardgamearena.com/Pre-release_checklist
 See misc/docs/CHECKLIST.md
 
 
+## Bjorn Card Validation
+
+Verify each of Bjorn's cards works correctly.
+Hero and Abilities:
+- custom should not part of r it should be implemented first
+- if triggered test should exists that trigger it
+- all specail trigger conditions should be covered
+- display effect make sure it resolves propertly
+
+### Hero Cards
+[x] card_hero_1_1 Bjorn I — spend focus action after dice roll to add 2 damage
+[x] card_hero_1_2 Bjorn II — upgraded: 3 damage
+
+### Ability Cards
+[x] card_ability_1_9 Eagle Eye I — passive (strength bonus only)
+[x] card_ability_1_10 Eagle Eye II — passive (strength bonus only)
+[x] card_ability_1_11 Long Shot I — add 2 damage if target at range 2+
+[x] card_ability_1_12 Long Shot II — add damage equal to distance
+[x] card_ability_1_13 Nailed Together I — custom: remaining damage pierces to next monster
+[ ] card_ability_1_14 Nailed Together II — custom: chain pierce
+[ ] card_ability_1_7 Stitching I — heal 1 from adjacent hero/equipment
+[ ] card_ability_1_8 Stitching II — heal 2
+[ ] card_ability_1_5 Suppressive Fire I — custom: prevent rank 1-2 monster from moving
+[ ] card_ability_1_6 Suppressive Fire II — custom: prevent any monster from moving
+[ ] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
+[ ] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
+
+### Equipment Cards
+[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus)
+[ ] card_equip_1_21 Helmet — durability: prevent 1 damage
+[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage
+[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent
+[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent
+[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack
+[ ] card_equip_1_20 Black Arrows — custom: spend arrow to add 3 damage
+[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent
+[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage
+[ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin
+
+### Event Cards
+[ ] card_event_1_27 Rest — heal 2 from Bjorn
+[ ] card_event_1_29 Back Down — kill rank 1-2 monster in range
+[ ] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest)
+[ ] card_event_1_32 Limber Bow — custom: attack range +2 this turn
+[ ] card_event_1_26 Master Shot — custom: add 2 damage to attack
+[ ] card_event_1_31 Perfect Aim — custom: reroll all misses
+[ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune
+[ ] card_event_1_25 Prey — custom: mark monster for +2 XP
+[ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location
+[ ] card_event_1_30 Sewing — custom: remove 1 damage from each card
+
+---
+
 ## TODO
 
 * Fix stacked tooltips

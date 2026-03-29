@@ -27,6 +27,9 @@ house_9|House|1|housemodel_1|1|hex_9_8
 # player markers: 2 action markers + 1 upgrade cost marker per player
 marker|Player Marker|3|marker|3|limbo
 
+# attack target marker (placed on hex during attack pipeline)
+marker_attack|Attack Target|1|marker_attack|1|limbo
+
 #resources
 crystal_green|Green Crystal|50||2|supply_crystal_green
 crystal_red|Red Crystal|50||2|supply_crystal_red

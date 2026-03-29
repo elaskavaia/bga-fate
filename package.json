@@ -13,7 +13,7 @@
     "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests",
     "genmat": "php8.4 misc/other/genmat.php misc/*.csv",
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
-    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --testdox --display-deprecations --display-warnings --bootstrap ./tests/_autoload.php  --colors=always",
+    "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --display-deprecations --display-warnings --bootstrap ./tests/_autoload.php",
     "tests": "npm run test -- tests",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap ./tests/_autoload.php --coverage-text",
     "jstests": "TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts",
