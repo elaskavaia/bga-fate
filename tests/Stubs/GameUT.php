@@ -90,6 +90,14 @@ class GameUT extends Game {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
         return $this;
     }
+    function initWithHeros(array $order = [1, 2, 3, 4]) {
+        $this->gamestate->changeActivePlayer(10);
+        $this->setPlayersNumber(count($order));
+        $this->setHeroOrder($order);
+        $this->game->setupGameTables();
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+        return $this;
+    }
 
     function getMultiMachine() {
         return $this->multimachine;

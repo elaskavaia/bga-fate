@@ -28,6 +28,12 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             "card_event_1_27_1", // Rest
             "card_event_1_27_2", // Rest
         ]);
+        // Clear random event cards from hand to avoid flaky triggers
+        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->playerColor());
+        foreach ($hand as $card) {
+            $this->game->tokens->moveToken($card["key"], "limbo");
+        }
+        $this->clearMonstersFromMap();
     }
 
     public function testMoveAttackMendKill(): void {
@@ -159,6 +165,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testLongShotINotOfferedAtRange1(): void {
+        $this->clearMonstersFromMap();
         $color = $this->playerColor();
         // Place both Long Shot cards on tableau — II ensures trigger isn't void
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
@@ -188,6 +195,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testLongShotIOfferedAtRange2(): void {
+        $this->clearMonstersFromMap();
         $color = $this->playerColor();
         // Place Long Shot I on tableau
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
@@ -216,6 +224,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testNailedTogetherIPiercesDamage(): void {
+        $this->clearMonstersFromMap();
         $color = $this->playerColor();
         // Place Nailed Together I on tableau
         $this->game->tokens->moveToken("card_ability_1_13", "tableau_$color");
@@ -261,7 +270,74 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
     }
 
+    public function testNailedTogetherIIChainWithChoice(): void {
+        $this->clearMonstersFromMap();
+        $color = $this->playerColor();
+        // Place Nailed Together II on tableau
+        $this->game->tokens->moveToken("card_ability_1_14", "tableau_$color");
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+
+        // Hero at hex_8_9. Layout in a line:
+        //   hex_7_9: goblin_20 (target, pre-damaged 1 → dies with overkill 2)
+        //   hex_6_9: goblin_1 (behind, pre-damaged 1 → 2 pierce kills with overkill 1, chains)
+        //   hex_7_8: goblin_2 (also behind hex_7_9 — player must choose)
+        //   hex_5_9: brute_1 (behind hex_6_9 — gets chain damage)
+        $goblin20 = "monster_goblin_20";
+        $goblin1 = "monster_goblin_1";
+        $goblin2 = "monster_goblin_2";
+        $brute = "monster_brute_1";
+
+        $this->game->getMonster($goblin20)->moveTo("hex_7_9", "");
+        $this->game->getMonster($goblin1)->moveTo("hex_6_9", "");
+        $this->game->getMonster($goblin2)->moveTo("hex_7_8", "");
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // Pre-damage goblin_20 (1 existing + 3 hits = 4 total, health=2, overkill=2)
+        $this->game->effect_moveCrystals("hero_1", "red", 1, $goblin20, ["message" => ""]);
+        // Pre-damage goblin_1 (1 existing + 2 pierce = 3 total, health=2, overkill=1)
+        $this->game->effect_moveCrystals("hero_1", "red", 1, $goblin1, ["message" => ""]);
+
+        // Bjorn strength=3, all hits
+        $this->seedRand([5, 5, 5]);
+        $this->respond("actionAttack");
+        $this->respond("hex_7_9"); // pick goblin_20
+
+        // Skip roll and actionAttack triggers
+        $args = $this->getOpArgs();
+        while (($args["type"] ?? "") === "trigger" && ($args["data"]["params"] ?? "") !== "monsterKilled") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // trigger(monsterKilled) — Nailed Together II offered
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("monsterKilled", $args["data"]["params"] ?? "");
+        $this->assertValidTarget("card_ability_1_14");
+        $this->respond("card_ability_1_14");
+
+        // nailedTogether — two monsters behind hex_7_9: hex_6_9 and hex_7_8
+        $args = $this->getOpArgs();
+        $this->assertEquals("nailedTogether", $args["type"] ?? "");
+        $this->assertValidTarget("hex_6_9");
+        $this->assertValidTarget("hex_7_8");
+
+        // Choose goblin_1 at hex_6_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
+        $this->respond("hex_6_9");
+
+        // Chain: nailedTogether again — brute at hex_5_9 is behind hex_6_9
+        // Auto-resolves since only one monster behind
+        // Brute should have 1 damage (chain overkill from goblin_1)
+        $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 chain damage");
+        // Both goblins should be dead
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin20));
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin1));
+        // Goblin_2 should be untouched
+        $this->assertEquals(0, $this->countDamage($goblin2));
+    }
+
     public function testBjornIIHeroCardDeals3Damage(): void {
+        $this->clearMonstersFromMap();
         $troll = "monster_troll_1";
         $trollHex = "hex_7_9";
 
@@ -272,12 +348,13 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->game->getMonster($troll)->moveTo($trollHex, "");
 
-        $this->seedRand([5, 5, 5]); // 3 hits
+        $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
         // Trigger fires — Bjorn II hero card offered
         $this->assertValidTarget("card_hero_1_2");
         $this->respond("card_hero_1_2");
+        $this->skipTriggers(); // skip any remaining triggers (actionAttack, etc.)
 
         // Troll took 3 damage from hero card + 3 hits from roll = 6 total (health=7, alive)
         $this->assertEquals($trollHex, $this->tokenLocation($troll));

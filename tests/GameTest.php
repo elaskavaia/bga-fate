@@ -32,9 +32,15 @@ final class GameTest extends TestCase {
         $op = $this->game->machine->createTopOperationFromDbForOwner(null);
         return $op;
     }
-    function game(int $x = 0) {
+    function game(int $x = -1) {
         $game = new GameUT();
-        $game->init($x);
+        if ($x === -1) {
+            $game->init();
+        } elseif ($x == 0) {
+            $game->initWithHeros();
+        } else {
+            $game->initWithHero($x);
+        }
         $this->game = $game;
         return $game;
     }
@@ -258,10 +264,7 @@ final class GameTest extends TestCase {
     }
 
     public function testInstanciateAllOperations() {
-        $this->game();
-        $this->game->setupGameTables();
-        $heroId = $this->game->getHeroTokenId(PCOLOR); // e.g. "hero_3"
-        $this->game->tokens->moveToken($heroId, "hex_9_9");
+        $this->game(0);
         $token_types = $this->game->material->get();
         $tested = [];
         foreach ($token_types as $key => $info) {
@@ -269,7 +272,7 @@ final class GameTest extends TestCase {
             if (!str_starts_with($key, "Op_")) {
                 continue;
             }
-            echo "testing op $key\n";
+            //echo "testing op $key\n";
             $this->subTestOp($key, $info);
             $tested[$key] = 1;
         }
@@ -291,7 +294,7 @@ final class GameTest extends TestCase {
             if (array_key_exists($key, $tested)) {
                 continue;
             }
-            echo "testing op $key\n";
+            //echo "testing op $key\n";
             $this->subTestOp($key, ["type" => $mne]);
         }
     }
@@ -343,10 +346,7 @@ final class GameTest extends TestCase {
     }
 
     public function testInstanciateAllEventCardOperations() {
-        $this->game();
-        $this->game->setupGameTables();
-        $heroId = $this->game->getHeroTokenId(PCOLOR);
-        $this->game->tokens->moveToken($heroId, "hex_9_9");
+        $this->game(0);
 
         foreach ($this->game->material->get() as $key => $info) {
             if (!str_starts_with($key, "card_event_")) {
@@ -363,10 +363,7 @@ final class GameTest extends TestCase {
     }
 
     public function testInstanciateAllEquipCardOperations() {
-        $this->game();
-        $this->game->setupGameTables();
-        $heroId = $this->game->getHeroTokenId(PCOLOR);
-        $this->game->tokens->moveToken($heroId, "hex_9_9");
+        $this->game(0);
 
         foreach ($this->game->material->get() as $key => $info) {
             if (!str_starts_with($key, "card_equip_")) {
@@ -376,7 +373,38 @@ final class GameTest extends TestCase {
             if ($r === "" || str_contains($r, "custom")) {
                 continue;
             }
-            echo "testing equip card $key r=$r\n";
+            //echo "testing equip card $key r=$r\n";
+            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
+        }
+    }
+
+    public function testInstanciateAllAbilityCardOperations() {
+        $this->game(0);
+        foreach ($this->game->material->get() as $key => $info) {
+            if (!str_starts_with($key, "card_ability_")) {
+                continue;
+            }
+            $r = $info["r"] ?? "";
+            if ($r === "" || str_contains($r, "custom")) {
+                continue;
+            }
+            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
+        }
+    }
+
+    public function testInstanciateAllHeroCardOperations() {
+        $this->game(0);
+
+        foreach ($this->game->material->get() as $key => $info) {
+            if (!str_starts_with($key, "card_hero_")) {
+                continue;
+            }
+            $r = $info["r"] ?? "";
+            if ($r === "" || str_contains($r, "custom")) {
+                continue;
+            }
             $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }

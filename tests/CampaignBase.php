@@ -122,6 +122,15 @@ abstract class CampaignBaseTest extends TestCase {
         $this->game->tokens->moveToken($cardId, "hand_$color");
     }
 
+    /** Remove all monsters from the map so tests are deterministic */
+    protected function clearMonstersFromMap(): void {
+        $monsters = $this->game->hexMap->getMonstersOnMap();
+        foreach ($monsters as $m) {
+            $this->game->tokens->moveToken($m["id"], "supply_monster");
+        }
+        $this->game->hexMap->invalidateOccupancy();
+    }
+
     /** Skip any pending trigger operations (e.g. on=roll reactions) */
     protected function skipTriggers(): void {
         $args = $this->getOpArgs();
