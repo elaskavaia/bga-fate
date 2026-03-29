@@ -37,7 +37,7 @@ class Op_spendAction extends Operation {
         if (in_array($actionType, $hero->getActionsTaken())) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Action already taken this turn")];
         }
-        return ["q" => Material::RET_OK];
+        return ["confirm"];
     }
 
     function resolve(): void {
