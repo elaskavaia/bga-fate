@@ -363,6 +363,19 @@ class Game extends Base {
         }
     }
 
+    function effect_addAttackDiceDamage(string $attackerId, int $strength): void {
+        $this->notifyMessage(clienttranslate('${char_name} adds ${strength} damage'), [
+            "token_name" => $attackerId,
+            "strength" => $strength,
+        ]);
+
+        $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
+        foreach ($diceTokens as $die) {
+            $dieId = $die["key"];
+            $this->tokens->dbSetTokenLocation($dieId, "display_battle", 6 /* damage */, "");
+        }
+    }
+
     /**
      * Resolve dice on display_battle: count hits (applying cover, armor, rune rules) and return hit count.
      * Dice remain on display_battle so the player can see them.

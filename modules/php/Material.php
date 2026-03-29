@@ -376,6 +376,10 @@ class Material {
         "type" => "preventDamage",
         "name" => clienttranslate("Prevent Damage"),
 ],
+    "Op_addDamage" => [ 
+        "type" => "addDamage",
+        "name" => clienttranslate("Add Damage"),
+],
     "Op_addTownPiece" => [ 
         "type" => "addTownPiece",
         "name" => clienttranslate("Add Town Piece"),
@@ -3388,7 +3392,7 @@ class Material {
         "num" => 11,
         "hno" => 1,
         "name" => clienttranslate("Long Shot I"),
-        "r" => "custom",
+        "r" => "2addDamage(inRange)",
         "on" => "actionAttack",
         "effect" => "Add 2 damage to your attack action if target is at range 2 or more.",
         "flavour" => "Sure, it's a long shot. But Bjorn enjoys a challenge.",
@@ -3400,9 +3404,10 @@ class Material {
         "num" => 12,
         "hno" => 1,
         "name" => clienttranslate("Long Shot II"),
-        "r" => "custom",
+        "r" => "addDamage(dist)",
         "on" => "actionAttack",
-        "effect" => "Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away). Oh, and always ignore cover.",
+        "effect" => "Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).",
+        "flavour" => "Oh, and always ignore cover.|",
 ],
     "card_ability_1_13" => [ 
         "ctype" => "ability",
