@@ -50,7 +50,7 @@ final class Op_resolveHitsTest extends TestCase {
         $dealDamageOps = array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage"));
         $this->assertNotEmpty($dealDamageOps, "dealDamage should be queued");
         $dealDamage = reset($dealDamageOps);
-        $this->assertEquals("1dealDamage", $dealDamage["type"]);
+        $this->assertEquals("dealDamage", $dealDamage["type"]);
     }
 
     public function testDraugrArmorAbsorbsAllHits(): void {
@@ -93,6 +93,6 @@ final class Op_resolveHitsTest extends TestCase {
         $dealDamageOps = array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage"));
         $this->assertNotEmpty($dealDamageOps);
         $dealDamage = reset($dealDamageOps);
-        $this->assertEquals("2dealDamage", $dealDamage["type"]);
+        $this->assertEquals("dealDamage", $dealDamage["type"]);
     }
 }

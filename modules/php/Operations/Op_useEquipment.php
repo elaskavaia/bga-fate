@@ -48,7 +48,7 @@ class Op_useEquipment extends Operation {
         foreach ($cards as $card) {
             $cardId = $card["key"];
             $r = $this->game->material->getRulesFor($cardId, "r", "");
-            if ($r === "" || $r === "passive") {
+            if ($r === "") {
                 continue;
             }
 

@@ -89,29 +89,36 @@ final class Op_triggerTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — trigger(monsterAttack) with ability cards
+    // getPossibleMoves — trigger(resolveHits) with ability cards
     // -------------------------------------------------------------------------
 
     public function testMonsterAttackTriggerFindsAbilityCard(): void {
-        // Riposte I (card_ability_3_3) has on=monsterAttack, r=preventDamage
+        // Riposte I (card_ability_3_3) has on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . PCOLOR);
-        $op = $this->createOp("trigger(monsterAttack)");
+        // Add 2 mana to the card so spendMana is payable
+        $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
+        $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
+        // Adjacent monster for dealDamage target in the r expression
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // Need dealDamage on stack for preventDamage to be valid
+        $this->game->machine->push("dealDamage", PCOLOR, ["target" => "hex_11_8", "count" => 3]);
+        $op = $this->createOp("trigger(resolveHits)");
         $targets = $op->getArgs()["target"];
         $this->assertContains("card_ability_3_3", $targets);
     }
 
     public function testMonsterAttackTriggerEmptyWhenNoMatchingCards(): void {
-        // Bjorn has no on=monsterAttack cards by default
-        $op = $this->createOp("trigger(monsterAttack)");
+        // Bjorn has no on=resolveHits cards by default
+        $op = $this->createOp("trigger(resolveHits)");
         $targets = $op->getArgs()["target"];
         $this->assertEmpty($targets);
     }
 
     public function testMonsterAttackTriggerFindsEventCard(): void {
-        // Retaliation (card_event_3_31) has on=monsterAttack, r=2dealDamage(adj)
+        // Retaliation (card_event_3_31) has on=resolveHits, r=2dealDamage(adj)
         $this->game->tokens->moveToken("card_event_3_31", "hand_" . PCOLOR);
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent target for dealDamage
-        $op = $this->createOp("trigger(monsterAttack)");
+        $op = $this->createOp("trigger(resolveHits)");
         $targets = $op->getArgs()["target"];
         $this->assertContains("card_event_3_31", $targets);
     }
@@ -121,9 +128,13 @@ final class Op_triggerTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveQueuesUseAbilityForAbilityCard(): void {
-        // Riposte I: on=monsterAttack, r=preventDamage
+        // Riposte I: on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . PCOLOR);
-        $op = $this->createOp("trigger(monsterAttack)");
+        $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
+        $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->machine->push("dealDamage", PCOLOR, ["target" => "hex_11_8", "count" => 3]);
+        $op = $this->createOp("trigger(resolveHits)");
         $op->action_resolve([Operation::ARG_TARGET => "card_ability_3_3"]);
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -141,11 +152,11 @@ final class Op_triggerTest extends TestCase {
 
     public function testResolveQueuesUseEquipmentForEquipmentCard(): void {
         // Quiver (card_equip_1_18) has on=actionAttack, r=gainDamage:custom
-        // Use a simpler equip: place one with on=monsterAttack and valid r
+        // Use a simpler equip: place one with on=resolveHits and valid r
         // There are no Bjorn equips with on= and non-custom r in starting set,
         // so test the action annotation is correct via info
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . PCOLOR);
-        $op = $this->createOp("trigger(monsterAttack)");
+        $op = $this->createOp("trigger(resolveHits)");
         $info = $op->getArgs()["info"];
         $this->assertEquals("useAbility", $info["card_ability_3_3"]["action"]);
     }

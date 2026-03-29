@@ -373,7 +373,7 @@ final class GameTest extends TestCase {
                 continue;
             }
             $r = $info["r"] ?? "";
-            if ($r === "" || str_contains($r, "custom") || str_contains($r, "passive")) {
+            if ($r === "" || str_contains($r, "custom")) {
                 continue;
             }
             echo "testing equip card $key r=$r\n";

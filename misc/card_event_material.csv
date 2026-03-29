@@ -37,7 +37,7 @@ num|hno|name|count|r|on|effect|flavour
 27|3|Maneuver|2|1moveHero||Move 1 area.|Embla has a way of tackling her problems from many angles.
 37|3|Preparations|1|spendAction(actionPrepare):drawEvent(max)||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.
-31|3|Retaliation|3|2dealDamage(adj)|monsterAttack|Play after an adjacent monster attacked you to deal 2 damage to it.|
+31|3|Retaliation|3|2dealDamage(adj)|resolveHits|Play after an adjacent monster attacked you to deal 2 damage to it.|
 29|3|Sophisticated|2|custom||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
 33|3|Speedy Attack|2|discardEvent:actionAttack||Discard another card from hand to perform an attack action.|
 32|3|Vigilance|2|dealDamage(adj)|monsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
@@ -55,7 +55,7 @@ num|hno|name|count|r|on|effect|flavour
 37|4|Seek Shelter|1|custom||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.
 28|4|Short Temper|3|killMonster(adj,'healthRem<=2')||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.
 # Events - Finkel (hno=5) - expansion, not implemented
-#35|5|Blinding Flash|2|custom|monsterAttack|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
+#35|5|Blinding Flash|2|custom|resolveHits|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
 #30|5|Blown Away|2|custom||Move anyone within range 2 up to 2 areas.|His presence can do that to you.
 #36|5|Burning Aura|1|custom||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.
 #28|5|Chain Lightning|3|custom||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.

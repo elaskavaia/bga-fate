@@ -43,7 +43,7 @@ class Op_useAbility extends Operation {
                 continue;
             }
             $r = $this->game->material->getRulesFor($cardId, "r", "");
-            if ($r === "" || $r === "passive") {
+            if ($r === "") {
                 continue;
             }
             $on = $this->game->material->getRulesFor($cardId, "on", "");

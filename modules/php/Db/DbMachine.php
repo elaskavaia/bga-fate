@@ -158,6 +158,12 @@ class DbMachine {
         $this->game->DbQuery("UPDATE machine SET `rank` = $rank WHERE $ids");
     }
 
+    function updateData($opOrId, mixed $data) {
+        $id = $this->getId($opOrId);
+        $encoded = $this->escapeStringForDB($this->fixedJsonEncode($data));
+        $this->game->DbQuery("UPDATE machine SET `data` = '$encoded' WHERE id = $id");
+    }
+
     function interrupt(int $from = 0, int $count = 1) {
         $this->game->DbQuery("UPDATE machine SET `rank` = `rank` + $count WHERE `rank` >= $from");
     }

@@ -29,8 +29,6 @@ class Op_trigger extends Operation {
         return true;
     }
 
-    private const DELEGATE_OPS = ["useEquipment", "useAbility", "playEvent"];
-
     function getPossibleMoves() {
         $triggerType = $this->getTriggerType();
         if ($triggerType === "") {
@@ -38,7 +36,7 @@ class Op_trigger extends Operation {
         }
         $owner = $this->getOwner();
         $targets = [];
-        foreach (self::DELEGATE_OPS as $action) {
+        foreach (["useEquipment", "useAbility", "playEvent"] as $action) {
             $op = $this->game->machine->instanciateOperation($action, $owner, ["on" => $triggerType]);
             $delegateMoves = $op->getArgs()["info"] ?? [];
             foreach ($delegateMoves as $cardId => $info) {

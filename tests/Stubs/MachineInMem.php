@@ -194,6 +194,17 @@ class MachineInMem extends DbMachine {
             }
         }
     }
+    function updateData($opOrId, mixed $data) {
+        $id = $this->getId($opOrId);
+        $encoded = $this->fixedJsonEncode($data);
+        foreach ($this->xtable as &$row) {
+            if ($row["id"] === $id) {
+                $row["data"] = $encoded;
+                return;
+            }
+        }
+    }
+
     function renice($list, $rank) {
         $ids = $this->ids($list);
         foreach ($this->xtable as &$row) {

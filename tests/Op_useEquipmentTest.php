@@ -48,26 +48,12 @@ final class Op_useEquipmentTest extends TestCase {
         $this->assertEquals(0, $moves[$this->cardId]["q"]);
     }
 
-    public function testPassiveCardSkipped(): void {
-        // Trollbane has r=passive
-        $this->game->tokens->moveToken("card_equip_1_22", "tableau_" . PCOLOR);
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("card_equip_1_22", $moves);
-    }
-
     public function testEmptyRCardSkipped(): void {
         // Bjorn's First Bow has r=""
         $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("card_equip_1_15", $moves);
-    }
-
-    public function testVoidWithOnlyPassiveCards(): void {
-        $this->game->tokens->moveToken("card_equip_1_22", "tableau_" . PCOLOR);
-        $op = $this->createOp();
-        $this->assertTrue($op->isVoid());
     }
 
     public function testNotVoidWithUsableCard(): void {

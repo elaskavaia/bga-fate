@@ -232,11 +232,11 @@ abstract class Operation {
         //$this->game->debugConsole("queue $type");
     }
 
-    function queueTrigger(?string $optype = null) {
+    function queueTrigger(?string $optype = null, $owner = null, mixed $data = null) {
         if ($optype == null) {
             $optype = $this->getType();
         }
-        $this->queue("trigger($optype)", $this->getOwner());
+        $this->queue("trigger($optype)", $owner, $data);
     }
 
     /**

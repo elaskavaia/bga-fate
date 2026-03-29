@@ -39,9 +39,16 @@ class Op_resolveHits extends Operation {
         $hits = $defender->applyArmor($hits);
 
         if ($hits > 0) {
-            $this->queue("{$hits}dealDamage", null, [
+            // Trigger damage prevention reactions for the defending hero
+            $defenderOwner = str_starts_with($defenderId, "hero_") ? $this->game->getHeroOwner($defenderId) : null;
+            if ($defenderOwner !== null) {
+                $this->queueTrigger(null, $defenderOwner, ["target" => $defenderId]);
+            }
+
+            $this->queue("dealDamage", null, [
                 "attacker" => $attackerId,
                 "target" => $targetHex,
+                "count" => $hits,
             ]);
         } else {
             $this->game->notifyMessage(clienttranslate('${char_name} attack missed!'), [
