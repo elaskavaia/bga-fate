@@ -497,12 +497,11 @@ See misc/docs/CHECKLIST.md
 ## Bjorn Card Validation
 
 Verify each of Bjorn's cards works correctly.
-Hero and Abilities:
+Hero, Abilities and Equipment:
 - custom should not part of r it should be implemented first
 - the rule (r) actuall does what text description say
-- if triggered test should exists that trigger it
-- all specail trigger conditions should be covered
-- display effect make sure it resolves propertly
+- if triggered, test should exists for all trigger conditions and negative conditions
+- make sure it resolves propertly using integration test
 
 ### Hero Cards
 [x] card_hero_1_1 Bjorn I — spend focus action after dice roll to add 2 damage
@@ -517,12 +516,12 @@ Hero and Abilities:
 [x] card_ability_1_14 Nailed Together II — custom: chain pierce
 [x] card_ability_1_7 Stitching I — heal 1 from adjacent hero/equipment
 [x] card_ability_1_8 Stitching II — heal 2
-[ ] card_ability_1_5 Suppressive Fire I — custom: prevent rank 1-2 monster from moving
-[ ] card_ability_1_6 Suppressive Fire II — custom: prevent any monster from moving
+[x] card_ability_1_5 Suppressive Fire I — prevent rank 1-2 monster within range 3 from moving (on=monsterMove trigger)
+[x] card_ability_1_6 Suppressive Fire II — prevent any monster within range 3 from moving (on=monsterMove trigger)
 [ ] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
 [ ] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
 
-### Equipment Cards
+### Equipment Cards (use)
 [ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus)
 [ ] card_equip_1_21 Helmet — durability: prevent 1 damage
 [ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage
@@ -558,4 +557,5 @@ Hero and Abilities:
 [ ] Show win/loss end screen — BGA default end screen works, custom UI 
 [ ] Range indicator for ranged monster attacks
 [ ] Legend monster special display
+[ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_suppressiveFire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
 [ ] Horizonal timetrack: I need to refactor timetrack looks like in UI.  There are two timetrack but only one active in any given game. I have this images /home/elaskavaia/git/bga-fate/img/timeline.webp and they are vertical and used as background now. Instead I want time track to be horizonal area on top of the board and instead of single bg image i just use grid with individual icons matching timeline events. Can you plan this for me?

@@ -223,8 +223,8 @@ final class Op_monsterAttackTest extends TestCase {
         $op = $this->game->machine->instanciateOperation("turnMonster", null);
         $op->resolve();
 
-        // Check that monsterAttack was queued
-        $attackOps = $this->game->machine->db->getOperations(null, "monsterAttack");
-        $this->assertNotEmpty($attackOps);
+        // Check that monsterAttackAll was queued
+        $attackAllOps = $this->game->machine->db->getOperations(null, "monsterAttackAll");
+        $this->assertNotEmpty($attackAllOps);
     }
 }

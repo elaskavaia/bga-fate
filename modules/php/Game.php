@@ -687,6 +687,24 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_suppressiveFire(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Place Suppressive Fire I on tableau
+        $this->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_{$color}");
+        // Place monsters within range 3 of hero start (hex_8_9)
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_8");
+        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_9");
+        $this->hexMap->invalidateOccupancy();
+        // Clear any random monsters from reinforcement
+        $monsters = $this->hexMap->getMonstersOnMap();
+        foreach ($monsters as $m) {
+            if ($m["id"] !== "monster_goblin_1" && $m["id"] !== "monster_brute_1") {
+                $this->tokens->dbSetTokenLocation($m["id"], "supply_monster", 0);
+            }
+        }
+        $this->hexMap->invalidateOccupancy();
+    }
+
     function debug_Op_gainDamage(): void {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         // Place Helmet (durability 3) on tableau

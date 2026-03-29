@@ -1,0 +1,12 @@
+{
+  "current_player_id": 10,
+  "reset": true,
+  "steps": [
+    { "endpoint": "debug_setupGame_h1", "reload": true },
+    { "endpoint": "debug_Op_suppressiveFire" },
+    { "endpoint": "action_resolve", "data": { "target": "actionPractice" } },
+    { "endpoint": "action_resolve", "data": { "target": "actionFocus" } },
+    { "endpoint": "action_skip" },
+    { "endpoint": "action_skip", "reload": true }
+  ]
+}

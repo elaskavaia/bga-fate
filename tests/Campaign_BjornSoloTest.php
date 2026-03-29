@@ -387,6 +387,189 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $state["name"]);
     }
 
+    // --- Suppressive Fire I/II (card_ability_1_5 / card_ability_1_6) ---
+
+    public function testSuppressiveFireIPreventsMonsterMovement(): void {
+        $color = $this->playerColor();
+        // Place Suppressive Fire I on tableau
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
+
+        // Place a goblin (rank 1) within range 3 of hero start (hex_8_9)
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_7_8"; // range 2 from hex_8_9
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Do two actions then end turn
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // skip free actions → end turn → monster turn starts
+
+        // Skip drawEvent if queued by turnEnd
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // Monster turn queues trigger(monsterMove) before movement
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("monsterMove", $args["data"]["params"] ?? "");
+        $this->assertValidTarget("card_ability_1_5");
+
+        // Use Suppressive Fire I — pick the goblin's hex
+        $this->respond("card_ability_1_5");
+        $args = $this->getOpArgs();
+        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->assertValidTarget($goblinHex);
+        $this->respond($goblinHex);
+
+        // Monster movement runs — goblin should NOT have moved
+        // Wait for next player turn
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+        $this->assertEquals($goblinHex, $this->tokenLocation($goblin), "Suppressed goblin should not have moved");
+
+        // Green crystal should still be on the goblin
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $goblin);
+        $this->assertCount(1, $crystals, "Green crystal should remain on goblin after movement phase");
+    }
+
+    public function testSuppressiveFireCannotChooseSameMonsterNextTurn(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
+
+        $goblin = "monster_goblin_20";
+        $brute = "monster_brute_1";
+        $goblinHex = "hex_7_8";
+        $bruteHex = "hex_6_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+
+        // Turn 1: suppress the goblin
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // end turn
+
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->respond("card_ability_1_5");
+        $this->respond($goblinHex);
+
+        // Wait for next player turn
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+
+        // Turn 2: end turn
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+        }
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+
+        // Skip drawEvent if queued
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // Monster turn trigger — Suppressive Fire offered again
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->respond("card_ability_1_5");
+
+        // Goblin should NOT be a valid target (still has green crystal)
+        $args = $this->getOpArgs();
+        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->assertNotValidTarget($goblinHex, "Goblin should be excluded (has green crystal from last turn)");
+        $this->assertValidTarget($bruteHex, "Brute should be available");
+    }
+
+    public function testSuppressiveFireIExcludesRank3(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
+
+        // Only a troll (rank 3) in range — Level I should not offer it
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // end turn
+
+        // The trigger(monsterMove) auto-skips because Suppressive Fire I has no valid
+        // targets (troll is rank 3, filter is rank<=2). Monster turn proceeds automatically.
+        // We should be back at player turn 2 (or the troll entered Grimheim).
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"], "Trigger should auto-skip when no valid targets");
+    }
+
+    public function testSuppressiveFireSkipRemovesCrystal(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
+
+        $goblin = "monster_goblin_20";
+        $brute = "monster_brute_1";
+        $goblinHex = "hex_7_8";
+        $bruteHex = "hex_6_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+
+        // Turn 1: suppress the goblin
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // end turn
+
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->respond("card_ability_1_5");
+        $this->respond($goblinHex);
+
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+
+        // Turn 2: end turn
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+        }
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // end turn
+
+        // Skip drawEvent if queued
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "drawEvent") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // Monster turn — use trigger but SKIP suppressiveFire
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->respond("card_ability_1_5");
+
+        // Skip suppressiveFire
+        $args = $this->getOpArgs();
+        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->skip();
+
+        // After monster turn, crystal should be removed from goblin
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $goblin);
+        $this->assertCount(0, $crystals, "Crystal should be removed when player skips Suppressive Fire");
+    }
+
     // --- Stitching I/II (card_ability_1_7 / card_ability_1_8) ---
 
     public function testStitchingIAutoHealsWhenOnlyHeroDamaged(): void {

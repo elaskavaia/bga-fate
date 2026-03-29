@@ -206,4 +206,24 @@ final class Op_triggerTest extends TestCase {
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("trigger(turnEnd)", $opTypes);
     }
+
+    // -------------------------------------------------------------------------
+    // turnMonster queues monsterMove trigger per player
+    // -------------------------------------------------------------------------
+
+    public function testTurnMonsterQueuesMonsterMoveTrigger(): void {
+        $this->game->tokens->setTokenState("rune_stone", 1);
+        $op = $this->game->machine->instanciateOperation("turnMonster", ACOLOR);
+        $op->resolve();
+        $ops = $this->game->machine->getAllOperations(PCOLOR);
+        $opTypes = array_map(fn($o) => $o["type"], $ops);
+        $this->assertContains("trigger(monsterMove)", $opTypes);
+    }
+
+    public function testMonsterMoveTriggerIsEmptyWithNoCards(): void {
+        // No ability cards with on=monsterMove on tableau → trigger should have no targets
+        $op = $this->createOp("trigger(monsterMove)");
+        $moves = $op->getPossibleMoves();
+        $this->assertEmpty($moves);
+    }
 }

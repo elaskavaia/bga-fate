@@ -252,6 +252,21 @@ class Material {
         "type" => "turnMonster",
         "name" => clienttranslate("Monster Turn"),
 ],
+// # Monster movement phase (auto: all monsters move toward Grimheim)
+    "Op_monsterMoveAll" => [ 
+        "type" => "monsterMoveAll",
+        "name" => clienttranslate("Monster Movement"),
+],
+// # Monster attack phase (auto: queue attacks for monsters adjacent to heroes)
+    "Op_monsterAttackAll" => [ 
+        "type" => "monsterAttackAll",
+        "name" => clienttranslate("Monster Attacks"),
+],
+// # End of monster turn (auto: check end of game, start next player round)
+    "Op_endOfMonsterTurn" => [ 
+        "type" => "endOfMonsterTurn",
+        "name" => clienttranslate("End Monster Turn"),
+],
 // # Monster reinforcement (auto: draw monster cards, place monsters)
     "Op_reinforcement" => [ 
         "type" => "reinforcement",
@@ -399,6 +414,11 @@ class Material {
     "Op_discardEvent" => [ 
         "type" => "discardEvent",
         "name" => clienttranslate("Discard Event"),
+],
+// # Suppressive Fire (triggered ability: prevent a monster from moving)
+    "Op_suppressiveFire" => [ 
+        "type" => "suppressiveFire",
+        "name" => clienttranslate("Suppressive Fire"),
 ],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
@@ -3477,7 +3497,7 @@ class Material {
         "num" => 5,
         "hno" => 1,
         "name" => clienttranslate("Suppressive Fire I"),
-        "r" => "custom",
+        "r" => "suppressiveFire('rank<=2')",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3488,7 +3508,7 @@ class Material {
         "num" => 6,
         "hno" => 1,
         "name" => clienttranslate("Suppressive Fire II"),
-        "r" => "custom",
+        "r" => "suppressiveFire",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3609,7 +3629,7 @@ class Material {
         "num" => 9,
         "hno" => 2,
         "name" => clienttranslate("Suppressive Fire I"),
-        "r" => "custom",
+        "r" => "suppressiveFire('rank<=2')",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3620,7 +3640,7 @@ class Material {
         "num" => 10,
         "hno" => 2,
         "name" => clienttranslate("Suppressive Fire II"),
-        "r" => "custom",
+        "r" => "suppressiveFire",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3997,7 +4017,7 @@ class Material {
         "durability" => 3,
         "r" => "gainDamage:1preventDamage",
         "quest" => "Practice makes perfect. <i>Spend 1 practice action and 1 experience</i> [XP] to make it.",
-        "effect" => "[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remoce all damage from this card.",
+        "effect" => "[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remove all damage from this card.",
         "flavour" => "When your life hangs by a thread, this is sturdier than it seams.",
 ],
     "card_equip_1_19" => [ 

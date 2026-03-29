@@ -13,7 +13,7 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) - last <i> some even cards are duplicated, so it tell them apart
 - `marker_<color>_<n>` — Player marker (e.g. `marker_ff0000_1`)
 - `monster_legend_<n>_<level>` — Legend monster tile. 6 legends numbered 1–6 (1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr). `_1` = yellow (Level I), `_2` = red (Level II) — same two-sided pattern as ability cards. `_1` starts in `supply_monster`, `_2` starts in `limbo`. When a red legend card is drawn, swap `_1` out and place `_2` on the map. Stats in `monster_material.csv`. Legends destroy 3 town pieces on entering Grimheim and can swap places with blocking monsters during movement.
-- `crystal_green_<n>` — Mana crystal (individual tokens on cards)
+- `crystal_green_<n>` — Mana crystal (individual tokens on cards). Also used as stun marker on monsters (Suppressive Fire): a green crystal on a monster means it skips its next movement and the crystal is removed.
 - `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
 - `crystal_red_<n>` — Damage crystal (individual tokens on cards and things)
 - `rune_stone` — Time track marker (singleton)
@@ -142,7 +142,7 @@ from a filtered set. Common target filters:
 - `actionAttack` — play during/after an attack action
 - `roll` — play after a dice roll
 - `damage` — play when receiving damage
-- `monsterMove` — play after the Monsters Move step
+- `monsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
 - `monsterAttack` — play after a monster attacks you
 
 - `damage X target` (Countable) — Deal X damage to target character (no dice).
@@ -180,13 +180,21 @@ from a filtered set. Common target filters:
   Used by: Durability (99repairCard), Mend in Grimheim (5repairCard)
 - `performAction type` (auto) — Queue an additional main action (attack/mend/focus/prepare/practice).
   Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket
+- `monsterMoveAll` (auto) — Move all monsters toward Grimheim. Extracted from `turnMonster` to allow
+  pre-movement triggers (e.g. Suppressive Fire). Monsters with a green crystal (stunned) skip movement;
+  crystal stays on the monster until next `suppressiveFire` trigger. Data field: `charge` (bool) for skull turn bonus step.
+- `suppressiveFire` (player, triggered) — Prevent a monster within range 3 from moving this monster turn.
+  Triggered via `useAbility` on `monsterMove`. Places a green crystal on the monster (stun marker).
+  Param(0): optional filter expression (e.g. `'rank<=2'` for Level I). Monsters with an existing green
+  crystal are excluded from selection ("cannot choose same monster next turn"). On resolve, any existing
+  stun crystal is moved to the new target. On skip, the old crystal is removed.
 
 **Not separate operations** (handled as modifiers/hooks on existing operations):
 - "Add X damage to this attack" — modifier applied in `actionAttack` resolve
 - "Attack range +X this turn" — temporary attribute modifier via tracker (see Hero Attribute Trackers below)
 - "Reroll all misses" — modifier on dice result in `actionAttack`
 - "Add damage for each [RUNE]" — modifier on dice result
-- "Prevent monster from moving" — flag on monster during `turnMonster`
+- "Prevent monster from moving" — green crystal placed on monster by `suppressiveFire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 - Static/persistent effects (strength bonus, armor, mana regen) — read from card data during relevant ops
 - Equipment [DAMAGE] effects — consume durability, separate activation system
 - Quest completion — specific quest logic, not a generic operation

@@ -230,10 +230,9 @@ final class Op_reinforcementTest extends TestCase {
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        // Check that reinforcement was queued
-        $top = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $this->assertNotNull($top);
-        $this->assertEquals("reinforcement", $top->getType());
+        // Check that reinforcement was queued (not necessarily top — monsterMoveAll is queued first)
+        $reinforcementOps = $this->game->machine->db->getOperations(null, "reinforcement");
+        $this->assertNotEmpty($reinforcementOps);
     }
 
     public function testReinforcementTriggeredOnRedAxesStep(): void {
@@ -242,10 +241,10 @@ final class Op_reinforcementTest extends TestCase {
         $op = $this->createTurnMonsterOp();
         $op->resolve();
 
-        $top = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $this->assertNotNull($top);
-        $this->assertEquals("reinforcement", $top->getType());
-        $data = $top->getData();
+        $reinforcementOps = $this->game->machine->db->getOperations(null, "reinforcement");
+        $this->assertNotEmpty($reinforcementOps);
+        $reinforcementOp = $this->game->machine->instanciateOperationFromDbRow(reset($reinforcementOps));
+        $data = $reinforcementOp->getData();
         $this->assertEquals("deck_monster_red", $data["deck"]);
     }
 

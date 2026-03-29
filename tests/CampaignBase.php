@@ -97,7 +97,6 @@ abstract class CampaignBaseTest extends TestCase {
         return $this->game->getPlayerColorById((int) $this->game->getCurrentPlayerId());
     }
 
-
     /** Get token location */
     protected function tokenLocation(string $tokenId): string {
         return $this->game->tokens->getTokenLocation($tokenId);

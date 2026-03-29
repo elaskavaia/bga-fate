@@ -22,6 +22,15 @@ turnEnd|End of Turn
 # Monster turn (runs after all players have taken their turn)
 turnMonster|Monster Turn
 
+# Monster movement phase (auto: all monsters move toward Grimheim)
+monsterMoveAll|Monster Movement
+
+# Monster attack phase (auto: queue attacks for monsters adjacent to heroes)
+monsterAttackAll|Monster Attacks
+
+# End of monster turn (auto: check end of game, start next player round)
+endOfMonsterTurn|End Monster Turn
+
 # Monster reinforcement (auto: draw monster cards, place monsters)
 reinforcement|Reinforcement
 
@@ -77,6 +86,9 @@ addTownPiece|Add Town Piece
 
 drawEvent|Draw Event
 discardEvent|Discard Event
+
+# Suppressive Fire (triggered ability: prevent a monster from moving)
+suppressiveFire|Suppressive Fire
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger
