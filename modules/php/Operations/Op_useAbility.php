@@ -57,6 +57,10 @@ class Op_useAbility extends Operation {
             if ($on !== $trigger) {
                 continue;
             }
+            // Cards without a trigger can only be used once per turn
+            if (!$on && $card["state"] == 1) {
+                continue;
+            }
 
             $op = $this->game->machine->instanciateOperation($r, $owner, ["card" => $cardId]);
             $targets[$cardId] = $op->getErrorInfo();
@@ -74,6 +78,11 @@ class Op_useAbility extends Operation {
             "effect_text" => $effect,
         ]);
         $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+        $on = $this->game->material->getRulesFor($cardId, "on", "");
+        if (!$on) {
+            //mark card as used, as these can only be used once per turn
+            $this->dbSetTokenState($cardId, 1, "");
+        }
         $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
     }
 

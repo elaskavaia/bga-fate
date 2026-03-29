@@ -499,6 +499,7 @@ See misc/docs/CHECKLIST.md
 Verify each of Bjorn's cards works correctly.
 Hero and Abilities:
 - custom should not part of r it should be implemented first
+- the rule (r) actuall does what text description say
 - if triggered test should exists that trigger it
 - all specail trigger conditions should be covered
 - display effect make sure it resolves propertly
@@ -513,9 +514,9 @@ Hero and Abilities:
 [x] card_ability_1_11 Long Shot I — add 2 damage if target at range 2+
 [x] card_ability_1_12 Long Shot II — add damage equal to distance
 [x] card_ability_1_13 Nailed Together I — custom: remaining damage pierces to next monster
-[ ] card_ability_1_14 Nailed Together II — custom: chain pierce
-[ ] card_ability_1_7 Stitching I — heal 1 from adjacent hero/equipment
-[ ] card_ability_1_8 Stitching II — heal 2
+[x] card_ability_1_14 Nailed Together II — custom: chain pierce
+[x] card_ability_1_7 Stitching I — heal 1 from adjacent hero/equipment
+[x] card_ability_1_8 Stitching II — heal 2
 [ ] card_ability_1_5 Suppressive Fire I — custom: prevent rank 1-2 monster from moving
 [ ] card_ability_1_6 Suppressive Fire II — custom: prevent any monster from moving
 [ ] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range

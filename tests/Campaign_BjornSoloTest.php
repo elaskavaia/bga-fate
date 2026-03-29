@@ -386,4 +386,77 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $state = $this->getStateArgs();
         $this->assertEquals("PlayerTurn", $state["name"]);
     }
+
+    // --- Stitching I/II (card_ability_1_7 / card_ability_1_8) ---
+
+    public function testStitchingIAutoHealsWhenOnlyHeroDamaged(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+
+        $this->assertValidTarget("card_ability_1_7", "Stitching I should be offered");
+        $this->respond("card_ability_1_7");
+        // Auto-resolved: heal(adj) picked (repairCard void), sole hero picked → back at turn
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
+
+    public function testStitchingIChooseHealOverRepair(): void {
+        $color = $this->playerColor();
+        $equipCard = "card_equip_1_15";
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
+        $this->game->tokens->dbSetTokenLocation($equipCard, "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "red", 1, $equipCard, ["message" => ""]);
+
+        $this->respond("card_ability_1_7");
+        $this->respond("choice_0"); // choose heal
+        // heal(adj) with sole hero → auto-resolves
+
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+        $this->assertEquals(1, $this->countDamage($equipCard));
+    }
+
+    public function testStitchingIChooseRepairOverHeal(): void {
+        $color = $this->playerColor();
+        $equipCard = "card_equip_1_15";
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
+        $this->game->tokens->dbSetTokenLocation($equipCard, "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "red", 1, $equipCard, ["message" => ""]);
+
+        $this->respond("card_ability_1_7");
+        $this->respond("choice_1"); // choose repairCard
+        // repairCard with sole damaged card → auto-resolves
+
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+        $this->assertEquals(0, $this->countDamage($equipCard));
+    }
+
+    public function testStitchingINotOfferedWhenNoDamage(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+
+        $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be offered with no damage");
+    }
+
+    public function testStitchingICannotBeUsedTwicePerTurn(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
+
+        $this->respond("card_ability_1_7");
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be usable twice per turn");
+    }
+
+    public function testStitchingIIHealsTwoDamage(): void {
+        $color = $this->playerColor();
+        $this->game->tokens->dbSetTokenLocation("card_ability_1_8", "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
+
+        $this->respond("card_ability_1_8");
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
 }

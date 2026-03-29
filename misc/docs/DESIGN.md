@@ -138,7 +138,7 @@ from a filtered set. Common target filters:
 - Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2dealDamage(adj))`
 
 **`on` column** — timing trigger for when the card can be played:
-- (empty) — play anytime during your turn
+- (empty) — play anytime during your turn (once per turn; tracked via token state=1, reset in turnEnd)
 - `actionAttack` — play during/after an attack action
 - `roll` — play after a dice roll
 - `damage` — play when receiving damage
@@ -347,3 +347,4 @@ Less common but present in specialized hero builds, these change one outcome for
 2. **Event deck is not reshuffled when exhausted**: The rules don't mention reshuffling the discard pile when the event deck runs out. We assume the deck simply stays empty — no auto-reshuffle.
 3. **"Move X" is mandatory; "Move up to X" is optional**: "Move 2 areas" means the hero must move exactly 2 steps if possible (falling back to max reachable if blocked). "Move up to 1 area" allows the player to choose not to move. Implemented via CountableOperation: `2moveHero` (count=2, mcount=2) vs `[0,1]moveHero` (count=1, mcount=0).
 4. **moveMonster cannot push into Grimheim**: When a player moves a monster via card effects (Kick, Swift Kick, etc.), we assume the player will not select a Grimheim hex as the destination. No `monsterEntersGrimheim` logic is implemented for player-initiated monster movement.
+5. **Stitching can heal adjacent heroes but only repair own equipment**: The card says "Remove damage from any hero or equipment within range 1." We assume "within range 1" applies to heroes (can heal any adjacent hero including self), but equipment repair is limited to the acting player's own tableau.

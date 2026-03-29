@@ -100,6 +100,20 @@ final class Op_useAbilityTest extends TestCase {
         $this->assertArrayHasKey($sureShotId, $moves);
     }
 
+    public function testCardWithoutTriggerCannotBeUsedTwice(): void {
+        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
+        $op = $this->createOp();
+        // First use — card should be available
+        $moves = $op->getPossibleMoves();
+        $this->assertArrayHasKey($this->cardId, $moves);
+        // Use the card
+        $op->action_resolve([Operation::ARG_TARGET => $this->cardId]);
+        // Second use — card should no longer be available
+        $op2 = $this->createOp();
+        $moves2 = $op2->getPossibleMoves();
+        $this->assertArrayNotHasKey($this->cardId, $moves2);
+    }
+
     public function testPresetTargetReturnsDirectly(): void {
         /** @var Op_useAbility */
         $op = $this->game->machine->instanciateOperation("useAbility", PCOLOR, ["target" => $this->cardId]);

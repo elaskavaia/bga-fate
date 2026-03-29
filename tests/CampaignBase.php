@@ -70,6 +70,16 @@ abstract class CampaignBaseTest extends TestCase {
         return $state["args"] ?? [];
     }
 
+    /** Dump current operation type, prompt, and valid targets for debugging */
+    protected function dumpState(string $label = ""): void {
+        $args = $this->getOpArgs();
+        $type = $args["type"] ?? "?";
+        $prompt = $args["prompt"] ?? "?";
+        $targets = $args["target"] ?? [];
+        $info = $label ? "[$label] " : "";
+        fwrite(STDERR, "{$info}op={$type} prompt=\"{$prompt}\" targets=[" . implode(", ", $targets) . "]\n");
+    }
+
     /** Assert that a target is valid (appears in target list with q=0) */
     protected function assertValidTarget(string $target, string $message = ""): void {
         $args = $this->getOpArgs();

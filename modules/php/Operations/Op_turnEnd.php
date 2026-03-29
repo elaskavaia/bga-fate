@@ -26,7 +26,6 @@ class Op_turnEnd extends Operation {
     }
 
     function resolve(): void {
-        // TODO: implement end-of-turn sequence:
         // 1. Reset action markers to empty slots
         $owner = $this->getOwner();
         $this->dbSetTokenLocation("marker_{$owner}_1", "aslot_{$owner}_empty_1", 0, "");
@@ -40,6 +39,7 @@ class Op_turnEnd extends Operation {
         $this->queueTrigger();
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
+        // TODO
         // 3. Add mana to cards with mana generation (green icon)
 
         $cards = $hero->getTableauCards();
@@ -52,9 +52,17 @@ class Op_turnEnd extends Operation {
                 ]);
             }
         }
+
+        // Reset "used" flag on ability/equipment cards (state 1 → 0)
+        foreach ($cards as $card) {
+            if ($card["state"] == 1) {
+                $this->dbSetTokenState($card["key"], 0, "");
+            }
+        }
         // 4. Draw 1 event card (handles hand limit internally)
         $this->queue("drawEvent");
         // 5. Allow cycling top equipment or top ability card
+        // TODO
 
         // Reset attribute trackers to base values
         $hero->recalcTrackers();
