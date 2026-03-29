@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\OpCommon;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Op_spend;
 
 abstract class ComplexOperation extends CountableOperation {
     /** @var Operation[] */
@@ -90,9 +89,6 @@ abstract class ComplexOperation extends CountableOperation {
             "max" => $max,
             "tooltip" => $sub->getOpName(),
         ];
-        if ($sub instanceof Op_spend) {
-            $res["token_id"] = $args["token_id"] ?? null;
-        }
         return $res;
     }
 

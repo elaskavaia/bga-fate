@@ -210,7 +210,7 @@ See CLAUDE.md for project overview
 ### Client
 [x] Action selection UI: show 6 action buttons, disable already-picked action
 [x] End turn button
-[xs] Undo support for action selection
+[x] Undo support for action selection
 
 ### Tests
 [x] Integration test: full round (all players turn + monster turn) — Campaign_BjornSoloTest
@@ -337,7 +337,7 @@ See CLAUDE.md for project overview
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [x] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
-- [ ] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
+- [x] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
 - [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
 - [x] `spendAction` — Consume a main action slot without performing it. Used by: event cards that cost an action

@@ -18,10 +18,19 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Use Ability free action: hero activates a special ability.
+ * Also serves as the base class for Op_useEquipment.
  */
 class Op_useAbility extends Operation {
     function getPrompt() {
         return clienttranslate("Choose an ability card to use");
+    }
+
+    /** Return array of token rows (each with "key") that are candidates for this action. */
+    protected function getCandidateCards(string $owner): array {
+        $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+        return array_filter($cards, function ($card) {
+            return str_starts_with($card["key"], "card_ability_") || str_starts_with($card["key"], "card_hero_");
+        });
     }
 
     function getTrigger() {
@@ -35,21 +44,20 @@ class Op_useAbility extends Operation {
         }
         $owner = $this->getOwner();
         $trigger = $this->getTrigger();
-        $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+        $cards = $this->getCandidateCards($owner);
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
-            if (!str_starts_with($cardId, "card_ability_") && !str_starts_with($cardId, "card_hero_")) {
-                continue;
-            }
             $r = $this->game->material->getRulesFor($cardId, "r", "");
             if ($r === "") {
                 continue;
             }
+
             $on = $this->game->material->getRulesFor($cardId, "on", "");
             if ($on !== $trigger) {
                 continue;
             }
+
             $op = $this->game->machine->instanciateOperation($r, $owner, ["card" => $cardId]);
             $targets[$cardId] = $op->getErrorInfo();
         }
