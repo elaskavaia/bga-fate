@@ -605,6 +605,11 @@ export class Game extends GameMachine {
     return gameui.wait(1);
   }
 
+  async notif_log(args: any, notif: any) {
+    super.notif_log(args, notif);
+    return gameui.wait(1);
+  }
+
   async notif_undoMove(args: any) {
     console.log("notif", args);
     return gameui.wait(1);

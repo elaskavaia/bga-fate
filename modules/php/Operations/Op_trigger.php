@@ -22,7 +22,18 @@ class Op_trigger extends Operation {
     }
 
     function getPrompt() {
-        return clienttranslate("Choose a card to play in response");
+        switch ($this->getTriggerType()) {
+            case "roll":
+                return clienttranslate("You may activate an ability in response to your dice roll");
+            case "actionAttack":
+                return clienttranslate("You may activate an ability related to your attack");
+            case "resolveHits":
+                return clienttranslate("You may activate an ability to prevent the damage");
+            case "monsterMove":
+                return clienttranslate("You may activate an ability related to monster move");
+            default:
+                return clienttranslate("You may activate an ability in response to trigger");
+        }
     }
 
     function canSkip() {

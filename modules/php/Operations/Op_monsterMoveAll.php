@@ -19,10 +19,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - charge: bool — whether this is a charge (skull) turn (+1 movement step)
  */
 class Op_monsterMoveAll extends Operation {
-    public function auto(): bool {
-        return true;
-    }
-
     function resolve(): void {
         $isChargeTurn = (bool) $this->getDataField("charge", false);
         $this->moveAllMonsters($isChargeTurn);

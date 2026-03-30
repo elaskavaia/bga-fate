@@ -243,15 +243,15 @@ class Game0Basics {
         }
         this.prevLogId = log_id;
     }
-    notif_log(args) {
+    notif_log(args, notif) {
         // if (notif.log) {
         //   console.log(notif.log, notif.args);
         //   var message = this.format_string_recursive(notif.log, notif.args);
         //   if (message != notif.log) console.log(message);
         // } else {
-        if (args.log) {
-            var message = this.format_string_recursive(args.log, args.args);
-            delete args.log;
+        if (notif.log) {
+            var message = this.format_string_recursive(notif.log, notif.args);
+            delete notif.log;
             console.log("debug log", message, args);
         }
         else {
@@ -2427,6 +2427,10 @@ class Game extends GameMachine {
     }
     async notif_message(args) {
         //console.log("notif", args);
+        return gameui.wait(1);
+    }
+    async notif_log(args, notif) {
+        super.notif_log(args, notif);
         return gameui.wait(1);
     }
     async notif_undoMove(args) {

@@ -149,6 +149,15 @@ abstract class CampaignBaseTest extends TestCase {
         }
     }
 
+    protected function skipIfOp(string $optype): bool {
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === $optype) {
+            $this->skip();
+            return true;
+        }
+        return false;
+    }
+
     /** Seed upcoming bgaRand results (e.g. dice rolls: 5=hit, 1=miss) */
     protected function seedRand(array $values): void {
         $this->game->randQueue = array_merge($this->game->randQueue, $values);

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Bga\GameFramework\States\GameState;
 use Bga\GameFramework\Table;
 
+use function Bga\Games\Fate\toJson;
+
 /**
  * Generic harness driver for BGA games.
  * Handles scenario execution, state persistence, endpoint dispatch, and notifications.
@@ -109,8 +111,8 @@ class GameDriver {
         if ($private === null) {
             return;
         }
-        $forPlayer = $private[$currentPlayerId]
-            ?? ($this->game->gamestate->isPlayerActive($currentPlayerId) ? ($private["active"] ?? null) : null);
+        $forPlayer =
+            $private[$currentPlayerId] ?? ($this->game->gamestate->isPlayerActive($currentPlayerId) ? $private["active"] ?? null : null);
         unset($state["args"]["_private"]);
         if ($forPlayer !== null) {
             $state["args"]["_private"] = $forPlayer;
@@ -204,7 +206,15 @@ class GameDriver {
 
         $method = $reflection->getMethod($methodName);
         $args = $this->matchStateMethodArgs($method, $privateStatePlayerId);
-        return $state->$methodName(...$args);
+        if ($this->verbose >= 2) {
+            $stateName = $reflection->getShortName();
+            echo "Calling $stateName::$methodName\n";
+        }
+        $res = $state->$methodName(...$args);
+        if ($this->verbose >= 2) {
+            echo "Return:" . toJson($res) . "\n";
+        }
+        return $res;
     }
 
     private function matchStateMethodArgs(\ReflectionMethod $method, ?int $privateStatePlayerId): array {

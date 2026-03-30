@@ -13,10 +13,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Must run after monsterMoveAll so positions are up to date.
  */
 class Op_monsterAttackAll extends Operation {
-    public function auto(): bool {
-        return true;
-    }
-
     function resolve(): void {
         if ($this->game->isEndOfGame()) {
             return;

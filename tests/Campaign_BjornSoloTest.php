@@ -80,10 +80,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $state["name"]);
 
         // Turn start: drawEvent may be queued — skip it to get to the turn actions
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-        }
+        $this->skipIfOp("drawEvent");
 
         // Check state — mend should be available
         $this->assertValidTarget("actionMend");
@@ -399,19 +396,21 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $goblinHex = "hex_7_8"; // range 2 from hex_8_9
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
+        // Place a brute far away — it should still move toward Grimheim
+        $brute = "monster_brute_1";
+        $bruteHex = "hex_1_15";
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+
         // Do two actions then end turn
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         $this->skip(); // skip free actions → end turn → monster turn starts
 
         // Skip drawEvent if queued by turnEnd
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
+        $this->skipIfOp("drawEvent");
 
         // Monster turn queues trigger(monsterMove) before movement
+        $args = $this->getOpArgs();
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->assertEquals("monsterMove", $args["data"]["params"] ?? "");
         $this->assertValidTarget("card_ability_1_5");
@@ -432,6 +431,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Green crystal should still be on the goblin
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $goblin);
         $this->assertCount(1, $crystals, "Green crystal should remain on goblin after movement phase");
+
+        // Brute (not suppressed) should have moved closer to Grimheim
+
+        $bruteHex2 = $this->tokenLocation($brute);
+        $this->assertNotEquals($bruteHex, $bruteHex2, "Non-suppressed brute should have moved $bruteHex2");
     }
 
     public function testSuppressiveFireCannotChooseSameMonsterNextTurn(): void {
@@ -450,11 +454,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->respond("actionFocus");
         $this->skip(); // end turn
 
+        $this->skipIfOp("drawEvent");
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
         $this->respond($goblinHex);
@@ -464,22 +465,16 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $state["name"]);
 
         // Turn 2: end turn
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-        }
+        $this->skipIfOp("drawEvent");
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         $this->skip();
 
         // Skip drawEvent if queued
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
+        $this->skipIfOp("drawEvent");
 
         // Monster turn trigger — Suppressive Fire offered again
+        $args = $this->getOpArgs();
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
 
@@ -487,7 +482,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $args = $this->getOpArgs();
         $this->assertEquals("suppressiveFire", $args["type"] ?? "");
         $this->assertNotValidTarget($goblinHex, "Goblin should be excluded (has green crystal from last turn)");
-        $this->assertValidTarget($bruteHex, "Brute should be available");
+        // Brute moved toward Grimheim after turn 1 — use its current hex
+        $bruteCurrentHex = $this->tokenLocation($brute);
+        $this->assertValidTarget($bruteCurrentHex, "Brute should be available");
     }
 
     public function testSuppressiveFireIExcludesRank3(): void {
@@ -526,11 +523,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->respond("actionFocus");
         $this->skip(); // end turn
 
+        $this->skipIfOp("drawEvent");
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
         $this->respond($goblinHex);
@@ -539,22 +533,16 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $state["name"]);
 
         // Turn 2: end turn
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-        }
+        $this->skipIfOp("drawEvent");
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         $this->skip(); // end turn
 
         // Skip drawEvent if queued
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "drawEvent") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
+        $this->skipIfOp("drawEvent");
 
         // Monster turn — use trigger but SKIP suppressiveFire
+        $args = $this->getOpArgs();
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
 
@@ -632,6 +620,39 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals(2, $this->countDamage($this->heroId));
 
         $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be usable twice per turn");
+    }
+
+    // --- Monster Attack ---
+
+    public function testMonsterAttacksAdjacentHero(): void {
+        // Place goblin adjacent to hero (hero starts in Grimheim hex_8_9)
+        $goblin = "monster_goblin_20";
+        $heroHex = "hex_7_8";
+        $goblinHex = "hex_7_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+        $this->game->tokens->dbSetTokenLocation($this->heroId, $heroHex);
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Seed dice: goblin strength=1 → 1 die, roll a hit (side 5)
+        $this->seedRand([5]);
+
+        // Do two actions then end turn
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // end turn → monster turn
+
+        // Skip drawEvent if queued by turnEnd
+        $this->skipIfOp("drawEvent");
+
+        // Skip triggers (monsterMove)
+        $this->skipTriggers();
+
+        // Monster turn runs: move + attack + reinforcement → back to player turn
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+
+        // Hero should have taken damage from the goblin attack
+        $this->assertGreaterThan(0, $this->countDamage($this->heroId), "Hero should have taken damage from monster attack");
     }
 
     public function testStitchingIIHealsTwoDamage(): void {
