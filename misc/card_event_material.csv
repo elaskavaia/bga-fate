@@ -11,7 +11,7 @@ num|hno|name|count|r|on|effect|flavour
 28|1|Burning Arrows|4|custom||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!
 32|1|Limber Bow|2|custom||You have attack range +2 this turn.|Twannng!
 26|1|Master Shot|4|custom|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
-31|1|Perfect Aim|2|custom|roll|Reroll all misses.|Hitting where it hurts, not always in the head.
+31|1|Perfect Aim|2|rerollMisses|roll|Reroll all misses.|Hitting where it hurts, not always in the head.
 33|1|Piercing Arrows|2|custom|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 25|1|Prey|2|custom||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 27|1|Rest|2|2heal(self)||Heal 2 damage from Bjorn.|Sea therapy, works every time...

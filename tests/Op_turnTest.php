@@ -126,10 +126,10 @@ final class Op_turnTest extends TestCase {
         $this->assertEquals("Select your second action", $op->getPrompt());
     }
 
-    public function testPromptFreeActionsOnly(): void {
+    public function testPromptNoValidActionsRemain(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->createOp();
-        $this->assertEquals("Select a free action or end your turn", $op->getPrompt());
+        $this->assertEquals("Confirm end of turn or undo", $op->getPrompt());
     }
 
     // -------------------------------------------------------------------------

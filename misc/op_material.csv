@@ -83,6 +83,7 @@ killMonster|Kill Monster
 preventDamage|Prevent Damage
 addDamage|Add Damage
 addTownPiece|Add Town Piece
+rerollMisses|Reroll Misses
 
 drawEvent|Draw Event
 discardEvent|Discard Event

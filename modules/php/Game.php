@@ -346,21 +346,17 @@ class Game extends Base {
         $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
         foreach ($diceTokens as $die) {
             $dieId = $die["key"];
-            $roll = $this->bgaRand(1, 6);
-            $sideName = $this->material->getRulesFor("side_die_attack_$roll", "name", "?");
-            $this->tokens->dbSetTokenLocation(
-                $dieId,
-                "display_battle",
-                $roll,
-                clienttranslate('${token_name} attacks ${token_name2} - ${side_name}'),
-                [
-                    "token_name" => $attackerId,
-                    "token_name2" => $defenderId,
-                    "side_name" => $sideName,
-                    "anim_target" => $defenderId,
-                ]
-            );
+            $this->effect_rollAttackDie($attackerId, $dieId);
         }
+    }
+
+    function effect_rollAttackDie(string $attackerId, string $dieId): void {
+        $roll = $this->bgaRand(1, 6);
+        $sideName = $this->material->getRulesFor("side_die_attack_$roll", "name", "?");
+        $this->tokens->dbSetTokenLocation($dieId, "display_battle", $roll, clienttranslate('${char_name} rolls ${side_name}'), [
+            "char_name" => $attackerId,
+            "side_name" => $sideName,
+        ]);
     }
 
     function effect_addAttackDiceDamage(string $attackerId, int $strength): void {
@@ -473,7 +469,7 @@ class Game extends Base {
     /** Return the hex targeted by the current attack, or null if no attack in progress. */
     function getAttackHex(): ?string {
         $loc = $this->tokens->getTokenLocation("marker_attack");
-        return ($loc !== null && $loc !== "limbo") ? $loc : null;
+        return $loc !== null && $loc !== "limbo" ? $loc : null;
     }
 
     /** Factory: create a Hero model from a hero token id. */
@@ -593,27 +589,6 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_Op_drawEvent_empty() {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Empty the deck to test the no-cards-left case
-        $deck = $this->tokens->getTokensOfTypeInLocation("card", "deck_event_{$color}");
-        foreach ($deck as $cardId => $info) {
-            $this->tokens->dbSetTokenLocation($cardId, "limbo");
-        }
-        $this->machine->push("drawEvent", $color);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    public function debug_Op_moveMonster(): void {
-        // Place hero with two adjacent monsters so phase 1 doesn't auto-resolve
-        $this->tokens->dbSetTokenLocation("hero_1", "hex_11_8");
-        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_12_8");
-        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_11_7");
-        $this->hexMap->invalidateOccupancy();
-        $this->machine->push("1moveMonster", $this->getCurrentPlayerColor(), []);
-        $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
-    }
-
     function debug_draw(string $card) {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->tokens->dbSetTokenLocation($card, "hand_{$color}");
@@ -694,15 +669,7 @@ class Game extends Base {
         // Place monsters within range 3 of hero start (hex_8_9)
         $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_8");
         $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_9");
-        $this->hexMap->invalidateOccupancy();
-        // Clear any random monsters from reinforcement
-        $monsters = $this->hexMap->getMonstersOnMap();
-        foreach ($monsters as $m) {
-            if ($m["id"] !== "monster_goblin_1" && $m["id"] !== "monster_brute_1") {
-                $this->tokens->dbSetTokenLocation($m["id"], "supply_monster", 0);
-            }
-        }
-        $this->hexMap->invalidateOccupancy();
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
     function debug_Op_gainDamage(): void {

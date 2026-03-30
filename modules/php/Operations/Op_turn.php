@@ -97,7 +97,7 @@ class Op_turn extends Operation {
             } else {
                 $op = $this->instanciateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
-                if ($res[$action]["q"] == 0 && $inline) {
+                if ($res[$action]["q"] == 0 && $inline && ($kind == "free" || $remaining > 0)) {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgs()["info"];
                     foreach ($info as $key => $value) {
@@ -124,8 +124,6 @@ class Op_turn extends Operation {
     function resolve(): void {
         $optype = $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
-        $actionsTaken = $hero->getActionsTaken();
-        $remaining = $hero->getActionsRemaining();
         $kind = $this->getActionKind($optype);
 
         if ($kind === "main") {
@@ -140,8 +138,11 @@ class Op_turn extends Operation {
             $argInfo = $this->getArgs()["info"][$optype];
             $action = $argInfo["action"] ?? "";
             $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action !== "");
+            $kind = $this->getActionKind($action);
 
-            $hero->placeActionMarker($action);
+            if ($kind == "main") {
+                $hero->placeActionMarker($action);
+            }
             $this->queue($action, null, ["target" => $optype]);
             $this->queue("turn");
         } else {
@@ -168,8 +169,17 @@ class Op_turn extends Operation {
             return clienttranslate("Select your first action");
         } elseif ($remaining == 1) {
             return clienttranslate("Select your second action");
+        } elseif ($this->noValidTargets()) {
+            return clienttranslate("Confirm end of turn or undo");
         }
         return clienttranslate("Select a free action or end your turn");
+    }
+
+    public function getSubTitle() {
+        if ($this->noValidTargets()) {
+            return clienttranslate("No valid actions remain");
+        }
+        return "";
     }
 
     public function getDescription() {

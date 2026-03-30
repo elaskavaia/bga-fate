@@ -407,6 +407,10 @@ class Material {
         "type" => "addTownPiece",
         "name" => clienttranslate("Add Town Piece"),
 ],
+    "Op_rerollMisses" => [ 
+        "type" => "rerollMisses",
+        "name" => clienttranslate("Reroll Misses"),
+],
     "Op_drawEvent" => [ 
         "type" => "drawEvent",
         "name" => clienttranslate("Draw Event"),
@@ -4581,7 +4585,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Perfect Aim"),
         "count" => 2,
-        "r" => "custom",
+        "r" => "rerollMisses",
         "on" => "roll",
         "effect" => "Reroll all misses.",
         "flavour" => "Hitting where it hurts, not always in the head.",

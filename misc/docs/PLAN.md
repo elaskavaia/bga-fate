@@ -539,7 +539,7 @@ Hero, Abilities and Equipment:
 [ ] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest)
 [ ] card_event_1_32 Limber Bow — custom: attack range +2 this turn
 [ ] card_event_1_26 Master Shot — custom: add 2 damage to attack
-[ ] card_event_1_31 Perfect Aim — custom: reroll all misses
+[x] card_event_1_31 Perfect Aim — rerollMisses
 [ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune
 [ ] card_event_1_25 Prey — custom: mark monster for +2 XP
 [ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location
