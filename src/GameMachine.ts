@@ -10,61 +10,7 @@
  */
 
 import { Game1Tokens } from "./Game1Tokens";
-import type { NotificationMessage } from "./Game0Basics";
-
-interface UiOptions {
-  buttons?: boolean;
-  replicate?: boolean;
-  imagebuttons?: boolean;
-  noactive?: boolean;
-  undo?: boolean;
-  color?: string; // buton color fallback
-}
-interface ParamInfo extends UiOptions {
-  q: number; // error code
-  max?: number; // max count for this param
-
-  err?: string | NotificationMessage; // error string if error code is set
-  name?: string | NotificationMessage; // alternative param representation (can be rec tr)
-  tooltip?: string | NotificationMessage;
-
-  sec?: boolean; // this is secondary target
-  o?: number; //  priority order
-  color?: string; // button color
-  confirm?: string; // extra confirmation dialog before submitting
-
-  token_id?: string; // representation item
-  args?: any;
-
-  info?: ParamInfoArray; // param info for next argument
-}
-
-interface ParamInfoArray {
-  [key: string]: ParamInfo;
-}
-
-interface OpInfo {
-  id: number;
-  type: string; // operation type
-  owner: string; // operation owner (color)
-  data: any; // operation data
-
-  ttype: string; // operation target type
-  void: boolean; // operation is void
-  target: string[]; // possible targets
-  info: ParamInfoArray; // possible targets extra info
-
-  confirm?: boolean; // require confirmation before sending to server
-  description?: string; // for other players
-  prompt?: string | NotificationMessage; // prompt when op is single/active
-  subtitle?: string; // sub prompt when op is single/active (rended small subtext)
-
-  err?: string | NotificationMessage; // error string or notification object XXX
-
-  count?: number;
-  mcount?: number;
-  ui?: UiOptions;
-}
+import { OpInfo, ParamInfo } from "./types";
 
 /**  Generic processing related to Operation Machine */
 export class GameMachine extends Game1Tokens {
@@ -112,11 +58,11 @@ export class GameMachine extends Game1Tokens {
 
       // we also can have one addition way of selection (possibly)
       let altNode: HTMLElement;
-      if (opInfo.ui.replicate == true) {
+      if (opInfo.ui.replicate == true || paramInfo.replicate == true) {
         altNode = this.replicateTargetOnSelectionArea(target, paramInfo);
       }
 
-      if (opInfo.ui.imagebuttons == true) {
+      if (opInfo.ui.imagebuttons == true || paramInfo.imagebuttons == true) {
         altNode = this.replicateTargetOnToolbar(target, paramInfo);
       }
 
@@ -196,14 +142,7 @@ export class GameMachine extends Game1Tokens {
     const active = q == 0;
     const color: any = paramInfo.color ?? "secondary";
     const div = $(target);
-    let cloneHtml = this.createCustomButtonImageHtml(target, paramInfo);
-    if (!cloneHtml && div) {
-      const clone = div.cloneNode(true) as HTMLElement;
-      clone.id = target + "_temp";
-      clone.classList.remove(this.classActiveSlot);
-      clone.classList.add(this.classActiveSlotHidden);
-      cloneHtml = clone.outerHTML;
-    }
+    let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
     if (!cloneHtml) {
       return undefined;
     }
@@ -219,19 +158,32 @@ export class GameMachine extends Game1Tokens {
     return undefined;
   }
 
-  replicateTargetOnSelectionArea(target: string, paramInfo: ParamInfo): HTMLElement | undefined {
+  createCustomTargetImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
+    let cloneHtml = this.createCustomButtonImageHtml(target, paramInfo);
+    if (cloneHtml) return cloneHtml;
     const div = $(target);
-    if (!div) return undefined;
+    if (div) {
+      const clone = div.cloneNode(true) as HTMLElement;
+      clone.id = target + "_temp";
+      clone.classList.remove(this.classActiveSlot);
+      clone.classList.add(this.classActiveSlotHidden);
+      cloneHtml = clone.outerHTML;
+      return cloneHtml;
+    }
+    return undefined;
+  }
+
+  replicateTargetOnSelectionArea(target: string, paramInfo: ParamInfo): HTMLElement | undefined {
+    let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
+    if (!cloneHtml) return;
     const parent = document.createElement("div");
     parent.classList.add("target_container");
-    const clone = div.cloneNode(true) as HTMLElement;
-    clone.id = div.id + "_temp";
-    parent.appendChild(clone);
+    parent.innerHTML = cloneHtml;
     $("selection_area").appendChild(parent);
-    clone.addEventListener("click", (event: Event) => this.onToken(event));
-    clone.classList.remove(this.classActiveSlot);
-    clone.classList.add(this.classActiveSlotHidden);
-    return clone;
+    const child = parent.children.item(0) as HTMLElement;
+    child.classList.add(this.classActiveSlotHidden);
+    child.addEventListener("click", (event: Event) => this.onToken(event));
+    return child;
   }
 
   getReasonText(reason: string) {

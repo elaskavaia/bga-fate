@@ -117,19 +117,19 @@ final class Op_turnTest extends TestCase {
 
     public function testPromptFirstAction(): void {
         $op = $this->createOp();
-        $this->assertEquals("Select your first action", $op->getPrompt());
+        $this->assertEquals("Select your first action or free action", $op->getPrompt());
     }
 
     public function testPromptSecondAction(): void {
         $this->simulateActionTaken("actionPractice");
         $op = $this->createOp();
-        $this->assertEquals("Select your second action", $op->getPrompt());
+        $this->assertEquals("Select your second action or free action", $op->getPrompt());
     }
 
     public function testPromptNoValidActionsRemain(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->createOp();
-        $this->assertEquals("Confirm end of turn or undo", $op->getPrompt());
+        $this->assertEquals("Confirm end of turn", $op->getPrompt());
     }
 
     // -------------------------------------------------------------------------

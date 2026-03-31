@@ -37,18 +37,22 @@ class Op_monsterAttack extends Operation {
         // Calculate monster strength with faction bonus and queue roll pipeline
         $strength = $this->getMonsterStrength($monsterHex);
 
-        // Find heroes in attack range
-        // Check via roll op whether this hero can be attacked on this hex
-        $rollOp = $this->instanciateOperation("{$strength}roll", null, ["attacker" => $monsterId]);
-        $hexes = $rollOp->getArgs()["target"];
+        $heroHex = $this->getDataField("target", ""); // defender  hex
 
-        if (empty($hexes)) {
-            return; // No heroes to attack
+        if (!$heroHex) {
+            // Find heroes in attack range
+            // Check via roll op whether this hero can be attacked on this hex
+            $rollOp = $this->instanciateOperation("roll", null, ["attacker" => $monsterId]);
+            $hexes = $rollOp->getArgs()["target"];
+
+            if (empty($hexes)) {
+                return; // No heroes to attack
+            }
+
+            // TODO: Hero selection — currently picks first
+            // Rules may require different targeting logic (e.g. closest, random, player choice).
+            $heroHex = $this->pickTarget($hexes);
         }
-
-        // TODO: Hero selection — currently picks first
-        // Rules may require different targeting logic (e.g. closest, random, player choice).
-        $heroHex = $this->pickTarget($hexes);
 
         $this->game->tokens->dbSetTokenLocation("marker_attack", $heroHex, 0, "");
         $this->queue("roll", null, [

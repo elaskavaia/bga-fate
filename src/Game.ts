@@ -12,6 +12,7 @@
 import { getPart, placeHtml } from "./Game0Basics";
 import { Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
 import { GameMachine } from "./GameMachine";
+import { CustomGamedatas, CustomPlayer, ParamInfo } from "./types";
 
 class PlayerTurn {
   private game: Game;
@@ -40,7 +41,7 @@ export class Game extends GameMachine {
 
   constructor(bga: Bga) {
     super(bga);
-    console.log("fate constructor");
+    //console.log("fate constructor");
 
     this.playerTurn = new PlayerTurn(this, bga);
     this.bga.states.register("PlayerTurn", this.playerTurn);
@@ -50,7 +51,9 @@ export class Game extends GameMachine {
     console.log("Starting game setup");
     super.setup(gamedatas);
     placeHtml(
-      `<div id="mainarea">
+      `
+      <div id='selection_area' class='selection_area'></div>
+      <div id="mainarea">
         <div id="thething"></div>
       </div>`,
       this.bga.gameArea.getElement()
@@ -290,6 +293,36 @@ export class Game extends GameMachine {
     }
 
     return result;
+  }
+
+  createCustomButtonImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
+    if (target.startsWith("action")) {
+      let icon = "";
+      switch (target) {
+        case "actionMove":
+          icon = "wicon_move";
+          break;
+        case "actionAttack":
+          icon = "wicon_strength";
+          break;
+        case "actionMend":
+          icon = "wicon_damage";
+          break;
+        case "actionPrepare":
+          icon = "wicon_hand";
+          break;
+        case "actionFocus":
+          icon = "wicon_mana";
+          break;
+        case "actionPractice":
+          icon = "wicon_gold";
+          break;
+      }
+      const name = this.getRulesFor(`Op_${target}`, "name");
+      const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
+      return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
+    }
+    return undefined;
   }
 
   /** Update data-count on a bucket by counting its direct children (excluding other buckets). */

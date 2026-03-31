@@ -219,9 +219,16 @@ describe("Game.updateTokenDisplayInfo hero tooltip", () => {
 describe("Game.onClickSanity", () => {
   let game: Game;
 
+  let consoleStub: sinon.SinonStub;
+
   beforeEach(() => {
     document.body.innerHTML = '<div id="ebd-body"><div id="thething"></div></div>';
     game = new Game(createMockBga());
+    consoleStub = sinon.stub(console, "log");
+  });
+
+  afterEach(() => {
+    consoleStub.restore();
   });
 
   function makeClickEvent(currentTarget: HTMLElement, target?: HTMLElement): Event {

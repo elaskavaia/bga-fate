@@ -26,7 +26,7 @@ class Game0Basics {
         this.defaultTooltipDelay = 800;
         this.lastMoveId = 0;
         this.prevLogId = 0;
-        console.log("game constructor");
+        //console.log("game constructor");
         this.bga = bga;
     }
     setup(gamedatas) {
@@ -869,7 +869,7 @@ class Game1Tokens extends Game0Basics {
             blocked: true,
             active: false
         };
-        console.log("on slot " + id, result);
+        console.log("on slot " + id);
         if (!id)
             return result;
         if (this.showHelp(id))
@@ -1460,10 +1460,10 @@ class GameMachine extends Game1Tokens {
             }
             // we also can have one addition way of selection (possibly)
             let altNode;
-            if (opInfo.ui.replicate == true) {
+            if (opInfo.ui.replicate == true || paramInfo.replicate == true) {
                 altNode = this.replicateTargetOnSelectionArea(target, paramInfo);
             }
-            if (opInfo.ui.imagebuttons == true) {
+            if (opInfo.ui.imagebuttons == true || paramInfo.imagebuttons == true) {
                 altNode = this.replicateTargetOnToolbar(target, paramInfo);
             }
             if (!altNode && (opInfo.ui.buttons || !div)) {
@@ -1535,14 +1535,7 @@ class GameMachine extends Game1Tokens {
         const active = q == 0;
         const color = paramInfo.color ?? "secondary";
         const div = $(target);
-        let cloneHtml = this.createCustomButtonImageHtml(target, paramInfo);
-        if (!cloneHtml && div) {
-            const clone = div.cloneNode(true);
-            clone.id = target + "_temp";
-            clone.classList.remove(this.classActiveSlot);
-            clone.classList.add(this.classActiveSlotHidden);
-            cloneHtml = clone.outerHTML;
-        }
+        let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
         if (!cloneHtml) {
             return undefined;
         }
@@ -1556,20 +1549,33 @@ class GameMachine extends Game1Tokens {
     createCustomButtonImageHtml(target, paramInfo) {
         return undefined;
     }
-    replicateTargetOnSelectionArea(target, paramInfo) {
+    createCustomTargetImageHtml(target, paramInfo) {
+        let cloneHtml = this.createCustomButtonImageHtml(target, paramInfo);
+        if (cloneHtml)
+            return cloneHtml;
         const div = $(target);
-        if (!div)
-            return undefined;
+        if (div) {
+            const clone = div.cloneNode(true);
+            clone.id = target + "_temp";
+            clone.classList.remove(this.classActiveSlot);
+            clone.classList.add(this.classActiveSlotHidden);
+            cloneHtml = clone.outerHTML;
+            return cloneHtml;
+        }
+        return undefined;
+    }
+    replicateTargetOnSelectionArea(target, paramInfo) {
+        let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
+        if (!cloneHtml)
+            return;
         const parent = document.createElement("div");
         parent.classList.add("target_container");
-        const clone = div.cloneNode(true);
-        clone.id = div.id + "_temp";
-        parent.appendChild(clone);
+        parent.innerHTML = cloneHtml;
         $("selection_area").appendChild(parent);
-        clone.addEventListener("click", (event) => this.onToken(event));
-        clone.classList.remove(this.classActiveSlot);
-        clone.classList.add(this.classActiveSlotHidden);
-        return clone;
+        const child = parent.children.item(0);
+        child.classList.add(this.classActiveSlotHidden);
+        child.addEventListener("click", (event) => this.onToken(event));
+        return child;
     }
     getReasonText(reason) {
         if (!reason)
@@ -1902,14 +1908,16 @@ class Game extends GameMachine {
         this.boundUpdateBoardScale = () => {
             this.updateBoardScale($("thething"));
         };
-        console.log("fate constructor");
+        //console.log("fate constructor");
         this.playerTurn = new PlayerTurn(this, bga);
         this.bga.states.register("PlayerTurn", this.playerTurn);
     }
     setup(gamedatas) {
         console.log("Starting game setup");
         super.setup(gamedatas);
-        placeHtml(`<div id="mainarea">
+        placeHtml(`
+      <div id='selection_area' class='selection_area'></div>
+      <div id="mainarea">
         <div id="thething"></div>
       </div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
@@ -2125,6 +2133,35 @@ class Game extends GameMachine {
             result.nop = true;
         }
         return result;
+    }
+    createCustomButtonImageHtml(target, paramInfo) {
+        if (target.startsWith("action")) {
+            let icon = "";
+            switch (target) {
+                case "actionMove":
+                    icon = "wicon_move";
+                    break;
+                case "actionAttack":
+                    icon = "wicon_strength";
+                    break;
+                case "actionMend":
+                    icon = "wicon_damage";
+                    break;
+                case "actionPrepare":
+                    icon = "wicon_hand";
+                    break;
+                case "actionFocus":
+                    icon = "wicon_mana";
+                    break;
+                case "actionPractice":
+                    icon = "wicon_gold";
+                    break;
+            }
+            const name = this.getRulesFor(`Op_${target}`, "name");
+            const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
+            return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
+        }
+        return undefined;
     }
     /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
     updateBucketCount(bucketId) {

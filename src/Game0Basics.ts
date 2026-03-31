@@ -9,6 +9,8 @@
  *
  */
 
+import { CustomGamedatas, NotificationMessage } from "./types";
+
 /** Class that extends default bga core game class with more functionality
  */
 export type StringProperties = { [key: string]: string };
@@ -36,7 +38,7 @@ export class Game0Basics {
   }
 
   constructor(bga: Bga) {
-    console.log("game constructor");
+    //console.log("game constructor");
     this.bga = bga;
   }
 
@@ -296,12 +298,6 @@ export class Game0Basics {
       this.bga.dialogs.showMessage(_("Announcement:") + " " + message, "info");
     }
   }
-}
-export interface NotificationMessage {
-  log: string;
-  args?: {
-    [key: string]: any;
-  };
 }
 
 /** This is essentically dojo.place but without dojo */

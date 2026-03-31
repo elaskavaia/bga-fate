@@ -98,8 +98,8 @@
 // wicon base: icon from tokens.webp sprite
 .wicon {
   display: inline-block;
-  width: 24px;
-  height: 24px;
+  height: 32px;
+  aspect-ratio: 1;
   background-image: url(img/tokens.webp);
   background-size: 600% 300%;
   background-repeat: no-repeat;
@@ -120,21 +120,47 @@
 
 .wicon_strength {
   background-position: 0% 50%;
-  order: 1;
 }
 .wicon_health {
   background-position: 0% 100%;
-  order: 2;
 }
 .wicon_range {
   background-position: 20% 100%;
-  order: 3;
 }
 .wicon_move {
   background-position: 20% 50%;
-  order: 4;
 }
 .wicon_hand {
   background-position: 100% 100%;
-  order: 5;
+}
+.wicon_damage,
+.wicon_red {
+  background-position: 60% 0%;
+}
+.wicon_gold,
+.wicon_xp,
+.wicon_yellow {
+  background-position: 80% 0%;
+}
+.wicon_mana,
+.wicon_green {
+  background-position: 100% 0%;
+}
+
+.miniboard {
+  .wicon_strength {
+    order: 1;
+  }
+  .wicon_health {
+    order: 2;
+  }
+  .wicon_range {
+    order: 3;
+  }
+  .wicon_move {
+    order: 4;
+  }
+  .wicon_hand {
+    order: 5;
+  }
 }

@@ -97,6 +97,7 @@ class Op_turn extends Operation {
             } else {
                 $op = $this->instanciateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
+                $res[$action]["replicate"] = true;
                 if ($res[$action]["q"] == 0 && $inline && ($kind == "free" || $remaining > 0)) {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgs()["info"];
@@ -166,11 +167,11 @@ class Op_turn extends Operation {
     public function getPrompt() {
         $remaining = $this->getActionsRemaining();
         if ($remaining == self::ACTIONS_PER_TURN) {
-            return clienttranslate("Select your first action");
+            return clienttranslate("Select your first action or free action");
         } elseif ($remaining == 1) {
-            return clienttranslate("Select your second action");
+            return clienttranslate("Select your second action or free action");
         } elseif ($this->noValidTargets()) {
-            return clienttranslate("Confirm end of turn or undo");
+            return clienttranslate("Confirm end of turn");
         }
         return clienttranslate("Select a free action or end your turn");
     }

@@ -9,9 +9,10 @@
  *
  */
 
-import { Game0Basics, NotificationMessage, placeHtml, getPart, getParentParts, StringProperties } from "./Game0Basics";
+import { Game0Basics, placeHtml, getPart, getParentParts, StringProperties } from "./Game0Basics";
 import { LaAnimations } from "./LaAnimations";
 import { BgaAnimations } from "./libs";
+import { NotificationMessage } from "./types";
 
 /**
  * Interface that mimics token datatabase object
@@ -304,7 +305,7 @@ export class Game1Tokens extends Game0Basics {
       active: false
     };
 
-    console.log("on slot " + id, result);
+    console.log("on slot " + id);
     if (!id) return result;
     if (this.showHelp(id)) return result;
 
