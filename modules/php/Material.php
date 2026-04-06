@@ -329,7 +329,7 @@ class Material {
         "type" => "playEvent",
         "name" => clienttranslate("Play Event"),
 ],
-// #shareGold|Share Gold|"notimpl"=>true
+// #shareGold|Share Gold|
 // # Card effect operations (building blocks for card effects)
     "Op_dealDamage" => [ 
         "type" => "dealDamage",

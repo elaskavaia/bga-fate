@@ -1,4 +1,4 @@
-type|name|php
+type|name|wicon
 #set id=Op_{type}
 
 #set class=
@@ -58,7 +58,7 @@ actionPractice|Practice
 useEquipment|Use Equipment
 useAbility|Use Ability
 playEvent|Play Event
-#shareGold|Share Gold|"notimpl"=>true
+#shareGold|Share Gold|
 
 #set kind=
 #set inline=
