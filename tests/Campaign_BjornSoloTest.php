@@ -313,16 +313,16 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertValidTarget("card_ability_1_14");
         $this->respond("card_ability_1_14");
 
-        // nailedTogether — two monsters behind hex_7_9: hex_6_9 and hex_7_8
+        // c_nailed — two monsters behind hex_7_9: hex_6_9 and hex_7_8
         $args = $this->getOpArgs();
-        $this->assertEquals("nailedTogether", $args["type"] ?? "");
+        $this->assertEquals("c_nailed", $args["type"] ?? "");
         $this->assertValidTarget("hex_6_9");
         $this->assertValidTarget("hex_7_8");
 
         // Choose goblin_1 at hex_6_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
         $this->respond("hex_6_9");
 
-        // Chain: nailedTogether again — brute at hex_5_9 is behind hex_6_9
+        // Chain: c_nailed again — brute at hex_5_9 is behind hex_6_9
         // Auto-resolves since only one monster behind
         // Brute should have 1 damage (chain overkill from goblin_1)
         $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 chain damage");

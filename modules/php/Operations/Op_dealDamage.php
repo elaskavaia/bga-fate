@@ -89,7 +89,7 @@ class Op_dealDamage extends CountableOperation {
 
         if ($remaining <= 0 && str_starts_with($defenderId, "monster_")) {
             $overkill = abs($remaining);
-            // Store overkill on marker_attack state for nailedTogether to read
+            // Store overkill on marker_attack state for c_nailed to read
             $this->game->tokens->dbSetTokenState("marker_attack", $overkill, "");
             $this->queueTrigger("monsterKilled");
         }

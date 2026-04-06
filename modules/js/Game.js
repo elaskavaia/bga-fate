@@ -1877,6 +1877,16 @@ class GameMachine {
     }
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 class PlayerTurn extends GameMachine {
     constructor(game, bga) {
         super(game, bga);
@@ -1898,28 +1908,9 @@ class PlayerTurn extends GameMachine {
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
     createCustomButtonImageHtml(target, paramInfo) {
         if (target.startsWith("action")) {
-            let icon = "";
-            switch (target) {
-                case "actionMove":
-                    icon = "wicon_move";
-                    break;
-                case "actionAttack":
-                    icon = "wicon_strength";
-                    break;
-                case "actionMend":
-                    icon = "wicon_damage";
-                    break;
-                case "actionPrepare":
-                    icon = "wicon_hand";
-                    break;
-                case "actionFocus":
-                    icon = "wicon_mana";
-                    break;
-                case "actionPractice":
-                    icon = "wicon_gold";
-                    break;
-            }
-            const name = this.game.getRulesFor(`Op_${target}`, "name");
+            const opKey = `Op_${target}`;
+            const icon = this.game.getRulesFor(opKey, "wicon", "");
+            const name = this.game.getRulesFor(opKey, "name");
             const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
             return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
         }

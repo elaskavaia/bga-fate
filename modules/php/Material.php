@@ -283,32 +283,38 @@ class Material {
         "inline" => 1,
         "type" => "actionMove",
         "name" => clienttranslate("Move"),
+        "wicon" => "wicon_move",
 ],
     "Op_actionAttack" => [ 
         "kind" => "main",
         "inline" => 1,
         "type" => "actionAttack",
         "name" => clienttranslate("Attack"),
+        "wicon" => "wicon_strength",
 ],
     "Op_actionPrepare" => [ 
         "kind" => "main",
         "type" => "actionPrepare",
         "name" => clienttranslate("Prepare"),
+        "wicon" => "wicon_hand",
 ],
     "Op_actionFocus" => [ 
         "kind" => "main",
         "type" => "actionFocus",
         "name" => clienttranslate("Focus"),
+        "wicon" => "wicon_mana",
 ],
     "Op_actionMend" => [ 
         "kind" => "main",
         "type" => "actionMend",
         "name" => clienttranslate("Mend"),
+        "wicon" => "wicon_damage",
 ],
     "Op_actionPractice" => [ 
         "kind" => "main",
         "type" => "actionPractice",
         "name" => clienttranslate("Practice"),
+        "wicon" => "wicon_gold",
 ],
 // # Free actions (can be done between/after main actions)
     "Op_useEquipment" => [ 
@@ -363,8 +369,8 @@ class Material {
         "type" => "endOfAttack",
         "name" => clienttranslate("End of Attack"),
 ],
-    "Op_nailedTogether" => [ 
-        "type" => "nailedTogether",
+    "Op_c_nailed" => [ 
+        "type" => "c_nailed",
         "name" => clienttranslate("Nailed Together"),
 ],
     "Op_heal" => [ 
@@ -3457,7 +3463,7 @@ class Material {
         "num" => 13,
         "hno" => 1,
         "name" => clienttranslate("Nailed Together I"),
-        "r" => "nailedTogether",
+        "r" => "c_nailed",
         "on" => "monsterKilled",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).",
 ],
@@ -3469,7 +3475,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Nailed Together II"),
         "strength" => 2,
-        "r" => "nailedTogether(chain)",
+        "r" => "c_nailed(chain)",
         "on" => "monsterKilled",
         "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.",
 ],

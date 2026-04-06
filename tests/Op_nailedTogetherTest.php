@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_nailedTogetherTest extends TestCase {
+final class Op_c_nailedTest extends TestCase {
     private GameUT $game;
 
     protected function setUp(): void {
@@ -22,19 +22,19 @@ final class Op_nailedTogetherTest extends TestCase {
 
     public function testNoOverkillReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 0);
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
     public function testNoMarkerReturnsError(): void {
         // marker_attack in limbo (no active attack)
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
     public function testNoMonsterBehindReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 2);
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
@@ -44,7 +44,7 @@ final class Op_nailedTogetherTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 2);
 
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $this->assertEquals(0, $op->getErrorCode());
         $targets = $op->getArgs()["target"] ?? [];
         $this->assertContains("hex_6_9", $targets);
@@ -55,7 +55,7 @@ final class Op_nailedTogetherTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 1);
 
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $op->action_resolve(["target" => "hex_6_9"]);
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
@@ -69,7 +69,7 @@ final class Op_nailedTogetherTest extends TestCase {
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
         $this->setAttackMarker("hex_7_9", 3);
 
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $op->action_resolve(["target" => "hex_6_9"]);
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
@@ -81,15 +81,15 @@ final class Op_nailedTogetherTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 3);
 
-        $op = $this->game->machine->instanciateOperation("nailedTogether(chain)", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed(chain)", PCOLOR);
         $op->action_resolve(["target" => "hex_6_9"]);
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
-        // Should have queued another nailedTogether(chain)
+        // Should have queued another c_nailed(chain)
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("nailedTogether(chain)", $opTypes);
+        $this->assertContains("c_nailed(chain)", $opTypes);
 
         // marker_attack should be updated to hex_6_9 with new overkill
         $this->assertEquals("hex_6_9", $this->game->tokens->getTokenLocation("marker_attack"));
@@ -100,12 +100,12 @@ final class Op_nailedTogetherTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 3);
 
-        $op = $this->game->machine->instanciateOperation("nailedTogether", PCOLOR);
+        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
         $op->action_resolve(["target" => "hex_6_9"]);
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertNotContains("nailedTogether(chain)", $opTypes);
-        $this->assertNotContains("nailedTogether", $opTypes);
+        $this->assertNotContains("c_nailed(chain)", $opTypes);
+        $this->assertNotContains("c_nailed", $opTypes);
     }
 }

@@ -43,14 +43,14 @@ monsterAttack|Monster Attack
 # Main actions (2 per turn, cannot repeat)
 #set kind=main
 #set inline=1
-actionMove|Move
-actionAttack|Attack
+actionMove|Move|wicon_move
+actionAttack|Attack|wicon_strength
 
 #set inline=
-actionPrepare|Prepare
-actionFocus|Focus
-actionMend|Mend
-actionPractice|Practice
+actionPrepare|Prepare|wicon_hand
+actionFocus|Focus|wicon_mana
+actionMend|Mend|wicon_damage
+actionPractice|Practice|wicon_gold
 
 # Free actions (can be done between/after main actions)
 #set kind=free
@@ -72,7 +72,7 @@ spendAction|Spend Action
 roll|Roll Dice
 resolveHits|Resolve Hits
 endOfAttack|End of Attack
-nailedTogether|Nailed Together
+c_nailed|Nailed Together
 heal|Heal
 moveHero|Move Hero
 moveMonster|Move Monster

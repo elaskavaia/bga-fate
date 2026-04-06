@@ -9,7 +9,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 use function Bga\Games\Fate\getPart;
 
 /**
- * nailedTogether: Pierce remaining damage through to a monster behind the killed one.
+ * c_nailed: Pierce remaining damage through to a monster behind the killed one.
  *
  * Reads from marker_attack: location = killed hex, state = overkill amount.
  *
@@ -22,9 +22,9 @@ use function Bga\Games\Fate\getPart;
  * - Deals overkill damage to chosen monster
  * - Level II: if that monster also dies, updates marker_attack and re-queues
  *
- * Used by: Nailed Together I (nailedTogether), Nailed Together II (nailedTogether(chain))
+ * Used by: Nailed Together I (c_nailed), Nailed Together II (c_nailed(chain))
  */
-class Op_nailedTogether extends Operation {
+class Op_c_nailed extends Operation {
     function getPrompt() {
         return clienttranslate('Choose a monster to deal ${overkill} piercing damage to');
     }
@@ -74,7 +74,7 @@ class Op_nailedTogether extends Operation {
         $attackerId = $this->game->getHeroTokenId($this->getOwner());
 
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
-        $this->game->systemAssert("ERR:nailedTogether:noMonsterOnHex:$targetHex", $defenderId !== null);
+        $this->game->systemAssert("ERR:c_nailed:noMonsterOnHex:$targetHex", $defenderId !== null);
 
         // Deal overkill damage
         $this->game->effect_moveCrystals($attackerId, "red", $overkill, $defenderId, [
@@ -88,7 +88,7 @@ class Op_nailedTogether extends Operation {
         if ($this->isChain() && $remaining <= 0) {
             $newOverkill = abs($remaining);
             $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, $newOverkill, "");
-            $this->queue("nailedTogether(chain)");
+            $this->queue("c_nailed(chain)");
         }
     }
 
