@@ -106,15 +106,6 @@ export class Game1Tokens extends Game0Basics {
     this.updateCountersSafe(this.gamedatas.counters);
   }
 
-  onLeavingState(stateName: string, args: any): void {
-    console.log("onLeavingState: " + stateName);
-    //this.disconnectAllTemp();
-    this.removeAllClasses(this.classActiveSlot, this.classActiveSlotHidden);
-    if (!gameui.on_client_state) {
-      this.removeAllClasses(this.classSelected, this.classSelectedAlt);
-    }
-    //super.onLeavingState(stateName);
-  }
 
   cancelLocalStateEffects() {
     //console.log(this.last_server_state);

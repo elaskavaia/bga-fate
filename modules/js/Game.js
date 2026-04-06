@@ -134,13 +134,6 @@ class Game0Basics {
         gameui.removeTooltip(nodeId);
         delete gameui.tooltips[nodeId]; // HACK: removeTooltip leaking this entry, removing manually
     }
-    callfn(methodName, ...args) {
-        if (this[methodName] !== undefined) {
-            console.log("Calling " + methodName, args);
-            return this[methodName](...args);
-        }
-        return undefined;
-    }
     /** @Override onScriptError from gameui */
     onScriptError(msg, url, linenumber) {
         if (gameui.page_is_unloading) {
@@ -196,6 +189,17 @@ class Game0Basics {
             return log;
         }
         //return this.clienttranslate_string(name);
+    }
+    setSubPrompt(text, args = {}) {
+        if (!text)
+            text = "";
+        if (!args)
+            args = [];
+        const message = this.format_string_recursive(this.getTr(text, args), args);
+        // have to set after otherwise status update wipes it
+        setTimeout(() => {
+            $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
+        }, 100);
     }
     reloadCss() {
         var links = document.getElementsByTagName("link");
@@ -687,15 +691,6 @@ class Game1Tokens extends Game0Basics {
         placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
         this.setupTokens();
         this.updateCountersSafe(this.gamedatas.counters);
-    }
-    onLeavingState(stateName, args) {
-        console.log("onLeavingState: " + stateName);
-        //this.disconnectAllTemp();
-        this.removeAllClasses(this.classActiveSlot, this.classActiveSlotHidden);
-        if (!gameui.on_client_state) {
-            this.removeAllClasses(this.classSelected, this.classSelectedAlt);
-        }
-        //super.onLeavingState(stateName);
     }
     cancelLocalStateEffects() {
         //console.log(this.last_server_state);
@@ -1417,28 +1412,39 @@ class Game1Tokens extends Game0Basics {
  *
  */
 /**  Generic processing related to Operation Machine */
-class GameMachine extends Game1Tokens {
-    onEnteringState_PlayerTurn(opInfo) {
+class GameMachine {
+    constructor(game, bga) {
+        this.game = game;
+        this.bga = bga;
+    }
+    callfn(methodName, ...args) {
+        if (this[methodName] !== undefined) {
+            console.log("Calling " + methodName, args);
+            return this[methodName](...args);
+        }
+        return undefined;
+    }
+    onEnteringStatePrivate(opInfo) {
         console.log("onEnteringState_PlayerTurn", opInfo);
         if (!this.bga.players.isCurrentPlayerActive()) {
             if (opInfo?.description)
-                this.bga.statusBar.setTitle(this.getTr(opInfo.description, opInfo));
-            this.setSubPrompt("");
+                this.bga.statusBar.setTitle(this.game.getTr(opInfo.description, opInfo));
+            this.game.setSubPrompt("");
             this.addUndoButton(opInfo.ui?.undo);
             return;
         }
         this.completeOpInfo(opInfo);
         this.opInfo = opInfo;
         if (opInfo.prompt) {
-            this.bga.statusBar.setTitle(this.getTr(opInfo.prompt, opInfo));
+            this.bga.statusBar.setTitle(this.game.getTr(opInfo.prompt, opInfo));
         }
         if (opInfo.subtitle)
-            this.setSubPrompt(this.getTr(opInfo.subtitle, opInfo), opInfo);
+            this.game.setSubPrompt(this.game.getTr(opInfo.subtitle, opInfo), opInfo);
         else if (opInfo.err) {
-            this.setSubPrompt(_("Error: ") + this.getTr(opInfo.err, opInfo));
+            this.game.setSubPrompt(_("Error: ") + this.game.getTr(opInfo.err, opInfo));
         }
         else
-            this.setSubPrompt(this.getReasonText(opInfo.data.reason));
+            this.game.setSubPrompt(this.getReasonText(opInfo.data.reason));
         const multiselect = this.isMultiSelectArgs(opInfo);
         const sortedTargets = Object.keys(opInfo.info);
         sortedTargets.sort((a, b) => opInfo.info[a].o - opInfo.info[b].o);
@@ -1454,7 +1460,7 @@ class GameMachine extends Game1Tokens {
             if (div && active && paramInfo.noactive !== true) {
                 const doNotShowActive = paramInfo.noactive ?? opInfo.ui.noactive ?? false;
                 if (doNotShowActive == false) {
-                    div.classList.add(this.classActiveSlot);
+                    div.classList.add(this.game.classActiveSlot);
                     div.dataset.targetOpType = opInfo.type;
                 }
             }
@@ -1474,15 +1480,15 @@ class GameMachine extends Game1Tokens {
             altNode.dataset.targetId = target;
             altNode.dataset.targetOpType = opInfo.type;
             if (!active) {
-                altNode.title = this.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
-                altNode.classList.add(this.classButtonDisabled);
+                altNode.title = this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
+                altNode.classList.add(this.game.classButtonDisabled);
             }
             else {
                 const title = paramInfo.tooltip;
                 if (title)
-                    altNode.title = this.getTr(title, paramInfo);
+                    altNode.title = this.game.getTr(title, paramInfo);
                 else
-                    this.updateTooltip(target, altNode);
+                    this.game.updateTooltip(target, altNode);
             }
             if (paramInfo.max !== undefined) {
                 altNode.dataset.max = String(paramInfo.max);
@@ -1492,7 +1498,7 @@ class GameMachine extends Game1Tokens {
             }
         }
         if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
-            this.addShowMeButton(true);
+            this.game.addShowMeButton(true);
         }
         // secondary buttons
         for (const target of sortedTargets) {
@@ -1506,11 +1512,11 @@ class GameMachine extends Game1Tokens {
                 }), {
                     color: color,
                     id: "button_" + target,
-                    confirm: this.getTr(paramInfo.confirm)
+                    confirm: this.game.getTr(paramInfo.confirm)
                 });
                 button.dataset.targetId = target;
                 if (paramInfo.q)
-                    button.classList.add(this.classButtonDisabled);
+                    button.classList.add(this.game.classButtonDisabled);
             }
         }
         if (multiselect) {
@@ -1557,8 +1563,8 @@ class GameMachine extends Game1Tokens {
         if (div) {
             const clone = div.cloneNode(true);
             clone.id = target + "_temp";
-            clone.classList.remove(this.classActiveSlot);
-            clone.classList.add(this.classActiveSlotHidden);
+            clone.classList.remove(this.game.classActiveSlot);
+            clone.classList.add(this.game.classActiveSlotHidden);
             cloneHtml = clone.outerHTML;
             return cloneHtml;
         }
@@ -1573,15 +1579,15 @@ class GameMachine extends Game1Tokens {
         parent.innerHTML = cloneHtml;
         $("selection_area").appendChild(parent);
         const child = parent.children.item(0);
-        child.classList.remove(this.classActiveSlot);
-        child.classList.add(this.classActiveSlotHidden);
+        child.classList.remove(this.game.classActiveSlot);
+        child.classList.add(this.game.classActiveSlotHidden);
         child.addEventListener("click", (event) => this.onToken(event));
         return child;
     }
     getReasonText(reason) {
         if (!reason)
             return "";
-        return _("Reason:") + " " + this.getTokenName(reason);
+        return _("Reason:") + " " + this.game.getTokenName(reason);
     }
     getTargetButtonName(target, paramInfo) {
         const div = $(target);
@@ -1590,9 +1596,9 @@ class GameMachine extends Game1Tokens {
             name = div.dataset.name;
         }
         if (!name)
-            return this.getTokenName(target);
+            return this.game.getTokenName(target);
         else
-            return this.getTr(name, paramInfo.args ?? paramInfo);
+            return this.game.getTr(name, paramInfo.args ?? paramInfo);
     }
     isMultiSelectArgs(args) {
         return args.ttype == "token_count" || args.ttype == "token_array";
@@ -1600,8 +1606,12 @@ class GameMachine extends Game1Tokens {
     isMultiCountArgs(args) {
         return args.ttype == "token_count";
     }
-    onLeavingState(stateName, args) {
-        super.onLeavingState(stateName, args);
+    onLeavingState(args, isCurrentPlayerActive) {
+        console.log("onLeavingState");
+        this.game.removeAllClasses(this.game.classActiveSlot, this.game.classActiveSlotHidden);
+        if (!this.bga.states.isOnClientState()) {
+            this.game.removeAllClasses(this.game.classSelected, this.game.classSelectedAlt);
+        }
         $("button_undo")?.remove();
         // remove children
         $("selection_area").replaceChildren();
@@ -1609,7 +1619,7 @@ class GameMachine extends Game1Tokens {
     /** default click processor */
     onToken(event, fromMethod) {
         console.log(event);
-        let result = this.onClickSanity(event);
+        let result = this.game.onClickSanity(event);
         if (!result.targetId) {
             return true;
         }
@@ -1665,11 +1675,11 @@ class GameMachine extends Game1Tokens {
             id: doneButtonId
         });
         this.bga.statusBar.addActionButton(_("Reset"), () => {
-            const allSel = document.querySelectorAll(`.${this.classSelectedAlt},.${this.classSelected}`);
+            const allSel = document.querySelectorAll(`.${this.game.classSelectedAlt},.${this.game.classSelected}`);
             allSel.forEach((node) => {
                 delete node.dataset.count;
             });
-            this.removeAllClasses(this.classSelected, this.classSelectedAlt);
+            this.game.removeAllClasses(this.game.classSelected, this.game.classSelectedAlt);
             this.onMultiSelectionUpdate(opInfo);
         }, {
             color: "alert",
@@ -1696,7 +1706,7 @@ class GameMachine extends Game1Tokens {
             console.log("action complete", x);
         })
             .catch((e) => {
-            this.setSubPrompt(e.message, e.args);
+            this.game.setSubPrompt(e.message, e.args);
         });
     }
     addUndoButton(cond = true) {
@@ -1706,7 +1716,7 @@ class GameMachine extends Game1Tokens {
                 checkAction: false
             })
                 ?.catch((e) => {
-                this.setSubPrompt(e.message, e.args);
+                this.game.setSubPrompt(e.message, e.args);
             }), {
                 color: "alert",
                 id: "button_undo"
@@ -1722,9 +1732,9 @@ class GameMachine extends Game1Tokens {
     }
     getMultiSelectCountAndSync(result = {}) {
         // sync alternative selection on toolbar
-        const allSel = document.querySelectorAll(`.${this.classSelected}`);
-        const selectedAlt = this.classSelectedAlt;
-        this.removeAllClasses(selectedAlt);
+        const allSel = document.querySelectorAll(`.${this.game.classSelected}`);
+        const selectedAlt = this.game.classSelectedAlt;
+        this.game.removeAllClasses(selectedAlt);
         let totalCount = 0;
         allSel.forEach((node) => {
             let altnode = document.querySelector(`[data-target-id="${node.id}"]`);
@@ -1759,10 +1769,10 @@ class GameMachine extends Game1Tokens {
         const selNode = cnode;
         if (count + 1 > max) {
             cnode.dataset.count = "0";
-            selNode.classList.remove(this.classSelected);
+            selNode.classList.remove(this.game.classSelected);
         }
         else {
-            selNode.classList.add(this.classSelected);
+            selNode.classList.add(this.game.classSelected);
         }
         this.onMultiSelectionUpdate(opInfo);
         return true;
@@ -1779,44 +1789,33 @@ class GameMachine extends Game1Tokens {
         const doneButton = $(doneButtonId);
         if (doneButton) {
             if ((count == 0 && skippable) || count < opInfo.mcount) {
-                doneButton.classList.add(this.classButtonDisabled);
+                doneButton.classList.add(this.game.classButtonDisabled);
                 doneButton.title = _("Cannot use this action because insuffient amount of elements selected");
             }
             else if (count > opInfo.count) {
-                doneButton.classList.add(this.classButtonDisabled);
+                doneButton.classList.add(this.game.classButtonDisabled);
                 doneButton.title = _("Cannot use this action because superfluous amount of elements selected");
             }
             else {
-                doneButton.classList.remove(this.classButtonDisabled);
+                doneButton.classList.remove(this.game.classButtonDisabled);
                 doneButton.title = "";
             }
             $(doneButtonId).innerHTML = buttonName + ": " + count;
         }
         if (count > 0) {
-            $(resetButtonId)?.classList.remove(this.classButtonDisabled);
+            $(resetButtonId)?.classList.remove(this.game.classButtonDisabled);
             if (skipButton) {
-                skipButton.classList.add(this.classButtonDisabled);
+                skipButton.classList.add(this.game.classButtonDisabled);
                 skipButton.title = _("Cannot use this action because there are some elements selected");
             }
         }
         else {
-            $(resetButtonId)?.classList.add(this.classButtonDisabled);
+            $(resetButtonId)?.classList.add(this.game.classButtonDisabled);
             if (skipButton) {
                 skipButton.title = "";
-                skipButton.classList.remove(this.classButtonDisabled);
+                skipButton.classList.remove(this.game.classButtonDisabled);
             }
         }
-    }
-    setSubPrompt(text, args = {}) {
-        if (!text)
-            text = "";
-        if (!args)
-            args = [];
-        const message = this.format_string_recursive(this.getTr(text, args), args);
-        // have to set after otherwise status update wipes it
-        setTimeout(() => {
-            $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
-        }, 100);
     }
     completeOpInfo(opInfo) {
         var _a, _b;
@@ -1878,21 +1877,75 @@ class GameMachine extends Game1Tokens {
     }
 }
 
-class PlayerTurn {
+class PlayerTurn extends GameMachine {
     constructor(game, bga) {
-        this.game = game;
-        this.bga = bga;
+        super(game, bga);
     }
     onEnteringState(args, isCurrentPlayerActive) {
-        if (args._private)
-            this.game.onEnteringState_PlayerTurn(args._private);
-        else
-            this.game.onEnteringState_PlayerTurn(args);
+        if (args._private) {
+            // merge private
+            const priv = args._private;
+            delete args._private;
+            super.onEnteringStatePrivate({ ...args, ...priv });
+        }
+        else {
+            super.onEnteringStatePrivate(args);
+        }
     }
     onLeavingState(args, isCurrentPlayerActive) {
-        this.game.onLeavingState("PlayerTurn", args);
+        super.onLeavingState(args);
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
+    createCustomButtonImageHtml(target, paramInfo) {
+        if (target.startsWith("action")) {
+            let icon = "";
+            switch (target) {
+                case "actionMove":
+                    icon = "wicon_move";
+                    break;
+                case "actionAttack":
+                    icon = "wicon_strength";
+                    break;
+                case "actionMend":
+                    icon = "wicon_damage";
+                    break;
+                case "actionPrepare":
+                    icon = "wicon_hand";
+                    break;
+                case "actionFocus":
+                    icon = "wicon_mana";
+                    break;
+                case "actionPractice":
+                    icon = "wicon_gold";
+                    break;
+            }
+            const name = this.game.getRulesFor(`Op_${target}`, "name");
+            const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
+            return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
+        }
+        return undefined;
+    }
+    onToken_nonActive(target, node) {
+        if (!target)
+            return false;
+        const mainType = getPart(target, 0);
+        switch (mainType) {
+            case "card": {
+                const cardType = getPart(target, 1);
+                const container = $(target).parentElement?.id;
+                if (container?.startsWith("discard") || container?.startsWith("deck")) {
+                    this.game.showHiddenContent(container, _("Pile contents"), 0, function (a, b) {
+                        const orderA = parseInt(a.dataset.state);
+                        const orderB = parseInt(b.dataset.state);
+                        return -orderA + orderB; // descending
+                    });
+                    return false;
+                }
+                break;
+            }
+        }
+        return true;
+    }
 }
 
 /**
@@ -1905,7 +1958,7 @@ class PlayerTurn {
  * -----
  *
  */
-class Game extends GameMachine {
+class Game extends Game1Tokens {
     constructor(bga) {
         super(bga);
         this.boardLayout = "scale";
@@ -1915,6 +1968,10 @@ class Game extends GameMachine {
         //console.log("fate constructor");
         this.playerTurn = new PlayerTurn(this, bga);
         this.bga.states.register("PlayerTurn", this.playerTurn);
+    }
+    onToken(e) {
+        // TODO: pick proper state object
+        this.playerTurn.onToken(e);
     }
     setup(gamedatas) {
         console.log("Starting game setup");
@@ -2138,35 +2195,6 @@ class Game extends GameMachine {
         }
         return result;
     }
-    createCustomButtonImageHtml(target, paramInfo) {
-        if (target.startsWith("action")) {
-            let icon = "";
-            switch (target) {
-                case "actionMove":
-                    icon = "wicon_move";
-                    break;
-                case "actionAttack":
-                    icon = "wicon_strength";
-                    break;
-                case "actionMend":
-                    icon = "wicon_damage";
-                    break;
-                case "actionPrepare":
-                    icon = "wicon_hand";
-                    break;
-                case "actionFocus":
-                    icon = "wicon_mana";
-                    break;
-                case "actionPractice":
-                    icon = "wicon_gold";
-                    break;
-            }
-            const name = this.getRulesFor(`Op_${target}`, "name");
-            const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
-            return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
-        }
-        return undefined;
-    }
     /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
     updateBucketCount(bucketId) {
         const bucket = $(bucketId);
@@ -2185,27 +2213,6 @@ class Game extends GameMachine {
         if (tc)
             return `<span style="color:${tc};font-weight:bold">${res}</span>`;
         return res;
-    }
-    onToken_nonActive(target, node) {
-        if (!target)
-            return false;
-        const mainType = getPart(target, 0);
-        switch (mainType) {
-            case "card": {
-                const cardType = getPart(target, 1);
-                const container = $(target).parentElement?.id;
-                if (container?.startsWith("discard") || container?.startsWith("deck")) {
-                    this.showHiddenContent(container, _("Pile contents"), 0, function (a, b) {
-                        const orderA = parseInt(a.dataset.state);
-                        const orderB = parseInt(b.dataset.state);
-                        return -orderA + orderB; // descending
-                    });
-                    return false;
-                }
-                break;
-            }
-        }
-        return true;
     }
     updateTokenDisplayInfo(tokenInfo) {
         // override to generate dynamic tooltips and such

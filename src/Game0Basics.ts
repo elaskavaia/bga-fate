@@ -150,13 +150,6 @@ export class Game0Basics {
     delete (gameui as any).tooltips[nodeId]; // HACK: removeTooltip leaking this entry, removing manually
   }
 
-  callfn(methodName: string, ...args: any) {
-    if (this[methodName] !== undefined) {
-      console.log("Calling " + methodName, args);
-      return this[methodName](...args);
-    }
-    return undefined;
-  }
   /** @Override onScriptError from gameui */
   onScriptError(msg: any, url: any, linenumber: any) {
     if ((gameui as any).page_is_unloading) {
@@ -218,6 +211,17 @@ export class Game0Basics {
 
     //return this.clienttranslate_string(name);
   }
+  setSubPrompt(text: string, args: any = {}) {
+    if (!text) text = "";
+    if (!args) args = [];
+    const message = this.format_string_recursive(this.getTr(text, args), args);
+
+    // have to set after otherwise status update wipes it
+    setTimeout(() => {
+      $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
+    }, 100);
+  }
+
   reloadCss() {
     var links = document.getElementsByTagName("link");
     for (var cl in links) {

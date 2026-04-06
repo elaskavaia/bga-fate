@@ -9,29 +9,45 @@
  *
  */
 
-import { Game1Tokens } from "./Game1Tokens";
+import type { Game } from "./Game";
 import { OpInfo, ParamInfo } from "./types";
 
 /**  Generic processing related to Operation Machine */
-export class GameMachine extends Game1Tokens {
+export class GameMachine {
+  game: Game;
+  bga: Bga;
   opInfo: OpInfo;
-  onEnteringState_PlayerTurn(opInfo: OpInfo) {
+
+  constructor(game: Game, bga: Bga) {
+    this.game = game;
+    this.bga = bga;
+  }
+
+  callfn(methodName: string, ...args: any) {
+    if (this[methodName] !== undefined) {
+      console.log("Calling " + methodName, args);
+      return this[methodName](...args);
+    }
+    return undefined;
+  }
+
+  onEnteringStatePrivate(opInfo: OpInfo) {
     console.log("onEnteringState_PlayerTurn", opInfo);
     if (!this.bga.players.isCurrentPlayerActive()) {
-      if (opInfo?.description) this.bga.statusBar.setTitle(this.getTr(opInfo.description, opInfo));
-      this.setSubPrompt("");
+      if (opInfo?.description) this.bga.statusBar.setTitle(this.game.getTr(opInfo.description, opInfo));
+      this.game.setSubPrompt("");
       this.addUndoButton(opInfo.ui?.undo);
       return;
     }
     this.completeOpInfo(opInfo);
     this.opInfo = opInfo;
     if (opInfo.prompt) {
-      this.bga.statusBar.setTitle(this.getTr(opInfo.prompt, opInfo));
+      this.bga.statusBar.setTitle(this.game.getTr(opInfo.prompt, opInfo));
     }
-    if (opInfo.subtitle) this.setSubPrompt(this.getTr(opInfo.subtitle, opInfo), opInfo);
+    if (opInfo.subtitle) this.game.setSubPrompt(this.game.getTr(opInfo.subtitle, opInfo), opInfo);
     else if (opInfo.err) {
-      this.setSubPrompt(_("Error: ") + this.getTr(opInfo.err, opInfo));
-    } else this.setSubPrompt(this.getReasonText(opInfo.data.reason));
+      this.game.setSubPrompt(_("Error: ") + this.game.getTr(opInfo.err, opInfo));
+    } else this.game.setSubPrompt(this.getReasonText(opInfo.data.reason));
 
     const multiselect = this.isMultiSelectArgs(opInfo);
 
@@ -51,7 +67,7 @@ export class GameMachine extends Game1Tokens {
       if (div && active && paramInfo.noactive !== true) {
         const doNotShowActive = paramInfo.noactive ?? opInfo.ui.noactive ?? false;
         if (doNotShowActive == false) {
-          div.classList.add(this.classActiveSlot);
+          div.classList.add(this.game.classActiveSlot);
           div.dataset.targetOpType = opInfo.type;
         }
       }
@@ -75,12 +91,12 @@ export class GameMachine extends Game1Tokens {
       altNode.dataset.targetId = target;
       altNode.dataset.targetOpType = opInfo.type;
       if (!active) {
-        altNode.title = this.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
-        altNode.classList.add(this.classButtonDisabled);
+        altNode.title = this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
+        altNode.classList.add(this.game.classButtonDisabled);
       } else {
         const title = paramInfo.tooltip;
-        if (title) altNode.title = this.getTr(title, paramInfo);
-        else this.updateTooltip(target, altNode);
+        if (title) altNode.title = this.game.getTr(title, paramInfo);
+        else this.game.updateTooltip(target, altNode);
       }
 
       if (paramInfo.max !== undefined) {
@@ -91,7 +107,7 @@ export class GameMachine extends Game1Tokens {
     }
 
     if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
-      this.addShowMeButton(true);
+      this.game.addShowMeButton(true);
     }
 
     // secondary buttons
@@ -110,11 +126,11 @@ export class GameMachine extends Game1Tokens {
           {
             color: color,
             id: "button_" + target,
-            confirm: this.getTr((paramInfo as any).confirm)
+            confirm: this.game.getTr((paramInfo as any).confirm)
           }
         );
         button.dataset.targetId = target;
-        if (paramInfo.q) button.classList.add(this.classButtonDisabled);
+        if (paramInfo.q) button.classList.add(this.game.classButtonDisabled);
       }
     }
 
@@ -165,8 +181,8 @@ export class GameMachine extends Game1Tokens {
     if (div) {
       const clone = div.cloneNode(true) as HTMLElement;
       clone.id = target + "_temp";
-      clone.classList.remove(this.classActiveSlot);
-      clone.classList.add(this.classActiveSlotHidden);
+      clone.classList.remove(this.game.classActiveSlot);
+      clone.classList.add(this.game.classActiveSlotHidden);
       cloneHtml = clone.outerHTML;
       return cloneHtml;
     }
@@ -181,15 +197,15 @@ export class GameMachine extends Game1Tokens {
     parent.innerHTML = cloneHtml;
     $("selection_area").appendChild(parent);
     const child = parent.children.item(0) as HTMLElement;
-    child.classList.remove(this.classActiveSlot);
-    child.classList.add(this.classActiveSlotHidden);
+    child.classList.remove(this.game.classActiveSlot);
+    child.classList.add(this.game.classActiveSlotHidden);
     child.addEventListener("click", (event: Event) => this.onToken(event));
     return child;
   }
 
   getReasonText(reason: string) {
     if (!reason) return "";
-    return _("Reason:") + " " + this.getTokenName(reason);
+    return _("Reason:") + " " + this.game.getTokenName(reason);
   }
   getTargetButtonName(target: string, paramInfo: ParamInfo) {
     const div = $(target);
@@ -198,8 +214,8 @@ export class GameMachine extends Game1Tokens {
     if (!name && div) {
       name = div.dataset.name;
     }
-    if (!name) return this.getTokenName(target);
-    else return this.getTr(name, paramInfo.args ?? paramInfo);
+    if (!name) return this.game.getTokenName(target);
+    else return this.game.getTr(name, paramInfo.args ?? paramInfo);
   }
 
   isMultiSelectArgs(args: OpInfo) {
@@ -209,8 +225,12 @@ export class GameMachine extends Game1Tokens {
     return args.ttype == "token_count";
   }
 
-  onLeavingState(stateName: string, args: OpInfo): void {
-    super.onLeavingState(stateName, args);
+  onLeavingState(args?: any, isCurrentPlayerActive?: boolean): void {
+    console.log("onLeavingState");
+    this.game.removeAllClasses(this.game.classActiveSlot, this.game.classActiveSlotHidden);
+    if (!this.bga.states.isOnClientState()) {
+      this.game.removeAllClasses(this.game.classSelected, this.game.classSelectedAlt);
+    }
     $("button_undo")?.remove();
     // remove children
     $("selection_area").replaceChildren();
@@ -219,7 +239,7 @@ export class GameMachine extends Game1Tokens {
   /** default click processor */
   onToken(event: Event, fromMethod?: string) {
     console.log(event);
-    let result = this.onClickSanity(event);
+    let result = this.game.onClickSanity(event);
     if (!result.targetId) {
       return true;
     }
@@ -284,12 +304,12 @@ export class GameMachine extends Game1Tokens {
     this.bga.statusBar.addActionButton(
       _("Reset"),
       () => {
-        const allSel = document.querySelectorAll(`.${this.classSelectedAlt},.${this.classSelected}`);
+        const allSel = document.querySelectorAll(`.${this.game.classSelectedAlt},.${this.game.classSelected}`);
         allSel.forEach((node: HTMLElement) => {
           delete node.dataset.count;
         });
 
-        this.removeAllClasses(this.classSelected, this.classSelectedAlt);
+        this.game.removeAllClasses(this.game.classSelected, this.game.classSelectedAlt);
         this.onMultiSelectionUpdate(opInfo);
       },
       {
@@ -324,7 +344,7 @@ export class GameMachine extends Game1Tokens {
         console.log("action complete", x);
       })
       .catch((e: any) => {
-        this.setSubPrompt(e.message, e.args);
+        this.game.setSubPrompt(e.message, e.args);
       });
   }
 
@@ -338,7 +358,7 @@ export class GameMachine extends Game1Tokens {
               checkAction: false
             })
             ?.catch((e: any) => {
-              this.setSubPrompt(e.message, e.args);
+              this.game.setSubPrompt(e.message, e.args);
             }),
         {
           color: "alert",
@@ -358,9 +378,9 @@ export class GameMachine extends Game1Tokens {
 
   getMultiSelectCountAndSync(result: any = {}) {
     // sync alternative selection on toolbar
-    const allSel = document.querySelectorAll(`.${this.classSelected}`);
-    const selectedAlt = this.classSelectedAlt;
-    this.removeAllClasses(selectedAlt);
+    const allSel = document.querySelectorAll(`.${this.game.classSelected}`);
+    const selectedAlt = this.game.classSelectedAlt;
+    this.game.removeAllClasses(selectedAlt);
     let totalCount = 0;
     allSel.forEach((node: any) => {
       let altnode = document.querySelector(`[data-target-id="${node.id}"]`);
@@ -396,9 +416,9 @@ export class GameMachine extends Game1Tokens {
     const selNode = cnode;
     if (count + 1 > max) {
       cnode.dataset.count = "0";
-      selNode.classList.remove(this.classSelected);
+      selNode.classList.remove(this.game.classSelected);
     } else {
-      selNode.classList.add(this.classSelected);
+      selNode.classList.add(this.game.classSelected);
     }
 
     this.onMultiSelectionUpdate(opInfo);
@@ -419,43 +439,32 @@ export class GameMachine extends Game1Tokens {
     const doneButton = $(doneButtonId);
     if (doneButton) {
       if ((count == 0 && skippable) || count < opInfo.mcount) {
-        doneButton.classList.add(this.classButtonDisabled);
+        doneButton.classList.add(this.game.classButtonDisabled);
         doneButton.title = _("Cannot use this action because insuffient amount of elements selected");
       } else if (count > opInfo.count) {
-        doneButton.classList.add(this.classButtonDisabled);
+        doneButton.classList.add(this.game.classButtonDisabled);
         doneButton.title = _("Cannot use this action because superfluous amount of elements selected");
       } else {
-        doneButton.classList.remove(this.classButtonDisabled);
+        doneButton.classList.remove(this.game.classButtonDisabled);
         doneButton.title = "";
       }
       $(doneButtonId).innerHTML = buttonName + ": " + count;
     }
     if (count > 0) {
-      $(resetButtonId)?.classList.remove(this.classButtonDisabled);
+      $(resetButtonId)?.classList.remove(this.game.classButtonDisabled);
 
       if (skipButton) {
-        skipButton.classList.add(this.classButtonDisabled);
+        skipButton.classList.add(this.game.classButtonDisabled);
         skipButton.title = _("Cannot use this action because there are some elements selected");
       }
     } else {
-      $(resetButtonId)?.classList.add(this.classButtonDisabled);
+      $(resetButtonId)?.classList.add(this.game.classButtonDisabled);
 
       if (skipButton) {
         skipButton.title = "";
-        skipButton.classList.remove(this.classButtonDisabled);
+        skipButton.classList.remove(this.game.classButtonDisabled);
       }
     }
-  }
-
-  setSubPrompt(text: string, args: any = {}) {
-    if (!text) text = "";
-    if (!args) args = [];
-    const message = this.format_string_recursive(this.getTr(text, args), args);
-
-    // have to set after otherwise status update wipes it
-    setTimeout(() => {
-      $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
-    }, 100);
   }
 
   completeOpInfo(opInfo: OpInfo) {

@@ -273,6 +273,9 @@ const statesRegistry: Record<string, any> = {};
 const states = {
   register(name: string, handler: any) {
     statesRegistry[name] = handler;
+  },
+  isOnClientState() {
+    return false;
   }
 };
 
@@ -330,7 +333,7 @@ async function main() {
   function enterState(gamestate: any, privateAlreadyUnwrapped = false) {
     const handler = statesRegistry[gamestate.name];
     const isActive = String(gamestate.active_player) === String(currentPlayerId);
-    if (currentStateName && currentStateName !== gamestate.name) {
+    if (currentStateName) {
       const leavingHandler = statesRegistry[currentStateName];
       if (leavingHandler?.onLeavingState) {
         log(`Leaving state: ${currentStateName}`);

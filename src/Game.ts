@@ -10,12 +10,11 @@
  */
 
 import { getPart, placeHtml } from "./Game0Basics";
-import { Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
-import { GameMachine } from "./GameMachine";
+import { Game1Tokens, Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
 import { PlayerTurn } from "./PlayerTurn";
-import { CustomGamedatas, CustomPlayer, ParamInfo } from "./types";
+import { CustomGamedatas, CustomPlayer } from "./types";
 
-export class Game extends GameMachine {
+export class Game extends Game1Tokens {
   private playerTurn: PlayerTurn;
   private boardLayout: string = "scale";
 
@@ -25,6 +24,11 @@ export class Game extends GameMachine {
 
     this.playerTurn = new PlayerTurn(this, bga);
     this.bga.states.register("PlayerTurn", this.playerTurn);
+  }
+
+  onToken(e: Event) {
+    // TODO: pick proper state object
+    this.playerTurn.onToken(e);
   }
 
   setup(gamedatas: CustomGamedatas) {
@@ -275,36 +279,6 @@ export class Game extends GameMachine {
     return result;
   }
 
-  createCustomButtonImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
-    if (target.startsWith("action")) {
-      let icon = "";
-      switch (target) {
-        case "actionMove":
-          icon = "wicon_move";
-          break;
-        case "actionAttack":
-          icon = "wicon_strength";
-          break;
-        case "actionMend":
-          icon = "wicon_damage";
-          break;
-        case "actionPrepare":
-          icon = "wicon_hand";
-          break;
-        case "actionFocus":
-          icon = "wicon_mana";
-          break;
-        case "actionPractice":
-          icon = "wicon_gold";
-          break;
-      }
-      const name = this.getRulesFor(`Op_${target}`, "name");
-      const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
-      return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
-    }
-    return undefined;
-  }
-
   /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
   updateBucketCount(bucketId: string) {
     const bucket = $(bucketId);
@@ -322,27 +296,6 @@ export class Game extends GameMachine {
     const tc = this.getRulesFor(tokenKey, "tc");
     if (tc) return `<span style="color:${tc};font-weight:bold">${res}</span>`;
     return res;
-  }
-
-  onToken_nonActive(target: string, node: HTMLElement) {
-    if (!target) return false;
-    const mainType = getPart(target, 0);
-    switch (mainType) {
-      case "card": {
-        const cardType = getPart(target, 1);
-        const container = $(target).parentElement?.id;
-        if (container?.startsWith("discard") || container?.startsWith("deck")) {
-          this.showHiddenContent(container, _("Pile contents"), 0, function (a: HTMLElement, b: HTMLElement) {
-            const orderA = parseInt(a.dataset.state);
-            const orderB = parseInt(b.dataset.state);
-            return -orderA + orderB; // descending
-          });
-          return false;
-        }
-        break;
-      }
-    }
-    return true;
   }
 
   updateTokenDisplayInfo(tokenInfo: TokenDisplayInfo) {
