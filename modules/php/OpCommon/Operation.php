@@ -527,11 +527,6 @@ abstract class Operation {
         if (count($targets) > 0) {
             $errCode = 0;
             $error = "";
-        } elseif ($errCode != 0) {
-            $res["info"]["_err"] = [
-                "q" => $errCode,
-                "err" => $error,
-            ];
         }
         $res["err"] = $error ?? null;
         $res["q"] = $errCode;
@@ -753,11 +748,34 @@ abstract class Operation {
         return $state;
     }
 
-    function getPossibleMovesDelegate(string $operationType) {
-        $moves = $this->instanciateOperation($operationType)->getArgsInfo();
-        foreach ($moves as &$move) {
-            $move["delegate"] = $operationType;
+    function getPossibleMovesDelegate(string|array $opTypes) {
+        if (!is_array($opTypes)) {
+            $opTypes = [$opTypes];
         }
-        return $moves;
+        $res = [];
+        $errinfo = [];
+        foreach ($opTypes as $operationType) {
+            $op = $this->instanciateOperation($operationType);
+            $moves = $op->getArgsInfo();
+            foreach ($moves as &$move) {
+                $move["delegate"] = $operationType;
+            }
+            if (count($moves) == 0) {
+                $errinfo = $op->getErrorInfo();
+            } else {
+                $res += $moves;
+            }
+        }
+        if (count($res) == 0) {
+            // figure out error
+            $q = $errinfo["q"] ?? 0;
+            if ($q != 0) {
+                $res["q"] = $q;
+                if (isset($errinfo["err"])) {
+                    $res["err"] = $errinfo["err"];
+                }
+            }
+        }
+        return $res;
     }
 }

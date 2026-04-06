@@ -56,11 +56,9 @@ class Op_heal extends CountableOperation {
         $targets = [];
         foreach ($this->getHeroCandidates() as $heroId) {
             $hex = $this->game->hexMap->getCharacterHex($heroId);
-            if ($hex === null) {
-                continue;
-            }
+            $this->game->systemAssert("ERR:heal:noHex:$heroId", $hex !== null);
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-            $targets[$hex] = ["q" => $damage > 0 ? Material::RET_OK : Material::ERR_NOT_APPLICABLE];
+            $targets[$hex] = $damage > 0 ? ["q" => Material::RET_OK] : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to heal")];
         }
         return $targets;
     }

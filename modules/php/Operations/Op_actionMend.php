@@ -42,7 +42,7 @@ class Op_actionMend extends Operation {
             return $this->getPossibleMovesDelegate("{$amount}heal");
         }
         $amount = 5;
-        return $this->getPossibleMovesDelegate("{$amount}heal") + $this->getPossibleMovesDelegate("{$amount}repairCard");
+        return $this->getPossibleMovesDelegate(["{$amount}heal", "{$amount}repairCard"]);
     }
 
     function resolve(): void {
