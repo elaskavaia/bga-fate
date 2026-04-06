@@ -1878,16 +1878,6 @@ class GameMachine extends Game1Tokens {
     }
 }
 
-/**
- *------
- * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
- *
- * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
- * See http://en.boardgamearena.com/#!doc/Studio for more information.
- * -----
- *
- */
 class PlayerTurn {
     constructor(game, bga) {
         this.game = game;
@@ -1904,6 +1894,17 @@ class PlayerTurn {
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
 }
+
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 class Game extends GameMachine {
     constructor(bga) {
         super(bga);

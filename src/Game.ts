@@ -12,28 +12,8 @@
 import { getPart, placeHtml } from "./Game0Basics";
 import { Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
 import { GameMachine } from "./GameMachine";
+import { PlayerTurn } from "./PlayerTurn";
 import { CustomGamedatas, CustomPlayer, ParamInfo } from "./types";
-
-class PlayerTurn {
-  private game: Game;
-  private bga: Bga;
-
-  constructor(game: Game, bga: Bga) {
-    this.game = game;
-    this.bga = bga;
-  }
-
-  onEnteringState(args: any, isCurrentPlayerActive: boolean) {
-    if (args._private) this.game.onEnteringState_PlayerTurn(args._private);
-    else this.game.onEnteringState_PlayerTurn(args);
-  }
-
-  onLeavingState(args: any, isCurrentPlayerActive: boolean) {
-    this.game.onLeavingState("PlayerTurn", args);
-  }
-
-  onPlayerActivationChange(args: any, isCurrentPlayerActive: boolean) {}
-}
 
 export class Game extends GameMachine {
   private playerTurn: PlayerTurn;
