@@ -701,6 +701,19 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
     }
 
+    function debug_Op_c_arrows(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Move hero to hex_7_5 (plains), adjacent to forest (hex_7_4, hex_8_4) and plains (hex_6_5)
+        $heroId = $this->getHeroTokenId($color);
+        $this->tokens->dbSetTokenLocation($heroId, "hex_7_5", 0, "");
+        // Place goblin on forest hex and brute on plains hex
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_4", 0, "");
+        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_5", 0, "");
+        $this->hexMap->invalidateOccupancy();
+        $this->machine->push("c_arrows", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }

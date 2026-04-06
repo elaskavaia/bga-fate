@@ -8,7 +8,7 @@ num|hno|name|count|r|on|effect|flavour
 #set _noquotes=create
 # Events - Bjorn (hno=1)
 29|1|Back Down|2|killMonster(inRange,'rank<=2')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
-28|1|Burning Arrows|4|custom||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!
+28|1|Burning Arrows|4|c_arrows||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!
 32|1|Limber Bow|2|custom||You have attack range +2 this turn.|Twannng!
 26|1|Master Shot|4|custom|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
 31|1|Perfect Aim|2|rerollMisses|roll|Reroll all misses.|Hitting where it hurts, not always in the head.

@@ -22,6 +22,8 @@ final class Op_playEventTest extends TestCase {
         // Clear the hand and place only the card we want to test with
         $this->clearHand();
         $this->putInHand(EVENT_CARD);
+        // Add damage so heal(self) from Rest card has valid targets
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
     }
 
     private function createOp(): Op_playEvent {
@@ -85,6 +87,8 @@ final class Op_playEventTest extends TestCase {
         $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken(EVENT_CARD, "hand_" . PCOLOR);
+        // Add damage so heal(self) from Rest card has valid targets
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
     }
 
     // -------------------------------------------------------------------------
@@ -118,8 +122,7 @@ final class Op_playEventTest extends TestCase {
 
     public function testPlayRestCardHealsHero(): void {
         $this->setupHeroOnMap();
-        // Add 4 damage to hero_1
-        $this->game->effect_moveCrystals("hero_1", "red", 4, "hero_1", ["message" => ""]);
+        // setupHeroOnMap adds 3 damage; Rest heals 2 → expect 1 remaining
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
@@ -132,6 +135,6 @@ final class Op_playEventTest extends TestCase {
         $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
         $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
-        $this->assertEquals(2, $damage);
+        $this->assertEquals(1, $damage);
     }
 }

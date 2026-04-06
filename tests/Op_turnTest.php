@@ -66,6 +66,8 @@ final class Op_turnTest extends TestCase {
 
     public function testFreeActionsOfferedAtStart(): void {
         $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
+        // Add damage so heal(self) from Rest card has valid targets
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();
 
@@ -76,6 +78,8 @@ final class Op_turnTest extends TestCase {
 
     public function testFreeActionsStillOfferedAfterBothMainActionsTaken(): void {
         $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
+        // Add damage so heal(self) from Rest card has valid targets
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->createOp();
         $moves = $op->getPossibleMoves();

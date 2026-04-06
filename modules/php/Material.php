@@ -369,6 +369,10 @@ class Material {
         "type" => "endOfAttack",
         "name" => clienttranslate("End of Attack"),
 ],
+    "Op_c_arrows" => [ 
+        "type" => "c_arrows",
+        "name" => clienttranslate("Burning Arrows"),
+],
     "Op_c_nailed" => [ 
         "type" => "c_nailed",
         "name" => clienttranslate("Nailed Together"),
@@ -4554,7 +4558,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Burning Arrows"),
         "count" => 4,
-        "r" => "custom",
+        "r" => "c_arrows",
         "effect" => "Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.",
         "flavour" => "Don't aim for too long!",
 ],

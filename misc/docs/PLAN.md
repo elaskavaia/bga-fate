@@ -536,7 +536,7 @@ Hero, Abilities and Equipment:
 ### Event Cards
 [ ] card_event_1_27 Rest — heal 2 from Bjorn
 [ ] card_event_1_29 Back Down — kill rank 1-2 monster in range
-[ ] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest)
+[x] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest)
 [ ] card_event_1_32 Limber Bow — custom: attack range +2 this turn
 [ ] card_event_1_26 Master Shot — custom: add 2 damage to attack
 [x] card_event_1_31 Perfect Aim — rerollMisses

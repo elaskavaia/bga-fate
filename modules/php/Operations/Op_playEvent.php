@@ -55,7 +55,15 @@ class Op_playEvent extends Operation {
             if ($on !== $trigger) {
                 continue;
             }
-            $targets[$cardId] = ["q" => Material::RET_OK];
+            $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+            $valid = true;
+            if ($r && $r != "custom") {
+                $op = $this->instanciateOperation($r);
+                $valid = !$op->noValidTargets();
+            }
+            $targets[$cardId] = $valid
+                ? ["q" => Material::RET_OK]
+                : ["q" => Material::ERR_PREREQ, "err" => clienttranslate("No valid targets")];
         }
         return $targets;
     }
