@@ -47,6 +47,10 @@ class Hero extends Character {
             }
             $ctype = $info["ctype"];
             $location = $deckMap[$ctype] ?? "limbo";
+            // Level II ability cards (even num) are reverse sides — go to limbo
+            if ($ctype === "ability" && ((int) $info["num"]) % 2 === 0) {
+                $location = "limbo";
+            }
             $count = $info["count"] ?? 1;
             $info["location"] = $location;
             $info["create"] = $count > 1 ? 2 : 1;

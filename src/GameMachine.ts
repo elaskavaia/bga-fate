@@ -59,7 +59,8 @@ export class GameMachine {
       if (paramInfo.sec) {
         continue; // secondary buttons
       }
-      const div = $(target);
+      const altTarget = paramInfo.tokenIdUi;
+      const div = $(target) ?? $(altTarget);
       const q = paramInfo.q;
       const active = q == 0;
 
@@ -74,6 +75,7 @@ export class GameMachine {
 
       // we also can have one addition way of selection (possibly)
       let altNode: HTMLElement;
+
       if (opInfo.ui.replicate == true || paramInfo.replicate == true) {
         altNode = this.replicateTargetOnSelectionArea(target, paramInfo);
       }
@@ -96,7 +98,7 @@ export class GameMachine {
       } else {
         const title = paramInfo.tooltip;
         if (title) altNode.title = this.game.getTr(title, paramInfo);
-        else this.game.updateTooltip(target, altNode);
+        else this.game.updateTooltip(altTarget ?? target, altNode);
       }
 
       if (paramInfo.max !== undefined) {
@@ -171,7 +173,28 @@ export class GameMachine {
     return button;
   }
   createCustomButtonImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
-    return undefined;
+    const altTarget = paramInfo.tokenIdUi;
+    if (!altTarget) return undefined;
+
+    const cardId = altTarget;
+    if (cardId) {
+      let tokenNode = $(cardId);
+      if (!tokenNode) {
+        this.game.prepareToken(cardId);
+        tokenNode = $(cardId);
+        return tokenNode?.outerHTML;
+      }
+      return this.cloneForReplication(tokenNode);
+    }
+  }
+
+  cloneForReplication(div: HTMLElement) {
+    const clone = div.cloneNode(true) as HTMLElement;
+    clone.id = div.id + "_temp";
+    clone.classList.remove(this.game.classActiveSlot);
+    clone.classList.add(this.game.classActiveSlotHidden);
+    const cloneHtml = clone.outerHTML;
+    return cloneHtml;
   }
 
   createCustomTargetImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
@@ -179,12 +202,7 @@ export class GameMachine {
     if (cloneHtml) return cloneHtml;
     const div = $(target);
     if (div) {
-      const clone = div.cloneNode(true) as HTMLElement;
-      clone.id = target + "_temp";
-      clone.classList.remove(this.game.classActiveSlot);
-      clone.classList.add(this.game.classActiveSlotHidden);
-      cloneHtml = clone.outerHTML;
-      return cloneHtml;
+      return this.cloneForReplication(div);
     }
     return undefined;
   }

@@ -421,6 +421,10 @@ class Material {
         "type" => "rerollMisses",
         "name" => clienttranslate("Reroll Misses"),
 ],
+    "Op_upgrade" => [ 
+        "type" => "upgrade",
+        "name" => clienttranslate("Upgrade Hero"),
+],
     "Op_drawEvent" => [ 
         "type" => "drawEvent",
         "name" => clienttranslate("Draw Event"),

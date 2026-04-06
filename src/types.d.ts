@@ -46,8 +46,7 @@ export interface ParamInfo extends UiOptions {
   o?: number; //  priority order
   color?: string; // button color
   confirm?: string; // extra confirmation dialog before submitting
-
-  token_id?: string; // representation item
+  tokenIdUi?: string; // alternative token to display
   args?: any;
 
   info?: ParamInfoArray; // param info for next argument

@@ -217,6 +217,30 @@ final class GameTest extends TestCase {
         $this->assertNotEmpty($eventTokens, "Should have event cards in deck");
     }
 
+    public function testAbilityDeckHasNoLevelIICards() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        $ph = $this->getHeroNumber(PCOLOR);
+        $deckCards = $game->tokens->getTokensOfTypeInLocation("card_ability_{$ph}", "deck_ability_" . PCOLOR);
+        foreach ($deckCards as $cardId => $info) {
+            $num = (int) \Bga\Games\Fate\getPart($cardId, 3);
+            $this->assertEquals(1, $num % 2, "Level II card $cardId should not be in ability deck");
+        }
+
+        // Level II ability cards should be in limbo
+        $this->assertEquals("limbo", $game->tokens->getTokenLocation("card_ability_{$ph}_10"));
+    }
+
+    public function testUpgradeCostMarkerOnTableauWithCost5() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        $markerId = "marker_" . PCOLOR . "_3";
+        $this->assertEquals("tableau_" . PCOLOR, $game->tokens->getTokenLocation($markerId));
+        $this->assertEquals(5, (int) $game->tokens->getTokenState($markerId));
+    }
+
     public function testSetupUnusedHeroesInLimbo() {
         $game = $this->game;
         $game->setupGameTables();

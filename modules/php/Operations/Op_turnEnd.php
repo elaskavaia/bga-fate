@@ -21,10 +21,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Runs automatically after a player has taken their 2 actions (or ended turn early).
  */
 class Op_turnEnd extends Operation {
-    function getPossibleMoves() {
-        return ["confirm"];
-    }
-
     function resolve(): void {
         // 1. Reset action markers to empty slots
         $owner = $this->getOwner();
@@ -39,7 +35,7 @@ class Op_turnEnd extends Operation {
         $this->queueTrigger();
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
-        // TODO
+        //$this->queue("upgrade");
         // 3. Add mana to cards with mana generation (green icon)
 
         $cards = $hero->getTableauCards();
@@ -59,8 +55,10 @@ class Op_turnEnd extends Operation {
                 $this->dbSetTokenState($card["key"], 0, "");
             }
         }
+
         // 4. Draw 1 event card (handles hand limit internally)
         $this->queue("drawEvent");
+
         // 5. Allow cycling top equipment or top ability card
         // TODO
 

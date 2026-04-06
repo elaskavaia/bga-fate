@@ -377,8 +377,8 @@ See CLAUDE.md for project overview
 [ ] Quest definitions on equipment cards
 [ ] Quest progress tracking
 [ ] Quest completion → new equipment active
-[ ] Upgrade cost track: 5, 6, 7, 8, 9, 10...
-[ ] End-of-turn upgrade option: spend XP for new ability or card improvement
+[x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
+[x] End-of-turn upgrade option: spend XP for new ability or card improvement
 [ ] Mana generation at end of turn
 
 ### Client
@@ -390,7 +390,7 @@ See CLAUDE.md for project overview
 
 ### Tests
 [ ] Test quest completion conditions
-[ ] Test upgrade cost calculation
+[x] Test upgrade cost calculation
 
 ---
 

@@ -44,7 +44,8 @@ export class PlayerTurn extends GameMachine {
       const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
       return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
     }
-    return undefined;
+
+    return super.createCustomButtonImageHtml(target, paramInfo);
   }
 
   onToken_nonActive(target: string, node: HTMLElement) {

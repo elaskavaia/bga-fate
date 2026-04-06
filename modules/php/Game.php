@@ -127,6 +127,8 @@ class Game extends Base {
             $this->tokens->moveToken("card_equip_{$heroNo}_15", "tableau_{$color}");
             // Add 1 mana to starting ability card
             $this->tokens->pickTokensForLocation(1, "supply_crystal_green", "card_ability_{$heroNo}_3");
+            // Place upgrade cost marker on tableau with starting cost of 5
+            $this->tokens->moveToken("marker_{$color}_3", "tableau_{$color}", 5);
             // Shuffle decks
             $this->tokens->shuffle("deck_ability_{$color}");
             $this->tokens->shuffle("deck_equip_{$color}");
@@ -278,13 +280,15 @@ class Game extends Base {
             return;
         }
 
+        $supply = "supply_crystal_$type";
+
         if ($inc > 0) {
-            $tokens = $this->tokens->pickTokensForLocation($inc, "supply_crystal_$type", $location);
+            $tokens = $this->tokens->pickTokensForLocation($inc, $supply, $location);
             // TODO: unlimited? create more if needed
             $this->tokens->dbSetTokensLocation($tokens, $location, 0, $message, $options);
         } else {
             $needed = abs($inc);
-            $tokens = $this->tokens->pickTokensForLocation($needed, $location, "supply_crystal_$type");
+            $tokens = $this->tokens->getTokensOfTypeInLocation("crystal_$type", $location);
             if (count($tokens) < $needed) {
                 throw new UserException(
                     new NotificationMessage(clienttranslate('Insufficient resources to pay: ${res_name}'), [
@@ -292,7 +296,9 @@ class Game extends Base {
                     ])
                 );
             }
-            $this->tokens->dbSetTokensLocation($tokens, "supply_crystal_$type", 0, $message, $options);
+            // trim $tokens to $needed
+            $tokens = array_slice($tokens, 0, $needed);
+            $this->tokens->dbSetTokensLocation($tokens, $supply, 0, $message, $options);
         }
     }
 
@@ -711,6 +717,15 @@ class Game extends Base {
         $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_5", 0, "");
         $this->hexMap->invalidateOccupancy();
         $this->machine->push("c_arrows", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_upgrade(): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        // Give player 10 XP so they can afford the upgrade (cost starts at 5)
+        $heroId = $this->getHeroTokenId($color);
+        $this->effect_moveCrystals($heroId, "yellow", 10, "tableau_{$color}", ["message" => ""]);
+        $this->machine->push("upgrade", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

@@ -106,7 +106,6 @@ export class Game1Tokens extends Game0Basics {
     this.updateCountersSafe(this.gamedatas.counters);
   }
 
-
   cancelLocalStateEffects() {
     //console.log(this.last_server_state);
 
@@ -359,7 +358,7 @@ export class Game1Tokens extends Game0Basics {
     this.updateTooltip(tokenInfo.location, undefined, { force: true });
   }
 
-  prapareToken(tokenId: string, tokenDbInfo?: Token, args: AnimArgs = {}) {
+  prepareToken(tokenId: string, tokenDbInfo?: Token, args: AnimArgs = {}): TokenMoveInfo | undefined {
     if (!tokenDbInfo) {
       tokenDbInfo = this.gamedatas.tokens[tokenId];
     }
@@ -392,7 +391,7 @@ export class Game1Tokens extends Game0Basics {
   }
 
   placeTokenSetup(tokenId: string, tokenDbInfo?: Token) {
-    const placeInfo = this.prapareToken(tokenId, tokenDbInfo);
+    const placeInfo = this.prepareToken(tokenId, tokenDbInfo);
 
     if (!placeInfo) {
       return;
@@ -410,7 +409,7 @@ export class Game1Tokens extends Game0Basics {
 
   async placeToken(tokenId: string, tokenDbInfo?: Token, args: AnimArgs = {}) {
     try {
-      const placeInfo = this.prapareToken(tokenId, tokenDbInfo, args);
+      const placeInfo = this.prepareToken(tokenId, tokenDbInfo, args);
 
       if (!placeInfo) {
         return;

@@ -924,7 +924,7 @@ class Game1Tokens extends Game0Basics {
         this.updateTooltip(tokenId, undefined, { force: true });
         this.updateTooltip(tokenInfo.location, undefined, { force: true });
     }
-    prapareToken(tokenId, tokenDbInfo, args = {}) {
+    prepareToken(tokenId, tokenDbInfo, args = {}) {
         if (!tokenDbInfo) {
             tokenDbInfo = this.gamedatas.tokens[tokenId];
         }
@@ -957,7 +957,7 @@ class Game1Tokens extends Game0Basics {
         return placeInfo;
     }
     placeTokenSetup(tokenId, tokenDbInfo) {
-        const placeInfo = this.prapareToken(tokenId, tokenDbInfo);
+        const placeInfo = this.prepareToken(tokenId, tokenDbInfo);
         if (!placeInfo) {
             return;
         }
@@ -973,7 +973,7 @@ class Game1Tokens extends Game0Basics {
     }
     async placeToken(tokenId, tokenDbInfo, args = {}) {
         try {
-            const placeInfo = this.prapareToken(tokenId, tokenDbInfo, args);
+            const placeInfo = this.prepareToken(tokenId, tokenDbInfo, args);
             if (!placeInfo) {
                 return;
             }
@@ -1453,7 +1453,8 @@ class GameMachine {
             if (paramInfo.sec) {
                 continue; // secondary buttons
             }
-            const div = $(target);
+            const altTarget = paramInfo.tokenIdUi;
+            const div = $(target) ?? $(altTarget);
             const q = paramInfo.q;
             const active = q == 0;
             // simple case we select element (dom node) which is target of operation
@@ -1488,7 +1489,7 @@ class GameMachine {
                 if (title)
                     altNode.title = this.game.getTr(title, paramInfo);
                 else
-                    this.game.updateTooltip(target, altNode);
+                    this.game.updateTooltip(altTarget ?? target, altNode);
             }
             if (paramInfo.max !== undefined) {
                 altNode.dataset.max = String(paramInfo.max);
@@ -1553,7 +1554,27 @@ class GameMachine {
         return button;
     }
     createCustomButtonImageHtml(target, paramInfo) {
-        return undefined;
+        const altTarget = paramInfo.tokenIdUi;
+        if (!altTarget)
+            return undefined;
+        const cardId = altTarget;
+        if (cardId) {
+            let tokenNode = $(cardId);
+            if (!tokenNode) {
+                this.game.prepareToken(cardId);
+                tokenNode = $(cardId);
+                return tokenNode?.outerHTML;
+            }
+            return this.cloneForReplication(tokenNode);
+        }
+    }
+    cloneForReplication(div) {
+        const clone = div.cloneNode(true);
+        clone.id = div.id + "_temp";
+        clone.classList.remove(this.game.classActiveSlot);
+        clone.classList.add(this.game.classActiveSlotHidden);
+        const cloneHtml = clone.outerHTML;
+        return cloneHtml;
     }
     createCustomTargetImageHtml(target, paramInfo) {
         let cloneHtml = this.createCustomButtonImageHtml(target, paramInfo);
@@ -1561,12 +1582,7 @@ class GameMachine {
             return cloneHtml;
         const div = $(target);
         if (div) {
-            const clone = div.cloneNode(true);
-            clone.id = target + "_temp";
-            clone.classList.remove(this.game.classActiveSlot);
-            clone.classList.add(this.game.classActiveSlotHidden);
-            cloneHtml = clone.outerHTML;
-            return cloneHtml;
+            return this.cloneForReplication(div);
         }
         return undefined;
     }
@@ -1914,7 +1930,7 @@ class PlayerTurn extends GameMachine {
             const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
             return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
         }
-        return undefined;
+        return super.createCustomButtonImageHtml(target, paramInfo);
     }
     onToken_nonActive(target, node) {
         if (!target)
