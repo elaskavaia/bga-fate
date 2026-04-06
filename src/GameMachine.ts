@@ -181,6 +181,7 @@ export class GameMachine extends Game1Tokens {
     parent.innerHTML = cloneHtml;
     $("selection_area").appendChild(parent);
     const child = parent.children.item(0) as HTMLElement;
+    child.classList.remove(this.classActiveSlot);
     child.classList.add(this.classActiveSlotHidden);
     child.addEventListener("click", (event: Event) => this.onToken(event));
     return child;
@@ -211,6 +212,8 @@ export class GameMachine extends Game1Tokens {
   onLeavingState(stateName: string, args: OpInfo): void {
     super.onLeavingState(stateName, args);
     $("button_undo")?.remove();
+    // remove children
+    $("selection_area").replaceChildren();
   }
 
   /** default click processor */

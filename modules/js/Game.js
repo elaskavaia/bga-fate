@@ -1573,6 +1573,7 @@ class GameMachine extends Game1Tokens {
         parent.innerHTML = cloneHtml;
         $("selection_area").appendChild(parent);
         const child = parent.children.item(0);
+        child.classList.remove(this.classActiveSlot);
         child.classList.add(this.classActiveSlotHidden);
         child.addEventListener("click", (event) => this.onToken(event));
         return child;
@@ -1602,6 +1603,8 @@ class GameMachine extends Game1Tokens {
     onLeavingState(stateName, args) {
         super.onLeavingState(stateName, args);
         $("button_undo")?.remove();
+        // remove children
+        $("selection_area").replaceChildren();
     }
     /** default click processor */
     onToken(event, fromMethod) {
@@ -2511,14 +2514,18 @@ class Game extends GameMachine {
         const parent = scalecontrol.parentElement;
         scalecontrol.style.transform = "none";
         scalecontrol.style.width = "";
+        scalecontrol.style.minWidth = "";
         scalecontrol.style.height = "";
         scalecontrol.style.marginBottom = "";
         scalecontrol.style.transformOrigin = "";
         scalecontrol.scrollLeft = 0;
         scalecontrol.dataset.scale = "1";
         parent.scrollLeft = 0;
-        if (!set)
+        if (!set) {
+            scalecontrol.style.minWidth = "unset";
+            scalecontrol.style.width = "100%";
             return;
+        }
         const naturalWidth = scalecontrol.scrollWidth;
         const availableWidth = parent.clientWidth;
         let scale = 1;

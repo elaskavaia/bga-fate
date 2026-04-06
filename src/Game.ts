@@ -698,6 +698,7 @@ export class Game extends GameMachine {
 
     scalecontrol.style.transform = "none";
     scalecontrol.style.width = "";
+    scalecontrol.style.minWidth = "";
     scalecontrol.style.height = "";
     scalecontrol.style.marginBottom = "";
     scalecontrol.style.transformOrigin = "";
@@ -705,7 +706,11 @@ export class Game extends GameMachine {
     scalecontrol.dataset.scale = "1";
     parent.scrollLeft = 0;
 
-    if (!set) return;
+    if (!set) {
+      scalecontrol.style.minWidth = "unset";
+      scalecontrol.style.width = "100%";
+      return;
+    }
 
     const naturalWidth = scalecontrol.scrollWidth;
     const availableWidth = parent.clientWidth;
