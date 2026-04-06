@@ -66,7 +66,7 @@ class Op_trigger extends Operation {
     function resolve(): void {
         $cardId = $this->getCheckedArg();
         $owner = $this->getOwner();
-        $argInfo = $this->getArgs()["info"][$cardId];
+        $argInfo = $this->getArgsInfo()[$cardId];
         $action = $argInfo["action"] ?? "";
         $this->game->systemAssert("ERR:trigger:noAction:$cardId", $action !== "");
         $this->queue($action, $owner, ["target" => $cardId]);

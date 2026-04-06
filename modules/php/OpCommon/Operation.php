@@ -315,8 +315,8 @@ abstract class Operation {
     protected function _getCheckedArg() {
         $args = $this->userArgs;
         $key = Operation::ARG_TARGET;
-        $possible_targets = $this->getArgs()[$key];
-        $info = $this->getArgs()["info"];
+        $possible_targets = $this->getArgsTarget();
+        $info = $this->getArgsInfo();
         //$this->game->userAssert("args " . toJson($args));
         $this->game->systemAssert("ERR:getCheckedArg:1", is_array($possible_targets));
         $this->game->systemAssert("ERR:getCheckedArg:1", is_array($info));
@@ -422,6 +422,16 @@ abstract class Operation {
         return $res;
     }
 
+    function getArgsInfo() {
+        $args = $this->getArgs();
+        return $args["info"] ?? [];
+    }
+
+    function getArgsTarget() {
+        $args = $this->getArgs();
+        return $args["target"] ?? [];
+    }
+
     function getSkipArgs() {
         return [
             "name" => $this->getSkipName(),
@@ -517,6 +527,11 @@ abstract class Operation {
         if (count($targets) > 0) {
             $errCode = 0;
             $error = "";
+        } elseif ($errCode != 0) {
+            $res["info"]["_err"] = [
+                "q" => $errCode,
+                "err" => $error,
+            ];
         }
         $res["err"] = $error ?? null;
         $res["q"] = $errCode;
@@ -537,12 +552,6 @@ abstract class Operation {
         $err = $this->getError();
         if ($q == 0) {
             return ["q" => $q];
-        }
-        if ($err) {
-            $qerr = $this->game->getRulesFor("err_$q", "name", "?$q");
-            if ($qerr == $err) {
-                return ["q" => $q];
-            }
         }
 
         return ["q" => $q, "err" => $err];
@@ -745,7 +754,7 @@ abstract class Operation {
     }
 
     function getPossibleMovesDelegate(string $operationType) {
-        $moves = $this->instanciateOperation($operationType)->getPossibleMoves();
+        $moves = $this->instanciateOperation($operationType)->getArgsInfo();
         foreach ($moves as &$move) {
             $move["delegate"] = $operationType;
         }

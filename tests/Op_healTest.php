@@ -106,7 +106,7 @@ final class Op_healTest extends TestCase {
         $this->addDamage("hero_1", 3);
         /** @var Op_heal */
         $op = $this->game->machine->instanciateOperation("2heal", PCOLOR, ["target" => "hex_11_8"]);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertCount(1, $moves);
         $this->assertArrayHasKey("hex_11_8", $moves);
         $op->action_resolve(["target" => "hex_11_8"]);

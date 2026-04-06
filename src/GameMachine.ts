@@ -470,6 +470,7 @@ export class GameMachine extends Game1Tokens {
       if (!opInfo.info) opInfo.info = {};
       if (!opInfo.target) opInfo.target = [];
       if (!opInfo.ui) opInfo.ui = {};
+      delete opInfo.info._err; // not needed in ui side
 
       const infokeys = Object.keys(opInfo.info);
       if (infokeys.length == 0 && opInfo.target.length > 0) {

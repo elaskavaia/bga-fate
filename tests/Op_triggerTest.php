@@ -157,7 +157,7 @@ final class Op_triggerTest extends TestCase {
         // so test the action annotation is correct via info
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . PCOLOR);
         $op = $this->createOp("trigger(resolveHits)");
-        $info = $op->getArgs()["info"];
+        $info = $op->getArgsInfo();
         $this->assertEquals("useAbility", $info["card_ability_3_3"]["action"]);
     }
 
@@ -223,7 +223,7 @@ final class Op_triggerTest extends TestCase {
     public function testMonsterMoveTriggerIsEmptyWithNoCards(): void {
         // No ability cards with on=monsterMove on tableau → trigger should have no targets
         $op = $this->createOp("trigger(monsterMove)");
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 }

@@ -32,21 +32,21 @@ final class Op_rollTest extends TestCase {
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
         $op = $this->createOp();
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
     public function testAdjacentMonsterIsTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->createOp();
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
     public function testNonAdjacentMonsterNotTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         $op = $this->createOp("roll(adj)");
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
@@ -54,7 +54,7 @@ final class Op_rollTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
         $op = $this->createOp();
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsTarget();
         $this->assertCount(2, $moves);
     }
 
@@ -63,7 +63,7 @@ final class Op_rollTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         /** @var Op_roll */
         $op = $this->game->machine->instanciateOperation("roll(inRange)", PCOLOR);
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_13_7", $moves);
     }
 
@@ -72,7 +72,7 @@ final class Op_rollTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_14_6");
         /** @var Op_roll */
         $op = $this->game->machine->instanciateOperation("roll(inRange3)", PCOLOR);
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_14_6", $moves);
     }
 
@@ -80,14 +80,14 @@ final class Op_rollTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         /** @var Op_roll */
         $op = $this->game->machine->instanciateOperation("roll(adj)", PCOLOR);
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
     public function testAdjacentHeroNotTarget(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
         $op = $this->createOp();
-        $moves = $op->getArgs()["info"];
+        $moves = $op->getArgsInfo();
         $this->assertArrayNotHasKey("hex_12_8", $moves);
     }
 

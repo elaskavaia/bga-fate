@@ -56,7 +56,7 @@ const templatePath = path.join(__dirname, "template.html");
 const templateHtml = fs.readFileSync(templatePath, "utf8");
 const dom = new JSDOM(templateHtml, {
   runScripts: "dangerously",
-  virtualConsole: (() => { const vc = new (require("jsdom").VirtualConsole)(); vc.sendTo(console, { omitJSDOMErrors: true }); return vc; })()
+  virtualConsole: (() => { const vc = new (require("jsdom").VirtualConsole)(); vc.forwardTo(console, { omitJSDOMErrors: true }); return vc; })()
 });
 const { window } = dom;
 const { document } = window;

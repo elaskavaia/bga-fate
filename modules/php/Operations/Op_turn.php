@@ -89,18 +89,18 @@ class Op_turn extends Operation {
         // Offer main actions if the player still has actions remaining
 
         foreach ($allops as $action => $actionInfo) {
-            $res[$action] = ["q" => 0, "name" => $actionInfo["name"]];
+            $res[$action] = ["q" => 0, "name" => $actionInfo["name"], "replicate" => true];
             $inline = $actionInfo["inline"] ?? 0;
             $kind = $actionInfo["kind"] ?? "main";
             if (in_array($action, $actionsTaken)) {
                 $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
+                $res[$action]["err"] = clienttranslate("Action cannot be performed second time");
             } else {
                 $op = $this->instanciateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
-                $res[$action]["replicate"] = true;
                 if ($res[$action]["q"] == 0 && $inline && ($kind == "free" || $remaining > 0)) {
                     // action is available, shortcut - send action parameters also
-                    $info = $op->getArgs()["info"];
+                    $info = $op->getArgsInfo();
                     foreach ($info as $key => $value) {
                         $res[$key] = $value;
                         $res[$key]["action"] = $action;
@@ -136,7 +136,7 @@ class Op_turn extends Operation {
             $this->queue("turn");
         } elseif ($kind === "") {
             // delegate: user picked a sub-target directly (e.g. a hex), resolve via parent action
-            $argInfo = $this->getArgs()["info"][$optype];
+            $argInfo = $this->getArgsInfo()[$optype];
             $action = $argInfo["action"] ?? "";
             $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action !== "");
             $kind = $this->getActionKind($action);

@@ -10,7 +10,7 @@
     "watch:scss": "sass --watch src/css/Game.scss fate.css",
     "watch": "npm run watch:ts && npm run watch:scss",
     "build": "npm run build:ts && npm run build:scss && npm run genmat",
-    "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests",
+    "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests && npm run play",
     "genmat": "php8.4 misc/other/genmat.php misc/*.csv",
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
     "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --display-deprecations --display-warnings --bootstrap ./tests/_autoload.php",
