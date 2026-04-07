@@ -39,26 +39,27 @@ class Op_seq extends ComplexOperation {
             $sub->withData($this->getData());
             $sub->withDataField("count", $max * $c);
             $sub->withDataField("mcount", $min * $c);
-            $sub->saveToDb($rank, false);
-            $rank++;
+            $this->queueOp($sub);
         }
 
         return true;
     }
 
     function getPossibleMoves() {
-        foreach ($this->delegates as $sub) {
-            if ($sub->isVoid()) {
-                return ["err" => $sub->getError()];
-            }
-        }
-        if ($this->isRangedChoice()) {
-            return parent::getRangeMoves();
-        }
         if (count($this->delegates) == 0) {
             return [];
         }
+        // cannot look beyond first sub, world can change after its executed
         $sub = $this->delegates[0];
+
+        if ($sub->isVoid()) {
+            return $sub->getErrorInfo();
+        }
+
+        if ($this->isRangedChoice()) {
+            return parent::getRangeMoves();
+        }
+
         return $sub->getPossibleMoves();
     }
 

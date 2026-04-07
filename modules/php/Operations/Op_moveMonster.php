@@ -37,7 +37,14 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_moveMonster extends CountableOperation {
     private function getMonsterHex(): ?string {
-        return $this->getDataField("target");
+        $hex = $this->getDataField("target");
+        if ($hex) {
+            return $hex;
+        }
+        if ($this->getParam() === "marked") {
+            $hex = $this->game->tokens->getTokenLocation("marker_attack");
+        }
+        return $hex;
     }
 
     private function getRange(): int {
@@ -46,20 +53,45 @@ class Op_moveMonster extends CountableOperation {
     }
 
     function getPrompt() {
-        if ($this->getMonsterHex()) {
-            return clienttranslate("Select where to move the monster");
+        $monsterHex = $this->getMonsterHex();
+        if ($monsterHex) {
+            // check if monster still alive
+            $monsterId = $this->game->hexMap->getCharacterOnHex($monsterHex, "monster");
+            if ($monsterId) {
+                return clienttranslate("Select where to move the monster");
+            } else {
+                return clienttranslate("Looks like your monster is dead");
+            }
         }
         return clienttranslate("Select a monster to move");
+    }
+
+    public function getSkipName() {
+        return clienttranslate("Skip Move");
     }
 
     function getPossibleMoves(): array {
         $monsterHex = $this->getMonsterHex();
         if ($monsterHex) {
-            return $this->getDestinationMoves($monsterHex);
+            // check if monster still alive
+            $monsterId = $this->game->hexMap->getCharacterOnHex($monsterHex, "monster");
+            if ($monsterId) {
+                return $this->getDestinationMoves($monsterHex);
+            } else {
+                return [];
+            }
         }
+
         $hero = $this->game->getHero($this->getOwner());
         $hexes = $hero->getMonsterHexesInRange($this->getRange());
         return $hexes;
+    }
+
+    public function canSkip() {
+        if ($this->noValidTargets()) {
+            return true;
+        }
+        return parent::canSkip();
     }
 
     private function getDestinationMoves(string $monsterHex): array {
