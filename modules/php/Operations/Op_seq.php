@@ -29,14 +29,13 @@ class Op_seq extends ComplexOperation {
         if (!$this->isSubTrancient()) {
             return false;
         }
-        $rank = 1;
-        $this->game->machine->interrupt($rank, count($this->delegates));
+
         $c = $this->getCount();
         foreach ($this->delegates as $sub) {
             $sub->destroy();
             $max = $sub->getDataField("count", 1);
             $min = $sub->getDataField("mcount", 1);
-            $sub->withData($this->getData());
+            $sub->withData($this->getData(), true);
             $sub->withDataField("count", $max * $c);
             $sub->withDataField("mcount", $min * $c);
             $this->queueOp($sub);
@@ -51,6 +50,7 @@ class Op_seq extends ComplexOperation {
         }
         // cannot look beyond first sub, world can change after its executed
         $sub = $this->delegates[0];
+        $sub->withData($this->getData(), true);
 
         if ($sub->isVoid()) {
             return $sub->getErrorInfo();

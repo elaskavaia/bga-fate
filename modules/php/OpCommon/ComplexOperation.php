@@ -20,14 +20,10 @@ abstract class ComplexOperation extends CountableOperation {
     /** @var Operation[] */
     public array $delegates = [];
 
-    function withData($data) {
-        parent::withData($data);
+    function withData(mixed $data, bool $nocounts = false) {
+        parent::withData($data, $nocounts);
         foreach ($this->delegates as $sub) {
-            $count = $sub->getDataField("count");
-            $mcount = $sub->getDataField("mcount");
-            $sub->withData($data);
-            if ($count !== null) $sub->withDataField("count", $count);
-            if ($mcount !== null) $sub->withDataField("mcount", $mcount);
+            $sub->withData($data, true); // always preserve sub-op counts
         }
         return $this;
     }

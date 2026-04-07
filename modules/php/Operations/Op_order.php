@@ -21,19 +21,27 @@ class Op_order extends ComplexOperation {
         // this suppose to pick selected operation and push on top of stack, remaing choice if any stored back
         $target = $this->getCheckedArg();
         foreach ($this->delegates as $i => $arg) {
-            if ($arg->getOpId() == $target) {
-                $this->queue($arg->getTypeFullExpr(), $arg->getOwner(), $arg->getDataForDb());
+            if ("choice_$i" == $target) {
+                $this->queueOp($arg);
                 $arg->destroy();
                 unset($this->delegates[$i]);
                 break;
             }
         }
         if (count($this->delegates) > 0) {
-            $this->queueRank++;
-            $this->saveToDb($this->queueRank, true);
+            $this->queueOp($this);
         }
 
         return;
+    }
+
+    function getPossibleMoves() {
+        $res = [];
+        foreach ($this->delegates as $i => $sub) {
+            $sub->withData($this->getData(), true);
+            $res["choice_$i"] = $this->paramInfo($sub);
+        }
+        return $res;
     }
 
     function getPrompt() {

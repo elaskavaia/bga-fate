@@ -70,8 +70,12 @@ abstract class Operation {
         $this->owner = $owner;
         return $this;
     }
-    function withData($data) {
+    function withData(mixed $data, bool $nocounts = false) {
         $xdata = self::decodeData($data);
+        if ($nocounts) {
+            unset($xdata["count"]);
+            unset($xdata["mcount"]);
+        }
         if ($this->data === null) {
             $this->data = $xdata;
         } elseif ($xdata) {
