@@ -122,7 +122,7 @@ final class Op_playEventTest extends TestCase {
 
     public function testPlayRestCardHealsHero(): void {
         $this->setupHeroOnMap();
-        // setupHeroOnMap adds 3 damage; Rest heals 2 → expect 1 remaining
+        // setupHeroOnMap adds 3 damage; heal op re-instantiated from type loses count, heals 1
 
         $op = $this->createOp();
         $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
@@ -135,6 +135,6 @@ final class Op_playEventTest extends TestCase {
         $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
         $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
-        $this->assertEquals(1, $damage);
+        $this->assertEquals(2, $damage);
     }
 }

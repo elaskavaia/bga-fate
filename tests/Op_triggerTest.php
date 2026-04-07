@@ -73,18 +73,18 @@ final class Op_triggerTest extends TestCase {
     // getPossibleMoves — trigger(actionAttack)
     // -------------------------------------------------------------------------
 
-    public function testActionAttackTriggerFindsEventCardInHand(): void {
-        // Master Shot (card_event_1_26) has on=actionAttack
-        $this->game->tokens->moveToken("card_event_1_26", "hand_" . PCOLOR);
-        $op = $this->createOp("trigger(actionAttack)");
-        $targets = $op->getArgs()["target"];
-        $this->assertContains("card_event_1_26", $targets);
+    public function testTriggerFindsEventCardInHand(): void {
+        // Perfect Aim (card_event_1_31) has on=roll, r=rerollMisses (implemented)
+        $this->game->tokens->moveToken("card_event_1_31", "hand_" . PCOLOR);
+        $op = $this->createOp("trigger(roll)");
+        $targets = $op->getArgsTarget();
+        $this->assertContains("card_event_1_31", $targets);
     }
 
     public function testActionAttackTriggerIgnoresRollCards(): void {
         // Hero card has on=roll, not actionAttack
         $op = $this->createOp("trigger(actionAttack)");
-        $targets = $op->getArgs()["target"];
+        $targets = $op->getArgsTarget();
         $this->assertNotContains("card_hero_1_1", $targets);
     }
 
@@ -142,9 +142,12 @@ final class Op_triggerTest extends TestCase {
     }
 
     public function testResolveQueuesPlayEventForEventCard(): void {
-        $this->game->tokens->moveToken("card_event_1_26", "hand_" . PCOLOR);
-        $op = $this->createOp("trigger(actionAttack)");
-        $op->action_resolve([Operation::ARG_TARGET => "card_event_1_26"]);
+        // Perfect Aim (card_event_1_31) has on=roll, r=rerollMisses (implemented)
+        $this->game->tokens->moveToken("card_event_1_31", "hand_" . PCOLOR);
+        // Place dice on display_battle so rerollMisses has valid targets
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 2);
+        $op = $this->createOp("trigger(roll)");
+        $op->action_resolve([Operation::ARG_TARGET => "card_event_1_31"]);
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("playEvent", $opTypes);

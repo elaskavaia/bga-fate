@@ -377,9 +377,7 @@ final class GameTest extends TestCase {
                 continue;
             }
             $r = $info["r"] ?? "";
-            if ($r === "" || $r === "custom") {
-                continue;
-            }
+            $this->assertNotEmpty($r, "r should be set for event");
             //echo "testing event card $key r=$r\n";
             $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
@@ -394,7 +392,7 @@ final class GameTest extends TestCase {
                 continue;
             }
             $r = $info["r"] ?? "";
-            if ($r === "" || str_contains($r, "custom")) {
+            if ($r === "") {
                 continue;
             }
             //echo "testing equip card $key r=$r\n";
@@ -410,7 +408,7 @@ final class GameTest extends TestCase {
                 continue;
             }
             $r = $info["r"] ?? "";
-            if ($r === "" || str_contains($r, "custom")) {
+            if ($r === "") {
                 continue;
             }
             $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
@@ -426,7 +424,7 @@ final class GameTest extends TestCase {
                 continue;
             }
             $r = $info["r"] ?? "";
-            if ($r === "" || str_contains($r, "custom")) {
+            if ($r === "") {
                 continue;
             }
             $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);

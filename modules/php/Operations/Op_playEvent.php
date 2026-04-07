@@ -51,37 +51,32 @@ class Op_playEvent extends Operation {
             if (!str_starts_with($cardId, "card_event_")) {
                 continue;
             }
-            $on = $this->game->material->getRulesFor($cardId, "on", "");
+            $on = $this->game->getRulesFor($cardId, "on", "");
             if ($on !== $trigger) {
                 continue;
             }
-            $r = $this->game->material->getRulesFor($cardId, "r", "nop");
-            $valid = true;
-            if ($r && $r != "custom") {
-                $op = $this->instanciateOperation($r);
-                $valid = !$op->noValidTargets();
-            }
-            $targets[$cardId] = $valid
-                ? ["q" => Material::RET_OK]
-                : ["q" => Material::ERR_PREREQ, "err" => clienttranslate("No valid targets")];
+            $r = $this->game->getRulesForAndAssert($cardId, "r");
+            $op = $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
+            $targets[$cardId] = $op->getErrorInfo();
         }
         return $targets;
     }
 
     function resolve(): void {
-        $target = $this->getCheckedArg();
+        $cardId = $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
         // discard first so a) other player see it b) its not in hard for other effects that follow
-        $hero->discardEventCard($target);
+        $hero->discardEventCard($cardId);
         // TODO: remove effect printing - temp for development
-        $effect = $this->game->material->getRulesFor($target, "effect", "");
+        $effect = $this->game->getRulesFor($cardId, "effect", "");
         $this->game->notifyMessage(clienttranslate('${char_name} plays ${token_name}: ${effect_text}'), [
             "char_name" => $hero->getId(),
-            "token_name" => $target,
+            "token_name" => $cardId,
             "effect_text" => $effect,
         ]);
-        $r = $this->game->material->getRulesFor($target, "r", "nop");
-        $this->queue($r, $this->getOwner(), ["reason" => $target]);
+        $r = $this->game->getRulesForAndAssert($cardId, "r");
+        $op = $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
+        $this->queueOp($op);
     }
 
     public function getUiArgs() {

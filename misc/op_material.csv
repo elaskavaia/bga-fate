@@ -95,3 +95,4 @@ suppressiveFire|Suppressive Fire
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger
+custom|Custom

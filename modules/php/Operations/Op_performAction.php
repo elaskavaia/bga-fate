@@ -22,9 +22,13 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket.
  */
 class Op_performAction extends Operation {
+    function getPossibleMoves() {
+        $actionType = $this->getParam(0, "nop");
+        $this->game->systemAssert("ERR:performAction:noActionType", $actionType !== null);
+        return $this->getPossibleMovesDelegate($actionType);
+    }
     function resolve(): void {
         $actionType = $this->getParam(0);
-        $this->game->systemAssert("ERR:performAction:noActionType", $actionType !== null);
         $this->queue($actionType);
     }
 }

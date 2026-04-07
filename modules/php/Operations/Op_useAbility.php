@@ -62,7 +62,7 @@ class Op_useAbility extends Operation {
                 continue;
             }
 
-            $op = $this->game->machine->instanciateOperation($r, $owner, ["card" => $cardId]);
+            $op = $this->instanciateOperation($r, null, ["card" => $cardId]);
             $targets[$cardId] = $op->getErrorInfo();
         }
         return $targets;

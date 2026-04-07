@@ -232,6 +232,11 @@ abstract class Operation {
         //$this->game->debugConsole("queue $type");
     }
 
+    function queueOp(Operation $op) {
+        $op->saveToDb($this->queueRank, true);
+        $this->queueRank++;
+    }
+
     function queueTrigger(?string $optype = null, $owner = null, mixed $data = null) {
         if ($optype == null) {
             $optype = $this->getType();

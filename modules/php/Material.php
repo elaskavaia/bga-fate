@@ -443,6 +443,10 @@ class Material {
         "type" => "trigger",
         "name" => clienttranslate("Trigger"),
 ],
+    "Op_custom" => [ 
+        "type" => "custom",
+        "name" => clienttranslate("Custom"),
+],
             /* --- gen php end op_material --- */
 
             /* --- gen php begin token_material --- */
