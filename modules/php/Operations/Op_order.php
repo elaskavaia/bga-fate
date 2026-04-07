@@ -38,7 +38,6 @@ class Op_order extends ComplexOperation {
     function getPossibleMoves() {
         $res = [];
         foreach ($this->delegates as $i => $sub) {
-            $sub->withData($this->getData(), true);
             $res["choice_$i"] = $this->paramInfo($sub);
         }
         return $res;

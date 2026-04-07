@@ -7,7 +7,7 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * suppressiveFire: Prevent a monster within range 3 from moving this monster turn.
+ * c_supfire: Prevent a monster within range 3 from moving this monster turn.
  *
  * Params:
  * - param(0): optional filter expression — e.g. "'rank<=2'" for Level I (default "true")
@@ -26,9 +26,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Used by: Suppressive Fire I (card_ability_1_5, card_ability_2_9),
  *          Suppressive Fire II (card_ability_1_6, card_ability_2_10).
  */
-class Op_suppressiveFire extends Operation {
+class Op_c_supfire extends Operation {
     function getPrompt() {
-        return clienttranslate('Choose a monster to suppress (prevent from moving)');
+        return clienttranslate("Choose a monster to suppress (prevent from moving)");
     }
 
     private function matchesFilter(string $monsterId): bool {
@@ -75,16 +75,21 @@ class Op_suppressiveFire extends Operation {
         $targetHex = $this->getCheckedArg();
 
         $monsterId = $this->game->hexMap->getCharacterOnHex($targetHex, "monster");
-        $this->game->systemAssert("ERR:suppressiveFire:noMonsterOnHex:$targetHex", $monsterId !== null);
+        $this->game->systemAssert("ERR:c_supfire:noMonsterOnHex:$targetHex", $monsterId !== null);
 
         // Move existing stun crystal to the new monster (or pick a fresh one from supply)
         $existingCrystal = $this->findStunCrystal();
         if ($existingCrystal !== null) {
-            $this->game->tokens->dbSetTokenLocation($existingCrystal, $monsterId, 0,
-                clienttranslate('${char_name} suppresses ${token_name} — it cannot move this turn'), [
+            $this->game->tokens->dbSetTokenLocation(
+                $existingCrystal,
+                $monsterId,
+                0,
+                clienttranslate('${char_name} suppresses ${token_name} — it cannot move this turn'),
+                [
                     "char_name" => $this->game->getHeroTokenId($this->getOwner()),
                     "token_name" => $monsterId,
-                ]);
+                ]
+            );
         } else {
             $heroId = $this->game->getHeroTokenId($this->getOwner());
             $this->game->effect_moveCrystals($heroId, "green", 1, $monsterId, [

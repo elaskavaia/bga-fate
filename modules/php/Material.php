@@ -247,32 +247,26 @@ class Material {
         "type" => "turnEnd",
         "name" => clienttranslate("End of Turn"),
 ],
-// # Monster turn (runs after all players have taken their turn)
     "Op_turnMonster" => [ 
         "type" => "turnMonster",
         "name" => clienttranslate("Monster Turn"),
 ],
-// # Monster movement phase (auto: all monsters move toward Grimheim)
     "Op_monsterMoveAll" => [ 
         "type" => "monsterMoveAll",
         "name" => clienttranslate("Monster Movement"),
 ],
-// # Monster attack phase (auto: queue attacks for monsters adjacent to heroes)
     "Op_monsterAttackAll" => [ 
         "type" => "monsterAttackAll",
         "name" => clienttranslate("Monster Attacks"),
 ],
-// # End of monster turn (auto: check end of game, start next player round)
     "Op_endOfMonsterTurn" => [ 
         "type" => "endOfMonsterTurn",
         "name" => clienttranslate("End Monster Turn"),
 ],
-// # Monster reinforcement (auto: draw monster cards, place monsters)
     "Op_reinforcement" => [ 
         "type" => "reinforcement",
         "name" => clienttranslate("Reinforcement"),
 ],
-// # Monster attack (queued per monster adjacent to hero)
     "Op_monsterAttack" => [ 
         "type" => "monsterAttack",
         "name" => clienttranslate("Monster Attack"),
@@ -369,14 +363,6 @@ class Material {
         "type" => "endOfAttack",
         "name" => clienttranslate("End of Attack"),
 ],
-    "Op_c_arrows" => [ 
-        "type" => "c_arrows",
-        "name" => clienttranslate("Burning Arrows"),
-],
-    "Op_c_nailed" => [ 
-        "type" => "c_nailed",
-        "name" => clienttranslate("Nailed Together"),
-],
     "Op_heal" => [ 
         "type" => "heal",
         "name" => clienttranslate("Heal"),
@@ -400,6 +386,14 @@ class Material {
     "Op_gainXp" => [ 
         "type" => "gainXp",
         "name" => clienttranslate("Gain XP"),
+],
+    "Op_spendXp" => [ 
+        "type" => "spendXp",
+        "name" => clienttranslate("Spend XP"),
+],
+    "Op_gainAtt" => [ 
+        "type" => "gainAtt",
+        "name" => clienttranslate("Gain Attribute"),
 ],
     "Op_killMonster" => [ 
         "type" => "killMonster",
@@ -433,10 +427,18 @@ class Material {
         "type" => "discardEvent",
         "name" => clienttranslate("Discard Event"),
 ],
-// # Suppressive Fire (triggered ability: prevent a monster from moving)
-    "Op_suppressiveFire" => [ 
-        "type" => "suppressiveFire",
+// #rare operations
+    "Op_c_supfire" => [ 
+        "type" => "c_supfire",
         "name" => clienttranslate("Suppressive Fire"),
+],
+    "Op_c_arrows" => [ 
+        "type" => "c_arrows",
+        "name" => clienttranslate("Burning Arrows"),
+],
+    "Op_c_nailed" => [ 
+        "type" => "c_nailed",
+        "name" => clienttranslate("Nailed Together"),
 ],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
@@ -3519,7 +3521,7 @@ class Material {
         "num" => 5,
         "hno" => 1,
         "name" => clienttranslate("Suppressive Fire I"),
-        "r" => "suppressiveFire('rank<=2')",
+        "r" => "c_supfire('rank<=2')",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3530,7 +3532,7 @@ class Material {
         "num" => 6,
         "hno" => 1,
         "name" => clienttranslate("Suppressive Fire II"),
-        "r" => "suppressiveFire",
+        "r" => "c_supfire",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3651,7 +3653,7 @@ class Material {
         "num" => 9,
         "hno" => 2,
         "name" => clienttranslate("Suppressive Fire I"),
-        "r" => "suppressiveFire('rank<=2')",
+        "r" => "c_supfire('rank<=2')",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3662,7 +3664,7 @@ class Material {
         "num" => 10,
         "hno" => 2,
         "name" => clienttranslate("Suppressive Fire II"),
-        "r" => "suppressiveFire",
+        "r" => "c_supfire",
         "on" => "monsterMove",
         "effect" => "Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.",
 ],
@@ -3813,7 +3815,7 @@ class Material {
         "num" => 13,
         "hno" => 3,
         "name" => clienttranslate("Swift Kick I"),
-        "r" => "dealDamage(adj,not_legend);moveMonster(marked)",
+        "r" => "dealDamage(adj,not_legend),moveMonster(marked)",
         "effect" => "Deal 1 damage to an adjacent non-legend monster and move it 1 area.",
 ],
     "card_ability_3_14" => [ 
@@ -3823,7 +3825,7 @@ class Material {
         "num" => 14,
         "hno" => 3,
         "name" => clienttranslate("Swift Kick II"),
-        "r" => "2dealDamage(adj,not_legend);2moveMonster(marked)",
+        "r" => "2dealDamage(adj,not_legend),2moveMonster(marked)",
         "effect" => "Deal 2 damage to an adjacent non-legend monster and move it 2 areas.",
 ],
 // # Abilities - Boldur (hno=4)
@@ -4834,7 +4836,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Kick"),
         "count" => 3,
-        "r" => "dealDamage(adj);moveMonster(marked)",
+        "r" => "dealDamage(adj),moveMonster(marked)",
         "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
         "flavour" => "I get a kick out of you.",
 ],
@@ -5005,7 +5007,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Kick"),
         "count" => 3,
-        "r" => "dealDamage(adj);moveMonster(marked)",
+        "r" => "dealDamage(adj),moveMonster(marked)",
         "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
         "flavour" => "I get a kick out of you.",
 ],

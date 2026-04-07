@@ -56,7 +56,7 @@ class OpMachine {
         return $this->createTopOperationFromDbForOwner($owner);
     }
 
-    function createTopOperationFromDbForOwner(?string $owner): ?Operation {
+    function createTopOperationFromDbForOwner(?string $owner = null): ?Operation {
         $ops = $this->db->getTopOperations($owner);
         if (count($ops) == 0) {
             return null;

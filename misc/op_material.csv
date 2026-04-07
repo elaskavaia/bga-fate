@@ -19,22 +19,12 @@ turnconf|Confirm Turn
 # End of turn
 turnEnd|End of Turn
 
-# Monster turn (runs after all players have taken their turn)
+
 turnMonster|Monster Turn
-
-# Monster movement phase (auto: all monsters move toward Grimheim)
 monsterMoveAll|Monster Movement
-
-# Monster attack phase (auto: queue attacks for monsters adjacent to heroes)
 monsterAttackAll|Monster Attacks
-
-# End of monster turn (auto: check end of game, start next player round)
 endOfMonsterTurn|End Monster Turn
-
-# Monster reinforcement (auto: draw monster cards, place monsters)
 reinforcement|Reinforcement
-
-# Monster attack (queued per monster adjacent to hero)
 monsterAttack|Monster Attack
 
 
@@ -72,14 +62,14 @@ spendAction|Spend Action
 roll|Roll Dice
 resolveHits|Resolve Hits
 endOfAttack|End of Attack
-c_arrows|Burning Arrows
-c_nailed|Nailed Together
 heal|Heal
 moveHero|Move Hero
 moveMonster|Move Monster
 performAction|Perform Action
 repairCard|Repair Card
 gainXp|Gain XP
+spendXp|Spend XP
+gainAtt|Gain Attribute
 killMonster|Kill Monster
 preventDamage|Prevent Damage
 addDamage|Add Damage
@@ -90,8 +80,10 @@ upgrade|Upgrade Hero
 drawEvent|Draw Event
 discardEvent|Discard Event
 
-# Suppressive Fire (triggered ability: prevent a monster from moving)
-suppressiveFire|Suppressive Fire
+#rare operations
+c_supfire|Suppressive Fire
+c_arrows|Burning Arrows
+c_nailed|Nailed Together
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger

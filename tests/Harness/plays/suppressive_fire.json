@@ -3,7 +3,7 @@
   "reset": true,
   "steps": [
     { "endpoint": "debug_setupGame_h1", "reload": true },
-    { "endpoint": "debug_Op_suppressiveFire" },
+    { "endpoint": "debug_Op_c_supfire" },
     { "endpoint": "action_resolve", "data": { "target": "actionPractice" } },
     { "endpoint": "action_resolve", "data": { "target": "actionFocus" } },
     { "endpoint": "action_skip" },

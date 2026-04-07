@@ -83,4 +83,56 @@ final class OperationTest extends TestCase {
         $this->assertArrayHasKey("card_equip_1_21", $moves);
         $this->assertNotEquals(Material::RET_OK, $moves["card_equip_1_21"]["q"]);
     }
+
+    // -------------------------------------------------------------------------
+    // copy() roundtrip
+    // -------------------------------------------------------------------------
+
+    public function testCopyPreservesTypeAndOwner(): void {
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
+        $copy = $op->copy();
+        $this->assertEquals($op->getTypeFullExpr(), $copy->getTypeFullExpr());
+        $this->assertEquals($op->getOwner(), $copy->getOwner());
+    }
+
+    public function testCopyPreservesData(): void {
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR, ["card" => "test_card", "reason" => "test"]);
+        $copy = $op->copy();
+        $this->assertEquals("test_card", $copy->getDataField("card"));
+        $this->assertEquals("test", $copy->getDataField("reason"));
+    }
+
+    public function testCopyPreservesCount(): void {
+        /** @var \Bga\Games\Fate\OpCommon\CountableOperation */
+        $copy = $this->game->machine->instanciateOperation("2dealDamage(adj)", PCOLOR)->copy();
+        $this->assertEquals(2, $copy->getCount());
+    }
+
+    public function testCopyIsIndependent(): void {
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR, ["card" => "original"]);
+        $copy = $op->copy();
+        $copy->withDataField("card", "modified");
+        $this->assertEquals("original", $op->getDataField("card"), "Modifying copy should not affect original");
+    }
+
+    public function testCopyHasZeroId(): void {
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
+        $copy = $op->copy();
+        $this->assertEquals(0, $copy->getId());
+    }
+
+    public function testCopyComplexOperation(): void {
+        $op = $this->game->machine->instanciateOperation("gainXp/drawEvent", PCOLOR, ["card" => "test"]);
+        $copy = $op->copy();
+        $this->assertEquals("gainXp/drawEvent", $copy->getTypeFullExpr());
+        $this->assertEquals("test", $copy->getDataField("card"));
+        $this->assertEquals(PCOLOR, $copy->getOwner());
+    }
+
+    public function testCopySeqOperation(): void {
+        $op = $this->game->machine->instanciateOperation("dealDamage(adj),moveMonster(marked)", PCOLOR, ["reason" => "kick"]);
+        $copy = $op->copy();
+        $this->assertEquals("dealDamage(adj),moveMonster(marked)", $copy->getTypeFullExpr());
+        $this->assertEquals(["reason" => "kick"], $copy->getData());
+    }
 }

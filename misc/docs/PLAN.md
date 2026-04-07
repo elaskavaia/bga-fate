@@ -557,5 +557,5 @@ Hero, Abilities and Equipment:
 [ ] Show win/loss end screen — BGA default end screen works, custom UI 
 [ ] Range indicator for ranged monster attacks
 [ ] Legend monster special display
-[ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_suppressiveFire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
+[ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
 [ ] Horizonal timetrack: I need to refactor timetrack looks like in UI.  There are two timetrack but only one active in any given game. I have this images /home/elaskavaia/git/bga-fate/img/timeline.webp and they are vertical and used as background now. Instead I want time track to be horizonal area on top of the board and instead of single bg image i just use grid with individual icons matching timeline events. Can you plan this for me?

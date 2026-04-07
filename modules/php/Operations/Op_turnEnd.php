@@ -35,7 +35,7 @@ class Op_turnEnd extends Operation {
         $this->queueTrigger();
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
-        //$this->queue("upgrade");
+        $this->queue("upgrade");
         // 3. Add mana to cards with mana generation (green icon)
 
         $cards = $hero->getTableauCards();

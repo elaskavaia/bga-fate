@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_suppressiveFire;
+use Bga\Games\Fate\Operations\Op_c_supfire;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_suppressiveFireTest extends TestCase {
+final class Op_c_supfireTest extends TestCase {
     private GameUT $game;
 
     protected function setUp(): void {
@@ -24,12 +24,12 @@ final class Op_suppressiveFireTest extends TestCase {
         $this->game->tokens->moveToken("hero_4", "hex_2_1");
     }
 
-    private function createOp(string $type = "suppressiveFire", ?string $cardId = null): Op_suppressiveFire {
+    private function createOp(string $type = "c_supfire", ?string $cardId = null): Op_c_supfire {
         $data = [];
         if ($cardId !== null) {
             $data["card"] = $cardId;
         }
-        /** @var Op_suppressiveFire */
+        /** @var Op_c_supfire */
         $op = $this->game->machine->instanciateOperation($type, PCOLOR, $data);
         return $op;
     }
@@ -75,28 +75,28 @@ final class Op_suppressiveFireTest extends TestCase {
 
     public function testLevelIOffersRank1Monster(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // rank 1
-        $op = $this->createOp("suppressiveFire('rank<=2')");
+        $op = $this->createOp("c_supfire('rank<=2')");
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
     public function testLevelIOffersRank2Monster(): void {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8"); // rank 2
-        $op = $this->createOp("suppressiveFire('rank<=2')");
+        $op = $this->createOp("c_supfire('rank<=2')");
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
     public function testLevelIExcludesRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $op = $this->createOp("suppressiveFire('rank<=2')");
+        $op = $this->createOp("c_supfire('rank<=2')");
         $moves = $op->getPossibleMoves();
         $this->assertEmpty($moves);
     }
 
     public function testLevelIIOffersRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $op = $this->createOp("suppressiveFire");
+        $op = $this->createOp("c_supfire");
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
@@ -190,7 +190,7 @@ final class Op_suppressiveFireTest extends TestCase {
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("hex_12_8", $loc, "Suppressed monster should not move");
 
-        // Crystal stays on the monster (removed next turn by suppressiveFire skip/resolve)
+        // Crystal stays on the monster (removed next turn by c_supfire skip/resolve)
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
         $this->assertCount(1, $crystals, "Crystal should stay on monster after movement phase");
     }

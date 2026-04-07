@@ -28,30 +28,20 @@ class Op_or extends ComplexOperation {
         }
         $total = 0;
         $count = $this->getCount();
-        $minCount = $this->getMinCount();
         foreach ($this->delegates as $i => $sub) {
             $key = "choice_$i";
             $c = $res[$key] ?? 0; // user selects the count of sub operation
             $total += $c;
             if ($c > 0) {
-                $max = $sub->getDataField("count", 1);
-                $min = $sub->getDataField("mcount", 1);
-                $sub->withData($this->getData(), true); // get all data from parent
-                // now override count
-                $sub->withDataField("count", $max * $c);
-                $sub->withDataField("mcount", $min * $c);
-                // save
-                $this->queueOp($sub);
+                $copy = $sub->copy();
+                if ($copy instanceof CountableOperation) {
+                    $copy->mulCounts($c);
+                }
 
-                // Reset delegate counts so serialization stays clean if saved again
-                $sub->withDataField("count", $max);
-                $sub->withDataField("mcount", $min);
-
-                //$this->notifyMessage(clienttranslate('${player_name} selected ${opname}'), ["opname" => $arg->getOpName()]);
-                $this->incMinCount(-$c);
-                $this->incCount(-$c);
+                $this->queueOp($copy);
+                $this->incCounts(-$c);
             }
-            $sub->destroy(); // this destroys this in db, but it will saved again when parent saves its state
+            $sub->destroy();
         }
 
         if ($total > $count) {
@@ -68,7 +58,6 @@ class Op_or extends ComplexOperation {
         $res = [];
         $totalLimit = 0;
         foreach ($this->delegates as $i => $sub) {
-            $sub->withData($this->getData(), true); // propagate parent data to sub
             $arg = $this->paramInfo($sub);
             $totalLimit += $arg["max"] ?? 0;
             $res["choice_$i"] = $arg;

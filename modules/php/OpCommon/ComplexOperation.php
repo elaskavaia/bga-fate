@@ -20,8 +20,8 @@ abstract class ComplexOperation extends CountableOperation {
     /** @var Operation[] */
     public array $delegates = [];
 
-    function withData(mixed $data, bool $nocounts = false) {
-        parent::withData($data, $nocounts);
+    function withData(mixed $data, bool $merge = false) {
+        parent::withData($data, $merge);
         foreach ($this->delegates as $sub) {
             $sub->withData($data, true); // always preserve sub-op counts
         }
@@ -55,6 +55,7 @@ abstract class ComplexOperation extends CountableOperation {
 
     function withDelegate(Operation $sub) {
         $this->delegates[] = $sub;
+        $sub->withData($this->getData(), true);
         return $this;
     }
 

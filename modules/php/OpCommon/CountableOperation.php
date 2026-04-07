@@ -84,6 +84,18 @@ abstract class CountableOperation extends Operation {
         return $v;
     }
 
+    function incCounts($inc = 1) {
+        $this->incMinCount($inc);
+        return $this->incCount($inc);
+    }
+
+    function mulCounts(int $coeff) {
+        $max = $this->getDataField("count", 1);
+        $min = $this->getDataField("mcount", 1);
+        $this->withDataField("count", $max * $coeff);
+        $this->withDataField("mcount", $min * $coeff);
+    }
+
     function isRanged() {
         $count = $this->getCount();
         $mcount = $this->getMinCount();

@@ -668,7 +668,7 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_Op_suppressiveFire(): void {
+    function debug_Op_c_supfire(): void {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         // Place Suppressive Fire I on tableau
         $this->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_{$color}");

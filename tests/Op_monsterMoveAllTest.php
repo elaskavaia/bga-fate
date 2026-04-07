@@ -221,7 +221,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $op->resolve();
 
         $crystalsAfter = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
-        $this->assertCount(1, $crystalsAfter, "Green crystal should stay on monster (removed by next suppressiveFire trigger)");
+        $this->assertCount(1, $crystalsAfter, "Green crystal should stay on monster (removed by next c_supfire trigger)");
     }
 
     public function testStunnedMonsterDoesNotMoveOnChargeTurn(): void {

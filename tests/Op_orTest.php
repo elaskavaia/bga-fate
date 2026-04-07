@@ -96,4 +96,17 @@ final class Op_orTest extends TestCase {
         $op = $this->game->machine->instanciateOperation("gainXp/drawEvent", PCOLOR);
         $this->assertEquals("gainXp/drawEvent", $op->getTypeFullExpr());
     }
+
+    public function testComplexInst(): void {
+        $op = $this->game->machine->instanciateOperation("2(gainAtt/3gainXp)", PCOLOR, ["reason" => "kick"]);
+        $copy = $op->copy();
+        $copy->queueOp($copy);
+        $op = $this->game->machine->createTopOperationFromDbForOwner();
+        $this->assertEquals("2(gainAtt/3(gainXp))", $op->getTypeFullExpr());
+        $this->assertEquals(["reason" => "kick", "count" => 2, "mcount" => 2], $op->getData());
+        $this->game->fakeUserAction($op, "choice_0");
+        $this->game->machine->dispatchAll();
+        $op = $this->game->machine->createTopOperationFromDbForOwner();
+        $this->assertEquals("gainAtt/3(gainXp)", $op->getTypeFullExpr());
+    }
 }

@@ -182,8 +182,8 @@ from a filtered set. Common target filters:
   Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket
 - `monsterMoveAll` (auto) — Move all monsters toward Grimheim. Extracted from `turnMonster` to allow
   pre-movement triggers (e.g. Suppressive Fire). Monsters with a green crystal (stunned) skip movement;
-  crystal stays on the monster until next `suppressiveFire` trigger. Data field: `charge` (bool) for skull turn bonus step.
-- `suppressiveFire` (player, triggered) — Prevent a monster within range 3 from moving this monster turn.
+  crystal stays on the monster until next `c_supfire` trigger. Data field: `charge` (bool) for skull turn bonus step.
+- `c_supfire` (player, triggered) — Prevent a monster within range 3 from moving this monster turn.
   Triggered via `useAbility` on `monsterMove`. Places a green crystal on the monster (stun marker).
   Param(0): optional filter expression (e.g. `'rank<=2'` for Level I). Monsters with an existing green
   crystal are excluded from selection ("cannot choose same monster next turn"). On resolve, any existing
@@ -194,7 +194,7 @@ from a filtered set. Common target filters:
 - "Attack range +X this turn" — temporary attribute modifier via tracker (see Hero Attribute Trackers below)
 - "Reroll all misses" — modifier on dice result in `actionAttack`
 - "Add damage for each [RUNE]" — modifier on dice result
-- "Prevent monster from moving" — green crystal placed on monster by `suppressiveFire`, checked by `monsterMoveAll` (crystal stays until next trigger)
+- "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 - Static/persistent effects (strength bonus, armor, mana regen) — read from card data during relevant ops
 - Equipment [DAMAGE] effects — consume durability, separate activation system
 - Quest completion — specific quest logic, not a generic operation

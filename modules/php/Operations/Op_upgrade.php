@@ -86,13 +86,9 @@ class Op_upgrade extends Operation {
         $target = $this->getCheckedArg();
         $owner = $this->getOwner();
         $cost = $this->getUpgradeCost();
-        $heroId = $this->game->getHeroTokenId($owner);
 
         // Pay XP
-        $this->game->effect_moveCrystals($heroId, "yellow", -$cost, "tableau_$owner", [
-            "message" => clienttranslate('${char_name} spends ${count} XP to upgrade'),
-            "count" => $cost,
-        ]);
+        $this->instanciateOperation("{$cost}spendXp")->resolve(); // instant resolve
 
         // Advance upgrade cost marker
         $markerId = "marker_{$owner}_3";

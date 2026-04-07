@@ -418,7 +418,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Use Suppressive Fire I — pick the goblin's hex
         $this->respond("card_ability_1_5");
         $args = $this->getOpArgs();
-        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->assertEquals("c_supfire", $args["type"] ?? "");
         $this->assertValidTarget($goblinHex);
         $this->respond($goblinHex);
 
@@ -480,7 +480,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Goblin should NOT be a valid target (still has green crystal)
         $args = $this->getOpArgs();
-        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->assertEquals("c_supfire", $args["type"] ?? "");
         $this->assertNotValidTarget($goblinHex, "Goblin should be excluded (has green crystal from last turn)");
         // Brute moved toward Grimheim after turn 1 — use its current hex
         $bruteCurrentHex = $this->tokenLocation($brute);
@@ -541,14 +541,14 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Skip drawEvent if queued
         $this->skipIfOp("drawEvent");
 
-        // Monster turn — use trigger but SKIP suppressiveFire
+        // Monster turn — use trigger but SKIP c_supfire
         $args = $this->getOpArgs();
         $this->assertEquals("trigger", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
 
-        // Skip suppressiveFire
+        // Skip c_supfire
         $args = $this->getOpArgs();
-        $this->assertEquals("suppressiveFire", $args["type"] ?? "");
+        $this->assertEquals("c_supfire", $args["type"] ?? "");
         $this->skip();
 
         // After monster turn, crystal should be removed from goblin

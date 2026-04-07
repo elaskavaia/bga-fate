@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\OpCommon\ComplexOperation;
+use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /** Sequence of operations, no user choice */
 class Op_seq extends ComplexOperation {
@@ -33,11 +34,9 @@ class Op_seq extends ComplexOperation {
         $c = $this->getCount();
         foreach ($this->delegates as $sub) {
             $sub->destroy();
-            $max = $sub->getDataField("count", 1);
-            $min = $sub->getDataField("mcount", 1);
-            $sub->withData($this->getData(), true);
-            $sub->withDataField("count", $max * $c);
-            $sub->withDataField("mcount", $min * $c);
+            if ($sub instanceof CountableOperation) {
+                $sub->mulCounts($c);
+            }
             $this->queueOp($sub);
         }
 
@@ -50,7 +49,6 @@ class Op_seq extends ComplexOperation {
         }
         // cannot look beyond first sub, world can change after its executed
         $sub = $this->delegates[0];
-        $sub->withData($this->getData(), true);
 
         if ($sub->isVoid()) {
             return $sub->getErrorInfo();
@@ -84,7 +82,7 @@ class Op_seq extends ComplexOperation {
             $this->withDataField("count", $c);
             $this->withDataField("mcount", $c);
 
-            $this->saveToDb();
+            $this->queueOp($this);
             return;
         }
     }

@@ -70,16 +70,20 @@ abstract class Operation {
         $this->owner = $owner;
         return $this;
     }
-    function withData(mixed $data, bool $nocounts = false) {
+    function withData(mixed $data, bool $merge = false) {
         $xdata = self::decodeData($data);
-        if ($nocounts) {
+        if ($merge) {
             unset($xdata["count"]);
             unset($xdata["mcount"]);
         }
         if ($this->data === null) {
             $this->data = $xdata;
         } elseif ($xdata) {
-            $this->data = array_merge($this->data, $xdata);
+            if ($merge) {
+                $this->data = array_merge($xdata, $this->data);
+            } else {
+                $this->data = array_merge($this->data, $xdata);
+            }
         }
         return $this;
     }
@@ -125,6 +129,11 @@ abstract class Operation {
 
     function getOperator() {
         return "!";
+    }
+
+    function copy() {
+        $op = $this->game->machine->instanciateOperation($this->getTypeFullExpr(), $this->getOwner(), $this->getData(), 0);
+        return $op;
     }
 
     function withDataField(string $field, mixed $value) {
