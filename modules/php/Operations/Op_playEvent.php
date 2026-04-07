@@ -30,11 +30,16 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_playEvent extends Operation {
     function getPrompt() {
-        return clienttranslate("Choose an Event card to play");
+        return clienttranslate("Choose an Event Card to play");
     }
 
-    function getTrigger() {
+    function getCurrentTrigger() {
         return $this->getDataField("on", "");
+    }
+
+    private function instanciateCardEffectOp(string $cardId): Operation {
+        $r = $this->game->getRulesForAndAssert($cardId, "r");
+        return $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
     }
 
     function getPossibleMoves() {
@@ -43,20 +48,16 @@ class Op_playEvent extends Operation {
             return [$presetTarget];
         }
         $hero = $this->game->getHero($this->getOwner());
-        $trigger = $this->getTrigger();
+        $trigger = $this->getCurrentTrigger();
         $cards = $hero->getHandCards();
         $targets = [];
-        foreach ($cards as $card) {
-            $cardId = $card["key"];
-            if (!str_starts_with($cardId, "card_event_")) {
-                continue;
-            }
+        foreach (array_keys($cards) as $cardId) {
             $on = $this->game->getRulesFor($cardId, "on", "");
             if ($on !== $trigger) {
+                $targets[$cardId] = ["q" => Material::ERR_PREREQ, "err" => clienttranslate("Card cannot be played at this time")];
                 continue;
             }
-            $r = $this->game->getRulesForAndAssert($cardId, "r");
-            $op = $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
+            $op = $this->instanciateCardEffectOp($cardId);
             $targets[$cardId] = $op->getErrorInfo();
         }
         return $targets;
@@ -74,8 +75,7 @@ class Op_playEvent extends Operation {
             "token_name" => $cardId,
             "effect_text" => $effect,
         ]);
-        $r = $this->game->getRulesForAndAssert($cardId, "r");
-        $op = $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
+        $op = $this->instanciateCardEffectOp($cardId);
         $this->queueOp($op);
     }
 

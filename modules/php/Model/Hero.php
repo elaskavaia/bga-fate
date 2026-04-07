@@ -148,6 +148,11 @@ class Hero extends Character {
         $this->game->tokens->incTrackerValue($this->owner, $type, $delta);
     }
 
+    /** Boldur (hero 4) always prevents 1 damage. No other heroes have passive armor. */
+    function getArmor(): int {
+        return $this->heroNum === 4 ? 1 : 0;
+    }
+
     /** Returns the current attack strength from tracker. */
     function getAttackStrength(): int {
         return $this->game->tokens->getTrackerValue($this->owner, "strength");

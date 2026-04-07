@@ -200,4 +200,20 @@ final class HeroTest extends TestCase {
         $hero->recalcTrackers();
         $this->assertEquals(1, $hero->getAttackRange());
     }
+
+    // -------------------------------------------------------------------------
+    // getArmor
+    // -------------------------------------------------------------------------
+
+    public function testBjornHasNoArmor(): void {
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(0, $hero->getArmor());
+    }
+
+    public function testBoldurHasArmor1(): void {
+        $game = new GameUT();
+        $game->initWithHero(4);
+        $hero = $game->getHeroById("hero_4");
+        $this->assertEquals(1, $hero->getArmor());
+    }
 }
