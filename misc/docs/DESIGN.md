@@ -1,3 +1,51 @@
+## Architecture
+
+### Operation-Based State Machine
+
+The game logic is built around an operation-based state machine:
+
+- **OpMachine** (`modules/php/OpCommon/OpMachine.php`) — Core state machine that manages operation queue and execution
+- **Operation** (`modules/php/OpCommon/Operation.php`) — Abstract base class for all game operations
+- **Operation implementations** (`modules/php/Operations/Op_*.php`) — Concrete operations
+- **ComplexOperation** — Operations that can contain sub-operations (delegates)
+- **CountableOperation** — Operations that can be repeated a specific number of times
+
+Operations are queued in the database (DbMachine) and executed sequentially, enabling complex game flows with undo/redo support.
+
+### Token Management
+
+- **DbTokens** (`modules/php/Db/DbTokens.php`) — Token storage, notifications, counters, and material-based creation
+- Tokens represent all physical game pieces (cards, dice, workers, resources, etc.)
+
+### Hex Map
+
+- **HexMap** (`modules/php/Common/HexMap.php`) — All hex grid logic: adjacency, distance, terrain queries, pathfinding, and monster movement helpers
+- Accessed via `$this->game->hexMap->` from operations and `$game->hexMap->` from tests
+- Key functions: `getAdjacentHexes`, `getReachableHexes`, `getDistanceMapToGrimheim`, `getMonsterNextHex`, `getMonstersOnMap`, `isHeroAdjacentTo`, `getHexesInLocation`, `isOccupied`, `isInGrimheim`
+
+### Game States
+
+State classes in `modules/php/States/` handle different game phases:
+
+- GameDispatch — Main game flow dispatcher
+- PlayerTurn — Individual player turn handling
+- MultiPlayerMaster/MultiPlayerTurnPrivate/MultiPlayerWaitPrivate — Multiplayer coordination
+- PlayerTurnConfirm — Turn confirmation state
+- MachineHalted — Error/debug state
+
+### Client-Side Code
+
+TypeScript files in `src/` compile to a single `Game.js`:
+
+- **Game.ts** — Main game class (extends GameMachine), entry point for client logic
+- **Game0Basics.ts** — First file in compilation order, basic definitions
+- **Game1Tokens.ts** — Token rendering and management
+- **GameMachine.ts** — Client-side state machine handling
+- **LaAnimations.ts** — Animation utilities
+
+SCSS files in `src/css/` compile to `fate.css` with `GameXBody.scss` as the entry point.
+
+---
 
 ## Token Naming Convention
 
