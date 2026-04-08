@@ -24,35 +24,9 @@
   border-radius: 50%;
 }
 
-// Experience / Gold slot — top-left corner of player board
-.pboard {
-  .bucket_crystal_yellow {
-    left: 8%;
-    top: 12%;
-    width: 14%;
-    height: 15%;
-    &[data-count]:not([data-count="0"])::after {
-      background-color: #ffeb3b;
-      color: black;
-    }
-  }
-}
-
-// Red crystal bucket: damage indicator (red badge, bottom-right)
-.hero,
-.monster {
-  .bucket_crystal_red {
-    bottom: 6%;
-    right: 40%;
-
-    &[data-count]:not([data-count="0"])::after {
-      background-color: #e53935;
-    }
-  }
-}
-
 .card,
-.gsupply {
+.gsupply,
+.miniboard {
   // Mana bucket: green badge, bottom-right corner of card
   .bucket_crystal_green,
   .bucket_crystal_red,
@@ -167,6 +141,19 @@
   background-repeat: no-repeat;
 }
 
+.tracker::after,
+.counter::after,
+.bucket::after {
+  content: attr(data-state);
+  font-weight: bold;
+  font-size: medium;
+  color: white;
+  aspect-ratio: 1;
+  text-align: center;
+  z-index: 10;
+  text-shadow: v.$textShadowBlack;
+}
+
 // Miniboard in BGA player panel
 .miniboard {
   display: flex;
@@ -175,6 +162,7 @@
   justify-content: space-around;
   padding: 4px 0;
   position: relative;
+  gap: 16px;
 
   .counter {
     height: 32px;
@@ -183,16 +171,38 @@
 
   // Tracker value display
   .tracker::after,
-  .counter::after {
-    content: attr(data-state);
-    position: relative;
+  .counter::after,
+  .bucket::after {
+    position: absolute;
     left: 12px;
     top: 9px;
-    font-family: var(--accent-game-font);
-    font-weight: bold;
-    font-size: 14px;
-    color: white;
-    text-shadow: v.$textShadowBlack;
+  }
+
+  & > * {
+    position: relative !important;
+  }
+
+  .wicon_strength {
+    order: 1;
+  }
+  .wicon_health {
+    order: 2;
+  }
+  .wicon_range {
+    order: 3;
+  }
+  .wicon_move {
+    order: 4;
+  }
+  .wicon_hand {
+    order: 5;
+  }
+
+  .bucket_crystal_yellow {
+    order: 6;
+  }
+  .counter_hand {
+    order: 7;
   }
 }
 
@@ -223,27 +233,6 @@
 .wicon_mana,
 .wicon_green {
   background-position: 100% 0%;
-}
-
-.miniboard {
-  .wicon_strength {
-    order: 1;
-  }
-  .wicon_health {
-    order: 2;
-  }
-  .wicon_range {
-    order: 3;
-  }
-  .wicon_move {
-    order: 4;
-  }
-  .wicon_hand {
-    order: 5;
-  }
-  .counter_hand {
-    order: 6;
-  }
 }
 
 .counter_hand::before {

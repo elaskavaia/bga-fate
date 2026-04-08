@@ -88,11 +88,15 @@ export class Game extends Game1Tokens {
           `tableau_${color}`
         );
       });
-      placeHtml(`<div id="miniboard_${color}" class="miniboard"></div>`, this.bga.playerPanels.getElement(Number(player.id)));
+      placeHtml(
+        `<div id="miniboard_${color}" class="miniboard">
+                  <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
+        </div>`,
+        this.bga.playerPanels.getElement(Number(player.id))
+      );
       placeHtml(
         `
         <div id="pboard_${color}" class="pboard">
-          <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
           <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
           <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
           <div id="aslot_${color}_actionPrepare" class="pboard_slot aslot aslot_actionPrepare"></div>
@@ -102,7 +106,7 @@ export class Game extends Game1Tokens {
           <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
         </div>`,
-        `tableau_${color}`
+        `limbo`
       );
     });
 
@@ -287,7 +291,7 @@ export class Game extends Game1Tokens {
     return result;
   }
 
-  /** Update data-count on a bucket by counting its direct children (excluding other buckets). */
+  /** Update data-state on a bucket by counting its direct children (excluding other buckets). */
   updateBucketCount(bucketId: string) {
     const bucket = $(bucketId);
     if (bucket) {
@@ -295,7 +299,7 @@ export class Game extends Game1Tokens {
       for (let i = 0; i < bucket.children.length; i++) {
         if (!bucket.children[i].classList.contains("bucket")) count++;
       }
-      bucket.dataset.count = String(count);
+      bucket.dataset.state = String(count);
     }
   }
 
@@ -501,20 +505,10 @@ export class Game extends Game1Tokens {
   /** Get crystal damage/gold/mana info for a character from its bucket children. */
   getCrystalInfo(tokenId: string): string {
     let info = "";
-    const dmgBucket = $(`bucket_crystal_red_${tokenId}`);
-    if (dmgBucket) {
-      const count = parseInt(dmgBucket.dataset.count ?? "0");
-      if (count > 0) info += this.ttSection(_("Damage"), String(count));
-    }
-    const manaBucket = $(`bucket_crystal_green_${tokenId}`);
-    if (manaBucket) {
-      const count = parseInt(manaBucket.dataset.count ?? "0");
-      if (count > 0) info += this.ttSection(_("Mana"), String(count));
-    }
-    const goldBucket = $(`bucket_crystal_yellow_${tokenId}`);
-    if (goldBucket) {
-      const count = parseInt(goldBucket.dataset.count ?? "0");
-      if (count > 0) info += this.ttSection(_("Gold"), String(count));
+    for (const type of ["red", "green", "yellow"]) {
+      const bucket = $(`bucket_crystal_${type}_${tokenId}`);
+      const count = parseInt(bucket?.dataset.state ?? "0");
+      if (count > 0) info += this.ttSection(this.getTokenName(`crystal_${type}`), String(count));
     }
     return info;
   }

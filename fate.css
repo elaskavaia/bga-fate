@@ -125,33 +125,15 @@
   border-radius: 50%;
 }
 
-.pboard .bucket_crystal_yellow {
-  left: 8%;
-  top: 12%;
-  width: 14%;
-  height: 15%;
-}
-.pboard .bucket_crystal_yellow[data-count]:not([data-count="0"])::after {
-  background-color: #ffeb3b;
-  color: black;
-}
-
-.hero .bucket_crystal_red,
-.monster .bucket_crystal_red {
-  bottom: 6%;
-  right: 40%;
-}
-.hero .bucket_crystal_red[data-count]:not([data-count="0"])::after,
-.monster .bucket_crystal_red[data-count]:not([data-count="0"])::after {
-  background-color: #e53935;
-}
-
 .card .bucket_crystal_green,
 .card .bucket_crystal_red,
 .card .bucket_crystal_yellow,
 .gsupply .bucket_crystal_green,
 .gsupply .bucket_crystal_red,
-.gsupply .bucket_crystal_yellow {
+.gsupply .bucket_crystal_yellow,
+.miniboard .bucket_crystal_green,
+.miniboard .bucket_crystal_red,
+.miniboard .bucket_crystal_yellow {
   background-image: url("img/tokens.webp");
   background-color: unset;
   border-radius: unset;
@@ -165,19 +147,25 @@
 .card .bucket_crystal_yellow > .crystal,
 .gsupply .bucket_crystal_green > .crystal,
 .gsupply .bucket_crystal_red > .crystal,
-.gsupply .bucket_crystal_yellow > .crystal {
+.gsupply .bucket_crystal_yellow > .crystal,
+.miniboard .bucket_crystal_green > .crystal,
+.miniboard .bucket_crystal_red > .crystal,
+.miniboard .bucket_crystal_yellow > .crystal {
   visibility: hidden;
 }
 .card .bucket_crystal_green,
-.gsupply .bucket_crystal_green {
+.gsupply .bucket_crystal_green,
+.miniboard .bucket_crystal_green {
   background-position: 40% 0%;
 }
 .card .bucket_crystal_red,
-.gsupply .bucket_crystal_red {
+.gsupply .bucket_crystal_red,
+.miniboard .bucket_crystal_red {
   background-position: 0% 0%;
 }
 .card .bucket_crystal_yellow,
-.gsupply .bucket_crystal_yellow {
+.gsupply .bucket_crystal_yellow,
+.miniboard .bucket_crystal_yellow {
   background-position: 20% 0%;
 }
 
@@ -291,6 +279,19 @@
   background-repeat: no-repeat;
 }
 
+.tracker::after,
+.counter::after,
+.bucket::after {
+  content: attr(data-state);
+  font-weight: bold;
+  font-size: medium;
+  color: white;
+  aspect-ratio: 1;
+  text-align: center;
+  z-index: 10;
+  text-shadow: -1px -1px rgba(0, 0, 0, 0.267), 1px 1px rgba(0, 0, 0, 0.267), -1px 1px rgba(0, 0, 0, 0.267), 1px -1px rgba(0, 0, 0, 0.267);
+}
+
 .miniboard {
   display: flex;
   flex-direction: row;
@@ -298,22 +299,42 @@
   justify-content: space-around;
   padding: 4px 0;
   position: relative;
+  gap: 16px;
 }
 .miniboard .counter {
   height: 32px;
   aspect-ratio: 1;
 }
 .miniboard .tracker::after,
-.miniboard .counter::after {
-  content: attr(data-state);
-  position: relative;
+.miniboard .counter::after,
+.miniboard .bucket::after {
+  position: absolute;
   left: 12px;
   top: 9px;
-  font-family: var(--accent-game-font);
-  font-weight: bold;
-  font-size: 14px;
-  color: white;
-  text-shadow: -1px -1px rgba(0, 0, 0, 0.267), 1px 1px rgba(0, 0, 0, 0.267), -1px 1px rgba(0, 0, 0, 0.267), 1px -1px rgba(0, 0, 0, 0.267);
+}
+.miniboard > * {
+  position: relative !important;
+}
+.miniboard .wicon_strength {
+  order: 1;
+}
+.miniboard .wicon_health {
+  order: 2;
+}
+.miniboard .wicon_range {
+  order: 3;
+}
+.miniboard .wicon_move {
+  order: 4;
+}
+.miniboard .wicon_hand {
+  order: 5;
+}
+.miniboard .bucket_crystal_yellow {
+  order: 6;
+}
+.miniboard .counter_hand {
+  order: 7;
 }
 
 .wicon_strength {
@@ -350,25 +371,6 @@
 .wicon_mana,
 .wicon_green {
   background-position: 100% 0%;
-}
-
-.miniboard .wicon_strength {
-  order: 1;
-}
-.miniboard .wicon_health {
-  order: 2;
-}
-.miniboard .wicon_range {
-  order: 3;
-}
-.miniboard .wicon_move {
-  order: 4;
-}
-.miniboard .wicon_hand {
-  order: 5;
-}
-.miniboard .counter_hand {
-  order: 6;
 }
 
 .counter_hand::before {
@@ -429,26 +431,34 @@
   filter: drop-shadow(2px 2px 3px black);
 }
 
-.bucket {
+.monster .bucket,
+.hero .bucket {
   position: absolute;
   z-index: 10;
   pointer-events: none;
+  aspect-ratio: 1;
+  height: 20%;
 }
-.bucket > * {
+.monster .bucket > *,
+.hero .bucket > * {
   position: absolute;
   visibility: hidden;
 }
-.bucket[data-count]:not([data-count="0"])::after {
-  content: attr(data-count);
-  display: block;
-  min-width: 1.4em;
-  height: 1.4em;
-  color: white;
-  font-size: 0.7em;
-  font-weight: bold;
-  line-height: 1.4em;
-  text-align: center;
+.monster .bucket[data-state]:not([data-state="0"])::after,
+.hero .bucket[data-state]:not([data-state="0"])::after {
+  content: attr(data-state);
+  position: absolute;
+  height: 100%;
   border-radius: 50%;
+}
+.monster .bucket_crystal_red,
+.hero .bucket_crystal_red {
+  bottom: 7%;
+  right: 41%;
+}
+.monster .bucket_crystal_red::after,
+.hero .bucket_crystal_red::after {
+  background-color: #e53935;
 }
 
 .monster.monster_draugr {

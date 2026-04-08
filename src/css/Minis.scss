@@ -45,29 +45,37 @@
 }
 
 // Bucket: generic sub-container for tokens placed on another token
-.bucket {
-  position: absolute;
-  z-index: 10;
-  pointer-events: none;
-
-  // Hide token children — only the count badge is visible
-  > * {
+.monster,
+.hero {
+  .bucket {
     position: absolute;
-    visibility: hidden;
-  }
+    z-index: 10;
+    pointer-events: none;
+    aspect-ratio: 1;
+    height: 20%;
 
-  // Count badge (shown when data-count > 0)
-  &[data-count]:not([data-count="0"])::after {
-    content: attr(data-count);
-    display: block;
-    min-width: 1.4em;
-    height: 1.4em;
-    color: white;
-    font-size: 0.7em;
-    font-weight: bold;
-    line-height: 1.4em;
-    text-align: center;
-    border-radius: 50%;
+    // Hide token children — only the count badge is visible
+    > * {
+      position: absolute;
+      visibility: hidden;
+    }
+
+    // Count badge (shown when data-state > 0)
+    &[data-state]:not([data-state="0"])::after {
+      content: attr(data-state);
+      position: absolute;
+      height: 100%;
+      border-radius: 50%;
+    }
+  }
+  // Red crystal bucket: damage indicator (red badge, bottom-right)
+  .bucket_crystal_red {
+    bottom: 7%;
+    right: 41%;
+
+    &::after {
+      background-color: #e53935;
+    }
   }
 }
 
