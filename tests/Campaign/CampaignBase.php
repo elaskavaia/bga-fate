@@ -5,9 +5,9 @@ declare(strict_types=1);
 use Bga\Games\Fate\StateConstants;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . "/Harness/HarnessGameInterface.php";
-require_once __DIR__ . "/Harness/GameWrapper.php";
-require_once __DIR__ . "/Harness/GameDriver.php";
+require_once __DIR__ . "/../Harness/HarnessGameInterface.php";
+require_once __DIR__ . "/../Harness/GameWrapper.php";
+require_once __DIR__ . "/../Harness/GameDriver.php";
 
 /**
  * Base class for campaign integration tests.

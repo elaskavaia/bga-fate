@@ -13,7 +13,7 @@ final class HarnessTest extends TestCase {
     private string $outputDir;
 
     protected function setUp(): void {
-        $this->outputDir = sys_get_temp_dir() . "/harness_test_" . getmypid();
+        $this->outputDir = sys_get_temp_dir() . "/_test_" . getmypid();
         if (!is_dir($this->outputDir)) {
             mkdir($this->outputDir, 0777, true);
         }
@@ -30,7 +30,7 @@ final class HarnessTest extends TestCase {
     }
 
     private function runPlayPhp(string $args = ""): int {
-        $playPhp = __DIR__ . "/Harness/play.php";
+        $playPhp = __DIR__ . "/play.php";
         $cmd = "php8.4 $playPhp --output $this->outputDir $args 2>&1";
         exec($cmd, $output, $exitCode);
         return $exitCode;
@@ -49,7 +49,7 @@ final class HarnessTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testSetupScenarioProducesOutputFiles(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $exitCode = $this->runPlayPhp("--scenario $scenarioPath");
         $this->assertEquals(0, $exitCode, "play.php should exit cleanly");
 
@@ -63,7 +63,7 @@ final class HarnessTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testGamedatasHasRequiredKeys(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $gamedatas = $this->readJson("gamedatas.json");
 
@@ -73,7 +73,7 @@ final class HarnessTest extends TestCase {
     }
 
     public function testGamestateHasRequiredFields(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $gamedatas = $this->readJson("gamedatas.json");
 
@@ -90,7 +90,7 @@ final class HarnessTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testNotificationsIsNonEmptyArray(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $notifs = $this->readJson("notifications.json");
 
@@ -99,7 +99,7 @@ final class HarnessTest extends TestCase {
     }
 
     public function testLastNotificationIsGameStateChange(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $notifs = $this->readJson("notifications.json");
 
@@ -112,7 +112,7 @@ final class HarnessTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testDbJsonHasRequiredKeys(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $db = $this->readJson("db.json");
 
@@ -123,7 +123,7 @@ final class HarnessTest extends TestCase {
     }
 
     public function testDbRoundTripPreservesState(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         $this->runPlayPhp("--scenario $scenarioPath");
         $db1 = $this->readJson("db.json");
 
@@ -142,20 +142,26 @@ final class HarnessTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testDebugGainXpAddsYellowCrystals(): void {
-        $scenarioPath = __DIR__ . "/Harness/plays/setup.json";
+        $scenarioPath = __DIR__ . "/plays/setup.json";
         // Run setup first
         $this->runPlayPhp("--scenario $scenarioPath");
         $baselineGamedatas = $this->readJson("gamedatas.json");
-        $baselineYellow = count(array_filter($baselineGamedatas["tokens"], fn($t) =>
-            str_starts_with($t["key"], "crystal_yellow") && str_starts_with($t["location"], "tableau_")
-        ));
+        $baselineYellow = count(
+            array_filter(
+                $baselineGamedatas["tokens"],
+                fn($t) => str_starts_with($t["key"], "crystal_yellow") && str_starts_with($t["location"], "tableau_")
+            )
+        );
 
         // Run with debug_Op_gainXp on top
         $this->runPlayPhp("--scenario $scenarioPath --debug debug_Op_gainXp");
         $gamedatas = $this->readJson("gamedatas.json");
-        $afterYellow = count(array_filter($gamedatas["tokens"], fn($t) =>
-            str_starts_with($t["key"], "crystal_yellow") && str_starts_with($t["location"], "tableau_")
-        ));
+        $afterYellow = count(
+            array_filter(
+                $gamedatas["tokens"],
+                fn($t) => str_starts_with($t["key"], "crystal_yellow") && str_starts_with($t["location"], "tableau_")
+            )
+        );
 
         $this->assertGreaterThan($baselineYellow, $afterYellow, "debug_Op_gainXp should add yellow crystals to tableau");
     }

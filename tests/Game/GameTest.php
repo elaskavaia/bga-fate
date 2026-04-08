@@ -301,8 +301,8 @@ final class GameTest extends TestCase {
             $tested[$key] = 1;
         }
 
-        $dir = dirname(dirname(__FILE__));
-        $files = glob("$dir/Operations/*.php");
+        $dir = dirname(__FILE__, 3);
+        $files = glob("$dir/modules/php/Operations/*.php");
 
         foreach ($files as $file) {
             $base = basename($file);
