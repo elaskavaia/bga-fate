@@ -25,13 +25,13 @@ deck_event|Event Deck|tableau|player|public|hidden|
 #set showtooltip=0
 limbo|Limbo||global|hidden|hidden|
 tableau|Player Area|players_panels|player|hidden|public|
-hand|Player Hand|players_panels|player|hidden|private|
-supply|Supply|thething|global|hidden|public|
+hand|Player Hand|players_panels|player|public|private|
+gsupply|Supply|thething|global|hidden|public|
 
 # Supply areas
-supply_monster|Monster Supply|supply|global|hidden|public|
-supply_crystal_green|Green Crystal Supply|supply|global|hidden|public|
-supply_crystal_red|Red Crystal Supply|supply|global|hidden|public|
-supply_crystal_yellow|Yellow Crystal Supply|supply|global|hidden|public|
-supply_die_attack|Attack Dice Supply|supply|global|hidden|public|
-supply_die_monster|Monster Die Supply|supply|global|hidden|public|
+supply_monster|Monster Supply|gsupply|global|hidden|public|
+supply_crystal_green|Green Crystal Supply|gsupply|global|hidden|public|
+supply_crystal_red|Red Crystal Supply|gsupply|global|hidden|public|
+supply_crystal_yellow|Yellow Crystal Supply|gsupply|global|hidden|public|
+supply_die_attack|Attack Dice Supply|gsupply|global|hidden|public|
+supply_die_monster|Monster Die Supply|gsupply|global|hidden|public|

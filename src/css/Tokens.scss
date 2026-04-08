@@ -24,6 +24,76 @@
   border-radius: 50%;
 }
 
+// Experience / Gold slot — top-left corner of player board
+.pboard {
+  .bucket_crystal_yellow {
+    left: 8%;
+    top: 12%;
+    width: 14%;
+    height: 15%;
+    &[data-count]:not([data-count="0"])::after {
+      background-color: #ffeb3b;
+      color: black;
+    }
+  }
+}
+
+// Red crystal bucket: damage indicator (red badge, bottom-right)
+.hero,
+.monster {
+  .bucket_crystal_red {
+    bottom: 6%;
+    right: 40%;
+
+    &[data-count]:not([data-count="0"])::after {
+      background-color: #e53935;
+    }
+  }
+}
+
+.card,
+.gsupply {
+  // Mana bucket: green badge, bottom-right corner of card
+  .bucket_crystal_green,
+  .bucket_crystal_red,
+  .bucket_crystal_yellow {
+    background-image: url("img/tokens.webp");
+    background-color: unset;
+    border-radius: unset;
+    background-size: 600% auto;
+    aspect-ratio: 1;
+    height: 32px;
+    filter: v.$dropShadow2;
+    & > .crystal {
+      visibility: hidden;
+    }
+  }
+
+  .bucket_crystal_green {
+    background-position: 40% 0%;
+  }
+  .bucket_crystal_red {
+    background-position: 0% 0%;
+  }
+  .bucket_crystal_yellow {
+    background-position: 20% 0%;
+  }
+}
+.card {
+  .bucket_crystal_green {
+    top: 1%;
+    right: 40%;
+  }
+  .bucket_crystal_red {
+    top: 1%;
+    right: 50%;
+  }
+  .bucket_crystal_yellow {
+    top: 1%;
+    left: 40%;
+  }
+}
+
 // Dice
 .die {
   background-image: url("img/dice.png");
@@ -87,15 +157,6 @@
 //   }
 // }
 
-// Miniboard in BGA player panel
-.miniboard {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  padding: 4px 0;
-}
-
 // wicon base: icon from tokens.webp sprite
 .wicon {
   display: inline-block;
@@ -106,17 +167,33 @@
   background-repeat: no-repeat;
 }
 
-// Tracker value display
-.miniboard .tracker::after {
-  content: attr(data-state);
+// Miniboard in BGA player panel
+.miniboard {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 4px 0;
   position: relative;
-  left: 12px;
-  top: 9px;
-  font-family: var(--accent-game-font);
-  font-weight: bold;
-  font-size: 14px;
-  color: white;
-  text-shadow: v.$textShadowBlack;
+
+  .counter {
+    height: 32px;
+    aspect-ratio: 1;
+  }
+
+  // Tracker value display
+  .tracker::after,
+  .counter::after {
+    content: attr(data-state);
+    position: relative;
+    left: 12px;
+    top: 9px;
+    font-family: var(--accent-game-font);
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    text-shadow: v.$textShadowBlack;
+  }
 }
 
 .wicon_strength {
@@ -164,4 +241,16 @@
   .wicon_hand {
     order: 5;
   }
+  .counter_hand {
+    order: 6;
+  }
+}
+
+.counter_hand::before {
+  content: "\f256";
+  font-family: FontAwesome;
+  font-size: 26px;
+  position: absolute;
+  top: 20%;
+  color: #535151;
 }

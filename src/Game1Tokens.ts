@@ -36,15 +36,10 @@ export interface TokenDisplayInfo {
   [key: string]: any;
 }
 
-export interface TokenMoveInfo extends Token {
+export interface TokenMoveInfo extends Token, AnimArgs {
   onStart?: (node: Element) => Promise<void> | void;
   onEnd?: (node: Element) => void;
   onClick?: (event?: any) => void;
-  animtime?: number;
-  noa?: boolean;
-  nop?: boolean;
-  place_from?: string;
-  inc?: number;
 }
 
 export interface AnimArgs {
@@ -75,7 +70,7 @@ export class Game1Tokens extends Game0Basics {
   animationManager: AnimationManager;
   animationLa: LaAnimations;
 
-  setupGame(gamedatas: any): void {
+  setupTokens(gamedatas: any): void {
     this.tokenInfoCache = {};
 
     // create the animation manager, and bind it to the `game.bgaAnimationsActive()` function
@@ -83,7 +78,8 @@ export class Game1Tokens extends Game0Basics {
       animationsActive: () => this.bgaAnimationsActive()
     });
 
-    this.animationLa = new LaAnimations();
+    this.animationLa = new LaAnimations(this.bga);
+    this.animationLa.setup();
 
     if (!this.gamedatas.tokens) {
       console.error("Missing gamadatas.tokens!");
@@ -100,9 +96,8 @@ export class Game1Tokens extends Game0Basics {
       location: "thething"
     };
     this.placeTokenSetup("limbo");
-    placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
 
-    this.setupTokens();
+    this.placeAllTokens();
     this.updateCountersSafe(this.gamedatas.counters);
   }
 
@@ -184,8 +179,8 @@ export class Game1Tokens extends Game0Basics {
     }
   }
 
-  setupTokens() {
-    console.log("Setup tokens");
+  private placeAllTokens() {
+    console.log("Place tokens");
 
     for (let loc of this.getAllLocations()) {
       this.placeTokenSetup(loc);
@@ -416,9 +411,9 @@ export class Game1Tokens extends Game0Basics {
       }
 
       const tokenNode = $(tokenId);
-      let animTime = placeInfo.animtime ?? this.defaultAnimationDuration;
+      let animTime = placeInfo.duration ?? this.defaultAnimationDuration;
 
-      if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
+      if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.duration === 0 || !tokenNode.parentNode) {
         animTime = 0;
       }
 

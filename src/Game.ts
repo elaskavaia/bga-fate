@@ -62,11 +62,11 @@ export class Game extends Game1Tokens {
         <div id="deck_monster_yellow" class="deck deck_monster"></div>
         <div id="deck_monster_red" class="deck deck_monster"></div>
       </div>
-      <div id="supply" class="supply">
+      <div id="gsupply" class="gsupply">
         <div id="supply_monster" class="supply"></div>
-        <div id="supply_crystal_green" class="supply"></div>
-        <div id="supply_crystal_red" class="supply"></div>
-        <div id="supply_crystal_yellow" class="supply"></div>
+        <div id="supply_crystal_green" class="supply bucket_crystal_green"></div>
+        <div id="supply_crystal_red" class="supply bucket_crystal_red"></div>
+        <div id="supply_crystal_yellow" class="supply bucket_crystal_yellow"></div>
         <div id="supply_die_attack" class="supply"></div>
         <div id="supply_die_monster" class="supply"></div>
       </div>
@@ -117,10 +117,18 @@ export class Game extends Game1Tokens {
       );
     }
 
-    this.setupGame(gamedatas);
+    this.setupTokens(gamedatas);
     this.setupLayoutControls();
 
     this.setupNotifications();
+
+    Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
+      const color = player.color;
+      // attach hand counter to miniboard
+      $(`miniboard_${color}`).appendChild($(`counter_hand_${color}`));
+      $(`counter_hand_${color}`).classList.add("counter_hand");
+      //"\f256"
+    });
 
     console.log("Ending game setup");
   }

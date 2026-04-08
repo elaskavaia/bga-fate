@@ -1,21 +1,15 @@
 @use "variables" as v;
 
 // Supply areas
-#supply {
+#gsupply {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
-}
-
-.supply {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  min-height: 30px;
+  & > * {
+    position: relative;
+  }
 }
 
 // Monster supply: sub-containers per type, stacked with counter
@@ -203,6 +197,7 @@
 
 // Layout controls - moved to player board by setupLocalControls
 .board_layout_controls {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,17 +296,6 @@
   background-repeat: no-repeat;
 }
 
-// Experience / Gold slot — top-left corner of player board
-.bucket_crystal_yellow {
-  left: 8%;
-  top: 12%;
-  width: 14%;
-  height: 15%;
-  &[data-count]:not([data-count="0"])::after {
-    background-color: #ffeb3b;
-    color: black;
-  }
-}
 .deck {
   position: relative;
   height: calc(v.$cardHeight + 6px);

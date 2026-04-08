@@ -166,7 +166,7 @@ Every physical game piece leaves footprints in multiple places: database, materi
    - Check if DESIGN.md already describes this element; if not, add an entry documenting:
      - Token key pattern using reverse DNS notation: `supertype_type_instance` (e.g. `monster_goblin_5`, `card_hero_1`)
      - Whether it is player-specific (keyed by color) or global
-     - Possible locations of these tokens (e.g. `supply`, `hex_X_Y`, `hand_<color>`, `tableau_<color>`)
+     - Possible locations of these tokens (e.g. `gsupply`, `hex_X_Y`, `hand_<color>`, `tableau_<color>`)
      - Possible states and what they mean
      - Whether it exists in the DB tokens table as a key, or only as a location
 

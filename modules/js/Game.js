@@ -316,8 +316,12 @@ function getParentParts(word) {
  *
  */
 class LaAnimations {
-    constructor() {
+    constructor(bga) {
+        this.bga = bga;
         this.defaultAnimationDuration = 500;
+    }
+    setup() {
+        placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
     }
     phantomMove(mobileId, newparentId, duration, mobileStyle, onEnd) {
         var mobileNode = $(mobileId);
@@ -667,13 +671,14 @@ class Game1Tokens extends Game0Basics {
         this.classSelectedAlt = "gg_selected_alt"; // for the purpose of multi-select operations with alternative node
         this.game = this;
     }
-    setupGame(gamedatas) {
+    setupTokens(gamedatas) {
         this.tokenInfoCache = {};
         // create the animation manager, and bind it to the `game.bgaAnimationsActive()` function
         this.animationManager = new BgaAnimations.Manager({
             animationsActive: () => this.bgaAnimationsActive()
         });
-        this.animationLa = new LaAnimations();
+        this.animationLa = new LaAnimations(this.bga);
+        this.animationLa.setup();
         if (!this.gamedatas.tokens) {
             console.error("Missing gamadatas.tokens!");
             this.gamedatas.tokens = {};
@@ -688,8 +693,7 @@ class Game1Tokens extends Game0Basics {
             location: "thething"
         };
         this.placeTokenSetup("limbo");
-        placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
-        this.setupTokens();
+        this.placeAllTokens();
         this.updateCountersSafe(this.gamedatas.counters);
     }
     cancelLocalStateEffects() {
@@ -765,8 +769,8 @@ class Game1Tokens extends Game0Basics {
             }
         }
     }
-    setupTokens() {
-        console.log("Setup tokens");
+    placeAllTokens() {
+        console.log("Place tokens");
         for (let loc of this.getAllLocations()) {
             this.placeTokenSetup(loc);
         }
@@ -978,8 +982,8 @@ class Game1Tokens extends Game0Basics {
                 return;
             }
             const tokenNode = $(tokenId);
-            let animTime = placeInfo.animtime ?? this.defaultAnimationDuration;
-            if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.animtime === 0 || !tokenNode.parentNode) {
+            let animTime = placeInfo.duration ?? this.defaultAnimationDuration;
+            if (this.game.bgaAnimationsActive() == false || args.noa || placeInfo.noa || placeInfo.duration === 0 || !tokenNode.parentNode) {
                 animTime = 0;
             }
             if (placeInfo.onStart)
@@ -2004,11 +2008,11 @@ class Game extends Game1Tokens {
         <div id="deck_monster_yellow" class="deck deck_monster"></div>
         <div id="deck_monster_red" class="deck deck_monster"></div>
       </div>
-      <div id="supply" class="supply">
+      <div id="gsupply" class="gsupply">
         <div id="supply_monster" class="supply"></div>
-        <div id="supply_crystal_green" class="supply"></div>
-        <div id="supply_crystal_red" class="supply"></div>
-        <div id="supply_crystal_yellow" class="supply"></div>
+        <div id="supply_crystal_green" class="supply bucket_crystal_green"></div>
+        <div id="supply_crystal_red" class="supply bucket_crystal_red"></div>
+        <div id="supply_crystal_yellow" class="supply bucket_crystal_yellow"></div>
         <div id="supply_die_attack" class="supply"></div>
         <div id="supply_die_monster" class="supply"></div>
       </div>
@@ -2043,9 +2047,16 @@ class Game extends Game1Tokens {
             const name = _("Hand (Events)");
             placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, `tableau_${myColor}`, "afterbegin");
         }
-        this.setupGame(gamedatas);
+        this.setupTokens(gamedatas);
         this.setupLayoutControls();
         this.setupNotifications();
+        Object.values(gamedatas.players).forEach((player) => {
+            const color = player.color;
+            // attach hand counter to miniboard
+            $(`miniboard_${color}`).appendChild($(`counter_hand_${color}`));
+            $(`counter_hand_${color}`).classList.add("counter_hand");
+            //"\f256"
+        });
         console.log("Ending game setup");
     }
     /** Populate timetrack slots inside the timetrack container (created by token system). */

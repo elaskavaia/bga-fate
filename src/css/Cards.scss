@@ -121,16 +121,6 @@ $hero-sprites: (
   background-position: 100% 0%;
 }
 
-// Mana bucket: green badge, bottom-right corner of card
-.bucket_crystal_green {
-  bottom: 4%;
-  right: 4%;
-
-  &[data-count]:not([data-count="0"])::after {
-    background-color: #43a047;
-  }
-}
-
 // Display area for monster cards during reinforcement
 #display_monsterturn {
   position: relative;

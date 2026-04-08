@@ -13,6 +13,10 @@ import { placeHtml, StringProperties } from "./Game0Basics";
 
 export class LaAnimations {
   public defaultAnimationDuration: number = 500;
+  constructor(protected bga: Bga) {}
+  setup() {
+    placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
+  }
   phantomMove(
     mobileId: ElementOrId,
     newparentId: ElementOrId,

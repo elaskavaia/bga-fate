@@ -125,6 +125,75 @@
   border-radius: 50%;
 }
 
+.pboard .bucket_crystal_yellow {
+  left: 8%;
+  top: 12%;
+  width: 14%;
+  height: 15%;
+}
+.pboard .bucket_crystal_yellow[data-count]:not([data-count="0"])::after {
+  background-color: #ffeb3b;
+  color: black;
+}
+
+.hero .bucket_crystal_red,
+.monster .bucket_crystal_red {
+  bottom: 6%;
+  right: 40%;
+}
+.hero .bucket_crystal_red[data-count]:not([data-count="0"])::after,
+.monster .bucket_crystal_red[data-count]:not([data-count="0"])::after {
+  background-color: #e53935;
+}
+
+.card .bucket_crystal_green,
+.card .bucket_crystal_red,
+.card .bucket_crystal_yellow,
+.gsupply .bucket_crystal_green,
+.gsupply .bucket_crystal_red,
+.gsupply .bucket_crystal_yellow {
+  background-image: url("img/tokens.webp");
+  background-color: unset;
+  border-radius: unset;
+  background-size: 600% auto;
+  aspect-ratio: 1;
+  height: 32px;
+  filter: drop-shadow(2px 2px 3px black);
+}
+.card .bucket_crystal_green > .crystal,
+.card .bucket_crystal_red > .crystal,
+.card .bucket_crystal_yellow > .crystal,
+.gsupply .bucket_crystal_green > .crystal,
+.gsupply .bucket_crystal_red > .crystal,
+.gsupply .bucket_crystal_yellow > .crystal {
+  visibility: hidden;
+}
+.card .bucket_crystal_green,
+.gsupply .bucket_crystal_green {
+  background-position: 40% 0%;
+}
+.card .bucket_crystal_red,
+.gsupply .bucket_crystal_red {
+  background-position: 0% 0%;
+}
+.card .bucket_crystal_yellow,
+.gsupply .bucket_crystal_yellow {
+  background-position: 20% 0%;
+}
+
+.card .bucket_crystal_green {
+  top: 1%;
+  right: 40%;
+}
+.card .bucket_crystal_red {
+  top: 1%;
+  right: 50%;
+}
+.card .bucket_crystal_yellow {
+  top: 1%;
+  left: 40%;
+}
+
 .die {
   background-image: url("img/dice.png");
   aspect-ratio: 1;
@@ -213,14 +282,6 @@
   line-height: 1;
 }
 
-.miniboard {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  padding: 4px 0;
-}
-
 .wicon {
   display: inline-block;
   height: 32px;
@@ -230,7 +291,20 @@
   background-repeat: no-repeat;
 }
 
-.miniboard .tracker::after {
+.miniboard {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  padding: 4px 0;
+  position: relative;
+}
+.miniboard .counter {
+  height: 32px;
+  aspect-ratio: 1;
+}
+.miniboard .tracker::after,
+.miniboard .counter::after {
   content: attr(data-state);
   position: relative;
   left: 12px;
@@ -292,6 +366,18 @@
 }
 .miniboard .wicon_hand {
   order: 5;
+}
+.miniboard .counter_hand {
+  order: 6;
+}
+
+.counter_hand::before {
+  content: "\f256";
+  font-family: FontAwesome;
+  font-size: 26px;
+  position: absolute;
+  top: 20%;
+  color: #535151;
 }
 
 /**
@@ -363,14 +449,6 @@
   line-height: 1.4em;
   text-align: center;
   border-radius: 50%;
-}
-
-.bucket_crystal_red {
-  bottom: 6%;
-  right: 40%;
-}
-.bucket_crystal_red[data-count]:not([data-count="0"])::after {
-  background-color: #e53935;
 }
 
 .monster.monster_draugr {
@@ -950,14 +1028,6 @@
   background-position: 100% 0%;
 }
 
-.bucket_crystal_green {
-  bottom: 4%;
-  right: 4%;
-}
-.bucket_crystal_green[data-count]:not([data-count="0"])::after {
-  background-color: #43a047;
-}
-
 #display_monsterturn {
   position: relative;
   display: flex;
@@ -973,21 +1043,15 @@
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
-#supply {
+#gsupply {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px;
 }
-
-.supply {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  min-height: 30px;
+#gsupply > * {
+  position: relative;
 }
 
 #supply_monster {
@@ -1261,6 +1325,7 @@
 }
 
 .board_layout_controls {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1347,17 +1412,6 @@
   background-size: 571% auto;
   background-position: 58% 0%;
   background-repeat: no-repeat;
-}
-
-.bucket_crystal_yellow {
-  left: 8%;
-  top: 12%;
-  width: 14%;
-  height: 15%;
-}
-.bucket_crystal_yellow[data-count]:not([data-count="0"])::after {
-  background-color: #ffeb3b;
-  color: black;
 }
 
 .deck {

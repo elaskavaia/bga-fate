@@ -71,17 +71,6 @@
   }
 }
 
-// Red crystal bucket: damage indicator (red badge, bottom-right)
-
-.bucket_crystal_red {
-  bottom: 6%;
-  right: 40%;
-
-  &[data-count]:not([data-count="0"])::after {
-    background-color: #e53935;
-  }
-}
-
 // Sprite positions: columns = rank3 (0%), rank2 (50%), rank1 (100%); rows = faction
 // Row 0 = dead, Row 1 = trollkin, Row 2 = firehorde
 .monster.monster_draugr {
