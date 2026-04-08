@@ -3141,6 +3141,20 @@ class Material {
     "tm_red_skull" => [ 
         "name" => clienttranslate("Charge"),
 ],
+// #Crystals on characters
+    "att_red" => [ 
+        "name" => clienttranslate("Damage"),
+],
+    "att_yellow" => [ 
+        "name" => clienttranslate("XP"),
+],
+    "att_green" => [ 
+        "name" => clienttranslate("Tag"),
+],
+    "upgrade_cost" => [ 
+        "name" => clienttranslate("Upgrade Cost"),
+        "tooltip" => clienttranslate("Shows current upgrade cost (max. 10)"),
+],
             /* --- gen php end strings_material --- */
             /* --- gen php begin time_material --- */
     "slot_timetrack_1_1" => [ 

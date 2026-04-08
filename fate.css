@@ -330,11 +330,27 @@
 .miniboard .wicon_hand {
   order: 5;
 }
+.miniboard .tracker_hand {
+  display: none;
+}
+.miniboard .counter_hand::after {
+  content: attr(data-state) "/" attr(data-limit);
+  left: 8px;
+}
 .miniboard .bucket_crystal_yellow {
   order: 6;
 }
-.miniboard .counter_hand {
-  order: 7;
+.miniboard .upgrade_cost {
+  order: 8;
+  background-color: unset;
+}
+.miniboard .upgrade_cost::before {
+  content: "\f062";
+  font-family: FontAwesome;
+  font-size: 32px;
+  position: absolute;
+  top: 5%;
+  color: #535151;
 }
 
 .wicon_strength {
@@ -371,15 +387,6 @@
 .wicon_mana,
 .wicon_green {
   background-position: 100% 0%;
-}
-
-.counter_hand::before {
-  content: "\f256";
-  font-family: FontAwesome;
-  font-size: 26px;
-  position: absolute;
-  top: 20%;
-  color: #535151;
 }
 
 /**

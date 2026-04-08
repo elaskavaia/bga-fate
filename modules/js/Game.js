@@ -2054,9 +2054,17 @@ class Game extends Game1Tokens {
         Object.values(gamedatas.players).forEach((player) => {
             const color = player.color;
             // attach hand counter to miniboard
-            $(`miniboard_${color}`).appendChild($(`counter_hand_${color}`));
-            $(`counter_hand_${color}`).classList.add("counter_hand");
-            //"\f256"
+            const handCounter = $(`counter_hand_${color}`);
+            $(`miniboard_${color}`).appendChild(handCounter);
+            handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
+            const handMaxCounter = $(`tracker_hand_${color}`);
+            if (handMaxCounter)
+                handCounter.dataset.limit = handMaxCounter.dataset.state;
+            // marker tracking cost of upgrade
+            const marker = $(`marker_${color}_3`);
+            $(`miniboard_${color}`).appendChild(marker);
+            marker.classList.add("bucket", "upgrade_cost");
+            this.updateTooltip("upgrade_cost", marker);
         });
         console.log("Ending game setup");
     }
@@ -2112,12 +2120,17 @@ class Game extends Game1Tokens {
         const tokenKey = tokenInfo.key;
         // Redirect tracker tokens to miniboard in player panel
         if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
-            const color = loc.replace("tableau_", "");
+            const color = getPart(loc, 1);
             result.location = `miniboard_${color}`;
             result.noa = true;
+            if (tokenKey.startsWith("tracker_hand")) {
+                const handCounter = $(`counter_hand_${color}`);
+                if (handCounter)
+                    handCounter.dataset.limit = String(tokenInfo.state);
+            }
         }
-        // Stack monsters by type in supply: create sub-container per monster type
-        if (loc === "supply_monster") {
+        else if (loc === "supply_monster") {
+            // Stack monsters by type in supply: create sub-container per monster type
             const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
             if (monsterType === "monster_legend") {
                 // Legends: place directly on map_wrapper, no piling

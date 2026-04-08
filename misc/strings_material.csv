@@ -1,4 +1,4 @@
-id|name
+id|name|tooltip
 
 # Terrain types
 forest|Forest
@@ -42,3 +42,11 @@ tm_red_axes|Red Reinforcements
 tm_yellow_shield|Yellow Shield
 tm_red_shield|Red Shield
 tm_red_skull|Charge
+
+
+#Crystals on characters
+att_red|Damage
+att_yellow|XP
+att_green|Tag
+
+upgrade_cost|Upgrade Cost|Shows current upgrade cost (max. 10)
