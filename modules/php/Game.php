@@ -323,6 +323,14 @@ class Game extends Base {
             $health = (int) $this->getRulesFor($context, "health", 0);
             $damage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $context));
             return $health - $damage;
+        } elseif ($x === "closerToGrimheim") {
+            $heroId = $this->getHeroTokenId($owner);
+            $heroHex = $this->hexMap->getCharacterHex($heroId);
+            $contextHex = $this->tokens->getTokenLocation($context);
+            $distMap = $this->hexMap->getDistanceMapToGrimheim();
+            $heroDist = $distMap[$heroHex] ?? PHP_INT_MAX;
+            $monsterDist = $distMap[$contextHex] ?? PHP_INT_MAX;
+            return (int) ($monsterDist < $heroDist);
         }
 
         //id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor
@@ -579,47 +587,9 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_Op_drawEvent() {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Fill hand to 4 cards to test the discard-or-skip choice
-        $deck = $this->tokens->getTokensOfTypeInLocation("card", "deck_event_{$color}");
-        $i = count($this->tokens->getTokensOfTypeInLocation("card", "hand_{$color}"));
-        foreach ($deck as $cardId => $info) {
-            if ($i >= 4) {
-                break;
-            }
-            $this->tokens->dbSetTokenLocation($cardId, "hand_{$color}");
-            $i++;
-        }
-        $this->machine->push("drawEvent", $color);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
     function debug_draw(string $card) {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->tokens->dbSetTokenLocation($card, "hand_{$color}");
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_dealDamage() {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Place 2 goblins adjacent to hero for testing
-        $heroId = $this->getHeroTokenId($color);
-        $heroHex = $this->hexMap->getCharacterHex($heroId);
-        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
-        $placed = 0;
-        $monsters = ["monster_goblin_1", "monster_goblin_2"];
-        foreach ($adjHexes as $hex) {
-            if ($placed >= 2) {
-                break;
-            }
-            if (!$this->hexMap->isOccupied($hex)) {
-                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
-                $placed++;
-            }
-        }
-        $this->hexMap->invalidateOccupancy();
-        $this->machine->push("2dealDamage", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
@@ -641,7 +611,32 @@ class Game extends Base {
             }
         }
         $this->hexMap->invalidateOccupancy();
-        $this->machine->push("killMonster(adj,'rank<=2')", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_c_sureshotII() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $cardId = "card_ability_1_4";
+        // Ensure Sure Shot II is on tableau with 4 mana
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
+        $this->effect_moveCrystals($heroId, "green", 4, $cardId);
+        // Place monsters in range
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        $monsters = ["monster_goblin_1", "monster_brute_1"];
+        $placed = 0;
+        foreach ($adjHexes as $hex) {
+            if ($placed >= 2) {
+                break;
+            }
+            if (!$this->hexMap->isOccupied($hex)) {
+                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
+                $placed++;
+            }
+        }
+        $this->hexMap->invalidateOccupancy();
+        $this->machine->push("c_sureshotII", $color, ["card" => $cardId]);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
@@ -654,69 +649,6 @@ class Game extends Base {
     function debug_Op_gainXp() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("2gainXp", $color);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_playEvent(): void {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Put the Rest card (2heal(self)) in hand for easy testing
-        $this->tokens->dbSetTokenLocation("card_event_1_27", "hand_{$color}");
-        // Add 3 damage to hero so heal has something to remove
-        $heroId = $this->getHeroTokenId($color);
-        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
-        $this->machine->push("playEvent", $color);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_c_supfire(): void {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Place Suppressive Fire I on tableau
-        $this->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_{$color}");
-        // Place monsters within range 3 of hero start (hex_8_9)
-        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_8");
-        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_9");
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_gainDamage(): void {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Place Helmet (durability 3) on tableau
-        $cardId = "card_equip_1_21";
-        $this->tokens->dbSetTokenLocation($cardId, "tableau_{$color}");
-        // Add 1 existing damage so we can see it accumulate
-        $heroId = $this->getHeroTokenId($color);
-        $this->effect_moveCrystals($heroId, "red", 1, $cardId, ["message" => ""]);
-        $this->machine->push("gainDamage", $color, ["card" => $cardId]);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_useEquipment(): void {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $heroId = $this->getHeroTokenId($color);
-        // Place Leather Purse (dur 3, gainDamage:2heal(adj)) and Throwing Axes (dur 2, gainDamage:3roll(adj))
-        $this->tokens->dbSetTokenLocation("card_equip_1_19", "tableau_{$color}");
-        $this->tokens->dbSetTokenLocation("card_equip_1_17", "tableau_{$color}");
-        // Add damage to hero so heal(adj) is not void
-        $this->effect_moveCrystals($heroId, "red", 3, $heroId, ["message" => ""]);
-        // Place a goblin adjacent so roll(adj) has a target
-        $heroHex = $this->hexMap->getCharacterHex($heroId);
-        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
-        $this->tokens->dbSetTokenLocation("monster_goblin_1", $adjHexes[0]);
-        $this->hexMap->invalidateOccupancy();
-        //$this->machine->push("useEquipment", $color);
-        $this->gamestate->jumpToState(StateConstants::STATE_PLAYER_TURN);
-    }
-
-    function debug_Op_c_arrows(): void {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        // Move hero to hex_7_5 (plains), adjacent to forest (hex_7_4, hex_8_4) and plains (hex_6_5)
-        $heroId = $this->getHeroTokenId($color);
-        $this->tokens->dbSetTokenLocation($heroId, "hex_7_5", 0, "");
-        // Place goblin on forest hex and brute on plains hex
-        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_4", 0, "");
-        $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_5", 0, "");
-        $this->hexMap->invalidateOccupancy();
-        $this->machine->push("c_arrows", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

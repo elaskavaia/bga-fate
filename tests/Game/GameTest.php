@@ -511,6 +511,41 @@ final class GameTest extends TestCase {
         $this->assertEquals(0, $result);
     }
 
+    public function testCloserToGrimheimTrue(): void {
+        $this->setupHeroAndTokens();
+        // Hero at hex_11_8, place goblin closer to Grimheim (hex_9_8 is nearer)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_9_8");
+        $result = $this->game->evaluateExpression("closerToGrimheim", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(1, $result);
+    }
+
+    public function testCloserToGrimheimFalse(): void {
+        $this->setupHeroAndTokens();
+        // Hero at hex_11_8, place goblin farther from Grimheim
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        $result = $this->game->evaluateExpression("closerToGrimheim", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(0, $result);
+    }
+
+    public function testCloserToGrimheimSameDistance(): void {
+        $this->setupHeroAndTokens();
+        // Place goblin at same distance as hero — should be false (strictly closer)
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_10_8");
+        $heroDist = $this->game->hexMap->getDistanceMapToGrimheim()["hex_11_8"];
+        $monsterDist = $this->game->hexMap->getDistanceMapToGrimheim()["hex_10_8"];
+        $expected = ($monsterDist < $heroDist) ? 1 : 0;
+        $result = $this->game->evaluateExpression("closerToGrimheim", PCOLOR, "monster_goblin_1");
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testCloserToGrimheimInCompoundExpression(): void {
+        $this->setupHeroAndTokens();
+        // Goblin (rank=1) closer to Grimheim
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_9_8");
+        $result = $this->game->evaluateExpression("rank<=2 and closerToGrimheim", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(1, $result);
+    }
+
     // -------------------------------------------------------------------------
     // getGameProgression
     // -------------------------------------------------------------------------

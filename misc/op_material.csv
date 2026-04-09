@@ -84,6 +84,7 @@ discardEvent|Discard Event
 c_supfire|Suppressive Fire
 c_arrows|Burning Arrows
 c_nailed|Nailed Together
+c_sureshotII|Sure Shot II
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger

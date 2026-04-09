@@ -440,6 +440,10 @@ class Material {
         "type" => "c_nailed",
         "name" => clienttranslate("Nailed Together"),
 ],
+    "Op_c_sureshotII" => [ 
+        "type" => "c_sureshotII",
+        "name" => clienttranslate("Sure Shot II"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -3570,7 +3574,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Sure Shot II"),
         "mana" => 2,
-        "r" => "custom",
+        "r" => "c_sureshotII",
         "effect" => "2-4[MANA]: Deal that much damage to a monster within attack range.",
 ],
 // # Abilities - Alva (hno=2)
@@ -4570,7 +4574,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Back Down"),
         "count" => 2,
-        "r" => "killMonster(inRange,'rank<=2')",
+        "r" => "killMonster(inRange,'rank<=2 and closerToGrimheim')",
         "effect" => "Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.",
         "flavour" => "Let's call it a warning shot.",
 ],
@@ -4594,7 +4598,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Limber Bow"),
         "count" => 2,
-        "r" => "custom",
+        "r" => "2gainAtt(range)",
         "effect" => "You have attack range +2 this turn.",
         "flavour" => "Twannng!",
 ],
@@ -4705,7 +4709,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Back Down!"),
         "count" => 2,
-        "r" => "killMonster(inRange,'rank<=2')",
+        "r" => "killMonster(inRange,'rank<=2 and closerToGrimheim')",
         "effect" => "Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.",
         "flavour" => "Let's call it a warning shot.",
 ],

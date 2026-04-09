@@ -655,6 +655,97 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertGreaterThan(0, $this->countDamage($this->heroId), "Hero should have taken damage from monster attack");
     }
 
+    // --- Sure Shot I (card_ability_1_3) ---
+
+    public function testSureShotISpendsManaAndDealsDamage(): void {
+        $sureShotId = "card_ability_1_3";
+
+        // Add 3 mana to Sure Shot I (it starts with 1 from setup, add 2 more)
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $sureShotId, ["message" => ""]);
+        $this->assertEquals(3, $this->countTokens("crystal_green", $sureShotId));
+
+        // Place a goblin within attack range (Bjorn range=2 with First Bow)
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_6_9"; // range 2 from hero start hex_8_9
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Sure Shot I should be offered as a free action
+        $this->assertValidTarget($sureShotId);
+        $this->respond($sureShotId);
+
+        // spendMana auto-resolves (only one card with enough mana)
+        // dealDamage auto-resolves (only one monster in range) → goblin killed (health=2, 3 damage)
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+
+        // Mana should be spent (3 → 0)
+        $this->assertEquals(0, $this->countTokens("crystal_green", $sureShotId));
+    }
+
+    public function testSureShotINotOfferedWithoutEnoughMana(): void {
+        $sureShotId = "card_ability_1_3";
+
+        // Sure Shot I starts with 1 mana from setup, needs 3
+        $this->assertEquals(1, $this->countTokens("crystal_green", $sureShotId));
+
+        // Place a goblin in range
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
+
+        // Sure Shot I should NOT be a valid target (insufficient mana)
+        $this->assertNotValidTarget($sureShotId, "Sure Shot I should not be offered with only 1 mana");
+    }
+
+    public function testSureShotINotOfferedWithoutMonstersInRange(): void {
+        $sureShotId = "card_ability_1_3";
+
+        // Add 3 mana
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $sureShotId, ["message" => ""]);
+
+        // No monsters on map (clearMonstersFromMap called in setUp)
+
+        // Sure Shot I should NOT be valid (no monsters in range)
+        $this->assertNotValidTarget($sureShotId, "Sure Shot I should not be offered with no monsters in range");
+    }
+
+    // --- Sure Shot II (card_ability_1_4) ---
+
+    public function testSureShotIISelectMonsterThenMana(): void {
+        $color = $this->playerColor();
+        $sureShotId = "card_ability_1_4";
+
+        // Swap Sure Shot I for Sure Shot II on tableau
+        $this->game->tokens->moveToken("card_ability_1_3", "limbo");
+        $this->game->tokens->dbSetTokenLocation($sureShotId, "tableau_$color", 0);
+
+        // Add 4 mana to Sure Shot II
+        $this->game->effect_moveCrystals($this->heroId, "green", 4, $sureShotId, ["message" => ""]);
+
+        // Place a brute within attack range (Bjorn range=2 with First Bow)
+        // Brute health=3
+        $brute = "monster_brute_1";
+        $bruteHex = "hex_6_9"; // range 2 from hero start hex_8_9
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+
+        // Sure Shot II should be offered as a free action
+        $this->assertValidTarget($sureShotId);
+        $this->respond($sureShotId);
+
+        // Step 1 auto-resolves (only one monster in range)
+        // Step 2: choose mana amount — brute health=3, so max=3
+        $args = $this->getOpArgs();
+        $this->assertEquals("c_sureshotII", $args["type"] ?? "");
+        $this->assertValidTarget("choice_2");
+        $this->assertValidTarget("choice_3");
+        $this->assertNotValidTarget("choice_4");
+        $this->respond("choice_3");
+
+        // spendMana + dealDamage auto-resolve → brute killed (health=3, 3 damage)
+        $this->assertEquals("supply_monster", $this->tokenLocation($brute));
+
+        // Mana should be spent (4 → 1)
+        $this->assertEquals(1, $this->countTokens("crystal_green", $sureShotId));
+    }
+
     public function testStitchingIIHealsTwoDamage(): void {
         $color = $this->playerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_8", "tableau_$color", 0);
@@ -662,5 +753,126 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->respond("card_ability_1_8");
         $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
+
+    // --- Rest (card_event_1_27) ---
+
+    public function testRestHeals2DamageFromBjorn(): void {
+        $restCard = "card_event_1_27_1";
+        $color = $this->playerColor();
+        // Put Rest in hand and add 3 damage to hero
+        $this->seedHand($restCard, $color);
+        $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
+        $this->assertEquals(3, $this->countDamage($this->heroId));
+
+        // Play Rest — r=2heal(self), auto-resolves (self target)
+        $this->assertValidTarget($restCard);
+        $this->respond($restCard);
+
+        // Hero should have 1 damage (3 - 2 healed)
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
+
+    public function testRestNotOfferedWhenNoDamage(): void {
+        $restCard = "card_event_1_27_1";
+        $color = $this->playerColor();
+        $this->seedHand($restCard, $color);
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+
+        // Rest should NOT be a valid target (no damage to heal)
+        $this->assertNotValidTarget($restCard, "Rest should not be offered when hero has no damage");
+    }
+
+    // --- Back Down (card_event_1_29) ---
+
+    public function testBackDownKillsMonsterCloserToGrimheim(): void {
+        $backDown = "card_event_1_29_1";
+        $color = $this->playerColor();
+        $this->seedHand($backDown, $color);
+
+        // Move hero away from Grimheim so monsters can be closer
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Place a goblin (rank 1) closer to Grimheim than hero
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_7_9"; // closer to Grimheim than hex_5_9
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Play Back Down
+        $this->assertValidTarget($backDown);
+        $this->respond($backDown);
+
+        // killMonster is skippable so doesn't auto-resolve — select target
+        $args = $this->getOpArgs();
+        $this->assertEquals("killMonster", $args["type"] ?? "");
+        $this->assertValidTarget($goblinHex);
+        $this->respond($goblinHex);
+
+        // Goblin should be dead
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+    }
+
+    public function testBackDownNotOfferedWhenMonsterFartherFromGrimheim(): void {
+        $backDown = "card_event_1_29_1";
+        $color = $this->playerColor();
+        $this->seedHand($backDown, $color);
+
+        // Hero in Grimheim (hex_8_9), goblin farther away
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_5_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Back Down should NOT be valid (goblin is farther from Grimheim than hero)
+        $this->assertNotValidTarget($backDown, "Back Down should not be offered when no monster is closer to Grimheim");
+    }
+
+    public function testBackDownExcludesRank3(): void {
+        $backDown = "card_event_1_29_1";
+        $color = $this->playerColor();
+        $this->seedHand($backDown, $color);
+
+        // Move hero away from Grimheim
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Place a troll (rank 3) closer to Grimheim — should not be targetable
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        // Back Down should NOT be valid (troll is rank 3)
+        $this->assertNotValidTarget($backDown, "Back Down should not be offered for rank 3 monsters");
+    }
+
+    // --- Limber Bow (card_event_1_32) ---
+
+    public function testLimberBowAddsRange2AndResetsAfterTurn(): void {
+        $limberBow = "card_event_1_32_1";
+        $color = $this->playerColor();
+        $this->seedHand($limberBow, $color);
+
+        $hero = $this->game->getHero($color);
+        $baseRange = $hero->getAttackRange();
+
+        // Play Limber Bow — auto-resolves (no target needed)
+        $this->assertValidTarget($limberBow);
+        $this->respond($limberBow);
+
+        // Range should be +2
+        $this->assertEquals($baseRange + 2, $hero->getAttackRange());
+
+        // Do two actions and end turn
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip(); // skip free actions → end turn → monster turn
+
+        // Wait for next player turn
+        $state = $this->getStateArgs();
+        $this->assertEquals("PlayerTurn", $state["name"]);
+
+        // Range should be back to base
+        $hero = $this->game->getHero($color);
+        $this->assertEquals($baseRange, $hero->getAttackRange());
     }
 }

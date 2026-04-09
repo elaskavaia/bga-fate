@@ -29,7 +29,7 @@ See CLAUDE.md for project overview
 [x] Phase 3: Monster system with one monster type (spawning + movement done)
 [x] Phase 4: Combat and damage system
 [x] Phase 5a: Hero attribute trackers (strength, range, move, health)
-[ ] Phase 5: Equipment, quests, and upgrades
+[~] Phase 5: Equipment, quests, and upgrades — equipment activation done, quests not tracked yet
 [x] Phase 6: Full monster turn (movement, attack, reinforcements)
 [x] Phase 7: Add remaining monster types and legends (all 3 factions done in Iter 2)
 [x] Phase 8: Add remaining heroes
@@ -357,10 +357,10 @@ See CLAUDE.md for project overview
 **Goal**: Equipment and abilities can be activated as free actions. Equipment has durability cost. Abilities cost mana. Hero card effect applies during relevant actions.
 
 ### Server
-[ ] Equipment: once-per-turn activation
-[ ] Ability: once-per-turn activation
+[x] Equipment: once-per-turn activation — useAbility/useEquipment check card state==1, reset in turnEnd
+[x] Ability: once-per-turn activation — same mechanism
 [X] Ability: costs mana
-[ ] Hero card effect applies during relevant actions
+[x] Hero card effect applies during relevant actions — trigger system handles on=roll etc, hero cards in candidate list
 [x] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
 [x] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 
@@ -374,12 +374,12 @@ See CLAUDE.md for project overview
 **Goal**: Equipment cards have quests. Completing quests unlocks new equipment. Upgrade system (spend XP to gain abilities or improve cards).
 
 ### Server
-[ ] Quest definitions on equipment cards
+[~] Quest definitions on equipment cards — quest column exists in card_equip_material.csv but no gameplay tracking
 [ ] Quest progress tracking
 [ ] Quest completion → new equipment active
 [x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
-[ ] Mana generation at end of turn
+[x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
 
 ### Client
 [ ] Show damage and mana on cards as crystal counters (unlike hero/monster damage buckets which are icons)
@@ -518,32 +518,38 @@ Hero, Abilities and Equipment:
 [x] card_ability_1_8 Stitching II — heal 2
 [x] card_ability_1_5 Suppressive Fire I — prevent rank 1-2 monster within range 3 from moving (on=monsterMove trigger)
 [x] card_ability_1_6 Suppressive Fire II — prevent any monster within range 3 from moving (on=monsterMove trigger)
-[ ] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
-[ ] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
+[x] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
+[x] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
 
-### Equipment Cards (use)
-[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus)
-[ ] card_equip_1_21 Helmet — durability: prevent 1 damage
-[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage
-[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent
-[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent
-[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack
-[ ] card_equip_1_20 Black Arrows — custom: spend arrow to add 3 damage
-[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent
-[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage
-[ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin
 
 ### Event Cards
-[ ] card_event_1_27 Rest — heal 2 from Bjorn
-[ ] card_event_1_29 Back Down — kill rank 1-2 monster in range
-[x] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest)
-[ ] card_event_1_32 Limber Bow — custom: attack range +2 this turn
-[ ] card_event_1_26 Master Shot — custom: add 2 damage to attack
-[x] card_event_1_31 Perfect Aim — rerollMisses
-[ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune
-[ ] card_event_1_25 Prey — custom: mark monster for +2 XP
-[ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location
-[ ] card_event_1_30 Sewing — custom: remove 1 damage from each card
+[x] card_event_1_27 Rest — heal 2 from Bjorn, r=2heal(self), has tests
+[x] card_event_1_29 Back Down — kill rank 1-2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
+[x] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest), r=c_arrows
+[x] card_event_1_31 Perfect Aim — rerollMisses, r=rerollMisses
+<!-- r=custom — needs custom operation implementation -->
+[x] card_event_1_32 Limber Bow — attack range +2 this turn, r=2gainAtt(range)
+[ ] card_event_1_26 Master Shot — custom: add 2 damage to attack, r=custom
+[ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune, r=custom
+[ ] card_event_1_25 Prey — custom: mark monster for +2 XP, r=custom
+[ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location, r=custom
+[ ] card_event_1_30 Sewing — custom: remove 1 damage from each card, r=custom
+
+### Equipment Cards (use)
+<!-- r=passive: no r field, just stat bonuses — needs validation that stats apply correctly -->
+[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
+<!-- r=gainDamage:effect — standard ops, needs integration test -->
+[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
+[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
+[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=gainDamage:2heal(adj), has tests
+[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=gainDamage:3roll(adj), has tests
+<!-- r=custom — needs custom operation implementation -->
+[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack, r=gainDamage:custom
+[ ] card_equip_1_20 Black Arrows — custom: spend arrow to add 3 damage, r=custom
+[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent, r=custom
+[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage, r=custom
+[ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin, r=custom
+
 
 ---
 

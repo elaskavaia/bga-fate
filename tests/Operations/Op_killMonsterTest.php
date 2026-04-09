@@ -33,7 +33,7 @@ final class Op_killMonsterTest extends TestCase {
     public function testAdjacentMonsterIsTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -53,7 +53,7 @@ final class Op_killMonsterTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         /** @var Op_killMonster */
         $op = $this->game->machine->instanciateOperation("killMonster(inRange,'rank<=2')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_13_7", $moves);
     }
 
@@ -71,7 +71,7 @@ final class Op_killMonsterTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         /** @var Op_killMonster */
         $op = $this->game->machine->instanciateOperation("killMonster(adj,'rank<=2')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -94,7 +94,7 @@ final class Op_killMonsterTest extends TestCase {
         $this->game->tokens->moveToken("crystal_red_1", "monster_brute_1");
         /** @var Op_killMonster */
         $op = $this->game->machine->instanciateOperation("killMonster(adj,'healthRem<=2')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -103,7 +103,7 @@ final class Op_killMonsterTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         /** @var Op_killMonster */
         $op = $this->game->machine->instanciateOperation("killMonster(adj,'healthRem<=2')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 

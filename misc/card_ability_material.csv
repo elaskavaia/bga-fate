@@ -19,7 +19,7 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 5|1|Suppressive Fire I||||c_supfire('rank<=2')|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
 6|1|Suppressive Fire II||||c_supfire|monsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
 3|1|Sure Shot I|||1|3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
-4|1|Sure Shot II|||2|custom||2-4[MANA]: Deal that much damage to a monster within attack range.|
+4|1|Sure Shot II|||2|c_sureshotII||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
 13|2|Flexibility I|||1|custom||1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.|
 14|2|Flexibility II|||2|custom||1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.|

@@ -53,15 +53,11 @@ class Op_dealDamage extends CountableOperation {
     function getPossibleMoves(): array {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget => ["q" => Material::RET_OK]];
+            return [$presetTarget];
         }
         $hero = $this->game->getHero($this->getOwner());
         $hexes = $hero->getMonsterHexesInRange($this->getRange(), fn($mId) => $this->matchesFilter($mId));
-        $targets = [];
-        foreach ($hexes as $hexId) {
-            $targets[$hexId] = ["q" => Material::RET_OK];
-        }
-        return $targets;
+        return $hexes;
     }
 
     protected function getDamageAmount(string $defenderId): int {

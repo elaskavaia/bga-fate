@@ -32,14 +32,14 @@ final class Op_dealDamageTest extends TestCase {
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
     public function testAdjacentMonsterIsTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -47,7 +47,7 @@ final class Op_dealDamageTest extends TestCase {
         // hex_13_7 is 2 hexes away from hex_11_8 — out of range 1
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
@@ -55,7 +55,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertCount(2, $moves);
     }
 
@@ -64,7 +64,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(inRange)", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_13_7", $moves);
     }
 
@@ -73,7 +73,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_14_6");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(inRange3)", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_14_6", $moves);
     }
 
@@ -82,7 +82,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
@@ -94,7 +94,7 @@ final class Op_dealDamageTest extends TestCase {
         // Default filter is "true" — should match any monster
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->createOp(); // dealDamage with no filter param
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -102,7 +102,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj,'not_legend')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
@@ -110,7 +110,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj,'not_legend')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -119,7 +119,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -127,7 +127,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
 
@@ -136,14 +136,14 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("dealDamage(adj,'rank==3 or legend')", PCOLOR);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsTarget();
         $this->assertEmpty($moves);
     }
 
     public function testAdjacentHeroNotTarget(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
         $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertArrayNotHasKey("hex_12_8", $moves);
     }
 
@@ -216,7 +216,7 @@ final class Op_dealDamageTest extends TestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
         /** @var Op_dealDamage */
         $op = $this->game->machine->instanciateOperation("2dealDamage", PCOLOR, ["target" => "hex_12_8"]);
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
         $this->assertCount(1, $moves);
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
