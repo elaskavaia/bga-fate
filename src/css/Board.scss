@@ -405,3 +405,15 @@
   width: 100%;
   @include v.vertical-title;
 }
+
+// Battle display (dice rolled during attack) — overlays map top center
+#display_battle {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 32px;
+}

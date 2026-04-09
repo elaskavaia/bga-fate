@@ -1,29 +1,6 @@
 @use "variables" as v;
 @use "sass:math";
 
-// crystals
-
-.crystal_yellow {
-  background-color: #ffeb3b;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.crystal_red {
-  background-color: #e53935;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.crystal_green {
-  background-color: #43a047;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
 .card,
 .gsupply,
 .miniboard {
@@ -38,9 +15,6 @@
     aspect-ratio: 1;
     height: 32px;
     filter: v.$dropShadow2;
-    & > .crystal {
-      visibility: hidden;
-    }
   }
 
   .bucket_crystal_green {
@@ -53,7 +27,28 @@
     background-position: 20% 0%;
   }
 }
+.gsupply {
+  .crystal {
+    // this is to allow pile counter
+    visibility: hidden;
+    display: block;
+  }
+}
+.miniboard,
 .card {
+  .bucket > * {
+    display: none;
+  }
+}
+.card {
+  .bucket {
+    position: absolute;
+    &::after {
+      position: absolute;
+      top: 9px;
+      left: 12px;
+    }
+  }
   .bucket_crystal_green {
     top: 1%;
     right: 40%;
@@ -88,18 +83,6 @@
   .die_monster[data-state="#{$i}"] {
     background-position: math.percentage(calc(($i - 1) / 5)) 100%;
   }
-}
-
-// Battle display (dice rolled during attack) — overlays map top center
-#display_battle {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  min-height: 32px;
 }
 
 // Action markers
@@ -164,22 +147,17 @@
   position: relative;
   gap: 16px;
 
-  .counter {
-    height: 32px;
-    aspect-ratio: 1;
-  }
-
-  // Tracker value display
-  .tracker::after,
-  .counter::after,
-  .bucket::after {
-    position: absolute;
-    left: 12px;
-    top: 9px;
-  }
-
   & > * {
     position: relative !important;
+    height: 32px;
+    &::after {
+      position: absolute;
+      top: 9px;
+      left: 12px;
+    }
+  }
+  .counter {
+    aspect-ratio: 1;
   }
 
   .wicon_strength {
@@ -194,33 +172,38 @@
   .wicon_move {
     order: 4;
   }
-  .wicon_hand {
+  .counter_hand {
     order: 5;
+    &::after {
+      content: attr(data-state) "/" attr(data-limit);
+      left: 8px;
+    }
   }
 
   .tracker_hand {
     display: none;
   }
 
-  .counter_hand::after {
-    content: attr(data-state) "/" attr(data-limit);
-    left: 8px;
-  }
-
   .bucket_crystal_yellow {
     order: 6;
   }
+  .miniboard_damage {
+    order: 7;
+  }
   .upgrade_cost {
     order: 8;
-    background-color: unset;
-    &::before {
-      content: "\f062";
-      font-family: FontAwesome;
-      font-size: 32px;
-      position: absolute;
-      top: 5%;
-      color: #535151;
-    }
+  }
+}
+
+.upgrade_cost {
+  background-color: unset;
+  &::before {
+    content: "\f062";
+    font-family: FontAwesome;
+    font-size: 32px;
+    position: absolute;
+    top: 5%;
+    color: #535151;
   }
 }
 

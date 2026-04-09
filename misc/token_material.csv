@@ -47,7 +47,7 @@ die_monster|Monster Die|1|die|1|supply_die_monster|"state"=>6
 # hero attribute trackers (created per hero in setupGameTables, not auto-created)
 tracker_strength|Strength|0|tracker wicon wicon_strength|4|tableau_{COLOR}
 tracker_range|Attack Range|0|tracker wicon wicon_range|4|tableau_{COLOR}
-tracker_move|Move|0|tracker wicon wicon_move|4|tableau_{COLOR}
+tracker_move|Move Range|0|tracker wicon wicon_move|4|tableau_{COLOR}
 tracker_health|Health|0|tracker wicon wicon_health|4|tableau_{COLOR}
 tracker_hand|Hand Limit|0|tracker wicon wicon_hand|4|tableau_{COLOR}
 

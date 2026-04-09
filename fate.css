@@ -104,27 +104,6 @@
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
-.crystal_yellow {
-  background-color: #ffeb3b;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.crystal_red {
-  background-color: #e53935;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.crystal_green {
-  background-color: #43a047;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
 .card .bucket_crystal_green,
 .card .bucket_crystal_red,
 .card .bucket_crystal_yellow,
@@ -142,17 +121,6 @@
   height: 32px;
   filter: drop-shadow(2px 2px 3px black);
 }
-.card .bucket_crystal_green > .crystal,
-.card .bucket_crystal_red > .crystal,
-.card .bucket_crystal_yellow > .crystal,
-.gsupply .bucket_crystal_green > .crystal,
-.gsupply .bucket_crystal_red > .crystal,
-.gsupply .bucket_crystal_yellow > .crystal,
-.miniboard .bucket_crystal_green > .crystal,
-.miniboard .bucket_crystal_red > .crystal,
-.miniboard .bucket_crystal_yellow > .crystal {
-  visibility: hidden;
-}
 .card .bucket_crystal_green,
 .gsupply .bucket_crystal_green,
 .miniboard .bucket_crystal_green {
@@ -169,6 +137,24 @@
   background-position: 20% 0%;
 }
 
+.gsupply .crystal {
+  visibility: hidden;
+  display: block;
+}
+
+.miniboard .bucket > *,
+.card .bucket > * {
+  display: none;
+}
+
+.card .bucket {
+  position: absolute;
+}
+.card .bucket::after {
+  position: absolute;
+  top: 9px;
+  left: 12px;
+}
 .card .bucket_crystal_green {
   top: 1%;
   right: 40%;
@@ -237,17 +223,6 @@
   background-position: 100% 100%;
 }
 
-#display_battle {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  min-height: 32px;
-}
-
 .marker {
   width: 24px;
   aspect-ratio: 1;
@@ -301,19 +276,17 @@
   position: relative;
   gap: 16px;
 }
-.miniboard .counter {
-  height: 32px;
-  aspect-ratio: 1;
-}
-.miniboard .tracker::after,
-.miniboard .counter::after,
-.miniboard .bucket::after {
-  position: absolute;
-  left: 12px;
-  top: 9px;
-}
 .miniboard > * {
   position: relative !important;
+  height: 32px;
+}
+.miniboard > *::after {
+  position: absolute;
+  top: 9px;
+  left: 12px;
+}
+.miniboard .counter {
+  aspect-ratio: 1;
 }
 .miniboard .wicon_strength {
   order: 1;
@@ -327,24 +300,30 @@
 .miniboard .wicon_move {
   order: 4;
 }
-.miniboard .wicon_hand {
+.miniboard .counter_hand {
   order: 5;
-}
-.miniboard .tracker_hand {
-  display: none;
 }
 .miniboard .counter_hand::after {
   content: attr(data-state) "/" attr(data-limit);
   left: 8px;
 }
+.miniboard .tracker_hand {
+  display: none;
+}
 .miniboard .bucket_crystal_yellow {
   order: 6;
 }
+.miniboard .miniboard_damage {
+  order: 7;
+}
 .miniboard .upgrade_cost {
   order: 8;
+}
+
+.upgrade_cost {
   background-color: unset;
 }
-.miniboard .upgrade_cost::before {
+.upgrade_cost::before {
   content: "\f062";
   font-family: FontAwesome;
   font-size: 32px;
@@ -446,13 +425,17 @@
   aspect-ratio: 1;
   height: 20%;
 }
+.monster .bucket[data-state="0"],
+.hero .bucket[data-state="0"] {
+  display: none;
+}
 .monster .bucket > *,
 .hero .bucket > * {
   position: absolute;
   visibility: hidden;
 }
-.monster .bucket[data-state]:not([data-state="0"])::after,
-.hero .bucket[data-state]:not([data-state="0"])::after {
+.monster .bucket[data-state]::after,
+.hero .bucket[data-state]::after {
   content: attr(data-state);
   position: absolute;
   height: 100%;
@@ -1594,6 +1577,17 @@
   align-items: center;
   justify-content: center;
   padding: 10px 0;
+}
+
+#display_battle {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  min-height: 32px;
 }
 
 /* tooltips */

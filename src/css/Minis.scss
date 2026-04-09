@@ -54,6 +54,10 @@
     aspect-ratio: 1;
     height: 20%;
 
+    &[data-state="0"] {
+      display: none;
+    }
+
     // Hide token children — only the count badge is visible
     > * {
       position: absolute;
@@ -61,7 +65,7 @@
     }
 
     // Count badge (shown when data-state > 0)
-    &[data-state]:not([data-state="0"])::after {
+    &[data-state]::after {
       content: attr(data-state);
       position: absolute;
       height: 100%;

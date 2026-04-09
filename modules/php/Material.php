@@ -629,7 +629,7 @@ class Material {
 ],
     "tracker_move" => [ 
         "state" => 0,
-        "name" => clienttranslate("Move"),
+        "name" => clienttranslate("Move Range"),
         "count" => 0,
         "type" => "tracker wicon wicon_move",
         "create" => 4,

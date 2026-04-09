@@ -126,6 +126,7 @@ export class Game extends Game1Tokens {
 
     this.setupNotifications();
 
+    // last minute tweaks for miniboard
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
       // attach hand counter to miniboard
@@ -135,6 +136,16 @@ export class Game extends Game1Tokens {
 
       const handMaxCounter = $(`tracker_hand_${color}`);
       if (handMaxCounter) handCounter.dataset.limit = handMaxCounter.dataset.state;
+
+      // hero damage mirror on miniboard
+      const heroNo = player.heroNo;
+
+      const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);
+      const initialState = srcBucket?.dataset.state ?? "0";
+      placeHtml(
+        `<div id="miniboard_damage_${color}" class="bucket bucket_crystal_red miniboard_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`,
+        `miniboard_${color}`
+      );
 
       // marker tracking cost of upgrade
       const marker = $(`marker_${color}_3`);
@@ -311,6 +322,12 @@ export class Game extends Game1Tokens {
         if (!bucket.children[i].classList.contains("bucket")) count++;
       }
       bucket.dataset.state = String(count);
+      // sync miniboard damage mirror if this is a hero's red crystal bucket
+      const match = bucketId.match(/^bucket_crystal_red_(hero_\d+)$/);
+      if (match) {
+        const mirror = document.querySelector(`[data-hero="${match[1]}"].bucket_crystal_red`) as HTMLElement;
+        if (mirror) mirror.dataset.state = String(count);
+      }
     }
   }
 
