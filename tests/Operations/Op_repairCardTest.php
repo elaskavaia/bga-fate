@@ -93,4 +93,49 @@ final class Op_repairCardTest extends TestCase {
         $this->assertCount(1, $moves);
         $this->assertArrayHasKey("card_equip_1_21", $moves);
     }
+
+    public function testAllModeReturnsConfirmTarget(): void {
+        $this->addDamageToCard("card_equip_1_21", 2);
+        $op = $this->createOp("1repairCard(all)");
+        $moves = $op->getPossibleMoves();
+        // In 'all' mode there is no per-card selection — a single confirm target auto-resolves.
+        $this->assertEquals(["confirm"], $moves);
+    }
+
+    public function testAllModeRepairsEveryDamagedCard(): void {
+        $this->addDamageToCard("card_equip_1_21", 2);
+        $this->addDamageToCard("card_equip_1_23", 1);
+        $op = $this->createOp("1repairCard(all)");
+        $op->action_resolve(["target" => "confirm"]);
+        $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
+    }
+
+    public function testAllModeLeavesUndamagedCardsAtZero(): void {
+        $this->addDamageToCard("card_equip_1_21", 1);
+        // card_equip_1_23 has no damage
+        $op = $this->createOp("1repairCard(all)");
+        $op->action_resolve(["target" => "confirm"]);
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
+        // Must not go negative
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
+    }
+
+    public function testAllModeCapsPerCard(): void {
+        $this->addDamageToCard("card_equip_1_21", 1);
+        $this->addDamageToCard("card_equip_1_23", 3);
+        // Count=2 per card — cap at existing damage on first, remove 2 of 3 on second.
+        $op = $this->createOp("2repairCard(all)");
+        $op->action_resolve(["target" => "confirm"]);
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
+        $this->assertEquals(1, $this->getCardDamage("card_equip_1_23"));
+    }
+
+    public function testAllModeNoDamagedCardsResolvesCleanly(): void {
+        // No pre-damage on any card.
+        $op = $this->createOp("1repairCard(all)");
+        $op->action_resolve(["target" => "confirm"]);
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
+        $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
+    }
 }

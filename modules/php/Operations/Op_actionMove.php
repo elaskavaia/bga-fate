@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -35,6 +36,12 @@ class Op_actionMove extends Operation {
         $target = $this->getDataField("target", "");
         if ($target) {
             return [$target];
+        }
+        // If the hero's move tracker has been reduced to 0 (e.g. Seek Shelter played this turn),
+        // the move action is not available. Return an error so the turn op filters it out
+        // rather than constructing an invalid "[1,0]moveHero" delegate.
+        if ($this->getNumberOfMoves() <= 0) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No moves remaining this turn")];
         }
         return $this->getPossibleMovesDelegate($this->getDelegateOperation());
     }

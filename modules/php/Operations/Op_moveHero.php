@@ -28,11 +28,20 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Optional movement (mcount < count, e.g. "[0,3]moveHero"): hero may move any
  * number of steps from mcount to count.
  *
- * Used by: Agility (2moveHero), Maneuver (1moveHero), Fleetfoot (1moveHero), Quick Reflexes (1moveHero)
+ * Params:
+ * - param(0): "locationOnly" — destinations restricted to hexes that belong to a
+ *   named location (DarkForest, Grimheim, TempleRuins, …).
+ *
+ * Used by: Agility (2moveHero), Maneuver (1moveHero), Fleetfoot (1moveHero),
+ * Quick Reflexes (1moveHero), Seek Shelter ([0,2]moveHero(locationOnly)).
  */
 class Op_moveHero extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Select where to move");
+    }
+
+    private function isLocationOnly(): bool {
+        return $this->getParam(0, "") === "locationOnly";
     }
 
     function getPossibleMoves(): array {
@@ -53,6 +62,14 @@ class Op_moveHero extends CountableOperation {
             $maxReachableDist = max($reachable);
             $requiredDist = min($maxSteps, $maxReachableDist);
             $reachable = array_filter($reachable, fn($dist) => $dist == $requiredDist);
+        }
+
+        if ($this->isLocationOnly()) {
+            $reachable = array_filter(
+                $reachable,
+                fn($_dist, $hexId) => $this->game->hexMap->getHexNamedLocation($hexId) !== "",
+                ARRAY_FILTER_USE_BOTH,
+            );
         }
 
         $moves = [];

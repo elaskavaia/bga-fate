@@ -20,14 +20,26 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
 /**
  * Remove up to X damage from a target card on the player's tableau.
  * Count = max damage to remove (use 99 for "all").
- * Used by: Durability (99repairCard), Mend in Grimheim (5repairCard).
+ *
+ * Params:
+ * - param(0): "all" — apply to every damaged card on the tableau (no user prompt).
+ *   Each damaged card has up to Count damage removed (capped by its current damage).
+ *
+ * Used by: Durability (99repairCard), Mend in Grimheim (5repairCard), Sewing (1repairCard(all)).
  */
 class Op_repairCard extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Choose a card to repair");
     }
 
+    private function isRepairAll(): bool {
+        return $this->getParam(0, "") === "all";
+    }
+
     function getPossibleMoves(): array {
+        if ($this->isRepairAll()) {
+            return ["confirm"];
+        }
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
             return [$presetTarget => ["q" => Material::RET_OK]];
@@ -35,18 +47,36 @@ class Op_repairCard extends CountableOperation {
         $owner = $this->getOwner();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
         $targets = [];
-        foreach ($cards as $cardId => $card) {
+        foreach (array_keys($cards) as $cardId) {
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
-            $targets[$cardId] = $damage > 0 ? ["q" => Material::RET_OK] : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to repair")];
+            $targets[$cardId] =
+                $damage > 0
+                    ? ["q" => Material::RET_OK]
+                    : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to repair")];
         }
         return $targets;
     }
 
     function resolve(): void {
-        $cardId = $this->getCheckedArg();
         $heroId = $this->game->getHeroTokenId($this->getOwner());
+        $count = (int) $this->getCount();
+
+        if ($this->isRepairAll()) {
+            $owner = $this->getOwner();
+            $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
+            foreach (array_keys($cards) as $cardId) {
+                $this->repairOne($heroId, $cardId, $count);
+            }
+            return;
+        }
+
+        $cardId = $this->getCheckedArg();
+        $this->repairOne($heroId, $cardId, $count);
+    }
+
+    private function repairOne(string $heroId, string $cardId, int $count): void {
         $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
-        $amount = min($this->getCount(), $damage);
+        $amount = min($count, $damage);
         if ($amount > 0) {
             $this->game->effect_moveCrystals($heroId, "red", -$amount, $cardId, [
                 "message" => clienttranslate('${char_name} repairs ${token_name}'),

@@ -12,8 +12,7 @@ final class Op_moveHeroTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
+        $this->game->initWithHero(1);
         // Assign hero 1 (Bjorn) to PCOLOR
         $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
@@ -71,6 +70,61 @@ final class Op_moveHeroTest extends TestCase {
         $target = array_key_first($moves);
         $op->action_resolve(["target" => $target]);
         $this->assertEquals($target, $this->getHeroHex());
+    }
+
+    public function testLocationOnlyFiltersToNamedLocationHexes(): void {
+        // Hero starts at hex_11_8 (plains, no loc). Grimheim hexes (10_8, 10_9, 9_9, etc.) are
+        // within 2 steps. Non-location plains like 12_8, 11_7 are also reachable but must be excluded.
+        $op = $this->createOp("[0,2]moveHero(locationOnly)");
+        $moves = $op->getPossibleMoves();
+
+        $this->assertNotEmpty($moves, "Should offer at least some Grimheim hexes within 2 steps of hex_11_8");
+        foreach (array_keys($moves) as $hexId) {
+            $loc = $this->game->hexMap->getHexNamedLocation($hexId);
+            $this->assertNotEquals("", $loc, "Hex $hexId should belong to a named location but has none");
+        }
+        // Spot-check: a known Grimheim hex within reach is offered
+        $this->assertArrayHasKey("hex_10_8", $moves);
+        // Spot-check: a known non-location adjacent hex is NOT offered
+        $this->assertArrayNotHasKey("hex_12_8", $moves);
+    }
+
+    public function testLocationOnlyOptionalAllowsSkip(): void {
+        // [0,N]moveHero is optional — the player must be able to decline to move even when
+        // the locationOnly filter is in effect. Staying put is expressed via canSkip(), not
+        // by including the current hex in getPossibleMoves().
+        $this->game->tokens->moveToken("hero_1", "hex_10_9");
+        $op = $this->createOp("[0,2]moveHero(locationOnly)");
+        $this->assertTrue($op->canSkip(), "Optional move with locationOnly must be skippable");
+    }
+
+    public function testLocationOnlyEmptyWhenNoReachableLocation(): void {
+        // hex_13_6 is a plains hex with no named location. Within 2 steps nothing else has a loc
+        // either (surrounding hexes are plains/mountain without loc — see map_material.csv).
+        $this->game->tokens->moveToken("hero_1", "hex_13_6");
+        $op = $this->createOp("[0,2]moveHero(locationOnly)");
+        $moves = $op->getPossibleMoves();
+
+        // Recompute the raw reachable set and assert none of them have a loc — if this assertion
+        // fails, the test fixture (hero start hex) needs to change, not the production code.
+        $reachable = $this->game->hexMap->getReachableHexes("hex_13_6", 2);
+        foreach (array_keys($reachable) as $hexId) {
+            $this->assertEquals(
+                "",
+                $this->game->hexMap->getHexNamedLocation($hexId),
+                "Test fixture assumption broken: hex $hexId has a named location"
+            );
+        }
+        $this->assertEmpty($moves, "No location hexes reachable → moves should be empty");
+    }
+
+    public function testMoveHeroWithoutParamReturnsAllReachable(): void {
+        // Regression check: without locationOnly, 2moveHero returns both location and non-location hexes.
+        $op = $this->createOp("[0,2]moveHero");
+        $moves = $op->getPossibleMoves();
+
+        $this->assertArrayHasKey("hex_12_8", $moves, "Non-location hex should be offered without the param");
+        $this->assertArrayHasKey("hex_10_8", $moves, "Grimheim hex should still be offered without the param");
     }
 
     public function testResolveToGrimheimUsesHomeHex(): void {

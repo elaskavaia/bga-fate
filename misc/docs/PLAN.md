@@ -579,8 +579,8 @@ Hero, Abilities and Equipment:
 [x] card_event_1_26 Master Shot — custom: add 2 damage to attack - verify
 [x] card_event_1_33 Piercing Arrows — r=counter(countRunes):addDamage, has tests
 [ ] card_event_1_25 Prey — custom: mark monster for +2 XP, r=custom
-[ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location, r=custom
-[ ] card_event_1_30 Sewing — custom: remove 1 damage from each card, r=custom
+[x] card_event_1_34 Seek Shelter — move up to 2 into a named location, blocks further moves this turn, r=[0,2]moveHero(locationOnly),0setAtt(move)
+[x] card_event_1_30 Sewing — remove 1 damage from each card, r=1repairCard(all)
 
 ### Equipment Cards (use)
 

@@ -13,10 +13,7 @@ final class Op_turnTest extends TestCase {
 
     protected function setUp(): void {
         $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 to PCOLOR so action ops can resolve
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->initWithHero(1);
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         // Markers start in limbo (fresh turn)
         $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");

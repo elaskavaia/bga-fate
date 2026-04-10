@@ -783,6 +783,89 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertNotValidTarget($restCard, "Rest should not be offered when hero has no damage");
     }
 
+    // --- Sewing (card_event_1_30) ---
+
+    public function testSewingRemovesOneDamageFromEachCard(): void {
+        $sewing = "card_event_1_30_1";
+        $color = $this->playerColor();
+        $this->seedHand($sewing, $color);
+
+        // Make sure a few cards are on tableau and pre-damage them to varying amounts.
+        $this->game->tokens->moveToken("card_equip_1_15", "tableau_$color"); // Bjorn's First Bow
+        $this->game->tokens->moveToken("card_equip_1_21", "tableau_$color"); // Helmet
+        $this->game->tokens->moveToken("card_ability_1_7", "tableau_$color"); // Stitching I (undamaged)
+
+        $this->game->effect_moveCrystals("card_equip_1_15", "red", 2, "card_equip_1_15", ["message" => ""]);
+        $this->game->effect_moveCrystals("card_equip_1_21", "red", 1, "card_equip_1_21", ["message" => ""]);
+
+        // Play Sewing — r=1repairCard(all), auto-resolves (single "confirm" target)
+        $this->assertValidTarget($sewing);
+        $this->respond($sewing);
+
+        // Each damaged card loses 1 damage; undamaged card stays at 0.
+        $this->assertEquals(1, $this->countDamage("card_equip_1_15"));
+        $this->assertEquals(0, $this->countDamage("card_equip_1_21"));
+        $this->assertEquals(0, $this->countDamage("card_ability_1_7"));
+
+        // Sewing should be discarded from hand after play.
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($sewing));
+    }
+
+    // --- Seek Shelter (card_event_1_34) ---
+
+    public function testSeekShelterMovesHeroToLocation(): void {
+        $seekShelter = "card_event_1_34_1";
+        $color = $this->playerColor();
+        $this->seedHand($seekShelter, $color);
+
+        // Move hero out to a non-location hex with a known named location reachable within 2.
+        // From hex_11_8 the hero can reach Grimheim within 2 steps.
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_11_8");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Sanity: before playing Seek Shelter, the hero's move tracker should be > 0.
+        $hero = $this->game->getHero($color);
+        $this->assertGreaterThan(0, $hero->getNumberOfMoves(), "Hero should start the turn with moves available");
+
+        // Play Seek Shelter — r=[0,2]moveHero(locationOnly),0setAtt(move). Prompts for a location hex.
+        $this->assertValidTarget($seekShelter);
+        $this->respond($seekShelter);
+
+        // Every offered target must be a named-location hex.
+        $args = $this->getOpArgs();
+        $targets = $args["target"] ?? [];
+        $this->assertNotEmpty($targets, "Seek Shelter should offer at least one location hex");
+        foreach ($targets as $hexId) {
+            $this->assertNotEquals(
+                "",
+                $this->game->hexMap->getHexNamedLocation($hexId),
+                "Seek Shelter offered non-location hex $hexId",
+            );
+        }
+
+        // Pick the first offered hex and resolve.
+        $chosen = $targets[0];
+        $this->respond($chosen);
+
+        // Hero should have moved. If chosen hex was Grimheim, moveHero redirects to the hero's
+        // home hex, so only assert the hero ended up on a named-location hex.
+        $finalHex = $this->tokenLocation($this->heroId);
+        $this->assertNotEquals(
+            "",
+            $this->game->hexMap->getHexNamedLocation($finalHex),
+            "Hero should end on a named-location hex",
+        );
+
+        // Seek Shelter is discarded from hand.
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($seekShelter));
+
+        // After Seek Shelter resolves, the move tracker should be 0 — hero may not move more this turn.
+        $this->assertEquals(0, $hero->getNumberOfMoves(), "Move tracker should be zeroed after Seek Shelter");
+        // actionMove delegates to [1,N]moveHero where N = move tracker; with N=0 the op has no valid
+        // targets, so the turn state no longer offers actionMove as a valid action.
+        $this->assertNotValidTarget("actionMove", "Hero should not be able to take a move action this turn");
+    }
+
     // --- Back Down (card_event_1_29) ---
 
     public function testBackDownKillsMonsterCloserToGrimheim(): void {
