@@ -8,6 +8,8 @@ argument-hint: <name>
 
 Step-by-step checklist for adding a new operation to the Fate BGA codebase. Follow this plan exactly — create a plan first with all items from this list.
 
+Before starting read docs/DESIGN.md
+
 ## Steps
 
 1. Create `modules/php/Operations/Op_<name>.php` with a **minimal empty template**
