@@ -99,6 +99,13 @@ class GameUT extends Game {
         return $this;
     }
 
+    /** Move every card out of the player's hand into limbo. */
+    function clearHand(): void {
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation(null, "hand_" . PCOLOR)) as $key) {
+            $this->game->tokens->moveToken($key, "limbo");
+        }
+    }
+
     function getMultiMachine() {
         return $this->multimachine;
     }
