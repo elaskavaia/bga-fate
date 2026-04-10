@@ -40,6 +40,9 @@ class Op_trigger extends Operation {
         return true;
     }
 
+    public function getSkipName() {
+        return clienttranslate("Not now");
+    }
     function requireConfirmation() {
         return !$this->noValidTargets();
     }

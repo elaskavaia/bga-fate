@@ -378,7 +378,7 @@ class Game extends Base {
 
     function effect_addAttackDiceDamage(string $attackerId, int $strength): void {
         $this->notifyMessage(clienttranslate('${char_name} adds ${strength} damage'), [
-            "token_name" => $attackerId,
+            "char_name" => $attackerId,
             "strength" => $strength,
         ]);
 

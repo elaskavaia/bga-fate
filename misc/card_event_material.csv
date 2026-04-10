@@ -13,7 +13,7 @@ num|hno|name|count|r|on|effect|flavour
 26|1|Master Shot|4|2addDamage|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
 31|1|Perfect Aim|2|rerollMisses|roll|Reroll all misses.|Hitting where it hurts, not always in the head.
 33|1|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
-25|1|Prey|2|custom||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
+25|1|Prey|2|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 27|1|Rest|2|2heal(self)||Heal 2 damage from Bjorn.|Sea therapy, works every time...
 34|1|Seek Shelter|1|[0,2]moveHero(locationOnly),0setAtt(move)||Move up to 2 areas into a location. You may not move more this turn.|Phew, lucky there was a cave here… Who's snoring?
 30|1|Sewing|2|repairCard(all)||Remove 1 damage from each of your cards.|Needles to say, sewing has been a common thread in Bjorn's crafts.
@@ -25,7 +25,7 @@ num|hno|name|count|r|on|effect|flavour
 26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
 34|2|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
-36|2|Prey|1|custom||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
+36|2|Prey|1|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 31|2|Rest|2|2heal(self)||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.
 33|2|Speedy Attack|2|custom||Discard another card from hand to perform an attack action.|
 29|2|Take a Knee|2|custom||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.

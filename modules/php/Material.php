@@ -452,6 +452,10 @@ class Material {
         "type" => "c_sureshotII",
         "name" => clienttranslate("Sure Shot II"),
 ],
+    "Op_c_prey" => [ 
+        "type" => "c_prey",
+        "name" => clienttranslate("Prey"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -4657,7 +4661,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Prey"),
         "count" => 2,
-        "r" => "custom",
+        "r" => "c_prey",
         "effect" => "Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].",
         "flavour" => "Pray for your life.",
 ],
@@ -4791,7 +4795,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Prey"),
         "count" => 1,
-        "r" => "custom",
+        "r" => "c_prey",
         "effect" => "Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].",
         "flavour" => "Pray for your life.",
 ],

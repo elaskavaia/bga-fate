@@ -928,6 +928,102 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertNotValidTarget($backDown, "Back Down should not be offered for rank 3 monsters");
     }
 
+    // --- Prey (card_event_1_25) ---
+
+    public function testPreyMarksRank3MonsterWithTwoYellow(): void {
+        $prey = "card_event_1_25_1";
+        $color = $this->playerColor();
+        $this->seedHand($prey, $color);
+
+        // Place a troll (rank 3) somewhere on the map
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        // Play Prey, then select the troll hex
+        $this->assertValidTarget($prey);
+        $this->respond($prey);
+        $this->assertValidTarget($trollHex);
+        $this->respond($trollHex);
+
+        // Troll should now carry 2 yellow crystals (bonus XP)
+        $this->assertEquals(2, $this->countTokens("crystal_yellow", $troll));
+    }
+
+    public function testPreyBonusXpAwardedOnKill(): void {
+        $prey = "card_event_1_25_1";
+        $color = $this->playerColor();
+        $this->seedHand($prey, $color);
+
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $baseXp = $this->game->getMonster($troll)->getXpReward();
+        $xpBefore = $this->countXp();
+
+        // Mark troll via Prey
+        $this->assertValidTarget($prey);
+        $this->respond($prey);
+        $this->respond($trollHex);
+
+        // Now kill the troll directly — killer receives base reward + 2 bonus.
+        $health = $this->game->getMonster($troll)->getHealth();
+        for ($i = 0; $i < $health; $i++) {
+            $this->game->tokens->moveToken("crystal_red_" . ($i + 1), $troll);
+        }
+        $this->game->getMonster($troll)->applyDamageEffects(0, $this->heroId);
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($troll));
+        $this->assertEquals($xpBefore + $baseXp + 2, $this->countXp());
+    }
+
+    public function testPreyNotOfferedWhenNoValidTarget(): void {
+        $prey = "card_event_1_25_1";
+        $color = $this->playerColor();
+        $this->seedHand($prey, $color);
+
+        // Only rank-1/2 monsters on map — Prey should not be offered.
+        $goblin = "monster_goblin_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_9", "");
+
+        $this->assertNotValidTarget($prey, "Prey should not be offered when no rank 3 / legend is available");
+    }
+
+    public function testPreyExcludesDamagedMonster(): void {
+        $prey = "card_event_1_25_1";
+        $color = $this->playerColor();
+        $this->seedHand($prey, $color);
+
+        // Damaged troll — not a valid Prey target, and the only rank-3 on the map,
+        // so the Prey card itself should not be offered as a free action.
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_9", "");
+        $this->game->effect_moveCrystals($troll, "red", 1, $troll, ["message" => ""]);
+
+        $this->assertNotValidTarget($prey, "Prey should not be offered when the only rank 3 monster is damaged");
+    }
+
+    public function testPreyExcludesDamagedMonsterWhenOtherValid(): void {
+        $prey = "card_event_1_25_1";
+        $color = $this->playerColor();
+        $this->seedHand($prey, $color);
+
+        // One damaged troll and one undamaged jotunn — Prey offered, damaged hex rejected.
+        $damaged = "monster_troll_1";
+        $this->game->getMonster($damaged)->moveTo("hex_7_9", "");
+        $this->game->effect_moveCrystals($damaged, "red", 1, $damaged, ["message" => ""]);
+
+        $fresh = "monster_jotunn_1";
+        $freshHex = "hex_12_5";
+        $this->game->getMonster($fresh)->moveTo($freshHex, "");
+
+        $this->assertValidTarget($prey);
+        $this->respond($prey);
+        $this->assertNotValidTarget("hex_7_9", "Damaged rank 3 monster should not be a valid Prey target");
+        $this->assertValidTarget($freshHex);
+    }
+
     // --- Master Shot (card_event_1_26) ---
 
     public function testMasterShotAdds2DamageDuringAttack(): void {

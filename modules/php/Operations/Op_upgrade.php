@@ -106,7 +106,10 @@ class Op_upgrade extends Operation {
 
     private function resolveGain(string $cardId, string $owner): void {
         // Move card from deck to tableau
-        $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains a new ability: ${token_name}'));
+        $heroId = $this->game->getHeroTokenId($owner);
+        $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains a new ability: ${token_name}'), [
+            "char_name" => $heroId,
+        ]);
 
         // Generate mana if the new card has mana generation
         $manaGen = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
