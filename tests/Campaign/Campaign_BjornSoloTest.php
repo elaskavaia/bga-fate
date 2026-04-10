@@ -925,4 +925,83 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $hero = $this->game->getHero($color);
         $this->assertEquals($baseRange, $hero->getAttackRange());
     }
+
+    // --- Piercing Arrows (card_event_1_33) ---
+
+    public function testPiercingArrowsOfferedOnRollTrigger(): void {
+        $piercingArrows = "card_event_1_33_1";
+        $color = $this->playerColor();
+        $this->seedHand($piercingArrows, $color);
+
+        // Place a troll adjacent (health=7, survives the attack so we can check damage)
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+
+        // Roll: 2 runes (3) + 1 hit (5) → 1 base damage + 2 from Piercing Arrows = 3 total
+        $this->seedRand([3, 3, 5]);
+        $this->respond("actionAttack");
+
+        // trigger(roll) — Piercing Arrows should be offered
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("roll", $args["data"]["params"] ?? "");
+        $this->assertValidTarget($piercingArrows);
+
+        // Play Piercing Arrows — counter(countRunes) evaluates to 2, addDamage adds 2 dice
+        $this->respond($piercingArrows);
+
+        // Skip remaining triggers (actionAttack) — then resolveHits applies all dice as damage
+        $this->skipTriggers();
+
+        // Troll should have 1 hit + 2 rune damage = 3 total damage
+        $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (1 hit + 2 from Piercing Arrows)");
+
+        // Card should be discarded from hand
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($piercingArrows));
+    }
+
+    public function testPiercingArrowsAddsZeroDamageWithNoRunes(): void {
+        $piercingArrows = "card_event_1_33_1";
+        $color = $this->playerColor();
+        $this->seedHand($piercingArrows, $color);
+
+        // Place a troll adjacent
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+
+        // Roll: all hits (5), 0 runes → Piercing Arrows should still be offered but adds 0 damage
+        $this->seedRand([5, 5, 5]);
+        $this->respond("actionAttack");
+
+        // trigger(roll) — Piercing Arrows should be offered (even with 0 runes)
+        $args = $this->getOpArgs();
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("roll", $args["data"]["params"] ?? "");
+        $this->assertValidTarget($piercingArrows);
+
+        $this->respond($piercingArrows);
+
+        // Skip remaining triggers — then resolveHits applies all dice as damage
+        $this->skipTriggers();
+
+        // Troll should have 3 hits + 0 rune damage = 3 total damage
+        $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (3 hits + 0 from Piercing Arrows)");
+    }
+
+    public function testPiercingArrowsNotOfferedOutsideRoll(): void {
+        $piercingArrows = "card_event_1_33_1";
+        $color = $this->playerColor();
+        $this->seedHand($piercingArrows, $color);
+
+        // Piercing Arrows has on=roll, so it should NOT be playable as a free action
+        $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be playable outside a roll");
+    }
 }

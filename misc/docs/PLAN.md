@@ -10,7 +10,6 @@ See misc/docs/DESIGN.md for preliminary design
 See misc/docs/RULES.md for game rules
 See CLAUDE.md for project overview
 
-
 ## Prepare game assets
 
 [x] Read the rulebook of Fate: Defenders of Grimheim and create RULES.md.
@@ -45,6 +44,7 @@ See CLAUDE.md for project overview
 **What already exists**: hex map rendering, token framework, Op_turn scaffold, Op_actionMove/Op_actionPractice stubs, state machine wiring.
 
 ### Game Elements
+
 [x] Add hero miniature tokens (hero_1..hero_4) — token_material.csv
 [x] Add house tokens (house_0..house_9) — token_material.csv
 [x] Add rune stone token — token_material.csv
@@ -52,6 +52,7 @@ See CLAUDE.md for project overview
 [x] Add action marker tokens — token_material.csv
 
 ### Server
+
 [x] `setupNewGame()`: create 1 hero per player in Grimheim, create rune stone on time track position 1, create town pieces (houses) in Grimheim
 [x] `Op_actionPractice`: implement — gain 1 XP (increment player counter)
 [x] `Op_actionMove`: implement — player picks a hex, hero moves there (no validation yet beyond "is it a hex on the map")
@@ -60,13 +61,14 @@ See CLAUDE.md for project overview
 [x] `getAllDatas()`: should work
 
 ### Client
+
 [X] Show hero tokens on map at their hex positions
 [X] Practice action: button that sends action to server, updates XP counter
 [X] Move action: click hex → send target hex to server → animate hero move
 [x] Show time track position (rune stone counter or simple text)
 
-
 ### Validation
+
 [x] Deploy to BGA studio, start a 1-player game, take turns, game ends
 
 ---
@@ -78,20 +80,22 @@ See CLAUDE.md for project overview
 ### Server
 
 [x] Implement adjacency helper functions in Game PHP:
-  - `getAdjacentHex($hexId)` — returns list of adjacent area IDs (hex id is hex_9_9)
-  - `getHexTerrain($hexId)` — returns terrain type
-  - `isOccupied($hexId)` — checks if a character is on this area
-  - `getMoveDistance($hexId, $otherHexId)` - distance beetwin hexes, if adjecent its 1, if one of them invalid its -1
+
+- `getAdjacentHex($hexId)` — returns list of adjacent area IDs (hex id is hex_9_9)
+- `getHexTerrain($hexId)` — returns terrain type
+- `isOccupied($hexId)` — checks if a character is on this area
+- `getMoveDistance($hexId, $otherHexId)` - distance beetwin hexes, if adjecent its 1, if one of them invalid its -1
 
 [x] Movement validation: check terrain, occupied hexes, max 3 steps
 [x] Grimheim special rules: entering ends movement, exiting can go to any adjacent non-mountain hex
 [x] Reachability calculation: given hero position, return set of valid destination hexes (`getReachableHexes()`)
 
 ### Client
+
 [x] Highlight reachable hexes when move action is active
 
-
 ### Tests
+
 [x] PHP unit tests for movement validation and reachability
 
 ---
@@ -101,10 +105,12 @@ See CLAUDE.md for project overview
 **Goal**: Monsters appear on the board. No movement or combat yet — just spawning from monster cards during reinforcement.
 
 ### Game Elements
+
 [x] Add monster tokens game element — monster_material.csv
 [x] Add monster card game element — monstercard_material.csv
 
 ### Server
+
 [x] Define monster tokens in material (goblins only to start — Trollkin rank 1) — already in monster_material.csv
 [x] Monster card data: define a few yellow monster cards with goblin placement
 [x] `Op_reinforcement`: draw monster card, place goblins at specified locations
@@ -112,11 +118,12 @@ See CLAUDE.md for project overview
 [x] Heroes can't move into hexes occupied by monsters — done in Iteration 1
 
 ### Client
-[x] Render monster tiles on map hexes — placeholder circles with faction color and name label
-[x] Add proper monster sprite graphics (img/mini_monsters.png) and update css 
 
+[x] Render monster tiles on map hexes — placeholder circles with faction color and name label
+[x] Add proper monster sprite graphics (img/mini_monsters.png) and update css
 
 ### Tests
+
 [X] PHP tests for monster placement from cards
 
 ---
@@ -126,6 +133,7 @@ See CLAUDE.md for project overview
 **Goal**: Monsters move toward Grimheim on monster turn, following paths/arrows/roads. Monster entering Grimheim destroys a town piece.
 
 ### Server
+
 [x] Monster path calculation: arrows → roads → Grimheim — `getMonsterNextHex()` + `getDistanceMapToGrimheim()` in HexMap.php
 [x] Monster movement order: closest to Grimheim first — `getMonstersOnMap()` sorts by distance
 [x] Movement rules: don't move if adjacent to hero, can't enter occupied hex — `moveMonsterOneStep()` in Op_turnMonster.php
@@ -133,11 +141,12 @@ See CLAUDE.md for project overview
 [x] Loss condition: all town pieces destroyed (Freyja's Well is last) — `isHeroesWin()` in Game.php
 
 ### Client
+
 [x] Animate monster movement (snap-to-position is fine)
 [x] Show town piece removal
 
-
 ### Tests
+
 [x] PHP tests for monster pathfinding — 8 tests in MonsterMovementTest.php
 [x] PHP tests for movement order — sorting + closest-first integration tests
 [x] Integration test: monsters reach Grimheim → town piece removed — house destruction, Freyja's Well, legend, charge tests
@@ -149,9 +158,11 @@ See CLAUDE.md for project overview
 **Goal**: Heroes can attack adjacent monsters. Simple dice rolling, damage tracking, monster death.
 
 ### Game Elements
+
 [x] Add attack dice game element — token_material.csv, dice_material.csv, Tokens.scss, Game.ts
 
 ### Server
+
 [x] `Op_actionAttack`: select adjacent monster, roll dice, apply hits as damage
 [x] `getAreasInRange($areaId, $range)` — for ranged attacks
 [X] Dice system: implement die faces (hit, hit-with-cover, miss, rune), roll N dice
@@ -161,12 +172,14 @@ See CLAUDE.md for project overview
 [X] Cover: if monster is in forest, hit-with-cover doesn't count
 
 ### Client
+
 [X] Attack action: highlight adjacent monsters, click to attack
 [X] Show dice results (text/simple display, no animation needed yet)
 [X] Show damage on monster tokens
 [x] Show monster death
 
 ### Tests
+
 [x] PHP tests for dice rolling and hit calculation
 [x] PHP tests for damage and monster death
 
@@ -177,6 +190,7 @@ See CLAUDE.md for project overview
 **Goal**: After movement, monsters adjacent to heroes attack. Hero damage, knocked out heroes.
 
 ### Server
+
 [x] Monster attack phase: all monsters adjacent to heroes attack
 [x] Monster attack strength from monster data
 [x] Trollkin faction bonus: +1 per adjacent trollkin
@@ -185,12 +199,14 @@ See CLAUDE.md for project overview
 [x] `Op_actionMend`: remove 2 damage from hero (5 if in Grimheim)
 
 ### Client
+
 [x] Show monster attacks in log
 [x] Show hero damage counter
 [x] Show knocked out animation (hero moves to Grimheim)
 [x] Mend action UI
 
 ### Tests
+
 [x] PHP tests for monster attack resolution
 [x] PHP tests for knocked out hero handling
 
@@ -201,55 +217,60 @@ See CLAUDE.md for project overview
 **Goal**: Complete playable game with Trollkin goblins only. All 6 actions work. Short time track. Win/loss conditions. This is the true MVP.
 
 ### Server
+
 [x] `Op_actionPrepare`: draw 1 event card
-[x] `Op_actionFocus`: add 1 mana to a card 
+[x] `Op_actionFocus`: add 1 mana to a card
 [x] Action selection: enforce "must pick 2 different actions" rule
 [x] Charge: on skull time track spots, monsters move +1 extra
 [x] Goblin special: moves 2 instead of 1
 
 ### Client
+
 [x] Action selection UI: show 6 action buttons, disable already-picked action
 [x] End turn button
 [x] Undo support for action selection
 
 ### Tests
+
 [x] Integration test: full round (all players turn + monster turn) — Campaign_BjornSoloTest
 [x] Test win condition (survive time track)
 [x] Test loss condition (all town pieces destroyed)
 
 ---
 
-
-
 ## Monsters: Brutes and Trolls
 
 **Goal**: Full Trollkin faction. Brutes (rank 2) and Trolls (rank 3) with higher stats.
 
 ### Server
+
 [x] Add brute and troll token types and material data — all 3 factions (trollkin, firehorde, dead) with 3 ranks each defined in monster_material.csv
 [x] Add monster cards that spawn brutes and trolls — all 54 cards defined in monstercard_material.csv
 [x] Red monster card deck (has stronger monsters) — 18 red cards defined, Op_reinforcement supports deck parameter
 [x] Reinforcement: yellow cards on yellow spots, red cards on red spots — Op_reinforcement handles both decks
 
 ### Client
+
 [x] Different visual for brutes and trolls vs goblins — all 9 monster types have distinct CSS in Minis.scss with rank-based sizing
 
 ### Tests
-[x] Test mixed monster spawning and movement — Op_reinforcementTest covers brutes/trolls
 
+[x] Test mixed monster spawning and movement — Op_reinforcementTest covers brutes/trolls
 
 ## Monster Faction (Fire Horde)
 
 ### Server
+
 [x] Fire Horde monster data and tokens — done in Iter 7
 [x] Range 2 attack for Fire Horde monsters — Monster::getAttackRange(), Op_monsterAttack uses getHexesInRange()
 [x] Monster cards that spawn Fire Horde monsters — done in Iter 7
 
 ### Client
+
 [x] Fire Horde visual styling — done in Iter 7
 
-
 ### Tests
+
 [x] Test range 2 attacks — MonsterTest, Op_monsterAttackTest, HeroTest, Op_actionAttackTest
 
 ---
@@ -257,6 +278,7 @@ See CLAUDE.md for project overview
 ## Monsters: Dead + Legends
 
 ### Server
+
 [x] Dead faction monster data — done in Iter 7
 [x] Runes count as hits for Dead attacks — Character::applyDamage() checks attacker faction
 [x] Draugr armor (prevent 1 damage each time) — Character::getArmor(), beginDefense(), armor absorbs in applyDamage()
@@ -265,10 +287,11 @@ See CLAUDE.md for project overview
 [x] All 54 monster cards defined — done in Iter 7
 
 ### Client
+
 [x] Dead faction visual styling — done in Iter 7
 
-
 ### Tests
+
 [x] Test Dead faction effects — MonsterTest: rune-as-hit, draugr armor, armor absorb/reset
 [x] Test Legend special rules — MonsterMovementTest: legend destroys 3 houses, legend movement
 
@@ -281,21 +304,23 @@ See CLAUDE.md for project overview
 **Goal**: Pick simplest hero. Implement hero card, starting equipment, starting ability. Equipment gives attack bonus.
 
 ### Game Elements
+
 [x] Add hero card game element (all heroes) — card_material.csv, Cards.scss, Game.ts
-[x] Add hero card sprite for first hero — img/<hero>_hero_cards.jpg
+[x] Add hero card sprite for first hero — img/<hero>\_hero_cards.jpg
 
 ### Server
+
 [x] Define first hero's card data (hero card, 1 starting ability, 1 starting equipment)
 [x] Equipment: attack strength bonus
 [x] Focus action: actually adds mana to ability/equipment cards — Op_actionFocus, Op_actionFocusTest
 
 ### Client
+
 [x] Player board: show hero card, active ability, active equipment
 [x] Card tooltips with effects
 [x] Activate equipment/ability buttons (free actions)
 
 ### Tests
-
 
 ---
 
@@ -304,6 +329,7 @@ See CLAUDE.md for project overview
 **Goal**: Event card deck works. Prepare action draws cards. Cards can be played as free actions.
 
 ### Server
+
 [x] Event deck setup: shuffle at game start
 [x] Prepare action: draw 1 event card, hand limit 4 — Op_actionPrepare queues Op_drawEvent
 [x] Op_drawEvent: auto-draws if hand < 4, else asks player to discard or skip
@@ -311,11 +337,13 @@ See CLAUDE.md for project overview
 [x] Play event: select from hand, discard, apply effect — Op_playEvent queues effect operations from `r` column
 
 ### Client
+
 [x] Hand display (private to player)
 [x] Play card from hand
 [x] Discard interface when at hand limit — Op_drawEvent shows hand cards to pick
 
 ### Tests
+
 [x] Test draw, play, discard cycle — Op_drawEventTest, Op_discardEventTest, Op_actionPrepareTest
 [x] Test hand limit enforcement — Op_drawEventTest
 
@@ -325,7 +353,8 @@ See CLAUDE.md for project overview
 
 **Goal**: Implement the generic parameterized operations that are building blocks for event/equipment/ability card effects. These are queued by `playEvent`/`useEquipment`/`useAbility` after a card is played. See DESIGN.md "Card Effect Operations" for full notation.
 
-### Operations (new Op_ classes)
+### Operations (new Op\_ classes)
+
 - [x] `dealDamage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
 - [x] `heal` (Countable) — Remove X damage from target hero. Used by: Rest, Stitching, Belt of Youth, etc.
 - [x] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
@@ -344,11 +373,10 @@ See CLAUDE.md for project overview
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 
 ### Integration
+
 - [x] `playEvent` resolve: parse `r` column notation, queue corresponding operations
 - [x] Operation parser: target params `(adj)`, `(self)`, `(inRange)` — already supported via `getParam()`
 - [x] Operation parser: chaining with `;` and cost notation with `:` — already supported
-
-
 
 ---
 
@@ -357,6 +385,7 @@ See CLAUDE.md for project overview
 **Goal**: Equipment and abilities can be activated as free actions. Equipment has durability cost. Abilities cost mana. Hero card effect applies during relevant actions.
 
 ### Server
+
 [x] Equipment: once-per-turn activation — useAbility/useEquipment check card state==1, reset in turnEnd
 [x] Ability: once-per-turn activation — same mechanism
 [X] Ability: costs mana
@@ -365,6 +394,7 @@ See CLAUDE.md for project overview
 [x] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 
 ### Tests
+
 [x] Test ability activation and mana spending
 [x] Integration tests: use equipment with durability cost → effect executes
 [x] Test equipment attack bonus
@@ -374,6 +404,7 @@ See CLAUDE.md for project overview
 **Goal**: Equipment cards have quests. Completing quests unlocks new equipment. Upgrade system (spend XP to gain abilities or improve cards).
 
 ### Server
+
 [~] Quest definitions on equipment cards — quest column exists in card_equip_material.csv but no gameplay tracking
 [ ] Quest progress tracking
 [ ] Quest completion → new equipment active
@@ -382,6 +413,7 @@ See CLAUDE.md for project overview
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
 
 ### Client
+
 [ ] Show damage and mana on cards as crystal counters (unlike hero/monster damage buckets which are icons)
 [ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
 [ ] Quest progress display on equipment cards
@@ -389,12 +421,11 @@ See CLAUDE.md for project overview
 [ ] Ability pile and equipment pile browsing
 
 ### Tests
+
 [ ] Test quest completion conditions
 [x] Test upgrade cost calculation
 
 ---
-
-
 
 ---
 
@@ -403,6 +434,7 @@ See CLAUDE.md for project overview
 **Goal**: Store hero attributes (strength, range, move, health) as persistent tracker tokens in the DB so card effects can temporarily modify them mid-turn. Trackers are recomputed from base card values at end of turn.
 
 ### Server
+
 [x] Add tracker token definitions to token_material.csv (tracker_strength, tracker_range, tracker_move, tracker_health)
 [x] Hero.php: `recalcTrackers()` computes base values from tableau cards, `incTrackerValue()` bumps mid-turn
 [x] Hero.php: `calcBaseStrength()`, `calcBaseRange()`, `calcBaseMove()`, `calcBaseHealth()` — base computation methods
@@ -414,6 +446,7 @@ See CLAUDE.md for project overview
 [x] getAllDatas: removed manual counter blocks (trackers sent automatically)
 
 ### Client
+
 [x] Game.ts: hero tooltips read from tracker tokens instead of manual counters; added Move attribute
 
 ---
@@ -423,17 +456,21 @@ See CLAUDE.md for project overview
 **Goal**: Implement heroes 2, 3, 4 with full card decks.
 
 ### Game Elements
-[ ] Add hero card sprites for heroes 2, 3, 4 — img/<hero>_hero_cards.jpg
+
+[ ] Add hero card sprites for heroes 2, 3, 4 — img/<hero>\_hero_cards.jpg
 
 ### Server
+
 [ ] Hero 2: card data, abilities, equipment, events, all effects
 [ ] Hero 3: same
 [ ] Hero 4: same
 
 ### Client
+
 [ ] Hero-specific card art/styling
 
 ### Tests
+
 [ ] Test each hero independently
 [ ] Test hero combinations
 
@@ -444,15 +481,18 @@ See CLAUDE.md for project overview
 **Goal**: Optional monster die variant. Game options for time track length, difficulty, player count.
 
 ### Game Elements
+
 [x] Add monster die game element — token_material.csv, dice_material.csv, Tokens.scss, Game.ts
 
 ### Server
+
 [ ] Monster die with 6 faces and effects
 [ ] Game options in gameoptions.json: time track (short/long), monster die (on/off), difficulty
 [ ] Long time track support
 [ ] 1-4 player support with correct town piece counts
 
 ### Client
+
 [ ] Monster die roll display
 [ ] Game option selection in lobby
 
@@ -463,6 +503,7 @@ See CLAUDE.md for project overview
 **Goal**: Animations, game log, responsive layout, BGA publishing requirements.
 
 ### UI/UX
+
 [ ] Smooth movement animations (hero and monster)
 [ ] Dice roll animation
 [ ] Card play/draw animations
@@ -471,6 +512,7 @@ See CLAUDE.md for project overview
 [ ] Visual indicators (current turn, threats, quest progress)
 
 ### BGA Requirements
+
 [x] `getGameProgression()` based on time track
 [ ] `zombieTurn()` for disconnected players
 [ ] Game statistics in stats.json
@@ -480,6 +522,7 @@ See CLAUDE.md for project overview
 [ ] Private info check (event cards in hand)
 
 ### Testing
+
 [ ] Full game playthrough (short + long track)
 [ ] All hero combinations
 [ ] All player counts
@@ -493,21 +536,23 @@ See CLAUDE.md for project overview
 Source: https://en.doc.boardgamearena.com/Pre-release_checklist
 See misc/docs/CHECKLIST.md
 
-
 ## Bjorn Card Validation
 
 Verify each of Bjorn's cards works correctly.
 Hero, Abilities and Equipment:
+
 - custom should not part of r it should be implemented first
 - the rule (r) actuall does what text description say
 - if triggered, test should exists for all trigger conditions and negative conditions
 - make sure it resolves propertly using integration test
 
 ### Hero Cards
+
 [x] card_hero_1_1 Bjorn I — spend focus action after dice roll to add 2 damage
 [x] card_hero_1_2 Bjorn II — upgraded: 3 damage
 
 ### Ability Cards
+
 [x] card_ability_1_9 Eagle Eye I — passive (strength bonus only)
 [x] card_ability_1_10 Eagle Eye II — passive (strength bonus only)
 [x] card_ability_1_11 Long Shot I — add 2 damage if target at range 2+
@@ -521,47 +566,54 @@ Hero, Abilities and Equipment:
 [x] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
 [x] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
 
-
 ### Event Cards
+
 [x] card_event_1_27 Rest — heal 2 from Bjorn, r=2heal(self), has tests
 [x] card_event_1_29 Back Down — kill rank 1-2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
 [x] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest), r=c_arrows
 [x] card_event_1_31 Perfect Aim — rerollMisses, r=rerollMisses
+
 <!-- r=custom — needs custom operation implementation -->
+
 [x] card_event_1_32 Limber Bow — attack range +2 this turn, r=2gainAtt(range)
-[x] card_event_1_26 Master Shot — custom: add 2 damage to attack  - verify
-[ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune, r=custom
+[x] card_event_1_26 Master Shot — custom: add 2 damage to attack - verify
+[x] card_event_1_33 Piercing Arrows — r=counter(countRunes):addDamage, has tests
 [ ] card_event_1_25 Prey — custom: mark monster for +2 XP, r=custom
 [ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location, r=custom
 [ ] card_event_1_30 Sewing — custom: remove 1 damage from each card, r=custom
 
 ### Equipment Cards (use)
+
 <!-- r=passive: no r field, just stat bonuses — needs validation that stats apply correctly -->
+
 [ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
+
 <!-- r=gainDamage:effect — standard ops, needs integration test -->
+
 [ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
 [ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
 [ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=gainDamage:2heal(adj), has tests
 [ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=gainDamage:3roll(adj), has tests
+
 <!-- r=custom — needs custom operation implementation -->
+
 [ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack, r=gainDamage:custom
 [ ] card_equip_1_20 Black Arrows — custom: spend arrow to add 3 damage, r=custom
 [ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent, r=custom
 [ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage, r=custom
 [ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin, r=custom
 
-
 ---
 
 ## TODO
 
-* Fix stacked tooltips
-* [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
-* Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
-[ ] Fix spawn locations in monster cards — current data is not correct 
-[ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders) 
-[ ] Show win/loss end screen — BGA default end screen works, custom UI 
-[ ] Range indicator for ranged monster attacks
-[ ] Legend monster special display
-[ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
-[ ] Flip animation for upgrades
+- Fix stacked tooltips
+- [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
+- Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
+  [ ] Fix spawn locations in monster cards — current data is not correct
+  [ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
+  [ ] Show win/loss end screen — BGA default end screen works, custom UI
+  [ ] Range indicator for ranged monster attacks
+  [ ] Legend monster special display
+  [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
+  [ ] Flip animation for upgrades

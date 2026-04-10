@@ -306,6 +306,9 @@ class Game extends Base {
         if ($x === "true") {
             return 1;
         }
+        if (str_starts_with($x, "count")) {
+            return parent::evaluateTerm($x, $owner, $context, $options);
+        }
         if ($context === null) {
             return 0;
         }

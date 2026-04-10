@@ -561,6 +561,105 @@ final class GameTest extends TestCase {
         $this->assertEquals(50, $this->game->getGameProgression());
     }
 
+    // -------------------------------------------------------------------------
+    // countRunes
+    // -------------------------------------------------------------------------
+
+    public function testCountRunesNoDice(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        // No dice on display_battle — should return 0
+        $this->assertEquals(0, $game->countRunes());
+    }
+
+    public function testCountRunesNoneAreRunes(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        // Place dice on display_battle with non-rune sides (1=miss, 5=hit)
+        $game->tokens->moveToken("die_attack_1", "display_battle", 1);
+        $game->tokens->moveToken("die_attack_2", "display_battle", 5);
+        $this->assertEquals(0, $game->countRunes());
+    }
+
+    public function testCountRunesOneRune(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        // Side 3 = rune
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3);
+        $game->tokens->moveToken("die_attack_2", "display_battle", 5);
+        $this->assertEquals(1, $game->countRunes());
+    }
+
+    public function testCountRunesMultipleRunes(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3);
+        $game->tokens->moveToken("die_attack_2", "display_battle", 3);
+        $game->tokens->moveToken("die_attack_3", "display_battle", 6); // hit
+        $this->assertEquals(2, $game->countRunes());
+    }
+
+    public function testCountRunesAllSides(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        // Place one die per side (1-6), only side 3 is rune
+        for ($i = 1; $i <= 6; $i++) {
+            $game->tokens->moveToken("die_attack_$i", "display_battle", $i);
+        }
+        $this->assertEquals(1, $game->countRunes());
+    }
+
+    // -------------------------------------------------------------------------
+    // evaluateTerm / evaluateExpression — countRunes
+    // -------------------------------------------------------------------------
+
+    public function testEvaluateTermCountRunesZero(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        // No dice on display → countRunes evaluates to 0
+        $result = $game->evaluateExpression("countRunes", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(0, $result);
+    }
+
+    public function testEvaluateTermCountRunesWithDice(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3); // rune
+        $game->tokens->moveToken("die_attack_2", "display_battle", 5); // hit
+        $game->tokens->moveToken("die_attack_3", "display_battle", 3); // rune
+        $result = $game->evaluateExpression("countRunes", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(2, $result);
+    }
+
+    public function testEvaluateTermCountRunesInArithmetic(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3); // rune
+        $game->tokens->moveToken("die_attack_2", "display_battle", 3); // rune
+        // countRunes + 1 = 3
+        $result = $game->evaluateExpression("countRunes+1", PCOLOR, "monster_goblin_1");
+        $this->assertEquals(3, $result);
+    }
+
+    public function testEvaluateTermCountRunesComparison(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3); // rune
+        // countRunes>=1 → true (1)
+        $this->assertEquals(1, $game->evaluateExpression("countRunes>=1", PCOLOR, "monster_goblin_1"));
+        // countRunes>=2 → false (0)
+        $this->assertEquals(0, $game->evaluateExpression("countRunes>=2", PCOLOR, "monster_goblin_1"));
+    }
+
+    public function testEvaluateTermCountRunesNoContext(): void {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+        $game->tokens->moveToken("die_attack_1", "display_battle", 3); // rune
+        // countRunes doesn't need context — should still work without one
+        $result = $game->evaluateExpression("countRunes", PCOLOR);
+        $this->assertEquals(1, $result);
+    }
+
     public function testGameProgressionAtEnd(): void {
         $this->game->tokens->createAllTokens();
         $this->game->tokens->moveToken("rune_stone", "timetrack_1", 12);
