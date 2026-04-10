@@ -122,19 +122,19 @@ class Op_upgrade extends Operation {
         $level2Id = $this->getArgsInfo()[$cardId]["tokenIdUi"];
         $heroId = $this->game->getHeroTokenId($owner);
 
+        $suppress = ["noa" => true];
         // Move L1 to limbo (suppress animation)
-        $this->dbSetTokenLocation($cardId, "limbo", 0, "", ["noa" => true]);
+        $this->dbSetTokenLocation($cardId, "limbo", 0, "", $suppress);
 
         // Move L2 to tableau (suppress animation)
         $this->dbSetTokenLocation($level2Id, "tableau_$owner", 0, clienttranslate('${char_name} upgrades to ${token_name}'), [
-            "noa" => true,
             "char_name" => $heroId,
-        ]);
+        ] + $suppress);
 
         // Transfer everything
         $tokens = $this->game->tokens->getTokensOfTypeInLocation(null, $cardId);
         if (count($tokens) > 0) {
-            $this->dbSetTokensLocation($tokens, $level2Id, 0, "", ["noa" => true]);
+            $this->dbSetTokensLocation($tokens, $level2Id, 0, "", $suppress);
         }
     }
 

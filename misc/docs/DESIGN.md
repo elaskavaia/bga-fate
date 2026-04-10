@@ -134,41 +134,47 @@ Operations are the building blocks of game flow. They are queued in the state ma
 
 Kinds: `auto` = server-resolves without player input; `player` = waits for player choice; `main` = counts as 1 of 2 actions per turn; `free` = doesn't consume a main action slot.
 
-### Framework Operations (built-in)
+### Common Machine Operations 
 
-- `nop` (auto) — No-op placeholder
-- `savepoint` (auto) — Marks an undo savepoint
-- `or` (player) — Player picks one branch from multiple choices
-- `order` (player) — Player picks execution order for a set of ops
-- `seq` (auto) — Runs sub-operations in sequence
+- `nop` — No-op placeholder
+- `savepoint` — Marks an undo savepoint
+- `or` — Player picks one branch from multiple choices. Notation: `a/b`
+- `order` — Player picks execution order for a set of ops. Notation: `a+b`
+- `seq` — Runs sub-operations in sequence. Notation: `a,b` or `a;b` (; is lower op priority)
+- `paygain` — Runs sub-operations in sequence. Notation: `cost:effect`
+- `counter` - Modify next operation on stack with count from resolving its expression
 
 
-### Game Operations
+### Main Game Operations
 
-- `turn` (player) — Main player turn: pick 2 actions + free actions — *implemented*
-- `turnconf` (player) — Confirm end of turn (undo checkpoint) — *stub*
-- `turnEnd` (auto) — Reset turn state, queue next player or monsterTurn — *implemented*
-- `turnMonster` (auto) — Advance time track; check win/loss; queue next round — *implemented*
-- `actionMove` (main) — Hero moves up to 3 hexes — *implemented*
-- `actionAttack` (main) — Hero attacks monster within range — *implemented*
-- `actionPrepare` (main) — Draw 1 event card — *implemented*
-- `actionFocus` (main) — Add 1 mana to a card — *implemented*
-- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) — *implemented*
-- `actionPractice` (main) — Gain 1 XP (yellow crystal) — *implemented*
-- `useEquipment` (free) — Activate an equipment card — *notimpl*
-- `useAbility` (free) — Activate an ability card (costs mana) — *notimpl*
-- `playEvent` (free) — Play an event card from hand — *stub: logs effect, no execution*
+- `turn` (player) — Main player turn: pick 2 actions + free actions 
+- `turnconf` (player) — Confirm end of turn (undo checkpoint) 
+- `turnEnd` (auto) — Reset turn state, queue next player or monsterTurn 
+- `turnMonster` (auto) — Advance time track; check win/loss; queue next round 
+- `actionMove` (main) — Hero moves up to 3 hexes 
+- `actionAttack` (main) — Hero attacks monster within range 
+- `actionPrepare` (main) — Draw 1 event card 
+- `actionFocus` (main) — Add 1 mana to a card 
+- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) 
+- `actionPractice` (main) — Gain 1 XP (yellow crystal) 
+- `useEquipment` (free) — Activate an equipment card 
+- `useAbility` (free) — Activate an ability card (costs mana)
+- `playEvent` (free) — Play an event card from hand 
 - `shareGold` (free) — Give gold to another hero — *notimpl*
 
 
-### Card Effect Operations (building blocks for card effects)
+### Card Effect Operations 
 
 These are **generic parameterized operations** used as building blocks to implement card effects.
 They are queued by `playEvent`/`useEquipment`/`useAbility` after the card is played.
 Most are Countable (X = count) and take a target that is either pre-seeded or player-chosen.
 
+See other operations in misc/op_material.csv
+
 **Targeting**: target can be pre-set when queuing (e.g. "self") or left for the player to pick
-from a filtered set. Common target filters:
+from a filtered set. 
+
+Common target filters (passed as "parameter" of operation):
 - `self` — the acting hero
 - `adj` — adjacent character (monster or hero depending on action content, including self)
 - `range` — monster within hero's attack range
@@ -176,14 +182,18 @@ from a filtered set. Common target filters:
 - `any` — any card on hero's tableau
 - `equip` — equipment card on hero's tableau
 
-**Filter conditions** (quoted, appended to target): `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`
+**Filter conditions** (if uses non ident characters quotes needed): 
+This is additional expression that is evaluated on the target
+`'rank<=2'`, `'hp<=2'`, `'rank3+legend'`
 
-**Chaining**: `;` separates multiple operations from one card, e.g. `dealDamage(adj);1moveMonster`
+**Not separate operations** (handled as modifiers/hooks on existing operations):
+- "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 
-**Costs**: `cost:effect` notation for activated effects:
-- `XspendMana:effect` — spend X mana from this card to perform effect, e.g. `3spendMana:3dealDamage(inRange)`
-- `gainDamage:effect` — spend 1 durability (take [DAMAGE] on card) to perform effect, e.g. `gainDamage:1preventDamage`
-- Multiple options separated by `/`: `(1spendMana:1moveHero)/(2spendMana:2dealDamage(adj))`
+
+### Trigger System
+
+Cards (events, abilities, equipment) can have an **`on`** field in Material specifying when they can be activated.
+At key points during gameplay, an `Op_trigger` is queued to offer the player matching cards.
 
 **`on` column** — timing trigger for when the card can be played:
 - (empty) — play anytime during your turn (once per turn; tracked via token state=1, reset in turnEnd)
@@ -193,59 +203,43 @@ from a filtered set. Common target filters:
 - `monsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
 - `monsterAttack` — play after a monster attacks you
 
-- `damage X target` (Countable) — Deal X damage to target character (no dice).
-  Used by: Kick, Courage, Lightning Bolt, Rain of Fire, etc.
-- `heal X target` (Countable) — Remove X damage from target hero.
-  Used by: Rest, Belt of Youth, Healing Potion, etc.
-- `roll X target` (Countable) — Roll X attack dice against target (uses existing dice/combat system).
-  Used by: Snipe, Hard Rock, Chain Lightning, Heat Stroke, etc.
-- `moveHero X` (Countable) — Move hero up to X areas (subset of actionMove logic).
-  Used by: Agility, Maneuver, Fleetfoot, Blown Away
-- `moveMonster X target` (Countable, player) — Move target monster X areas. Player selects monster, then destination hex.
-  Param: range filter (adj/inRange). Assumption: player will not select Grimheim as destination (no monsterEntersGrimheim logic).
-  Used by: Kick, Swift Kick, Bowling
-- `killMonster target` (player) — Kill target monster (with filter: rank, health, range).
-  Used by: Back Down, Short Temper, Heat Death, In Charge
-- `gainXp X(condition)` (auto) — Gain X gold/XP (move yellow crystals to tableau).
-  Optional condition: `grimheim` (hero in Grimheim), `adjMountain` (hero adjacent to mountain).
-  Used by: Miner (`2gainXp(adjMountain)`), Popular (`2gainXp(grimheim)`), Discipline, actionPractice
-- `gainMana X target` (player) — Add X mana to target card.
-  Used by: Power Surge, Elementary Student, Focus event
-- `spendMana X source` (player) — Remove X mana from source card (cost/prerequisite).
-  Used by: precondition for mana-activated abilities
-- `drawEvent X` (Countable, confirm) — Draw X event cards. If hand is at limit, prompts discard first.
-  Param: `max` — draw until hand is full (no discard prompt).
-  Used by: actionPrepare (drawEvent), Starsong (2drawEvent), Preparations (drawEvent(max))
-- `spendAction type` (auto) — Consume a main action slot without performing the action.
-  Param(0): action type to spend (e.g. "actionPrepare").
-  Used by: event cards that cost an action (e.g. Preparations)
-- `addTownPiece` (auto) — Add 1 Town Piece back to Grimheim (returns a destroyed house to its hex).
-  Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
-- `preventDamage X` (auto) — Prevent up to X damage in current attack.
-  Used by: Dodge, Stoneskin, Riposte, Dreadnought
-- `repairCard X target` (Countable) — Remove up to X damage from target card on tableau.
-  Use `99repairCard` for "remove all damage" (99 is effectively unlimited).
-  Used by: Durability (99repairCard), Mend in Grimheim (5repairCard)
-- `performAction type` (auto) — Queue an additional main action (attack/mend/focus/prepare/practice).
-  Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket
-- `monsterMoveAll` (auto) — Move all monsters toward Grimheim. Extracted from `turnMonster` to allow
-  pre-movement triggers (e.g. Suppressive Fire). Monsters with a green crystal (stunned) skip movement;
-  crystal stays on the monster until next `c_supfire` trigger. Data field: `charge` (bool) for skull turn bonus step.
-- `c_supfire` (player, triggered) — Prevent a monster within range 3 from moving this monster turn.
-  Triggered via `useAbility` on `monsterMove`. Places a green crystal on the monster (stun marker).
-  Param(0): optional filter expression (e.g. `'rank<=2'` for Level I). Monsters with an existing green
-  crystal are excluded from selection ("cannot choose same monster next turn"). On resolve, any existing
-  stun crystal is moved to the new target. On skip, the old crystal is removed.
+**How triggers fire:**
 
-**Not separate operations** (handled as modifiers/hooks on existing operations):
-- "Add X damage to this attack" — modifier applied in `actionAttack` resolve
-- "Attack range +X this turn" — temporary attribute modifier via tracker (see Hero Attribute Trackers below)
-- "Reroll all misses" — modifier on dice result in `actionAttack`
-- "Add damage for each [RUNE]" — modifier on dice result
-- "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
-- Static/persistent effects (strength bonus, armor, mana regen) — read from card data during relevant ops
-- Equipment [DAMAGE] effects — consume durability, separate activation system
-- Quest completion — specific quest logic, not a generic operation
+1. An operation calls `$this->queueTrigger("triggerType")` (or `queueTrigger()` which defaults to the operation's own type).
+2. This queues `Op_trigger(triggerType)` for the current player.
+3. `Op_trigger.getPossibleMoves()` instantiates `useEquipment`, `useAbility`, and `playEvent` with `["on" => triggerType]`, collecting all cards whose Material `on` field matches.
+4. The player picks a card (or skips). On selection, `Op_trigger.resolve()` queues the corresponding action (`useEquipment`/`useAbility`/`playEvent`) with the chosen card as target.
+5. That action executes the card's `r` rule (e.g., `playEvent` discards the event card, then queues the effect operations parsed from its `r` field).
+
+**Where triggers are queued (operation → trigger → description):**
+
+```
+Op_roll
+  → trigger(roll)            — after a hero rolls attack dice
+  → trigger(actionAttack)    — after a roll initiated by Op_actionAttack
+Op_actionMove
+  → trigger(actionMove)      — after hero movement resolves
+Op_resolveHits
+  → trigger(resolveHits)     — before damage is applied to a hero (for damage prevention)
+Op_dealDamage
+  → trigger(monsterKilled)   — when a monster is killed
+Op_turnEnd
+  → trigger(turnEnd)         — at end of player turn
+```
+
+**Attack action trigger sequence (example):**
+
+```
+actionAttack → player picks target → roll dice
+  → trigger(roll)          — cards with on="roll" offered (e.g., Perfect Aim: reroll misses)
+  → trigger(actionAttack)  — cards with on="actionAttack" offered (e.g., Master Shot: add 2 damage)
+  → resolveHits            — converts dice to damage
+    → trigger(resolveHits) — damage prevention cards offered (e.g., Dodge: prevent damage)
+  → dealDamage             — applies damage to monster
+    → trigger(monsterKilled) — if monster died (e.g., Nailed Together: pierce overkill)
+```
+
+Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
 
 ### Hero Attribute Trackers
 
@@ -382,18 +376,6 @@ These are found on Event Cards, which are drawn into your hand rather than place
 Less common but present in specialized hero builds, these change one outcome for another. [10] 
 
 * Example: Syndra's "Circle of Life" allows damage that would be dealt to her to be placed on the card instead, where it can later be repaired. [4] 
-
-[1] [https://www.youtube.com](https://www.youtube.com/watch?v=_6XfamMLPQ8&t=2)
-[2] RULES
-[3] [https://www.youtube.com](https://www.youtube.com/watch?v=ZPvuN_9b9L8&t=16)
-[4] [https://www.youtube.com](https://www.youtube.com/watch?v=v-2_QiLx9y8&t=540)
-[5] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3650916/abilities)
-[6] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3556712/timing-of-attack-rolls-and-abilities-and-more-ques)
-[7] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3636742/questions-after-1st-play)
-[8] RULES
-[9] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3650916/abilities)
-[10] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3541771/2-newbie-questions-on-abilities)
-[11] [https://boardgamegeek.com](https://boardgamegeek.com/thread/3497389/move-towards-grimheim-plus-end-movement-question)
 
 
 

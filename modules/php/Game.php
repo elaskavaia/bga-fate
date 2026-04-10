@@ -403,6 +403,20 @@ class Game extends Base {
         return $hits;
     }
 
+    /** Count dice on display_battle showing a rune (side 3). Used by evaluateExpression("countRunes"). */
+    function countRunes($owner = null, $context = null, $options = null): int {
+        $count = 0;
+        $diceOnDisplay = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        foreach ($diceOnDisplay as $die) {
+            $roll = (int) $die["state"];
+            $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
+            if ($rule === "rune") {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
     /**
      * Destroy N town pieces (houses). Freyja's Well (house_0) is always destroyed last.
      * @param string $charId token causing the destruction (for log messages and animation)

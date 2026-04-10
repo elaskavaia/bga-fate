@@ -845,6 +845,56 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertNotValidTarget($backDown, "Back Down should not be offered for rank 3 monsters");
     }
 
+    // --- Master Shot (card_event_1_26) ---
+
+    public function testMasterShotAdds2DamageDuringAttack(): void {
+        $masterShot = "card_event_1_26_1";
+        $color = $this->playerColor();
+        $this->seedHand($masterShot, $color);
+
+        // Place a troll adjacent (health=7)
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_9";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        // Use both action markers so only attack is available
+        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
+        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+
+        // Bjorn strength=3, all hits
+        $this->seedRand([5, 5, 5]);
+        $this->respond("actionAttack");
+
+        // Skip trigger(roll) if it appears
+        $args = $this->getOpArgs();
+        if (($args["data"]["params"] ?? "") === "roll") {
+            $this->skip();
+            $args = $this->getOpArgs();
+        }
+
+        // trigger(actionAttack) — Master Shot should be offered
+        $this->assertEquals("trigger", $args["type"] ?? "");
+        $this->assertEquals("actionAttack", $args["data"]["params"] ?? "");
+        $this->assertValidTarget($masterShot);
+
+        $this->respond($masterShot);
+
+        // Master Shot adds 2 damage dice → troll takes 3 hits + 2 bonus = 5 total damage
+        $this->assertEquals(5, $this->countDamage($troll), "Troll should have 5 damage (3 hits + 2 from Master Shot)");
+
+        // Master Shot card should be discarded from hand
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($masterShot));
+    }
+
+    public function testMasterShotNotOfferedOutsideAttack(): void {
+        $masterShot = "card_event_1_26_1";
+        $color = $this->playerColor();
+        $this->seedHand($masterShot, $color);
+
+        // Master Shot has on=actionAttack, so it should NOT be a valid free action target
+        $this->assertNotValidTarget($masterShot, "Master Shot should not be playable outside an attack");
+    }
+
     // --- Limber Bow (card_event_1_32) ---
 
     public function testLimberBowAddsRange2AndResetsAfterTurn(): void {

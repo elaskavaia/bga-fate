@@ -224,6 +224,10 @@ export class Game extends Game1Tokens {
         const handCounter = $(`counter_hand_${color}`);
         if (handCounter) handCounter.dataset.limit = String(tokenInfo.state);
       }
+    } else if (tokenKey.startsWith("marker_") && loc.startsWith("tableau_")) {
+      const color = getPart(loc, 1);
+      result.location = `miniboard_${color}`;
+      result.noa = true;
     } else if (loc === "supply_monster") {
       // Stack monsters by type in supply: create sub-container per monster type
       const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
@@ -579,7 +583,7 @@ export class Game extends Game1Tokens {
       minDuration: 1,
       minDurationNoText: 1,
 
-      logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
+      //logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
       //handlers: [this, this.tokens],
       onStart: (notifName, msg, args) => {
         if (msg) this.setSubPrompt(msg, args);
@@ -592,8 +596,16 @@ export class Game extends Game1Tokens {
     return super.notif_tokenMoved(args);
   }
 
+  async notif_tokenMovedAsync(args: any) {
+    return super.notif_tokenMovedAsync(args);
+  }
+
   async notif_counter(args: any) {
     return super.notif_counter(args);
+  }
+
+  async notif_counterAsync(args: any) {
+    return super.notif_counterAsync(args);
   }
 
   async notif_message(args: any) {

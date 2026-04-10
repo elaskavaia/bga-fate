@@ -182,6 +182,7 @@ export class GameMachine {
       if (!tokenNode) {
         this.game.prepareToken(cardId);
         tokenNode = $(cardId);
+        tokenNode.id = `${cardId}_temp`;
         return tokenNode?.outerHTML;
       }
       return this.cloneForReplication(tokenNode);

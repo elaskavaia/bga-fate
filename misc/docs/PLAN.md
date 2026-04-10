@@ -529,7 +529,7 @@ Hero, Abilities and Equipment:
 [x] card_event_1_31 Perfect Aim — rerollMisses, r=rerollMisses
 <!-- r=custom — needs custom operation implementation -->
 [x] card_event_1_32 Limber Bow — attack range +2 this turn, r=2gainAtt(range)
-[ ] card_event_1_26 Master Shot — custom: add 2 damage to attack, r=custom
+[x] card_event_1_26 Master Shot — custom: add 2 damage to attack  - verify
 [ ] card_event_1_33 Piercing Arrows — custom: add 1 damage per rune, r=custom
 [ ] card_event_1_25 Prey — custom: mark monster for +2 XP, r=custom
 [ ] card_event_1_34 Seek Shelter — custom: move up to 2 into a location, r=custom
@@ -564,4 +564,4 @@ Hero, Abilities and Equipment:
 [ ] Range indicator for ranged monster attacks
 [ ] Legend monster special display
 [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
-[ ] Horizonal timetrack: I need to refactor timetrack looks like in UI.  There are two timetrack but only one active in any given game. I have this images /home/elaskavaia/git/bga-fate/img/timeline.webp and they are vertical and used as background now. Instead I want time track to be horizonal area on top of the board and instead of single bg image i just use grid with individual icons matching timeline events. Can you plan this for me?
+[ ] Flip animation for upgrades

@@ -81,7 +81,7 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 #14|6|Discipline II||||custom||Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.|
 #11|6|Meditation I|||1|custom||Freely move mana [MANA] from Meditation to other cards.|Meditating? Sleeping? Both do wonders for you.
 #12|6|Meditation II|||2|custom||Freely move mana [MANA] between your cards.|"Repeat until you reach enlightenment: ""Wah Tefu Layam""."
-#3|6|Spark I|||1|2spendMana:custom|actionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
-#4|6|Spark II|||2|custom|actionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
+#3|6|Spark I|||1|2spendMana:2addDamage|actionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
+#4|6|Spark II|||2|[1,3](spendMana:addDamage)|actionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
 #9|6|Stonesoul I|||1|custom||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.
 #10|6|Stonesoul II|||2|custom||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…

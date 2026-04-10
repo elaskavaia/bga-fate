@@ -293,6 +293,9 @@ class Hero extends Character {
      */
     function placeActionMarker(string $actionType): void {
         $x = count($this->getActionsTaken()) + 1;
+        if ($x > 2) {
+            return;
+        }
         $actionName = $this->game->getTokenName("Op_$actionType");
         $this->game->tokens->dbSetTokenLocation(
             "marker_{$this->owner}_{$x}",

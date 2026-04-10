@@ -10,9 +10,9 @@ num|hno|name|count|r|on|effect|flavour
 29|1|Back Down|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
 28|1|Burning Arrows|4|c_arrows||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!
 32|1|Limber Bow|2|2gainAtt(range)||You have attack range +2 this turn.|Twannng!
-26|1|Master Shot|4|custom|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
+26|1|Master Shot|4|2addDamage|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
 31|1|Perfect Aim|2|rerollMisses|roll|Reroll all misses.|Hitting where it hurts, not always in the head.
-33|1|Piercing Arrows|2|custom|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
+33|1|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 25|1|Prey|2|custom||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 27|1|Rest|2|2heal(self)||Heal 2 damage from Bjorn.|Sea therapy, works every time...
 34|1|Seek Shelter|1|custom||Move up to 2 areas into a location. You may not move more this turn.|Phew, lucky there was a cave here… Who's snoring?
@@ -23,7 +23,7 @@ num|hno|name|count|r|on|effect|flavour
 30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
 27|2|Mastery|3|custom|actionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
 26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
-34|2|Piercing Arrows|2|custom|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
+34|2|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
 36|2|Prey|1|custom||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 31|2|Rest|2|2heal(self)||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.

@@ -1567,6 +1567,7 @@ class GameMachine {
             if (!tokenNode) {
                 this.game.prepareToken(cardId);
                 tokenNode = $(cardId);
+                tokenNode.id = `${cardId}_temp`;
                 return tokenNode?.outerHTML;
             }
             return this.cloneForReplication(tokenNode);
@@ -2135,6 +2136,11 @@ class Game extends Game1Tokens {
                     handCounter.dataset.limit = String(tokenInfo.state);
             }
         }
+        else if (tokenKey.startsWith("marker_") && loc.startsWith("tableau_")) {
+            const color = getPart(loc, 1);
+            result.location = `miniboard_${color}`;
+            result.noa = true;
+        }
         else if (loc === "supply_monster") {
             // Stack monsters by type in supply: create sub-container per monster type
             const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
@@ -2491,7 +2497,7 @@ class Game extends Game1Tokens {
         this.bga.notifications.setupPromiseNotifications({
             minDuration: 1,
             minDurationNoText: 1,
-            logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
+            //logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
             //handlers: [this, this.tokens],
             onStart: (notifName, msg, args) => {
                 if (msg)
@@ -2503,8 +2509,14 @@ class Game extends Game1Tokens {
     async notif_tokenMoved(args) {
         return super.notif_tokenMoved(args);
     }
+    async notif_tokenMovedAsync(args) {
+        return super.notif_tokenMovedAsync(args);
+    }
     async notif_counter(args) {
         return super.notif_counter(args);
+    }
+    async notif_counterAsync(args) {
+        return super.notif_counterAsync(args);
     }
     async notif_message(args) {
         //console.log("notif", args);

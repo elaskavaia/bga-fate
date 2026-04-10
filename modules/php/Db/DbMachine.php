@@ -294,6 +294,5 @@ class DbMachine {
         return [];
     }
 
-    public function fromJson(array $rows): void {
-    }
+    public function fromJson(array $rows): void {}
 }

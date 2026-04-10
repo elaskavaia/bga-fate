@@ -1098,8 +1098,6 @@ class DbTokens {
         $notifyArgs = [
             "token_id" => $token_id,
             "place_id" => $place_id,
-            "token_name" => $token_id,
-            "place_name" => $place_id,
             "new_state" => $state,
             "place_from" => $place_from,
         ];
@@ -1107,7 +1105,15 @@ class DbTokens {
         if (str_contains($notif, '${token_div}')) {
             $notifyArgs["token_div"] = $token_id;
         }
+
+        if (str_contains($notif, '${place_name}')) {
+            $notifyArgs["place_name"] = $place_id;
+        }
+        if (str_contains($notif, '${token_name}')) {
+            $notifyArgs["token_name"] = $token_id;
+        }
         $args = array_merge($notifyArgs, $args);
+
         //$this->warn("$type $notif ".$args['token_id']." -> ".$args['place_id']."|");
         if ($player_id != 0) {
             // use it
@@ -1318,6 +1324,5 @@ class DbTokens {
         return [];
     }
 
-    public function fromJson(array $rows): void {
-    }
+    public function fromJson(array $rows): void {}
 }

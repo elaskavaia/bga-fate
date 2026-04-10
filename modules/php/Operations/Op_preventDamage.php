@@ -52,8 +52,7 @@ class Op_preventDamage extends CountableOperation {
         $newCount = $currentCount - $prevented;
 
         // Update the dealDamage operation's count
-        $dealDamageOp->withDataField("count", $newCount);
-        $this->game->machine->db->updateData($dealDamageOp->getId(), $dealDamageOp->getDataForDb());
+        $this->game->machine->setCounts($dealDamageOp, $newCount);
 
         if ($newCount <= 0) {
             $this->game->machine->db->hide($dealDamageRow);

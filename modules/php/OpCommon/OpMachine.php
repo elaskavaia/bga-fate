@@ -221,6 +221,20 @@ class OpMachine {
         $rank++;
     }
 
+    function setCounts($opOrRow, mixed $count, mixed $mincount = null): void {
+        if ($opOrRow instanceof Operation) {
+            $op = $opOrRow;
+        } else {
+            $op = $this->instanciateOperationFromDbRow($opOrRow);
+        }
+        $op->withDataField("count", $count);
+        if ($mincount === null) {
+            $mincount = $count;
+        }
+        $op->withDataField("mcount", $mincount);
+        $this->db->updateData($op->getId(), $op->getDataForDb());
+    }
+
     //DISPATCH
 
     function dispatchAll(int $n = OpMachine::MA_GAME_DISPATCH_MAX) {

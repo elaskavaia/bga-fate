@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
