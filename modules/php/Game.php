@@ -539,10 +539,6 @@ class Game extends Base {
         return $name;
     }
 
-    function getTrackerIdAndValue(?string $color, string $type, ?array &$arr = null) {
-        return $this->tokens->getTrackerIdAndValue($color, $type, $arr);
-    }
-
     function getEndScores(): array {
         $endScores = [];
         $players = $this->loadPlayersBasicInfos();
