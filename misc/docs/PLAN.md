@@ -371,6 +371,22 @@ See CLAUDE.md for project overview
 - [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
 - [x] `spendAction` — Consume a main action slot without performing it. Used by: event cards that cost an action
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
+- [x] `spendGold` — Remove X yellow crystals (gold/arrows) from the context card as a cost. Parallel to `spendMana`. Used by: Black Arrows (`1spendGold:3addDamage`), future "spend token from card" effects.
+
+### Extensions to existing ops
+
+- [x] `addDamage` — accept a defender-filter expression param like `Op_dealDamage` already supports (e.g. `1addDamage(true,trollkin)` for Trollbane). Added `trollkin`/`firehorde`/`dead` bareword terms in `Game::evaluateTerm`.
+- [ ] Hero target resolver (`getRangeFromParam`) — add `adj_attack` target meaning "monsters adjacent to the current attack target hex" (via `getAttackHex()`). Used by Bone Bane Bow's `dealDamage(adj_attack)`.
+- [ ] `repairCard` — rename `all` param to `max` and replace `99repairCard` kludges in CSV files with the cleaner form.
+
+### Auto-triggered static effects (new mechanism — blocker for 2 cards)
+
+The current `on=` trigger system only *offers* cards to the player via `Op_trigger` for voluntary activation. Several equipment cards need effects that fire automatically without the player invoking `useEquipment`:
+
+- **`equipPlaced`** trigger — fires when an equipment card enters the tableau. Needed by Black Arrows to seed 3 yellow crystals on the card when equipped.
+- **Per-rune rolled** automatic hook — fires for each rune die showing after an attack roll. Needed by Home Sewn Cape to add 1 mana to the card per rune rolled.
+
+Design direction (TBD): either a new trigger kind that runs a rule expression server-side (not prompting the player), or dedicated hooks on equip-placement / roll resolution for one-shot automatic effects. Needs a separate design pass.
 
 ### Integration
 
