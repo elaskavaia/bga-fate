@@ -33,7 +33,6 @@ class Op_c_supfire extends Operation {
 
     private function matchesFilter(string $monsterId): bool {
         $filter = $this->getParam(0, "true");
-        $filter = trim($filter, "'");
         return !!$this->game->evaluateExpression($filter, $this->getOwner(), $monsterId);
     }
 

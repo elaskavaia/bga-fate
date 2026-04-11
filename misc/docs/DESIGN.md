@@ -182,9 +182,15 @@ Common target filters (passed as "parameter" of operation):
 - `any` — any card on hero's tableau
 - `equip` — equipment card on hero's tableau
 
-**Filter conditions** (if uses non ident characters quotes needed): 
-This is additional expression that is evaluated on the target
-`'rank<=2'`, `'hp<=2'`, `'rank3+legend'`
+**Filter conditions** (if uses non ident characters quotes needed):
+This is additional expression that is evaluated on the target using the MathExpression
+engine (`Base::evaluateExpression`). Terms are resolved via `Game::evaluateTerm`:
+- numeric rules fields (`rank`, `health`, `strength`, `xp`, ...) resolve via `getRulesFor`
+- bareword predicates: `legend`, `not_legend`, `trollkin`, `firehorde`, `dead`, `adj`,
+  `closerToGrimheim`, `healthRem`
+- `count*` terms dispatch to methods on `Game` (e.g. `countRunes`)
+
+Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quotes needed).
 
 **Not separate operations** (handled as modifiers/hooks on existing operations):
 - "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)

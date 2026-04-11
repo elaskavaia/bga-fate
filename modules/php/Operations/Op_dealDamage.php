@@ -46,7 +46,6 @@ class Op_dealDamage extends CountableOperation {
 
     private function matchesFilter(string $monsterId): bool {
         $filter = $this->getParam(1, "true");
-        $filter = trim($filter, "'");
         return !!$this->game->evaluateExpression($filter, $this->getOwner(), $monsterId);
     }
 

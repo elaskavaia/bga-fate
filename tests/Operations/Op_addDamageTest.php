@@ -107,4 +107,67 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $dice = $this->getDiceOnBattle();
         $this->assertCount(3, $dice, "Should add 3 dice for distance 3");
     }
+
+    // --- Param: filter expression (param 1) ---
+
+    public function testFilterMatchesFaction(): void {
+        // Trollbane: add 1 damage when attacking trollkin
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $op = $this->createOp("1addDamage(true,trollkin)");
+        $this->assertEquals(0, $op->getErrorCode(), "Filter should pass for trollkin target");
+    }
+
+    public function testFilterRejectsWrongFaction(): void {
+        // Target is firehorde, filter requires trollkin
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $this->op = $this->createOp("1addDamage(true,trollkin)");
+        $this->assertNoValidTargets("Filter should reject non-trollkin target");
+    }
+
+    public function testFilterRejectsNoAttackMarker(): void {
+        // marker_attack in limbo, filter requires trollkin
+        $this->op = $this->createOp("1addDamage(true,trollkin)");
+        $this->assertNoValidTargets("Filter should reject when no attack marker");
+    }
+
+    public function testFilterRejectsNoMonsterOnHex(): void {
+        // Marker on empty hex, filter set
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $this->op = $this->createOp("1addDamage(true,trollkin)");
+        $this->assertNoValidTargets("Filter should reject when no character on marked hex");
+    }
+
+    public function testFilterRankExpression(): void {
+        // monster_goblin is rank 1, filter requires rank<=2
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $op = $this->createOp("1addDamage(true,'rank<=2')");
+        $this->assertEquals(0, $op->getErrorCode(), "rank<=2 should pass for rank 1 goblin");
+    }
+
+    public function testFilterRankExpressionFails(): void {
+        // monster_troll is rank 3, filter requires rank<=2
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $this->op = $this->createOp("1addDamage(true,'rank<=2')");
+        $this->assertNoValidTargets("rank<=2 should reject rank 3 troll");
+    }
+
+    public function testFilterCombinedWithMinRange(): void {
+        // Both range and filter: monster at distance 2, trollkin
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_9_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_9_8");
+        $op = $this->createOp("1addDamage(2,trollkin)");
+        $this->assertEquals(0, $op->getErrorCode(), "Range and filter should both pass");
+    }
+
+    public function testFilterResolveAddsDice(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $op = $this->createOp("1addDamage(true,trollkin)");
+        $op->resolve();
+        $this->assertCount(1, $this->getDiceOnBattle(), "Should add 1 die when filter passes");
+    }
 }

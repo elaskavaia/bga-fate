@@ -182,7 +182,11 @@ abstract class Operation {
             return $default;
         }
         $pargs = explode(",", $params);
-        return $pargs[$index] ?? $default;
+        $val = $pargs[$index] ?? $default;
+        if (is_string($val)) {
+            $val = trim($val, "'");
+        }
+        return $val;
     }
 
     final function isTrancient() {

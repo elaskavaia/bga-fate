@@ -21,11 +21,18 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * addDamage: Add X hit dice to display_battle (guaranteed damage, no roll needed).
  * Count = number of damage dice to add (default 1).
  *
+ * Params:
+ * - param(0): range specifier — "" or "true" (no range check), "dist" (amount = distance to target),
+ *             or numeric min-range (e.g. "2" means range 2+)
+ * - param(1): optional filter expression evaluated against the current attack target monster.
+ *             Uses the MathExpression bareword terms defined in Game::evaluateTerm
+ *             (e.g. "trollkin", "legend", "rank<=2"). Defaults to no filter.
+ *
  * Behaviour:
  * - Automated: places count dice on display_battle with state 6 (hit/damage)
  * - Used by cards that say "add X damage to this attack action"
  *
- * Used by: Master Shot, Berserk, hero card effects, etc.
+ * Used by: Master Shot, Berserk, hero card effects, Trollbane (1addDamage(true,trollkin)), etc.
  */
 class Op_addDamage extends CountableOperation {
     private function getRangeParam(): string {
@@ -41,23 +48,38 @@ class Op_addDamage extends CountableOperation {
         return $this->game->hexMap->getHexDistance($hero->getHex(), $hex);
     }
 
+    private function matchesFilter(): bool {
+        $filter = $this->getParam(1, "");
+        if ($filter === "" || $filter === "true") {
+            return true;
+        }
+        $hex = $this->game->getAttackHex();
+        if ($hex === null) {
+            return false;
+        }
+        $defenderId = $this->game->hexMap->getCharacterOnHex($hex, null);
+        if ($defenderId === null) {
+            return false;
+        }
+        return !!$this->game->evaluateExpression($filter, $this->getOwner(), $defenderId);
+    }
+
     public function getPossibleMoves() {
         $param = $this->getRangeParam();
-        if ($param === "") {
-            return parent::getPossibleMoves();
-        }
         if ($param === "dist") {
             $dist = $this->getDistanceToTarget();
             if ($dist === null || $dist < 1) {
                 return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No attack target")];
             }
-            return parent::getPossibleMoves();
+        } elseif ($param !== "" && $param !== "true") {
+            $minRange = (int) $param;
+            $dist = $this->getDistanceToTarget();
+            if ($dist === null || $dist < $minRange) {
+                return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Target not in range")];
+            }
         }
-        // Numeric param: minimum distance required (e.g. "2" means range 2+)
-        $minRange = (int) $param;
-        $dist = $this->getDistanceToTarget();
-        if ($dist === null || $dist < $minRange) {
-            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Target not in range")];
+        if (!$this->matchesFilter()) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Target does not match filter")];
         }
         return parent::getPossibleMoves();
     }
