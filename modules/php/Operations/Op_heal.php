@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -58,7 +58,10 @@ class Op_heal extends CountableOperation {
             $hex = $this->game->hexMap->getCharacterHex($heroId);
             $this->game->systemAssert("ERR:heal:noHex:$heroId", $hex !== null);
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
-            $targets[$hex] = $damage > 0 ? ["q" => Material::RET_OK] : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to heal")];
+            $targets[$hex] =
+                $damage > 0
+                    ? ["q" => Material::RET_OK]
+                    : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to heal")];
         }
         return $targets;
     }

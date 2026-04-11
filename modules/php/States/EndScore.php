@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -19,16 +19,9 @@ use Bga\Games\Fate\Game;
 
 const ST_END_GAME = 99;
 
-class EndScore extends \Bga\GameFramework\States\GameState
-{
-
-    function __construct(
-        protected Game $game,
-    ) {
-        parent::__construct($game,
-            id: 98,
-            type: StateType::GAME,
-        );
+class EndScore extends \Bga\GameFramework\States\GameState {
+    function __construct(protected Game $game) {
+        parent::__construct($game, id: 98, type: StateType::GAME);
     }
 
     /**

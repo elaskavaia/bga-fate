@@ -2,7 +2,7 @@
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
- * Fate implementation : © Alena Laskavaia <laskava@gmail.com>
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -27,7 +27,7 @@ namespace Bga\Games\Fate\Operations;
  */
 class Op_killMonster extends Op_dealDamage {
     function getPrompt() {
-        return clienttranslate('Choose a monster to kill');
+        return clienttranslate("Choose a monster to kill");
     }
 
     function canSkip() {
