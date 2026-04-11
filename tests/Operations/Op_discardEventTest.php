@@ -34,17 +34,15 @@ final class Op_discardEventTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testHandCardsAreTargets(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
         // Setup draws 1 card to hand
         $handCards = $this->getHandCards();
         $this->assertNotEmpty($handCards);
         foreach ($handCards as $cardId => $info) {
-            $this->assertArrayHasKey($cardId, $moves);
+            $this->assertValidTarget($cardId);
         }
     }
 
@@ -60,10 +58,8 @@ final class Op_discardEventTest extends AbstractOpTestCase {
 
     public function testMultipleHandCardsAllTargetable(): void {
         $this->fillHand(2); // plus the 1 from setup = 3 total
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
         $handCards = $this->getHandCards();
-        $this->assertCount(count($handCards), $moves);
+        $this->assertValidTargetCount(count($handCards));
     }
 
     // -------------------------------------------------------------------------

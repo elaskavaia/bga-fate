@@ -16,18 +16,16 @@ final class Op_gainManaTest extends AbstractOpTestCase {
     }
 
     private function getMana(string $cardId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
+        return $this->countGreenCrystals($cardId);
     }
 
     public function testOnlyManaCardsAreTargets(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
         // Sure Shot I has mana field — should be a target
-        $this->assertArrayHasKey("card_ability_1_3", $moves);
+        $this->assertValidTarget("card_ability_1_3");
         // First Bow has no mana field — should not be a target
-        $this->assertArrayNotHasKey("card_equip_1_15", $moves);
+        $this->assertNotValidTarget("card_equip_1_15");
         // Hero card has no mana field — should not be a target
-        $this->assertArrayNotHasKey("card_hero_1_1", $moves);
+        $this->assertNotValidTarget("card_hero_1_1");
     }
 
     public function testResolveAdds1Mana(): void {
@@ -43,18 +41,17 @@ final class Op_gainManaTest extends AbstractOpTestCase {
     }
 
     public function testResolveTakesFromSupply(): void {
-        $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "supply_crystal_green"));
+        $supplyBefore = $this->countGreenCrystals("supply_crystal_green");
         $this->op = $this->createOp("2gainMana");
         $this->call_resolve("card_ability_1_3");
-        $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "supply_crystal_green"));
+        $supplyAfter = $this->countGreenCrystals("supply_crystal_green");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
 
     public function testPresetTargetReturnsOnlyThatTarget(): void {
-        $op = $this->createOp("2gainMana", ["target" => "card_ability_1_3"]);
-        $moves = $op->getPossibleMoves();
-        $this->assertCount(1, $moves);
-        $this->assertArrayHasKey("card_ability_1_3", $moves);
+        $this->op = $this->createOp("2gainMana", ["target" => "card_ability_1_3"]);
+        $this->assertValidTargetCount(1);
+        $this->assertValidTarget("card_ability_1_3");
     }
 
     public function testManaStacksOnCard(): void {

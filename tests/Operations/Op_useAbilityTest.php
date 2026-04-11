@@ -2,18 +2,13 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_useAbility;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
 final class Op_useAbilityTest extends AbstractOpTestCase {
     /** card_ability_1_7 = Stitching I (hero 1, r=1heal(adj)) */
     private string $cardId = "card_ability_1_7";
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Add damage so heal(adj) is not void
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1");
@@ -30,38 +25,33 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
     }
 
     public function testStitchingIsValidTarget(): void {
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
-        $this->assertEquals(0, $moves[$this->cardId]["q"]);
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
+        $this->assertValidTarget($this->cardId);
     }
 
     public function testPassiveCardSkipped(): void {
         // Eagle Eye I has r=passive
-        $this->game->tokens->moveToken("card_ability_1_9", "tableau_" . PCOLOR);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("card_ability_1_9", $moves);
+        $this->game->tokens->moveToken("card_ability_1_9", $this->getPlayersTableau());
+        $this->assertNotValidTarget("card_ability_1_9");
     }
 
     public function testEmptyRCardSkipped(): void {
         // Find a card with empty r — Long Shot I has r=passive too, but Eagle Eye has no r field
         // Eagle Eye I: r=passive — already tested. Check card with r=""
         // All non-passive Bjorn abilities have r set, so test with a passive one
-        $this->game->tokens->moveToken("card_ability_1_9", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_ability_1_9", $this->getPlayersTableau());
         $op = $this->op;
         $this->assertTrue($op->isVoid());
     }
 
     public function testNotVoidWithUsableCard(): void {
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
         $op = $this->op;
         $this->assertFalse($op->isVoid());
     }
 
     public function testResolveQueuesRExpression(): void {
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
         $op = $this->op;
         $this->call_resolve($this->cardId);
         $pending = $this->game->machine->getTopOperations(PCOLOR);
@@ -71,41 +61,35 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
     public function testEffectVoidReturnsError(): void {
         // Stitching r=1heal(adj) — remove all hero damage so heal is void
         $this->game->effect_moveCrystals("hero_1", "red", -3, "hero_1");
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
-        $this->assertNotEquals(0, $moves[$this->cardId]["q"]);
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
+        $this->assertNotValidTarget($this->cardId);
     }
 
     public function testMultipleCardsOffered(): void {
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR); // Stitching I
-        // Sure Shot I: r=3spendMana:3dealDamage(inRange) — needs mana on card
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau()); // Stitching I
+        // Sure Shot I: r=3spendMana:3dealDamage(inRange) — needs 3 mana on card and a monster in range
         $sureShotId = "card_ability_1_3";
-        $this->game->tokens->moveToken($sureShotId, "tableau_" . PCOLOR);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
-        $this->assertArrayHasKey($sureShotId, $moves);
+        $this->game->tokens->moveToken($sureShotId, $this->getPlayersTableau());
+        $this->game->effect_moveCrystals("hero_1", "green", 3, $sureShotId, ["message" => ""]);
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->assertValidTarget($this->cardId);
+        $this->assertValidTarget($sureShotId);
     }
 
     public function testCardWithoutTriggerCannotBeUsedTwice(): void {
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . PCOLOR);
-        $op = $this->op;
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
         // First use — card should be available
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
+        $this->assertValidTarget($this->cardId);
         // Use the card
         $this->call_resolve($this->cardId);
         // Second use — card should no longer be available
-        $op2 = $this->createOp();
-        $moves2 = $op2->getPossibleMoves();
-        $this->assertArrayNotHasKey($this->cardId, $moves2);
+        $this->op = $this->createOp();
+        $this->assertNotValidTarget($this->cardId);
     }
 
     public function testPresetTargetReturnsDirectly(): void {
-        $op = $this->createOp("useAbility", ["target" => $this->cardId]);
-        $moves = $op->getPossibleMoves();
-        $this->assertEquals([$this->cardId], $moves);
+        $this->op = $this->createOp("useAbility", ["target" => $this->cardId]);
+        $this->assertValidTargetCount(1);
+        $this->assertValidTarget($this->cardId);
     }
 }

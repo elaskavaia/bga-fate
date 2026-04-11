@@ -15,7 +15,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — trigger(roll)
+    // Testing possible moves — trigger(roll)
     // -------------------------------------------------------------------------
 
     public function testRollTriggerHeroCardNotOfferedWhenCannotPay(): void {
@@ -52,7 +52,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — trigger(actionAttack)
+    // Testing possible moves — trigger(actionAttack)
     // -------------------------------------------------------------------------
 
     public function testTriggerFindsEventCardInHand(): void {
@@ -69,12 +69,12 @@ final class Op_triggerTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — trigger(resolveHits) with ability cards
+    // Testing possible moves — trigger(resolveHits) with ability cards
     // -------------------------------------------------------------------------
 
     public function testMonsterAttackTriggerFindsAbilityCard(): void {
         // Riposte I (card_ability_3_3) has on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
-        $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
         // Add 2 mana to the card so spendMana is payable
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
@@ -106,7 +106,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
 
     public function testResolveQueuesUseAbilityForAbilityCard(): void {
         // Riposte I: on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
-        $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
@@ -135,7 +135,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // Use a simpler equip: place one with on=resolveHits and valid r
         // There are no Bjorn equips with on= and non-custom r in starting set,
         // so test the action annotation is correct via info
-        $this->game->tokens->moveToken("card_ability_3_3", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
         $this->op = $this->createOp("trigger(resolveHits)");
         $info = $this->op->getArgsInfo();
         $this->assertEquals("useAbility", $info["card_ability_3_3"]["action"]);

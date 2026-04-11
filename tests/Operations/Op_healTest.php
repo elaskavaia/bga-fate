@@ -11,7 +11,7 @@ final class Op_healTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR, hero 2 (Alva) to BCOLOR
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("card_hero_2_1", "tableau_" . BCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
@@ -22,7 +22,7 @@ final class Op_healTest extends AbstractOpTestCase {
     }
 
     private function getDamage(string $heroId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $heroId));
+        return $this->countRedCrystals($heroId);
     }
 
     public function testHealSelfRemovesDamage(): void {
@@ -41,32 +41,26 @@ final class Op_healTest extends AbstractOpTestCase {
 
     public function testHealSelfNotApplicableWhenNoDamage(): void {
         $this->op = $this->createOp("2heal(self)");
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_11_8", $moves);
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["hex_11_8"]["q"]);
+        $this->assertTargetError("hex_11_8", Material::ERR_NOT_APPLICABLE);
     }
 
     public function testHealSelfTargetsWhenDamaged(): void {
         $this->addDamage("hero_1", 3);
         $this->op = $this->createOp("2heal(self)");
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_11_8", $moves);
-        $this->assertEquals(Material::RET_OK, $moves["hex_11_8"]["q"]);
+        $this->assertValidTarget("hex_11_8");
     }
 
     public function testHealAdjIncludesSelf(): void {
         $this->addDamage("hero_1", 2);
         $this->op = $this->createOp("1heal(adj)");
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_11_8", $moves);
+        $this->assertValidTarget("hex_11_8");
     }
 
     public function testHealAdjIncludesAdjacentHero(): void {
         // hex_11_8 and hex_12_8 are adjacent
         $this->addDamage("hero_2", 3);
         $this->op = $this->createOp("1heal(adj)");
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testHealAdjExcludesDistantHero(): void {
@@ -74,8 +68,7 @@ final class Op_healTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_2", "hex_8_5");
         $this->addDamage("hero_2", 3);
         $this->op = $this->createOp("1heal(adj)");
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayNotHasKey("hex_8_5", $moves);
+        $this->assertNotValidTarget("hex_8_5");
     }
 
     public function testHealAdjResolvesOnTarget(): void {
@@ -95,8 +88,7 @@ final class Op_healTest extends AbstractOpTestCase {
     public function testHealPresetTargetUsesHexId(): void {
         $this->addDamage("hero_1", 3);
         $this->op = $this->createOp("2heal", ["target" => "hex_11_8"]);
-        $moves = $this->op->getArgsInfo();
-        $this->assertCount(1, $moves);
+        $this->assertValidTargetCount(1);
         $this->assertValidTarget("hex_11_8");
         $this->call_resolve("hex_11_8");
         $this->assertEquals(1, $this->getDamage("hero_1"));

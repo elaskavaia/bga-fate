@@ -15,22 +15,21 @@ final class Op_orderTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testGetPossibleMovesTwoOptions(): void {
-        $op = $this->createOp("gainXp+drawEvent");
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("choice_0", $moves);
-        $this->assertArrayHasKey("choice_1", $moves);
-        $this->assertCount(2, $moves);
+        $this->op = $this->createOp("gainXp+drawEvent");
+        $this->assertValidTarget("choice_0");
+        $this->assertValidTarget("choice_1");
+        $this->assertValidTargetCount(2);
     }
 
     public function testGetPossibleMovesPropagatesParentData(): void {
         /** @var Op_order */
         $op = $this->createOp("gainXp+drawEvent", ["card" => "test_card"]);
 
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
 
         $this->assertArrayHasKey("choice_0", $moves);
         $this->assertArrayHasKey("choice_1", $moves);
@@ -48,7 +47,7 @@ final class Op_orderTest extends AbstractOpTestCase {
         $this->op = $this->createOp("gainXp+drawEvent");
         $this->op->saveToDb(1, true);
 
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
 
         $this->call_resolve("choice_0");
 

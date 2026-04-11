@@ -2,34 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Operations\Op_c_prey;
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
 final class Op_c_preyTest extends AbstractOpTestCase {
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        $this->game->setPlayersNumber(1);
-        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("hero_1", "hex_8_9");
-        $this->game->tokens->moveToken("hero_2", "hex_1_1");
-        $this->game->tokens->moveToken("hero_3", "hex_1_2");
-        $this->game->tokens->moveToken("hero_4", "hex_2_1");
-        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
-        $this->op = $this->createOp();
-    }
-
-    private function yellowOn(string $loc): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $loc));
-    }
-
-    private function redOn(string $loc): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $loc));
-    }
-
     // ---- target selection ----
 
     public function testNoMonstersAutoSkips(): void {
@@ -81,7 +54,7 @@ final class Op_c_preyTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
         $op = $this->op;
         $this->call_resolve("hex_12_5");
-        $this->assertEquals(2, $this->yellowOn("monster_troll_1"));
+        $this->assertEquals(2, $this->countYellowCrystals("monster_troll_1"));
     }
 
     // ---- bonus XP on kill ----
@@ -91,7 +64,9 @@ final class Op_c_preyTest extends AbstractOpTestCase {
         // Mark via Prey
         $op = $this->op;
         $this->call_resolve("hex_12_5");
-        $this->assertEquals(2, $this->yellowOn("monster_troll_1"));
+        $this->assertEquals(2, $this->countYellowCrystals("monster_troll_1"));
+
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
 
         // Kill the troll directly via the model
         $troll = $this->game->getMonster("monster_troll_1");
@@ -106,9 +81,9 @@ final class Op_c_preyTest extends AbstractOpTestCase {
         // Troll removed
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
         // Yellow crystals returned to supply, not stuck on the monster
-        $this->assertEquals(0, $this->yellowOn("monster_troll_1"));
+        $this->assertEquals(0, $this->countYellowCrystals("monster_troll_1"));
         // Hero gained base + 2 XP
-        $heroXp = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
-        $this->assertEquals($baseXp + 2, $heroXp);
+        $heroXp = $this->countYellowCrystals($this->getPlayersTableau());
+        $this->assertEquals($xpBefore + $baseXp + 2, $heroXp);
     }
 }

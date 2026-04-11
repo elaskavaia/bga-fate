@@ -10,7 +10,7 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 to player
-        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1", $this->getPlayersTableau());
         // Move all heroes far away so they don't interfere with monster tests
         $this->game->tokens->moveToken("hero_1", "hex_1_1");
         $this->game->tokens->moveToken("hero_2", "hex_1_2");

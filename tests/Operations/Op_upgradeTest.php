@@ -9,11 +9,11 @@ use PHPUnit\Framework\TestCase;
 
 final class Op_upgradeTest extends AbstractOpTestCase {
     private function giveXp(int $amount): void {
-        $this->game->effect_moveCrystals("hero_1", "yellow", $amount, "tableau_" . PCOLOR, ["message" => ""]);
+        $this->game->effect_moveCrystals("hero_1", "yellow", $amount, $this->getPlayersTableau(), ["message" => ""]);
     }
 
     private function getXp(): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        return $this->countYellowCrystals($this->getPlayersTableau());
     }
 
     private function getUpgradeCost(): int {
@@ -29,23 +29,21 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — not enough XP
+    // Testing possible moves — not enough XP
     // -------------------------------------------------------------------------
 
     public function testNotEnoughXpReturnsError(): void {
         // initWithHero gives 2 starting XP + 2 = 4, which is < 5
         $this->giveXp(2);
-        $op = $this->op;
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     public function testNoXpReturnsError(): void {
-        $op = $this->op;
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — enough XP
+    // Testing possible moves — enough XP
     // -------------------------------------------------------------------------
 
     public function testEnoughXpShowsDeckCard(): void {
@@ -92,7 +90,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $cardId = $topCard["key"];
         $op = $this->op;
         $this->call_resolve($cardId);
-        $this->assertEquals("tableau_" . PCOLOR, $this->game->tokens->getTokenLocation($cardId));
+        $this->assertEquals($this->getPlayersTableau(), $this->game->tokens->getTokenLocation($cardId));
     }
 
     public function testGainDeductsXp(): void {
@@ -119,7 +117,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $this->assertEquals(0, (int) $this->game->material->getRulesFor($cardId, "mana", 0));
         $op = $this->op;
         $this->call_resolve($cardId);
-        $manaOnCard = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
+        $manaOnCard = $this->countGreenCrystals($cardId);
         $this->assertEquals(0, $manaOnCard);
     }
 
@@ -129,7 +127,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("card_ability_1_3", "deck_ability_" . PCOLOR, 999);
         $op = $this->op;
         $this->call_resolve("card_ability_1_3");
-        $manaOnCard = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3"));
+        $manaOnCard = $this->countGreenCrystals("card_ability_1_3");
         // Had 1 mana from setup + 1 generated = 2
         $this->assertEquals(2, $manaOnCard);
     }
@@ -144,7 +142,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $this->call_resolve("card_ability_1_3");
         // L1 should be in limbo, L2 on tableau
         $this->assertEquals("limbo", $this->game->tokens->getTokenLocation("card_ability_1_3"));
-        $this->assertEquals("tableau_" . PCOLOR, $this->game->tokens->getTokenLocation("card_ability_1_4"));
+        $this->assertEquals($this->getPlayersTableau(), $this->game->tokens->getTokenLocation("card_ability_1_4"));
     }
 
     public function testImproveHeroCard(): void {
@@ -152,7 +150,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $op = $this->op;
         $this->call_resolve("card_hero_1_1");
         $this->assertEquals("limbo", $this->game->tokens->getTokenLocation("card_hero_1_1"));
-        $this->assertEquals("tableau_" . PCOLOR, $this->game->tokens->getTokenLocation("card_hero_1_2"));
+        $this->assertEquals($this->getPlayersTableau(), $this->game->tokens->getTokenLocation("card_hero_1_2"));
     }
 
     public function testImproveTransfersCrystals(): void {
@@ -165,13 +163,13 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $this->call_resolve("card_ability_1_3");
 
         // Crystals should now be on L2 card (2 added + 1 from setup = 3 green)
-        $greenOnL2 = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_4"));
-        $redOnL2 = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "card_ability_1_4"));
+        $greenOnL2 = $this->countGreenCrystals("card_ability_1_4");
+        $redOnL2 = $this->countRedCrystals("card_ability_1_4");
         $this->assertEquals(3, $greenOnL2);
         $this->assertEquals(1, $redOnL2);
         // Nothing left on L1
-        $greenOnL1 = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3"));
-        $redOnL1 = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "card_ability_1_3"));
+        $greenOnL1 = $this->countGreenCrystals("card_ability_1_3");
+        $redOnL1 = $this->countRedCrystals("card_ability_1_3");
         $this->assertEquals(0, $greenOnL1);
         $this->assertEquals(0, $redOnL1);
     }
@@ -190,7 +188,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
 
     public function testCostCapsAt10(): void {
         // Set marker to state 9 (cost=9), upgrade should advance to 10
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", "tableau_" . PCOLOR, 9);
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", $this->getPlayersTableau(), 9);
         $this->giveXp(9);
         $op = $this->op;
         $topCard = $this->game->tokens->getTokenOnTop("deck_ability_" . PCOLOR);
@@ -200,7 +198,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
 
     public function testCostStaysAt10(): void {
         // Set marker to state 10, upgrade should stay at 10
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", "tableau_" . PCOLOR, 10);
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", $this->getPlayersTableau(), 10);
         $this->giveXp(10);
         $op = $this->op;
         $topCard = $this->game->tokens->getTokenOnTop("deck_ability_" . PCOLOR);

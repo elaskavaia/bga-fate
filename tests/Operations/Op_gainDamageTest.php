@@ -11,34 +11,28 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . $this->owner);
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
     private function getDamage(string $cardId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+        return $this->countRedCrystals($cardId);
     }
 
     public function testCardWithRoomIsValid(): void {
         $this->op = $this->createOp(null, ["card" => $this->cardId]);
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
-        $this->assertEquals(Material::RET_OK, $moves[$this->cardId]["q"]);
+        $this->assertValidTarget($this->cardId);
     }
 
     public function testCardAtMaxDurabilityNotApplicable(): void {
         // Helmet has durability 3, add 3 red crystals
         $this->game->effect_moveCrystals("hero_1", "red", 3, $this->cardId);
         $this->op = $this->createOp(null, ["card" => $this->cardId]);
-        $moves = $this->op->getPossibleMoves();
-        $this->assertArrayHasKey($this->cardId, $moves);
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves[$this->cardId]["q"]);
+        $this->assertTargetError($this->cardId, Material::ERR_NOT_APPLICABLE);
     }
 
     public function testNoCardReturnsError(): void {
-        $op = $this->createOp("gainDamage");
-        $moves = $op->getPossibleMoves();
-        $this->assertNotEquals(0, $moves["q"] ?? 0);
+        $this->assertNoValidTargets();
     }
 
     public function testResolveAdds1Damage(): void {
@@ -49,10 +43,10 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
     }
 
     public function testResolveTakesFromSupply(): void {
-        $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "supply_crystal_red"));
+        $supplyBefore = $this->countRedCrystals("supply_crystal_red");
         $this->op = $this->createOp(null, ["card" => $this->cardId]);
         $this->call_resolve($this->cardId);
-        $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "supply_crystal_red"));
+        $supplyAfter = $this->countRedCrystals("supply_crystal_red");
         $this->assertEquals($supplyBefore - 1, $supplyAfter);
     }
 
@@ -68,7 +62,6 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
         // Add 2 of 3 durability
         $this->game->effect_moveCrystals("hero_1", "red", 2, $this->cardId);
         $this->op = $this->createOp(null, ["card" => $this->cardId]);
-        $moves = $this->op->getPossibleMoves();
-        $this->assertEquals(Material::RET_OK, $moves[$this->cardId]["q"]);
+        $this->assertValidTarget($this->cardId);
     }
 }

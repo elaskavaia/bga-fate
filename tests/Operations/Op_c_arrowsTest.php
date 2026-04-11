@@ -16,7 +16,7 @@ final class Op_c_arrowsTest extends AbstractOpTestCase {
     }
 
     private function getDamage(string $monsterId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
+        return $this->countRedCrystals($monsterId);
     }
 
     // -------------------------------------------------------------------------

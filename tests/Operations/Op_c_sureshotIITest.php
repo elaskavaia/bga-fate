@@ -10,15 +10,15 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->game->clearMachine();
-        $this->game->tokens->moveToken($this->cardId, "tableau_" . $this->owner); // Sure Shot II
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . $this->owner); // First Bow (range=2)
+        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau()); // Sure Shot II
+        $this->game->tokens->moveToken("card_equip_1_15", $this->getPlayersTableau()); // First Bow (range=2)
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Add 4 mana to Sure Shot II
         $this->game->effect_moveCrystals("hero_1", "green", 4, $this->cardId);
     }
 
     private function getMana(): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $this->cardId));
+        return $this->countGreenCrystals($this->cardId);
     }
 
     // --- Step 1: Monster selection ---

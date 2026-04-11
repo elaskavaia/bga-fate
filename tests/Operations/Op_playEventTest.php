@@ -39,13 +39,11 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testHandEventCardsAreTargets(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey(EVENT_CARD, $moves);
+        $this->assertValidTarget(EVENT_CARD);
     }
 
     public function testEmptyHandReturnsNoMoves(): void {
@@ -55,13 +53,13 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testMultipleHandCardsAllTargetable(): void {
-        $second = "card_event_1_30"; // Bjorn "Sewing"
+        $second = "card_event_1_30"; // Bjorn "Sewing" — r=1repairCard(all), needs a damaged equipment card
         $this->putInHand($second);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey(EVENT_CARD, $moves);
-        $this->assertArrayHasKey($second, $moves);
-        $this->assertCount(2, $moves);
+        $this->game->tokens->moveToken("card_equip_1_15", $this->getPlayersTableau());
+        $this->game->effect_moveCrystals("hero_1", "red", 1, "card_equip_1_15", ["message" => ""]);
+        $this->assertValidTarget(EVENT_CARD);
+        $this->assertValidTarget($second);
+        $this->assertValidTargetCount(2);
     }
 
     /** Setup needed for integration tests that require hero on map.
@@ -71,7 +69,7 @@ final class Op_playEventTest extends AbstractOpTestCase {
         $this->game = new GameUT();
         $this->game->init();
         $this->game->tokens->createAllTokens();
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken(EVENT_CARD, "hand_" . PCOLOR);
         // Add damage so heal(self) from Rest card has valid targets
@@ -121,7 +119,7 @@ final class Op_playEventTest extends AbstractOpTestCase {
         $healOp = $this->createOp($top["type"]);
         $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
-        $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
+        $damage = $this->countRedCrystals("hero_1");
         $this->assertEquals(2, $damage);
     }
 }

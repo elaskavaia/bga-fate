@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\OpCommon\Operation;
-
 final class Op_drawEventTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
@@ -26,7 +24,7 @@ final class Op_drawEventTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — hand < limit: confirm target
+    // Testing possible moves — hand < limit: confirm target
     // -------------------------------------------------------------------------
 
     public function testConfirmOfferedWhenHandNotFull(): void {
@@ -38,8 +36,7 @@ final class Op_drawEventTest extends AbstractOpTestCase {
         foreach ($deck as $cardId => $info) {
             $this->game->tokens->moveToken($cardId, "limbo");
         }
-        $this->assertNotValidTarget("confirm");
-        $this->assertNotEquals(0, $this->op->getPossibleMoves()["q"]);
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
@@ -47,7 +44,7 @@ final class Op_drawEventTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testStarsongIIOffersConfirmAtHandSize4(): void {
-        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_2_8", $this->getPlayersTableau());
         $this->game->getHero($this->owner)->recalcTrackers();
         $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
         $this->assertCount(4, $this->getHandCards());
@@ -55,7 +52,7 @@ final class Op_drawEventTest extends AbstractOpTestCase {
     }
 
     public function testStarsongIIPromtsDiscardAtHandSize5(): void {
-        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_2_8", $this->getPlayersTableau());
         $this->game->getHero($this->owner)->recalcTrackers();
         $this->fillHandFromDeck(4); // 1 from setup + 4 = 5
         $this->assertCount(5, $this->getHandCards());
@@ -63,7 +60,7 @@ final class Op_drawEventTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — when hand is full
+    // Testing possible moves — when hand is full
     // -------------------------------------------------------------------------
 
     public function testPossibleMovesReturnsHandCards(): void {

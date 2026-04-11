@@ -16,20 +16,20 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
     public function testNoOverkillReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 0);
-        $op = $this->createOp("c_nailed");
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("c_nailed");
+        $this->assertNoValidTargets();
     }
 
     public function testNoMarkerReturnsError(): void {
         // marker_attack in limbo (no active attack)
-        $op = $this->createOp("c_nailed");
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("c_nailed");
+        $this->assertNoValidTargets();
     }
 
     public function testNoMonsterBehindReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 2);
-        $op = $this->createOp("c_nailed");
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("c_nailed");
+        $this->assertNoValidTargets();
     }
 
     public function testFindsMonsterBehindTarget(): void {

@@ -14,11 +14,11 @@ final class Op_rollTest extends AbstractOpTestCase {
     }
 
     private function getDamage(string $monsterId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
+        return $this->countRedCrystals($monsterId);
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
@@ -39,9 +39,7 @@ final class Op_rollTest extends AbstractOpTestCase {
     public function testMultipleAdjacentMonsters(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
-        $op = $this->op;
-        $moves = $op->getArgsTarget();
-        $this->assertCount(2, $moves);
+        $this->assertValidTargetCount(2);
     }
 
     public function testInRangeUsesHeroAttackRange(): void {

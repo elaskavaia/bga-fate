@@ -9,11 +9,11 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
     }
 
     private function getDamage(string $monsterId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
+        return $this->countRedCrystals($monsterId);
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — same as dealDamage, range + filter
+    // Testing possible moves — same as dealDamage, range + filter
     // -------------------------------------------------------------------------
 
     public function testAdjacentMonsterIsTarget(): void {
@@ -101,18 +101,18 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
     public function testKillGrantsXp(): void {
         // Goblin xp=1
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->call_resolve("hex_12_8");
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 1, $xpAfter);
     }
 
     public function testKillBruteGrantsMoreXp(): void {
         // Brute xp=2
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->call_resolve("hex_12_8");
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 2, $xpAfter);
     }
 

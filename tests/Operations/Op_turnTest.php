@@ -21,39 +21,31 @@ final class Op_turnTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testAllMainActionsOfferedAtStart(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertArrayHasKey("actionMove", $moves);
-        $this->assertArrayHasKey("actionAttack", $moves);
-        $this->assertArrayHasKey("actionPrepare", $moves);
-        $this->assertArrayHasKey("actionFocus", $moves);
-        $this->assertArrayHasKey("actionMend", $moves);
-        $this->assertArrayHasKey("actionPractice", $moves);
+        $this->assertValidTarget("actionMove");
+        $this->assertNotValidTarget("actionAttack");
+        $this->assertValidTarget("actionPrepare");
+        $this->assertValidTarget("actionFocus");
+        $this->assertNotValidTarget("actionMend");
+        $this->assertValidTarget("actionPractice");
     }
 
     public function testMainActionsAvailableAtStart(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertEquals(Material::RET_OK, $moves["actionPractice"]["q"]);
-        $this->assertEquals(Material::RET_OK, $moves["actionMove"]["q"]);
+        $this->assertValidTarget("actionPractice");
+        $this->assertValidTarget("actionMove");
     }
 
     public function testFreeActionsOfferedAtStart(): void {
         $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
 
         // Free actions are inlined — individual cards appear with "action" => "playEvent"
-        $this->assertArrayHasKey("card_event_1_27", $moves);
-        $this->assertEquals("playEvent", $moves["card_event_1_27"]["action"]);
+        $info = $this->getTargetInfo("card_event_1_27");
+        $this->assertEquals("playEvent", $info["action"]);
     }
 
     public function testFreeActionsStillOfferedAfterBothMainActionsTaken(): void {
@@ -61,38 +53,27 @@ final class Op_turnTest extends AbstractOpTestCase {
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
 
-        $this->assertArrayHasKey("card_event_1_27", $moves);
-        $this->assertEquals("playEvent", $moves["card_event_1_27"]["action"]);
+        $info = $this->getTargetInfo("card_event_1_27");
+        $this->assertEquals("playEvent", $info["action"]);
     }
 
     public function testAlreadyTakenActionIsNotApplicable(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["actionPractice"]["q"]);
+        $this->assertTargetError("actionPractice", Material::ERR_NOT_APPLICABLE);
     }
 
     public function testOtherActionsStillAvailableAfterOneTaken(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertEquals(Material::RET_OK, $moves["actionMove"]["q"]);
-        $this->assertNotEquals(Material::ERR_NOT_APPLICABLE, $moves["actionAttack"]["q"]);
+        $this->assertValidTarget("actionMove");
+        $this->assertValidTarget("actionFocus");
     }
 
     public function testNoMainActionsOfferedAfterBothTaken(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertArrayNotHasKey("actionPractice", $moves);
-        $this->assertArrayNotHasKey("actionMove", $moves);
-        $this->assertArrayNotHasKey("actionAttack", $moves);
+        $this->assertNotValidTarget("actionPractice");
+        $this->assertNotValidTarget("actionMove");
+        $this->assertNotValidTarget("actionAttack");
     }
 
     // -------------------------------------------------------------------------
@@ -213,12 +194,12 @@ final class Op_turnTest extends AbstractOpTestCase {
     // public function testResolveFreeActionDoesNotConsumeMainAction(): void { ... }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves: delegate sub-targets
+    // Testing possible moves: delegate sub-targets
     // -------------------------------------------------------------------------
 
     public function testPossibleMovesIncludesDelegateTargets(): void {
         $op = $this->op;
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
 
         $hasDelegateTarget = false;
         foreach ($moves as $key => $value) {
@@ -234,9 +215,7 @@ final class Op_turnTest extends AbstractOpTestCase {
 
     public function testDelegateTargetsNotPresentWhenNoActionsRemaining(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertEquals(0, count($moves));
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
@@ -245,7 +224,7 @@ final class Op_turnTest extends AbstractOpTestCase {
 
     public function testResolveDelegateTargetQueuesAction(): void {
         $op = $this->op;
-        $moves = $op->getPossibleMoves();
+        $moves = $op->getArgsInfo();
 
         $hexTarget = null;
         foreach ($moves as $key => $value) {

@@ -12,7 +12,7 @@ final class Op_actionAttackTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves tested via noValidTargets(), getArgsInfo() and getArgsTarget()
+    // Testing possible moves tested via noValidTargets(), getArgsInfo() and getArgsTarget()
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
@@ -43,9 +43,7 @@ final class Op_actionAttackTest extends AbstractOpTestCase {
 
     public function testAdjacentHeroNotTargetable(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertNotContains("hex_12_8", $moves);
+        $this->assertNotValidTarget("hex_12_8");
     }
 
     // -------------------------------------------------------------------------

@@ -11,10 +11,10 @@ final class Op_actionMendTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Place equipment on tableau
-        $this->game->tokens->moveToken("card_equip_1_21", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_equip_1_21", $this->getPlayersTableau());
     }
 
     private function addDamage(string $tokenId, int $amount): void {
@@ -38,8 +38,7 @@ final class Op_actionMendTest extends AbstractOpTestCase {
     }
 
     public function testMendNotAvailableWithZeroDamage(): void {
-        $op = $this->op;
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $op->getErrorCode());
+        $this->assertNoValidTargetsAndError(Material::ERR_NOT_APPLICABLE);
     }
 
     public function testMendAvailableWithDamage(): void {
@@ -51,10 +50,8 @@ final class Op_actionMendTest extends AbstractOpTestCase {
     public function testMendOutsideGrimheimOnlyOffersHex(): void {
         $this->addDamage("hero_1", 2);
         $this->addDamage("card_equip_1_21", 1);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_11_8", $moves);
-        $this->assertArrayNotHasKey("card_equip_1_21", $moves);
+        $this->assertValidTarget("hex_11_8");
+        $this->assertNotValidTarget("card_equip_1_21");
     }
 
     // --- In Grimheim ---
@@ -73,12 +70,8 @@ final class Op_actionMendTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage("hero_1", 2);
         $this->addDamage("card_equip_1_21", 1);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_9_9", $moves);
-        $this->assertArrayHasKey("card_equip_1_21", $moves);
-        $this->assertEquals(Material::RET_OK, $moves["hex_9_9"]["q"]);
-        $this->assertEquals(Material::RET_OK, $moves["card_equip_1_21"]["q"]);
+        $this->assertValidTarget("hex_9_9");
+        $this->assertValidTarget("card_equip_1_21");
     }
 
     public function testMendInGrimheimQueuesRepairForCard(): void {

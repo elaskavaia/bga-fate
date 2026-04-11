@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 final class Op_spendActionTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         // Fresh turn: both markers in limbo
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "limbo");
@@ -26,14 +26,14 @@ final class Op_spendActionTest extends AbstractOpTestCase {
     public function testFailsIfActionAlreadyTaken(): void {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionPrepare");
         $this->op = $this->createOp("spendAction(actionPrepare)");
-        $this->assertNotEquals(0, $this->op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     public function testFailsIfNoActionsRemaining(): void {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionMove");
         $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_actionAttack");
         $this->op = $this->createOp("spendAction(actionPrepare)");
-        $this->assertNotEquals(0, $this->op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     public function testResolveMovesMarkerToAslot(): void {

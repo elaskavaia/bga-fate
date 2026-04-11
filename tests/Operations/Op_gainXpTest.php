@@ -12,13 +12,13 @@ final class Op_gainXpTest extends AbstractOpTestCase {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // setupGameTables seeds 2 starting XP on tableau — drain so tests start from 0
-        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->owner)) as $key) {
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $this->getPlayersTableau())) as $key) {
             $this->game->tokens->moveToken($key, "supply_crystal_yellow");
         }
     }
 
     private function getXp(): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->owner));
+        return $this->countYellowCrystals($this->getPlayersTableau());
     }
 
     // -------------------------------------------------------------------------
@@ -38,10 +38,10 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     }
 
     public function testResolveTakesFromSupply(): void {
-        $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "supply_crystal_yellow"));
+        $supplyBefore = $this->countYellowCrystals("supply_crystal_yellow");
         $this->op = $this->createOp("2gainXp");
         $this->call_resolve();
-        $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "supply_crystal_yellow"));
+        $supplyAfter = $this->countYellowCrystals("supply_crystal_yellow");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
 
@@ -67,7 +67,7 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     public function testGrimheimConditionFailsOutsideGrimheim(): void {
         // hero_1 is on hex_11_8 (plains, not Grimheim)
         $this->op = $this->createOp("2gainXp(grimheim)");
-        $this->assertNotEquals(0, $this->op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     public function testGrimheimConditionResolves(): void {
@@ -92,7 +92,7 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     public function testAdjMountainConditionFailsWhenNotAdjacent(): void {
         // hero_1 is on hex_11_8 — no adjacent mountains
         $this->op = $this->createOp("2gainXp(adjMountain)");
-        $this->assertNotEquals(0, $this->op->getErrorCode());
+        $this->assertNoValidTargets();
     }
 
     public function testAdjMountainConditionResolves(): void {

@@ -68,8 +68,8 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
 
     public function testNoDealDamageOnStackReturnsError(): void {
         // No dealDamage queued — getPossibleMoves returns error
-        $op = $this->createOp("1preventDamage");
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("1preventDamage");
+        $this->assertNoValidTargets();
     }
 
     public function testPreventDoesNotAffectOtherOperations(): void {

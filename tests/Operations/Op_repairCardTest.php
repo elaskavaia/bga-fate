@@ -11,11 +11,11 @@ final class Op_repairCardTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Place some equipment on tableau
-        $this->game->tokens->moveToken("card_equip_1_21", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_equip_1_23", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_equip_1_21", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("card_equip_1_23", $this->getPlayersTableau());
     }
 
     private function addDamageToCard(string $cardId, int $amount): void {
@@ -23,30 +23,23 @@ final class Op_repairCardTest extends AbstractOpTestCase {
     }
 
     private function getCardDamage(string $cardId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+        return $this->countRedCrystals($cardId);
     }
 
     public function testNoDamagedCardsAllNotApplicable(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
         // Equipment cards should be listed but not applicable
-        $this->assertArrayHasKey("card_equip_1_21", $moves);
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["card_equip_1_21"]["q"]);
+        $this->assertTargetError("card_equip_1_21", Material::ERR_NOT_APPLICABLE);
     }
 
     public function testDamagedCardIsValid(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertEquals(Material::RET_OK, $moves["card_equip_1_21"]["q"]);
+        $this->assertValidTarget("card_equip_1_21");
     }
 
     public function testUndamagedCardNotApplicable(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
         // card_equip_1_23 has no damage
-        $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["card_equip_1_23"]["q"]);
+        $this->assertTargetError("card_equip_1_23", Material::ERR_NOT_APPLICABLE);
     }
 
     public function testResolveRemovesAllDamage(): void {
@@ -77,10 +70,9 @@ final class Op_repairCardTest extends AbstractOpTestCase {
     public function testPresetTargetReturnsOnlyThatTarget(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
         $this->addDamageToCard("card_equip_1_23", 1);
-        $op = $this->createOp("5repairCard", ["target" => "card_equip_1_21"]);
-        $moves = $op->getArgsInfo();
-        $this->assertCount(1, $moves);
-        $this->assertArrayHasKey("card_equip_1_21", $moves);
+        $this->op = $this->createOp("5repairCard", ["target" => "card_equip_1_21"]);
+        $this->assertValidTargetCount(1);
+        $this->assertValidTarget("card_equip_1_21");
     }
 
     public function testAllModeReturnsConfirmTarget(): void {

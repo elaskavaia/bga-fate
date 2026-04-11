@@ -11,7 +11,7 @@ final class Op_moveHeroTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 

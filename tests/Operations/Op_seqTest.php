@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\Operations\Op_seq;
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
@@ -40,9 +41,9 @@ final class Op_seqTest extends AbstractOpTestCase {
         $op = $this->createOp("gainXp,drawEvent");
         $op->saveToDb(1, true);
 
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->game->machine->dispatchAll();
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
 
         $this->assertEquals($xpBefore + 1, $xpAfter, "XP should be gained from first sub-op");
     }
@@ -52,23 +53,21 @@ final class Op_seqTest extends AbstractOpTestCase {
         $op = $this->createOp("2(gainXp,drawEvent)");
         $op->saveToDb(1, true);
 
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->game->machine->dispatchAll();
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
 
         $this->assertEquals($xpBefore + 2, $xpAfter, "XP should be gained twice");
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — delegates to first sub-op
+    // Testing possible moves — delegates to first sub-op
     // -------------------------------------------------------------------------
 
     public function testGetPossibleMovesFromFirstSub(): void {
         // First sub is gainXp which auto-resolves, so getPossibleMoves delegates to it
-        $op = $this->createOp("gainXp,drawEvent");
-        $moves = $op->getPossibleMoves();
-        $this->assertNotEmpty($moves);
-        $this->assertEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("gainXp,drawEvent");
+        $this->assertValidTargetCount(1);
     }
 
     public function testEmptyDelegatesReturnsEmpty(): void {
@@ -80,6 +79,7 @@ final class Op_seqTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testParentDataPropagatedToSubOps(): void {
+        /** @var ComplexOperation */
         $op = $this->createOp("gainXp,drawEvent", ["card" => "test_card"]);
         $this->assertEquals("test_card", $op->delegates[0]->getDataField("card"));
         $this->assertEquals("test_card", $op->delegates[1]->getDataField("card"));

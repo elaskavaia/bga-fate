@@ -11,11 +11,11 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
     }
 
     private function getDamage(string $monsterId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
+        return $this->countRedCrystals($monsterId);
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // Testing possible moves
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
@@ -37,9 +37,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
     public function testMultipleAdjacentMonsters(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
-        $op = $this->op;
-        $moves = $op->getArgsTarget();
-        $this->assertCount(2, $moves);
+        $this->assertValidTargetCount(2);
     }
 
     public function testInRangeUsesHeroAttackRange(): void {
@@ -138,20 +136,20 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
     public function testKillGrantsXp(): void {
         // Goblin xp=1 — killing it should add 1 yellow crystal to tableau
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->op = $this->createOp("2dealDamage");
         $this->call_resolve("hex_12_8");
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 1, $xpAfter);
     }
 
     public function testNoXpIfNotKilled(): void {
         // Troll health=7 — 1 damage doesn't kill
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $op = $this->op;
         $this->call_resolve("hex_12_8");
-        $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore, $xpAfter);
     }
 
@@ -179,10 +177,9 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
     public function testPresetTargetReturnsOnlyThatTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
-        $op = $this->createOp("2dealDamage", ["target" => "hex_12_8"]);
-        $moves = $op->getArgsInfo();
-        $this->assertCount(1, $moves);
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->op = $this->createOp("2dealDamage", ["target" => "hex_12_8"]);
+        $this->assertValidTargetCount(1);
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testNoDiceRolled(): void {
@@ -196,10 +193,10 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
 
     public function testCrystalsTakenFromSupply(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "supply_crystal_red"));
+        $supplyBefore = $this->countRedCrystals("supply_crystal_red");
         $this->op = $this->createOp("2dealDamage");
         $this->call_resolve("hex_12_8");
-        $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "supply_crystal_red"));
+        $supplyAfter = $this->countRedCrystals("supply_crystal_red");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
 }

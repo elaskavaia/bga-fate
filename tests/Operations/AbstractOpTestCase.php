@@ -53,7 +53,53 @@ abstract class AbstractOpTestCase extends TestCase {
         $this->assertTrue($op->noValidTargets(), $message ?: "op should have no valid targets");
     }
 
+    /** Assert that the op has exactly $expected valid targets. */
+    protected function assertValidTargetCount(int $expected, string $message = ""): void {
+        $count = count($this->op->getArgsTarget());
+        $this->assertEquals($expected, $count, $message ?: "op should have exactly $expected valid targets");
+    }
+
+    /** Fetch the info record for $target from getArgsInfo, asserting it exists. Record may be valid or carry an error code. */
+    protected function getTargetInfo(string $target): array {
+        $info = $this->op->getArgsInfo();
+        $this->assertArrayHasKey($target, $info, "$target should be in possible moves");
+        return $info[$target];
+    }
+
+    /** Assert that the op has no valid targets AND reports the given error code. */
+    protected function assertNoValidTargetsAndError(int $expectedErrorCode, string $message = ""): void {
+        $op = $this->op;
+        $this->assertTrue($op->noValidTargets(), $message ?: "op should have no valid targets");
+        $this->assertEquals($expectedErrorCode, $op->getErrorCode(), $message ?: "op should have error code $expectedErrorCode");
+    }
+
+    /** Assert that $target is listed in getArgsInfo but has the given error code. */
+    protected function assertTargetError(string $target, int $expectedErrorCode, string $message = ""): void {
+        $info = $this->op->getArgsInfo();
+        $this->assertArrayHasKey($target, $info, $message ?: "$target should be listed in args info");
+        $this->assertEquals($expectedErrorCode, (int) $info[$target]["q"], $message ?: "$target should have error code $expectedErrorCode");
+    }
+    // -------------------------------------------------------------------------
+    //  Helper methods
+    // -------------------------------------------------------------------------
+
     function call_resolve(mixed $target = []) {
         return $this->op->action_resolve([Operation::ARG_TARGET => $target]);
+    }
+
+    protected function getPlayersTableau(): string {
+        return "tableau_" . $this->owner;
+    }
+
+    protected function countYellowCrystals(string $loc): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $loc));
+    }
+
+    protected function countRedCrystals(string $loc): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $loc));
+    }
+
+    protected function countGreenCrystals(string $loc): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $loc));
     }
 }

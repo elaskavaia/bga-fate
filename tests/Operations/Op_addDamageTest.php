@@ -69,8 +69,8 @@ final class Op_addDamageTest extends AbstractOpTestCase {
     public function testMinDistRejectsCloseTarget(): void {
         // Hero at hex_11_8, marker_attack at adjacent hex (distance 1)
         $this->game->tokens->moveToken("marker_attack", "hex_12_8");
-        $op = $this->createOp("2addDamage(2)");
-        $this->assertNotEquals(0, $op->getErrorCode(), "Should reject target at distance 1 when min is 2");
+        $this->op = $this->createOp("2addDamage(2)");
+        $this->assertNoValidTargets("Should reject target at distance 1 when min is 2");
     }
 
     public function testMinDistAcceptsDistantTarget(): void {
@@ -82,8 +82,8 @@ final class Op_addDamageTest extends AbstractOpTestCase {
 
     public function testMinDistRejectsNoMarker(): void {
         // marker_attack in limbo (no active attack)
-        $op = $this->createOp("2addDamage(2)");
-        $this->assertNotEquals(0, $op->getErrorCode(), "Should reject when no attack marker");
+        $this->op = $this->createOp("2addDamage(2)");
+        $this->assertNoValidTargets("Should reject when no attack marker");
     }
 
     // --- Param: "dist" (damage = distance) ---
@@ -95,8 +95,8 @@ final class Op_addDamageTest extends AbstractOpTestCase {
     }
 
     public function testDistParamRejectsNoMarker(): void {
-        $op = $this->createOp("addDamage(dist)");
-        $this->assertNotEquals(0, $op->getErrorCode(), "dist param should reject when no attack marker");
+        $this->op = $this->createOp("addDamage(dist)");
+        $this->assertNoValidTargets("dist param should reject when no attack marker");
     }
 
     public function testDistParamAddsDiceEqualToDistance(): void {

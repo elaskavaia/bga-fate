@@ -18,64 +18,46 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves (delegated to moveHero)
+    // Testing possible moves (delegated to moveHero)
     // -------------------------------------------------------------------------
 
     public function testReachableHexesFromGrimheim(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
         // Grimheim hexes (other than starting hex) are reachable at distance 0
-        $this->assertArrayHasKey("hex_9_8", $moves);
-        $this->assertArrayHasKey("hex_10_8", $moves);
-        $this->assertArrayHasKey("hex_8_10", $moves);
+        $this->assertValidTarget("hex_9_8");
+        $this->assertValidTarget("hex_10_8");
+        $this->assertValidTarget("hex_8_10");
 
         // Adjacent to Grimheim (distance 1)
-        $this->assertArrayHasKey("hex_11_8", $moves);
-        $this->assertArrayHasKey("hex_7_8", $moves);
+        $this->assertValidTarget("hex_11_8");
+        $this->assertValidTarget("hex_7_8");
     }
 
     public function testCurrentHexNotReachable(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
         // Current hex should not be in the list
-        $this->assertArrayNotHasKey("hex_9_9", $moves);
+        $this->assertNotValidTarget("hex_9_9");
     }
 
     public function testTooFarHexesNotReachable(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
         // hex_9_1 is far from Grimheim (> 3 steps)
-        $this->assertArrayNotHasKey("hex_9_1", $moves);
+        $this->assertNotValidTarget("hex_9_1");
     }
 
     public function testMountainHexesNotReachable(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
         // hex_9_11 is mountain, should not be reachable
-        $this->assertArrayNotHasKey("hex_9_11", $moves);
+        $this->assertNotValidTarget("hex_9_11");
     }
 
     public function testOccupiedHexBlocks(): void {
         // Place another hero on an adjacent hex
         $this->game->tokens->moveToken("hero_2", "hex_11_8");
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
         // Occupied hex should not be reachable
-        $this->assertArrayNotHasKey("hex_11_8", $moves);
+        $this->assertNotValidTarget("hex_11_8");
     }
 
     public function testNoNonMapLocationsOffered(): void {
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-
-        $this->assertArrayNotHasKey("limbo", $moves);
-        $this->assertArrayNotHasKey("supply_crystal_yellow", $moves);
-        $this->assertArrayNotHasKey("timetrack_1", $moves);
+        $this->assertNotValidTarget("limbo");
+        $this->assertNotValidTarget("supply_crystal_yellow");
+        $this->assertNotValidTarget("timetrack_1");
     }
 
     // -------------------------------------------------------------------------

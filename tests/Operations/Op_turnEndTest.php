@@ -57,7 +57,7 @@ final class Op_turnEndTest extends AbstractOpTestCase {
 
     public function testMana2CardGenerates2(): void {
         // Add Sure Shot II (mana=2) to tableau
-        $this->game->tokens->moveToken("card_ability_1_4", "tableau_" . $this->owner);
+        $this->game->tokens->moveToken("card_ability_1_4", $this->getPlayersTableau());
 
         $op = $this->op;
         $this->call_resolve();

@@ -8,7 +8,7 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // Assign hero 1 (Bjorn) to player
-        $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_hero_1", $this->getPlayersTableau());
         // Place Bjorn on hex_11_8 and move others out of the way
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken("hero_2", "hex_1_1");
@@ -17,14 +17,12 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — Level II (no rank filter)
+    // Testing possible moves — Level II (no rank filter)
     // -------------------------------------------------------------------------
 
     public function testOffersMonsterInRange(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // range 1 from hero
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testExcludesMonsterOutOfRange(): void {
@@ -47,7 +45,7 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // getPossibleMoves — Level I (rank<=2 filter)
+    // Testing possible moves — Level I (rank<=2 filter)
     // -------------------------------------------------------------------------
 
     public function testLevelIOffersRank1Monster(): void {
@@ -82,10 +80,7 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         // Simulate previous suppression: place green crystal on monster
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
-
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("hex_12_8", $moves, "Previously suppressed monster should be excluded");
+        $this->assertNotValidTarget("hex_12_8", "Previously suppressed monster should be excluded");
     }
 
     public function testAllowsDifferentMonsterWhenOneHasCrystal(): void {
@@ -93,11 +88,8 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_13_7");
         // Suppress goblin_1 last turn
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
-
-        $op = $this->op;
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("hex_12_8", $moves, "Goblin should be excluded");
-        $this->assertArrayHasKey("hex_13_7", $moves, "Brute should still be available");
+        $this->assertNotValidTarget("hex_12_8", "Goblin should be excluded");
+        $this->assertValidTarget("hex_13_7", "Brute should still be available");
     }
 
     // -------------------------------------------------------------------------
