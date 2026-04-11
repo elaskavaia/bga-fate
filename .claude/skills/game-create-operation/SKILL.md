@@ -8,7 +8,15 @@ argument-hint: <name>
 
 Step-by-step checklist for adding a new operation to the Fate BGA codebase. Follow this plan exactly — create a plan first with all items from this list.
 
-Before starting read docs/DESIGN.md
+Before starting read docs/DESIGN.md understand what Operation (concept) means and how it used.
+
+## Context
+
+- An **Operation** is the unit of game flow in this codebase: a single step of game logic (e.g. "move hero", "deal damage", "draw card") implemented as a class extending `Operation`. Card effects, actions, and triggered reactions are all composed from operations.
+- `OpMachine` resolves operations one at a time per player. Inside `resolve()`, calling `queue("other")` adds a sub-op to the current operation frame; multiple `queue()` calls in the same resolve run in the order they were added (FIFO within the frame). A player-facing op declares its valid targets in `getPossibleMoves()` — the engine shows them to the player, then calls `resolve()` with the chosen target. An automated op skips straight to `resolve()`.
+- Base classes: `Operation`, `CountableOperation` (has a count/mcount — auto-handles "do X times" and supports `counter(expr)` setting count dynamically), `ComplexOperation` (delegates to sub-ops).
+- Params vs data: **params** are baked into the op type string at queue time in parentheses (`heal(self)`, `dealDamage(adj,'rank<=2')`), read via `getParam(i, default)`. **Data fields** are seeded by the caller via `queue("op", $owner, ["card" => $id])`, read via `getDataField("card")`. Params are for static config; data fields carry per-invocation context. Note: a leading numeric prefix like `2addDamage` is the op's count (for `CountableOperation`), not a param.
+- Naming: reusable building blocks are `Op_<verb>` (e.g. `Op_heal`, `Op_spendMana`). Card-specific one-off logic uses `Op_c_<name>` (e.g. `Op_c_arrows`, `Op_c_prey`) and typically extends a generic op.
 
 ## Steps
 
