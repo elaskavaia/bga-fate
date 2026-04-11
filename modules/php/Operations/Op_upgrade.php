@@ -119,6 +119,12 @@ class Op_upgrade extends Operation {
                 "message" => clienttranslate('${place_name} generates ${count} mana'),
             ]);
         }
+
+        // Reveal the new top of the ability deck so the client can render it.
+        $newTop = $this->game->tokens->getTokenOnTop("deck_ability_$owner");
+        if ($newTop !== null) {
+            $this->dbSetTokenLocation($newTop["key"], "deck_ability_$owner", (int) $newTop["state"], "");
+        }
     }
 
     private function resolveImprove(string $cardId, string $owner): void {
@@ -130,9 +136,15 @@ class Op_upgrade extends Operation {
         $this->dbSetTokenLocation($cardId, "limbo", 0, "", $suppress);
 
         // Move L2 to tableau (suppress animation)
-        $this->dbSetTokenLocation($level2Id, "tableau_$owner", 0, clienttranslate('${char_name} upgrades to ${token_name}'), [
-            "char_name" => $heroId,
-        ] + $suppress);
+        $this->dbSetTokenLocation(
+            $level2Id,
+            "tableau_$owner",
+            0,
+            clienttranslate('${char_name} upgrades to ${token_name}'),
+            [
+                "char_name" => $heroId,
+            ] + $suppress
+        );
 
         // Transfer everything
         $tokens = $this->game->tokens->getTokensOfTypeInLocation(null, $cardId);

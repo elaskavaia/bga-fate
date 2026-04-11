@@ -30,10 +30,7 @@ class Campaign_UpgradeTest extends CampaignBaseTest {
             "card_event_1_27_2",
         ]);
         // Clear hand to avoid flaky triggers
-        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->color);
-        foreach ($hand as $card) {
-            $this->game->tokens->moveToken($card["key"], "limbo");
-        }
+        $this->clearHand($this->color);
         $this->clearMonstersFromMap();
     }
 
@@ -103,8 +100,9 @@ class Campaign_UpgradeTest extends CampaignBaseTest {
         // Give player enough XP
         $this->game->effect_moveCrystals($this->heroId, "yellow", 5, "tableau_" . $this->color, ["message" => ""]);
 
-        // Seed ability deck with Eagle Eye I
-        $this->seedDeck("deck_ability_" . $this->color, ["card_ability_1_9"]);
+        // Seed ability deck with Eagle Eye I on top, Nailed Together I beneath it.
+        // Order: first element = top of deck.
+        $this->seedDeck("deck_ability_" . $this->color, ["card_ability_1_9", "card_ability_1_13"]);
 
         // Two actions + skip
         $this->respond("hex_7_9"); // move action
@@ -116,10 +114,32 @@ class Campaign_UpgradeTest extends CampaignBaseTest {
         $args = $this->getOpArgs();
         $this->assertEquals("upgrade", $args["type"] ?? "");
 
-        // Choose to gain new ability from deck
+        // Snapshot notification count before gain so we only inspect new notifs.
+        $notifCountBefore = count($this->game->notify->_getNotifications());
+
+        // Choose to gain new ability from deck (top card)
         $this->respond("card_ability_1_9");
 
         // Card should now be on tableau
         $this->assertEquals("tableau_" . $this->color, $this->tokenLocation("card_ability_1_9"));
+        // The card beneath it is now the new top of the deck
+        $this->assertEquals("deck_ability_" . $this->color, $this->tokenLocation("card_ability_1_13"));
+
+        // A tokenMoved notification should have been emitted for the new top card,
+        // so the client can reveal it in the deck slot.
+        $notifsAfter = array_slice($this->game->notify->_getNotifications(), $notifCountBefore);
+        $revealed = false;
+        foreach ($notifsAfter as $notif) {
+            if (($notif["type"] ?? "") !== "tokenMoved") {
+                continue;
+            }
+            $tokenId = $notif["args"]["token_id"] ?? null;
+            $placeId = $notif["args"]["place_id"] ?? null;
+            if ($tokenId === "card_ability_1_13" && $placeId === "deck_ability_" . $this->color) {
+                $revealed = true;
+                break;
+            }
+        }
+        $this->assertTrue($revealed, "Expected tokenMoved notification revealing new top of ability deck");
     }
 }

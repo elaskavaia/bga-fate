@@ -30,6 +30,35 @@ abstract class CampaignBaseTest extends TestCase {
     }
 
     /**
+     * Scan every emitted notification's log string for ${name} placeholders and
+     * assert that each one has a matching key in the notification's args. This
+     * catches bugs like passing "token_name" when the template expects "char_name".
+     */
+    private function assertNotificationPlaceholdersResolved(): void {
+        if (!isset($this->game) || !isset($this->game->notify)) {
+            return;
+        }
+        $notifs = $this->game->notify->_getNotifications();
+        foreach ($notifs as $idx => $notif) {
+            $log = $notif["log"] ?? "";
+            if ($log === "" || !is_string($log)) {
+                continue;
+            }
+            if (!preg_match_all('/\$\{([a-zA-Z0-9_]+)\}/', $log, $matches)) {
+                continue;
+            }
+            $args = $notif["args"] ?? [];
+            foreach ($matches[1] as $name) {
+                $this->assertArrayHasKey(
+                    $name,
+                    $args,
+                    "Notification #$idx ({$notif["type"]}) template \"$log\" references \${{$name}} but no matching arg was provided",
+                );
+            }
+        }
+    }
+
+    /**
      * Set up a game with specified heroes.
      * @param array $heroOrder hero numbers in player order, e.g. [1] for solo Bjorn, [2,4] for Alva+Boldur
      */
@@ -131,6 +160,13 @@ abstract class CampaignBaseTest extends TestCase {
         $this->game->tokens->moveToken($cardId, "hand_$color");
     }
 
+    /** Move every card currently in the player's hand to limbo. */
+    protected function clearHand(string $color = PCOLOR): void {
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation(null, "hand_$color")) as $key) {
+            $this->game->tokens->moveToken($key, "limbo");
+        }
+    }
+
     /** Remove all monsters from the map so tests are deterministic */
     protected function clearMonstersFromMap(): void {
         $monsters = $this->game->hexMap->getMonstersOnMap();
@@ -164,6 +200,7 @@ abstract class CampaignBaseTest extends TestCase {
     }
 
     protected function tearDown(): void {
+        $this->assertNotificationPlaceholdersResolved();
         array_map("unlink", glob("$this->outputDir/*"));
         if (is_dir($this->outputDir)) {
             @rmdir($this->outputDir);
