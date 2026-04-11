@@ -347,6 +347,10 @@ class Material {
         "type" => "spendMana",
         "name" => clienttranslate("Spend Mana"),
 ],
+    "Op_spendGold" => [ 
+        "type" => "spendGold",
+        "name" => clienttranslate("Spend Gold"),
+],
     "Op_gainDamage" => [ 
         "type" => "gainDamage",
         "name" => clienttranslate("Gain Damage"),
