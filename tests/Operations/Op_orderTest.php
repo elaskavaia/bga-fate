@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\OpCommon\CountableOperation;
 use Bga\Games\Fate\Operations\Op_order;
-use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
 final class Op_orderTest extends AbstractOpTestCase {
     protected function setUp(): void {
@@ -55,6 +54,11 @@ final class Op_orderTest extends AbstractOpTestCase {
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("gainXp", $opTypes);
+
+        // And once dispatched, XP should actually be gained
+        $this->game->machine->dispatchAll();
+        $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
+        $this->assertEquals($xpBefore + 1, $xpAfter);
     }
 
     public function testResolveQueuesRemainingAsOrder(): void {
@@ -81,6 +85,7 @@ final class Op_orderTest extends AbstractOpTestCase {
     }
 
     public function testCountIsOne(): void {
+        /** @var CountableOperation */
         $op = $this->createOp("gainXp+drawEvent");
         $this->assertEquals(1, $op->getCount());
         $this->assertEquals(1, $op->getMinCount());
