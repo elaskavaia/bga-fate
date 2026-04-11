@@ -8,57 +8,48 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_spendActionTest extends TestCase {
-    private GameUT $game;
-
+final class Op_spendActionTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
+        parent::setUp();
+        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . $this->owner);
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         // Fresh turn: both markers in limbo
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "limbo");
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "limbo");
-    }
-
-    private function createOp(string $expr = "spendAction(actionPrepare)"): Op_spendAction {
-        /** @var Op_spendAction */
-        return $this->game->machine->instanciateOperation($expr, PCOLOR);
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "limbo");
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "limbo");
     }
 
     public function testAvailableWithFreshTurn(): void {
-        $op = $this->createOp();
-        $this->assertEquals(0, $op->getErrorCode());
+        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->assertEquals(0, $this->op->getErrorCode());
     }
 
     public function testFailsIfActionAlreadyTaken(): void {
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_actionPrepare");
-        $op = $this->createOp();
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionPrepare");
+        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->assertNotEquals(0, $this->op->getErrorCode());
     }
 
     public function testFailsIfNoActionsRemaining(): void {
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_actionMove");
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "aslot_" . PCOLOR . "_actionAttack");
-        $op = $this->createOp();
-        $this->assertNotEquals(0, $op->getErrorCode());
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionMove");
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_actionAttack");
+        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->assertNotEquals(0, $this->op->getErrorCode());
     }
 
     public function testResolveMovesMarkerToAslot(): void {
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->call_resolve();
 
-        $loc = $this->game->tokens->getTokenLocation("marker_" . PCOLOR . "_1");
-        $this->assertEquals("aslot_" . PCOLOR . "_actionPrepare", $loc);
+        $loc = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_1");
+        $this->assertEquals("aslot_" . $this->owner . "_actionPrepare", $loc);
     }
 
     public function testResolveUsesSecondMarkerIfFirstAlreadyPlaced(): void {
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_actionMove");
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionMove");
+        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->call_resolve();
 
-        $loc = $this->game->tokens->getTokenLocation("marker_" . PCOLOR . "_2");
-        $this->assertEquals("aslot_" . PCOLOR . "_actionPrepare", $loc);
+        $loc = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_2");
+        $this->assertEquals("aslot_" . $this->owner . "_actionPrepare", $loc);
     }
 }

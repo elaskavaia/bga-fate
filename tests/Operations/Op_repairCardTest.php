@@ -7,25 +7,15 @@ use Bga\Games\Fate\Operations\Op_repairCard;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_repairCardTest extends TestCase {
-    private GameUT $game;
-
+final class Op_repairCardTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
+        parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR
         $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Place some equipment on tableau
         $this->game->tokens->moveToken("card_equip_1_21", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("card_equip_1_23", "tableau_" . PCOLOR);
-    }
-
-    private function createOp(string $expr = "99repairCard"): Op_repairCard {
-        /** @var Op_repairCard */
-        $op = $this->game->machine->instanciateOperation($expr, PCOLOR);
-        return $op;
     }
 
     private function addDamageToCard(string $cardId, int $amount): void {
@@ -37,7 +27,7 @@ final class Op_repairCardTest extends TestCase {
     }
 
     public function testNoDamagedCardsAllNotApplicable(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         // Equipment cards should be listed but not applicable
         $this->assertArrayHasKey("card_equip_1_21", $moves);
@@ -46,14 +36,14 @@ final class Op_repairCardTest extends TestCase {
 
     public function testDamagedCardIsValid(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertEquals(Material::RET_OK, $moves["card_equip_1_21"]["q"]);
     }
 
     public function testUndamagedCardNotApplicable(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         // card_equip_1_23 has no damage
         $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["card_equip_1_23"]["q"]);
@@ -62,24 +52,24 @@ final class Op_repairCardTest extends TestCase {
     public function testResolveRemovesAllDamage(): void {
         $this->addDamageToCard("card_equip_1_21", 3);
         $this->assertEquals(3, $this->getCardDamage("card_equip_1_21"));
-        $op = $this->createOp();
-        $op->action_resolve(["target" => "card_equip_1_21"]);
+        $this->op = $this->createOp("99repairCard");
+        $this->call_resolve("card_equip_1_21");
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
     }
 
     public function testResolveDoesNotAffectOtherCards(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
         $this->addDamageToCard("card_equip_1_23", 1);
-        $op = $this->createOp();
-        $op->action_resolve(["target" => "card_equip_1_21"]);
+        $op = $this->op;
+        $this->call_resolve("card_equip_1_21");
         // Other card should still have damage
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_23"));
     }
 
     public function testLimitedCountRemovesOnlyUpToCount(): void {
         $this->addDamageToCard("card_equip_1_21", 3);
-        $op = $this->createOp("2repairCard");
-        $op->action_resolve(["target" => "card_equip_1_21"]);
+        $this->op = $this->createOp("2repairCard");
+        $this->call_resolve("card_equip_1_21");
         // Should remove only 2 of 3 damage
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
     }
@@ -87,26 +77,24 @@ final class Op_repairCardTest extends TestCase {
     public function testPresetTargetReturnsOnlyThatTarget(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
         $this->addDamageToCard("card_equip_1_23", 1);
-        /** @var Op_repairCard */
-        $op = $this->game->machine->instanciateOperation("5repairCard", PCOLOR, ["target" => "card_equip_1_21"]);
-        $moves = $op->getPossibleMoves();
+        $op = $this->createOp("5repairCard", ["target" => "card_equip_1_21"]);
+        $moves = $op->getArgsInfo();
         $this->assertCount(1, $moves);
         $this->assertArrayHasKey("card_equip_1_21", $moves);
     }
 
     public function testAllModeReturnsConfirmTarget(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
-        $op = $this->createOp("1repairCard(all)");
-        $moves = $op->getPossibleMoves();
-        // In 'all' mode there is no per-card selection — a single confirm target auto-resolves.
-        $this->assertEquals(["confirm"], $moves);
+        $this->op = $this->createOp("1repairCard(all)");
+        // In 'all' mode there is no per-card selection — a single "confirm" target represents the action.
+        $this->assertValidTarget("confirm");
     }
 
     public function testAllModeRepairsEveryDamagedCard(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
         $this->addDamageToCard("card_equip_1_23", 1);
-        $op = $this->createOp("1repairCard(all)");
-        $op->action_resolve(["target" => "confirm"]);
+        $this->op = $this->createOp("1repairCard(all)");
+        $this->call_resolve("confirm");
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
     }
@@ -114,8 +102,8 @@ final class Op_repairCardTest extends TestCase {
     public function testAllModeLeavesUndamagedCardsAtZero(): void {
         $this->addDamageToCard("card_equip_1_21", 1);
         // card_equip_1_23 has no damage
-        $op = $this->createOp("1repairCard(all)");
-        $op->action_resolve(["target" => "confirm"]);
+        $this->op = $this->createOp("1repairCard(all)");
+        $this->call_resolve("confirm");
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
         // Must not go negative
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
@@ -125,16 +113,16 @@ final class Op_repairCardTest extends TestCase {
         $this->addDamageToCard("card_equip_1_21", 1);
         $this->addDamageToCard("card_equip_1_23", 3);
         // Count=2 per card — cap at existing damage on first, remove 2 of 3 on second.
-        $op = $this->createOp("2repairCard(all)");
-        $op->action_resolve(["target" => "confirm"]);
+        $this->op = $this->createOp("2repairCard(all)");
+        $this->call_resolve("confirm");
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_23"));
     }
 
     public function testAllModeNoDamagedCardsResolvesCleanly(): void {
         // No pre-damage on any card.
-        $op = $this->createOp("1repairCard(all)");
-        $op->action_resolve(["target" => "confirm"]);
+        $this->op = $this->createOp("1repairCard(all)");
+        $this->call_resolve("confirm");
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
     }

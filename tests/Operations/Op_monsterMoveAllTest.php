@@ -6,14 +6,9 @@ use Bga\Games\Fate\Operations\Op_monsterMoveAll;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_monsterMoveAllTest extends TestCase {
-    private GameUT $game;
-
+final class Op_monsterMoveAllTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        $this->game->setPlayersNumber(1);
+        parent::setUp();
         // Assign hero 1 to player
         $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
         // Move all heroes far away so they don't interfere with monster tests
@@ -21,12 +16,6 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("hero_2", "hex_1_2");
         $this->game->tokens->moveToken("hero_3", "hex_2_1");
         $this->game->tokens->moveToken("hero_4", "hex_2_2");
-    }
-
-    private function createOp(bool $charge = false): Op_monsterMoveAll {
-        /** @var Op_monsterMoveAll */
-        $op = $this->game->machine->instanciateOperation("monsterMoveAll", ACOLOR, ["charge" => $charge]);
-        return $op;
     }
 
     // -------------------------------------------------------------------------
@@ -37,9 +26,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $distBefore = $this->game->hexMap->getDistanceMapToGrimheim()["hex_12_8"];
 
-        $op = $this->createOp();
-        $op->resolve();
-
+        $this->call_resolve();
         $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
         $distAfter = $this->game->hexMap->getDistanceMapToGrimheim()[$newLoc] ?? PHP_INT_MAX;
         $this->assertLessThan($distBefore, $distAfter, "Monster should have moved closer to Grimheim");
@@ -49,9 +36,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("hero_1", "hex_11_8"); // adjacent
 
-        $op = $this->createOp();
-        $op->resolve();
-
+        $this->call_resolve();
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("hex_12_8", $loc, "Monster should not move when adjacent to hero");
     }
@@ -60,8 +45,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_8"); // dist 1
         $this->game->tokens->moveToken("monster_brute_2", "hex_12_8"); // dist 2, wants to move to hex_11_8
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         // brute_1 should have entered Grimheim (removed)
         $loc1 = $this->game->tokens->getTokenLocation("monster_brute_1");
@@ -79,8 +63,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $g1Before = $distMap["hex_13_7"];
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         // goblin_2 (closer) should have entered Grimheim
         $loc2 = $this->game->tokens->getTokenLocation("monster_goblin_2");
@@ -101,9 +84,7 @@ final class Op_monsterMoveAllTest extends TestCase {
 
         $housesBefore = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
         $countBefore = count($housesBefore);
-
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("supply_monster", $loc);
@@ -122,8 +103,7 @@ final class Op_monsterMoveAllTest extends TestCase {
 
         $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8");
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         $wellLoc = $this->game->tokens->getTokenLocation("house_0");
         $this->assertEquals("limbo", $wellLoc, "Freyja's Well should be destroyed when it's the last house");
@@ -136,8 +116,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $countBefore = count($housesBefore);
         $this->assertGreaterThanOrEqual(3, $countBefore, "Need at least 3 houses for this test");
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         $loc = $this->game->tokens->getTokenLocation("monster_legend_3_1");
         $this->assertEquals("supply_monster", $loc);
@@ -154,8 +133,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // dist 1 — enters Grimheim
         $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7"); // dist 3 — should stay put
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         $this->assertEquals("limbo", $this->game->tokens->getTokenLocation("house_0"), "Well should be destroyed");
         $this->assertTrue($this->game->isEndOfGame(), "Game should have ended");
@@ -176,7 +154,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $distBefore = $distMap["hex_13_7"];
 
-        $op = $this->createOp(charge: true);
+        $op = $this->createOp(null, ["charge" => true]);
         $op->resolve();
 
         $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
@@ -189,7 +167,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $distBefore = $distMap["hex_13_7"];
 
-        $op = $this->createOp(charge: false);
+        $op = $this->createOp(null, ["charge" => false]);
         $op->resolve();
 
         $newLoc = $this->game->tokens->getTokenLocation("monster_brute_1");
@@ -206,8 +184,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         // Place a green crystal on the monster (stunned)
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("hex_12_8", $loc, "Stunned monster should not move");
@@ -217,9 +194,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
-        $op->resolve();
-
+        $this->call_resolve();
         $crystalsAfter = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
         $this->assertCount(1, $crystalsAfter, "Green crystal should stay on monster (removed by next c_supfire trigger)");
     }
@@ -228,7 +203,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp(charge: true);
+        $op = $this->createOp(null, ["charge" => true]);
         $op->resolve();
 
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
@@ -243,8 +218,7 @@ final class Op_monsterMoveAllTest extends TestCase {
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $g2Before = $distMap["hex_13_7"];
 
-        $op = $this->createOp();
-        $op->resolve();
+        $this->call_resolve();
 
         // Stunned monster stays
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));

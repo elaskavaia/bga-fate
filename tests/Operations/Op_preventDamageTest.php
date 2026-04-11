@@ -7,12 +7,9 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_preventDamageTest extends TestCase {
-    private GameUT $game;
-
+final class Op_preventDamageTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
     }
@@ -41,21 +38,21 @@ final class Op_preventDamageTest extends TestCase {
 
     public function testPrevent1ReducesDealDamageBy1(): void {
         $this->queueDealDamage(3);
-        $op = $this->game->machine->instanciateOperation("1preventDamage", PCOLOR);
+        $op = $this->createOp("1preventDamage");
         $op->resolve();
         $this->assertEquals(2, $this->getDealDamageCount());
     }
 
     public function testPrevent2ReducesDealDamageBy2(): void {
         $this->queueDealDamage(3);
-        $op = $this->game->machine->instanciateOperation("2preventDamage", PCOLOR);
+        $op = $this->createOp("2preventDamage");
         $op->resolve();
         $this->assertEquals(1, $this->getDealDamageCount());
     }
 
     public function testPreventAllDamageHidesDealDamage(): void {
         $this->queueDealDamage(2);
-        $op = $this->game->machine->instanciateOperation("2preventDamage", PCOLOR);
+        $op = $this->createOp("2preventDamage");
         $op->resolve();
         // dealDamage should be hidden (removed from active queue)
         $this->assertNull($this->getDealDamageCount());
@@ -63,7 +60,7 @@ final class Op_preventDamageTest extends TestCase {
 
     public function testPreventMoreThanDamageClamps(): void {
         $this->queueDealDamage(1);
-        $op = $this->game->machine->instanciateOperation("3preventDamage", PCOLOR);
+        $op = $this->createOp("3preventDamage");
         $op->resolve();
         // Only 1 damage existed, all prevented
         $this->assertNull($this->getDealDamageCount());
@@ -71,14 +68,14 @@ final class Op_preventDamageTest extends TestCase {
 
     public function testNoDealDamageOnStackReturnsError(): void {
         // No dealDamage queued — getPossibleMoves returns error
-        $op = $this->game->machine->instanciateOperation("1preventDamage", PCOLOR);
+        $op = $this->createOp("1preventDamage");
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
     public function testPreventDoesNotAffectOtherOperations(): void {
         $this->game->machine->push("roll", PCOLOR, ["count" => 3]);
         $this->queueDealDamage(3);
-        $op = $this->game->machine->instanciateOperation("1preventDamage", PCOLOR);
+        $op = $this->createOp("1preventDamage");
         $op->resolve();
         // dealDamage reduced, roll untouched
         $this->assertEquals(2, $this->getDealDamageCount());

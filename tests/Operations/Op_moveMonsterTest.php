@@ -8,27 +8,17 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_moveMonsterTest extends TestCase {
-    private GameUT $game;
-
+final class Op_moveMonsterTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
+        parent::setUp();
         // Assign hero 1 (Bjorn) to PCOLOR
         $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
-    private function createOp(string $expr = "1moveMonster"): Op_moveMonster {
-        /** @var Op_moveMonster */
-        $op = $this->game->machine->instanciateOperation($expr, PCOLOR);
-        return $op;
-    }
-
     private function createPhase2Op(string $monsterHex, string $expr = "1moveMonster"): Op_moveMonster {
         /** @var Op_moveMonster */
-        $op = $this->game->machine->instanciateOperation($expr, PCOLOR, ["target" => $monsterHex]);
+        $op = $this->createOp($expr, ["target" => $monsterHex]);
         return $op;
     }
 
@@ -37,14 +27,13 @@ final class Op_moveMonsterTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $op = $this->op;
+        $this->assertNoValidTargets();
     }
 
     public function testAdjacentMonsterIsTargetable(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertContains("hex_12_8", $moves);
     }
@@ -52,15 +41,14 @@ final class Op_moveMonsterTest extends TestCase {
     public function testNonAdjacentMonsterNotTargetable(): void {
         // hex_13_7 is 2 hexes away from hex_11_8 — out of adj range
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $op = $this->op;
+        $this->assertNoValidTargets();
     }
 
     public function testMultipleAdjacentMonsters(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertCount(2, $moves);
     }
@@ -76,8 +64,8 @@ final class Op_moveMonsterTest extends TestCase {
 
     public function testResolvePhase1QueuesMoveMonsterWithDestination(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_8");
         // Should have queued a moveMonster operation with destination field
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
@@ -174,10 +162,10 @@ final class Op_moveMonsterTest extends TestCase {
 
     public function testResolvePhase2MovesMonster(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createPhase2Op("hex_12_8");
-        $moves = $op->getPossibleMoves();
+        $this->op = $this->createPhase2Op("hex_12_8");
+        $moves = $this->op->getPossibleMoves();
         $target = array_key_first($moves);
-        $op->action_resolve([Operation::ARG_TARGET => $target]);
+        $this->call_resolve($target);
         $this->assertEquals($target, $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
 
@@ -185,10 +173,10 @@ final class Op_moveMonsterTest extends TestCase {
         // Two monsters on map — only the targeted one should move
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_5_5");
-        $op = $this->createPhase2Op("hex_12_8");
-        $moves = $op->getPossibleMoves();
+        $this->op = $this->createPhase2Op("hex_12_8");
+        $moves = $this->op->getPossibleMoves();
         $target = array_key_first($moves);
-        $op->action_resolve([Operation::ARG_TARGET => $target]);
+        $this->call_resolve($target);
         $this->assertEquals($target, $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $this->assertEquals("hex_5_5", $this->game->tokens->getTokenLocation("monster_brute_1"));
     }
@@ -196,11 +184,11 @@ final class Op_moveMonsterTest extends TestCase {
     public function testPhase1AutoResolvesWithSingleMonster(): void {
         // Only one adjacent monster — phase 1 should auto-resolve and queue phase 2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertCount(1, $moves);
         // Auto-resolve should queue a moveMonster with destination field
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->call_resolve("hex_12_8");
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
         $this->assertEquals("moveMonster", $queued["type"]);

@@ -37,22 +37,28 @@ class Op_repairCard extends CountableOperation {
     }
 
     function getPossibleMoves(): array {
-        if ($this->isRepairAll()) {
-            return ["confirm"];
-        }
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget => ["q" => Material::RET_OK]];
+            return [$presetTarget];
         }
         $owner = $this->getOwner();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");
         $targets = [];
+        $total = 0;
         foreach (array_keys($cards) as $cardId) {
             $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+            $total += $damage;
             $targets[$cardId] =
                 $damage > 0
                     ? ["q" => Material::RET_OK]
                     : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to repair")];
+        }
+        if ($this->isRepairAll()) {
+            if ($total > 0) {
+                return ["confirm"];
+            } else {
+                return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to repair")];
+            }
         }
         return $targets;
     }

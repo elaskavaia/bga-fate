@@ -106,6 +106,11 @@ class GameUT extends Game {
         }
     }
 
+    /** Remove every operation from the machine stack. */
+    function clearMachine(): void {
+        $this->machine->db->loadRows([]);
+    }
+
     function getMultiMachine() {
         return $this->multimachine;
     }

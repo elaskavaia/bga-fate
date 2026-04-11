@@ -7,24 +7,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_resolveHitsTest extends TestCase {
-    private GameUT $game;
-
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR: strength 2, starting equip (+1) = 3 dice
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("hero_1", "hex_11_8");
-    }
-
-    private function getDamage(string $monsterId): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
-    }
-
+final class Op_resolveHitsTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
     // Armor reduces hits (Draugr has armor=1)
     // -------------------------------------------------------------------------
@@ -38,8 +21,7 @@ final class Op_resolveHitsTest extends TestCase {
         $this->game->effect_rollAttackDice("hero_1", "monster_draugr_1", 2);
 
         // Queue resolveHits
-        /** @var Op_resolveHits */
-        $op = $this->game->machine->instanciateOperation("resolveHits", PCOLOR, [
+        $op = $this->createOp("resolveHits", [
             "attacker" => "hero_1",
             "target" => "hex_12_8",
         ]);
@@ -61,8 +43,7 @@ final class Op_resolveHitsTest extends TestCase {
         $this->game->randQueue = [5];
         $this->game->effect_rollAttackDice("hero_1", "monster_draugr_1", 1);
 
-        /** @var Op_resolveHits */
-        $op = $this->game->machine->instanciateOperation("resolveHits", PCOLOR, [
+        $op = $this->createOp("resolveHits", [
             "attacker" => "hero_1",
             "target" => "hex_12_8",
         ]);
@@ -82,8 +63,7 @@ final class Op_resolveHitsTest extends TestCase {
         $this->game->randQueue = [5, 5];
         $this->game->effect_rollAttackDice("hero_1", "monster_goblin_1", 2);
 
-        /** @var Op_resolveHits */
-        $op = $this->game->machine->instanciateOperation("resolveHits", PCOLOR, [
+        $op = $this->createOp("resolveHits", [
             "attacker" => "hero_1",
             "target" => "hex_12_8",
         ]);

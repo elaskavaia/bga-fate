@@ -3,18 +3,10 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_c_supfire;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
-final class Op_c_supfireTest extends TestCase {
-    private GameUT $game;
-
+final class Op_c_supfireTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        $this->game->setPlayersNumber(1);
+        parent::setUp();
         // Assign hero 1 (Bjorn) to player
         $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
         // Place Bjorn on hex_11_8 and move others out of the way
@@ -24,23 +16,13 @@ final class Op_c_supfireTest extends TestCase {
         $this->game->tokens->moveToken("hero_4", "hex_2_1");
     }
 
-    private function createOp(string $type = "c_supfire", ?string $cardId = null): Op_c_supfire {
-        $data = [];
-        if ($cardId !== null) {
-            $data["card"] = $cardId;
-        }
-        /** @var Op_c_supfire */
-        $op = $this->game->machine->instanciateOperation($type, PCOLOR, $data);
-        return $op;
-    }
-
     // -------------------------------------------------------------------------
     // getPossibleMoves — Level II (no rank filter)
     // -------------------------------------------------------------------------
 
     public function testOffersMonsterInRange(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // range 1 from hero
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_12_8", $moves);
     }
@@ -48,25 +30,20 @@ final class Op_c_supfireTest extends TestCase {
     public function testExcludesMonsterOutOfRange(): void {
         // Place monster far away (range > 3 from hex_11_8)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_5_5");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $this->assertNoValidTargets();
     }
 
     public function testOffersMultipleMonstersInRange(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // range 1
         $this->game->tokens->moveToken("monster_brute_1", "hex_13_7"); // range 2
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
-        $this->assertArrayHasKey("hex_13_7", $moves);
+
+        $this->assertValidTarget("hex_12_8");
+        $this->assertValidTarget("hex_13_7");
     }
 
     public function testVoidWhenNoMonstersInRange(): void {
         // No monsters on map
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
@@ -75,30 +52,26 @@ final class Op_c_supfireTest extends TestCase {
 
     public function testLevelIOffersRank1Monster(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // rank 1
-        $op = $this->createOp("c_supfire('rank<=2')");
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testLevelIOffersRank2Monster(): void {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8"); // rank 2
-        $op = $this->createOp("c_supfire('rank<=2')");
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testLevelIExcludesRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $op = $this->createOp("c_supfire('rank<=2')");
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->assertNoValidTargets();
     }
 
     public function testLevelIIOffersRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $op = $this->createOp("c_supfire");
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->op = $this->createOp("c_supfire");
+        $this->assertValidTarget("hex_12_8");
     }
 
     // -------------------------------------------------------------------------
@@ -110,7 +83,7 @@ final class Op_c_supfireTest extends TestCase {
         // Simulate previous suppression: place green crystal on monster
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("hex_12_8", $moves, "Previously suppressed monster should be excluded");
     }
@@ -121,7 +94,7 @@ final class Op_c_supfireTest extends TestCase {
         // Suppress goblin_1 last turn
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertArrayNotHasKey("hex_12_8", $moves, "Goblin should be excluded");
         $this->assertArrayHasKey("hex_13_7", $moves, "Brute should still be available");
@@ -133,8 +106,8 @@ final class Op_c_supfireTest extends TestCase {
 
     public function testResolvePlacesGreenCrystal(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_8");
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
         $this->assertCount(1, $crystals, "Green crystal should be placed on the monster");
@@ -146,8 +119,8 @@ final class Op_c_supfireTest extends TestCase {
         // Suppress goblin last turn
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_13_7"]);
+        $op = $this->op;
+        $this->call_resolve("hex_13_7");
 
         $goblinCrystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
         $this->assertCount(0, $goblinCrystals, "Old crystal should be removed from goblin");
@@ -157,7 +130,7 @@ final class Op_c_supfireTest extends TestCase {
     }
 
     public function testCanSkip(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertTrue($op->canSkip(), "Suppressive Fire should be skippable");
     }
 
@@ -165,7 +138,7 @@ final class Op_c_supfireTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
 
-        $op = $this->createOp();
+        $op = $this->op;
         $op->action_skip();
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
@@ -180,12 +153,11 @@ final class Op_c_supfireTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
         // Suppress the monster
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->call_resolve("hex_12_8");
 
         // Now run monster movement
-        $moveOp = $this->game->machine->instanciateOperation("monsterMoveAll", ACOLOR);
-        $moveOp->resolve();
+        $this->createOp("monsterMoveAll");
+        $this->op->resolve();
 
         $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
         $this->assertEquals("hex_12_8", $loc, "Suppressed monster should not move");

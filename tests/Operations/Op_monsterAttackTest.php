@@ -5,13 +5,9 @@ declare(strict_types=1);
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_monsterAttackTest extends TestCase {
-    private GameUT $game;
-
+final class Op_monsterAttackTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Move other heroes off map so they don't interfere with ranged attacks
         $this->game->tokens->moveToken("hero_2", "limbo");

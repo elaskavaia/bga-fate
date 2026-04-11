@@ -4,47 +4,30 @@ declare(strict_types=1);
 
 use Bga\Games\Fate\Operations\Op_actionAttack;
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
-final class Op_actionAttackTest extends TestCase {
-    private GameUT $game;
-
+final class Op_actionAttackTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
-    private function createOp(): Op_actionAttack {
-        /** @var Op_actionAttack */
-        $op = $this->game->machine->instanciateOperation("actionAttack", PCOLOR);
-        return $op;
-    }
-
     // -------------------------------------------------------------------------
-    // getPossibleMoves
+    // getPossibleMoves tested via noValidTargets(), getArgsInfo() and getArgsTarget()
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $this->assertNoValidTargets();
     }
 
     public function testAdjacentMonsterIsTargetable(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertContains("hex_12_8", $moves);
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testRange2MonsterTargetableWithBow(): void {
         // Bjorn has First Bow (attack_range=2), hex_13_7 is 2 steps from hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertContains("hex_13_7", $moves);
+        $this->assertValidTarget("hex_13_7");
     }
 
     public function testOutOfRangeMonsterNotTargetable(): void {
@@ -55,15 +38,12 @@ final class Op_actionAttackTest extends TestCase {
 
         // hex_13_7 is 2 hexes from hex_11_8 — out of range with range=1
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertNotContains("hex_13_7", $moves);
+        $this->assertNotValidTarget("hex_13_7");
     }
 
     public function testAdjacentHeroNotTargetable(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertNotContains("hex_12_8", $moves);
     }
@@ -75,8 +55,8 @@ final class Op_actionAttackTest extends TestCase {
     public function testResolveQueuesRollWithStrength(): void {
         // Bjorn strength = 3 (hero card 2 + equip +1)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_8");
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -85,8 +65,8 @@ final class Op_actionAttackTest extends TestCase {
 
     public function testResolveRollHasTargetData(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_8");
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         foreach ($ops as $o) {
@@ -100,9 +80,9 @@ final class Op_actionAttackTest extends TestCase {
     }
 
     public function testResolveInvalidTargetThrows(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $this->expectException(\Bga\GameFramework\UserException::class);
         $this->expectOutputRegex("/./");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->call_resolve("hex_12_8");
     }
 }

@@ -2,15 +2,9 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
-final class Op_c_nailedTest extends TestCase {
-    private GameUT $game;
-
+final class Op_c_nailedTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         // Hero at hex_8_9 (Grimheim edge)
         $this->game->tokens->moveToken("hero_1", "hex_8_9");
     }
@@ -22,19 +16,19 @@ final class Op_c_nailedTest extends TestCase {
 
     public function testNoOverkillReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 0);
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
+        $op = $this->createOp("c_nailed");
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
     public function testNoMarkerReturnsError(): void {
         // marker_attack in limbo (no active attack)
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
+        $op = $this->createOp("c_nailed");
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
     public function testNoMonsterBehindReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 2);
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
+        $op = $this->createOp("c_nailed");
         $this->assertNotEquals(0, $op->getErrorCode());
     }
 
@@ -43,20 +37,14 @@ final class Op_c_nailedTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 2);
-
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
-        $this->assertEquals(0, $op->getErrorCode());
-        $targets = $op->getArgs()["target"] ?? [];
-        $this->assertContains("hex_6_9", $targets);
+        $this->assertValidTarget("hex_6_9");
     }
 
     public function testResolveDealsDamage(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 1);
-
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
-        $op->action_resolve(["target" => "hex_6_9"]);
+        $this->call_resolve("hex_6_9");
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(1, $crystals);
@@ -68,9 +56,7 @@ final class Op_c_nailedTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
         $this->setAttackMarker("hex_7_9", 3);
-
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
-        $op->action_resolve(["target" => "hex_6_9"]);
+        $this->call_resolve("hex_6_9");
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
@@ -81,8 +67,8 @@ final class Op_c_nailedTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 3);
 
-        $op = $this->game->machine->instanciateOperation("c_nailed(chain)", PCOLOR);
-        $op->action_resolve(["target" => "hex_6_9"]);
+        $this->op = $this->createOp("c_nailed(chain)");
+        $this->call_resolve("hex_6_9");
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
 
@@ -100,8 +86,7 @@ final class Op_c_nailedTest extends TestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 3);
 
-        $op = $this->game->machine->instanciateOperation("c_nailed", PCOLOR);
-        $op->action_resolve(["target" => "hex_6_9"]);
+        $this->call_resolve("hex_6_9");
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);

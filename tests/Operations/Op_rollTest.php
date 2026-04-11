@@ -7,19 +7,10 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_rollTest extends TestCase {
-    private GameUT $game;
-
+final class Op_rollTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-    }
-
-    private function createOp(string $expr = "roll"): Op_roll {
-        /** @var Op_roll */
-        $op = $this->game->machine->instanciateOperation($expr, PCOLOR);
-        return $op;
     }
 
     private function getDamage(string $monsterId): int {
@@ -31,29 +22,24 @@ final class Op_rollTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testNoMonstersAdjacentReturnsEmpty(): void {
-        $op = $this->createOp();
-        $moves = $op->getArgsTarget();
-        $this->assertEmpty($moves);
+        $this->assertNoValidTargets();
     }
 
     public function testAdjacentMonsterIsTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $op = $this->createOp();
-        $moves = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_12_8", $moves);
+        $this->assertValidTarget("hex_12_8");
     }
 
     public function testNonAdjacentMonsterNotTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $op = $this->createOp("roll(adj)");
-        $moves = $op->getArgsTarget();
-        $this->assertEmpty($moves);
+        $this->op = $this->createOp("roll(adj)");
+        $this->assertNoValidTargets();
     }
 
     public function testMultipleAdjacentMonsters(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_11_7");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getArgsTarget();
         $this->assertCount(2, $moves);
     }
@@ -61,34 +47,26 @@ final class Op_rollTest extends TestCase {
     public function testInRangeUsesHeroAttackRange(): void {
         // Bjorn has First Bow (attack_range=2), hex_13_7 is 2 hexes away
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        /** @var Op_roll */
-        $op = $this->game->machine->instanciateOperation("roll(inRange)", PCOLOR);
-        $moves = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_13_7", $moves);
+        $this->op = $this->createOp("roll(inRange)");
+        $this->assertValidTarget("hex_13_7");
     }
 
     public function testInRange3ReachesDistance3(): void {
         // hex_14_6 is 3 hexes from hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_14_6");
-        /** @var Op_roll */
-        $op = $this->game->machine->instanciateOperation("roll(inRange3)", PCOLOR);
-        $moves = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_14_6", $moves);
+        $this->op = $this->createOp("roll(inRange3)");
+        $this->assertValidTarget("hex_14_6");
     }
 
     public function testAdjDoesNotReachDistance2(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        /** @var Op_roll */
-        $op = $this->game->machine->instanciateOperation("roll(adj)", PCOLOR);
-        $moves = $op->getArgsTarget();
-        $this->assertEmpty($moves);
+        $this->op = $this->createOp("roll(adj)");
+        $this->assertNoValidTargets();
     }
 
     public function testAdjacentHeroNotTarget(): void {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
-        $op = $this->createOp();
-        $moves = $op->getArgsInfo();
-        $this->assertArrayNotHasKey("hex_12_8", $moves);
+        $this->assertNotValidTarget("hex_12_8");
     }
 
     // -------------------------------------------------------------------------
@@ -97,8 +75,8 @@ final class Op_rollTest extends TestCase {
 
     public function testResolveRollsDice(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $op = $this->createOp("3roll");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->op = $this->createOp("3roll");
+        $this->call_resolve("hex_12_8");
         // 3 dice should be on display_battle
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         $this->assertCount(3, $diceOnDisplay);
@@ -106,8 +84,8 @@ final class Op_rollTest extends TestCase {
 
     public function testResolveQueuesResolveHits(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $op = $this->createOp("3roll");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->op = $this->createOp("3roll");
+        $this->call_resolve("hex_12_8");
         // resolveHits should be queued in the machine
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -117,16 +95,16 @@ final class Op_rollTest extends TestCase {
     public function testResolveDoesNotApplyDamageDirectly(): void {
         // Roll only puts dice on display — damage comes from resolveHits → dealDamage
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $op = $this->createOp("3roll");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->op = $this->createOp("3roll");
+        $this->call_resolve("hex_12_8");
         // No red crystals on the monster yet (resolveHits hasn't run)
         $this->assertEquals(0, $this->getDamage("monster_troll_1"));
     }
 
     public function testCountDeterminesDiceRolled(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $op = $this->createOp("5roll");
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->op = $this->createOp("5roll");
+        $this->call_resolve("hex_12_8");
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         $this->assertCount(5, $diceOnDisplay);
     }

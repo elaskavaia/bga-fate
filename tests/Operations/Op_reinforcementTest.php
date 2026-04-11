@@ -8,27 +8,19 @@ use Bga\Games\Fate\Operations\Op_turnMonster;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_reinforcementTest extends TestCase {
-    private GameUT $game;
-
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-    }
-
+final class Op_reinforcementTest extends AbstractOpTestCase {
     private function createReinforcementOp(array $data = []): Op_reinforcement {
         if (!isset($data["deck"])) {
             $data["deck"] = "deck_monster_yellow";
         }
         /** @var Op_reinforcement */
-        $op = $this->game->machine->instanciateOperation("reinforcement", ACOLOR, $data);
+        $op = $this->createOp("reinforcement", $data);
         return $op;
     }
 
     private function createTurnMonsterOp(array $data = []): Op_turnMonster {
         /** @var Op_turnMonster */
-        $op = $this->game->machine->instanciateOperation("turnMonster", ACOLOR, $data);
+        $op = $this->createOp("turnMonster", $data);
         return $op;
     }
 

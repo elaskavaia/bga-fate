@@ -9,31 +9,24 @@ use PHPUnit\Framework\TestCase;
 
 use function Bga\Games\Fate\toJson;
 
-final class Op_seqTest extends TestCase {
-    private GameUT $game;
-
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
-    }
-
+final class Op_seqTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
     // basics
     // -------------------------------------------------------------------------
 
     public function testGetOperator(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR);
+        $op = $this->createOp("gainXp,drawEvent");
         $this->assertInstanceOf(Op_seq::class, $op);
         $this->assertEquals(",", $op->getOperator());
     }
 
     public function testGetTypeFullExpr(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR);
+        $op = $this->createOp("gainXp,drawEvent");
         $this->assertEquals("gainXp,drawEvent", $op->getTypeFullExpr());
     }
 
     public function testCopyRoundtrip(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR, ["reason" => "test"]);
+        $op = $this->createOp("gainXp,drawEvent", ["reason" => "test"]);
         $copy = $op->copy();
         $this->assertEquals("gainXp,drawEvent", $copy->getTypeFullExpr());
         $this->assertEquals("test", $copy->getDataField("reason"));
@@ -44,7 +37,7 @@ final class Op_seqTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testExpandQueuesSubOps(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR);
+        $op = $this->createOp("gainXp,drawEvent");
         $op->saveToDb(1, true);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -56,7 +49,7 @@ final class Op_seqTest extends TestCase {
 
     public function testExpandWithCount(): void {
         // 2(gainXp,drawEvent) — each sub-op should execute with count*2
-        $op = $this->game->machine->instanciateOperation("2(gainXp,drawEvent)", PCOLOR);
+        $op = $this->createOp("2(gainXp,drawEvent)");
         $op->saveToDb(1, true);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -72,17 +65,14 @@ final class Op_seqTest extends TestCase {
 
     public function testGetPossibleMovesFromFirstSub(): void {
         // First sub is gainXp which auto-resolves, so getPossibleMoves delegates to it
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR);
+        $op = $this->createOp("gainXp,drawEvent");
         $moves = $op->getPossibleMoves();
         $this->assertNotEmpty($moves);
         $this->assertEquals(0, $op->getErrorCode());
     }
 
     public function testEmptyDelegatesReturnsEmpty(): void {
-        /** @var Op_seq */
-        $op = $this->game->machine->instanciateOperation("seq", PCOLOR);
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
@@ -90,13 +80,13 @@ final class Op_seqTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testParentDataPropagatedToSubOps(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp,drawEvent", PCOLOR, ["card" => "test_card"]);
+        $op = $this->createOp("gainXp,drawEvent", ["card" => "test_card"]);
         $this->assertEquals("test_card", $op->delegates[0]->getDataField("card"));
         $this->assertEquals("test_card", $op->delegates[1]->getDataField("card"));
     }
 
     public function testComplexInst(): void {
-        $op = $this->game->machine->instanciateOperation("[0,2](gainAtt,3gainXp)", PCOLOR, ["reason" => "kick"]);
+        $op = $this->createOp("[0,2](gainAtt,3gainXp)", ["reason" => "kick"]);
         $copy = $op->copy();
         $copy->queueOp($copy);
         $op = $this->game->machine->createTopOperationFromDbForOwner();

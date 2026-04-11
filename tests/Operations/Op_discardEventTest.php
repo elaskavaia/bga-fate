@@ -7,35 +7,28 @@ use Bga\Games\Fate\Operations\Op_discardEvent;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_discardEventTest extends TestCase {
-    private GameUT $game;
-
+final class Op_discardEventTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->setupGameTables();
+        $this->game = new \Bga\Games\Fate\Stubs\GameUT();
+        $this->game->initWithHero(1);
+        // Don't clear hand — tests rely on the 1 card drawn by setupGameTables
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+        $this->op = $this->createOp();
     }
 
-    private function createOp(): Op_discardEvent {
-        /** @var Op_discardEvent */
-        $op = $this->game->machine->instanciateOperation("discardEvent", PCOLOR);
-        return $op;
-    }
-
-    /** Helper: get event cards in hand for PCOLOR */
     private function getHandCards(): array {
-        return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
+        return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . $this->owner);
     }
 
     /** Helper: move N event cards from deck to hand */
     private function fillHand(int $count): void {
-        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
+        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . $this->owner);
         $i = 0;
         foreach ($deck as $cardId => $info) {
             if ($i >= $count) {
                 break;
             }
-            $this->game->tokens->moveToken($cardId, "hand_" . PCOLOR);
+            $this->game->tokens->moveToken($cardId, "hand_" . $this->owner);
             $i++;
         }
     }
@@ -45,7 +38,7 @@ final class Op_discardEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testHandCardsAreTargets(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         // Setup draws 1 card to hand
         $handCards = $this->getHandCards();
@@ -59,16 +52,15 @@ final class Op_discardEventTest extends TestCase {
         // Move all hand cards back to deck
         $handCards = $this->getHandCards();
         foreach ($handCards as $cardId => $info) {
-            $this->game->tokens->moveToken($cardId, "deck_event_" . PCOLOR);
+            $this->game->tokens->moveToken($cardId, "deck_event_" . $this->owner);
         }
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $op = $this->op;
+        $this->assertNoValidTargets();
     }
 
     public function testMultipleHandCardsAllTargetable(): void {
         $this->fillHand(2); // plus the 1 from setup = 3 total
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $handCards = $this->getHandCards();
         $this->assertCount(count($handCards), $moves);
@@ -82,18 +74,18 @@ final class Op_discardEventTest extends TestCase {
         $handCards = $this->getHandCards();
         $cardId = array_key_first($handCards);
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardId]);
+        $op = $this->op;
+        $this->call_resolve($cardId);
 
-        $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation($cardId));
+        $this->assertEquals("discard_" . $this->owner, $this->game->tokens->getTokenLocation($cardId));
     }
 
     public function testResolveRemovesCardFromHand(): void {
         $handBefore = count($this->getHandCards());
 
         $cardId = array_key_first($this->getHandCards());
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardId]);
+        $op = $this->op;
+        $this->call_resolve($cardId);
 
         $handAfter = count($this->getHandCards());
         $this->assertEquals($handBefore - 1, $handAfter);

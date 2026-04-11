@@ -3,37 +3,24 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_drawEvent;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
-final class Op_drawEventTest extends TestCase {
-    private GameUT $game;
-
+final class Op_drawEventTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->setupGameTables();
+        parent::setUp();
+        $this->fillHandFromDeck(1);
     }
-
-    private function createOp(): Op_drawEvent {
-        /** @var Op_drawEvent */
-        $op = $this->game->machine->instanciateOperation("drawEvent", PCOLOR);
-        return $op;
-    }
-
     private function getHandCards(): array {
-        return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
+        return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . $this->owner);
     }
 
     private function fillHandFromDeck(int $count): void {
-        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
+        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . $this->owner);
         $i = 0;
         foreach ($deck as $cardId => $info) {
             if ($i >= $count) {
                 break;
             }
-            $this->game->tokens->moveToken($cardId, "hand_" . PCOLOR);
+            $this->game->tokens->moveToken($cardId, "hand_" . $this->owner);
             $i++;
         }
     }
@@ -43,21 +30,16 @@ final class Op_drawEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testConfirmOfferedWhenHandNotFull(): void {
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("confirm", $moves);
-        $this->assertEquals(0, $moves["confirm"]["q"]);
+        $this->assertValidTarget("confirm");
     }
 
     public function testDeckEmptyReturnsError(): void {
-        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . PCOLOR);
+        $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . $this->owner);
         foreach ($deck as $cardId => $info) {
             $this->game->tokens->moveToken($cardId, "limbo");
         }
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("confirm", $moves);
-        $this->assertNotEquals(0, $moves["q"]);
+        $this->assertNotValidTarget("confirm");
+        $this->assertNotEquals(0, $this->op->getPossibleMoves()["q"]);
     }
 
     // -------------------------------------------------------------------------
@@ -65,23 +47,19 @@ final class Op_drawEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testStarsongIIOffersConfirmAtHandSize4(): void {
-        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
-        $this->game->getHero(PCOLOR)->recalcTrackers();
+        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . $this->owner);
+        $this->game->getHero($this->owner)->recalcTrackers();
         $this->fillHandFromDeck(3); // 1 from setup + 3 = 4
         $this->assertCount(4, $this->getHandCards());
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayHasKey("confirm", $moves); // still under limit of 5
+        $this->assertValidTarget("confirm"); // still under limit of 5
     }
 
     public function testStarsongIIPromtsDiscardAtHandSize5(): void {
-        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . PCOLOR);
-        $this->game->getHero(PCOLOR)->recalcTrackers();
+        $this->game->tokens->moveToken("card_ability_2_8", "tableau_" . $this->owner);
+        $this->game->getHero($this->owner)->recalcTrackers();
         $this->fillHandFromDeck(4); // 1 from setup + 4 = 5
         $this->assertCount(5, $this->getHandCards());
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertArrayNotHasKey("confirm", $moves); // at limit, offers discard
+        $this->assertNotValidTarget("confirm"); // at limit, offers discard
     }
 
     // -------------------------------------------------------------------------
@@ -90,17 +68,14 @@ final class Op_drawEventTest extends TestCase {
 
     public function testPossibleMovesReturnsHandCards(): void {
         $this->fillHandFromDeck(3);
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
         $handCards = $this->getHandCards();
-        $this->assertCount(count($handCards), $moves);
-        foreach ($handCards as $cardId => $info) {
-            $this->assertArrayHasKey($cardId, $moves);
+        foreach (array_keys($handCards) as $cardId) {
+            $this->assertValidTarget($cardId);
         }
     }
 
     public function testCanSkip(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertTrue($op->canSkip());
     }
 
@@ -114,19 +89,19 @@ final class Op_drawEventTest extends TestCase {
         $cardToDiscard = array_key_first($handCards);
         $handBefore = count($handCards);
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardToDiscard]);
+        $op = $this->op;
+        $this->call_resolve($cardToDiscard);
 
         // Discarded card should be in discard pile
-        $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation($cardToDiscard));
+        $this->assertEquals("discard_" . $this->owner, $this->game->tokens->getTokenLocation($cardToDiscard));
         // Hand size should stay the same (discarded 1, drew 1)
         $this->assertCount($handBefore, $this->getHandCards());
     }
 
     public function testResolveConfirmDrawsCard(): void {
         $handBefore = count($this->getHandCards());
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "confirm"]);
+        $op = $this->op;
+        $this->call_resolve("confirm");
         $this->assertCount($handBefore + 1, $this->getHandCards());
     }
 
@@ -135,8 +110,8 @@ final class Op_drawEventTest extends TestCase {
         $handCards = $this->getHandCards();
         $cardToDiscard = array_key_first($handCards);
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => $cardToDiscard]);
+        $op = $this->op;
+        $this->call_resolve($cardToDiscard);
 
         // The discarded card should no longer be in hand
         $newHand = $this->getHandCards();
@@ -151,7 +126,7 @@ final class Op_drawEventTest extends TestCase {
         $this->fillHandFromDeck(3); // hand = 4
         $handBefore = $this->getHandCards();
 
-        $op = $this->createOp();
+        $op = $this->op;
         $op->action_skip();
 
         $handAfter = $this->getHandCards();

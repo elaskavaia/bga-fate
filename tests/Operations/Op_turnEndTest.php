@@ -6,27 +6,19 @@ use Bga\Games\Fate\Operations\Op_turnEnd;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_turnEndTest extends TestCase {
-    private GameUT $game;
-
+final class Op_turnEndTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        // Assign hero 1 (Bjorn) to PCOLOR with Sure Shot I (mana=1) and First Bow (no mana)
-        $this->game->tokens->moveToken("card_hero_1_1", "tableau_" . PCOLOR);
-        $this->game->tokens->moveToken("card_ability_1_3", "tableau_" . PCOLOR); // Sure Shot I, mana=1
-        $this->game->tokens->moveToken("card_equip_1_15", "tableau_" . PCOLOR); // Bjorn's First Bow, no mana
+        parent::setUp();
+        // setupGameTables already puts card_hero_1_1, card_ability_1_3 (Sure Shot I, mana=1),
+        // and card_equip_1_15 on tableau, and seeds 1 mana on Sure Shot I — drain that mana
+        // so tests can reason about zero-start mana generation.
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3")) as $key) {
+            $this->game->tokens->moveToken($key, "supply_crystal_green");
+        }
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Place action markers
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_actionPractice");
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "aslot_" . PCOLOR . "_actionMove");
-    }
-
-    private function createOp(): Op_turnEnd {
-        /** @var Op_turnEnd */
-        $op = $this->game->machine->instanciateOperation("turnEnd", PCOLOR);
-        return $op;
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionPractice");
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_actionMove");
     }
 
     // -------------------------------------------------------------------------
@@ -34,8 +26,8 @@ final class Op_turnEndTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testManaGeneratedForCardWithManaField(): void {
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         // Sure Shot I has mana=1, should get 1 green crystal
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
@@ -43,8 +35,8 @@ final class Op_turnEndTest extends TestCase {
     }
 
     public function testNoManaGeneratedForCardWithoutManaField(): void {
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         // First Bow has no mana field — should get no green crystals
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_equip_1_15");
@@ -55,8 +47,8 @@ final class Op_turnEndTest extends TestCase {
         // Pre-place 1 mana on the card
         $this->game->tokens->pickTokensForLocation(1, "supply_crystal_green", "card_ability_1_3");
 
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         // Should now have 2 green crystals
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
@@ -65,10 +57,10 @@ final class Op_turnEndTest extends TestCase {
 
     public function testMana2CardGenerates2(): void {
         // Add Sure Shot II (mana=2) to tableau
-        $this->game->tokens->moveToken("card_ability_1_4", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("card_ability_1_4", "tableau_" . $this->owner);
 
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         // Sure Shot II should get 2 green crystals
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_4");
@@ -80,8 +72,8 @@ final class Op_turnEndTest extends TestCase {
     }
 
     public function testHeroCardGetsNoMana(): void {
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_hero_1_1");
         $this->assertCount(0, $crystals);
@@ -92,13 +84,13 @@ final class Op_turnEndTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testActionMarkersResetToEmpty(): void {
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
-        $loc1 = $this->game->tokens->getTokenLocation("marker_" . PCOLOR . "_1");
-        $loc2 = $this->game->tokens->getTokenLocation("marker_" . PCOLOR . "_2");
-        $this->assertEquals("aslot_" . PCOLOR . "_empty_1", $loc1);
-        $this->assertEquals("aslot_" . PCOLOR . "_empty_2", $loc2);
+        $loc1 = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_1");
+        $loc2 = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_2");
+        $this->assertEquals("aslot_" . $this->owner . "_empty_1", $loc1);
+        $this->assertEquals("aslot_" . $this->owner . "_empty_2", $loc2);
     }
 
     // -------------------------------------------------------------------------
@@ -110,8 +102,8 @@ final class Op_turnEndTest extends TestCase {
         $this->game->tokens->moveToken("die_attack_1", "display_battle");
         $this->game->tokens->moveToken("die_attack_2", "display_battle");
 
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
 
         $this->assertEquals("supply_die_attack", $this->game->tokens->getTokenLocation("die_attack_1"));
         $this->assertEquals("supply_die_attack", $this->game->tokens->getTokenLocation("die_attack_2"));
@@ -119,8 +111,8 @@ final class Op_turnEndTest extends TestCase {
 
     public function testNoBattleDiceNoCrash(): void {
         // No dice on display_battle — should not error
-        $op = $this->createOp();
-        $op->action_resolve([]);
+        $op = $this->op;
+        $this->call_resolve();
         $this->assertTrue(true); // no exception
     }
 }

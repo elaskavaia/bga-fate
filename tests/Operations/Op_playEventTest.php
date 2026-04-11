@@ -12,24 +12,12 @@ use PHPUnit\Framework\TestCase;
 // card_event_1_27 = "Rest" (r: 2heal(self)) — simple, no expression args.
 const EVENT_CARD = "card_event_1_27";
 
-final class Op_playEventTest extends TestCase {
-    private GameUT $game;
-
+final class Op_playEventTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->setupGameTables();
-        // Clear the hand and place only the card we want to test with
-        $this->clearHand();
+        parent::setUp();
         $this->putInHand(EVENT_CARD);
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
-    }
-
-    private function createOp(): Op_playEvent {
-        /** @var Op_playEvent */
-        $op = $this->game->machine->instanciateOperation("playEvent", PCOLOR);
-        return $op;
     }
 
     /** Move all event cards from hand back to deck */
@@ -55,22 +43,21 @@ final class Op_playEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testHandEventCardsAreTargets(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey(EVENT_CARD, $moves);
     }
 
     public function testEmptyHandReturnsNoMoves(): void {
         $this->clearHand();
-        $op = $this->createOp();
-        $moves = $op->getPossibleMoves();
-        $this->assertEmpty($moves);
+        $op = $this->op;
+        $this->assertNoValidTargets();
     }
 
     public function testMultipleHandCardsAllTargetable(): void {
         $second = "card_event_1_30"; // Bjorn "Sewing"
         $this->putInHand($second);
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey(EVENT_CARD, $moves);
         $this->assertArrayHasKey($second, $moves);
@@ -96,23 +83,23 @@ final class Op_playEventTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveMovesCardToDiscard(): void {
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+        $op = $this->op;
+        $this->call_resolve(EVENT_CARD);
 
         $this->assertEquals("discard_" . PCOLOR, $this->game->tokens->getTokenLocation(EVENT_CARD));
     }
 
     public function testResolveRemovesCardFromHand(): void {
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+        $op = $this->op;
+        $this->call_resolve(EVENT_CARD);
 
         $this->assertArrayNotHasKey(EVENT_CARD, $this->getHandCards());
     }
 
     public function testResolveQueuesSubOperation(): void {
         $this->setupHeroOnMap();
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+        $op = $this->op;
+        $this->call_resolve(EVENT_CARD);
 
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
@@ -124,14 +111,14 @@ final class Op_playEventTest extends TestCase {
         $this->setupHeroOnMap();
         // setupHeroOnMap adds 3 damage; heal op re-instantiated from type loses count, heals 1
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => EVENT_CARD]);
+        $op = $this->op;
+        $this->call_resolve(EVENT_CARD);
 
         // Get and resolve the queued heal operation
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
         $top = reset($queued);
-        $healOp = $this->game->machine->instanciateOperation($top["type"], PCOLOR);
+        $healOp = $this->createOp($top["type"]);
         $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
 
         $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));

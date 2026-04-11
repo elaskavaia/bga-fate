@@ -5,12 +5,9 @@ declare(strict_types=1);
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_rerollMissesTest extends TestCase {
-    private GameUT $game;
-
+final class Op_rerollMissesTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -29,7 +26,7 @@ final class Op_rerollMissesTest extends TestCase {
         // Seed rerolls to hit (side 5)
         $this->game->randQueue = [5, 5];
 
-        $op = $this->game->machine->instanciateOperation("rerollMisses", PCOLOR);
+        $op = $this->createOp("rerollMisses");
         $op->resolve();
 
         $dice = $this->getDiceOnBattle();
@@ -43,7 +40,7 @@ final class Op_rerollMissesTest extends TestCase {
         $this->placeDie("die_attack_1", 3);
         $this->game->randQueue = [6];
 
-        $op = $this->game->machine->instanciateOperation("rerollMisses", PCOLOR);
+        $op = $this->createOp("rerollMisses");
         $op->resolve();
 
         $dice = $this->getDiceOnBattle();
@@ -57,7 +54,7 @@ final class Op_rerollMissesTest extends TestCase {
         $this->placeDie("die_attack_2", 6);
         $this->placeDie("die_attack_3", 4);
 
-        $op = $this->game->machine->instanciateOperation("rerollMisses", PCOLOR);
+        $op = $this->createOp("rerollMisses");
         $op->resolve();
 
         $dice = $this->getDiceOnBattle();
@@ -73,7 +70,7 @@ final class Op_rerollMissesTest extends TestCase {
         $this->placeDie("die_attack_3", 2); // miss
         $this->game->randQueue = [6, 6];
 
-        $op = $this->game->machine->instanciateOperation("rerollMisses", PCOLOR);
+        $op = $this->createOp("rerollMisses");
         $op->resolve();
 
         $dice = $this->getDiceOnBattle();
@@ -83,7 +80,7 @@ final class Op_rerollMissesTest extends TestCase {
     }
 
     public function testNoDiceDoesNothing(): void {
-        $op = $this->game->machine->instanciateOperation("rerollMisses", PCOLOR);
+        $op = $this->createOp("rerollMisses");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         $this->assertCount(0, $dice);

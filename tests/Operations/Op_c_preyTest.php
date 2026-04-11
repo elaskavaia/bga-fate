@@ -7,9 +7,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_c_preyTest extends TestCase {
-    private GameUT $game;
-
+final class Op_c_preyTest extends AbstractOpTestCase {
     protected function setUp(): void {
         $this->game = new GameUT();
         $this->game->init();
@@ -20,12 +18,8 @@ final class Op_c_preyTest extends TestCase {
         $this->game->tokens->moveToken("hero_2", "hex_1_1");
         $this->game->tokens->moveToken("hero_3", "hex_1_2");
         $this->game->tokens->moveToken("hero_4", "hex_2_1");
-    }
-
-    private function createOp(): Op_c_prey {
-        /** @var Op_c_prey */
-        $op = $this->game->machine->instanciateOperation("c_prey", PCOLOR);
-        return $op;
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+        $this->op = $this->createOp();
     }
 
     private function yellowOn(string $loc): int {
@@ -39,35 +33,30 @@ final class Op_c_preyTest extends TestCase {
     // ---- target selection ----
 
     public function testNoMonstersAutoSkips(): void {
-        $op = $this->createOp();
-        $this->assertTrue($op->noValidTargets());
+        $this->assertNoValidTargets();
     }
 
     public function testRank3MonsterIsTarget(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
-        $op = $this->createOp();
-        $info = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_12_5", $info);
+        $this->assertValidTarget("hex_12_5");
     }
 
     public function testLegendMonsterIsTarget(): void {
         // Any legend works regardless of rank stat
         $this->game->tokens->moveToken("monster_legend_2_1", "hex_5_5");
-        $op = $this->createOp();
-        $info = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_5_5", $info);
+        $this->assertValidTarget("hex_5_5");
     }
 
     public function testRank1MonsterNotTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_5");
-        $op = $this->createOp();
+        $op = $this->op;
         $info = $op->getArgsInfo();
         $this->assertArrayNotHasKey("hex_12_5", $info);
     }
 
     public function testRank2MonsterNotTarget(): void {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_5");
-        $op = $this->createOp();
+        $op = $this->op;
         $info = $op->getArgsInfo();
         $this->assertArrayNotHasKey("hex_12_5", $info);
     }
@@ -75,7 +64,7 @@ final class Op_c_preyTest extends TestCase {
     public function testDamagedRank3NotTarget(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
         $this->game->tokens->moveToken("crystal_red_1", "monster_troll_1");
-        $op = $this->createOp();
+        $op = $this->op;
         $info = $op->getArgsInfo();
         $this->assertArrayNotHasKey("hex_12_5", $info);
     }
@@ -83,17 +72,15 @@ final class Op_c_preyTest extends TestCase {
     public function testTargetsAnyDistance(): void {
         // Hero at hex_8_9, pick a far-away hex — no range restriction
         $this->game->tokens->moveToken("monster_jotunn_1", "hex_2_10");
-        $op = $this->createOp();
-        $info = $op->getArgsInfo();
-        $this->assertArrayHasKey("hex_2_10", $info);
+        $this->assertValidTarget("hex_2_10");
     }
 
     // ---- resolve ----
 
     public function testResolveMarksWithTwoYellow(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_5"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_5");
         $this->assertEquals(2, $this->yellowOn("monster_troll_1"));
     }
 
@@ -102,8 +89,8 @@ final class Op_c_preyTest extends TestCase {
     public function testBonusXpAwardedOnKill(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
         // Mark via Prey
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "hex_12_5"]);
+        $op = $this->op;
+        $this->call_resolve("hex_12_5");
         $this->assertEquals(2, $this->yellowOn("monster_troll_1"));
 
         // Kill the troll directly via the model

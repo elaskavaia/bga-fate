@@ -6,19 +6,10 @@ use Bga\Games\Fate\Operations\Op_actionMove;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_actionMoveTest extends TestCase {
-    private GameUT $game;
-
+final class Op_actionMoveTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
-    }
-
-    private function createOp(): Op_actionMove {
-        /** @var Op_actionMove */
-        $op = $this->game->machine->instanciateOperation("actionMove", PCOLOR);
-        return $op;
     }
 
     private function getQueuedOp(): ?array {
@@ -31,7 +22,7 @@ final class Op_actionMoveTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testReachableHexesFromGrimheim(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // Grimheim hexes (other than starting hex) are reachable at distance 0
@@ -45,7 +36,7 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     public function testCurrentHexNotReachable(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // Current hex should not be in the list
@@ -53,7 +44,7 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     public function testTooFarHexesNotReachable(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // hex_9_1 is far from Grimheim (> 3 steps)
@@ -61,7 +52,7 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     public function testMountainHexesNotReachable(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // hex_9_11 is mountain, should not be reachable
@@ -71,7 +62,7 @@ final class Op_actionMoveTest extends TestCase {
     public function testOccupiedHexBlocks(): void {
         // Place another hero on an adjacent hex
         $this->game->tokens->moveToken("hero_2", "hex_11_8");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // Occupied hex should not be reachable
@@ -79,7 +70,7 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     public function testNoNonMapLocationsOffered(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertArrayNotHasKey("limbo", $moves);
@@ -92,7 +83,7 @@ final class Op_actionMoveTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveQueuesMoveHero(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $op->resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
@@ -100,7 +91,8 @@ final class Op_actionMoveTest extends TestCase {
     }
 
     public function testGetNumberOfMovesDefault3(): void {
-        $op = $this->createOp();
+        /** @var Op_actionMove */
+        $op = $this->op;
         $this->assertEquals(3, $op->getNumberOfMoves());
     }
 }

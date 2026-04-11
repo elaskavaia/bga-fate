@@ -5,21 +5,14 @@ declare(strict_types=1);
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_spendXpTest extends TestCase {
-    private GameUT $game;
-
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
-    }
-
+final class Op_spendXpTest extends AbstractOpTestCase {
     public function testSpendXpRemovesCrystal(): void {
         // Give the player some XP first
         $heroId = $this->game->getHeroTokenId(PCOLOR);
         $this->game->effect_moveCrystals($heroId, "yellow", 3, "tableau_" . PCOLOR, ["message" => ""]);
         $before = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
-        $op = $this->game->machine->instanciateOperation("spendXp", PCOLOR);
+        $op = $this->createOp("spendXp");
         $op->resolve();
 
         $after = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -31,7 +24,7 @@ final class Op_spendXpTest extends TestCase {
         $this->game->effect_moveCrystals($heroId, "yellow", 3, "tableau_" . PCOLOR, ["message" => ""]);
         $before = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
-        $op = $this->game->machine->instanciateOperation("2spendXp", PCOLOR);
+        $op = $this->createOp("2spendXp");
         $op->resolve();
 
         $after = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
@@ -46,7 +39,7 @@ final class Op_spendXpTest extends TestCase {
         }
 
         $this->expectException(\Bga\GameFramework\UserException::class);
-        $op = $this->game->machine->instanciateOperation("spendXp", PCOLOR);
+        $op = $this->createOp("spendXp");
         $op->resolve();
     }
 }

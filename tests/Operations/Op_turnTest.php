@@ -8,21 +8,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_turnTest extends TestCase {
-    private GameUT $game;
-
-    protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
-        $this->game->clearHand(); // no random event card
-    }
-
-    private function createOp(): Op_turn {
-        /** @var Op_turn */
-        $op = $this->game->machine->instanciateOperation("turn", PCOLOR);
-        return $op;
-    }
-
+final class Op_turnTest extends AbstractOpTestCase {
     /** Simulate one action already taken by placing marker 1 in its aslot */
     private function simulateActionTaken(string $actionType): void {
         $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_" . $actionType);
@@ -39,7 +25,7 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testAllMainActionsOfferedAtStart(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertArrayHasKey("actionMove", $moves);
@@ -51,7 +37,7 @@ final class Op_turnTest extends TestCase {
     }
 
     public function testMainActionsAvailableAtStart(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertEquals(Material::RET_OK, $moves["actionPractice"]["q"]);
@@ -62,7 +48,7 @@ final class Op_turnTest extends TestCase {
         $this->game->tokens->moveToken("card_event_1_27", "hand_" . PCOLOR);
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         // Free actions are inlined — individual cards appear with "action" => "playEvent"
@@ -75,7 +61,7 @@ final class Op_turnTest extends TestCase {
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertArrayHasKey("card_event_1_27", $moves);
@@ -84,7 +70,7 @@ final class Op_turnTest extends TestCase {
 
     public function testAlreadyTakenActionIsNotApplicable(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertEquals(Material::ERR_NOT_APPLICABLE, $moves["actionPractice"]["q"]);
@@ -92,7 +78,7 @@ final class Op_turnTest extends TestCase {
 
     public function testOtherActionsStillAvailableAfterOneTaken(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertEquals(Material::RET_OK, $moves["actionMove"]["q"]);
@@ -101,7 +87,7 @@ final class Op_turnTest extends TestCase {
 
     public function testNoMainActionsOfferedAfterBothTaken(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $this->assertArrayNotHasKey("actionPractice", $moves);
@@ -114,19 +100,19 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testPromptFirstAction(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertEquals("Select your first action or free action", $op->getPrompt());
     }
 
     public function testPromptSecondAction(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertEquals("Select your second action or free action", $op->getPrompt());
     }
 
     public function testPromptNoValidActionsRemain(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertEquals("Confirm end of turn", $op->getPrompt());
     }
 
@@ -135,19 +121,19 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testCannotSkipAtStart(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertFalse($op->canSkip());
     }
 
     public function testCannotSkipWithOneActionRemaining(): void {
         $this->simulateActionTaken("actionPractice");
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertFalse($op->canSkip());
     }
 
     public function testCanSkipWhenNoActionsRemaining(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $this->assertTrue($op->canSkip());
     }
 
@@ -156,8 +142,8 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveMainActionQueuesActionOp(): void {
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
+        $op = $this->op;
+        $this->call_resolve("actionPractice");
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
         $this->assertNotNull($top);
@@ -167,16 +153,16 @@ final class Op_turnTest extends TestCase {
     public function testResolveMainActionMovesMarker(): void {
         $markerKey = "marker_" . PCOLOR . "_1";
 
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
+        $op = $this->op;
+        $this->call_resolve("actionPractice");
 
         $location = $this->game->tokens->getTokenLocation($markerKey);
         $this->assertEquals("aslot_" . PCOLOR . "_actionPractice", $location);
     }
 
     public function testResolveFirstActionDecrementsRemaining(): void {
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
+        $op = $this->op;
+        $this->call_resolve("actionPractice");
 
         $this->game->machine->dispatchAll(); // run actionPractice
         $turnOp = $this->game->machine->createTopOperationFromDbForOwner(null);
@@ -189,8 +175,8 @@ final class Op_turnTest extends TestCase {
 
     public function testResolveSecondMarkerPlacedForSecondAction(): void {
         // First action
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
+        $op = $this->op;
+        $this->call_resolve("actionPractice");
         $this->game->machine->dispatchAll(); // run actionPractice, returns to turn
 
         // Second action
@@ -208,8 +194,8 @@ final class Op_turnTest extends TestCase {
 
     public function testResolveDuplicateMainActionThrows(): void {
         // Take practice as first action
-        $op = $this->createOp();
-        $op->action_resolve([Operation::ARG_TARGET => "actionPractice"]);
+        $op = $this->op;
+        $this->call_resolve("actionPractice");
         $this->game->machine->dispatchAll();
 
         // Try to take practice again as second action — should throw
@@ -231,7 +217,7 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testPossibleMovesIncludesDelegateTargets(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $hasDelegateTarget = false;
@@ -248,7 +234,7 @@ final class Op_turnTest extends TestCase {
 
     public function testDelegateTargetsNotPresentWhenNoActionsRemaining(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
         $this->assertEquals(0, count($moves));
     }
@@ -258,7 +244,7 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveDelegateTargetQueuesAction(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $moves = $op->getPossibleMoves();
 
         $hexTarget = null;
@@ -270,7 +256,7 @@ final class Op_turnTest extends TestCase {
         }
         $this->assertNotNull($hexTarget, "Expected a hex delegate target");
 
-        $op->action_resolve([Operation::ARG_TARGET => $hexTarget]);
+        $this->call_resolve($hexTarget);
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
         $this->assertNotNull($top);
@@ -283,7 +269,7 @@ final class Op_turnTest extends TestCase {
 
     public function testSkipQueuesEndOfTurn(): void {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $op->skip();
 
         $top = $this->game->machine->createTopOperationFromDbForOwner(null);
@@ -296,7 +282,7 @@ final class Op_turnTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testExtraArgsAtStart(): void {
-        $op = $this->createOp();
+        $op = $this->op;
         $args = $op->getExtraArgs();
 
         $this->assertEquals(2, $args["actions_remaining"]);
@@ -305,7 +291,7 @@ final class Op_turnTest extends TestCase {
 
     public function testExtraArgsAfterOneAction(): void {
         $this->simulateActionTaken("actionMove");
-        $op = $this->createOp();
+        $op = $this->op;
         $args = $op->getExtraArgs();
 
         $this->assertEquals(1, $args["actions_remaining"]);

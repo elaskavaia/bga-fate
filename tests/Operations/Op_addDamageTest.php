@@ -5,12 +5,9 @@ declare(strict_types=1);
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
-final class Op_addDamageTest extends TestCase {
-    private GameUT $game;
-
+final class Op_addDamageTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -19,21 +16,21 @@ final class Op_addDamageTest extends TestCase {
     }
 
     public function testAdds1DiceToBattle(): void {
-        $op = $this->game->machine->instanciateOperation("1addDamage", PCOLOR);
+        $op = $this->createOp("1addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         $this->assertCount(1, $dice);
     }
 
     public function testAdds3DiceToBattle(): void {
-        $op = $this->game->machine->instanciateOperation("3addDamage", PCOLOR);
+        $op = $this->createOp("3addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         $this->assertCount(3, $dice);
     }
 
     public function testDiceHaveHitState(): void {
-        $op = $this->game->machine->instanciateOperation("2addDamage", PCOLOR);
+        $op = $this->createOp("2addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         foreach ($dice as $die) {
@@ -46,14 +43,14 @@ final class Op_addDamageTest extends TestCase {
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 5);
         $this->game->tokens->moveToken("die_attack_2", "display_battle", 5);
 
-        $op = $this->game->machine->instanciateOperation("2addDamage", PCOLOR);
+        $op = $this->createOp("2addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         $this->assertCount(4, $dice);
     }
 
     public function testUsesCustomAttacker(): void {
-        $op = $this->game->machine->instanciateOperation("1addDamage", PCOLOR, ["attacker" => "monster_goblin_1"]);
+        $op = $this->createOp("1addDamage", ["attacker" => "monster_goblin_1"]);
         $op->resolve();
         // Just verify it doesn't crash and dice are placed
         $dice = $this->getDiceOnBattle();
@@ -63,7 +60,7 @@ final class Op_addDamageTest extends TestCase {
     // --- Param: no param (unconditional) ---
 
     public function testNoParamAlwaysValid(): void {
-        $op = $this->game->machine->instanciateOperation("2addDamage", PCOLOR);
+        $op = $this->createOp("2addDamage");
         $this->assertEquals(0, $op->getErrorCode());
     }
 
@@ -72,20 +69,20 @@ final class Op_addDamageTest extends TestCase {
     public function testMinDistRejectsCloseTarget(): void {
         // Hero at hex_11_8, marker_attack at adjacent hex (distance 1)
         $this->game->tokens->moveToken("marker_attack", "hex_12_8");
-        $op = $this->game->machine->instanciateOperation("2addDamage(2)", PCOLOR);
+        $op = $this->createOp("2addDamage(2)");
         $this->assertNotEquals(0, $op->getErrorCode(), "Should reject target at distance 1 when min is 2");
     }
 
     public function testMinDistAcceptsDistantTarget(): void {
         // Hero at hex_11_8, marker_attack 2 hexes away
         $this->game->tokens->moveToken("marker_attack", "hex_9_8");
-        $op = $this->game->machine->instanciateOperation("2addDamage(2)", PCOLOR);
+        $op = $this->createOp("2addDamage(2)");
         $this->assertEquals(0, $op->getErrorCode(), "Should accept target at distance 2 when min is 2");
     }
 
     public function testMinDistRejectsNoMarker(): void {
         // marker_attack in limbo (no active attack)
-        $op = $this->game->machine->instanciateOperation("2addDamage(2)", PCOLOR);
+        $op = $this->createOp("2addDamage(2)");
         $this->assertNotEquals(0, $op->getErrorCode(), "Should reject when no attack marker");
     }
 
@@ -93,19 +90,19 @@ final class Op_addDamageTest extends TestCase {
 
     public function testDistParamValid(): void {
         $this->game->tokens->moveToken("marker_attack", "hex_9_8");
-        $op = $this->game->machine->instanciateOperation("addDamage(dist)", PCOLOR);
+        $op = $this->createOp("addDamage(dist)");
         $this->assertEquals(0, $op->getErrorCode(), "dist param should be valid when marker present");
     }
 
     public function testDistParamRejectsNoMarker(): void {
-        $op = $this->game->machine->instanciateOperation("addDamage(dist)", PCOLOR);
+        $op = $this->createOp("addDamage(dist)");
         $this->assertNotEquals(0, $op->getErrorCode(), "dist param should reject when no attack marker");
     }
 
     public function testDistParamAddsDiceEqualToDistance(): void {
         // Hero at hex_11_8, marker 3 hexes away
         $this->game->tokens->moveToken("marker_attack", "hex_8_8");
-        $op = $this->game->machine->instanciateOperation("addDamage(dist)", PCOLOR);
+        $op = $this->createOp("addDamage(dist)");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
         $this->assertCount(3, $dice, "Should add 3 dice for distance 3");
