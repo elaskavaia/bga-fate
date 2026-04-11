@@ -83,12 +83,12 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
         // Use the card
         $this->call_resolve($this->cardId);
         // Second use — card should no longer be available
-        $this->op = $this->createOp();
+        $this->createOp();
         $this->assertNotValidTarget($this->cardId);
     }
 
     public function testPresetTargetReturnsDirectly(): void {
-        $this->op = $this->createOp("useAbility", ["target" => $this->cardId]);
+        $this->createOp("useAbility", ["target" => $this->cardId]);
         $this->assertValidTargetCount(1);
         $this->assertValidTarget($this->cardId);
     }

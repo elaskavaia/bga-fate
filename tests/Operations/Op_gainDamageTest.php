@@ -20,14 +20,14 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
     }
 
     public function testCardWithRoomIsValid(): void {
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->assertValidTarget($this->cardId);
     }
 
     public function testCardAtMaxDurabilityNotApplicable(): void {
         // Helmet has durability 3, add 3 red crystals
         $this->game->effect_moveCrystals("hero_1", "red", 3, $this->cardId);
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->assertTargetError($this->cardId, Material::ERR_NOT_APPLICABLE);
     }
 
@@ -37,14 +37,14 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
 
     public function testResolveAdds1Damage(): void {
         $this->assertEquals(0, $this->getDamage($this->cardId));
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->call_resolve($this->cardId);
         $this->assertEquals(1, $this->getDamage($this->cardId));
     }
 
     public function testResolveTakesFromSupply(): void {
         $supplyBefore = $this->countRedCrystals("supply_crystal_red");
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->call_resolve($this->cardId);
         $supplyAfter = $this->countRedCrystals("supply_crystal_red");
         $this->assertEquals($supplyBefore - 1, $supplyAfter);
@@ -61,7 +61,7 @@ final class Op_gainDamageTest extends AbstractOpTestCase {
     public function testPartialDurabilityStillValid(): void {
         // Add 2 of 3 durability
         $this->game->effect_moveCrystals("hero_1", "red", 2, $this->cardId);
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->assertValidTarget($this->cardId);
     }
 }

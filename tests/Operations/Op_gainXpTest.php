@@ -32,14 +32,14 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     }
 
     public function testResolveGains2Xp(): void {
-        $this->op = $this->createOp("2gainXp");
+        $this->createOp("2gainXp");
         $this->call_resolve();
         $this->assertEquals(2, $this->getXp());
     }
 
     public function testResolveTakesFromSupply(): void {
         $supplyBefore = $this->countYellowCrystals("supply_crystal_yellow");
-        $this->op = $this->createOp("2gainXp");
+        $this->createOp("2gainXp");
         $this->call_resolve();
         $supplyAfter = $this->countYellowCrystals("supply_crystal_yellow");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
@@ -60,20 +60,20 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     public function testGrimheimConditionPassesInGrimheim(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2gainXp(grimheim)");
+        $this->createOp("2gainXp(grimheim)");
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 
     public function testGrimheimConditionFailsOutsideGrimheim(): void {
         // hero_1 is on hex_11_8 (plains, not Grimheim)
-        $this->op = $this->createOp("2gainXp(grimheim)");
+        $this->createOp("2gainXp(grimheim)");
         $this->assertNoValidTargets();
     }
 
     public function testGrimheimConditionResolves(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2gainXp(grimheim)");
+        $this->createOp("2gainXp(grimheim)");
         $this->call_resolve();
         $this->assertEquals(2, $this->getXp());
     }
@@ -85,20 +85,20 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     public function testAdjMountainConditionPassesWhenAdjacent(): void {
         $this->game->tokens->moveToken("hero_1", "hex_14_2"); // adjacent to hex_14_1 (mountain)
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2gainXp(adjMountain)");
+        $this->createOp("2gainXp(adjMountain)");
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 
     public function testAdjMountainConditionFailsWhenNotAdjacent(): void {
         // hero_1 is on hex_11_8 — no adjacent mountains
-        $this->op = $this->createOp("2gainXp(adjMountain)");
+        $this->createOp("2gainXp(adjMountain)");
         $this->assertNoValidTargets();
     }
 
     public function testAdjMountainConditionResolves(): void {
         $this->game->tokens->moveToken("hero_1", "hex_14_2");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2gainXp(adjMountain)");
+        $this->createOp("2gainXp(adjMountain)");
         $this->call_resolve();
         $this->assertEquals(2, $this->getXp());
     }
@@ -108,7 +108,7 @@ final class Op_gainXpTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testNoConditionAlwaysValid(): void {
-        $this->op = $this->createOp("2gainXp");
+        $this->createOp("2gainXp");
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 }

@@ -21,13 +21,13 @@ final class Op_triggerTest extends AbstractOpTestCase {
     public function testRollTriggerHeroCardNotOfferedWhenCannotPay(): void {
         // Bjorn's hero card (card_hero_1_1) has on=roll, r=spendAction(actionFocus):2dealDamage
         // Without action markers, spendAction can't be paid — card is not offered
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->assertNotValidTarget("card_hero_1_1");
     }
 
     public function testRollTriggerIgnoresCardsWithoutOnRoll(): void {
         // Bjorn's ability card (card_ability_1_3, Sure Shot I) has no on field
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->assertNotValidTarget("card_ability_1_3");
     }
 
@@ -37,17 +37,17 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // Perfect Aim (card_event_1_31, on=roll) — also r=custom, won't work
         // For events, playEvent doesn't validate r, it just checks on field
         $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->assertValidTarget("card_event_1_31");
     }
 
     public function testEmptyTriggerTypeReturnsNoTargets(): void {
-        $this->op = $this->createOp("trigger");
+        $this->createOp("trigger");
         $this->assertNoValidTargets();
     }
 
     public function testCanSkip(): void {
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->assertTrue($this->op->canSkip());
     }
 
@@ -58,13 +58,13 @@ final class Op_triggerTest extends AbstractOpTestCase {
     public function testTriggerFindsEventCardInHand(): void {
         // Perfect Aim (card_event_1_31) has on=roll, r=rerollMisses (implemented)
         $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->assertValidTarget("card_event_1_31");
     }
 
     public function testActionAttackTriggerIgnoresRollCards(): void {
         // Hero card has on=roll, not actionAttack
-        $this->op = $this->createOp("trigger(actionAttack)");
+        $this->createOp("trigger(actionAttack)");
         $this->assertNotValidTarget("card_hero_1_1");
     }
 
@@ -82,13 +82,13 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         // Need dealDamage on stack for preventDamage to be valid
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
-        $this->op = $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(resolveHits)");
         $this->assertValidTarget("card_ability_3_3");
     }
 
     public function testMonsterAttackTriggerEmptyWhenNoMatchingCards(): void {
         // Bjorn has no on=resolveHits cards by default
-        $this->op = $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(resolveHits)");
         $this->assertNoValidTargets();
     }
 
@@ -96,7 +96,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // Retaliation (card_event_3_31) has on=resolveHits, r=2dealDamage(adj)
         $this->game->tokens->moveToken("card_event_3_31", "hand_" . $this->owner);
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent target for dealDamage
-        $this->op = $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(resolveHits)");
         $this->assertValidTarget("card_event_3_31");
     }
 
@@ -111,7 +111,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
-        $this->op = $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(resolveHits)");
         $this->call_resolve("card_ability_3_3");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -123,7 +123,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
         // Place dice on display_battle so rerollMisses has valid targets
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 2);
-        $this->op = $this->createOp("trigger(roll)");
+        $this->createOp("trigger(roll)");
         $this->call_resolve("card_event_1_31");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -136,7 +136,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // There are no Bjorn equips with on= and non-custom r in starting set,
         // so test the action annotation is correct via info
         $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
-        $this->op = $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(resolveHits)");
         $info = $this->op->getArgsInfo();
         $this->assertEquals("useAbility", $info["card_ability_3_3"]["action"]);
     }
@@ -147,7 +147,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
 
     public function testRollQueuesTriggerForHeroAttack(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->op = $this->createOp("3roll");
+        $this->createOp("3roll");
         $this->call_resolve("hex_12_8");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -156,7 +156,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
 
     public function testRollDoesNotQueueTriggerForMonsterAttack(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->op = $this->createOp("3roll", ["attacker" => "monster_goblin_1"]);
+        $this->createOp("3roll", ["attacker" => "monster_goblin_1"]);
         $this->call_resolve("hex_11_8");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -168,7 +168,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testActionMoveQueuesTrigger(): void {
-        $this->op = $this->createOp("actionMove");
+        $this->createOp("actionMove");
         $this->call_resolve("hex_10_9");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -180,7 +180,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testTurnEndQueuesTrigger(): void {
-        $this->op = $this->createOp("turnEnd");
+        $this->createOp("turnEnd");
         $this->call_resolve("confirm");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
@@ -202,7 +202,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
 
     public function testMonsterMoveTriggerIsEmptyWithNoCards(): void {
         // No ability cards with on=monsterMove on tableau → trigger should have no targets
-        $this->op = $this->createOp("trigger(monsterMove)");
+        $this->createOp("trigger(monsterMove)");
         $this->assertNoValidTargets();
     }
 }

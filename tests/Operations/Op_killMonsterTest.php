@@ -34,21 +34,21 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
     public function testInRangeFilter(): void {
         // Bjorn has attack_range=2; hex_13_7 is 2 hexes from hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->op = $this->createOp("killMonster(inRange,'rank<=2')");
+        $this->createOp("killMonster(inRange,'rank<=2')");
         $this->assertValidTarget("hex_13_7");
     }
 
     public function testRankFilterExcludesHighRank(): void {
         // Troll is rank 3 — should be excluded by rank<=2
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->op = $this->createOp("killMonster(adj,'rank<=2')");
+        $this->createOp("killMonster(adj,'rank<=2')");
         $this->assertNoValidTargets();
     }
 
     public function testRankFilterIncludesLowRank(): void {
         // Goblin is rank 1 — should be included by rank<=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->op = $this->createOp("killMonster(adj,'rank<=2')");
+        $this->createOp("killMonster(adj,'rank<=2')");
         $this->assertValidTarget("hex_12_8");
     }
 
@@ -59,7 +59,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
     public function testHealthRemFilterFullHealthExcluded(): void {
         // Brute health=3, no damage → healthRem=3, filter healthRem<=2 excludes it
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
-        $this->op = $this->createOp("killMonster(adj,'healthRem<=2')");
+        $this->createOp("killMonster(adj,'healthRem<=2')");
         $this->assertNoValidTargets();
     }
 
@@ -67,14 +67,14 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         // Brute health=3, 1 damage → healthRem=2, filter healthRem<=2 includes it
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $this->game->tokens->moveToken("crystal_red_1", "monster_brute_1");
-        $this->op = $this->createOp("killMonster(adj,'healthRem<=2')");
+        $this->createOp("killMonster(adj,'healthRem<=2')");
         $this->assertValidTarget("hex_12_8");
     }
 
     public function testHealthRemGoblinFullHealthIncluded(): void {
         // Goblin health=2 → healthRem=2, filter healthRem<=2 includes it
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->op = $this->createOp("killMonster(adj,'healthRem<=2')");
+        $this->createOp("killMonster(adj,'healthRem<=2')");
         $this->assertValidTarget("hex_12_8");
     }
 

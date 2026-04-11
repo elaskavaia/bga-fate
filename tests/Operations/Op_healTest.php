@@ -27,39 +27,39 @@ final class Op_healTest extends AbstractOpTestCase {
 
     public function testHealSelfRemovesDamage(): void {
         $this->addDamage("hero_1", 4);
-        $this->op = $this->createOp("2heal(self)");
+        $this->createOp("2heal(self)");
         $this->call_resolve("hex_11_8");
         $this->assertEquals(2, $this->getDamage("hero_1"));
     }
 
     public function testHealSelfCapsAtCurrentDamage(): void {
         $this->addDamage("hero_1", 1);
-        $this->op = $this->createOp("2heal(self)");
+        $this->createOp("2heal(self)");
         $this->call_resolve("hex_11_8");
         $this->assertEquals(0, $this->getDamage("hero_1"));
     }
 
     public function testHealSelfNotApplicableWhenNoDamage(): void {
-        $this->op = $this->createOp("2heal(self)");
+        $this->createOp("2heal(self)");
         $this->assertTargetError("hex_11_8", Material::ERR_NOT_APPLICABLE);
     }
 
     public function testHealSelfTargetsWhenDamaged(): void {
         $this->addDamage("hero_1", 3);
-        $this->op = $this->createOp("2heal(self)");
+        $this->createOp("2heal(self)");
         $this->assertValidTarget("hex_11_8");
     }
 
     public function testHealAdjIncludesSelf(): void {
         $this->addDamage("hero_1", 2);
-        $this->op = $this->createOp("1heal(adj)");
+        $this->createOp("1heal(adj)");
         $this->assertValidTarget("hex_11_8");
     }
 
     public function testHealAdjIncludesAdjacentHero(): void {
         // hex_11_8 and hex_12_8 are adjacent
         $this->addDamage("hero_2", 3);
-        $this->op = $this->createOp("1heal(adj)");
+        $this->createOp("1heal(adj)");
         $this->assertValidTarget("hex_12_8");
     }
 
@@ -67,27 +67,27 @@ final class Op_healTest extends AbstractOpTestCase {
         // Move hero 2 far away
         $this->game->tokens->moveToken("hero_2", "hex_8_5");
         $this->addDamage("hero_2", 3);
-        $this->op = $this->createOp("1heal(adj)");
+        $this->createOp("1heal(adj)");
         $this->assertNotValidTarget("hex_8_5");
     }
 
     public function testHealAdjResolvesOnTarget(): void {
         $this->addDamage("hero_2", 4);
-        $this->op = $this->createOp("2heal(adj)");
+        $this->createOp("2heal(adj)");
         $this->call_resolve("hex_12_8");
         $this->assertEquals(2, $this->getDamage("hero_2"));
     }
 
     public function testHealCountFromExpression(): void {
         $this->addDamage("hero_1", 5);
-        $this->op = $this->createOp("3heal(self)");
+        $this->createOp("3heal(self)");
         $this->call_resolve("hex_11_8");
         $this->assertEquals(2, $this->getDamage("hero_1"));
     }
 
     public function testHealPresetTargetUsesHexId(): void {
         $this->addDamage("hero_1", 3);
-        $this->op = $this->createOp("2heal", ["target" => "hex_11_8"]);
+        $this->createOp("2heal", ["target" => "hex_11_8"]);
         $this->assertValidTargetCount(1);
         $this->assertValidTarget("hex_11_8");
         $this->call_resolve("hex_11_8");

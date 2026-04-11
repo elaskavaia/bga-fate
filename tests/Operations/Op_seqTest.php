@@ -66,7 +66,7 @@ final class Op_seqTest extends AbstractOpTestCase {
 
     public function testGetPossibleMovesFromFirstSub(): void {
         // First sub is gainXp which auto-resolves, so getPossibleMoves delegates to it
-        $this->op = $this->createOp("gainXp,drawEvent");
+        $this->createOp("gainXp,drawEvent");
         $this->assertValidTargetCount(1);
     }
 

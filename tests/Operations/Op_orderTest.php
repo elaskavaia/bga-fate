@@ -18,7 +18,7 @@ final class Op_orderTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testGetPossibleMovesTwoOptions(): void {
-        $this->op = $this->createOp("gainXp+drawEvent");
+        $this->createOp("gainXp+drawEvent");
         $this->assertValidTarget("choice_0");
         $this->assertValidTarget("choice_1");
         $this->assertValidTargetCount(2);
@@ -43,7 +43,7 @@ final class Op_orderTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testResolveChooseFirst(): void {
-        $this->op = $this->createOp("gainXp+drawEvent");
+        $this->createOp("gainXp+drawEvent");
         $this->op->saveToDb(1, true);
 
         $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
@@ -62,7 +62,7 @@ final class Op_orderTest extends AbstractOpTestCase {
     }
 
     public function testResolveQueuesRemainingAsOrder(): void {
-        $this->op = $this->createOp("gainXp+drawEvent+moveHero");
+        $this->createOp("gainXp+drawEvent+moveHero");
         $this->op->saveToDb(1, true);
 
         $this->call_resolve("choice_0");

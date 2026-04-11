@@ -35,21 +35,21 @@ final class Op_gainManaTest extends AbstractOpTestCase {
     }
 
     public function testResolveAdds2Mana(): void {
-        $this->op = $this->createOp("2gainMana");
+        $this->createOp("2gainMana");
         $this->call_resolve("card_ability_1_3");
         $this->assertEquals(2, $this->getMana("card_ability_1_3"));
     }
 
     public function testResolveTakesFromSupply(): void {
         $supplyBefore = $this->countGreenCrystals("supply_crystal_green");
-        $this->op = $this->createOp("2gainMana");
+        $this->createOp("2gainMana");
         $this->call_resolve("card_ability_1_3");
         $supplyAfter = $this->countGreenCrystals("supply_crystal_green");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
 
     public function testPresetTargetReturnsOnlyThatTarget(): void {
-        $this->op = $this->createOp("2gainMana", ["target" => "card_ability_1_3"]);
+        $this->createOp("2gainMana", ["target" => "card_ability_1_3"]);
         $this->assertValidTargetCount(1);
         $this->assertValidTarget("card_ability_1_3");
     }

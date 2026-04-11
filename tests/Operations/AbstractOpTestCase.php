@@ -10,13 +10,17 @@ abstract class AbstractOpTestCase extends TestCase {
     protected string $owner;
     protected Operation $op;
 
+    /**
+     * Instantiate op and cache $this->op;
+     */
     function createOp(?string $type = null, mixed $data = null): Operation {
         // Derive op type from the test class name: "Op_c_preyTest" → "c_prey"
         if ($type == null) {
             $className = (new \ReflectionClass($this))->getShortName();
             $type = preg_replace(["/^Op_/", '/Test$/'], "", $className);
         }
-        return $this->game->machine->instanciateOperation($type, $this->owner, $data);
+        $this->op = $this->game->machine->instanciateOperation($type, $this->owner, $data);
+        return $this->op;
     }
 
     protected function setUp(): void {
@@ -24,7 +28,7 @@ abstract class AbstractOpTestCase extends TestCase {
         $this->game->initWithHero(1);
         $this->game->clearHand();
         $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
-        $this->op = $this->createOp();
+        $this->createOp();
     }
 
     // -------------------------------------------------------------------------

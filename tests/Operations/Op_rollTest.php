@@ -32,7 +32,7 @@ final class Op_rollTest extends AbstractOpTestCase {
 
     public function testNonAdjacentMonsterNotTarget(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->op = $this->createOp("roll(adj)");
+        $this->createOp("roll(adj)");
         $this->assertNoValidTargets();
     }
 
@@ -45,20 +45,20 @@ final class Op_rollTest extends AbstractOpTestCase {
     public function testInRangeUsesHeroAttackRange(): void {
         // Bjorn has First Bow (attack_range=2), hex_13_7 is 2 hexes away
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->op = $this->createOp("roll(inRange)");
+        $this->createOp("roll(inRange)");
         $this->assertValidTarget("hex_13_7");
     }
 
     public function testInRange3ReachesDistance3(): void {
         // hex_14_6 is 3 hexes from hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_14_6");
-        $this->op = $this->createOp("roll(inRange3)");
+        $this->createOp("roll(inRange3)");
         $this->assertValidTarget("hex_14_6");
     }
 
     public function testAdjDoesNotReachDistance2(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->op = $this->createOp("roll(adj)");
+        $this->createOp("roll(adj)");
         $this->assertNoValidTargets();
     }
 
@@ -73,7 +73,7 @@ final class Op_rollTest extends AbstractOpTestCase {
 
     public function testResolveRollsDice(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->op = $this->createOp("3roll");
+        $this->createOp("3roll");
         $this->call_resolve("hex_12_8");
         // 3 dice should be on display_battle
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
@@ -82,7 +82,7 @@ final class Op_rollTest extends AbstractOpTestCase {
 
     public function testResolveQueuesResolveHits(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->op = $this->createOp("3roll");
+        $this->createOp("3roll");
         $this->call_resolve("hex_12_8");
         // resolveHits should be queued in the machine
         $ops = $this->game->machine->getAllOperations(PCOLOR);
@@ -93,7 +93,7 @@ final class Op_rollTest extends AbstractOpTestCase {
     public function testResolveDoesNotApplyDamageDirectly(): void {
         // Roll only puts dice on display — damage comes from resolveHits → dealDamage
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->op = $this->createOp("3roll");
+        $this->createOp("3roll");
         $this->call_resolve("hex_12_8");
         // No red crystals on the monster yet (resolveHits hasn't run)
         $this->assertEquals(0, $this->getDamage("monster_troll_1"));
@@ -101,7 +101,7 @@ final class Op_rollTest extends AbstractOpTestCase {
 
     public function testCountDeterminesDiceRolled(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->op = $this->createOp("5roll");
+        $this->createOp("5roll");
         $this->call_resolve("hex_12_8");
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         $this->assertCount(5, $diceOnDisplay);

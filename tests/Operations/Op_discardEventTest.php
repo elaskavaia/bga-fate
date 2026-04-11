@@ -13,7 +13,7 @@ final class Op_discardEventTest extends AbstractOpTestCase {
         $this->game->initWithHero(1);
         // Don't clear hand — tests rely on the 1 card drawn by setupGameTables
         $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
-        $this->op = $this->createOp();
+        $this->createOp();
     }
 
     private function getHandCards(): array {

@@ -16,19 +16,19 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
     public function testNoOverkillReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 0);
-        $this->op = $this->createOp("c_nailed");
+        $this->createOp("c_nailed");
         $this->assertNoValidTargets();
     }
 
     public function testNoMarkerReturnsError(): void {
         // marker_attack in limbo (no active attack)
-        $this->op = $this->createOp("c_nailed");
+        $this->createOp("c_nailed");
         $this->assertNoValidTargets();
     }
 
     public function testNoMonsterBehindReturnsError(): void {
         $this->setAttackMarker("hex_7_9", 2);
-        $this->op = $this->createOp("c_nailed");
+        $this->createOp("c_nailed");
         $this->assertNoValidTargets();
     }
 
@@ -67,7 +67,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
         $this->game->hexMap->invalidateOccupancy();
         $this->setAttackMarker("hex_7_9", 3);
 
-        $this->op = $this->createOp("c_nailed(chain)");
+        $this->createOp("c_nailed(chain)");
         $this->call_resolve("hex_6_9");
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));

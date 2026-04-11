@@ -18,12 +18,12 @@ final class Op_spendManaTest extends AbstractOpTestCase {
     }
 
     public function testCardWithEnoughManaIsValid(): void {
-        $this->op = $this->createOp(null, ["card" => "card_ability_1_3"]);
+        $this->createOp(null, ["card" => "card_ability_1_3"]);
         $this->assertValidTarget("card_ability_1_3");
     }
 
     public function testCardWithInsufficientManaIsNotApplicable(): void {
-        $this->op = $this->createOp("4spendMana", ["card" => "card_ability_1_3"]);
+        $this->createOp("4spendMana", ["card" => "card_ability_1_3"]);
         $this->assertTargetError("card_ability_1_3", Material::ERR_NOT_APPLICABLE);
     }
 
@@ -33,27 +33,27 @@ final class Op_spendManaTest extends AbstractOpTestCase {
 
     public function testResolveRemoves1Mana(): void {
         $this->assertEquals(3, $this->getMana("card_ability_1_3"));
-        $this->op = $this->createOp(null, ["card" => "card_ability_1_3"]);
+        $this->createOp(null, ["card" => "card_ability_1_3"]);
         $this->call_resolve("card_ability_1_3");
         $this->assertEquals(2, $this->getMana("card_ability_1_3"));
     }
 
     public function testResolveRemoves3Mana(): void {
-        $this->op = $this->createOp("3spendMana", ["card" => "card_ability_1_3"]);
+        $this->createOp("3spendMana", ["card" => "card_ability_1_3"]);
         $this->call_resolve("card_ability_1_3");
         $this->assertEquals(0, $this->getMana("card_ability_1_3"));
     }
 
     public function testResolveReturnsToSupply(): void {
         $supplyBefore = $this->countGreenCrystals("supply_crystal_green");
-        $this->op = $this->createOp("2spendMana", ["card" => "card_ability_1_3"]);
+        $this->createOp("2spendMana", ["card" => "card_ability_1_3"]);
         $this->call_resolve("card_ability_1_3");
         $supplyAfter = $this->countGreenCrystals("supply_crystal_green");
         $this->assertEquals($supplyBefore + 2, $supplyAfter);
     }
 
     public function testInsufficientManaThrows(): void {
-        $this->op = $this->createOp("4spendMana", ["card" => "card_ability_1_3"]);
+        $this->createOp("4spendMana", ["card" => "card_ability_1_3"]);
         $this->expectException(\Bga\GameFramework\UserException::class);
         $this->call_resolve("card_ability_1_3");
     }
@@ -65,26 +65,26 @@ final class Op_spendManaTest extends AbstractOpTestCase {
     public function testGrimheimConditionPassesInGrimheim(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
+        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 
     public function testGrimheimConditionFailsOutsideGrimheim(): void {
         // hero_1 is on hex_11_8 (not Grimheim)
-        $this->op = $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
+        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
         $this->assertNoValidTargets();
     }
 
     public function testGrimheimConditionResolves(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
+        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
         $this->call_resolve("card_ability_1_3");
         $this->assertEquals(1, $this->getMana("card_ability_1_3"));
     }
 
     public function testNoConditionAlwaysValid(): void {
-        $this->op = $this->createOp("2spendMana", ["card" => "card_ability_1_3"]);
+        $this->createOp("2spendMana", ["card" => "card_ability_1_3"]);
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 }

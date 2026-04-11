@@ -21,7 +21,9 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * dealDamage: Deal X direct damage (red crystals, no dice) to target character.
  *
  * Params:
- * - param(0): range specifier passed to getRangeFromParam() — e.g. "adj", "inRange", "inRange3" (default "adj")
+ * - param(0): range specifier — hero-centered via getRangeFromParam() ("adj", "inRange", "inRange3"),
+ *             or "adj_attack" meaning "monsters adjacent to the current attack target hex"
+ *             (excluding the attack hex itself). Default "adj".
  * - param(1): optional filter expression evaluated per monster — e.g. "'rank<=2'", "'rank==3 or legend'" (default "true")
  *
  * Data Fields:
@@ -32,7 +34,8 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * - Normal case: player selects a monster hex in range matching the filter; deal count damage; if killed, hero gains XP.
  * - Can target heroes too (attacker field set by caller).
  *
- * Used by: Kick, Courage, Lightning Bolt, Retaliation, Vigilance, Heels, etc.
+ * Used by: Kick, Courage, Lightning Bolt, Retaliation, Vigilance, Heels,
+ *          Bone Bane Bow (adj_attack), Fireball II (adj_attack), etc.
  */
 class Op_dealDamage extends CountableOperation {
     function getPrompt() {
@@ -54,9 +57,34 @@ class Op_dealDamage extends CountableOperation {
         if ($presetTarget) {
             return [$presetTarget];
         }
+        if ($this->getParam(0, "adj") === "adj_attack") {
+            return $this->getAdjacentToAttackHexes();
+        }
         $hero = $this->game->getHero($this->getOwner());
         $hexes = $hero->getMonsterHexesInRange($this->getRange(), fn($mId) => $this->matchesFilter($mId));
         return $hexes;
+    }
+
+    /**
+     * Hexes with a monster adjacent to the current attack target hex,
+     * excluding the attack hex itself, filtered by param(1).
+     */
+    private function getAdjacentToAttackHexes(): array {
+        $attackHex = $this->game->getAttackHex();
+        if ($attackHex === null) {
+            return [];
+        }
+        $targets = [];
+        foreach ($this->game->hexMap->getAdjacentHexes($attackHex) as $hexId) {
+            if ($hexId === $attackHex) {
+                continue;
+            }
+            $monsterId = $this->game->hexMap->isOccupiedByCharacterType($hexId, "monster");
+            if ($monsterId !== null && $this->matchesFilter($monsterId)) {
+                $targets[] = $hexId;
+            }
+        }
+        return $targets;
     }
 
     protected function getDamageAmount(string $defenderId): int {

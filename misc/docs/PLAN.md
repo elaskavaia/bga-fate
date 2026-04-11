@@ -376,8 +376,8 @@ See CLAUDE.md for project overview
 ### Extensions to existing ops
 
 - [x] `addDamage` — accept a defender-filter expression param like `Op_dealDamage` already supports (e.g. `1addDamage(true,trollkin)` for Trollbane). Added `trollkin`/`firehorde`/`dead` bareword terms in `Game::evaluateTerm`.
-- [ ] Hero target resolver (`getRangeFromParam`) — add `adj_attack` target meaning "monsters adjacent to the current attack target hex" (via `getAttackHex()`). Used by Bone Bane Bow's `dealDamage(adj_attack)`.
-- [ ] `repairCard` — rename `all` param to `max` and replace `99repairCard` kludges in CSV files with the cleaner form.
+- [x] `dealDamage` — added `adj_attack` param meaning "monsters adjacent to the current attack target hex" (via `getAttackHex()`, excluding the attack hex itself). Used by Bone Bane Bow and Fireball II. Kept as a special case inside `Op_dealDamage::getPossibleMoves()` rather than in `Hero::getRangeFromParam` since it's not hero-centered.
+- [ ] `repairCard` — add param `max` and replace `99repairCard` kludges in CSV files with the cleaner form.
 
 ### Auto-triggered static effects (new mechanism — blocker for 2 cards)
 

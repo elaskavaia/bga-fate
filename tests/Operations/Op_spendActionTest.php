@@ -19,25 +19,25 @@ final class Op_spendActionTest extends AbstractOpTestCase {
     }
 
     public function testAvailableWithFreshTurn(): void {
-        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->createOp("spendAction(actionPrepare)");
         $this->assertEquals(0, $this->op->getErrorCode());
     }
 
     public function testFailsIfActionAlreadyTaken(): void {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionPrepare");
-        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->createOp("spendAction(actionPrepare)");
         $this->assertNoValidTargets();
     }
 
     public function testFailsIfNoActionsRemaining(): void {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionMove");
         $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_actionAttack");
-        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->createOp("spendAction(actionPrepare)");
         $this->assertNoValidTargets();
     }
 
     public function testResolveMovesMarkerToAslot(): void {
-        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->createOp("spendAction(actionPrepare)");
         $this->call_resolve();
 
         $loc = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_1");
@@ -46,7 +46,7 @@ final class Op_spendActionTest extends AbstractOpTestCase {
 
     public function testResolveUsesSecondMarkerIfFirstAlreadyPlaced(): void {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_actionMove");
-        $this->op = $this->createOp("spendAction(actionPrepare)");
+        $this->createOp("spendAction(actionPrepare)");
         $this->call_resolve();
 
         $loc = $this->game->tokens->getTokenLocation("marker_" . $this->owner . "_2");

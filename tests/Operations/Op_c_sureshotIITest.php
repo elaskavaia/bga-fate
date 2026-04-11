@@ -26,13 +26,13 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     public function testStep1ReturnsMonsterHexesInRange(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("hex_12_8", $targets);
     }
 
     public function testStep1ErrorWhenNoMonstersInRange(): void {
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $targets = $this->op->getArgsTarget();
         $this->assertEmpty($targets);
     }
@@ -42,7 +42,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
         $this->assertEquals(1, $this->getMana());
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $targets = $this->op->getArgsTarget();
         $this->assertEmpty($targets);
     }
@@ -50,7 +50,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     public function testStep1ResolveQueuesStep2(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->createOp(null, ["card" => $this->cardId]);
         $this->call_resolve("hex_12_8");
         $pending = $this->game->machine->getTopOperations($this->owner);
         $this->assertNotEmpty($pending);
@@ -62,7 +62,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     public function testStep2OffersChoices2To4(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // troll health=7
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
         $this->assertContains("choice_3", $targets);
@@ -76,7 +76,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
         $this->assertEquals(3, $this->getMana());
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // troll health=7
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
         $this->assertContains("choice_3", $targets);
@@ -87,7 +87,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
         // Goblin health=2, no pre-damage → max=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
         $this->assertNotContains("choice_3", $targets);
@@ -98,7 +98,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_brute_1");
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
         $this->assertNotContains("choice_3", $targets);
@@ -107,7 +107,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     public function testStep2ResolveQueuesSpendManaAndDealDamage(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $this->call_resolve("choice_3");
         $pending = $this->game->machine->getTopOperations($this->owner);
         $this->assertNotEmpty($pending);
@@ -116,7 +116,7 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
     public function testStep2ExtraArgsContainsRemainingHealth(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // troll health=7
         $this->game->hexMap->invalidateOccupancy();
-        $this->op = $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
+        $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $extra = $this->op->getExtraArgs();
         $this->assertArrayHasKey("remaining_health", $extra);
         $this->assertEquals(7, $extra["remaining_health"]);

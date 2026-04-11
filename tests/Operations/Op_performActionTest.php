@@ -15,7 +15,7 @@ final class Op_performActionTest extends AbstractOpTestCase {
     }
 
     public function testQueuesActionAttack(): void {
-        $this->op = $this->createOp("performAction(actionAttack)");
+        $this->createOp("performAction(actionAttack)");
         $this->call_resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
@@ -23,7 +23,7 @@ final class Op_performActionTest extends AbstractOpTestCase {
     }
 
     public function testQueuesActionMend(): void {
-        $this->op = $this->createOp("performAction(actionMend)");
+        $this->createOp("performAction(actionMend)");
         $this->call_resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
@@ -31,7 +31,7 @@ final class Op_performActionTest extends AbstractOpTestCase {
     }
 
     public function testQueuesActionPractice(): void {
-        $this->op = $this->createOp("performAction(actionPractice)");
+        $this->createOp("performAction(actionPractice)");
         $this->call_resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);

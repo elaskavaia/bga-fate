@@ -50,25 +50,25 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
 
     public function testLevelIOffersRank1Monster(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // rank 1
-        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->createOp("c_supfire('rank<=2')");
         $this->assertValidTarget("hex_12_8");
     }
 
     public function testLevelIOffersRank2Monster(): void {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8"); // rank 2
-        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->createOp("c_supfire('rank<=2')");
         $this->assertValidTarget("hex_12_8");
     }
 
     public function testLevelIExcludesRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $this->op = $this->createOp("c_supfire('rank<=2')");
+        $this->createOp("c_supfire('rank<=2')");
         $this->assertNoValidTargets();
     }
 
     public function testLevelIIOffersRank3Monster(): void {
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8"); // rank 3
-        $this->op = $this->createOp("c_supfire");
+        $this->createOp("c_supfire");
         $this->assertValidTarget("hex_12_8");
     }
 

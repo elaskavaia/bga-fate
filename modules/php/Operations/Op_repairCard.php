@@ -25,7 +25,7 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * - param(0): "all" — apply to every damaged card on the tableau (no user prompt).
  *   Each damaged card has up to Count damage removed (capped by its current damage).
  *
- * Used by: Durability (99repairCard), Mend in Grimheim (5repairCard), Sewing (1repairCard(all)).
+ * Used by: Durability (repairCard(max)), Mend in Grimheim (5repairCard), Sewing (1repairCard(all)).
  */
 class Op_repairCard extends CountableOperation {
     function getPrompt() {
@@ -34,6 +34,10 @@ class Op_repairCard extends CountableOperation {
 
     private function isRepairAll(): bool {
         return $this->getParam(0, "") === "all";
+    }
+
+    private function isRepairMax(): bool {
+        return $this->getParam(0, "") === "max";
     }
 
     function getPossibleMoves(): array {
@@ -65,7 +69,7 @@ class Op_repairCard extends CountableOperation {
 
     function resolve(): void {
         $heroId = $this->game->getHeroTokenId($this->getOwner());
-        $count = (int) $this->getCount();
+        $count = $this->isRepairMax() ? 99 : (int) $this->getCount();
 
         if ($this->isRepairAll()) {
             $owner = $this->getOwner();
