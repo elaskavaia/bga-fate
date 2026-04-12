@@ -42,8 +42,8 @@ class CardGeneric extends Card {
         }
     }
 
-    public function canTrigger(string $triggerName): bool {
-        if (parent::canTrigger($triggerName)) {
+    public function canTriggerEffectOn(string $triggerName): bool {
+        if (parent::canTriggerEffectOn($triggerName)) {
             return true;
         }
         $cardId = $this->id;
@@ -55,13 +55,7 @@ class CardGeneric extends Card {
         return false;
     }
     public function canBePlayed(string $triggerName, ?array &$errorRes = null): bool {
-        if (!$errorRes) {
-            $errorRes = [];
-        }
-
-        if (!$this->canTrigger($triggerName)) {
-            $errorRes["q"] = Material::ERR_PREREQ;
-            $errorRes["err"] = clienttranslate("Cannot be used now");
+        if (!parent::canBePlayed($triggerName, $errorRes)) {
             return false;
         }
         $cardId = $this->id;

@@ -134,12 +134,12 @@ Base class for card instances created on the fly during trigger dispatch. Each c
 - `getId()`, `getOwner()`, `getRulesFor($field)`, `getDamage()`, `getMana()`, `getGold()`
 - `queue($type, $owner, $data)` — delegates to the parent operation's `queue()` with this card preset in `data["card"]`
 - `onTrigger($triggerName)` — routes to `on<TriggerName>()` if the subclass defines it, else falls back to `onTriggerDefault()`
-- `canTrigger($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
+- `canTriggerEffectOn($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
 - `canBePlayed($triggerName, &$errorRes)` — returns true if the card is actually playable. Base returns true; `CardGeneric` overrides with full checks.
 - `useCard()` — executes the card: sends notification, marks once-per-turn cards as used, queues the `r` expression, discards event cards
 
 **CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class when no bespoke subclass exists. Implements the standard voluntary trigger flow:
-- `canTrigger()` — also returns true when the Material `on` field matches the trigger type
+- `canTriggerEffectOn()` — also returns true when the Material `on` field matches the trigger type
 - `canBePlayed()` — checks trigger match, once-per-turn state, non-empty `r` field, and whether the `r` expression's op has valid targets
 - `onTriggerDefault()` — if `canBePlayed()`, queues a single `useCard` op per trigger type (deduplicated: checks if a `useCard` with the same `on` trigger already exists on the machine). The `useCard` op then offers all matching cards from tableau and hand in one prompt.
 

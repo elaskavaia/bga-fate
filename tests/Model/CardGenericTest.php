@@ -43,19 +43,19 @@ final class CardGenericTest extends AbstractCardTestCase {
         // Riposte I has on=resolveHits
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
         $card = $this->createCard("card_ability_3_3", "resolveHits");
-        $this->assertTrue($card->canTrigger("resolveHits"));
+        $this->assertTrue($card->canTriggerEffectOn("resolveHits"));
     }
 
     public function testCanTriggerReturnsFalseWhenOnFieldDoesNotMatch(): void {
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
         $card = $this->createCard("card_ability_3_3", "roll");
-        $this->assertFalse($card->canTrigger("roll"));
+        $this->assertFalse($card->canTriggerEffectOn("roll"));
     }
 
     public function testCanTriggerReturnsFalseForCardWithNoOnField(): void {
         // Sure Shot I (card_ability_1_3) has no `on` field
         $card = $this->createCard("card_ability_1_3", "roll");
-        $this->assertFalse($card->canTrigger("roll"));
+        $this->assertFalse($card->canTriggerEffectOn("roll"));
     }
 
     // -------------------------------------------------------------------------

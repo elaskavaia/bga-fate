@@ -16,6 +16,7 @@ namespace Bga\Games\Fate\Model;
 
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 use function Bga\Games\Fate\getPart;
@@ -126,13 +127,18 @@ class Card {
     }
 
     /**
-     * Checks if card can be played with this trigger (empty string means can be play now)
+     * Checks if card can be played with this trigger (empty string means can be played now)
+     * Can be triggered means it's a right trigger, but it may not be played which is another method
      */
-    public function canTrigger(string $triggerName): bool {
+    public function canTriggerEffectOn(string $triggerName): bool {
         $method = $this->getTriggerMethod($triggerName);
         if (method_exists($this, $method)) {
-            if ($triggerName == "enter" && $this->op->getDataField("card", "") == $this->id) {
-                return true;
+            if ($triggerName == "enter") {
+                if ($this->op->getDataField("card", "") == $this->id) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 return true;
             }
@@ -141,9 +147,19 @@ class Card {
         return false;
     }
 
+    /**
+     * Checks if card can be played and sets the error code. The difference is UX - it's better
+     * to explain to the user why the card cannot be played, sometimes it's subtle
+     */
     public function canBePlayed(string $triggerName, ?array &$errorRes = null): bool {
         if (!$errorRes) {
             $errorRes = [];
+        }
+
+        if (!$this->canTriggerEffectOn($triggerName)) {
+            $errorRes["q"] = Material::ERR_PREREQ;
+            $errorRes["err"] = clienttranslate("Cannot be used now");
+            return false;
         }
 
         $errorRes = ["q" => 0];

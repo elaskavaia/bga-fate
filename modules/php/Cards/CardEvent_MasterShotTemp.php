@@ -29,7 +29,7 @@ class CardEvent_MasterShotTemp extends CardGeneric {
         $this->queue("2addDamage");
     }
 
-    public function canTrigger(string $triggerName): bool {
+    public function canTriggerEffectOn(string $triggerName): bool {
         if ($triggerName == "roll" && $this->isAttackAction()) {
             echo "+MasterShot can trigger $triggerName\n";
             return true;

@@ -64,7 +64,7 @@ class Op_useCard extends Operation {
         foreach ($cards as $card) {
             $cardId = $card["key"];
             $cardIns = $this->game->instantiateCard($card, $this);
-            if (!$cardIns->canTrigger($trigger)) {
+            if (!$cardIns->canTriggerEffectOn($trigger)) {
                 continue;
             }
             $targets[$cardId] = ["q" => 0];
