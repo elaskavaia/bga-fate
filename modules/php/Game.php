@@ -706,6 +706,13 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_equip(string $cardId = ""): void {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $data = $cardId !== "" ? ["target" => $cardId] : [];
+        $this->machine->push("gainEquip", $color, $data);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_game_variant(string $type = "variant_multi", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }

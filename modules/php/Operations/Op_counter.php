@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -24,7 +25,7 @@ class Op_counter extends Operation {
 
     function evaluate() {
         $owner = $this->getOwner();
-        $expr = $this->getParam(0);
+        $expr = $this->getParam(0, "0");
         $min = $this->getParam(1, "");
         $max = $this->getParam(2, "");
         if ($min === "null") {
@@ -45,6 +46,14 @@ class Op_counter extends Operation {
         $this->game->systemAssert("ERR:counter:notNumeric:$min=$mincount", is_numeric($mincount));
 
         return [$count, $mincount];
+    }
+
+    public function getPossibleMoves() {
+        list($count, $mincount) = $this->evaluate();
+        if ($count == 0) {
+            return ["q" => Material::ERR_PREREQ];
+        }
+        return parent::getPossibleMoves();
     }
 
     function resolve(): void {

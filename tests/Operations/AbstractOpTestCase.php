@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
+
 abstract class AbstractOpTestCase extends TestCase {
     protected GameUT $game;
     protected string $owner;

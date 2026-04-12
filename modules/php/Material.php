@@ -435,6 +435,10 @@ class Material {
         "type" => "upgrade",
         "name" => clienttranslate("Upgrade Hero"),
 ],
+    "Op_gainEquip" => [ 
+        "type" => "gainEquip",
+        "name" => clienttranslate("Gain Equipment"),
+],
     "Op_drawEvent" => [ 
         "type" => "drawEvent",
         "name" => clienttranslate("Draw Event"),
@@ -4024,9 +4028,9 @@ class Material {
         "num" => 20,
         "hno" => 1,
         "name" => clienttranslate("Black Arrows"),
-        "r" => "custom",
+        "r" => "spendGold:3addDamage",
         "quest" => "<i>Spend 1 attack action in the Robber Camp</i> to loot it.",
-        "effect" => "Starts with 3 arrows here (use zxp> markers).<br>Spend 1 arrow to add 3 damage to this attack action.",
+        "effect" => "Starts with 3 arrows here (use [XP] markers).<br>Spend 1 arrow to add 3 damage to this attack action.",
         "flavour" => "Painted black for the funeral they are about to attend.",
 ],
     "card_equip_1_16" => [ 

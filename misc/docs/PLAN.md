@@ -371,13 +371,13 @@ See CLAUDE.md for project overview
 - [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
 - [x] `spendAction` — Consume a main action slot without performing it. Used by: event cards that cost an action
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
-- [x] `spendGold` — Remove X yellow crystals (gold/arrows) from the context card as a cost. Parallel to `spendMana`. Used by: Black Arrows (`1spendGold:3addDamage`), future "spend token from card" effects.
+- [x] `spendGold` — Remove X yellow crystals (gold/arrows) from the context card as a cost. Parallel to `spendMana`. Used by: Black Arrows (`spendGold:3addDamage`), future "spend token from card" effects.
 
 ### Extensions to existing ops
 
 - [x] `addDamage` — accept a defender-filter expression param like `Op_dealDamage` already supports (e.g. `1addDamage(true,trollkin)` for Trollbane). Added `trollkin`/`firehorde`/`dead` bareword terms in `Game::evaluateTerm`.
 - [x] `dealDamage` — added `adj_attack` param meaning "monsters adjacent to the current attack target hex" (via `getAttackHex()`, excluding the attack hex itself). Used by Bone Bane Bow and Fireball II. Kept as a special case inside `Op_dealDamage::getPossibleMoves()` rather than in `Hero::getRangeFromParam` since it's not hero-centered.
-- [ ] `repairCard` — add param `max` and replace `99repairCard` kludges in CSV files with the cleaner form.
+- [x] `repairCard` — add param `max` 
 
 ### Card class hierarchy (implemented)
 
@@ -390,7 +390,7 @@ See CLAUDE.md for project overview
 
 ### Remaining blocker: `enter` trigger for equipment placement
 
-- **`enter`** trigger — fires when an equipment card enters the tableau. Needed by Black Arrows to seed 3 yellow crystals on equip. Blocked on `effect_gainEquipment` (see Iteration 11).
+- [x] **`enter`** trigger — fires when an equipment card enters the tableau. Needed by Black Arrows to seed 3 yellow crystals on equip. Implemented via `effect_gainEquipment` + `onEnter()` hook.
 
 ### Integration
 
@@ -428,7 +428,7 @@ See CLAUDE.md for project overview
 [~] Quest definitions on equipment cards — quest column exists in card_equip_material.csv but no gameplay tracking
 [ ] Quest progress tracking
 [ ] Quest completion → new equipment active
-[ ] `effect_gainEquipment($cardId, $owner)` — places an equipment card on the player's tableau and fires `trigger(enter)`. Should be called from quest completion, upgrade flow, and starting equipment setup ([Game.php:127](modules/php/Game.php#L127)). Black Arrows ("starts with 3 arrows here") and Tiara ("starts with 6 gold here") need this for their `onEnter` hook to fire.
+[x] `effect_gainEquipment($cardId, $owner)` — places an equipment card on the player's tableau and fires `trigger(enter)`. Should be called from quest completion, upgrade flow, and starting equipment setup ([Game.php:127](modules/php/Game.php#L127)). Black Arrows ("starts with 3 arrows here") and Tiara ("starts with 6 gold here") need this for their `onEnter` hook to fire.
 [x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
@@ -619,7 +619,7 @@ Hero, Abilities and Equipment:
 <!-- r=custom — needs custom operation implementation -->
 
 [ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack, r=gainDamage:custom
-[ ] card_equip_1_20 Black Arrows — custom: spend arrow to add 3 damage, r=custom
+[x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
 [ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent, r=custom
 [ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage, r=custom
 [ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin, r=custom

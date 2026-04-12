@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Model;
 
 use Bga\Games\Fate\Game;
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 use function Bga\Games\Fate\getPart;
@@ -123,7 +122,11 @@ class Card {
     public function canTrigger(string $triggerName): bool {
         $method = $this->getTriggerMethod($triggerName);
         if (method_exists($this, $method)) {
-            return true;
+            if ($triggerName == "enter" && $this->op->getDataField("card", "") == $this->id) {
+                return true;
+            } else {
+                return true;
+            }
         }
 
         return false;

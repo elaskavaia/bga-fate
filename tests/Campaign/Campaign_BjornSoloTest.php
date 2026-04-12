@@ -1164,7 +1164,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertNotEquals("hand_$color", $this->tokenLocation($piercingArrows));
     }
 
-    public function testPiercingArrowsAddsZeroDamageWithNoRunes(): void {
+    public function testPiercingArrowsNotOfferedWithNoRunes(): void {
         $piercingArrows = "card_event_1_33_1";
         $color = $this->playerColor();
         $this->seedHand($piercingArrows, $color);
@@ -1177,26 +1177,27 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
         $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
 
-        // Roll: all hits (5), 0 runes → Piercing Arrows should still be offered but adds 0 damage
+        // Roll: all hits (5), 0 runes → counter(countRunes) evaluates to 0, card should not be offered
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // New flow: trigger(roll) auto-resolves. Bjorn hero card offered first; skip it.
+        // trigger(roll) auto-resolves. Bjorn hero card offered first; skip it.
         $args = $this->getOpArgs();
         if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
-        $this->assertEquals("playEvent", $args["type"] ?? "");
-        $this->assertValidTarget($piercingArrows);
 
-        $this->respond($piercingArrows);
+        // Piercing Arrows should NOT be offered — 0 runes means counter is void
+        if (($args["type"] ?? "") === "playEvent") {
+            $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be offered with 0 runes");
+        }
+        // Otherwise we're already past the trigger phase — also correct
 
-        // Skip remaining triggers — then resolveHits applies all dice as damage
         $this->skipTriggers();
 
-        // Troll should have 3 hits + 0 rune damage = 3 total damage
-        $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (3 hits + 0 from Piercing Arrows)");
+        // Troll should have 3 hits only (no rune bonus damage)
+        $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (3 hits, no Piercing Arrows)");
     }
 
     public function testPiercingArrowsNotOfferedOutsideRoll(): void {
@@ -1206,5 +1207,86 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Piercing Arrows has on=roll, so it should NOT be playable as a free action
         $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be playable outside a roll");
+    }
+
+    // --- Black Arrows (card_equip_1_20) ---
+
+    public function testBlackArrowsOnEnterSeeds3Arrows(): void {
+        $blackArrows = "card_equip_1_20";
+        $color = $this->playerColor();
+
+        // Card starts in supply — no yellow crystals on it
+        $this->assertEquals(0, $this->countTokens("crystal_yellow", $blackArrows));
+
+        // Gain equipment via Op_gainEquip — seeds deck so Black Arrows is on top, then run the op
+        $this->seedDeck("deck_equip_$color", [$blackArrows]);
+        $op = $this->game->machine->instanciateOperation("gainEquip", $color);
+        $op->resolve();
+
+        // Card should now be on tableau with 3 yellow crystals (arrows)
+        $this->assertEquals("tableau_$color", $this->tokenLocation($blackArrows));
+        $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
+    }
+
+    public function testBlackArrowsSpendArrowAdds3Damage(): void {
+        $blackArrows = "card_equip_1_20";
+        $color = $this->playerColor();
+        $goblin = "monster_goblin_20";
+        $heroHex = "hex_5_9";
+        $goblinHex = "hex_5_8";
+
+        // Gain equipment via Op_gainEquip — onEnter seeds 3 arrows
+        $this->seedDeck("deck_equip_$color", [$blackArrows]);
+        $op = $this->game->machine->instanciateOperation("gainEquip", $color);
+        $op->resolve();
+        $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
+
+        // Place goblin adjacent to heroHex
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Action 1: Move hero from Grimheim to heroHex (adjacent to goblin)
+        $this->respond($heroHex);
+
+        // Action 2: Attack the goblin
+        $this->respond($goblinHex);
+        $this->skipTriggers(); // hero card on=roll trigger
+
+        // Now in free-action phase after attack — Black Arrows should be offered
+        $this->assertValidTarget($blackArrows, "Black Arrows should be usable after attack");
+
+        // Count dice on display_battle before using arrows
+        $diceBefore = $this->countTokens("die_attack", "display_battle");
+
+        // Use Black Arrows — spends 1 arrow, adds 3 damage dice
+        $this->respond($blackArrows);
+
+        // Verify: 1 arrow spent (2 remaining), 3 damage dice added
+        $this->assertEquals(2, $this->countTokens("crystal_yellow", $blackArrows));
+        $diceAfter = $this->countTokens("die_attack", "display_battle");
+        $this->assertEquals($diceBefore + 3, $diceAfter, "Black Arrows should add 3 damage dice");
+    }
+
+    public function testBlackArrowsNotOfferedWhenNoArrows(): void {
+        $blackArrows = "card_equip_1_20";
+        $color = $this->playerColor();
+        $goblin = "monster_goblin_20";
+        $heroHex = "hex_5_9";
+        $goblinHex = "hex_5_8";
+
+        // Place Black Arrows on tableau with 0 arrows
+        $this->game->tokens->moveToken($blackArrows, "tableau_$color");
+
+        // Place goblin adjacent to heroHex
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Action 1: Move hero to heroHex
+        $this->respond($heroHex);
+
+        // Action 2: Attack goblin
+        $this->respond($goblinHex);
+        $this->skipTriggers();
+
+        // Black Arrows should NOT be offered — no arrows to spend
+        $this->assertNotValidTarget($blackArrows, "Black Arrows should not be usable with 0 arrows");
     }
 }

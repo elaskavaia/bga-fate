@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/../Operations/AbstractOpTestCase.php";
-
 /**
  * Smoke test for the Card subclass dispatch mechanism via Home Sewn Cape.
  *
@@ -12,14 +10,11 @@ require_once __DIR__ . "/../Operations/AbstractOpTestCase.php";
  * hook reads the rune count from display_battle and adds that many green
  * crystals to the card.
  */
-class CardEquip_HomeSewnCapeTest extends AbstractOpTestCase {
+class CardEquip_HomeSewnCapeTest extends AbstractCardTestCase {
     private const CAPE = "card_equip_1_24";
 
     protected function setUp(): void {
-        $this->game = new \Bga\Games\Fate\Stubs\GameUT();
-        $this->game->initWithHero(1);
-        $this->game->clearHand();
-        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+        parent::setUp();
         $this->game->tokens->moveToken(self::CAPE, $this->getPlayersTableau());
     }
 

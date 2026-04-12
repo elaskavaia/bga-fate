@@ -22,6 +22,9 @@ use Bga\Games\Fate\Material;
  */
 class CardGeneric extends Card {
     public function onTriggerDefault(string $triggerName): void {
+        if ($triggerName === "enter") {
+            return; // lifecycle event - handled only by card on itself
+        }
         $cardId = $this->id;
         if (!$this->canBePlayed($triggerName)) {
             return;
@@ -32,8 +35,7 @@ class CardGeneric extends Card {
     }
 
     public function canTrigger(string $triggerName): bool {
-        $method = $this->getTriggerMethod($triggerName);
-        if (method_exists($this, $method)) {
+        if (parent::canTrigger($triggerName)) {
             return true;
         }
         $cardId = $this->id;
