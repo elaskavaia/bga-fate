@@ -1062,7 +1062,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             $args = $this->getOpArgs();
         }
 
-        // Master Shot (on=actionAttack) — useCard prompt with card preset.
+        // Master Shot  — useCard prompt with card preset.
         $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget($masterShot);
 

@@ -465,6 +465,7 @@ See CLAUDE.md for project overview
 [x] Op_turnEnd: call `recalcTrackers()` to reset at end of turn
 [x] Op_actionMove: read move count from `hero->getNumberOfMoves()` instead of hardcoded 3
 [x] getAllDatas: removed manual counter blocks (trackers sent automatically)
+[ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
 
 ### Client
 
@@ -638,3 +639,5 @@ Hero, Abilities and Equipment:
   [ ] Legend monster special display
   [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
   [ ] Flip animation for upgrades
+
+  [ ] Design issue - all useCard should be stacked together even triggered by different triggers, currely I cannot pick between 2 cards if one triggered on roll and anoher on actionAttack

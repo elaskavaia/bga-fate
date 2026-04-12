@@ -77,7 +77,7 @@ class Op_useCard extends Operation {
         $cardId = $this->getCheckedArg();
 
         $cardInst = $this->game->instantiateCard($cardId, $this);
-        $cardInst->useCard();
+        $cardInst->useCard($this->getTrigger());
     }
 
     public function getUiArgs() {

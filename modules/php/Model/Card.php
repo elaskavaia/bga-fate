@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Model;
 
+use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -103,7 +104,15 @@ class Card {
             $this->onTriggerDefault($triggerName);
             return;
         }
+
         $this->$method();
+    }
+
+    function checkPlayability($triggerName) {
+        $errorRes = [];
+        if (!$this->canBePlayed($triggerName, $errorRes)) {
+            throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be peformed now"));
+        }
     }
 
     public function onTriggerDefault(string $triggerName): void {}
@@ -144,7 +153,8 @@ class Card {
     /**
      * Temp implementation
      */
-    public function useCard() {
+    public function useCard(string $triggerName) {
+        $this->checkPlayability($triggerName);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
         $effect = $this->game->material->getRulesFor($cardId, "effect", "");
@@ -167,5 +177,17 @@ class Card {
 
     function isEvent(): bool {
         return str_starts_with($this->id, "card_event");
+    }
+
+    /**
+     * Reset per-turn state on this card at end of turn.
+     * Base: clear the "used" flag (state 1 → 0). Subclasses may override
+     * to reset additional per-turn state (e.g. charges, cooldowns).
+     */
+    public function resetUse(): void {
+        if ($this->state == 1) {
+            $this->op->dbSetTokenState($this->id, 0, "");
+            $this->state = 0;
+        }
     }
 }

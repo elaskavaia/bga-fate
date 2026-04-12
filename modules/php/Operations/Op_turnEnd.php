@@ -49,11 +49,9 @@ class Op_turnEnd extends Operation {
             }
         }
 
-        // Reset "used" flag on ability/equipment cards (state 1 → 0)
+        // Let each tableau card reset its per-turn state (base class clears state=1).
         foreach ($cards as $card) {
-            if ($card["state"] == 1) {
-                $this->dbSetTokenState($card["key"], 0, "");
-            }
+            $this->game->instantiateCard($card, $this)->resetUse();
         }
 
         // 4. Draw 1 event card (handles hand limit internally)

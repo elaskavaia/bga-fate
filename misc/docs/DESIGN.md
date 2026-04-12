@@ -222,9 +222,8 @@ At key points during gameplay, an `Op_trigger` is queued which walks every card 
 - (empty) — play anytime during your turn (once per turn; tracked via token state=1, reset in turnEnd)
 - `actionAttack` — play during/after an attack action
 - `roll` — play after a dice roll
-- `damage` — play when receiving damage
 - `monsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
-- `monsterAttack` — play after a monster attacks you
+- `resolveHits` — play before damage is applied (for damage prevention)
 - `custom` — card has a bespoke class under `modules/php/Cards/` that handles its own trigger logic
 
 **How triggers fire:**
