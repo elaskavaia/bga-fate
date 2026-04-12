@@ -52,7 +52,7 @@ class Monster extends Character {
         $health = $this->getHealth();
 
         $remaining = $health - $totalDamage;
-        $this->game->notifyMessage(clienttranslate('${char_name2} deals ${amount} damage to ${char_name} (${remaining} left)'), [
+        $this->game->notifyMessage(clienttranslate('${char_name2} deals ${amount} damage to ${char_name} (${remaining} health left)'), [
             "char_name" => $this->id,
             "char_name2" => $attackerId,
             "amount" => $amount,

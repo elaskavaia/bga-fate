@@ -5250,7 +5250,7 @@ class Material {
         "dtype" => "attack",
         "side" => 3,
         "rule" => "rune",
-        "name" => clienttranslate("Miss (Rune)"),
+        "name" => clienttranslate("Rune"),
 ],
     "side_die_attack_4" => [ 
         "dtype" => "attack",

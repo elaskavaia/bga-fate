@@ -3,7 +3,7 @@ dtype|side|rule|name
 # Attack die (hit x 2, hit-with-cover, miss x 2, rune)
 attack|1|miss|Miss
 attack|2|miss|Miss
-attack|3|rune|Miss (Rune)
+attack|3|rune|Rune
 attack|4|hitcov|Hit (except Forest)
 attack|5|hit|Hit
 attack|6|hit|Hit
