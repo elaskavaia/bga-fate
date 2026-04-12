@@ -21,7 +21,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * gainDamage: Add 1 damage (red crystal) to an equipment card as a durability cost.
  *
  * Data Fields:
- * - card - the equipment card to place damage on (set by useEquipment)
+ * - card - the equipment card to place damage on (set by useCard)
  *
  * Behaviour:
  * - Normal case: places 1 red crystal on card, automated (no user choice)

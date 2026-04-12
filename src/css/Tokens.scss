@@ -95,6 +95,7 @@
 .marker_attack {
   background: none;
   position: relative;
+  top: 10px;
   &::before {
     content: "✳";
     position: absolute;

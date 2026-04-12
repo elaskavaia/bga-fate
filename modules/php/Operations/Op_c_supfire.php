@@ -13,7 +13,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - param(0): optional filter expression — e.g. "'rank<=2'" for Level I (default "true")
  *
  * Data Fields:
- * - card: the ability card ID that triggered this (set by useAbility)
+ * - card: the ability card ID that triggered this (set by useCard)
  *
  * Behaviour:
  * - Player selects an eligible monster hex within range 3

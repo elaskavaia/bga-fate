@@ -136,7 +136,6 @@ Base class for card instances created on the fly during trigger dispatch. Each c
 - `onTrigger($triggerName)` — routes to `on<TriggerName>()` if the subclass defines it, else falls back to `onTriggerDefault()`
 - `canTrigger($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
 - `canBePlayed($triggerName, &$errorRes)` — returns true if the card is actually playable. Base returns true; `CardGeneric` overrides with full checks.
-- `getUseCardOperationType()` — maps card supertype to action op: equip → `useEquipment`, ability/hero → `useAbility`, event → `playEvent`
 - `useCard()` — executes the card: sends notification, marks once-per-turn cards as used, queues the `r` expression, discards event cards
 
 **CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class when no bespoke subclass exists. Implements the standard voluntary trigger flow:
@@ -177,17 +176,14 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `actionFocus` (main) — Add 1 mana to a card 
 - `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) 
 - `actionPractice` (main) — Gain 1 XP (yellow crystal) 
-- `useCard` (free) — Unified card activation: offers all playable cards (abilities, equipment, events) matching the current trigger. Subclasses `useAbility`, `useEquipment`, `playEvent` filter candidates by card type.
-- `useEquipment` (free) — Activate an equipment card (filters to `card_equip_*` on tableau)
-- `useAbility` (free) — Activate an ability or hero card (filters to `card_ability_*` and `card_hero_*` on tableau)
-- `playEvent` (free) — Play an event card from hand (filters to hand cards)
+- `useCard` (free) — Unified card activation: offers all playable cards (abilities, equipment, events) from tableau and hand matching the current trigger.
 - `shareGold` (free) — Give gold to another hero — *notimpl*
 
 
 ### Card Effect Operations 
 
 These are **generic parameterized operations** used as building blocks to implement card effects.
-They are queued by `useCard` (or its subclasses `useAbility`/`useEquipment`/`playEvent`) after the card is played.
+They are queued by `useCard` after the card is played.
 Most are Countable (X = count) and take a target that is either pre-seeded or player-chosen.
 
 See other operations in misc/op_material.csv

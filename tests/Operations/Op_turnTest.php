@@ -43,9 +43,9 @@ final class Op_turnTest extends AbstractOpTestCase {
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
 
-        // Free actions are inlined — individual cards appear with "action" => "playEvent"
+        // Free actions are inlined — individual cards appear with "action" => "useCard"
         $info = $this->getTargetInfo("card_event_1_27");
-        $this->assertEquals("playEvent", $info["action"]);
+        $this->assertEquals("useCard", $info["action"]);
     }
 
     public function testFreeActionsStillOfferedAfterBothMainActionsTaken(): void {
@@ -55,7 +55,7 @@ final class Op_turnTest extends AbstractOpTestCase {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
 
         $info = $this->getTargetInfo("card_event_1_27");
-        $this->assertEquals("playEvent", $info["action"]);
+        $this->assertEquals("useCard", $info["action"]);
     }
 
     public function testAlreadyTakenActionIsNotApplicable(): void {

@@ -92,7 +92,7 @@ class Op_turn extends Operation {
             } else {
                 $op = $this->instanciateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
-                if ($res[$action]["q"] == 0 && $inline && ($kind == "free" || $remaining > 0)) {
+                if ($res[$action]["q"] == 0 && $inline) {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgsInfo();
                     foreach ($info as $key => $value) {
@@ -101,11 +101,9 @@ class Op_turn extends Operation {
                     }
                 }
             }
-            if ($kind == "free") {
-                // free action only offered via its inlined possible moves
-                unset($res[$action]);
-            } elseif ($remaining == 0) {
-                unset($res[$action]);
+            if ($remaining == 0 && $kind == "main") {
+                $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
+                $res[$action]["err"] = clienttranslate("Main action cannot be performed anymore");
             }
         }
 

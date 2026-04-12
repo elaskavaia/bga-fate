@@ -325,24 +325,6 @@ class Material {
         "type" => "useCard",
         "name" => clienttranslate("Use Card"),
 ],
-    "Op_useEquipment" => [ 
-        "kind" => "free",
-        "inline" => 1,
-        "type" => "useEquipment",
-        "name" => clienttranslate("Use Equipment"),
-],
-    "Op_useAbility" => [ 
-        "kind" => "free",
-        "inline" => 1,
-        "type" => "useAbility",
-        "name" => clienttranslate("Use Ability"),
-],
-    "Op_playEvent" => [ 
-        "kind" => "free",
-        "inline" => 1,
-        "type" => "playEvent",
-        "name" => clienttranslate("Play Event"),
-],
 // #shareGold|Share Gold|
 // # Card effect operations (building blocks for card effects)
     "Op_dealDamage" => [ 

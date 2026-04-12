@@ -146,7 +146,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals(4, $hero->getAttackStrength());
 
         // Not offered as a free action (r is empty)
-        $op = $this->game->machine->instanciateOperation("useAbility", $color);
+        $op = $this->game->machine->instanciateOperation("useCard", $color);
         $targets = $op->getArgs()["target"];
         $this->assertNotContains("card_ability_1_9", $targets);
     }
@@ -299,7 +299,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             $args = $this->getOpArgs();
         }
 
-        // useAbility prompt for Nailed Together II (on=monsterKilled)
+        // useCard prompt for Nailed Together II (on=monsterKilled)
         $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget("card_ability_1_14");
         $this->respond("card_ability_1_14");
@@ -400,7 +400,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Skip drawEvent if queued by turnEnd
         $this->skipIfOp("drawEvent");
 
-        // New flow: trigger(monsterMove) auto-resolves; useAbility for Suppressive Fire I is queued.
+        // New flow: trigger(monsterMove) auto-resolves; useCard for Suppressive Fire I is queued.
         $args = $this->getOpArgs();
         $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget("card_ability_1_5");
@@ -1062,7 +1062,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             $args = $this->getOpArgs();
         }
 
-        // Master Shot (on=actionAttack) — playEvent prompt with card preset.
+        // Master Shot (on=actionAttack) — useCard prompt with card preset.
         $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget($masterShot);
 

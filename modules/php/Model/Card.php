@@ -142,23 +142,6 @@ class Card {
     }
 
     /**
-     * Operation type used to "use" this card via player action — derived from
-     * the card supertype: equip → useEquipment, ability/hero → useAbility,
-     * event → playEvent. Asserts on unknown card types.
-     */
-    public function getUseCardOperationType(): string {
-        $type = getPart($this->id, 1);
-        $action = match ($type) {
-            "equip" => "useEquipment",
-            "ability", "hero" => "useAbility",
-            "event" => "playEvent",
-            default => null,
-        };
-        $this->game->systemAssert("ERR:Card:unknownType:" . $this->id, $action !== null);
-        return $action;
-    }
-
-    /**
      * Temp implementation
      */
     public function useCard() {

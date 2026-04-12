@@ -35,9 +35,9 @@ final class Op_triggerTest extends AbstractOpTestCase {
      * Tableau card with matching `on` field → CardGeneric default queues a useCard op.
      * This proves Op_trigger::resolve() instantiated the card and called onTrigger() on it.
      */
-    public function testDispatcherInstantiatesTableauCardAndQueuesUseAbility(): void {
+    public function testDispatcherInstantiatesTableauCardAndQueuesUseCard(): void {
         // Riposte I (card_ability_3_3) on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
-        // Set up so the card is actually playable, then verify CardGeneric queues useAbility.
+        // Set up so the card is actually playable, then verify CardGeneric queues useCard.
         $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");

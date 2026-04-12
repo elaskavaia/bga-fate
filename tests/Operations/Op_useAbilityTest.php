@@ -9,14 +9,18 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
     /** card_ability_1_7 = Stitching I (hero 1, r=1heal(adj)) */
     private string $abilityCard = "card_ability_1_7";
 
+    function getOperationType(): string {
+        return "useCard";
+    }
+
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        // Add damage so heal(adj) is not void
-        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1");
     }
 
     public function testAbilityCardIsValidTarget(): void {
+        // Add damage so heal(adj) is not void
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1");
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
         $this->assertValidTarget($this->abilityCard);
     }
@@ -25,7 +29,7 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
         // Hero card (card_hero_1_1) has on=roll — not offered as free action (no trigger match),
         // but IS included in candidate list (not filtered out by type).
         // When triggered during roll, it should be offered.
-        $this->createOp("useAbility", ["on" => "roll"]);
+        $this->createOp("useCard", ["on" => "roll"]);
         $this->assertValidTarget("card_hero_1_1");
     }
 
@@ -40,6 +44,7 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
     }
 
     public function testMultipleAbilitiesOffered(): void {
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1");
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau()); // Stitching I
         // Sure Shot I: r=3spendMana:3dealDamage(inRange) — needs mana + monster
         $sureShotId = "card_ability_1_3";

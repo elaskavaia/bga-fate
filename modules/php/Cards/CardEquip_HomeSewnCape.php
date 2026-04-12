@@ -27,7 +27,7 @@ use Bga\Games\Fate\Model\Card;
  * adds that many green crystals to this card.
  *
  * Voluntary: spend clauses come from the CSV `r` field via standard
- * `useEquipment` activation — this class does not need to override that path.
+ * `useCard` activation — this class does not need to override that path.
  */
 class CardEquip_HomeSewnCape extends Card {
     public function onRoll(): void {

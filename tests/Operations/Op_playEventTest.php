@@ -10,6 +10,9 @@ use Bga\Games\Fate\OpCommon\Operation;
 const EVENT_CARD = "card_event_1_27";
 
 final class Op_playEventTest extends AbstractOpTestCase {
+    function getOperationType(): string {
+        return "useCard";
+    }
     protected function setUp(): void {
         parent::setUp();
         $this->putInHand(EVENT_CARD);

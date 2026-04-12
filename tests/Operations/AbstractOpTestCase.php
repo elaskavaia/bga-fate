@@ -14,11 +14,14 @@ abstract class AbstractOpTestCase extends TestCase {
     /**
      * Instantiate op and cache $this->op;
      */
+    function getOperationType(): string {
+        $className = (new \ReflectionClass($this))->getShortName();
+        return preg_replace(["/^Op_/", '/Test$/'], "", $className);
+    }
+
     function createOp(?string $type = null, mixed $data = null): Operation {
-        // Derive op type from the test class name: "Op_c_preyTest" → "c_prey"
         if ($type == null) {
-            $className = (new \ReflectionClass($this))->getShortName();
-            $type = preg_replace(["/^Op_/", '/Test$/'], "", $className);
+            $type = $this->getOperationType();
         }
         $this->op = $this->game->machine->instanciateOperation($type, $this->owner, $data);
         return $this->op;

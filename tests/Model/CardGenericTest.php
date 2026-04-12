@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
  * Tests for CardGeneric — the default Card subclass used when no bespoke
  * class exists for a card. Its job is to read the card's `on` field from
  * Material and, when a trigger of that type fires, queue the appropriate
- * voluntary action op (useEquipment / useAbility / playEvent) to prompt
+ * voluntary action op (useCard) to prompt
  * the player.
  *
  * These tests construct a CardGeneric directly with a minimal parent op,

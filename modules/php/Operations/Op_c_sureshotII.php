@@ -15,7 +15,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - Then queues NspendMana:NdealDamage with chosen N and preset target
  *
  * Data Fields:
- * - card: the ability card ID (set by useAbility)
+ * - card: the ability card ID (set by useCard)
  * - target: (step 2 only) the monster hex selected in step 1
  *
  * Used by: Sure Shot II (card_ability_1_4)

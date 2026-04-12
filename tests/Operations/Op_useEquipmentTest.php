@@ -8,7 +8,9 @@ declare(strict_types=1);
 final class Op_useEquipmentTest extends AbstractOpTestCase {
     /** card_equip_1_19 = Leather Purse (hero 1, durability 3, r=gainDamage:2heal(adj)) */
     private string $equipCard = "card_equip_1_19";
-
+    function getOperationType(): string {
+        return "useCard";
+    }
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
@@ -21,19 +23,9 @@ final class Op_useEquipmentTest extends AbstractOpTestCase {
         $this->assertValidTarget($this->equipCard);
     }
 
-    public function testAbilityCardExcluded(): void {
-        $this->game->tokens->moveToken("card_ability_1_7", $this->getPlayersTableau());
-        $this->assertNotValidTarget("card_ability_1_7");
-    }
-
     public function testHeroCardExcluded(): void {
         // card_hero_1_1 is on tableau from setup
         $this->assertNotValidTarget("card_hero_1_1");
-    }
-
-    public function testEventCardExcluded(): void {
-        $this->game->tokens->moveToken("card_event_1_27", "hand_" . $this->owner);
-        $this->assertNotValidTarget("card_event_1_27");
     }
 
     public function testEmptyRCardSkipped(): void {
