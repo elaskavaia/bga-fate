@@ -19,12 +19,14 @@ use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Common\HexMap;
 use Bga\Games\Fate\Db\DbMultiUndo;
 use Bga\Games\Fate\Db\DbTokens;
+use Bga\Games\Fate\Model\Card;
 use Bga\Games\Fate\OpCommon\AiOperation;
 use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\Model\Character;
 use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Monster;
+use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\States\GameDispatch;
 
 class Game extends Base {
@@ -539,6 +541,33 @@ class Game extends Base {
         $name = $this->material->getRulesFor($token_id, "name", $default);
 
         return $name;
+    }
+
+    /**
+     * Instantiate a custom card class for cards declaring on=custom in Material.
+     * The class name is derived from the card type and the Material `name` field
+     * (alphanumeric only, PascalCase).
+     *
+     * Example: card_equip_1_20 "Black Arrows" → Bga\Games\Fate\Cards\CardEquip_BlackArrows
+     *
+     * @param string $cardId Token id (e.g. "card_equip_1_20")
+     * @param Operation $op Calling operation (provides owner and queue context)
+     */
+    function instantiateCard(string $cardId, Operation $op): Card {
+        // card_<type>_..., e.g. card_equip_1_20 → "equip"
+        $type = getPart($cardId, 1);
+        $name = (string) $this->material->getRulesFor($cardId, "name", "");
+        $sanitized = preg_replace("/[^A-Za-z0-9]/", "", $name);
+        $this->systemAssert("ERR:instantiateCard:emptyName:$cardId", $sanitized !== "" && $sanitized !== null);
+
+        // Try bespoke class first; fall back to per-supertype generic in Model/.
+        $bespoke = "Bga\\Games\\Fate\\Cards\\Card" . ucfirst($type) . "_" . $sanitized;
+        if (class_exists($bespoke)) {
+            return new $bespoke($this, $cardId, $op->getOwner(), $op);
+        }
+        $generic = "Bga\\Games\\Fate\\Model\\CardGeneric";
+        $this->systemAssert("ERR:instantiateCard:noGeneric:$generic", class_exists($generic));
+        return new $generic($this, $cardId, $op->getOwner(), $op);
     }
 
     function getEndScores(): array {

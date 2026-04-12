@@ -7,6 +7,19 @@ use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Tests for Op_trigger.
+ *
+ * Op_trigger is a pure dispatcher: walks tableau + hand cards of the active
+ * player, instantiates a Card object for each, and calls onTrigger($triggerType).
+ * Per-card matching/queueing logic lives in Card and CardGeneric (see
+ * tests/Model/CardGenericTest.php). The tests here cover:
+ *
+ * 1. Fire sites — verify that operations like Op_roll, Op_actionMove, Op_turnEnd,
+ *    Op_turnMonster correctly queue trigger(<type>) ops at the right moments.
+ * 2. Dispatcher — verify Op_trigger walks both tableau and hand and calls
+ *    onTrigger() for each card it visits.
+ */
 final class Op_triggerTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
@@ -15,130 +28,52 @@ final class Op_triggerTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Testing possible moves — trigger(roll)
+    // Dispatcher — Op_trigger walks tableau + hand and calls onTrigger per card
     // -------------------------------------------------------------------------
 
-    public function testRollTriggerHeroCardNotOfferedWhenCannotPay(): void {
-        // Bjorn's hero card (card_hero_1_1) has on=roll, r=spendAction(actionFocus):2dealDamage
-        // Without action markers, spendAction can't be paid — card is not offered
-        $this->createOp("trigger(roll)");
-        $this->assertNotValidTarget("card_hero_1_1");
-    }
-
-    public function testRollTriggerIgnoresCardsWithoutOnRoll(): void {
-        // Bjorn's ability card (card_ability_1_3, Sure Shot I) has no on field
-        $this->createOp("trigger(roll)");
-        $this->assertNotValidTarget("card_ability_1_3");
-    }
-
-    public function testRollTriggerIncludesHandEventCards(): void {
-        // Put Piercing Arrows (on=roll, r=custom) in hand — custom cards still match
-        // But custom r can't be instantiated, so use a different approach:
-        // Perfect Aim (card_event_1_31, on=roll) — also r=custom, won't work
-        // For events, playEvent doesn't validate r, it just checks on field
-        $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        $this->createOp("trigger(roll)");
-        $this->assertValidTarget("card_event_1_31");
-    }
-
-    public function testEmptyTriggerTypeReturnsNoTargets(): void {
-        $this->createOp("trigger");
-        $this->assertNoValidTargets();
-    }
-
-    public function testCanSkip(): void {
-        $this->createOp("trigger(roll)");
-        $this->assertTrue($this->op->canSkip());
-    }
-
-    // -------------------------------------------------------------------------
-    // Testing possible moves — trigger(actionAttack)
-    // -------------------------------------------------------------------------
-
-    public function testTriggerFindsEventCardInHand(): void {
-        // Perfect Aim (card_event_1_31) has on=roll, r=rerollMisses (implemented)
-        $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        $this->createOp("trigger(roll)");
-        $this->assertValidTarget("card_event_1_31");
-    }
-
-    public function testActionAttackTriggerIgnoresRollCards(): void {
-        // Hero card has on=roll, not actionAttack
-        $this->createOp("trigger(actionAttack)");
-        $this->assertNotValidTarget("card_hero_1_1");
-    }
-
-    // -------------------------------------------------------------------------
-    // Testing possible moves — trigger(resolveHits) with ability cards
-    // -------------------------------------------------------------------------
-
-    public function testMonsterAttackTriggerFindsAbilityCard(): void {
-        // Riposte I (card_ability_3_3) has on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
-        $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
-        // Add 2 mana to the card so spendMana is payable
-        $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
-        $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
-        // Adjacent monster for dealDamage target in the r expression
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        // Need dealDamage on stack for preventDamage to be valid
-        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
-        $this->createOp("trigger(resolveHits)");
-        $this->assertValidTarget("card_ability_3_3");
-    }
-
-    public function testMonsterAttackTriggerEmptyWhenNoMatchingCards(): void {
-        // Bjorn has no on=resolveHits cards by default
-        $this->createOp("trigger(resolveHits)");
-        $this->assertNoValidTargets();
-    }
-
-    public function testMonsterAttackTriggerFindsEventCard(): void {
-        // Retaliation (card_event_3_31) has on=resolveHits, r=2dealDamage(adj)
-        $this->game->tokens->moveToken("card_event_3_31", "hand_" . $this->owner);
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent target for dealDamage
-        $this->createOp("trigger(resolveHits)");
-        $this->assertValidTarget("card_event_3_31");
-    }
-
-    // -------------------------------------------------------------------------
-    // resolve — queues the correct sub-operation
-    // -------------------------------------------------------------------------
-
-    public function testResolveQueuesUseAbilityForAbilityCard(): void {
-        // Riposte I: on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
+    /**
+     * Tableau card with matching `on` field → CardGeneric default queues a useAbility op.
+     * This proves Op_trigger::resolve() instantiated the card and called onTrigger() on it.
+     */
+    public function testDispatcherInstantiatesTableauCardAndQueuesUseAbility(): void {
+        // Riposte I (card_ability_3_3) on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
+        // Set up so the card is actually playable, then verify CardGeneric queues useAbility.
         $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
         $this->createOp("trigger(resolveHits)");
-        $this->call_resolve("card_ability_3_3");
-        $ops = $this->game->machine->getAllOperations($this->owner);
-        $opTypes = array_map(fn($o) => $o["type"], $ops);
+        $this->call_resolve();
+        $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
         $this->assertContains("useAbility", $opTypes);
     }
 
-    public function testResolveQueuesPlayEventForEventCard(): void {
-        // Perfect Aim (card_event_1_31) has on=roll, r=rerollMisses (implemented)
+    /**
+     * Hand event card with matching `on` field → CardGeneric default queues a playEvent op.
+     * Covers the hand-walking branch of the dispatcher.
+     */
+    public function testDispatcherWalksHandAndQueuesPlayEvent(): void {
+        // Perfect Aim (card_event_1_31) has on=roll, lives in hand.
         $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        // Place dice on display_battle so rerollMisses has valid targets
-        $this->game->tokens->moveToken("die_attack_1", "display_battle", 2);
         $this->createOp("trigger(roll)");
-        $this->call_resolve("card_event_1_31");
-        $ops = $this->game->machine->getAllOperations($this->owner);
-        $opTypes = array_map(fn($o) => $o["type"], $ops);
+        $this->call_resolve();
+        $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
         $this->assertContains("playEvent", $opTypes);
     }
 
-    public function testResolveQueuesUseEquipmentForEquipmentCard(): void {
-        // Quiver (card_equip_1_18) has on=actionAttack, r=gainDamage:custom
-        // Use a simpler equip: place one with on=resolveHits and valid r
-        // There are no Bjorn equips with on= and non-custom r in starting set,
-        // so test the action annotation is correct via info
+    /**
+     * Trigger type that no card on the tableau reacts to → no action queued.
+     * Proves the matching logic in CardGeneric works for the negative case.
+     */
+    public function testDispatcherSkipsNonMatchingCards(): void {
+        // Riposte I has on=resolveHits; no Bjorn starting card has on=monsterKilled.
         $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
-        $this->createOp("trigger(resolveHits)");
-        $info = $this->op->getArgsInfo();
-        $this->assertEquals("useAbility", $info["card_ability_3_3"]["action"]);
+        $this->createOp("trigger(monsterKilled)");
+        $this->call_resolve();
+        $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
+        $this->assertNotContains("useAbility", $opTypes);
+        $this->assertNotContains("playEvent", $opTypes);
     }
 
     // -------------------------------------------------------------------------
@@ -198,11 +133,5 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("trigger(monsterMove)", $opTypes);
-    }
-
-    public function testMonsterMoveTriggerIsEmptyWithNoCards(): void {
-        // No ability cards with on=monsterMove on tableau → trigger should have no targets
-        $this->createOp("trigger(monsterMove)");
-        $this->assertNoValidTargets();
     }
 }

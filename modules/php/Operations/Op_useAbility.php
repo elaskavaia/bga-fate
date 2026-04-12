@@ -22,6 +22,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useAbility extends Operation {
     function getPrompt() {
+        if ($this->isOneChoice()) {
+            return clienttranslate("You can activate this ability now or skip");
+        }
         return clienttranslate("Choose an ability card to use");
     }
 
@@ -35,6 +38,19 @@ class Op_useAbility extends Operation {
 
     function getTrigger() {
         return $this->getDataField("on", "");
+    }
+
+    function requireConfirmation() {
+        return (bool) $this->getDataField("prompt", false);
+    }
+    public function getSkipName() {
+        return clienttranslate("Not now");
+    }
+    public function canSkip() {
+        if ($this->requireConfirmation()) {
+            return true;
+        }
+        return parent::canSkip();
     }
 
     function getPossibleMoves() {

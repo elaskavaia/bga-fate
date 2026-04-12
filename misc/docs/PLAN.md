@@ -424,6 +424,7 @@ Design direction (TBD): either a new trigger kind that runs a rule expression se
 [~] Quest definitions on equipment cards — quest column exists in card_equip_material.csv but no gameplay tracking
 [ ] Quest progress tracking
 [ ] Quest completion → new equipment active
+[ ] `effect_gainEquipment($cardId, $owner)` — places an equipment card on the player's tableau and fires `trigger(enter)`. Should be called from quest completion, upgrade flow, and starting equipment setup ([Game.php:127](modules/php/Game.php#L127)). Black Arrows ("starts with 3 arrows here") and Tiara ("starts with 6 gold here") need this for their `onEnter` hook to fire.
 [x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals

@@ -30,11 +30,27 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_playEvent extends Operation {
     function getPrompt() {
+        if ($this->isOneChoice()) {
+            return clienttranslate("You can play Event Card now or skip");
+        }
         return clienttranslate("Choose an Event Card to play");
     }
 
     function getCurrentTrigger() {
         return $this->getDataField("on", "");
+    }
+
+    function requireConfirmation() {
+        return (bool) $this->getDataField("prompt", false);
+    }
+    public function getSkipName() {
+        return clienttranslate("Not now");
+    }
+    public function canSkip() {
+        if ($this->requireConfirmation()) {
+            return true;
+        }
+        return parent::canSkip();
     }
 
     private function instanciateCardEffectOp(string $cardId): Operation {

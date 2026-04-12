@@ -12,70 +12,23 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - param(0): the trigger type (e.g. "actionAttack", "monsterAttack", "roll", "monsterMove", "turnEnd")
  *
  * Behaviour:
- * - Delegates to useEquipment, useAbility, playEvent with "on" data field
- * - Each sub-operation filters its own cards by the "on" material field
- * - Collects their possible moves, annotated with "action", and presents as own targets
+ * - Instantiates card that can have triggers
  */
 class Op_trigger extends Operation {
     private function getTriggerType(): string {
-        return $this->getParam(0, "");
-    }
-
-    function getPrompt() {
-        switch ($this->getTriggerType()) {
-            case "roll":
-                return clienttranslate("You may activate an ability in response to your dice roll");
-            case "actionAttack":
-                return clienttranslate("You may activate an ability related to your attack");
-            case "resolveHits":
-                return clienttranslate("You may activate an ability to prevent the damage");
-            case "monsterMove":
-                return clienttranslate("You may activate an ability related to monster move");
-            default:
-                return clienttranslate("You may activate an ability in response to trigger");
-        }
-    }
-
-    function canSkip() {
-        return true;
-    }
-
-    public function getSkipName() {
-        return clienttranslate("Not now");
-    }
-    function requireConfirmation() {
-        return !$this->noValidTargets();
-    }
-
-    function getPossibleMoves() {
-        $triggerType = $this->getTriggerType();
-        if ($triggerType === "") {
-            return [];
-        }
-        $owner = $this->getOwner();
-        $targets = [];
-        foreach (["useEquipment", "useAbility", "playEvent"] as $action) {
-            $op = $this->game->machine->instanciateOperation($action, $owner, ["on" => $triggerType]);
-            $delegateArgs = $op->getArgs();
-            $delegateInfo = $delegateArgs["info"] ?? [];
-            foreach ($delegateInfo as $cardId => $info) {
-                $info["action"] = $action;
-                $targets[$cardId] = $info;
-            }
-        }
-        return $targets;
+        return $this->getParam(0, "move");
     }
 
     function resolve(): void {
-        $cardId = $this->getCheckedArg();
+        $triggerType = $this->getTriggerType();
+        $this->game->systemAssert("trigger required", $triggerType);
         $owner = $this->getOwner();
-        $argInfo = $this->getArgsInfo()[$cardId];
-        $action = $argInfo["action"] ?? "";
-        $this->game->systemAssert("ERR:trigger:noAction:$cardId", $action !== "");
-        $this->queue($action, $owner, ["target" => $cardId]);
-    }
-
-    public function getUiArgs() {
-        return ["buttons" => false];
+        $cards =
+            $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner") +
+            $this->game->tokens->getTokensOfTypeInLocation("card", "hand_$owner");
+        foreach (array_keys($cards) as $cardId) {
+            $cardObj = $this->game->instantiateCard($cardId, $this);
+            $cardObj->onTrigger($triggerType);
+        }
     }
 }
