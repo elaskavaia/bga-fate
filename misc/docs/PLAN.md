@@ -379,14 +379,18 @@ See CLAUDE.md for project overview
 - [x] `dealDamage` — added `adj_attack` param meaning "monsters adjacent to the current attack target hex" (via `getAttackHex()`, excluding the attack hex itself). Used by Bone Bane Bow and Fireball II. Kept as a special case inside `Op_dealDamage::getPossibleMoves()` rather than in `Hero::getRangeFromParam` since it's not hero-centered.
 - [ ] `repairCard` — add param `max` and replace `99repairCard` kludges in CSV files with the cleaner form.
 
-### Auto-triggered static effects (new mechanism — blocker for 2 cards)
+### Card class hierarchy (implemented)
 
-The current `on=` trigger system only *offers* cards to the player via `Op_trigger` for voluntary activation. Several equipment cards need effects that fire automatically without the player invoking `useEquipment`:
+[x] Op_trigger refactored into pure dispatcher — walks tableau + hand, instantiates Card objects per card, calls `onTrigger($triggerType)`.
+[x] `Model/Card` base class with `onTrigger`, `canTrigger`, `canBePlayed`, `queue`, `getUseCardOperationType`.
+[x] `Model/CardGeneric` — default class for cards without a bespoke subclass. Implements the standard voluntary trigger flow.
+[x] `Cards/CardEquip_HomeSewnCape` — first bespoke card. Passive `onRoll`: adds 1 mana per rune rolled.
+[x] `Game::instantiateCard($card, $op)` — factory resolving bespoke class from Material `name` field, falling back to `CardGeneric`.
+[x] `Op_turnStart` — fires `trigger(turnStart)` at start of each player turn, then queues `turn`. Call sites updated.
 
-- **`equipPlaced`** trigger — fires when an equipment card enters the tableau. Needed by Black Arrows to seed 3 yellow crystals on the card when equipped.
-- **Per-rune rolled** automatic hook — fires for each rune die showing after an attack roll. Needed by Home Sewn Cape to add 1 mana to the card per rune rolled.
+### Remaining blocker: `enter` trigger for equipment placement
 
-Design direction (TBD): either a new trigger kind that runs a rule expression server-side (not prompting the player), or dedicated hooks on equip-placement / roll resolution for one-shot automatic effects. Needs a separate design pass.
+- **`enter`** trigger — fires when an equipment card enters the tableau. Needed by Black Arrows to seed 3 yellow crystals on equip. Blocked on `effect_gainEquipment` (see Iteration 11).
 
 ### Integration
 

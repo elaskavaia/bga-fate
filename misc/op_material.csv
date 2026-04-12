@@ -17,7 +17,8 @@ turn|Turn
 turnconf|Confirm Turn
 
 
-# End of turn
+# Start/end of turn
+turnStart|Start of Turn
 turnEnd|End of Turn
 
 

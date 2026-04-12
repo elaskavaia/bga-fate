@@ -19,6 +19,6 @@ class Op_endOfMonsterTurn extends Operation {
 
         // Start next round with the first player
         $firstPlayerId = $this->game->getFirstPlayer();
-        $this->game->machine->queue("turn", $this->game->custom_getPlayerColorById($firstPlayerId));
+        $this->game->machine->queue("turnStart", $this->game->custom_getPlayerColorById($firstPlayerId));
     }
 }

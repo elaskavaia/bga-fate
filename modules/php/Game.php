@@ -152,7 +152,7 @@ class Game extends Base {
         }
         $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
-        $this->machine->queue("turn", $color);
+        $this->machine->queue("turnStart", $color);
         $this->customUndoSavepoint($startingPlayer, 1);
         return GameDispatch::class;
     }
@@ -607,7 +607,7 @@ class Game extends Base {
             $this->machine->queue("turnMonster", $this->getAutomaColor());
         } else {
             // More players still need to take their turn this round
-            $this->machine->queue("turn", $this->custom_getPlayerColorById($nextPlayerId));
+            $this->machine->queue("turnStart", $this->custom_getPlayerColorById($nextPlayerId));
         }
     }
 

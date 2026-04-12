@@ -243,6 +243,8 @@ Unlike the old design (single "pick one card" prompt), the new flow offers each 
 **Where triggers are queued (operation → trigger → description):**
 
 ```
+Op_turnStart
+  → trigger(turnStart)       — at start of player turn (passive start-of-turn effects)
 Op_roll
   → trigger(roll)            — after a hero rolls attack dice
   → trigger(actionAttack)    — after a roll initiated by Op_actionAttack

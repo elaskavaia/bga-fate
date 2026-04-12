@@ -246,7 +246,11 @@ class Material {
         "type" => "turnconf",
         "name" => clienttranslate("Confirm Turn"),
 ],
-// # End of turn
+// # Start/end of turn
+    "Op_turnStart" => [ 
+        "type" => "turnStart",
+        "name" => clienttranslate("Start of Turn"),
+],
     "Op_turnEnd" => [ 
         "type" => "turnEnd",
         "name" => clienttranslate("End of Turn"),
