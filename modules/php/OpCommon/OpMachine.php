@@ -63,10 +63,10 @@ class OpMachine {
         }
         $dop = reset($ops);
 
-        return $this->instanciateOperationFromDbRow($dop);
+        return $this->instantiateOperationFromDbRow($dop);
     }
 
-    function instanciateOperationFromDbRow(mixed $dop): Operation {
+    function instantiateOperationFromDbRow(mixed $dop): Operation {
         if (is_string($dop["data"])) {
             $data = Operation::decodeData($dop["data"]);
         } else {
@@ -76,17 +76,17 @@ class OpMachine {
         if ($args) {
             unset($data["args"]);
         }
-        $op = $this->instanciateOperation($dop["type"], $dop["owner"], $data, $dop["id"] ?? 0);
+        $op = $this->instantiateOperation($dop["type"], $dop["owner"], $data, $dop["id"] ?? 0);
         if ($op instanceof ComplexOperation) {
             foreach ($args as $sub) {
-                $subOp = $this->instanciateOperationFromDbRow(["owner" => $dop["owner"]] + $sub);
+                $subOp = $this->instantiateOperationFromDbRow(["owner" => $dop["owner"]] + $sub);
                 $op->withDelegate($subOp);
             }
         }
         return $op;
     }
 
-    function instanciateOperation(string $type, ?string $owner = null, mixed $data = null, mixed $id = 0): Operation {
+    function instantiateOperation(string $type, ?string $owner = null, mixed $data = null, mixed $id = 0): Operation {
         try {
             if ($id) {
                 $id = (int) $id;
@@ -108,7 +108,7 @@ class OpMachine {
         if (!$expr->isSimple()) {
             $mnemonic = self::opToMnemonic($operand);
             /** @var ComplexOperation */
-            $op = $this->instanciateCommonOperation($mnemonic, $owner);
+            $op = $this->instantiateCommonOperation($mnemonic, $owner);
             foreach ($expr->args as $arg) {
                 $sub = $this->exprToOperation($arg, $owner);
                 $op->withDelegate($sub);
@@ -125,14 +125,14 @@ class OpMachine {
             $params = $matches[2];
             $unrangedType = $matches[1];
         }
-        $sub = $this->instanciateSimpleOperation($unrangedType, $owner)->withParams($params);
+        $sub = $this->instantiateSimpleOperation($unrangedType, $owner)->withParams($params);
         if ($expr instanceof OpExpressionRanged) {
             if ($sub instanceof CountableOperation) {
                 $sub->withCounts($expr);
                 return $sub;
             } else {
                 /** @var ComplexOperation */
-                $op = $this->instanciateCommonOperation("seq", $owner);
+                $op = $this->instantiateCommonOperation("seq", $owner);
                 $op->withDelegate($sub)->withCounts($expr);
                 return $op;
             }
@@ -152,13 +152,13 @@ class OpMachine {
             default => throw new SystemException("Unknown operator $operand"),
         };
     }
-    function instanciateCommonOperation(string $type, ?string $owner = null, mixed $data = null): Operation {
+    function instantiateCommonOperation(string $type, ?string $owner = null, mixed $data = null): Operation {
         $reflectionClass = new ReflectionClass("Bga\\Games\\Fate\\Operations\\Op_$type");
         $instance = $reflectionClass->newInstance($type, $owner, $data);
         return $instance;
     }
 
-    function instanciateSimpleOperation(string $type, ?string $owner = null, mixed $data = null): Operation {
+    function instantiateSimpleOperation(string $type, ?string $owner = null, mixed $data = null): Operation {
         if (strlen($type) > 80) {
             throw new SystemException("Cannot instantiate op");
         }
@@ -225,7 +225,7 @@ class OpMachine {
         if ($opOrRow instanceof Operation) {
             $op = $opOrRow;
         } else {
-            $op = $this->instanciateOperationFromDbRow($opOrRow);
+            $op = $this->instantiateOperationFromDbRow($opOrRow);
         }
         $op->withDataField("count", $count);
         if ($mincount === null) {
@@ -317,7 +317,7 @@ class OpMachine {
             //$this->game->debugLog("- MULTI $i: RESET machine top", $operations);
             while (count($operations) > 0 && $playersloop) {
                 $dop = array_shift($operations);
-                $op = $this->instanciateOperationFromDbRow($dop);
+                $op = $this->instantiateOperationFromDbRow($dop);
                 $color = $op->getOwner();
                 $this->game->systemAssert("not set result", isset($results[$color]));
                 $prevresult = &$results[$color];

@@ -16,7 +16,7 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     }
 
     private function resolveMonsterAttack(string $monsterId): void {
-        $op = $this->game->machine->instanciateOperation("monsterAttack", null, ["char" => $monsterId]);
+        $op = $this->game->machine->instantiateOperation("monsterAttack", null, ["char" => $monsterId]);
         $op->resolve();
         // Run the queued roll → resolveHits → dealDamage pipeline
         $this->game->machine->dispatchAll();
@@ -216,7 +216,7 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         // Need time track setup for turnMonster
         $this->game->tokens->moveToken("rune_stone", "timetrack_1", 0);
 
-        $op = $this->game->machine->instanciateOperation("turnMonster", null);
+        $op = $this->game->machine->instantiateOperation("turnMonster", null);
         $op->resolve();
 
         // Check that monsterAttackAll was queued

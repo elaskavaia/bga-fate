@@ -88,7 +88,7 @@ class Op_upgrade extends Operation {
         $cost = $this->getUpgradeCost();
 
         // Pay XP
-        $this->instanciateOperation("{$cost}spendXp")->resolve(); // instant resolve
+        $this->instantiateOperation("{$cost}spendXp")->resolve(); // instant resolve
 
         // Advance upgrade cost marker
         $markerId = "marker_{$owner}_3";

@@ -44,7 +44,7 @@ class Op_preventDamage extends CountableOperation {
         $dealDamageRow = $this->game->machine->findOperation(null, "dealDamage");
         $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageRow);
         /** @var Op_dealDamage */
-        $dealDamageOp = $this->game->machine->instanciateOperationFromDbRow($dealDamageRow);
+        $dealDamageOp = $this->game->machine->instantiateOperationFromDbRow($dealDamageRow);
 
         $currentCount = (int) $dealDamageOp->getCount();
         $prevented = min($amount, $currentCount);

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of Grimheim" (also will be refers in Fate). It uses TypeScript, Scss for client-side code and PHP for server-side game logic.
+This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of Grimheim" (also referred to as Fate). It uses TypeScript, Scss for client-side code and PHP for server-side game logic.
 
 ## Architecture
 

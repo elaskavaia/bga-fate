@@ -86,7 +86,7 @@ final class Op_playEventTest extends AbstractOpTestCase {
 
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
-        $healOp = $this->game->machine->instanciateOperationFromDbRow(reset($queued));
+        $healOp = $this->game->machine->instantiateOperationFromDbRow(reset($queued));
         $healOp->action_resolve([Operation::ARG_TARGET => "hero_1"]);
 
         $damage = $this->countRedCrystals("hero_1");

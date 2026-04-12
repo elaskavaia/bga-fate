@@ -111,7 +111,7 @@ class Card {
     function checkPlayability($triggerName) {
         $errorRes = [];
         if (!$this->canBePlayed($triggerName, $errorRes)) {
-            throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be peformed now"));
+            throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be performed now"));
         }
     }
 

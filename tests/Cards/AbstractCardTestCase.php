@@ -18,7 +18,7 @@ abstract class AbstractCardTestCase extends AbstractOpTestCase {
         if ($type == null) {
             $type = "trigger(move)";
         }
-        $this->op = $this->game->machine->instanciateOperation($type, $this->owner, $data);
+        $this->op = $this->game->machine->instantiateOperation($type, $this->owner, $data);
         return $this->op;
     }
 }

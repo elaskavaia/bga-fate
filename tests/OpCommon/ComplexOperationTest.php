@@ -20,7 +20,7 @@ final class ComplexOperationTest extends TestCase {
 
     public function testWithDataPropagatesDataToChildren(): void {
         /** @var ComplexOperation $op */
-        $op = $this->game->machine->instanciateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19"]);
+        $op = $this->game->machine->instantiateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19"]);
         $this->assertInstanceOf(ComplexOperation::class, $op);
         foreach ($op->delegates as $sub) {
             $this->assertEquals("card_equip_1_19", $sub->getDataField("card"), "child " . $sub->getType() . " missing card data");
@@ -29,7 +29,7 @@ final class ComplexOperationTest extends TestCase {
 
     public function testWithDataPreservesChildCount(): void {
         /** @var ComplexOperation $op */
-        $op = $this->game->machine->instanciateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19"]);
+        $op = $this->game->machine->instantiateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19"]);
         foreach ($op->delegates as $sub) {
             if ($sub->getType() === "heal") {
                 /** @var CountableOperation $sub */
@@ -40,7 +40,7 @@ final class ComplexOperationTest extends TestCase {
 
     public function testWithDataDoesNotOverwriteChildMcount(): void {
         /** @var ComplexOperation $op */
-        $op = $this->game->machine->instanciateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19", "count" => 5]);
+        $op = $this->game->machine->instantiateOperation("gainDamage:2heal(adj)", PCOLOR, ["card" => "card_equip_1_19", "count" => 5]);
         foreach ($op->delegates as $sub) {
             if ($sub->getType() === "heal") {
                 /** @var CountableOperation $sub */
@@ -50,7 +50,7 @@ final class ComplexOperationTest extends TestCase {
     }
 
     public function testWithDataOnSimpleOpNoChildren(): void {
-        $op = $this->game->machine->instanciateOperation("gainDamage", PCOLOR, ["card" => "card_equip_1_19"]);
+        $op = $this->game->machine->instantiateOperation("gainDamage", PCOLOR, ["card" => "card_equip_1_19"]);
         $this->assertNotInstanceOf(ComplexOperation::class, $op);
         $this->assertEquals("card_equip_1_19", $op->getDataField("card"));
     }

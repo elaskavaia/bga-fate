@@ -28,7 +28,7 @@ final class OperationTest extends TestCase {
 
     public function testDelegateSingleWithTargets(): void {
         $this->addDamage("hero_1", 3);
-        $op = $this->game->machine->instanciateOperation("actionMend", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("actionMend", PCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_11_8", $moves);
         $this->assertEquals(Material::RET_OK, $moves["hex_11_8"]["q"]);
@@ -37,7 +37,7 @@ final class OperationTest extends TestCase {
 
     public function testDelegateSingleNoTargetsHasError(): void {
         // No damage → heal targets present but not applicable
-        $op = $this->game->machine->instanciateOperation("actionMend", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("actionMend", PCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_11_8", $moves);
         $this->assertNotEquals(Material::RET_OK, $moves["hex_11_8"]["q"]);
@@ -53,7 +53,7 @@ final class OperationTest extends TestCase {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage("hero_1", 2);
         $this->addDamage("card_equip_1_21", 1);
-        $op = $this->game->machine->instanciateOperation("actionMend", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("actionMend", PCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_9_9", $moves);
         $this->assertArrayHasKey("card_equip_1_21", $moves);
@@ -65,7 +65,7 @@ final class OperationTest extends TestCase {
         // In Grimheim: hero has damage, equipment does not
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage("hero_1", 2);
-        $op = $this->game->machine->instanciateOperation("actionMend", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("actionMend", PCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_9_9", $moves);
         // Equipment has no damage → still present but not applicable
@@ -76,7 +76,7 @@ final class OperationTest extends TestCase {
     public function testDelegateMultiNoTargetsAllHaveErrors(): void {
         // In Grimheim: no damage anywhere → targets present but all non-applicable
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
-        $op = $this->game->machine->instanciateOperation("actionMend", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("actionMend", PCOLOR);
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_9_9", $moves);
         $this->assertNotEquals(Material::RET_OK, $moves["hex_9_9"]["q"]);
@@ -89,14 +89,14 @@ final class OperationTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testCopyPreservesTypeAndOwner(): void {
-        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("dealDamage(adj)", PCOLOR);
         $copy = $op->copy();
         $this->assertEquals($op->getTypeFullExpr(), $copy->getTypeFullExpr());
         $this->assertEquals($op->getOwner(), $copy->getOwner());
     }
 
     public function testCopyPreservesData(): void {
-        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR, ["card" => "test_card", "reason" => "test"]);
+        $op = $this->game->machine->instantiateOperation("dealDamage(adj)", PCOLOR, ["card" => "test_card", "reason" => "test"]);
         $copy = $op->copy();
         $this->assertEquals("test_card", $copy->getDataField("card"));
         $this->assertEquals("test", $copy->getDataField("reason"));
@@ -104,25 +104,25 @@ final class OperationTest extends TestCase {
 
     public function testCopyPreservesCount(): void {
         /** @var \Bga\Games\Fate\OpCommon\CountableOperation */
-        $copy = $this->game->machine->instanciateOperation("2dealDamage(adj)", PCOLOR)->copy();
+        $copy = $this->game->machine->instantiateOperation("2dealDamage(adj)", PCOLOR)->copy();
         $this->assertEquals(2, $copy->getCount());
     }
 
     public function testCopyIsIndependent(): void {
-        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR, ["card" => "original"]);
+        $op = $this->game->machine->instantiateOperation("dealDamage(adj)", PCOLOR, ["card" => "original"]);
         $copy = $op->copy();
         $copy->withDataField("card", "modified");
         $this->assertEquals("original", $op->getDataField("card"), "Modifying copy should not affect original");
     }
 
     public function testCopyHasZeroId(): void {
-        $op = $this->game->machine->instanciateOperation("dealDamage(adj)", PCOLOR);
+        $op = $this->game->machine->instantiateOperation("dealDamage(adj)", PCOLOR);
         $copy = $op->copy();
         $this->assertEquals(0, $copy->getId());
     }
 
     public function testCopyComplexOperation(): void {
-        $op = $this->game->machine->instanciateOperation("gainXp/drawEvent", PCOLOR, ["card" => "test"]);
+        $op = $this->game->machine->instantiateOperation("gainXp/drawEvent", PCOLOR, ["card" => "test"]);
         $copy = $op->copy();
         $this->assertEquals("gainXp/drawEvent", $copy->getTypeFullExpr());
         $this->assertEquals("test", $copy->getDataField("card"));
@@ -130,7 +130,7 @@ final class OperationTest extends TestCase {
     }
 
     public function testCopySeqOperation(): void {
-        $op = $this->game->machine->instanciateOperation("dealDamage(adj),moveMonster(marked)", PCOLOR, ["reason" => "kick"]);
+        $op = $this->game->machine->instantiateOperation("dealDamage(adj),moveMonster(marked)", PCOLOR, ["reason" => "kick"]);
         $copy = $op->copy();
         $this->assertEquals("dealDamage(adj),moveMonster(marked)", $copy->getTypeFullExpr());
         $this->assertEquals(["reason" => "kick"], $copy->getData());

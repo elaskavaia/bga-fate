@@ -127,7 +127,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
 
     public function testTurnMonsterQueuesMonsterMoveTrigger(): void {
         $this->game->tokens->setTokenState("rune_stone", 1);
-        $op = $this->game->machine->instanciateOperation("turnMonster", ACOLOR);
+        $op = $this->game->machine->instantiateOperation("turnMonster", ACOLOR);
         $op->resolve();
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);

@@ -49,7 +49,7 @@ class Op_drawEvent extends CountableOperation {
             ];
         }
         if (!$this->isMax() && $hero->getHandSize() >= $hero->getHandLimit()) {
-            return $this->instanciateOperation("discardEvent")->getPossibleMoves();
+            return $this->instantiateOperation("discardEvent")->getPossibleMoves();
         }
         return [
             "prompt" => clienttranslate("Confirm to draw event card, this cannot be undone"),

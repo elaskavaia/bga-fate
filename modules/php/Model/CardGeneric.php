@@ -34,7 +34,7 @@ class CardGeneric extends Card {
         $action = "useCard";
 
         $alreadyOp = $this->game->machine->findOperation($owner, $action, function ($row) use ($triggerName) {
-            $op = $this->game->machine->instanciateOperationFromDbRow($row);
+            $op = $this->game->machine->instantiateOperationFromDbRow($row);
             return $op->getDataField("on") === $triggerName;
         });
         if (!$alreadyOp) {
@@ -81,7 +81,7 @@ class CardGeneric extends Card {
             return false;
         }
 
-        $op = $this->op->instanciateOperation($r, $this->owner, ["card" => $cardId]);
+        $op = $this->op->instantiateOperation($r, $this->owner, ["card" => $cardId]);
         if ($op->noValidTargets()) {
             $errorRes = array_merge($errorRes, $op->getErrorInfo());
             return false;

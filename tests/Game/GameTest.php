@@ -287,7 +287,7 @@ final class GameTest extends TestCase {
         $this->assertCount(1, $hand, "Hero should have exactly 1 card in hand after setup");
     }
 
-    public function testInstanciateAllOperations() {
+    public function testinstantiateAllOperations() {
         $this->game(0);
         $token_types = $this->game->material->get();
         $tested = [];
@@ -369,7 +369,7 @@ final class GameTest extends TestCase {
         $game->effect_moveCrystals("hero_1", "green", -1, "tableau_" . PCOLOR);
     }
 
-    public function testInstanciateAllEventCardOperations() {
+    public function testinstantiateAllEventCardOperations() {
         $this->game(0);
 
         foreach ($this->game->material->get() as $key => $info) {
@@ -379,12 +379,12 @@ final class GameTest extends TestCase {
             $r = $info["r"] ?? "";
             $this->assertNotEmpty($r, "r should be set for event");
             //echo "testing event card $key r=$r\n";
-            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $op = $this->game->machine->instantiateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }
     }
 
-    public function testInstanciateAllEquipCardOperations() {
+    public function testinstantiateAllEquipCardOperations() {
         $this->game(0);
 
         foreach ($this->game->material->get() as $key => $info) {
@@ -396,12 +396,12 @@ final class GameTest extends TestCase {
                 continue;
             }
             //echo "testing equip card $key r=$r\n";
-            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $op = $this->game->machine->instantiateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }
     }
 
-    public function testInstanciateAllAbilityCardOperations() {
+    public function testinstantiateAllAbilityCardOperations() {
         $this->game(0);
         foreach ($this->game->material->get() as $key => $info) {
             if (!str_starts_with($key, "card_ability_")) {
@@ -411,12 +411,12 @@ final class GameTest extends TestCase {
             if ($r === "") {
                 continue;
             }
-            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $op = $this->game->machine->instantiateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }
     }
 
-    public function testInstanciateAllHeroCardOperations() {
+    public function testinstantiateAllHeroCardOperations() {
         $this->game(0);
 
         foreach ($this->game->material->get() as $key => $info) {
@@ -427,7 +427,7 @@ final class GameTest extends TestCase {
             if ($r === "") {
                 continue;
             }
-            $op = $this->game->machine->instanciateOperation($r, PCOLOR, ["card" => $key]);
+            $op = $this->game->machine->instantiateOperation($r, PCOLOR, ["card" => $key]);
             $this->assertNotNull($op, "Failed to instantiate op '$r' for $key");
         }
     }
@@ -440,7 +440,7 @@ final class GameTest extends TestCase {
         }
 
         /** @var \Bga\Games\Fate\OpCommon\Operation */
-        $op = $this->game->machine->instanciateOperation($type, PCOLOR);
+        $op = $this->game->machine->instantiateOperation($type, PCOLOR);
 
         $args = $op->getArgs();
         $ttype = $args["ttype"] ?? "";
@@ -533,7 +533,7 @@ final class GameTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_10_8");
         $heroDist = $this->game->hexMap->getDistanceMapToGrimheim()["hex_11_8"];
         $monsterDist = $this->game->hexMap->getDistanceMapToGrimheim()["hex_10_8"];
-        $expected = ($monsterDist < $heroDist) ? 1 : 0;
+        $expected = $monsterDist < $heroDist ? 1 : 0;
         $result = $this->game->evaluateExpression("closerToGrimheim", PCOLOR, "monster_goblin_1");
         $this->assertEquals($expected, $result);
     }

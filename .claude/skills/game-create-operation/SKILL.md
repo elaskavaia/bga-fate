@@ -54,7 +54,7 @@ Before starting read docs/DESIGN.md understand what Operation (concept) means an
    - `getExtraArgs()` — extra data sent to client (e.g. `["token_div" => $id]`)
 10. Ask user to code review before moving to next step
 11. Add tests in `tests/`
-    - Instantiate via `$this->game->machine->instanciateOperation($type, $owner, $data)`
+    - Instantiate via `$this->game->machine->instantiateOperation($type, $owner, $data)`
     - Test `getPossibleMoves()` returns expected valid/invalid targets
     - Test `resolve()` produces correct side effects (token moves, state changes)
 12. Add a `debug_Op_<name>` function in `Game.php` that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:

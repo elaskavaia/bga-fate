@@ -146,7 +146,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals(4, $hero->getAttackStrength());
 
         // Not offered as a free action (r is empty)
-        $op = $this->game->machine->instanciateOperation("useCard", $color);
+        $op = $this->game->machine->instantiateOperation("useCard", $color);
         $targets = $op->getArgs()["target"];
         $this->assertNotContains("card_ability_1_9", $targets);
     }
@@ -1208,7 +1208,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Gain equipment via Op_gainEquip — seeds deck so Black Arrows is on top, then run the op
         $this->seedDeck("deck_equip_$color", [$blackArrows]);
-        $op = $this->game->machine->instanciateOperation("gainEquip", $color);
+        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
         $op->resolve();
 
         // Card should now be on tableau with 3 yellow crystals (arrows)
@@ -1225,7 +1225,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Gain equipment via Op_gainEquip — onEnter seeds 3 arrows
         $this->seedDeck("deck_equip_$color", [$blackArrows]);
-        $op = $this->game->machine->instanciateOperation("gainEquip", $color);
+        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
         $op->resolve();
         $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
 

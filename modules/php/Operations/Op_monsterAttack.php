@@ -42,7 +42,7 @@ class Op_monsterAttack extends Operation {
         if (!$heroHex) {
             // Find heroes in attack range
             // Check via roll op whether this hero can be attacked on this hex
-            $rollOp = $this->instanciateOperation("roll", null, ["attacker" => $monsterId]);
+            $rollOp = $this->instantiateOperation("roll", null, ["attacker" => $monsterId]);
             $hexes = $rollOp->getArgs()["target"];
 
             if (empty($hexes)) {

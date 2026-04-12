@@ -90,7 +90,7 @@ class Op_turn extends Operation {
                 $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
                 $res[$action]["err"] = clienttranslate("Action cannot be performed second time");
             } else {
-                $op = $this->instanciateOperation($action);
+                $op = $this->instantiateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
                 if ($res[$action]["q"] == 0 && $inline) {
                     // action is available, shortcut - send action parameters also

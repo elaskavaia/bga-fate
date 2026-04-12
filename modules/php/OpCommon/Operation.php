@@ -132,7 +132,7 @@ abstract class Operation {
     }
 
     function copy() {
-        $op = $this->game->machine->instanciateOperation($this->getTypeFullExpr(), $this->getOwner(), $this->getData(), 0);
+        $op = $this->game->machine->instantiateOperation($this->getTypeFullExpr(), $this->getOwner(), $this->getData(), 0);
         return $op;
     }
 
@@ -221,7 +221,7 @@ abstract class Operation {
         }
         return GameDispatch::class;
     }
-    function instanciateOperation($type, $owner = null, $data = null) {
+    function instantiateOperation($type, $owner = null, $data = null) {
         if ($owner === null) {
             $owner = $this->getOwner();
         }
@@ -231,7 +231,7 @@ abstract class Operation {
         if (!isset($data["reason"])) {
             $data["reason"] = $this->getOpId();
         }
-        return $this->game->machine->instanciateOperation($type, $owner, $data);
+        return $this->game->machine->instantiateOperation($type, $owner, $data);
     }
     function queue($type, $owner = null, $data = null) {
         $this->game->systemAssert("empty op pushed", $type);
@@ -777,7 +777,7 @@ abstract class Operation {
         $res = [];
         $errinfo = [];
         foreach ($opTypes as $operationType) {
-            $op = $this->instanciateOperation($operationType);
+            $op = $this->instantiateOperation($operationType);
             $moves = $op->getArgsInfo();
             foreach ($moves as &$move) {
                 $move["delegate"] = $operationType;

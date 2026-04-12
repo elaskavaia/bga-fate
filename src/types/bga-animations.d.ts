@@ -378,7 +378,7 @@ declare class BaseAnimationManager {
    */
   wait(delay: number): Promise<void>;
   /**
-   * returns the getBoundingClientRect of an element with zoom awareness, independant to browser native handling of CSS zoom property.
+   * returns the getBoundingClientRect of an element with zoom awareness, independent of browser native handling of CSS zoom property.
    */
   getBoundingClientRect(element: HTMLElement):
     | DOMRect
@@ -396,7 +396,7 @@ declare class BaseAnimationManager {
 
 /**
  * The animation class, giving access to many type of animations, and the possibility to run multiple animation with a delta or sync/async.
- * Instanciate only one for all your game animations.
+ * instantiate only one for all your game animations.
  */
 declare class AnimationManager {
   base: BaseAnimationManager;

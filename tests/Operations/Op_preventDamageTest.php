@@ -28,7 +28,7 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
             return null;
         }
         $row = reset($ops);
-        $op = $this->game->machine->instanciateOperationFromDbRow($row);
+        $op = $this->game->machine->instantiateOperationFromDbRow($row);
         return (int) $op->getCount();
     }
 

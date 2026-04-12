@@ -235,7 +235,7 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
 
         $reinforcementOps = $this->game->machine->db->getOperations(null, "reinforcement");
         $this->assertNotEmpty($reinforcementOps);
-        $reinforcementOp = $this->game->machine->instanciateOperationFromDbRow(reset($reinforcementOps));
+        $reinforcementOp = $this->game->machine->instantiateOperationFromDbRow(reset($reinforcementOps));
         $data = $reinforcementOp->getData();
         $this->assertEquals("deck_monster_red", $data["deck"]);
     }

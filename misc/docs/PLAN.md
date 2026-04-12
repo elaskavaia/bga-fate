@@ -2,7 +2,7 @@
 
 This document is a plan for the implementation of the game Fate: Defenders of Grimheim on Board Game Arena (BGA). It outlines the steps and tasks required to create a digital version of the game that can be played online.
 
-This document also refered as TODO list.
+This document also referred as TODO list.
 
 ## Documents
 

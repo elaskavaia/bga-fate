@@ -27,7 +27,7 @@ final class CardGenericTest extends AbstractCardTestCase {
     /** Build a CardGeneric for $cardId, parented to a fresh trigger op of $triggerName. */
     private function createCard(string $cardId, string $triggerName = ""): CardGeneric {
         $opType = $triggerName ? "trigger($triggerName)" : "nop";
-        $parentOp = $this->game->machine->instanciateOperation($opType, $this->owner);
+        $parentOp = $this->game->machine->instantiateOperation($opType, $this->owner);
         return new CardGeneric($this->game, $cardId, $parentOp);
     }
 
