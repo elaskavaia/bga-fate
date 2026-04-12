@@ -1878,6 +1878,7 @@ html:before {
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  min-height: 46px;
   z-index: 20;
 }
 .selection_area > * {

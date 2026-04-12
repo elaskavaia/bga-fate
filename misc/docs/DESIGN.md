@@ -137,11 +137,12 @@ Base class for card instances created on the fly during trigger dispatch. Each c
 - `canTrigger($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
 - `canBePlayed($triggerName, &$errorRes)` — returns true if the card is actually playable. Base returns true; `CardGeneric` overrides with full checks.
 - `getUseCardOperationType()` — maps card supertype to action op: equip → `useEquipment`, ability/hero → `useAbility`, event → `playEvent`
+- `useCard()` — executes the card: sends notification, marks once-per-turn cards as used, queues the `r` expression, discards event cards
 
 **CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class when no bespoke subclass exists. Implements the standard voluntary trigger flow:
 - `canTrigger()` — also returns true when the Material `on` field matches the trigger type
 - `canBePlayed()` — checks trigger match, once-per-turn state, non-empty `r` field, and whether the `r` expression's op has valid targets
-- `onTriggerDefault()` — if `canBePlayed()`, queues the corresponding `useEquipment`/`useAbility`/`playEvent` with `prompt=true` so the player can confirm or skip
+- `onTriggerDefault()` — if `canBePlayed()`, queues a single `useCard` op per trigger type (deduplicated: checks if a `useCard` with the same `on` trigger already exists on the machine). The `useCard` op then offers all matching cards from tableau and hand in one prompt.
 
 **Bespoke card classes** (`modules/php/Cards/CardEquip_<Name>.php`, etc.) — per-card classes that override `on<TriggerName>()` hooks for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name derived from Material `name` field: `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Created via `Game::instantiateCard()` which tries the bespoke class first, then falls back to `CardGeneric`.
 
@@ -176,16 +177,17 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `actionFocus` (main) — Add 1 mana to a card 
 - `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) 
 - `actionPractice` (main) — Gain 1 XP (yellow crystal) 
-- `useEquipment` (free) — Activate an equipment card 
-- `useAbility` (free) — Activate an ability card (costs mana)
-- `playEvent` (free) — Play an event card from hand 
+- `useCard` (free) — Unified card activation: offers all playable cards (abilities, equipment, events) matching the current trigger. Subclasses `useAbility`, `useEquipment`, `playEvent` filter candidates by card type.
+- `useEquipment` (free) — Activate an equipment card (filters to `card_equip_*` on tableau)
+- `useAbility` (free) — Activate an ability or hero card (filters to `card_ability_*` and `card_hero_*` on tableau)
+- `playEvent` (free) — Play an event card from hand (filters to hand cards)
 - `shareGold` (free) — Give gold to another hero — *notimpl*
 
 
 ### Card Effect Operations 
 
 These are **generic parameterized operations** used as building blocks to implement card effects.
-They are queued by `playEvent`/`useEquipment`/`useAbility` after the card is played.
+They are queued by `useCard` (or its subclasses `useAbility`/`useEquipment`/`playEvent`) after the card is played.
 Most are Countable (X = count) and take a target that is either pre-seeded or player-chosen.
 
 See other operations in misc/op_material.csv
@@ -236,9 +238,9 @@ At key points during gameplay, an `Op_trigger` is queued which walks every card 
 3. `Op_trigger::resolve()` walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($triggerType)`.
 4. For each card, `Card::onTrigger()` routes to `on<TriggerName>()` if the subclass defines it, else to `onTriggerDefault()`.
 5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
-6. **Generic cards** (`CardGeneric`) check `canBePlayed($triggerType)` — verifying the `on` field matches, the card hasn't been used this turn, the `r` field is non-empty, and the effect has valid targets. If playable, queues `useEquipment`/`useAbility`/`playEvent` with the card preset and `prompt=true`, so the player can confirm or skip each card individually.
+6. **Generic cards** (`CardGeneric`) check `canBePlayed($triggerType)` — verifying the `on` field matches, the card hasn't been used this turn, the `r` field is non-empty, and the effect has valid targets. If playable, queues a single `useCard` op with `on=$triggerType` and `prompt=true`. The dedup logic ensures only one `useCard` is queued per trigger type — subsequent cards matching the same trigger share the same prompt.
 
-Unlike the old design (single "pick one card" prompt), the new flow offers each matching card as a separate confirm-or-skip prompt. This correctly allows the player to react with multiple cards per trigger.
+The `useCard` op collects all playable cards (tableau + hand) that match the trigger, presenting them in a single "choose a card or skip" prompt. After a card is played, the prompt reappears for remaining cards (via the machine's standard dispatch loop).
 
 **Where triggers are queued (operation → trigger → description):**
 

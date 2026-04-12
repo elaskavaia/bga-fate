@@ -157,4 +157,32 @@ class Card {
         $this->game->systemAssert("ERR:Card:unknownType:" . $this->id, $action !== null);
         return $action;
     }
+
+    /**
+     * Temp implementation
+     */
+    public function useCard() {
+        $cardId = $this->id;
+        $hero = $this->game->getHero($this->getOwner());
+        $effect = $this->game->material->getRulesFor($cardId, "effect", "");
+        $this->game->notifyMessage(clienttranslate('${char_name} uses ${token_name}: ${effect_text}'), [
+            "char_name" => $hero->getId(),
+            "token_name" => $cardId,
+            "effect_text" => $effect,
+        ]);
+        $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+        $on = $this->game->material->getRulesFor($cardId, "on", "");
+        if (!$on) {
+            //mark card as used, as these can only be used once per turn
+            $this->op->dbSetTokenState($cardId, 1, "");
+        }
+        $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
+        if ($this->isEvent()) {
+            $hero->discardEventCard($cardId);
+        }
+    }
+
+    function isEvent(): bool {
+        return str_starts_with($this->id, "card_event");
+    }
 }

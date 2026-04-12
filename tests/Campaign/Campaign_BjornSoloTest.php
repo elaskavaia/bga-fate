@@ -179,11 +179,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered first; skip it.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $targets = $args["target"] ?? [];
         $this->assertNotContains("card_ability_1_11", $targets, "Long Shot I should not be offered at range 1");
         $this->assertContains("card_ability_1_12", $targets, "Long Shot II should be offered at range 1");
@@ -206,14 +206,14 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->respond("actionAttack");
 
         // New flow: trigger(roll) and trigger(actionAttack) auto-resolve.
-        // CardGeneric queues useAbility per matching card. Bjorn hero card (on=roll)
+        // CardGeneric queues useCard per matching card. Bjorn hero card (on=roll)
         // comes first; skip it. Then Long Shot I (on=actionAttack) is offered.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $targets = $args["target"] ?? [];
         $this->assertContains("card_ability_1_11", $targets, "Long Shot I should be offered at range 2");
     }
@@ -239,15 +239,15 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->respond("actionAttack");
         $this->respond("hex_7_9"); // pick the goblin as attack target
 
-        // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered as a useAbility prompt; skip it.
+        // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered as a useCard prompt; skip it.
         // Then Nailed Together I (on=monsterKilled) should be the next prompt.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
 
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget("card_ability_1_13");
 
         // Use Nailed Together I — auto-resolves since only one monster behind
@@ -294,13 +294,13 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered first; skip it.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
 
         // useAbility prompt for Nailed Together II (on=monsterKilled)
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget("card_ability_1_14");
         $this->respond("card_ability_1_14");
 
@@ -402,7 +402,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // New flow: trigger(monsterMove) auto-resolves; useAbility for Suppressive Fire I is queued.
         $args = $this->getOpArgs();
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget("card_ability_1_5");
 
         // Use Suppressive Fire I — pick the goblin's hex
@@ -446,7 +446,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->skipIfOp("drawEvent");
         $args = $this->getOpArgs();
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
         $this->respond($goblinHex);
 
@@ -463,9 +463,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Skip drawEvent if queued
         $this->skipIfOp("drawEvent");
 
-        // Monster turn — Suppressive Fire offered again as useAbility
+        // Monster turn — Suppressive Fire offered again as useCard
         $args = $this->getOpArgs();
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
 
         // Goblin should NOT be a valid target (still has green crystal)
@@ -515,7 +515,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->skipIfOp("drawEvent");
         $args = $this->getOpArgs();
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
         $this->respond($goblinHex);
 
@@ -533,7 +533,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Monster turn — use Suppressive Fire but SKIP c_supfire
         $args = $this->getOpArgs();
-        $this->assertEquals("useAbility", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->respond("card_ability_1_5");
 
         // Skip c_supfire
@@ -854,11 +854,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $targets = $args["target"] ?? [];
         $this->assertNotEmpty($targets, "Seek Shelter should offer at least one location hex");
         foreach ($targets as $hexId) {
-            $this->assertNotEquals(
-                "",
-                $this->game->hexMap->getHexNamedLocation($hexId),
-                "Seek Shelter offered non-location hex $hexId",
-            );
+            $this->assertNotEquals("", $this->game->hexMap->getHexNamedLocation($hexId), "Seek Shelter offered non-location hex $hexId");
         }
 
         // Pick the first offered hex and resolve.
@@ -868,11 +864,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Hero should have moved. If chosen hex was Grimheim, moveHero redirects to the hero's
         // home hex, so only assert the hero ended up on a named-location hex.
         $finalHex = $this->tokenLocation($this->heroId);
-        $this->assertNotEquals(
-            "",
-            $this->game->hexMap->getHexNamedLocation($finalHex),
-            "Hero should end on a named-location hex",
-        );
+        $this->assertNotEquals("", $this->game->hexMap->getHexNamedLocation($finalHex), "Hero should end on a named-location hex");
 
         // Seek Shelter is discarded from hand.
         $this->assertNotEquals("hand_$color", $this->tokenLocation($seekShelter));
@@ -1065,13 +1057,13 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // New flow: each matching reaction is queued as its own prompt.
         // Bjorn hero card (on=roll) is offered first; skip it.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility") {
+        if (($args["type"] ?? "") === "useCard") {
             $this->skip();
             $args = $this->getOpArgs();
         }
 
         // Master Shot (on=actionAttack) — playEvent prompt with card preset.
-        $this->assertEquals("playEvent", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget($masterShot);
 
         $this->respond($masterShot);
@@ -1142,16 +1134,12 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->seedRand([3, 3, 5]);
         $this->respond("actionAttack");
 
-        // New flow: trigger(roll) auto-resolves. Bjorn hero card (on=roll) offered first; skip it.
+        // trigger(roll) auto-resolves. useCard offers both hero card and Piercing Arrows.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
-        $this->assertEquals("playEvent", $args["type"] ?? "");
+        $this->assertEquals("useCard", $args["type"] ?? "");
         $this->assertValidTarget($piercingArrows);
 
-        // Play Piercing Arrows — counter(countRunes) evaluates to 2, addDamage adds 2 dice
+        // Play Piercing Arrows (hero card also offered but we pick the event)
         $this->respond($piercingArrows);
 
         // Skip remaining triggers (actionAttack) — then resolveHits applies all dice as damage
@@ -1183,13 +1171,13 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // trigger(roll) auto-resolves. Bjorn hero card offered first; skip it.
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useAbility" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
             $this->skip();
             $args = $this->getOpArgs();
         }
 
         // Piercing Arrows should NOT be offered — 0 runes means counter is void
-        if (($args["type"] ?? "") === "playEvent") {
+        if (($args["type"] ?? "") === "useCard") {
             $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be offered with 0 runes");
         }
         // Otherwise we're already past the trigger phase — also correct

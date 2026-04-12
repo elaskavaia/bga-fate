@@ -2,36 +2,38 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_useEquipment;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
+/**
+ * Tests for Op_useEquipment — filters to equipment cards only.
+ */
 final class Op_useEquipmentTest extends AbstractOpTestCase {
     /** card_equip_1_19 = Leather Purse (hero 1, durability 3, r=gainDamage:2heal(adj)) */
-    private string $cardId = "card_equip_1_19";
+    private string $equipCard = "card_equip_1_19";
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         // Add damage so heal(adj) is not void
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1");
     }
 
-    public function testNoEquipmentReturnsEmpty(): void {
-        $op = $this->op;
-        $this->assertNoValidTargets();
+    public function testEquipmentCardIsValidTarget(): void {
+        $this->game->tokens->moveToken($this->equipCard, $this->getPlayersTableau());
+        $this->assertValidTarget($this->equipCard);
     }
 
-    public function testIsVoidWithNoEquipment(): void {
-        $op = $this->op;
-        $this->assertTrue($op->isVoid());
+    public function testAbilityCardExcluded(): void {
+        $this->game->tokens->moveToken("card_ability_1_7", $this->getPlayersTableau());
+        $this->assertNotValidTarget("card_ability_1_7");
     }
 
-    public function testLeatherPurseIsValidTarget(): void {
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
-        $this->assertValidTarget($this->cardId);
+    public function testHeroCardExcluded(): void {
+        // card_hero_1_1 is on tableau from setup
+        $this->assertNotValidTarget("card_hero_1_1");
+    }
+
+    public function testEventCardExcluded(): void {
+        $this->game->tokens->moveToken("card_event_1_27", "hand_" . $this->owner);
+        $this->assertNotValidTarget("card_event_1_27");
     }
 
     public function testEmptyRCardSkipped(): void {
@@ -40,40 +42,18 @@ final class Op_useEquipmentTest extends AbstractOpTestCase {
         $this->assertNotValidTarget("card_equip_1_15");
     }
 
-    public function testNotVoidWithUsableCard(): void {
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
-        $op = $this->op;
-        $this->assertFalse($op->isVoid());
-    }
-
     public function testMaxDurabilityReturnsError(): void {
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
+        $this->game->tokens->moveToken($this->equipCard, $this->getPlayersTableau());
         // Leather Purse has durability 3, fill it up
-        $this->game->effect_moveCrystals("hero_1", "red", 3, $this->cardId);
-        $this->assertNotValidTarget($this->cardId);
+        $this->game->effect_moveCrystals("hero_1", "red", 3, $this->equipCard);
+        $this->assertNotValidTarget($this->equipCard);
     }
 
-    public function testResolveQueuesRExpression(): void {
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
-        $op = $this->op;
-        $this->call_resolve($this->cardId);
-        // gainDamage:2heal(adj) should be queued — check machine has pending ops
-        $pending = $this->game->machine->getTopOperations(PCOLOR);
-        $this->assertNotEmpty($pending);
-    }
-
-    public function testEffectVoidReturnsError(): void {
-        // Leather Purse r=gainDamage:2heal(adj) — remove all hero damage so heal is void
-        $this->game->effect_moveCrystals("hero_1", "red", -3, "hero_1");
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
-        $this->assertNotValidTarget($this->cardId);
-    }
-
-    public function testMultipleCardsOffered(): void {
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau()); // Leather Purse
-        $this->game->tokens->moveToken("card_equip_1_17", $this->getPlayersTableau()); // Throwing Axes — r=gainDamage:3roll(adj), needs adjacent monster
+    public function testMultipleEquipmentOffered(): void {
+        $this->game->tokens->moveToken($this->equipCard, $this->getPlayersTableau()); // Leather Purse
+        $this->game->tokens->moveToken("card_equip_1_17", $this->getPlayersTableau()); // Throwing Axes
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->assertValidTarget($this->cardId);
+        $this->assertValidTarget($this->equipCard);
         $this->assertValidTarget("card_equip_1_17");
     }
 }

@@ -319,6 +319,12 @@ class Material {
         "wicon" => "wicon_gold",
 ],
 // # Free actions (can be done between/after main actions)
+    "Op_useCard" => [ 
+        "kind" => "free",
+        "inline" => 1,
+        "type" => "useCard",
+        "name" => clienttranslate("Use Card"),
+],
     "Op_useEquipment" => [ 
         "kind" => "free",
         "inline" => 1,
@@ -5140,7 +5146,7 @@ class Material {
         "name" => clienttranslate("Bjorn"),
         "strength" => 2,
         "health" => 9,
-        "r" => "spendAction(actionFocus):2dealDamage",
+        "r" => "spendAction(actionFocus):2addDamage",
         "on" => "roll",
         "effect" => "After any dice roll, you may spend 1 focus action to add 2 damage.",
         "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
@@ -5154,7 +5160,7 @@ class Material {
         "name" => clienttranslate("Bjorn"),
         "strength" => 4,
         "health" => 10,
-        "r" => "spendAction(actionFocus):3dealDamage",
+        "r" => "spendAction(actionFocus):3addDamage",
         "on" => "roll",
         "effect" => "After any dice roll, you may spend 1 focus action to add 3 damage.",
         "flavour" => "Bjorn can solve any problem, including the problems caused by his previous solutions.",
@@ -5180,7 +5186,7 @@ class Material {
         "name" => clienttranslate("Alva"),
         "strength" => 4,
         "health" => 10,
-        "effect" => "End any movement in a forset to add 1 mana [MANA] to any card.",
+        "effect" => "End any movement in a forest to add 1 mana [MANA] to any card.",
         "flavour" => "I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.",
 ],
     "card_hero_3_1" => [ 

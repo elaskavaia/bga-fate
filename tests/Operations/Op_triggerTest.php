@@ -32,7 +32,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     /**
-     * Tableau card with matching `on` field → CardGeneric default queues a useAbility op.
+     * Tableau card with matching `on` field → CardGeneric default queues a useCard op.
      * This proves Op_trigger::resolve() instantiated the card and called onTrigger() on it.
      */
     public function testDispatcherInstantiatesTableauCardAndQueuesUseAbility(): void {
@@ -46,11 +46,11 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->createOp("trigger(resolveHits)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
-        $this->assertContains("useAbility", $opTypes);
+        $this->assertContains("useCard", $opTypes);
     }
 
     /**
-     * Hand event card with matching `on` field → CardGeneric default queues a playEvent op.
+     * Hand event card with matching `on` field → CardGeneric default queues a useCard op.
      * Covers the hand-walking branch of the dispatcher.
      */
     public function testDispatcherWalksHandAndQueuesPlayEvent(): void {
@@ -59,7 +59,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->createOp("trigger(roll)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
-        $this->assertContains("playEvent", $opTypes);
+        $this->assertContains("useCard", $opTypes);
     }
 
     /**
@@ -72,8 +72,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->createOp("trigger(monsterKilled)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
-        $this->assertNotContains("useAbility", $opTypes);
-        $this->assertNotContains("playEvent", $opTypes);
+        $this->assertNotContains("useCard", $opTypes);
     }
 
     // -------------------------------------------------------------------------

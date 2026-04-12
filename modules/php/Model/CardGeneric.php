@@ -25,13 +25,20 @@ class CardGeneric extends Card {
         if ($triggerName === "enter") {
             return; // lifecycle event - handled only by card on itself
         }
-        $cardId = $this->id;
+
         if (!$this->canBePlayed($triggerName)) {
             return;
         }
         $owner = $this->getOwner();
-        $action = $this->getUseCardOperationType();
-        $this->queue($action, $owner, ["target" => $cardId, "prompt" => true]);
+        $action = "useCard";
+
+        $alreadyOp = $this->game->machine->findOperation($owner, $action, function ($row) use ($triggerName) {
+            $op = $this->game->machine->instanciateOperationFromDbRow($row);
+            return $op->getDataField("on") === $triggerName;
+        });
+        if (!$alreadyOp) {
+            $this->queue($action, null, ["prompt" => true, "on" => $triggerName]);
+        }
     }
 
     public function canTrigger(string $triggerName): bool {

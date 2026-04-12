@@ -31,8 +31,8 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_preventDamage extends CountableOperation {
     function getPossibleMoves() {
-        $ops = $this->game->machine->db->getOperations(null, "dealDamage");
-        if (empty($ops)) {
+        $op = $this->game->machine->findOperation(null, "dealDamage");
+        if (!$op) {
             return ["q" => Material::ERR_NOT_APPLICABLE];
         }
         return parent::getPossibleMoves();
@@ -41,8 +41,7 @@ class Op_preventDamage extends CountableOperation {
         $amount = (int) $this->getCount();
 
         // Find the pending dealDamage on the stack
-        $ops = $this->game->machine->db->getOperations(null, "dealDamage");
-        $dealDamageRow = reset($ops);
+        $dealDamageRow = $this->game->machine->findOperation(null, "dealDamage");
         $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageRow);
         /** @var Op_dealDamage */
         $dealDamageOp = $this->game->machine->instanciateOperationFromDbRow($dealDamageRow);

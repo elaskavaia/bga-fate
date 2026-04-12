@@ -47,6 +47,7 @@ actionPractice|Practice|wicon_gold
 # Free actions (can be done between/after main actions)
 #set kind=free
 #set inline=1
+useCard|Use Card
 useEquipment|Use Equipment
 useAbility|Use Ability
 playEvent|Play Event

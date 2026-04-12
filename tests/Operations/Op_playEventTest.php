@@ -3,9 +3,6 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Operations\Op_playEvent;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
 // Hero 1 (Bjorn) is always assigned to PCOLOR in a 1-player setup.
 // Use a specific known Bjorn event card to avoid relying on deck order.
@@ -18,14 +15,6 @@ final class Op_playEventTest extends AbstractOpTestCase {
         $this->putInHand(EVENT_CARD);
         // Add damage so heal(self) from Rest card has valid targets
         $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
-    }
-
-    /** Move all event cards from hand back to deck */
-    private function clearHand(): void {
-        $handCards = $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . PCOLOR);
-        foreach ($handCards as $cardId => $info) {
-            $this->game->tokens->moveToken($cardId, "deck_event_" . PCOLOR);
-        }
     }
 
     /** Move a specific card to hand (from wherever it is) */
@@ -47,8 +36,7 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testEmptyHandReturnsNoMoves(): void {
-        $this->clearHand();
-        $op = $this->op;
+        $this->game->clearHand();
         $this->assertNoValidTargets();
     }
 
@@ -60,20 +48,6 @@ final class Op_playEventTest extends AbstractOpTestCase {
         $this->assertValidTarget(EVENT_CARD);
         $this->assertValidTarget($second);
         $this->assertValidTargetCount(2);
-    }
-
-    /** Setup needed for integration tests that require hero on map.
-     *  Creates a fresh game with createAllTokens (no setupGameTables), then
-     *  places hero 1 and the test event card for use. */
-    private function setupHeroOnMap(): void {
-        $this->game = new GameUT();
-        $this->game->init();
-        $this->game->tokens->createAllTokens();
-        $this->game->tokens->moveToken("card_hero_1_1", $this->getPlayersTableau());
-        $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        $this->game->tokens->moveToken(EVENT_CARD, "hand_" . PCOLOR);
-        // Add damage so heal(self) from Rest card has valid targets
-        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
     }
 
     // -------------------------------------------------------------------------
@@ -95,8 +69,6 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testResolveQueuesSubOperation(): void {
-        $this->setupHeroOnMap();
-        $op = $this->op;
         $this->call_resolve(EVENT_CARD);
 
         $queued = $this->game->machine->getTopOperations(PCOLOR);
@@ -106,20 +78,15 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testPlayRestCardHealsHero(): void {
-        $this->setupHeroOnMap();
-        // setupHeroOnMap adds 3 damage; heal op re-instantiated from type loses count, heals 1
-
-        $op = $this->op;
+        // setUp adds 3 damage; Rest r=2heal(self) heals 2 → 1 remaining
         $this->call_resolve(EVENT_CARD);
 
-        // Get and resolve the queued heal operation
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
-        $top = reset($queued);
-        $healOp = $this->createOp($top["type"]);
-        $healOp->action_resolve([Operation::ARG_TARGET => "hex_11_8"]);
+        $healOp = $this->game->machine->instanciateOperationFromDbRow(reset($queued));
+        $healOp->action_resolve([Operation::ARG_TARGET => "hero_1"]);
 
         $damage = $this->countRedCrystals("hero_1");
-        $this->assertEquals(2, $damage);
+        $this->assertEquals(1, $damage);
     }
 }

@@ -96,6 +96,8 @@ class Op_roll extends CountableOperation {
             "attacker" => $attackerId,
             "target" => $targetHex,
         ]);
+
+        $this->game->customUndoSavepoint($this->getPlayerId(), 1, "roll");
     }
 
     public function getUiArgs() {

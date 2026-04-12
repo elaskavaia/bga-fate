@@ -19,6 +19,11 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Game::stGameDispatch (next player's turn).
  */
 class Op_turnStart extends Operation {
+    public function auto(): bool {
+        $this->game->switchActivePlayer($this->getPlayerId(), true);
+        $this->game->customUndoSavepoint($this->getPlayerId(), 1);
+        return parent::auto();
+    }
     function resolve(): void {
         $this->queueTrigger("turnStart");
         $this->queue("turn");

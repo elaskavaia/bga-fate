@@ -34,12 +34,6 @@ use Exception;
 class Op_turn extends Operation {
     const ACTIONS_PER_TURN = 2;
 
-    public function auto(): bool {
-        $this->game->switchActivePlayer($this->getPlayerId(), true);
-        $this->game->customUndoSavepoint($this->getPlayerId(), 1);
-        return parent::auto();
-    }
-
     function canSkip() {
         $remaining = $this->getActionsRemaining();
         return $remaining === 0; //only can skip if no mandatory actions

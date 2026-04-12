@@ -438,6 +438,21 @@ class OpMachine {
         }
         return $result;
     }
+
+    function findOperation($owner = null, $type = null, ?callable $filter = null) {
+        $ops = $this->findOperations($owner, $type, $filter);
+        $op = reset($ops);
+        return $op;
+    }
+
+    function findOperations($owner = null, $type = null, ?callable $filter = null): array {
+        $ops = $this->db->getOperations($owner, $type);
+        if ($filter !== null) {
+            $ops = array_filter($ops, $filter);
+        }
+        return $ops;
+    }
+
     function isMultiplayerOperationMode() {
         if (!$this->isMultiplayerSupported()) {
             return false;

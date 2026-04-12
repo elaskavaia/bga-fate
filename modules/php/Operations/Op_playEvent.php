@@ -28,73 +28,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Rules: cards may not be played mid-action (except attack-action cards after the dice roll),
  * and not outside the player's turn unless the card specifies otherwise.
  */
-class Op_playEvent extends Operation {
-    function getPrompt() {
-        if ($this->isOneChoice()) {
-            return clienttranslate("You can play Event Card now or skip");
-        }
-        return clienttranslate("Choose an Event Card to play");
-    }
-
-    function getCurrentTrigger() {
-        return $this->getDataField("on", "");
-    }
-
-    function requireConfirmation() {
-        return (bool) $this->getDataField("prompt", false);
-    }
-    public function getSkipName() {
-        return clienttranslate("Not now");
-    }
-    public function canSkip() {
-        if ($this->requireConfirmation()) {
-            return true;
-        }
-        return parent::canSkip();
-    }
-
-    private function instanciateCardEffectOp(string $cardId): Operation {
-        $r = $this->game->getRulesForAndAssert($cardId, "r");
-        return $this->instanciateOperation($r, $this->getOwner(), ["reason" => $cardId, "card" => $cardId]);
-    }
-
-    function getPossibleMoves() {
-        $presetTarget = $this->getDataField("target");
-        if ($presetTarget) {
-            return [$presetTarget];
-        }
-        $hero = $this->game->getHero($this->getOwner());
-        $trigger = $this->getCurrentTrigger();
+class Op_playEvent extends Op_useCard {
+    protected function getCandidateCards(string $owner): array {
+        $hero = $this->game->getHero($owner);
         $cards = $hero->getHandCards();
-        $targets = [];
-        foreach ($cards as $cardId => $card) {
-            $cardIns = $this->game->instantiateCard($card, $this);
-            if (!$cardIns->canTrigger($trigger)) {
-                continue;
-            }
-            $targets[$cardId] = ["q" => 0];
-            $cardIns->canBePlayed($trigger, $targets[$cardId]);
-        }
-        return $targets;
-    }
-
-    function resolve(): void {
-        $cardId = $this->getCheckedArg();
-        $hero = $this->game->getHero($this->getOwner());
-        // discard first so a) other player see it b) its not in hard for other effects that follow
-        $hero->discardEventCard($cardId);
-        // TODO: remove effect printing - temp for development
-        $effect = $this->game->getRulesFor($cardId, "effect", "");
-        $this->game->notifyMessage(clienttranslate('${char_name} plays ${token_name}: ${effect_text}'), [
-            "char_name" => $hero->getId(),
-            "token_name" => $cardId,
-            "effect_text" => $effect,
-        ]);
-        $op = $this->instanciateCardEffectOp($cardId);
-        $this->queueOp($op);
-    }
-
-    public function getUiArgs() {
-        return ["buttons" => false];
+        return $cards;
     }
 }
