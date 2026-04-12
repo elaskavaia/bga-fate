@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Model;
 
 use Bga\Games\Fate\Game;
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 use function Bga\Games\Fate\getPart;
@@ -32,7 +33,23 @@ use function Bga\Games\Fate\getPart;
  * can insert sub-ops into the correct operation frame.
  */
 class Card {
-    public function __construct(protected Game $game, protected string $id, protected string $owner, protected Operation $op) {}
+    protected $owner;
+    protected $id;
+    protected $state;
+    protected $location;
+    public function __construct(protected Game $game, string|array $cardOrId, protected Operation $op) {
+        $this->owner = $op->getOwner();
+        if (is_array($cardOrId)) {
+            $this->id = $cardOrId["key"];
+            $this->location = $cardOrId["location"];
+            $this->state = $cardOrId["state"];
+        } else {
+            $this->id = $cardOrId;
+            $info = $this->game->tokens->getTokenInfo($cardOrId);
+            $this->location = $info["location"];
+            $this->state = $info["state"];
+        }
+    }
 
     function getId(): string {
         return $this->id;
@@ -93,8 +110,32 @@ class Card {
     public function onTriggerDefault(string $triggerName): void {}
 
     protected function getTriggerMethod(string $triggerName) {
+        if (!$triggerName) {
+            return "onManual";
+        }
         $method = "on" . ucfirst($triggerName);
         return $method;
+    }
+
+    /**
+     * Checks if card can be played with this trigger (empty string means can be play now)
+     */
+    public function canTrigger(string $triggerName): bool {
+        $method = $this->getTriggerMethod($triggerName);
+        if (method_exists($this, $method)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function canBePlayed(string $triggerName, ?array &$errorRes = null): bool {
+        if (!$errorRes) {
+            $errorRes = [];
+        }
+
+        $errorRes = ["q" => 0];
+        return true;
     }
 
     /**

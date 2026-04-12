@@ -553,7 +553,8 @@ class Game extends Base {
      * @param string $cardId Token id (e.g. "card_equip_1_20")
      * @param Operation $op Calling operation (provides owner and queue context)
      */
-    function instantiateCard(string $cardId, Operation $op): Card {
+    function instantiateCard(array $card, Operation $op): Card {
+        $cardId = $card["key"];
         // card_<type>_..., e.g. card_equip_1_20 → "equip"
         $type = getPart($cardId, 1);
         $name = (string) $this->material->getRulesFor($cardId, "name", "");
@@ -563,11 +564,11 @@ class Game extends Base {
         // Try bespoke class first; fall back to per-supertype generic in Model/.
         $bespoke = "Bga\\Games\\Fate\\Cards\\Card" . ucfirst($type) . "_" . $sanitized;
         if (class_exists($bespoke)) {
-            return new $bespoke($this, $cardId, $op->getOwner(), $op);
+            return new $bespoke($this, $card, $op);
         }
         $generic = "Bga\\Games\\Fate\\Model\\CardGeneric";
         $this->systemAssert("ERR:instantiateCard:noGeneric:$generic", class_exists($generic));
-        return new $generic($this, $cardId, $op->getOwner(), $op);
+        return new $generic($this, $card, $op);
     }
 
     function getEndScores(): array {

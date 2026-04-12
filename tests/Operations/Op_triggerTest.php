@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * Tests for Op_trigger.
  *
  * Op_trigger is a pure dispatcher: walks tableau + hand cards of the active
- * player, instantiates a Card object for each, and calls onTrigger($triggerType).
+ * player, instantiates a Card object for each, and calls onTrigger($triggerName).
  * Per-card matching/queueing logic lives in Card and CardGeneric (see
  * tests/Model/CardGenericTest.php). The tests here cover:
  *

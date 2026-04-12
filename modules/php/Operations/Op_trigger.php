@@ -20,15 +20,16 @@ class Op_trigger extends Operation {
     }
 
     function resolve(): void {
-        $triggerType = $this->getTriggerType();
-        $this->game->systemAssert("trigger required", $triggerType);
+        $triggerName = $this->getTriggerType();
+        $this->game->systemAssert("trigger required", $triggerName);
         $owner = $this->getOwner();
-        $cards =
-            $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner") +
-            $this->game->tokens->getTokensOfTypeInLocation("card", "hand_$owner");
-        foreach (array_keys($cards) as $cardId) {
-            $cardObj = $this->game->instantiateCard($cardId, $this);
-            $cardObj->onTrigger($triggerType);
+        $cards = array_merge(
+            $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner"),
+            $this->game->tokens->getTokensOfTypeInLocation("card", "hand_$owner")
+        );
+        foreach ($cards as $cardId => $card) {
+            $cardObj = $this->game->instantiateCard($card, $this);
+            $cardObj->onTrigger($triggerName);
         }
     }
 }

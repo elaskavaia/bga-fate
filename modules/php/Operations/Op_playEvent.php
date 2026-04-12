@@ -67,14 +67,13 @@ class Op_playEvent extends Operation {
         $trigger = $this->getCurrentTrigger();
         $cards = $hero->getHandCards();
         $targets = [];
-        foreach (array_keys($cards) as $cardId) {
-            $on = $this->game->getRulesFor($cardId, "on", "");
-            if ($on !== $trigger) {
-                $targets[$cardId] = ["q" => Material::ERR_PREREQ, "err" => clienttranslate("Card cannot be played at this time")];
+        foreach ($cards as $cardId => $card) {
+            $cardIns = $this->game->instantiateCard($card, $this);
+            if (!$cardIns->canTrigger($trigger)) {
                 continue;
             }
-            $op = $this->instanciateCardEffectOp($cardId);
-            $targets[$cardId] = $op->getErrorInfo();
+            $targets[$cardId] = ["q" => 0];
+            $cardIns->canBePlayed($trigger, $targets[$cardId]);
         }
         return $targets;
     }

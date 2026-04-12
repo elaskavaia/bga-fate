@@ -126,6 +126,25 @@ Domain model objects for game characters. Created via factory methods on `Game`:
 - Dead: rune die results count as hits when Dead monsters attack
 - Draugr: armor=1, absorbs 1 hit per attack (via `beginDefense` + `armorRemaining` state)
 
+### Card (`modules/php/Model/Card.php`)
+
+Base class for card instances created on the fly during trigger dispatch. Each card on a player's tableau or hand is instantiated as a `Card` (or subclass) by `Op_trigger::resolve()` via `Game::instantiateCard($card, $op)`.
+
+- Constructor: `(Game $game, string|array $cardOrId, Operation $op)` — accepts token ID or full token row (with `key`, `location`, `state`). Owner comes from `$op->getOwner()`.
+- `getId()`, `getOwner()`, `getRulesFor($field)`, `getDamage()`, `getMana()`, `getGold()`
+- `queue($type, $owner, $data)` — delegates to the parent operation's `queue()` with this card preset in `data["card"]`
+- `onTrigger($triggerName)` — routes to `on<TriggerName>()` if the subclass defines it, else falls back to `onTriggerDefault()`
+- `canTrigger($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
+- `canBePlayed($triggerName, &$errorRes)` — returns true if the card is actually playable. Base returns true; `CardGeneric` overrides with full checks.
+- `getUseCardOperationType()` — maps card supertype to action op: equip → `useEquipment`, ability/hero → `useAbility`, event → `playEvent`
+
+**CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class when no bespoke subclass exists. Implements the standard voluntary trigger flow:
+- `canTrigger()` — also returns true when the Material `on` field matches the trigger type
+- `canBePlayed()` — checks trigger match, once-per-turn state, non-empty `r` field, and whether the `r` expression's op has valid targets
+- `onTriggerDefault()` — if `canBePlayed()`, queues the corresponding `useEquipment`/`useAbility`/`playEvent` with `prompt=true` so the player can confirm or skip
+
+**Bespoke card classes** (`modules/php/Cards/CardEquip_<Name>.php`, etc.) — per-card classes that override `on<TriggerName>()` hooks for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name derived from Material `name` field: `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Created via `Game::instantiateCard()` which tries the bespoke class first, then falls back to `CardGeneric`.
+
 ---
 
 ## Operation Catalog
@@ -199,7 +218,7 @@ Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quo
 ### Trigger System
 
 Cards (events, abilities, equipment) can have an **`on`** field in Material specifying when they can be activated.
-At key points during gameplay, an `Op_trigger` is queued to offer the player matching cards.
+At key points during gameplay, an `Op_trigger` is queued which walks every card on the active player's tableau and hand, instantiates a `Card` object for each, and calls `onTrigger($triggerType)`.
 
 **`on` column** — timing trigger for when the card can be played:
 - (empty) — play anytime during your turn (once per turn; tracked via token state=1, reset in turnEnd)
@@ -208,14 +227,18 @@ At key points during gameplay, an `Op_trigger` is queued to offer the player mat
 - `damage` — play when receiving damage
 - `monsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
 - `monsterAttack` — play after a monster attacks you
+- `custom` — card has a bespoke class under `modules/php/Cards/` that handles its own trigger logic
 
 **How triggers fire:**
 
 1. An operation calls `$this->queueTrigger("triggerType")` (or `queueTrigger()` which defaults to the operation's own type).
 2. This queues `Op_trigger(triggerType)` for the current player.
-3. `Op_trigger.getPossibleMoves()` instantiates `useEquipment`, `useAbility`, and `playEvent` with `["on" => triggerType]`, collecting all cards whose Material `on` field matches.
-4. The player picks a card (or skips). On selection, `Op_trigger.resolve()` queues the corresponding action (`useEquipment`/`useAbility`/`playEvent`) with the chosen card as target.
-5. That action executes the card's `r` rule (e.g., `playEvent` discards the event card, then queues the effect operations parsed from its `r` field).
+3. `Op_trigger::resolve()` walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($triggerType)`.
+4. For each card, `Card::onTrigger()` routes to `on<TriggerName>()` if the subclass defines it, else to `onTriggerDefault()`.
+5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
+6. **Generic cards** (`CardGeneric`) check `canBePlayed($triggerType)` — verifying the `on` field matches, the card hasn't been used this turn, the `r` field is non-empty, and the effect has valid targets. If playable, queues `useEquipment`/`useAbility`/`playEvent` with the card preset and `prompt=true`, so the player can confirm or skip each card individually.
+
+Unlike the old design (single "pick one card" prompt), the new flow offers each matching card as a separate confirm-or-skip prompt. This correctly allows the player to react with multiple cards per trigger.
 
 **Where triggers are queued (operation → trigger → description):**
 
@@ -237,12 +260,12 @@ Op_turnEnd
 
 ```
 actionAttack → player picks target → roll dice
-  → trigger(roll)          — cards with on="roll" offered (e.g., Perfect Aim: reroll misses)
-  → trigger(actionAttack)  — cards with on="actionAttack" offered (e.g., Master Shot: add 2 damage)
+  → trigger(roll)          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
+  → trigger(actionAttack)  — same: each matching card is offered as a separate confirm-or-skip
   → resolveHits            — converts dice to damage
-    → trigger(resolveHits) — damage prevention cards offered (e.g., Dodge: prevent damage)
+    → trigger(resolveHits) — damage prevention cards offered individually
   → dealDamage             — applies damage to monster
-    → trigger(monsterKilled) — if monster died (e.g., Nailed Together: pierce overkill)
+    → trigger(monsterKilled) — if monster died, each matching card reacts
 ```
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).

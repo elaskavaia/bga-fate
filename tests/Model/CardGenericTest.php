@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
  * the player.
  *
  * These tests construct a CardGeneric directly with a minimal parent op,
- * call onTrigger($triggerType), and assert what was queued.
+ * call onTrigger($triggerName), and assert what was queued.
  */
 final class CardGenericTest extends TestCase {
     private GameUT $game;
@@ -30,14 +30,88 @@ final class CardGenericTest extends TestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
-    /** Build a CardGeneric for $cardId, parented to a fresh trigger op of $triggerType. */
-    private function makeCard(string $cardId, string $triggerType): CardGeneric {
-        $parentOp = $this->game->machine->instanciateOperation("trigger($triggerType)", $this->owner);
-        return new CardGeneric($this->game, $cardId, $this->owner, $parentOp);
+    /** Build a CardGeneric for $cardId, parented to a fresh trigger op of $triggerName. */
+    private function makeCard(string $cardId, string $triggerName = ""): CardGeneric {
+        $opType = $triggerName ? "trigger($triggerName)" : "nop";
+        $parentOp = $this->game->machine->instanciateOperation($opType, $this->owner);
+        return new CardGeneric($this->game, $cardId, $parentOp);
     }
 
     private function queuedOpTypes(): array {
         return array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
+    }
+
+    // -------------------------------------------------------------------------
+    // canTrigger — checks whether card reacts to a given trigger type
+    // -------------------------------------------------------------------------
+
+    public function testCanTriggerReturnsTrueWhenOnFieldMatches(): void {
+        // Riposte I has on=resolveHits
+        $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
+        $card = $this->makeCard("card_ability_3_3", "resolveHits");
+        $this->assertTrue($card->canTrigger("resolveHits"));
+    }
+
+    public function testCanTriggerReturnsFalseWhenOnFieldDoesNotMatch(): void {
+        $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
+        $card = $this->makeCard("card_ability_3_3", "roll");
+        $this->assertFalse($card->canTrigger("roll"));
+    }
+
+    public function testCanTriggerReturnsFalseForCardWithNoOnField(): void {
+        // Sure Shot I (card_ability_1_3) has no `on` field
+        $card = $this->makeCard("card_ability_1_3", "roll");
+        $this->assertFalse($card->canTrigger("roll"));
+    }
+
+    // -------------------------------------------------------------------------
+    // canBePlayed — checks whether card is actually playable (trigger match + cost payable + r non-empty)
+    // -------------------------------------------------------------------------
+
+    public function testCanBePlayedReturnsTrueWhenPlayable(): void {
+        // Riposte I on=resolveHits, r=2spendMana:(2preventDamage:2dealDamage)
+        $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
+        $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
+        $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
+
+        $card = $this->makeCard("card_ability_3_3", "resolveHits");
+        $this->assertTrue($card->canBePlayed("resolveHits"));
+    }
+
+    public function testCanBePlayedReturnsFalseWhenTriggerDoesNotMatch(): void {
+        $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
+        $card = $this->makeCard("card_ability_3_3", "roll");
+        $this->assertFalse($card->canBePlayed("roll"));
+    }
+
+    public function testCanBePlayedReturnsFalseWhenCannotPayCost(): void {
+        // Bjorn's hero card on=roll, r=spendAction(actionFocus):2dealDamage — no action available
+        $card = $this->makeCard("card_hero_1_1", "roll");
+        $this->assertFalse($card->canBePlayed("roll"));
+    }
+
+    public function testCanBePlayedReturnsFalseWhenAlreadyUsedThisTurn(): void {
+        // Sure Shot I (card_ability_1_3) has no `on` field → once-per-turn, state=1 means used
+        $this->game->tokens->setTokenState("card_ability_1_3", 1);
+        $card = $this->makeCard("card_ability_1_3", "");
+        $this->assertFalse($card->canBePlayed(""));
+    }
+
+    public function testCanBePlayedReturnsFalseWhenRFieldEmpty(): void {
+        // Bjorn's First Bow (card_equip_1_15) has no `r` field — passive stats only
+        $card = $this->makeCard("card_equip_1_15", "roll");
+        $this->assertFalse($card->canBePlayed("roll"));
+    }
+
+    public function testCanBePlayedPopulatesErrorInfo(): void {
+        $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
+        $card = $this->makeCard("card_ability_3_3", "roll");
+        $errorRes = [];
+        $result = $card->canBePlayed("roll", $errorRes);
+        $this->assertFalse($result);
+        $this->assertNotEquals(0, $errorRes["q"] ?? 0);
     }
 
     // -------------------------------------------------------------------------

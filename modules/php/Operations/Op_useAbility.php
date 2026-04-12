@@ -64,22 +64,12 @@ class Op_useAbility extends Operation {
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
-            $r = $this->game->material->getRulesFor($cardId, "r", "");
-            if ($r === "") {
+            $cardIns = $this->game->instantiateCard($card, $this);
+            if (!$cardIns->canTrigger($trigger)) {
                 continue;
             }
-
-            $on = $this->game->material->getRulesFor($cardId, "on", "");
-            if ($on !== $trigger) {
-                continue;
-            }
-            // Cards without a trigger can only be used once per turn
-            if (!$on && $card["state"] == 1) {
-                continue;
-            }
-
-            $op = $this->instanciateOperation($r, null, ["card" => $cardId]);
-            $targets[$cardId] = $op->getErrorInfo();
+            $targets[$cardId] = ["q" => 0];
+            $cardIns->canBePlayed($trigger, $targets[$cardId]);
         }
         return $targets;
     }
