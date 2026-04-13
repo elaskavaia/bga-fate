@@ -21,6 +21,15 @@ use Bga\Games\Fate\Material;
  * modules/php/Cards/. Inherits all default Card behavior.
  */
 class CardGeneric extends Card {
+    public function onTrigger(string $triggerName): void {
+        $method = $this->getTriggerMethod($triggerName);
+        if (!method_exists($this, $method)) {
+            $this->onTriggerDefault($triggerName);
+            return;
+        }
+
+        $this->callOnTriggerMethod($method, $triggerName);
+    }
     public function onTriggerDefault(string $triggerName): void {
         if ($triggerName === "enter") {
             return; // lifecycle event - handled only by card on itself
@@ -33,12 +42,18 @@ class CardGeneric extends Card {
         $owner = $this->getOwner();
         $action = "useCard";
 
-        $alreadyOp = $this->game->machine->findOperation($owner, $action, function ($row) use ($triggerName) {
-            $op = $this->game->machine->instantiateOperationFromDbRow($row);
-            return $op->getDataField("on") === $triggerName;
-        });
+        $alreadyOp = $this->game->machine->findOperation($owner, $action);
         if (!$alreadyOp) {
-            $this->queue($action, null, ["prompt" => true, "on" => $triggerName]);
+            $this->queue($action, null, ["prompt" => true, "on" => [$triggerName]]);
+        } else {
+            $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
+            $onarr = $op->getDataField("on", []);
+            if (in_array($triggerName, $onarr)) {
+                return;
+            }
+            $onarr[] = $triggerName;
+            $op->withDataField("on", $onarr);
+            $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
         }
     }
 
@@ -62,7 +77,7 @@ class CardGeneric extends Card {
         $on = $this->game->material->getRulesFor($cardId, "on", "");
 
         // Cards without a trigger can only be used once per turn
-        if (!$on && $this->state == 1) {
+        if (!$on && $this->getState() == 1) {
             $errorRes["q"] = Material::ERR_OCCUPIED;
             $errorRes["err"] = clienttranslate("Already Used");
             return false;
@@ -80,7 +95,7 @@ class CardGeneric extends Card {
             $errorRes = array_merge($errorRes, $op->getErrorInfo());
             return false;
         }
-        $errorRes = ["q" => 0];
+        $errorRes = array_merge($errorRes, ["q" => 0, "err" => ""]);
         return true;
     }
 

@@ -16,7 +16,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_trigger extends Operation {
     private function getTriggerType(): string {
-        return $this->getParam(0, "move");
+        return $this->getParam(0, "nop");
     }
 
     function resolve(): void {

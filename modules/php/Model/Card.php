@@ -35,9 +35,9 @@ use function Bga\Games\Fate\getPart;
  */
 class Card {
     protected $owner;
-    protected $id;
-    protected $state;
-    protected $location;
+    protected string $id;
+    protected ?int $state;
+    protected ?string $location;
     public function __construct(protected Game $game, string|array $cardOrId, protected Operation $op) {
         $this->owner = $op->getOwner();
         if (is_array($cardOrId)) {
@@ -46,9 +46,8 @@ class Card {
             $this->state = $cardOrId["state"];
         } else {
             $this->id = $cardOrId;
-            $info = $this->game->tokens->getTokenInfo($cardOrId);
-            $this->location = $info["location"];
-            $this->state = $info["state"];
+            $this->state = null;
+            $this->location = null;
         }
     }
 
@@ -58,6 +57,17 @@ class Card {
 
     function getOwner(): string {
         return $this->owner;
+    }
+
+    function getState(): int {
+        if ($this->state !== null) {
+            return (int) $this->state;
+        }
+        // lazy init
+        $info = $this->game->tokens->getTokenInfo($this->id);
+        $this->location = $info["location"];
+        $this->state = $info["state"];
+        return (int) $this->state;
     }
 
     /** Read a Material rule field for this card (e.g. "r", "on", "name"). */
@@ -100,12 +110,25 @@ class Card {
      * @param string $triggerName Trigger type, e.g. "enter", "roll", "actionAttack"
      */
     public function onTrigger(string $triggerName): void {
-        $method = $this->getTriggerMethod($triggerName);
-        if (!method_exists($this, $method)) {
-            $this->onTriggerDefault($triggerName);
+        if (!$this->canTriggerEffectOn($triggerName)) {
             return;
         }
+        $method = $this->getTriggerMethod($triggerName);
+        $this->callOnTriggerMethod($method, $triggerName);
+    }
 
+    /**
+     * Invoke a hook method, optionally passing $triggerName as a named argument
+     * if the method declares a parameter with that name.
+     */
+    protected function callOnTriggerMethod(string $method, string $triggerName): void {
+        $ref = new \ReflectionMethod($this, $method);
+        foreach ($ref->getParameters() as $param) {
+            if ($param->getName() === "triggerName") {
+                $this->$method(triggerName: $triggerName);
+                return;
+            }
+        }
         $this->$method();
     }
 
@@ -115,8 +138,6 @@ class Card {
             throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be performed now"));
         }
     }
-
-    public function onTriggerDefault(string $triggerName): void {}
 
     protected function getTriggerMethod(string $triggerName) {
         if (!$triggerName) {
@@ -162,32 +183,36 @@ class Card {
             return false;
         }
 
-        $errorRes = ["q" => 0];
+        $errorRes = array_merge($errorRes, ["q" => 0, "err" => ""]);
         return true;
     }
 
-    /**
-     * Temp implementation
-     */
     public function useCard(string $triggerName) {
         $this->checkPlayability($triggerName);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
         $effect = $this->game->material->getRulesFor($cardId, "effect", "");
-        $this->game->notifyMessage(clienttranslate('${char_name} uses ${token_name}: ${effect_text}'), [
+        if ($this->isEvent()) {
+            $message = clienttranslate('${char_name} plays ${token_name}: ${effect_text}');
+        } else {
+            $message = clienttranslate('${char_name} uses ${token_name}: ${effect_text}');
+        }
+        $this->game->notifyMessage($message, [
             "char_name" => $hero->getId(),
             "token_name" => $cardId,
             "effect_text" => $effect,
         ]);
         $r = $this->game->material->getRulesFor($cardId, "r", "nop");
-        $on = $this->game->material->getRulesFor($cardId, "on", "");
-        if (!$on) {
-            //mark card as used, as these can only be used once per turn
-            $this->op->dbSetTokenState($cardId, 1, "");
-        }
         $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
+
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);
+        } else {
+            $on = $this->game->material->getRulesFor($cardId, "on", "");
+            if (!$on) {
+                //mark card as used, as these can only be used once per turn
+                $this->setUsed(true);
+            }
         }
     }
 
@@ -195,15 +220,12 @@ class Card {
         return str_starts_with($this->id, "card_event");
     }
 
-    /**
-     * Reset per-turn state on this card at end of turn.
-     * Base: clear the "used" flag (state 1 → 0). Subclasses may override
-     * to reset additional per-turn state (e.g. charges, cooldowns).
-     */
-    public function resetUse(): void {
-        if ($this->state == 1) {
-            $this->op->dbSetTokenState($this->id, 0, "");
-            $this->state = 0;
-        }
+    function isUsed() {
+        return $this->getState() == 1;
+    }
+    function setUsed(bool $used) {
+        $state = $used ? 1 : 0;
+        $this->op->dbSetTokenState($this->id, $state, "");
+        $this->state = $state;
     }
 }

@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\Operations\Op_reinforcement;
 use Bga\Games\Fate\Operations\Op_turnMonster;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
 final class Op_reinforcementTest extends AbstractOpTestCase {
+    protected function setUp(): void {
+        parent::setUp();
+        $this->game->clearMachine();
+        $this->game->machine->push("turnStart");
+        $this->game->machine->dispatchAll();
+    }
     private function createReinforcementOp(array $data = []): Op_reinforcement {
         if (!isset($data["deck"])) {
             $data["deck"] = "deck_monster_yellow";

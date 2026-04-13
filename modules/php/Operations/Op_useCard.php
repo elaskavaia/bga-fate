@@ -35,8 +35,8 @@ class Op_useCard extends Operation {
         return $cards;
     }
 
-    function getTrigger() {
-        return $this->getDataField("on", "");
+    function getTriggers() {
+        return $this->getDataField("on", []);
     }
 
     function requireConfirmation() {
@@ -53,22 +53,30 @@ class Op_useCard extends Operation {
     }
 
     function getPossibleMoves() {
+        $triggers = $this->getTriggers();
+        if (empty($triggers)) {
+            $triggers = [""]; // manual activation — cards without `on` field match
+        }
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget];
+            return [$presetTarget => ["q" => 0, "trigger" => $triggers[0] ?? ""]];
         }
+
         $owner = $this->getOwner();
-        $trigger = $this->getTrigger();
+
         $cards = $this->getCandidateCards($owner);
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
             $cardIns = $this->game->instantiateCard($card, $this);
-            if (!$cardIns->canTriggerEffectOn($trigger)) {
-                continue;
+            foreach ($triggers as $trigger) {
+                $info = ["q" => 0, "trigger" => $trigger];
+                if ($cardIns->canBePlayed($trigger, $info)) {
+                    $targets[$cardId] = $info;
+                    break;
+                }
+                $targets[$cardId] = $info;
             }
-            $targets[$cardId] = ["q" => 0];
-            $cardIns->canBePlayed($trigger, $targets[$cardId]);
         }
         return $targets;
     }
@@ -77,7 +85,10 @@ class Op_useCard extends Operation {
         $cardId = $this->getCheckedArg();
 
         $cardInst = $this->game->instantiateCard($cardId, $this);
-        $cardInst->useCard($this->getTrigger());
+
+        $info = $this->getArgsInfo()[$cardId];
+        $trigger = $info["trigger"] ?? "";
+        $cardInst->useCard($trigger);
     }
 
     public function getUiArgs() {
