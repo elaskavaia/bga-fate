@@ -260,6 +260,10 @@ class Game extends Base {
     function handleEndOfGame(): void {
         if ($this->isHeroesWin()) {
             $this->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! Heroes win!"), []);
+            // Award each player 1 point so the win is recorded by the BGA framework
+            foreach ($this->loadPlayersBasicInfos() as $playerId => $player) {
+                $this->playerScore->set((int) $playerId, 1);
+            }
         } else {
             $this->notify->all("message", clienttranslate("The Heroes have failed. The Monsters win!"), []);
         }
@@ -274,13 +278,12 @@ class Game extends Base {
     ////////////
 
     function effect_moveCrystals(string $charId, string $type, int $inc, string $location, array $options = []) {
-        $message = array_get($options, "message", clienttranslate('${char_name} gains ${count} ${token_name}'));
-        unset($options["message"]);
-        $options["char_name"] = $charId;
-
         if ($inc == 0) {
             return;
         }
+        $message = array_get($options, "message", clienttranslate('${char_name} gains ${count} ${token_name}'));
+        unset($options["message"]);
+        $options["char_name"] = $charId;
 
         $supply = "supply_crystal_$type";
 
@@ -630,6 +633,9 @@ class Game extends Base {
         return false;
     }
 
+    function debug_q() {
+        $this->handleEndOfGame();
+    }
     function debug_op(string $type) {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push($type, $color);

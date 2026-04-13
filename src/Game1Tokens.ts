@@ -163,11 +163,12 @@ export class Game1Tokens extends Game0Basics {
       let node = $(key);
       if (counters.hasOwnProperty(key)) {
         if (!node) {
-          const deckId = key.replace("counter_", "");
-          if ($(deckId)) {
-            placeHtml(`<div id='${key}' class='counter'></div>`, deckId);
-            node = $(key);
+          let deckId = key.replace("counter_", "");
+          if (!$(deckId)) {
+            deckId = "limbo";
           }
+          placeHtml(`<div id='${key}' class='counter'></div>`, deckId);
+          node = $(key);
         }
         if (node) {
           const value = counters[key].value;
@@ -657,10 +658,13 @@ export class Game1Tokens extends Game0Basics {
     return tokenInfo;
   }
 
-  getTokenPresentaton(type: string, tokenKey: string, args: any = {}): string {
-    if (type.includes("_div")) return this.createTokenImage(tokenKey);
-    if (tokenKey.includes("wicon")) return this.createTokenImage(tokenKey);
-    return this.getTokenName(tokenKey);
+  getTokenPresentaton(type: string, value: string, _args: any = {}): string {
+    if (type.includes("_div")) return this.createTokenImage(value);
+    if (value.includes("wicon")) return this.createTokenImage(value);
+    if (type == "reason" && value) {
+      return "(" + this.getTokenName(value) + ")";
+    }
+    return "<b>" + this.getTokenName(value) + "</b>";
   }
   // override to generate dynamic tooltips and such
   updateTokenDisplayInfo(tokenDisplayInfo: TokenDisplayInfo) {}
@@ -706,6 +710,7 @@ export class Game1Tokens extends Game0Basics {
           "token_div",
           "token2_div",
           "token3_div",
+          "reason",
           "token_icon"
         ];
         for (var i in keys) {

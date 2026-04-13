@@ -18,7 +18,10 @@ export class Game0Basics {
   player_color: string;
   defaultTooltipDelay: number = 800;
   public gamedatas!: CustomGamedatas;
-  public bga: Bga;
+
+  constructor(public bga: Bga) {
+    //console.log("game constructor");
+  }
 
   // proxies for GameGui properties/methods accessed via gameui
   get player_id() {
@@ -35,11 +38,6 @@ export class Game0Basics {
 
   bgaAnimationsActive(): boolean {
     return gameui.bgaAnimationsActive();
-  }
-
-  constructor(bga: Bga) {
-    //console.log("game constructor");
-    this.bga = bga;
   }
 
   setup(gamedatas: any) {

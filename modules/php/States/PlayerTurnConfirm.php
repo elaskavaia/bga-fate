@@ -18,7 +18,6 @@ use Bga\GameFramework\StateType;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\StateConstants;
 use Bga\GameFramework\States\PossibleAction;
-use Bga\GameFramework\Actions\Types\JsonParam;
 use Bga\GameFramework\States\GameState;
 
 class PlayerTurnConfirm extends GameState {
@@ -37,7 +36,7 @@ class PlayerTurnConfirm extends GameState {
     }
 
     #[PossibleAction]
-    function action_resolve(#[JsonParam] array $data) {
+    function action_resolve() {
         $this->game->notify->all("message", ""); // empty message
         if ($this->game->isEndOfGame()) {
             return StateConstants::STATE_END_GAME;

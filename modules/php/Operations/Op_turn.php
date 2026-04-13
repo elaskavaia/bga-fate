@@ -87,8 +87,11 @@ class Op_turn extends Operation {
             $inline = $actionInfo["inline"] ?? 0;
             $kind = $actionInfo["kind"] ?? "main";
             if (in_array($action, $actionsTaken)) {
-                $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
+                $res[$action]["q"] = Material::ERR_MAX;
                 $res[$action]["err"] = clienttranslate("Action cannot be performed second time");
+            } elseif ($remaining == 0 && $kind == "main") {
+                $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
+                $res[$action]["err"] = clienttranslate("Main action cannot be performed anymore");
             } else {
                 $op = $this->instantiateOperation($action);
                 $res[$action] = array_merge($res[$action], $op->getErrorInfo());
@@ -100,10 +103,6 @@ class Op_turn extends Operation {
                         $res[$key]["action"] = $action;
                     }
                 }
-            }
-            if ($remaining == 0 && $kind == "main") {
-                $res[$action]["q"] = Material::ERR_NOT_APPLICABLE;
-                $res[$action]["err"] = clienttranslate("Main action cannot be performed anymore");
             }
         }
 

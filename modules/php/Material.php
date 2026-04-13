@@ -421,7 +421,7 @@ class Material {
 ],
     "Op_upgrade" => [ 
         "type" => "upgrade",
-        "name" => clienttranslate("Upgrade Hero"),
+        "name" => clienttranslate("Upgrade"),
 ],
     "Op_gainEquip" => [ 
         "type" => "gainEquip",
@@ -3541,7 +3541,7 @@ class Material {
         "num" => 8,
         "hno" => 1,
         "name" => clienttranslate("Stitching II"),
-        "r" => "2heal(adj)/2repairCard",
+        "r" => "2heal(adj)/2repairCard/(heal(adj),repairCard)",
         "effect" => "Remove a total of 2 damage from heroes and equipment within range 1.",
 ],
     "card_ability_1_5" => [ 
@@ -4098,7 +4098,7 @@ class Material {
         "name" => clienttranslate("Quiver"),
         "strength" => 1,
         "durability" => 3,
-        "r" => "gainDamage:custom",
+        "r" => "gainDamage:addDamage",
         "on" => "actionAttack",
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
         "effect" => "[DAMAGE]: Add 1 damage to this attack action.",
@@ -4125,7 +4125,8 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Trollbane"),
         "strength" => 3,
-        "r" => "custom",
+        "r" => "addDamage(true,trollkin)",
+        "on" => "actionAttack",
         "quest" => "<i>Collect 5 gold</i> [XP] <i>from killing trollkin</i> to get a fearsome reputation.",
         "effect" => "This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin.",
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",

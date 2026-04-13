@@ -14,6 +14,24 @@ import { Game1Tokens, Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from ".
 import { PlayerTurn } from "./PlayerTurn";
 import { CustomGamedatas, CustomPlayer } from "./types";
 
+class PlayerTurnConfirm {
+  constructor(
+    private game: Game,
+    private bga: Bga
+  ) {}
+  onEnteringState(args: any, isCurrentPlayerActive: boolean) {
+    this.bga.statusBar.addActionButton(_("Confirm"), (event: Event) => {
+      this.bga.actions
+        .performAction("action_resolve", {})
+        .then((x) => {
+          console.log("action complete", x);
+        })
+        .catch((e: any) => {
+          this.game.setSubPrompt(e.message, e.args);
+        });
+    });
+  }
+}
 export class Game extends Game1Tokens {
   private playerTurn: PlayerTurn;
   private boardLayout: string = "scale";
@@ -24,6 +42,11 @@ export class Game extends Game1Tokens {
 
     this.playerTurn = new PlayerTurn(this, bga);
     this.bga.states.register("PlayerTurn", this.playerTurn);
+    this.bga.states.register("PlayerTurnConfirm", new PlayerTurnConfirm(this, bga));
+  }
+
+  onEnteringState(stateName: string, args: { args: { [key: string]: any } | null }) {
+    console.log("Entering unknown state", stateName, args);
   }
 
   onToken(e: Event) {
@@ -88,11 +111,12 @@ export class Game extends Game1Tokens {
           `tableau_${color}`
         );
       });
+      const panel = this.bga.playerPanels.getElement(Number(player.id));
       placeHtml(
         `<div id="miniboard_${color}" class="miniboard">
                   <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`,
-        this.bga.playerPanels.getElement(Number(player.id))
+        panel
       );
       placeHtml(
         `
@@ -130,12 +154,15 @@ export class Game extends Game1Tokens {
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
       // attach hand counter to miniboard
+      const mini = $(`miniboard_${color}`);
       const handCounter = $(`counter_hand_${color}`);
-      $(`miniboard_${color}`).appendChild(handCounter);
-      handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
+      if (handCounter) {
+        mini.appendChild(handCounter);
+        handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
 
-      const handMaxCounter = $(`tracker_hand_${color}`);
-      if (handMaxCounter) handCounter.dataset.limit = handMaxCounter.dataset.state;
+        const handMaxCounter = $(`tracker_hand_${color}`);
+        if (handMaxCounter) handCounter.dataset.limit = handMaxCounter.dataset.state;
+      }
 
       // hero damage mirror on miniboard
       const heroNo = player.heroNo;

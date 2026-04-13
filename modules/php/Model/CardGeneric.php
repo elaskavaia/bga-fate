@@ -39,6 +39,10 @@ class CardGeneric extends Card {
             return;
         }
 
+        $this->promptUseCard($triggerName);
+    }
+
+    function promptUseCard($triggerName) {
         $owner = $this->getOwner();
         $action = "useCard";
 

@@ -43,7 +43,7 @@ class Card {
         if (is_array($cardOrId)) {
             $this->id = $cardOrId["key"];
             $this->location = $cardOrId["location"];
-            $this->state = $cardOrId["state"];
+            $this->state = (int) $cardOrId["state"];
         } else {
             $this->id = $cardOrId;
             $this->state = null;
@@ -66,8 +66,8 @@ class Card {
         // lazy init
         $info = $this->game->tokens->getTokenInfo($this->id);
         $this->location = $info["location"];
-        $this->state = $info["state"];
-        return (int) $this->state;
+        $this->state = (int) $info["state"];
+        return $this->state;
     }
 
     /** Read a Material rule field for this card (e.g. "r", "on", "name"). */
@@ -193,9 +193,9 @@ class Card {
         $hero = $this->game->getHero($this->getOwner());
         $effect = $this->game->material->getRulesFor($cardId, "effect", "");
         if ($this->isEvent()) {
-            $message = clienttranslate('${char_name} plays ${token_name}: ${effect_text}');
+            $message = clienttranslate('${char_name} plays event ${token_name}: ${effect_text}');
         } else {
-            $message = clienttranslate('${char_name} uses ${token_name}: ${effect_text}');
+            $message = clienttranslate('${char_name} uses ability of ${token_name}: ${effect_text}');
         }
         $this->game->notifyMessage($message, [
             "char_name" => $hero->getId(),

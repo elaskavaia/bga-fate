@@ -60,7 +60,7 @@ final class Op_turnTest extends AbstractOpTestCase {
 
     public function testAlreadyTakenActionIsNotApplicable(): void {
         $this->simulateActionTaken("actionPractice");
-        $this->assertTargetError("actionPractice", Material::ERR_NOT_APPLICABLE);
+        $this->assertTargetError("actionPractice", Material::ERR_MAX);
     }
 
     public function testOtherActionsStillAvailableAfterOneTaken(): void {

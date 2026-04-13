@@ -9,6 +9,13 @@
  *
  */
 class Game0Basics {
+    constructor(bga) {
+        this.bga = bga;
+        this.defaultTooltipDelay = 800;
+        this.lastMoveId = 0;
+        this.prevLogId = 0;
+        //console.log("game constructor");
+    }
     // proxies for GameGui properties/methods accessed via gameui
     get player_id() {
         return gameui.player_id;
@@ -21,13 +28,6 @@ class Game0Basics {
     }
     bgaAnimationsActive() {
         return gameui.bgaAnimationsActive();
-    }
-    constructor(bga) {
-        this.defaultTooltipDelay = 800;
-        this.lastMoveId = 0;
-        this.prevLogId = 0;
-        //console.log("game constructor");
-        this.bga = bga;
     }
     setup(gamedatas) {
         this.gamedatas = gamedatas;
@@ -753,11 +753,12 @@ class Game1Tokens extends Game0Basics {
             let node = $(key);
             if (counters.hasOwnProperty(key)) {
                 if (!node) {
-                    const deckId = key.replace("counter_", "");
-                    if ($(deckId)) {
-                        placeHtml(`<div id='${key}' class='counter'></div>`, deckId);
-                        node = $(key);
+                    let deckId = key.replace("counter_", "");
+                    if (!$(deckId)) {
+                        deckId = "limbo";
                     }
+                    placeHtml(`<div id='${key}' class='counter'></div>`, deckId);
+                    node = $(key);
                 }
                 if (node) {
                     const value = counters[key].value;
@@ -1207,12 +1208,15 @@ class Game1Tokens extends Game0Basics {
         //console.log("cached", tokenId);
         return tokenInfo;
     }
-    getTokenPresentaton(type, tokenKey, args = {}) {
+    getTokenPresentaton(type, value, _args = {}) {
         if (type.includes("_div"))
-            return this.createTokenImage(tokenKey);
-        if (tokenKey.includes("wicon"))
-            return this.createTokenImage(tokenKey);
-        return this.getTokenName(tokenKey);
+            return this.createTokenImage(value);
+        if (value.includes("wicon"))
+            return this.createTokenImage(value);
+        if (type == "reason" && value) {
+            return "(" + this.getTokenName(value) + ")";
+        }
+        return "<b>" + this.getTokenName(value) + "</b>";
     }
     // override to generate dynamic tooltips and such
     updateTokenDisplayInfo(tokenDisplayInfo) { }
@@ -1259,6 +1263,7 @@ class Game1Tokens extends Game0Basics {
                     "token_div",
                     "token2_div",
                     "token3_div",
+                    "reason",
                     "token_icon"
                 ];
                 for (var i in keys) {
@@ -1970,6 +1975,24 @@ class PlayerTurn extends GameMachine {
  * -----
  *
  */
+class PlayerTurnConfirm {
+    constructor(game, bga) {
+        this.game = game;
+        this.bga = bga;
+    }
+    onEnteringState(args, isCurrentPlayerActive) {
+        this.bga.statusBar.addActionButton(_("Confirm"), (event) => {
+            this.bga.actions
+                .performAction("action_resolve", {})
+                .then((x) => {
+                console.log("action complete", x);
+            })
+                .catch((e) => {
+                this.game.setSubPrompt(e.message, e.args);
+            });
+        });
+    }
+}
 class Game extends Game1Tokens {
     constructor(bga) {
         super(bga);
@@ -1980,6 +2003,10 @@ class Game extends Game1Tokens {
         //console.log("fate constructor");
         this.playerTurn = new PlayerTurn(this, bga);
         this.bga.states.register("PlayerTurn", this.playerTurn);
+        this.bga.states.register("PlayerTurnConfirm", new PlayerTurnConfirm(this, bga));
+    }
+    onEnteringState(stateName, args) {
+        console.log("Entering unknown state", stateName, args);
     }
     onToken(e) {
         // TODO: pick proper state object
@@ -2028,9 +2055,10 @@ class Game extends Game1Tokens {
                 const name = this.getRulesFor(d, "name");
                 placeHtml(`<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`, `tableau_${color}`);
             });
+            const panel = this.bga.playerPanels.getElement(Number(player.id));
             placeHtml(`<div id="miniboard_${color}" class="miniboard">
                   <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
-        </div>`, this.bga.playerPanels.getElement(Number(player.id)));
+        </div>`, panel);
             placeHtml(`
         <div id="pboard_${color}" class="pboard">
           <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
@@ -2056,12 +2084,15 @@ class Game extends Game1Tokens {
         Object.values(gamedatas.players).forEach((player) => {
             const color = player.color;
             // attach hand counter to miniboard
+            const mini = $(`miniboard_${color}`);
             const handCounter = $(`counter_hand_${color}`);
-            $(`miniboard_${color}`).appendChild(handCounter);
-            handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
-            const handMaxCounter = $(`tracker_hand_${color}`);
-            if (handMaxCounter)
-                handCounter.dataset.limit = handMaxCounter.dataset.state;
+            if (handCounter) {
+                mini.appendChild(handCounter);
+                handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
+                const handMaxCounter = $(`tracker_hand_${color}`);
+                if (handMaxCounter)
+                    handCounter.dataset.limit = handMaxCounter.dataset.state;
+            }
             // hero damage mirror on miniboard
             const heroNo = player.heroNo;
             const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);

@@ -619,11 +619,11 @@ Hero, Abilities and Equipment:
 
 <!-- r=custom — needs custom operation implementation -->
 
-[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack, r=gainDamage:custom
+[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack
 [x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
-[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent, r=custom
-[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage, r=custom
-[ ] card_equip_1_22 Trollbane — custom: main weapon, +1 vs trollkin, r=custom
+[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent
+[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage
+[x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
 
 ---
 
@@ -641,3 +641,4 @@ Hero, Abilities and Equipment:
   [ ] Flip animation for upgrades
 
   [ ] Design issue - all useCard should be stacked together even triggered by different triggers, currely I cannot pick between 2 cards if one triggered on roll and anoher on actionAttack
+  [ ] Main weapon - restriction only one main weapon allowed

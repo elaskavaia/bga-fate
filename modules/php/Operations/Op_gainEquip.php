@@ -58,6 +58,12 @@ class Op_gainEquip extends Operation {
             "char_name" => $heroId,
         ]);
 
+        // Reveal the new top of the deck so the client can render it.
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
+        if ($newTop !== null) {
+            $this->dbSetTokenLocation($newTop["key"], "deck_equip_$owner", (int) $newTop["state"], "");
+        }
+
         $cardObj = $this->game->instantiateCard($card, $this);
         $cardObj->onTrigger("enter");
     }

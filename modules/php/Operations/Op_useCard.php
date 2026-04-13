@@ -92,9 +92,9 @@ class Op_useCard extends Operation {
     }
 
     public function getUiArgs() {
-        if ($this->isOneChoice()) {
-            return [];
-        }
+        // if ($this->isOneChoice()) {
+        //     return [];
+        // }
         return ["buttons" => false];
     }
 }
