@@ -433,7 +433,7 @@ class HexMap {
         foreach ($occ as $hex => $entry) {
             $char = $entry["character"];
             if ($char !== null && getPart($char, 0) === "monster") {
-                $result[] = ["id" => $char, "hex" => $hex, "dist" => $distMap[$hex] ?? PHP_INT_MAX];
+                $result[] = ["key" => $char, "hex" => $hex, "dist" => $distMap[$hex] ?? PHP_INT_MAX];
             }
         }
         // Sort closest to Grimheim first, ties broken by hex id

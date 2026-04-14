@@ -39,10 +39,10 @@ class Op_c_supfire extends Operation {
     /** Find the green crystal currently on a monster (from previous suppression), or null. */
     private function findStunCrystal(): ?string {
         $monsters = $this->game->hexMap->getMonstersOnMap();
-        foreach ($monsters as $m) {
-            $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $m["id"]);
-            foreach ($crystals as $crystal) {
-                return $crystal["key"];
+        foreach ($monsters as $monster) {
+            $found = $this->game->tokens->getTokensOfTypeInLocationSingleKey("crystal_green", $monster["key"]);
+            if ($found) {
+                return $found;
             }
         }
         return null;

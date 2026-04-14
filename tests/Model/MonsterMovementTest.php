@@ -116,9 +116,9 @@ final class MonsterMovementTest extends TestCase {
         $monsters = $this->game->hexMap->getMonstersOnMap();
         $this->assertCount(3, $monsters);
         // Should be sorted: closest first
-        $this->assertEquals("monster_goblin_1", $monsters[0]["id"]);
-        $this->assertEquals("monster_goblin_3", $monsters[1]["id"]);
-        $this->assertEquals("monster_goblin_2", $monsters[2]["id"]);
+        $this->assertEquals("monster_goblin_1", $monsters[0]["key"]);
+        $this->assertEquals("monster_goblin_3", $monsters[1]["key"]);
+        $this->assertEquals("monster_goblin_2", $monsters[2]["key"]);
     }
 
     // -------------------------------------------------------------------------
@@ -141,5 +141,4 @@ final class MonsterMovementTest extends TestCase {
         // Hero on the same hex counts as adjacent
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
-
 }

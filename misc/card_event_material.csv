@@ -21,13 +21,13 @@ num|hno|name|count|r|on|effect|flavour
 28|2|Agility|2|2move||Move 2 areas. Just because you can.|
 35|2|Back Down!|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
 30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
-27|2|Mastery|3|custom|EventActionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
+27|2|Mastery|3|4addRoll|EventActionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
 26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
 34|2|Piercing Arrows|2|counter(countRunes):addDamage|EventRoll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
 36|2|Prey|1|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 31|2|Rest|2|2heal(self)||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.
-33|2|Speedy Attack|2|custom||Discard another card from hand to perform an attack action.|
+33|2|Speedy Attack|2|discardEvent:actionAttack||Discard another card from hand to perform an attack action.|
 29|2|Take a Knee|2|custom||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.
 # Events - Embla (hno=3)
 30|3|Courage|2|2dealDamage(adj,'(rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.

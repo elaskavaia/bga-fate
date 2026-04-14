@@ -62,6 +62,7 @@ spendGold|Spend Gold
 gainDamage|Gain Damage
 spendAction|Spend Action
 roll|Roll Dice
+addRoll|Add Roll Dice
 resolveHits|Resolve Hits
 endOfAttack|End of Attack
 heal|Heal

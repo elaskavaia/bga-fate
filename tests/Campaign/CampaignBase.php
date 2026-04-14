@@ -171,7 +171,7 @@ abstract class CampaignBaseTest extends TestCase {
     protected function clearMonstersFromMap(): void {
         $monsters = $this->game->hexMap->getMonstersOnMap();
         foreach ($monsters as $m) {
-            $this->game->tokens->moveToken($m["id"], "supply_monster");
+            $this->game->tokens->moveToken($m["key"], "supply_monster");
         }
         $this->game->hexMap->invalidateOccupancy();
     }

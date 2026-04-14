@@ -25,7 +25,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_c_prey extends Operation {
     function getPrompt() {
-        return clienttranslate('Choose an undamaged rank 3 monster or Legend to mark');
+        return clienttranslate("Choose an undamaged rank 3 monster or Legend to mark");
     }
 
     function canSkip() {
@@ -35,7 +35,7 @@ class Op_c_prey extends Operation {
     function getPossibleMoves() {
         $targets = [];
         foreach ($this->game->hexMap->getMonstersOnMap() as $entry) {
-            $monsterId = $entry["id"];
+            $monsterId = $entry["key"];
             if (!$this->isValidTarget($monsterId)) {
                 continue;
             }

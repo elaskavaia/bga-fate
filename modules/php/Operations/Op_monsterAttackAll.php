@@ -19,13 +19,13 @@ class Op_monsterAttackAll extends Operation {
         }
         $monsters = $this->game->hexMap->getMonstersOnMap();
         foreach ($monsters as $m) {
-            $hex = $this->game->hexMap->getCharacterHex($m["id"]);
+            $hex = $this->game->hexMap->getCharacterHex($m["key"]);
             if ($hex === null) {
                 continue;
             }
-            $monster = $this->game->getMonster($m["id"]);
+            $monster = $this->game->getMonster($m["key"]);
             if ($this->game->hexMap->isCharacterTypeInRange($hex, $monster->getAttackRange(), "hero")) {
-                $this->queue("monsterAttack", null, ["char" => $m["id"]]);
+                $this->queue("monsterAttack", null, ["char" => $m["key"]]);
             }
         }
     }

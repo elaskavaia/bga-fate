@@ -43,7 +43,7 @@ class Op_monsterMoveAll extends Operation {
         }
 
         foreach ($monsters as $m) {
-            $monsterId = $m["id"];
+            $monsterId = $m["key"];
             $currentHex = $m["hex"];
 
             // Check if monster is stunned (green crystal = Suppressive Fire)

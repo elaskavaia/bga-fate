@@ -412,8 +412,8 @@ final class HexMapTest extends TestCase {
         $monsters = $this->game->hexMap->getMonstersOnMap();
         $this->assertCount(2, $monsters);
         // Closest first
-        $this->assertEquals("monster_goblin_2", $monsters[0]["id"]);
-        $this->assertEquals("monster_goblin_1", $monsters[1]["id"]);
+        $this->assertEquals("monster_goblin_2", $monsters[0]["key"]);
+        $this->assertEquals("monster_goblin_1", $monsters[1]["key"]);
     }
 
     public function testGetMonstersOnMapExcludesHeroes(): void {
@@ -423,7 +423,7 @@ final class HexMapTest extends TestCase {
 
         $monsters = $this->game->hexMap->getMonstersOnMap();
         $this->assertCount(1, $monsters);
-        $this->assertEquals("monster_goblin_1", $monsters[0]["id"]);
+        $this->assertEquals("monster_goblin_1", $monsters[0]["key"]);
     }
 
     // -------------------------------------------------------------------------

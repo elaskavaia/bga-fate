@@ -37,20 +37,36 @@ class Op_roll extends CountableOperation {
         return $hero->getRangeFromParam($this->getParam(0, "inRange"));
     }
 
+    /**
+     * Resolve the attacker token id: the `attacker` data field if set, otherwise
+     * the owner's hero. Asserts non-empty — a roll without an attacker is a bug.
+     */
+    private function getAttackerId(): string {
+        $attackerId = $this->getDataField("attacker") ?? $this->game->getHeroTokenId($this->getOwner());
+        $this->game->systemAssert("ERR:roll:noAttacker", $attackerId);
+        return $attackerId;
+    }
+
     function getPossibleMoves(): array {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
             return [$presetTarget];
         }
 
+        if ($this->isAddition()) {
+            $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+            if (count($diceOnDisplay) == 0) {
+                return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
+            }
+        }
+
+        $attackerId = $this->getAttackerId();
+
         // Monster attacking: find hero hexes in range (excluding Grimheim)
-        $attackerId = $this->getDataField("attacker") ?? $this->game->getHeroTokenId($this->getOwner());
-        if ($attackerId && getPart($attackerId, 0) === "monster") {
+        if (getPart($attackerId, 0) === "monster") {
             $monster = $this->game->getMonster($attackerId);
             $monsterHex = $monster->getHex();
-            if ($monsterHex === null) {
-                return [];
-            }
+            $this->game->systemAssert("ERR:roll:monsterNotOnMap:$attackerId", $monsterHex !== null);
             $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $monster->getAttackRange());
             $targets = [];
             foreach ($hexesInRange as $hex) {
@@ -77,11 +93,12 @@ class Op_roll extends CountableOperation {
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
         $this->game->systemAssert("ERR:roll:noCharOnHex:$targetHex", $defenderId !== null);
 
-        $attackerId = $this->getDataField("attacker") ?? $this->game->getHeroTokenId($this->getOwner());
+        $attackerId = $this->getAttackerId();
         $diceCount = (int) $this->getCount();
 
         // Roll dice onto display_battle
-        $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount);
+        $add = $this->isAddition();
+        $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount, $add);
 
         // Only trigger on player rolls (hero is attacker), not monster rolls
         if (str_starts_with($attackerId, "hero_")) {
@@ -97,10 +114,10 @@ class Op_roll extends CountableOperation {
             "attacker" => $attackerId,
             "target" => $targetHex,
         ]);
-
-        $this->game->customUndoSavepoint($this->getPlayerId(), 1, "roll");
     }
-
+    function isAddition() {
+        return false;
+    }
     public function getUiArgs() {
         return ["buttons" => false];
     }

@@ -352,18 +352,20 @@ class Game extends Base {
      * Roll attack dice onto display_battle. Does NOT count hits — that's done later by effect_resolveHits.
      * Cleans up leftover dice, announces the attack, picks dice from supply and rolls them.
      */
-    function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength): void {
+    function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength, bool $add = false): void {
         $this->notifyMessage(clienttranslate('${token_name} attacks ${token_name2} with strength ${strength}'), [
             "token_name" => $attackerId,
             "token_name2" => $defenderId,
             "strength" => $strength,
         ]);
 
-        // Clean up any leftover dice on display from a previous attack
-        $leftover = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
-        if (count($leftover) > 0) {
-            $leftoverKeys = array_map(fn($d) => $d["key"], $leftover);
-            $this->tokens->dbSetTokensLocation($leftoverKeys, "supply_die_attack", 6, "");
+        if (!$add) {
+            // Clean up any leftover dice on display from a previous attack
+            $leftover = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+            if (count($leftover) > 0) {
+                $leftoverKeys = array_map(fn($d) => $d["key"], $leftover);
+                $this->tokens->dbSetTokensLocation($leftoverKeys, "supply_die_attack", 6, "");
+            }
         }
 
         // Roll attack dice — pick from supply, then notify each with its roll result
@@ -372,6 +374,9 @@ class Game extends Base {
             $dieId = $die["key"];
             $this->effect_rollAttackDie($attackerId, $dieId);
         }
+
+        // global undo reset, information revealed
+        $this->customUndoSavepoint(0, 1, "roll");
     }
 
     function effect_rollAttackDie(string $attackerId, string $dieId): void {
