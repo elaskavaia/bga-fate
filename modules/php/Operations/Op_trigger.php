@@ -3,25 +3,24 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Trigger operation — fires automatically in response to a game event.
+ * Trigger operation — fires automatically in response to a published game event.
  *
  * Params:
- * - param(0): the trigger type (e.g. "actionAttack", "monsterAttack", "roll", "monsterMove", "turnEnd")
+ * - param(0): the Event wire value (e.g. "EventActionAttack", "EventRoll", "EventMonsterMove")
  *
  * Behaviour:
- * - Instantiates card that can have triggers
+ * - Converts the wire string back into an Event case at the boundary, then
+ *   walks every card in the owner's tableau + hand and dispatches onTrigger($event).
  */
 class Op_trigger extends Operation {
-    private function getTriggerType(): string {
-        return $this->getParam(0, "nop");
-    }
-
     function resolve(): void {
-        $triggerName = $this->getTriggerType();
-        $this->game->systemAssert("trigger required", $triggerName);
+        $wire = $this->getParam(0, "");
+        $this->game->systemAssert("trigger required", $wire !== "");
+        $event = Event::from($wire);
         $owner = $this->getOwner();
         $cards = array_merge(
             $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner"),
@@ -29,7 +28,7 @@ class Op_trigger extends Operation {
         );
         foreach ($cards as $cardId => $card) {
             $cardObj = $this->game->instantiateCard($card, $this);
-            $cardObj->onTrigger($triggerName);
+            $cardObj->onTrigger($event);
         }
     }
 }

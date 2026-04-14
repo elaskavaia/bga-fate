@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -42,7 +43,7 @@ class Op_resolveHits extends Operation {
             // Trigger damage prevention reactions for the defending hero
             $defenderOwner = str_starts_with($defenderId, "hero_") ? $this->game->getHeroOwner($defenderId) : null;
             if ($defenderOwner !== null) {
-                $this->queueTrigger(null, $defenderOwner, ["target" => $defenderId]);
+                $this->queueTrigger(Event::ResolveHits, $defenderOwner, ["target" => $defenderId]);
             }
 
             $this->queue("dealDamage", null, [

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -35,8 +36,16 @@ class Op_useCard extends Operation {
         return $cards;
     }
 
-    function getTriggers() {
-        return $this->getDataField("on", []);
+    /**
+     * Returns the list of Event cases this useCard prompt is offering.
+     * `on` data field stores wire-format strings (e.g. "EventActionAttack");
+     * convert them back to Event cases at this boundary.
+     *
+     * @return Event[]
+     */
+    function getTriggers(): array {
+        $wire = $this->getDataField("on", []);
+        return array_map(fn($w) => Event::from((string) $w), $wire);
     }
 
     function requireConfirmation() {
@@ -53,13 +62,14 @@ class Op_useCard extends Operation {
     }
 
     function getPossibleMoves() {
+        /** @var Event[] $triggers */
         $triggers = $this->getTriggers();
         if (empty($triggers)) {
-            $triggers = [""]; // manual activation — cards without `on` field match
+            $triggers = [Event::Manual]; // manual activation — cards without `on` field match
         }
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget => ["q" => 0, "trigger" => $triggers[0] ?? ""]];
+            return [$presetTarget => ["q" => 0, "trigger" => $triggers[0]->value]];
         }
 
         $owner = $this->getOwner();
@@ -70,7 +80,7 @@ class Op_useCard extends Operation {
             $cardId = $card["key"];
             $cardIns = $this->game->instantiateCard($card, $this);
             foreach ($triggers as $trigger) {
-                $info = ["q" => 0, "trigger" => $trigger];
+                $info = ["q" => 0, "trigger" => $trigger->value];
                 if ($cardIns->canBePlayed($trigger, $info)) {
                     $targets[$cardId] = $info;
                     break;
@@ -87,7 +97,8 @@ class Op_useCard extends Operation {
         $cardInst = $this->game->instantiateCard($cardId, $this);
 
         $info = $this->getArgsInfo()[$cardId];
-        $trigger = $info["trigger"] ?? "";
+        $triggerWire = $info["trigger"] ?? Event::Manual->value;
+        $trigger = Event::from($triggerWire);
         $cardInst->useCard($trigger);
     }
 

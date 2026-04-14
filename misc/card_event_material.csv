@@ -10,9 +10,9 @@ num|hno|name|count|r|on|effect|flavour
 29|1|Back Down|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
 28|1|Burning Arrows|4|c_arrows||Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.|Don't aim for too long!
 32|1|Limber Bow|2|2gainAtt(range)||You have attack range +2 this turn.|Twannng!
-26|1|Master Shot|4|2addDamage|actionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
-31|1|Perfect Aim|2|rerollMisses|roll|Reroll all misses.|Hitting where it hurts, not always in the head.
-33|1|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
+26|1|Master Shot|4|2addDamage|EventActionAttack|Add 2 damage to this attack action.|I wondered where the arrow went. Then it hit me…
+31|1|Perfect Aim|2|rerollMisses|EventRoll|Reroll all misses.|Hitting where it hurts, not always in the head.
+33|1|Piercing Arrows|2|counter(countRunes):addDamage|EventRoll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 25|1|Prey|2|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 27|1|Rest|2|2heal(self)||Heal 2 damage from Bjorn.|Sea therapy, works every time...
 34|1|Seek Shelter|1|[0,2]moveHero(locationOnly),0setAtt(move)||Move up to 2 areas into a location. You may not move more this turn.|Phew, lucky there was a cave here… Who's snoring?
@@ -21,9 +21,9 @@ num|hno|name|count|r|on|effect|flavour
 28|2|Agility|2|2moveHero||Move 2 areas. Just because you can.|
 35|2|Back Down!|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
 30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
-27|2|Mastery|3|custom|actionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
+27|2|Mastery|3|custom|EventActionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
 26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
-34|2|Piercing Arrows|2|counter(countRunes):addDamage|roll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
+34|2|Piercing Arrows|2|counter(countRunes):addDamage|EventRoll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
 36|2|Prey|1|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 31|2|Rest|2|2heal(self)||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.
@@ -33,16 +33,16 @@ num|hno|name|count|r|on|effect|flavour
 30|3|Courage|2|2dealDamage(adj,'(rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
 36|3|Durability|1|repairCard(max)||Remove all damage from an equipment card.|
 28|3|Kick|3|dealDamage(adj),moveMonster(marked)||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
-34|3|Magic Runes|2|custom|roll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
+34|3|Magic Runes|2|custom|EventRoll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
 27|3|Maneuver|2|1moveHero||Move 1 area.|Embla has a way of tackling her problems from many angles.
 37|3|Preparations|1|spendAction(actionPrepare):drawEvent(max)||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.
-31|3|Retaliation|3|2dealDamage(adj)|resolveHits|Play after an adjacent monster attacked you to deal 2 damage to it.|
+31|3|Retaliation|3|2dealDamage(adj)|EventResolveHits|Play after an adjacent monster attacked you to deal 2 damage to it.|
 29|3|Sophisticated|2|custom||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
 33|3|Speedy Attack|2|discardEvent:actionAttack||Discard another card from hand to perform an attack action.|
-32|3|Vigilance|2|dealDamage(adj)|monsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
+32|3|Vigilance|2|dealDamage(adj)|EventMonsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
 # Events - Boldur (hno=4)
-32|4|Berserk|3|custom|actionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
+32|4|Berserk|3|custom|EventActionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
 36|4|Boldur's Gate|1|custom||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
 35|4|Dodge|1|2preventDamage||Prevent up to 2 damage.|Did you miss me?
 34|4|Durability|1|repairCard(max)||Remove all damage from an equipment card.|Can't even handle the mead?
@@ -55,16 +55,16 @@ num|hno|name|count|r|on|effect|flavour
 37|4|Seek Shelter|1|[0,2]moveHero(locationOnly),0setAtt(move)||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.
 28|4|Short Temper|3|killMonster(adj,'healthRem<=2')||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.
 # Events - Finkel (hno=5) - expansion, not implemented
-#35|5|Blinding Flash|2|custom|resolveHits|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
+#35|5|Blinding Flash|2|custom|EventResolveHits|Play before a monster attacks you. Ignore the attack.|Survival tactic: flash someone!
 #30|5|Blown Away|2|custom||Move anyone within range 2 up to 2 areas.|His presence can do that to you.
 #36|5|Burning Aura|1|custom||After each step you take this turn, you and every adjacent character take 1 unpreventable damage.|He's so hot right now.
 #28|5|Chain Lightning|3|custom||Choose a monster within range 2. Roll 2[DIE_ATTACK] against it, and 2[DIE_ATTACK] against another monster adjacent to it.|If the voltage doesn't kill you, the electric bill will.
 #34|5|Durability|2|repairCard(max)||Remove all damage from an equipment card.|
-#33|5|Heat Death|2|custom|roll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
+#33|5|Heat Death|2|custom|EventRoll|Play when you rolled any [RUNE] against a non-Legend monster to kill it.|
 #31|5|Heat Stroke|2|custom||Remove 2 mana [MANA]. Roll 6[DIE_ATTACK] against an adjacent monster.|Monsters don't use sunblock. Too bad for them.
 #27|5|Lightning Bolt|3|dealDamage(inRange3)||Deal 1 damage to a monster within range 3.|You're in for a shock!
 #32|5|Power Surge|2|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
-#37|5|Quick Reflexes|1|1moveHero|monsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
+#37|5|Quick Reflexes|1|1moveHero|EventMonsterMove|After the Monsters Move step, move 1 area.|Now you see me, now you… still see me, but further away. Ain't that impressive?
 #29|5|Rain of Fire|2|custom||Deal 1 damage to each adjacent monster.|
 # Events - Sindra (hno=6) - expansion, not implemented
 #35|6|Alchemy|1|custom||Remove up to 5 mana [MANA] to gain that much gold [XP].|It is a golden opportunity.

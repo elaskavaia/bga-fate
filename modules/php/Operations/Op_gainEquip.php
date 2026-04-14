@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -65,6 +66,6 @@ class Op_gainEquip extends Operation {
         }
 
         $cardObj = $this->game->instantiateCard($card, $this);
-        $cardObj->onTrigger("enter");
+        $cardObj->onTrigger(Event::Enter);
     }
 }

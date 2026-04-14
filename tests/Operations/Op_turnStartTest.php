@@ -15,7 +15,7 @@ class Op_turnStartTest extends AbstractOpTestCase {
         $this->createOp("turnStart");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
-        $this->assertContains("trigger(turnStart)", $opTypes, "Should queue trigger(turnStart)");
+        $this->assertContains("trigger(EventTurnStart)", $opTypes, "Should queue trigger(turnStart)");
         $this->assertContains("turn", $opTypes, "Should queue turn");
     }
 
@@ -24,7 +24,7 @@ class Op_turnStartTest extends AbstractOpTestCase {
         $this->call_resolve();
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $triggerIdx = array_search("trigger(turnStart)", $opTypes);
+        $triggerIdx = array_search("trigger(EventTurnStart)", $opTypes);
         $turnIdx = array_search("turn", $opTypes);
         $this->assertLessThan($turnIdx, $triggerIdx, "trigger(turnStart) should be queued before turn");
     }

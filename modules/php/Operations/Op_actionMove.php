@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -48,7 +49,7 @@ class Op_actionMove extends Operation {
 
     function resolve(): void {
         $this->queue($this->getDelegateOperation(), null, ["target" => $this->getDataField("target", "")]);
-        $this->queueTrigger();
+        $this->queueTrigger(Event::ActionMove);
     }
 
     public function getUiArgs() {

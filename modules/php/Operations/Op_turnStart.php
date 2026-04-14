@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -25,7 +26,7 @@ class Op_turnStart extends Operation {
         return parent::auto();
     }
     function resolve(): void {
-        $this->queueTrigger("turnStart");
+        $this->queueTrigger(Event::TurnStart);
         $this->queue("turn");
     }
 }

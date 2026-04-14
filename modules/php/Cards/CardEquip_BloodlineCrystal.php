@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Cards;
 
 use Bga\Games\Fate\Model\CardGeneric;
+use Bga\Games\Fate\Model\Event;
 
 /**
  * Bloodline Crystal (card_equip_2_25)
@@ -29,16 +30,16 @@ use Bga\Games\Fate\Model\CardGeneric;
  * reports ERR_NOT_APPLICABLE when there are no dice on display_battle — so outside
  * an attack only the draw branch is selectable.
  *
- * This card listens on two triggers (both route through the generic useCard flow):
- *  - actionAttack: damage branch becomes viable mid-attack
- *  - manual (empty trigger): player activates as a free action at any time
+ * This card listens on two events (both route through the generic useCard flow):
+ *  - Event::ActionAttack: damage branch becomes viable mid-attack
+ *  - Event::Manual: player activates as a free action at any time
  */
 class CardEquip_BloodlineCrystal extends CardGeneric {
     public function onActionAttack(): void {
-        $this->onTriggerDefault("actionAttack");
+        $this->onTriggerDefault(Event::ActionAttack);
     }
 
     public function onManual(): void {
-        $this->onTriggerDefault("");
+        $this->onTriggerDefault(Event::Manual);
     }
 }

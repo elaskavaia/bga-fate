@@ -102,67 +102,62 @@ class Card {
     }
 
     /**
-     * Single entry point called by Op_trigger when a trigger fires for this card.
-     * Routes to on<TriggerName>() — e.g. trigger "enter" → onEnter().
+     * Single entry point called by Op_trigger when an event fires for this card.
+     * Routes to on<EventName>() — e.g. Event::Enter → onEnter().
      *
      * If the subclass does not implement the hook, falls back to onTriggerDefault().
-     *
-     * @param string $triggerName Trigger type, e.g. "enter", "roll", "actionAttack"
      */
-    public function onTrigger(string $triggerName): void {
-        if (!$this->canTriggerEffectOn($triggerName)) {
+    public function onTrigger(Event $event): void {
+        if (!$this->canTriggerEffectOn($event)) {
             return;
         }
-        $method = $this->getTriggerMethod($triggerName);
-        $this->callOnTriggerMethod($method, $triggerName);
+        $method = $this->getTriggerMethod($event);
+        $this->callOnTriggerMethod($method, $event);
     }
 
     /**
-     * Invoke a hook method, optionally passing $triggerName as a named argument
+     * Invoke a hook method, optionally passing $event as a named argument
      * if the method declares a parameter with that name.
      */
-    protected function callOnTriggerMethod(string $method, string $triggerName): void {
+    protected function callOnTriggerMethod(string $method, Event $event): void {
         $ref = new \ReflectionMethod($this, $method);
         foreach ($ref->getParameters() as $param) {
-            if ($param->getName() === "triggerName") {
-                $this->$method(triggerName: $triggerName);
+            if ($param->getName() === "event") {
+                $this->$method(event: $event);
                 return;
             }
         }
         $this->$method();
     }
 
-    function checkPlayability($triggerName) {
+    function checkPlayability(Event $event) {
         $errorRes = [];
-        if (!$this->canBePlayed($triggerName, $errorRes)) {
+        if (!$this->canBePlayed($event, $errorRes)) {
             throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be performed now"));
         }
     }
 
-    protected function getTriggerMethod(string $triggerName) {
-        if (!$triggerName) {
-            return "onManual";
-        }
-        $method = "on" . ucfirst($triggerName);
-        return $method;
+    /**
+     * Derive the on<EventName>() hook method name from an Event case.
+     * Uses the case `name` (e.g. Event::ActionAttack → "ActionAttack") so the hook
+     * derivation does not depend on the `Event` prefix in the wire-format value.
+     */
+    protected function getTriggerMethod(Event $event): string {
+        return "on" . $event->name;
     }
 
     /**
-     * Checks if card can be played with this trigger (empty string means can be played now)
-     * Can be triggered means it's a right trigger, but it may not be played which is another method
+     * Returns true if this card has a hook for the given event (and any extra
+     * preconditions on the event are met).
      */
-    public function canTriggerEffectOn(string $triggerName): bool {
-        $method = $this->getTriggerMethod($triggerName);
+    public function canTriggerEffectOn(Event $event): bool {
+        $method = $this->getTriggerMethod($event);
         if (method_exists($this, $method)) {
-            if ($triggerName == "enter") {
-                if ($this->op->getDataField("card", "") == $this->id) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
+            if ($event === Event::Enter) {
+                // Lifecycle event only fires for the card that just entered play.
+                return $this->op->getDataField("card", "") == $this->id;
             }
+            return true;
         }
 
         return false;
@@ -172,12 +167,12 @@ class Card {
      * Checks if card can be played and sets the error code. The difference is UX - it's better
      * to explain to the user why the card cannot be played, sometimes it's subtle
      */
-    public function canBePlayed(string $triggerName, ?array &$errorRes = null): bool {
+    public function canBePlayed(Event $event, ?array &$errorRes = null): bool {
         if (!$errorRes) {
             $errorRes = [];
         }
 
-        if (!$this->canTriggerEffectOn($triggerName)) {
+        if (!$this->canTriggerEffectOn($event)) {
             $errorRes["q"] = Material::ERR_PREREQ;
             $errorRes["err"] = clienttranslate("Cannot be used now");
             return false;
@@ -187,8 +182,8 @@ class Card {
         return true;
     }
 
-    public function useCard(string $triggerName, ?string $r = null, ?string $effect = null) {
-        $this->checkPlayability($triggerName);
+    public function useCard(Event $event, ?string $r = null, ?string $effect = null) {
+        $this->checkPlayability($event);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
         if ($effect === null) {
@@ -220,20 +215,20 @@ class Card {
         }
     }
 
-    function promptUseCard($triggerName) {
+    function promptUseCard(Event $event) {
         $owner = $this->getOwner();
         $action = "useCard";
 
         $alreadyOp = $this->game->machine->findOperation($owner, $action);
         if (!$alreadyOp) {
-            $this->queue($action, null, ["prompt" => true, "on" => [$triggerName]]);
+            $this->queue($action, null, ["prompt" => true, "on" => [$event->value]]);
         } else {
             $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
             $onarr = $op->getDataField("on", []);
-            if (in_array($triggerName, $onarr)) {
+            if (in_array($event->value, $onarr)) {
                 return;
             }
-            $onarr[] = $triggerName;
+            $onarr[] = $event->value;
             $op->withDataField("on", $onarr);
             $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
         }

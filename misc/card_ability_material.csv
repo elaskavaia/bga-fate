@@ -10,14 +10,14 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 # Abilities - Bjorn (hno=1)
 9|1|Eagle Eye I|1|||||You have attack range +1|If I can see it, I can hit it.
 10|1|Eagle Eye II|2|||||You have attack range +2. Always ignore the armor|Yeah, why shoot the armor?
-11|1|Long Shot I||||2addDamage(2)|actionAttack|Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.
-12|1|Long Shot II||||addDamage(dist)|actionAttack|Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).|Oh, and always ignore cover.
-13|1|Nailed Together I||||c_nailed|monsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).|
-14|1|Nailed Together II|2|||c_nailed(chain)|monsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.|
+11|1|Long Shot I||||2addDamage(2)|EventActionAttack|Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.
+12|1|Long Shot II||||addDamage(dist)|EventActionAttack|Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).|Oh, and always ignore cover.
+13|1|Nailed Together I||||c_nailed|EventMonsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).|
+14|1|Nailed Together II|2|||c_nailed(chain)|EventMonsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.|
 7|1|Stitching I||||heal(adj)/repairCard||Remove 1 damage from any hero or equipment within range 1.|If you're in a pinch, Bjorn can patch.
 8|1|Stitching II||||2heal(adj)/2repairCard/(heal(adj),repairCard)||Remove a total of 2 damage from heroes and equipment within range 1.|
-5|1|Suppressive Fire I||||c_supfire('rank<=2')|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
-6|1|Suppressive Fire II||||c_supfire|monsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
+5|1|Suppressive Fire I||||c_supfire('rank<=2')|EventMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
+6|1|Suppressive Fire II||||c_supfire|EventMonsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
 3|1|Sure Shot I|||1|3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
 4|1|Sure Shot II|||2|c_sureshotII||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
@@ -27,36 +27,36 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 4|2|Hail of Arrows II|||2|custom||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.|
 11|2|Snipe I||||2roll(inRange)||Roll 2[DIE_ATTACK] against a monster within attack range.|
 12|2|Snipe II||||5roll(inRange)||Roll 5[DIE_ATTACK] against a monster within attack range.|
-7|2|Starsong I||||custom|turnEnd|At the end of your turn, draw 1 additional card.|
-8|2|Starsong II||||custom|turnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
-9|2|Suppressive Fire I||||c_supfire('rank<=2')|monsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
-10|2|Suppressive Fire II||||c_supfire|monsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
+7|2|Starsong I||||custom|EventTurnEnd|At the end of your turn, draw 1 additional card.|
+8|2|Starsong II||||custom|EventTurnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
+9|2|Suppressive Fire I||||c_supfire('rank<=2')|EventMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
+10|2|Suppressive Fire II||||c_supfire|EventMonsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
 5|2|Treetreader I||2||custom||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
 6|2|Treetreader II||2||custom||Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.
 # Abilities - Embla (hno=3)
 7|3|Fleetfoot I||1||moveHero||Move 1 area.|Oh no, she's surrounding us!
 8|3|Fleetfoot II||3||moveHero||Move 1 area. You may always move into mountains and through occupied areas.|
-5|3|In Charge I||||custom|actionMove|After each move action, you may kill an adjacent rank 1 monster.|
-6|3|In Charge II||||custom|actionMove|After each move action, you may kill an adjacent rank 1 or rank 2 monster.|
+5|3|In Charge I||||custom|EventActionMove|After each move action, you may kill an adjacent rank 1 monster.|
+6|3|In Charge II||||custom|EventActionMove|After each move action, you may kill an adjacent rank 1 or rank 2 monster.|
 11|3|Queen of the Hill I||||custom||Deal 2 damage to an adjacent monster and switch places with it.|Let's dance...
 12|3|Queen of the Hill II||||custom||Deal 4 damage to an adjacent monster and switch places with it.|Another round? Ok!
-9|3|Reaper Swing I||||custom|actionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
-10|3|Reaper Swing II|3|||custom|actionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
-3|3|Riposte I|||1|2spendMana:(2preventDamage:2dealDamage)|resolveHits|2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.|
-4|3|Riposte II|||2|3spendMana:(3preventDamage:3dealDamage)|resolveHits|3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.
+9|3|Reaper Swing I||||custom|EventActionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
+10|3|Reaper Swing II|3|||custom|EventActionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|
+3|3|Riposte I|||1|2spendMana:(2preventDamage:2dealDamage)|EventResolveHits|2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.|
+4|3|Riposte II|||2|3spendMana:(3preventDamage:3dealDamage)|EventResolveHits|3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.|What goes around comes around... with interest.
 13|3|Swift Kick I||||dealDamage(adj,not_legend),moveMonster(marked)||Deal 1 damage to an adjacent non-legend monster and move it 1 area.|
 14|3|Swift Kick II||||2dealDamage(adj,not_legend),2moveMonster(marked)||Deal 2 damage to an adjacent non-legend monster and move it 2 areas.|
 # Abilities - Boldur (hno=4)
 9|4|Beefy Berserker I|1|||||Runes [RUNE] always count as hits for you. Because that's the way you roll.|
 10|4|Beefy Berserker II|3|||||Runes [RUNE] always count as hits for you. It runes in the family.|
-11|4|Dreadnought I|||1|spendMana:preventDamage|resolveHits|1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.
-12|4|Dreadnought II|||1|spendMana:(preventDamage,custom)|resolveHits|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
+11|4|Dreadnought I|||1|spendMana:preventDamage|EventResolveHits|1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.
+12|4|Dreadnought II|||1|spendMana:(preventDamage,custom)|EventResolveHits|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
 13|4|Fortified I||||1heal(self)||Heal 1 damage from Boldur.|It's not hiding, it's strategic positioning.
 14|4|Fortified II|1|2||1heal(self)||Heal 1 damage from Boldur.|
 3|4|Rapid Strike I|||1|3spendMana:performAction(actionAttack)||3[MANA]: Perform an attack action.|
 4|4|Rapid Strike II|||1|2spendMana:performAction(actionAttack)||2[MANA]: Perform an attack action. May be used several times per turn.|
-5|4|Sweeping Strike I||||custom|actionAttack|Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
-6|4|Sweeping Strike II||||custom|actionAttack|Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
+5|4|Sweeping Strike I||||custom|EventActionAttack|Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
+6|4|Sweeping Strike II||||custom|EventActionAttack|Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
 7|4|Wrecking Ball I||||custom||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area.|He's on a roll!
 8|4|Wrecking Ball II||||custom||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1.|
 # Abilities - Finkel (hno=5) - expansion, not implemented
@@ -81,7 +81,7 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 #14|6|Discipline II||||custom||Add 1 mana [MANA] to any card, gain 1 experience [XP], and draw 1 card.|
 #11|6|Meditation I|||1|custom||Freely move mana [MANA] from Meditation to other cards.|Meditating? Sleeping? Both do wonders for you.
 #12|6|Meditation II|||2|custom||Freely move mana [MANA] between your cards.|"Repeat until you reach enlightenment: ""Wah Tefu Layam""."
-#3|6|Spark I|||1|2spendMana:2addDamage|actionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
-#4|6|Spark II|||2|[1,3](spendMana:addDamage)|actionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
+#3|6|Spark I|||1|2spendMana:2addDamage|EventActionAttack|2[MANA]: Add 2 damage to this attack action.|A spark is all it takes.
+#4|6|Spark II|||2|[1,3](spendMana:addDamage)|EventActionAttack|1-3[MANA]: Add that much damage to this attack action.|Some people just have that spark.
 #9|6|Stonesoul I|||1|custom||1[MANA]: If you stand adjacent to a mountain, deal 1 damage to a monster within range 2. May be used once per monster.|Her feet are firmly planted in midair.
 #10|6|Stonesoul II|||2|custom||2[MANA]: If you stand adjacent to a mountain, deal 2 damage to a monster within range 2. May be used once per monster.|She's completely stoned…

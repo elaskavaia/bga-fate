@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Event;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -34,7 +35,7 @@ class Op_turnMonster extends Operation {
         // Effects: maneuver CW/CCW, attack +1, charge rank 1, push, ambush
         // Pre-movement trigger: Suppressive Fire and similar abilities
         foreach ($this->game->getPlayerColors() as $color) {
-            $this->queue("trigger(monsterMove)", $color);
+            $this->queueTrigger(Event::MonsterMove, $color);
         }
         $this->queue("monsterMoveAll", null, ["charge" => $isChargeTurn]);
         $this->queue("monsterAttackAll");

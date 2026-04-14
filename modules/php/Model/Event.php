@@ -14,9 +14,33 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Model;
 
-use Bga\Games\Fate\Game;
-
 /**
- * Base class for Card Event
+ * Published game events that cards can react to via on<EventName>() hooks.
+ *
+ * The case `name` (e.g. "ActionAttack") is used by Card::getTriggerMethod() to derive
+ * the hook method name ("onActionAttack"). The case `value` (e.g. "EventActionAttack")
+ * is the wire format used in CSV `on` columns and serialized op-machine expressions
+ * like trigger(EventActionAttack).
+ *
+ * The `Event` prefix exists to disambiguate event names from operation type names,
+ * which previously shared the same string namespace (e.g. both an Op_actionAttack
+ * operation and an "actionAttack" trigger).
  */
-class Event extends Card {}
+enum Event: string {
+    case ActionAttack = "EventActionAttack";
+    case ActionMove = "EventActionMove";
+    case Roll = "EventRoll";
+    case ResolveHits = "EventResolveHits";
+    case TurnEnd = "EventTurnEnd";
+    case TurnStart = "EventTurnStart";
+    case MonsterMove = "EventMonsterMove";
+    case MonsterKilled = "EventMonsterKilled";
+    case Enter = "EventEnter";
+    /**
+     * Synthetic "event" representing manual activation from the useCard free-action
+     * prompt. Never published via Op_trigger and never appears in the CSV `on` column —
+     * it exists so that `getTriggerMethod(Event::Manual)` derives the `onManual` hook
+     * the same way real events derive `onRoll`, `onActionAttack`, etc.
+     */
+    case Manual = "EventManual";
+}

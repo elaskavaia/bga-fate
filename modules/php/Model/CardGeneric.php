@@ -21,47 +21,51 @@ use Bga\Games\Fate\Material;
  * modules/php/Cards/. Inherits all default Card behavior.
  */
 class CardGeneric extends Card {
-    public function onTrigger(string $triggerName): void {
-        $method = $this->getTriggerMethod($triggerName);
+    public function onTrigger(Event $event): void {
+        $method = $this->getTriggerMethod($event);
         if (!method_exists($this, $method)) {
-            $this->onTriggerDefault($triggerName);
+            $this->onTriggerDefault($event);
             return;
         }
 
-        $this->callOnTriggerMethod($method, $triggerName);
+        $this->callOnTriggerMethod($method, $event);
     }
-    public function onTriggerDefault(string $triggerName): void {
-        if ($triggerName === "enter") {
+    public function onTriggerDefault(Event $event): void {
+        if ($event === Event::Enter) {
             return; // lifecycle event - handled only by card on itself
         }
 
-        if (!$this->canBePlayed($triggerName)) {
+        if (!$this->canBePlayed($event)) {
             return;
         }
 
-        $this->promptUseCard($triggerName);
+        $this->promptUseCard($event);
     }
 
-    public function canTriggerEffectOn(string $triggerName): bool {
-        if (parent::canTriggerEffectOn($triggerName)) {
+    public function canTriggerEffectOn(Event $event): bool {
+        if (parent::canTriggerEffectOn($event)) {
             return true;
         }
         $cardId = $this->id;
         $on = $this->game->material->getRulesFor($cardId, "on", "");
-        if ($on === $triggerName) {
+        // Manual play: generic cards with no `on` field are offered as free-action useCard targets.
+        if ($event === Event::Manual && $on === "") {
+            return true;
+        }
+        if ($on === $event->value) {
             return true;
         }
 
         return false;
     }
-    public function canBePlayed(string $triggerName, ?array &$errorRes = null): bool {
-        if (!parent::canBePlayed($triggerName, $errorRes)) {
+    public function canBePlayed(Event $event, ?array &$errorRes = null): bool {
+        if (!parent::canBePlayed($event, $errorRes)) {
             return false;
         }
         $cardId = $this->id;
         $on = $this->game->material->getRulesFor($cardId, "on", "");
 
-        // Cards without a trigger can only be used once per turn
+        // Cards without a published-event trigger can only be used once per turn
         if (!$on && $this->getState() == 1) {
             $errorRes["q"] = Material::ERR_OCCUPIED;
             $errorRes["err"] = clienttranslate("Already Used");

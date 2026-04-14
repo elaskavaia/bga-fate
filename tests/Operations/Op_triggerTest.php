@@ -43,7 +43,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
-        $this->createOp("trigger(resolveHits)");
+        $this->createOp("trigger(EventResolveHits)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
         $this->assertContains("useCard", $opTypes);
@@ -56,7 +56,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     public function testDispatcherWalksHandAndQueuesPlayEvent(): void {
         // Perfect Aim (card_event_1_31) has on=roll, lives in hand.
         $this->game->tokens->moveToken("card_event_1_31", "hand_" . $this->owner);
-        $this->createOp("trigger(roll)");
+        $this->createOp("trigger(EventRoll)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
         $this->assertContains("useCard", $opTypes);
@@ -69,7 +69,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
     public function testDispatcherSkipsNonMatchingCards(): void {
         // Riposte I has on=resolveHits; no Bjorn starting card has on=monsterKilled.
         $this->game->tokens->moveToken("card_ability_3_3", $this->getPlayersTableau());
-        $this->createOp("trigger(monsterKilled)");
+        $this->createOp("trigger(EventMonsterKilled)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));
         $this->assertNotContains("useCard", $opTypes);
@@ -85,7 +85,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->call_resolve("hex_12_8");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("trigger(roll)", $opTypes);
+        $this->assertContains("trigger(EventRoll)", $opTypes);
     }
 
     public function testRollDoesNotQueueTriggerForMonsterAttack(): void {
@@ -94,7 +94,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->call_resolve("hex_11_8");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertNotContains("trigger(roll)", $opTypes);
+        $this->assertNotContains("trigger(EventRoll)", $opTypes);
     }
 
     // -------------------------------------------------------------------------
@@ -106,7 +106,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->call_resolve("hex_10_9");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("trigger(actionMove)", $opTypes);
+        $this->assertContains("trigger(EventActionMove)", $opTypes);
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +118,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->call_resolve("confirm");
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("trigger(turnEnd)", $opTypes);
+        $this->assertContains("trigger(EventTurnEnd)", $opTypes);
     }
 
     // -------------------------------------------------------------------------
@@ -131,6 +131,6 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $op->resolve();
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
-        $this->assertContains("trigger(monsterMove)", $opTypes);
+        $this->assertContains("trigger(EventMonsterMove)", $opTypes);
     }
 }
