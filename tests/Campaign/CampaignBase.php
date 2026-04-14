@@ -52,7 +52,7 @@ abstract class CampaignBaseTest extends TestCase {
                 $this->assertArrayHasKey(
                     $name,
                     $args,
-                    "Notification #$idx ({$notif["type"]}) template \"$log\" references \${{$name}} but no matching arg was provided",
+                    "Notification #$idx ({$notif["type"]}) template \"$log\" references \${{$name}} but no matching arg was provided"
                 );
             }
         }
@@ -121,9 +121,9 @@ abstract class CampaignBaseTest extends TestCase {
         $this->assertNotContains($target, $args["target"] ?? [], $message ?: "$target should not be a valid target");
     }
 
-    /** Get the color of the current player */
-    protected function playerColor(): string {
-        return $this->game->getPlayerColorById((int) $this->game->getCurrentPlayerId());
+    /** Get the color of the active player */
+    protected function getActivePlayerColor(): string {
+        return $this->game->getPlayerColorById((int) $this->game->getCurrentPlayerId()); // XXX use current for now
     }
 
     /** Get token location */
@@ -143,7 +143,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /** Count XP (yellow crystals) on current player's tableau */
     protected function countXp(): int {
-        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->playerColor()));
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . $this->getActivePlayerColor()));
     }
 
     /** Place specific cards on top of a deck (first in array = top of deck) */

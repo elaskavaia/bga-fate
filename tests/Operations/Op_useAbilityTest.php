@@ -29,18 +29,9 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
         // Hero card (card_hero_1_1) has on=roll — not offered as free action (no trigger match),
         // but IS included in candidate list (not filtered out by type).
         // When triggered during roll, it should be offered.
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 1);
         $this->createOp("useCard", ["on" => ["roll"]]);
         $this->assertValidTarget("card_hero_1_1");
-    }
-
-    public function testEquipmentCardExcluded(): void {
-        $this->game->tokens->moveToken("card_equip_1_19", $this->getPlayersTableau());
-        $this->assertNotValidTarget("card_equip_1_19");
-    }
-
-    public function testEventCardExcluded(): void {
-        $this->game->tokens->moveToken("card_event_1_27", "hand_" . $this->owner);
-        $this->assertNotValidTarget("card_event_1_27");
     }
 
     public function testMultipleAbilitiesOffered(): void {

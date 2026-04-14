@@ -42,25 +42,6 @@ class CardGeneric extends Card {
         $this->promptUseCard($triggerName);
     }
 
-    function promptUseCard($triggerName) {
-        $owner = $this->getOwner();
-        $action = "useCard";
-
-        $alreadyOp = $this->game->machine->findOperation($owner, $action);
-        if (!$alreadyOp) {
-            $this->queue($action, null, ["prompt" => true, "on" => [$triggerName]]);
-        } else {
-            $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
-            $onarr = $op->getDataField("on", []);
-            if (in_array($triggerName, $onarr)) {
-                return;
-            }
-            $onarr[] = $triggerName;
-            $op->withDataField("on", $onarr);
-            $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
-        }
-    }
-
     public function canTriggerEffectOn(string $triggerName): bool {
         if (parent::canTriggerEffectOn($triggerName)) {
             return true;

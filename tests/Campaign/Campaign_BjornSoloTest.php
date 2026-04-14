@@ -14,7 +14,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     protected function setUp(): void {
         parent::setUp();
         $this->setupGame([1]); // Solo Bjorn
-        $this->heroId = $this->game->getHeroTokenId($this->playerColor());
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
         // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
@@ -24,12 +24,12 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             "card_monster_10", // Burnt Offerings
         ]);
         // Seed event deck with non-custom cards (Rest x2) to avoid Op_custom errors
-        $this->seedDeck("deck_event_" . $this->playerColor(), [
+        $this->seedDeck("deck_event_" . $this->getActivePlayerColor(), [
             "card_event_1_27_1", // Rest
             "card_event_1_27_2", // Rest
         ]);
         // Clear random event cards from hand to avoid flaky triggers
-        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->playerColor());
+        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->getActivePlayerColor());
         foreach ($hand as $card) {
             $this->game->tokens->moveToken($card["key"], "limbo");
         }
@@ -131,12 +131,12 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals(5, $this->countDamage($troll));
 
         // Focus action was spent
-        $hero = $this->game->getHero($this->playerColor());
+        $hero = $this->game->getHero($this->getActivePlayerColor());
         $this->assertContains("actionFocus", $hero->getActionsTaken());
     }
 
     public function testEagleEyeIAddsStrength(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place Eagle Eye I on tableau
         $this->game->tokens->moveToken("card_ability_1_9", "tableau_$color");
         $hero = $this->game->getHero($color);
@@ -152,7 +152,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testEagleEyeIIAddsStrength(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_ability_1_10", "tableau_$color");
         $hero = $this->game->getHero($color);
         $hero->recalcTrackers();
@@ -163,7 +163,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     public function testLongShotINotOfferedAtRange1(): void {
         $this->clearMonstersFromMap();
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place both Long Shot cards on tableau — II ensures trigger isn't void
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
         $this->game->tokens->moveToken("card_ability_1_12", "tableau_$color");
@@ -191,7 +191,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     public function testLongShotIOfferedAtRange2(): void {
         $this->clearMonstersFromMap();
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place Long Shot I on tableau
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
         // Use both action markers
@@ -220,7 +220,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     public function testNailedTogetherIPiercesDamage(): void {
         $this->clearMonstersFromMap();
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place Nailed Together I on tableau
         $this->game->tokens->moveToken("card_ability_1_13", "tableau_$color");
         // Use both action markers so only attack is available
@@ -261,7 +261,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     public function testNailedTogetherIIChainWithChoice(): void {
         $this->clearMonstersFromMap();
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place Nailed Together II on tableau
         $this->game->tokens->moveToken("card_ability_1_14", "tableau_$color");
         $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
@@ -330,7 +330,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $trollHex = "hex_7_9";
 
         // Upgrade hero card: swap level I for level II
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_hero_1_1", "limbo");
         $this->game->tokens->moveToken("card_hero_1_2", "tableau_$color");
 
@@ -348,7 +348,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals($trollHex, $this->tokenLocation($troll));
         $this->assertEquals(6, $this->countDamage($troll));
 
-        $hero = $this->game->getHero($this->playerColor());
+        $hero = $this->game->getHero($this->getActivePlayerColor());
         $this->assertContains("actionFocus", $hero->getActionsTaken());
     }
 
@@ -365,7 +365,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Rest card should now be in hand
         $restCard = "card_event_1_27_1";
-        $this->assertEquals("hand_" . $this->playerColor(), $this->tokenLocation($restCard));
+        $this->assertEquals("hand_" . $this->getActivePlayerColor(), $this->tokenLocation($restCard));
 
         // End turn (skip free actions)
         $this->skip();
@@ -378,7 +378,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     // --- Suppressive Fire I/II (card_ability_1_5 / card_ability_1_6) ---
 
     public function testSuppressiveFireIPreventsMonsterMovement(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Place Suppressive Fire I on tableau
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
@@ -429,7 +429,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testSuppressiveFireCannotChooseSameMonsterNextTurn(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
         $goblin = "monster_goblin_20";
@@ -478,7 +478,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testSuppressiveFireIExcludesRank3(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
         // Only a troll (rank 3) in range — Level I should not offer it
@@ -498,7 +498,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testSuppressiveFireSkipRemovesCrystal(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
         $goblin = "monster_goblin_20";
@@ -551,7 +551,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     // --- Stitching I/II (card_ability_1_7 / card_ability_1_8) ---
 
     public function testStitchingIAutoHealsWhenOnlyHeroDamaged(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
         $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
 
@@ -562,7 +562,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testStitchingIChooseHealOverRepair(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $equipCard = "card_equip_1_15";
         $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
         $this->game->tokens->dbSetTokenLocation($equipCard, "tableau_$color", 0);
@@ -578,7 +578,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testStitchingIChooseRepairOverHeal(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $equipCard = "card_equip_1_15";
         $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
         $this->game->tokens->dbSetTokenLocation($equipCard, "tableau_$color", 0);
@@ -594,7 +594,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testStitchingINotOfferedWhenNoDamage(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
         $this->assertEquals(0, $this->countDamage($this->heroId));
 
@@ -602,7 +602,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testStitchingICannotBeUsedTwicePerTurn(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
         $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
 
@@ -700,7 +700,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     // --- Sure Shot II (card_ability_1_4) ---
 
     public function testSureShotIISelectMonsterThenMana(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $sureShotId = "card_ability_1_4";
 
         // Swap Sure Shot I for Sure Shot II on tableau
@@ -737,7 +737,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testStitchingIIHealsTwoDamage(): void {
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_8", "tableau_$color", 0);
         $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
 

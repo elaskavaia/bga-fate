@@ -481,20 +481,104 @@ See CLAUDE.md for project overview
 
 [ ] Add hero card sprites for heroes 2, 3, 4 — img/<hero>\_hero_cards.jpg
 
-### Server
+### Server Hero 2 - Alva
 
-[ ] Hero 2: card data, abilities, equipment, events, all effects
+Verify each of Alva's cards works correctly.
+Same rules as Bjorn validation (see below):
+
+- custom should not be part of r — it should be implemented first
+- the rule (r) actually does what the text description says
+- if triggered, tests should exist for all trigger conditions and negative conditions
+- make sure it resolves properly using integration test
+
+#### Hero Cards
+
+<!-- r=passive (bonus triggers via effect text, not r column) — needs custom handling -->
+
+[ ] card_hero_2_1 Alva Hero I — r=(none), on=(none), effect: end move action in forest → add 1 mana to any card (custom trigger)
+[ ] card_hero_2_2 Alva Hero II — r=(none), on=(none), effect: end any movement in forest → add 1 mana to any card (custom trigger)
+
+#### Equipment Cards (use)
+
+<!-- r=passive: no r field, just stat bonuses -->
+
+[x] card_equip_2_15 Alva's First Bow — passive (strength + range bonus), r=(none), has tests
+[x] card_equip_2_24 Elven Arrows — passive (strength +2), r=(none), has tests
+
+<!-- r=gainDamage:effect — standard durability-cost ops -->
+
+[x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=gainDamage:3roll(adj), has tests
+
+<!-- r=heal/addDamage — direct effects -->
+
+[ ] card_equip_2_22 Belt of Youth — durability: heal 1 from Alva, r=1heal(self)
+
+<!-- r=spendMana:effect — mana-cost activations -->
+
+[ ] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action, r=3spendMana:performAction(actionAttack)
+
+<!-- r=custom — needs custom operation implementation -->
+
+[ ] card_equip_2_18 Quiver — custom: durability: add 1 damage to attack, on=actionAttack
+[x] card_equip_2_25 Bloodline Crystal — r=(3spendMana:2addDamage)/(3spendMana:drawEvent), on=custom, bespoke class routes actionAttack+manual via CardGeneric. Has tests
+[ ] card_equip_2_21 Elven Blade — custom: after each attack, deal 1 damage to monster adjacent to Alva, on=actionAttack
+[ ] card_equip_2_20 Singing Bow — custom: main weapon, after each attack add 1 mana to any card, on=actionAttack
+[ ] card_equip_2_16 Tiara — custom: starts with 6 gold, gain 1 gold per turn (bespoke onEnter + turnStart)
+[ ] card_equip_2_19 Windbite — custom: main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune
+
+#### Ability Cards
+
+<!-- r=standard — direct effects -->
+
+[ ] card_ability_2_11 Snipe I — roll 2 dice vs monster in range, r=2roll(inRange)
+[ ] card_ability_2_12 Snipe II — roll 5 dice vs monster in range, r=5roll(inRange)
+
+<!-- r=triggered — c_supfire (shared with Bjorn) -->
+
+[ ] card_ability_2_9 Suppressive Fire I — r=c_supfire('rank<=2'), on=monsterMove
+[ ] card_ability_2_10 Suppressive Fire II — r=c_supfire, on=monsterMove
+
+<!-- r=custom — needs custom operation implementation -->
+
+[ ] card_ability_2_13 Flexibility I — custom: 1[MANA]:move+1 / 2[MANA]:range+1 / 2[MANA]:+2 damage
+[ ] card_ability_2_14 Flexibility II — custom: Flexibility I effects + 2[MANA]:draw 1 card
+[ ] card_ability_2_3 Hail of Arrows I — custom: 3[MANA]: deal 1 damage to 3 monsters in range
+[ ] card_ability_2_4 Hail of Arrows II — custom: 1-4[MANA]: deal 1 damage to that many different monsters in range
+[ ] card_ability_2_7 Starsong I — custom: draw 1 additional card at turn end, on=turnEnd
+[ ] card_ability_2_8 Starsong II — custom: draw 2 additional cards at turn end + 5 card hand max, on=turnEnd
+[ ] card_ability_2_5 Treetreader I — custom: move into or out of adjacent forest
+[ ] card_ability_2_6 Treetreader II — custom: Treetreader I + heal 1 when moving into forest
+
+#### Event Cards
+
+<!-- r=standard — direct effects -->
+
+[ ] card_event_2_28 Agility — move 2 areas, r=2moveHero
+[ ] card_event_2_35 Back Down! — kill rank<=2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
+[ ] card_event_2_30 Inspire Defense — spend 2[MANA] in Grimheim to add town piece, r=2spendMana(grimheim):addTownPiece
+[ ] card_event_2_32 Popular — gain 2[XP] in Grimheim, r=2gainXp(grimheim)
+[ ] card_event_2_31 Rest — heal 2 from Alva, r=2heal(self)
+
+<!-- r=triggered -->
+
+[ ] card_event_2_34 Piercing Arrows — add 1 damage per [RUNE], r=counter(countRunes):addDamage, on=roll
+[ ] card_event_2_36 Prey — mark undamaged rank 3/Legend with 2 gold, r=c_prey
+
+<!-- r=custom — needs custom operation implementation -->
+
+[ ] card_event_2_27 Mastery — custom: add 4[DIE_ATTACK] to this attack, on=actionAttack
+[ ] card_event_2_26 Multi-Shot — custom: roll 2[DIE_ATTACK] against each of up to 2 monsters in range
+[ ] card_event_2_33 Speedy Attack — custom: discard another card to perform attack action
+[ ] card_event_2_29 Take a Knee — custom: prevent non-Legend monster in range from moving this monster turn
+
+### Server Hero 3
+
 [ ] Hero 3: same
+
+### Server Hero 4
+
 [ ] Hero 4: same
 
-### Client
-
-[ ] Hero-specific card art/styling
-
-### Tests
-
-[ ] Test each hero independently
-[ ] Test hero combinations
 
 ---
 
@@ -568,41 +652,6 @@ Hero, Abilities and Equipment:
 - if triggered, test should exists for all trigger conditions and negative conditions
 - make sure it resolves propertly using integration test
 
-### Hero Cards
-
-[x] card_hero_1_1 Bjorn I — spend focus action after dice roll to add 2 damage
-[x] card_hero_1_2 Bjorn II — upgraded: 3 damage
-
-### Ability Cards
-
-[x] card_ability_1_9 Eagle Eye I — passive (strength bonus only)
-[x] card_ability_1_10 Eagle Eye II — passive (strength bonus only)
-[x] card_ability_1_11 Long Shot I — add 2 damage if target at range 2+
-[x] card_ability_1_12 Long Shot II — add damage equal to distance
-[x] card_ability_1_13 Nailed Together I — custom: remaining damage pierces to next monster
-[x] card_ability_1_14 Nailed Together II — custom: chain pierce
-[x] card_ability_1_7 Stitching I — heal 1 from adjacent hero/equipment
-[x] card_ability_1_8 Stitching II — heal 2
-[x] card_ability_1_5 Suppressive Fire I — prevent rank 1-2 monster within range 3 from moving (on=monsterMove trigger)
-[x] card_ability_1_6 Suppressive Fire II — prevent any monster within range 3 from moving (on=monsterMove trigger)
-[x] card_ability_1_3 Sure Shot I — 3 mana: deal 3 damage in range
-[x] card_ability_1_4 Sure Shot II — custom: 2-4 mana: deal that much damage
-
-### Event Cards
-
-[x] card_event_1_27 Rest — heal 2 from Bjorn, r=2heal(self), has tests
-[x] card_event_1_29 Back Down — kill rank 1-2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
-[x] card_event_1_28 Burning Arrows — custom: 1 damage (2 in forest), r=c_arrows
-[x] card_event_1_31 Perfect Aim — rerollMisses, r=rerollMisses
-
-<!-- r=custom — needs custom operation implementation -->
-
-[x] card_event_1_32 Limber Bow — attack range +2 this turn, r=2gainAtt(range)
-[x] card_event_1_26 Master Shot — custom: add 2 damage to attack - verify
-[x] card_event_1_33 Piercing Arrows — r=counter(countRunes):addDamage, has tests
-[x] card_event_1_25 Prey — mark undamaged rank 3/legend for +2 XP, r=c_prey, has tests
-[x] card_event_1_34 Seek Shelter — move up to 2 into a named location, blocks further moves this turn, r=[0,2]moveHero(locationOnly),0setAtt(move)
-[x] card_event_1_30 Sewing — remove 1 damage from each card, r=1repairCard(all)
 
 ### Equipment Cards (use)
 

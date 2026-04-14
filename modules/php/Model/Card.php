@@ -187,11 +187,13 @@ class Card {
         return true;
     }
 
-    public function useCard(string $triggerName) {
+    public function useCard(string $triggerName, ?string $r = null, ?string $effect = null) {
         $this->checkPlayability($triggerName);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
-        $effect = $this->game->material->getRulesFor($cardId, "effect", "");
+        if ($effect === null) {
+            $effect = $this->game->material->getRulesFor($cardId, "effect", clienttranslate("custom"));
+        }
         if ($this->isEvent()) {
             $message = clienttranslate('${char_name} plays event ${token_name}: ${effect_text}');
         } else {
@@ -202,7 +204,9 @@ class Card {
             "token_name" => $cardId,
             "effect_text" => $effect,
         ]);
-        $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+        if ($r === null) {
+            $r = $this->game->material->getRulesFor($cardId, "r", "nop");
+        }
         $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
 
         if ($this->isEvent()) {
@@ -213,6 +217,25 @@ class Card {
                 //mark card as used, as these can only be used once per turn
                 $this->setUsed(true);
             }
+        }
+    }
+
+    function promptUseCard($triggerName) {
+        $owner = $this->getOwner();
+        $action = "useCard";
+
+        $alreadyOp = $this->game->machine->findOperation($owner, $action);
+        if (!$alreadyOp) {
+            $this->queue($action, null, ["prompt" => true, "on" => [$triggerName]]);
+        } else {
+            $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
+            $onarr = $op->getDataField("on", []);
+            if (in_array($triggerName, $onarr)) {
+                return;
+            }
+            $onarr[] = $triggerName;
+            $op->withDataField("on", $onarr);
+            $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
         }
     }
 

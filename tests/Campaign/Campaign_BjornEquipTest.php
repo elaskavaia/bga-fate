@@ -15,7 +15,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
     protected function setUp(): void {
         parent::setUp();
         $this->setupGame([1]); // Solo Bjorn
-        $this->heroId = $this->game->getHeroTokenId($this->playerColor());
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
         // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
@@ -25,12 +25,12 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
             "card_monster_10", // Burnt Offerings
         ]);
         // Seed event deck with non-custom cards (Rest x2) to avoid Op_custom errors
-        $this->seedDeck("deck_event_" . $this->playerColor(), [
+        $this->seedDeck("deck_event_" . $this->getActivePlayerColor(), [
             "card_event_1_27_1", // Rest
             "card_event_1_27_2", // Rest
         ]);
         // Clear random event cards from hand to avoid flaky triggers
-        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->playerColor());
+        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->getActivePlayerColor());
         foreach ($hand as $card) {
             $this->game->tokens->moveToken($card["key"], "limbo");
         }
@@ -41,7 +41,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testHomeSewnCapeGainsManaPerRuneRolled(): void {
         $cape = "card_equip_1_24";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($cape, "tableau_$color");
 
         // Place a goblin adjacent so the attack has a target.
@@ -69,7 +69,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testBlackArrowsOnEnterSeeds3Arrows(): void {
         $blackArrows = "card_equip_1_20";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
 
         // Card starts in supply — no yellow crystals on it
         $this->assertEquals(0, $this->countTokens("crystal_yellow", $blackArrows));
@@ -86,7 +86,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testBlackArrowsSpendArrowAdds3Damage(): void {
         $blackArrows = "card_equip_1_20";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $goblin = "monster_goblin_20";
         $heroHex = "hex_5_9";
         $goblinHex = "hex_5_8";
@@ -124,7 +124,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testBlackArrowsNotOfferedWhenNoArrows(): void {
         $blackArrows = "card_equip_1_20";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $goblin = "monster_goblin_20";
         $heroHex = "hex_5_9";
         $goblinHex = "hex_5_8";
@@ -150,7 +150,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testTrollbaneOfferedWhenAttackingTrollkin(): void {
         $trollbane = "card_equip_1_22";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
         // Place a goblin (trollkin) adjacent
@@ -177,7 +177,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testTrollbaneNotOfferedAgainstNonTrollkin(): void {
         $trollbane = "card_equip_1_22";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
         // Place a sprite (firehorde, not trollkin) adjacent
@@ -203,7 +203,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
     public function testTrollbaneAdds1DamageDieAgainstTrollkin(): void {
         $trollbane = "card_equip_1_22";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
         $goblin = "monster_goblin_20";

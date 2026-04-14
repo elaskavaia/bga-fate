@@ -14,21 +14,13 @@ class Campaign_UpgradeTest extends CampaignBaseTest {
     protected function setUp(): void {
         parent::setUp();
         $this->setupGame([1]); // Solo Bjorn
-        $this->color = $this->playerColor();
+        $this->color = $this->getActivePlayerColor();
         $this->heroId = $this->game->getHeroTokenId($this->color);
 
         // Seed monster deck
-        $this->seedDeck("deck_monster_yellow", [
-            "card_monster_7",
-            "card_monster_8",
-            "card_monster_9",
-            "card_monster_10",
-        ]);
+        $this->seedDeck("deck_monster_yellow", ["card_monster_7", "card_monster_8", "card_monster_9", "card_monster_10"]);
         // Seed event deck with non-custom cards
-        $this->seedDeck("deck_event_" . $this->color, [
-            "card_event_1_27_1",
-            "card_event_1_27_2",
-        ]);
+        $this->seedDeck("deck_event_" . $this->color, ["card_event_1_27_1", "card_event_1_27_2"]);
         // Clear hand to avoid flaky triggers
         $this->clearHand($this->color);
         $this->clearMonstersFromMap();

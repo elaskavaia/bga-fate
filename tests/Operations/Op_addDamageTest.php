@@ -9,6 +9,7 @@ final class Op_addDamageTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 1);
     }
 
     private function getDiceOnBattle(): array {
@@ -19,20 +20,22 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $op = $this->createOp("1addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
-        $this->assertCount(1, $dice);
+        $this->assertCount(2, $dice);
     }
 
     public function testAdds3DiceToBattle(): void {
         $op = $this->createOp("3addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
-        $this->assertCount(3, $dice);
+        $this->assertCount(4, $dice);
     }
 
     public function testDiceHaveHitState(): void {
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 6);
         $op = $this->createOp("2addDamage");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
+
         foreach ($dice as $die) {
             $this->assertEquals(6, (int) $die["state"], "Die should have state 6 (hit/damage)");
         }
@@ -54,14 +57,21 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $op->resolve();
         // Just verify it doesn't crash and dice are placed
         $dice = $this->getDiceOnBattle();
-        $this->assertCount(1, $dice);
+        $this->assertCount(2, $dice);
     }
 
     // --- Param: no param (unconditional) ---
 
-    public function testNoParamAlwaysValid(): void {
+    public function testNoParamValid(): void {
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 1);
         $op = $this->createOp("2addDamage");
-        $this->assertEquals(0, $op->getErrorCode());
+        $this->assertFalse($op->isVoid());
+    }
+
+    public function testNoParamVoid(): void {
+        $this->game->tokens->moveToken("die_attack_1", "limbo", 1);
+        $op = $this->createOp("2addDamage");
+        $this->assertTrue($op->isVoid());
     }
 
     // --- Param: numeric minimum distance ---
@@ -105,7 +115,7 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $op = $this->createOp("addDamage(dist)");
         $op->resolve();
         $dice = $this->getDiceOnBattle();
-        $this->assertCount(3, $dice, "Should add 3 dice for distance 3");
+        $this->assertCount(4, $dice, "Should have 4 dice (1 seed + 3 added) for distance 3");
     }
 
     // --- Param: filter expression (param 1) ---
@@ -168,6 +178,6 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("marker_attack", "hex_12_8");
         $op = $this->createOp("1addDamage(true,trollkin)");
         $op->resolve();
-        $this->assertCount(1, $this->getDiceOnBattle(), "Should add 1 die when filter passes");
+        $this->assertCount(2, $this->getDiceOnBattle(), "Should have 2 dice (1 seed + 1 added) when filter passes");
     }
 }

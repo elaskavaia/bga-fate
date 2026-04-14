@@ -81,6 +81,11 @@ class Op_addDamage extends CountableOperation {
         if (!$this->matchesFilter()) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Target does not match filter")];
         }
+
+        $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
+        if (count($diceOnDisplay) == 0) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
+        }
         return parent::getPossibleMoves();
     }
 

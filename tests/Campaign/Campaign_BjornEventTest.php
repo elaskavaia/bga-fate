@@ -15,7 +15,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
     protected function setUp(): void {
         parent::setUp();
         $this->setupGame([1]); // Solo Bjorn
-        $this->heroId = $this->game->getHeroTokenId($this->playerColor());
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
         // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
@@ -25,12 +25,12 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
             "card_monster_10", // Burnt Offerings
         ]);
         // Seed event deck with non-custom cards (Rest x2) to avoid Op_custom errors
-        $this->seedDeck("deck_event_" . $this->playerColor(), [
+        $this->seedDeck("deck_event_" . $this->getActivePlayerColor(), [
             "card_event_1_27_1", // Rest
             "card_event_1_27_2", // Rest
         ]);
         // Clear random event cards from hand to avoid flaky triggers
-        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->playerColor());
+        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->getActivePlayerColor());
         foreach ($hand as $card) {
             $this->game->tokens->moveToken($card["key"], "limbo");
         }
@@ -41,7 +41,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testRestHeals2DamageFromBjorn(): void {
         $restCard = "card_event_1_27_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         // Put Rest in hand and add 3 damage to hero
         $this->seedHand($restCard, $color);
         $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
@@ -57,7 +57,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testRestNotOfferedWhenNoDamage(): void {
         $restCard = "card_event_1_27_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($restCard, $color);
         $this->assertEquals(0, $this->countDamage($this->heroId));
 
@@ -69,7 +69,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testSewingRemovesOneDamageFromEachCard(): void {
         $sewing = "card_event_1_30_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($sewing, $color);
 
         // Make sure a few cards are on tableau and pre-damage them to varying amounts.
@@ -97,7 +97,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testSeekShelterMovesHeroToLocation(): void {
         $seekShelter = "card_event_1_34_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($seekShelter, $color);
 
         // Move hero out to a non-location hex with a known named location reachable within 2.
@@ -144,7 +144,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testBackDownKillsMonsterCloserToGrimheim(): void {
         $backDown = "card_event_1_29_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($backDown, $color);
 
         // Move hero away from Grimheim so monsters can be closer
@@ -172,7 +172,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testBackDownNotOfferedWhenMonsterFartherFromGrimheim(): void {
         $backDown = "card_event_1_29_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($backDown, $color);
 
         // Hero in Grimheim (hex_8_9), goblin farther away
@@ -186,7 +186,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testBackDownExcludesRank3(): void {
         $backDown = "card_event_1_29_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($backDown, $color);
 
         // Move hero away from Grimheim
@@ -206,7 +206,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPreyMarksRank3MonsterWithTwoYellow(): void {
         $prey = "card_event_1_25_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);
 
         // Place a troll (rank 3) somewhere on the map
@@ -226,7 +226,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPreyBonusXpAwardedOnKill(): void {
         $prey = "card_event_1_25_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);
 
         $troll = "monster_troll_1";
@@ -254,7 +254,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPreyNotOfferedWhenNoValidTarget(): void {
         $prey = "card_event_1_25_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);
 
         // Only rank-1/2 monsters on map — Prey should not be offered.
@@ -266,7 +266,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPreyExcludesDamagedMonster(): void {
         $prey = "card_event_1_25_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);
 
         // Damaged troll — not a valid Prey target, and the only rank-3 on the map,
@@ -280,7 +280,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPreyExcludesDamagedMonsterWhenOtherValid(): void {
         $prey = "card_event_1_25_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);
 
         // One damaged troll and one undamaged jotunn — Prey offered, damaged hex rejected.
@@ -302,7 +302,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testMasterShotAdds2DamageDuringAttack(): void {
         $masterShot = "card_event_1_26_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($masterShot, $color);
 
         // Place a troll adjacent (health=7)
@@ -320,11 +320,9 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // New flow: each matching reaction is queued as its own prompt.
         // Bjorn hero card (on=roll) is offered first; skip it.
+
+        $this->skipIfOp("useCard");
         $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useCard") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
 
         // Master Shot  — useCard prompt with card preset.
         $this->assertEquals("useCard", $args["type"] ?? "");
@@ -341,7 +339,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testMasterShotNotOfferedOutsideAttack(): void {
         $masterShot = "card_event_1_26_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($masterShot, $color);
 
         // Master Shot has on=actionAttack, so it should NOT be a valid free action target
@@ -352,7 +350,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testLimberBowAddsRange2AndResetsAfterTurn(): void {
         $limberBow = "card_event_1_32_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($limberBow, $color);
 
         $hero = $this->game->getHero($color);
@@ -383,7 +381,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPiercingArrowsOfferedOnRollTrigger(): void {
         $piercingArrows = "card_event_1_33_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($piercingArrows, $color);
 
         // Place a troll adjacent (health=7, survives the attack so we can check damage)
@@ -418,7 +416,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPiercingArrowsNotOfferedWithNoRunes(): void {
         $piercingArrows = "card_event_1_33_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($piercingArrows, $color);
 
         // Place a troll adjacent
@@ -454,7 +452,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
     public function testPiercingArrowsNotOfferedOutsideRoll(): void {
         $piercingArrows = "card_event_1_33_1";
-        $color = $this->playerColor();
+        $color = $this->getActivePlayerColor();
         $this->seedHand($piercingArrows, $color);
 
         // Piercing Arrows has on=roll, so it should NOT be playable as a free action
