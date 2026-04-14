@@ -20,7 +20,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Move action: hero moves up to 3 areas (some abilities may change this).
- * Delegates to moveHero operation.
+ * Delegates to move operation.
  */
 class Op_actionMove extends Operation {
     function getNumberOfMoves(): int {
@@ -30,7 +30,7 @@ class Op_actionMove extends Operation {
 
     function getDelegateOperation() {
         $steps = $this->getNumberOfMoves();
-        return "[1,{$steps}]moveHero";
+        return "[1,{$steps}]move";
     }
 
     function getPossibleMoves(): array {
@@ -40,7 +40,7 @@ class Op_actionMove extends Operation {
         }
         // If the hero's move tracker has been reduced to 0 (e.g. Seek Shelter played this turn),
         // the move action is not available. Return an error so the turn op filters it out
-        // rather than constructing an invalid "[1,0]moveHero" delegate.
+        // rather than constructing an invalid "[1,0]move" delegate.
         if ($this->getNumberOfMoves() <= 0) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No moves remaining this turn")];
         }

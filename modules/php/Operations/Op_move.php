@@ -21,21 +21,21 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Move hero X areas (count = max steps, mcount = min steps).
  * Reuses getReachableHexes() from HexMap with count as maxSteps.
  *
- * Mandatory movement (mcount == count, e.g. "2moveHero"): hero must move exactly
+ * Mandatory movement (mcount == count, e.g. "2move"): hero must move exactly
  * count steps if possible. If no hex at that distance is reachable, falls back to
  * the farthest reachable distance. If completely blocked, returns empty.
  *
- * Optional movement (mcount < count, e.g. "[0,3]moveHero"): hero may move any
+ * Optional movement (mcount < count, e.g. "[0,3]move"): hero may move any
  * number of steps from mcount to count.
  *
  * Params:
  * - param(0): "locationOnly" — destinations restricted to hexes that belong to a
  *   named location (DarkForest, Grimheim, TempleRuins, …).
  *
- * Used by: Agility (2moveHero), Maneuver (1moveHero), Fleetfoot (1moveHero),
- * Quick Reflexes (1moveHero), Seek Shelter ([0,2]moveHero(locationOnly)).
+ * Used by: Agility (2move), Maneuver (1move), Fleetfoot (1move),
+ * Quick Reflexes (1move), Seek Shelter ([0,2]move(locationOnly)).
  */
-class Op_moveHero extends CountableOperation {
+class Op_move extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Select where to move");
     }

@@ -109,7 +109,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $hero = $this->game->getHero($color);
         $this->assertGreaterThan(0, $hero->getNumberOfMoves(), "Hero should start the turn with moves available");
 
-        // Play Seek Shelter — r=[0,2]moveHero(locationOnly),0setAtt(move). Prompts for a location hex.
+        // Play Seek Shelter — r=[0,2]move(locationOnly),0setAtt(move). Prompts for a location hex.
         $this->assertValidTarget($seekShelter);
         $this->respond($seekShelter);
 
@@ -125,7 +125,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $chosen = $targets[0];
         $this->respond($chosen);
 
-        // Hero should have moved. If chosen hex was Grimheim, moveHero redirects to the hero's
+        // Hero should have moved. If chosen hex was Grimheim, move redirects to the hero's
         // home hex, so only assert the hero ended up on a named-location hex.
         $finalHex = $this->tokenLocation($this->heroId);
         $this->assertNotEquals("", $this->game->hexMap->getHexNamedLocation($finalHex), "Hero should end on a named-location hex");
@@ -135,7 +135,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // After Seek Shelter resolves, the move tracker should be 0 — hero may not move more this turn.
         $this->assertEquals(0, $hero->getNumberOfMoves(), "Move tracker should be zeroed after Seek Shelter");
-        // actionMove delegates to [1,N]moveHero where N = move tracker; with N=0 the op has no valid
+        // actionMove delegates to [1,N]move where N = move tracker; with N=0 the op has no valid
         // targets, so the turn state no longer offers actionMove as a valid action.
         $this->assertNotValidTarget("actionMove", "Hero should not be able to take a move action this turn");
     }

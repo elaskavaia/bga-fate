@@ -358,7 +358,7 @@ See CLAUDE.md for project overview
 - [x] `dealDamage` (Countable) — Deal X damage to target character (no dice). Used by: Kick, Courage, Lightning Bolt, Rain of Fire, Swift Kick, etc.
 - [x] `heal` (Countable) — Remove X damage from target hero. Used by: Rest, Stitching, Belt of Youth, etc.
 - [x] `roll` (Countable) — Roll X attack dice against target monster. Used by: Snipe, Hard Rock, Chain Lightning, Fire Spark, etc.
-- [x] `moveHero` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
+- [x] `move` (Countable) — Move hero up to X areas. Used by: Agility, Maneuver, Fleetfoot, Quick Reflexes
 - [x] `moveMonster` — Move target monster X areas. Used by: Kick, Swift Kick, Bowling
 - [x] `killMonster` — Kill target monster matching filter (rank, health, range). Used by: Back Down, Short Temper, Heat Death, In Charge
 - [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
@@ -553,7 +553,7 @@ Same rules as Bjorn validation (see below):
 
 <!-- r=standard — direct effects -->
 
-[ ] card_event_2_28 Agility — move 2 areas, r=2moveHero
+[ ] card_event_2_28 Agility — move 2 areas, r=2move
 [ ] card_event_2_35 Back Down! — kill rank<=2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
 [ ] card_event_2_30 Inspire Defense — spend 2[MANA] in Grimheim to add town piece, r=2spendMana(grimheim):addTownPiece
 [ ] card_event_2_32 Popular — gain 2[XP] in Grimheim, r=2gainXp(grimheim)

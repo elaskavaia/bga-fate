@@ -65,7 +65,7 @@ roll|Roll Dice
 resolveHits|Resolve Hits
 endOfAttack|End of Attack
 heal|Heal
-moveHero|Move Hero
+move|Move Hero
 moveMonster|Move Monster
 performAction|Perform Action
 repairCard|Repair Card

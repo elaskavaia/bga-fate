@@ -16,7 +16,7 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Testing possible moves (delegated to moveHero)
+    // Testing possible moves (delegated to move)
     // -------------------------------------------------------------------------
 
     public function testReachableHexesFromGrimheim(): void {
@@ -59,7 +59,7 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // resolve (delegates to [1,3]moveHero)
+    // resolve (delegates to [1,3]move)
     // -------------------------------------------------------------------------
 
     public function testResolveQueuesMoveHero(): void {
@@ -67,7 +67,7 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
         $op->resolve();
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
-        $this->assertEquals("[1,3]moveHero", $queued["type"]);
+        $this->assertEquals("[1,3]move", $queued["type"]);
     }
 
     public function testGetNumberOfMovesDefault3(): void {

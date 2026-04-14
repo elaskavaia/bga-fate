@@ -62,7 +62,7 @@ final class Op_orderTest extends AbstractOpTestCase {
     }
 
     public function testResolveQueuesRemainingAsOrder(): void {
-        $this->createOp("gainXp+drawEvent+moveHero");
+        $this->createOp("gainXp+drawEvent+move");
         $this->op->saveToDb(1, true);
 
         $this->call_resolve("choice_0");
