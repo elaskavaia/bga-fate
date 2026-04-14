@@ -62,6 +62,8 @@ If the card is implemented (r is not `custom`) but integration tests are missing
 - Resolve the card and verify the effect applies correctly
 - Run the tests to confirm they pass
 
+### 6. When done check the card in the plan
+
 ## Output Format
 
 Present a structured report AFTER creating the tests:
