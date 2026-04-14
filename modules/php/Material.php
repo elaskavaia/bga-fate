@@ -343,6 +343,10 @@ class Material {
         "type" => "spendGold",
         "name" => clienttranslate("Spend Gold"),
 ],
+    "Op_spendUse" => [ 
+        "type" => "spendUse",
+        "name" => clienttranslate("Spend Use"),
+],
     "Op_costDamage" => [ 
         "type" => "costDamage",
         "name" => clienttranslate("Take Damage"),
