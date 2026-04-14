@@ -60,13 +60,14 @@ class Op_gainMana extends CountableOperation {
         return ["buttons" => false];
     }
 
-    function canResolveAutomatically() {
+    public function canSkip() {
         if ($this->noValidTargets()) {
-            if ($this->canSkip()) {
-                return true;
-            }
-            return false;
+            return parent::canSkip();
         }
+        return false; //mandatory is possible
+    }
+
+    public function isTrivial(): bool {
         if ($this->isOneChoice()) {
             return true;
         }

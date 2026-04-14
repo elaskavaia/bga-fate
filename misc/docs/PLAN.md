@@ -364,7 +364,7 @@ See CLAUDE.md for project overview
 - [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
-- [x] `gainDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
+- [x] `costDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
 - [x] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
@@ -410,7 +410,7 @@ See CLAUDE.md for project overview
 [x] Ability: once-per-turn activation — same mechanism
 [X] Ability: costs mana
 [x] Hero card effect applies during relevant actions — trigger system handles on=roll etc, hero cards in candidate list
-[x] `useEquipment` resolve: parse `r` column, handle `gainDamage:effect` cost
+[x] `useEquipment` resolve: parse `r` column, handle `costDamage:effect` cost
 [x] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 
 ### Tests
@@ -505,9 +505,9 @@ Same rules as Bjorn validation (see below):
 [x] card_equip_2_15 Alva's First Bow — passive (strength + range bonus), r=(none), has tests
 [x] card_equip_2_24 Elven Arrows — passive (strength +2), r=(none), has tests
 
-<!-- r=gainDamage:effect — standard durability-cost ops -->
+<!-- r=costDamage:effect — standard durability-cost ops -->
 
-[x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=gainDamage:3roll(adj), has tests
+[x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
 
 <!-- r=heal/addDamage — direct effects -->
 
@@ -659,12 +659,12 @@ Hero, Abilities and Equipment:
 
 [ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
 
-<!-- r=gainDamage:effect — standard ops, needs integration test -->
+<!-- r=costDamage:effect — standard ops, needs integration test -->
 
-[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
-[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=gainDamage:1preventDamage, has tests
-[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=gainDamage:2heal(adj), has tests
-[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=gainDamage:3roll(adj), has tests
+[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=costDamage:2heal(adj), has tests
+[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
 
 <!-- r=custom — needs custom operation implementation -->
 
@@ -691,3 +691,4 @@ Hero, Abilities and Equipment:
 
   [ ] Design issue - all useCard should be stacked together even triggered by different triggers, currely I cannot pick between 2 cards if one triggered on roll and anoher on actionAttack
   [ ] Main weapon - restriction only one main weapon allowed
+  [ ] Enforce "no Play Event mid-action" rule — per RULES.md:187, event cards may not be played while performing an action (e.g. mid-move, mid-mend). Carve-outs: events with text "this attack action" may be played *after* the dice roll in an attack action; damage-prevention events (and events that explicitly say so) may be played outside your turn. Abilities and equipment are unaffected — they can be used mid-action. Today `Op_useCard` offers event cards in any free-action slot including mid-action triggers. Likely fix: filter out `card_event_*` candidates from `Op_useCard::getCandidateCards` when the parent op is an in-progress action (e.g. endOfAttack on stack, actionMove in-flight), keeping the after-the-roll and reactive carve-outs.

@@ -90,4 +90,13 @@ class Op_seq extends ComplexOperation {
     function getOperator() {
         return ",";
     }
+
+    function isTrivial(): bool {
+        foreach ($this->delegates as $sub) {
+            if (!$sub->isTrivial()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

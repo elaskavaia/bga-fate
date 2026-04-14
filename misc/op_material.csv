@@ -59,7 +59,7 @@ dealDamage|Deal Damage
 gainMana|Gain Mana
 spendMana|Spend Mana
 spendGold|Spend Gold
-gainDamage|Gain Damage
+costDamage|Take Damage
 spendAction|Spend Action
 roll|Roll Dice
 addRoll|Add Roll Dice

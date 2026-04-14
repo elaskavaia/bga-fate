@@ -691,6 +691,12 @@ abstract class Operation {
         }
     }
 
+    /** Operation is trivial if it requires no meaningful player decision and its order relative to other
+     * operations doesn't matter if they are all trivial (otherwise trivial ones should be resolved first) */
+    function isTrivial(): bool {
+        return false;
+    }
+
     function canResolveAutomatically() {
         if ($this->requireConfirmation()) {
             return false;

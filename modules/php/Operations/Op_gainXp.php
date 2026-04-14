@@ -68,4 +68,8 @@ class Op_gainXp extends CountableOperation {
         $amount = (int) $this->getCount();
         $this->game->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner");
     }
+
+    public function isTrivial(): bool {
+        return true;
+    }
 }

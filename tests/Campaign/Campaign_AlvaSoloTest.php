@@ -82,7 +82,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
     }
 
     // --- Throwing Darts (card_equip_2_17) ---
-    // r=gainDamage:3roll(adj), durability 2: pay 1 durability → roll 3 dice vs adjacent monster
+    // r=costDamage:3roll(adj), durability 2: pay 1 durability → roll 3 dice vs adjacent monster
 
     private function placeAdjacentGoblin(string $goblinId = "monster_goblin_20"): string {
         // Move Alva out of Grimheim (heroes can't fight from inside the Grimheim location),
@@ -127,7 +127,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
     public function testThrowingDartsNotOfferedAtMaxDurability(): void {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_equip_2_17", "tableau_$color");
-        // Fill up durability (2) — no room for gainDamage
+        // Fill up durability (2) — no room for costDamage
         $this->game->effect_moveCrystals($this->heroId, "red", 2, "card_equip_2_17", ["message" => ""]);
         $this->placeAdjacentGoblin();
 

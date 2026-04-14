@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Tests for Op_useEquipment — filters to equipment cards only.
  */
 final class Op_useEquipmentTest extends AbstractOpTestCase {
-    /** card_equip_1_19 = Leather Purse (hero 1, durability 3, r=gainDamage:2heal(adj)) */
+    /** card_equip_1_19 = Leather Purse (hero 1, durability 3, r=costDamage:2heal(adj)) */
     private string $equipCard = "card_equip_1_19";
     function getOperationType(): string {
         return "useCard";

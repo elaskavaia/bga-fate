@@ -92,4 +92,14 @@ class Op_or extends ComplexOperation {
     function getOperator() {
         return "/";
     }
+
+    function isTrivial(): bool {
+        $nonVoid = [];
+        foreach ($this->delegates as $sub) {
+            if (!$sub->isVoid()) {
+                $nonVoid[] = $sub;
+            }
+        }
+        return count($nonVoid) <= 1 && (!$nonVoid || $nonVoid[0]->isTrivial());
+    }
 }
