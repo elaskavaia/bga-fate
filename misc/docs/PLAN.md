@@ -495,8 +495,8 @@ Same rules as Bjorn validation (see below):
 
 <!-- r=passive (bonus triggers via effect text, not r column) — needs custom handling -->
 
-[ ] card_hero_2_1 Alva Hero I — r=(none), on=(none), effect: end move action in forest → add 1 mana to any card (custom trigger)
-[ ] card_hero_2_2 Alva Hero II — r=(none), on=(none), effect: end any movement in forest → add 1 mana to any card (custom trigger)
+[x] card_hero_2_1 Alva Hero I — bespoke CardHero_AlvaHeroI on Event::ActionMove, queues ?gainMana when ending move action in forest. Has tests
+[x] card_hero_2_2 Alva Hero II — bespoke CardHero_AlvaHeroII on Event::Move, queues ?gainMana when ending any movement in forest. Has tests
 
 #### Equipment Cards (use)
 

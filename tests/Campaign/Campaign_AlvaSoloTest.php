@@ -247,6 +247,54 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countTokens("card_event", "hand_$color"));
     }
 
+    // --- Alva Hero I (card_hero_2_1) ---
+    // "End your move action in a forest to add 1 mana [MANA] to any card."
+    // Listens on Event::ActionMove; queues ?gainMana when Alva ends the move action in a forest.
+
+    public function testAlvaHeroIAddsManaWhenMoveActionEndsInForest(): void {
+        // Hail of Arrows I (card_ability_2_3, mana=1) is on Alva's starting tableau and is the
+        // sole mana-target card → Op_gainMana auto-picks it without prompting.
+        $hailId = "card_ability_2_3";
+        $manaBefore = $this->countTokens("crystal_green", $hailId);
+
+        // Place Alva on a plains hex with a forest neighbor (hex_5_9 plains → hex_5_8 forest)
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->respond("hex_5_8"); // turn op inlines actionMove targets, so picking the hex directly works
+
+        // Trigger fired, ?gainMana auto-resolved on the sole valid target — back at PlayerTurn
+        // with the second action available.
+        $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+        $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));
+    }
+
+    // --- Alva Hero II (card_hero_2_2) ---
+    // "End any movement in a forest to add 1 mana [MANA] to any card."
+    // Listens on Event::Move (any movement, not just action move).
+
+    public function testAlvaHeroIIAddsManaWhenMoveActionEndsInForest(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Alva Hero I → Alva Hero II on tableau
+        $this->game->tokens->moveToken("card_hero_2_1", "limbo");
+        $this->game->tokens->moveToken("card_hero_2_2", "tableau_$color");
+
+        $hailId = "card_ability_2_3";
+        $manaBefore = $this->countTokens("crystal_green", $hailId);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->respond("hex_5_8");
+
+        // Hero II listens on Event::Move (any movement). Op_actionMove queues Op_move which
+        // emits Event::Move on completion → ?gainMana auto-resolves on Hail of Arrows I.
+        $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+        $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));
+    }
+
     public function testFirstBowEnablesRangedAttack(): void {
         // Place a goblin 2 hexes from Alva — should be attackable thanks to range 2
         $goblin = "monster_goblin_20";

@@ -28,7 +28,8 @@ namespace Bga\Games\Fate\Model;
  */
 enum Event: string {
     case ActionAttack = "EventActionAttack";
-    case ActionMove = "EventActionMove";
+    case ActionMove = "EventActionMove"; // move with action move
+    case Move = "EventMove"; // any move
     case Roll = "EventRoll";
     case ResolveHits = "EventResolveHits";
     case TurnEnd = "EventTurnEnd";

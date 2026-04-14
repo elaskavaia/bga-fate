@@ -59,4 +59,17 @@ class Op_gainMana extends CountableOperation {
     public function getUiArgs() {
         return ["buttons" => false];
     }
+
+    function canResolveAutomatically() {
+        if ($this->noValidTargets()) {
+            if ($this->canSkip()) {
+                return true;
+            }
+            return false;
+        }
+        if ($this->isOneChoice()) {
+            return true;
+        }
+        return false;
+    }
 }

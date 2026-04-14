@@ -31,6 +31,11 @@ class Character {
         return $this->game->hexMap->getCharacterHex($this->id);
     }
 
+    function isInForest(): bool {
+        $hex = $this->getHex();
+        return $hex !== null && $this->game->hexMap->getHexTerrain($hex) === "forest";
+    }
+
     function getAttackRange(): int {
         return 1;
     }
@@ -64,8 +69,7 @@ class Character {
      * Check if defender has cover (forest hex blocks "hitcov" results).
      */
     function hasCover(): bool {
-        $hex = $this->getHex();
-        return $hex !== null && $this->game->hexMap->getHexTerrain($hex) === "forest";
+        return $this->isInForest();
     }
 
     /**

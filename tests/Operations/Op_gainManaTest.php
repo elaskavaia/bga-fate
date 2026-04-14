@@ -61,4 +61,47 @@ final class Op_gainManaTest extends AbstractOpTestCase {
         $op2->action_resolve([Operation::ARG_TARGET => "card_ability_1_3"]);
         $this->assertEquals(3, $this->getMana("card_ability_1_3"));
     }
+
+    // -------------------------------------------------------------------------
+    // ?gainMana — optional form used when the gain may have no valid target
+    // (e.g. Alva Hero I/II). Behaviour:
+    //   - 0 targets → void-but-skippable, auto() takes the skip path
+    //   - 1 target  → auto-resolves on that target without prompting
+    //   - 2+ targets → real choice, user must pick
+    // -------------------------------------------------------------------------
+
+    public function testOptionalGainManaWithNoTargetsAutoSkips(): void {
+        // Drain the only mana card so the tableau has zero mana-target cards.
+        $this->game->tokens->moveToken("card_ability_1_3", "limbo");
+        $op = $this->createOp("?gainMana");
+        $this->assertTrue($op->noValidTargets(), "no mana cards → no targets");
+        $this->assertTrue($op->canSkip(), "? prefix makes the op optional");
+        $this->assertFalse($op->isVoid(), "optional + no targets is not void (skip path)");
+        $this->assertTrue($op->canResolveAutomatically(), "should auto-skip");
+        // auto() should not throw and should leave no side effect
+        $manaBefore = $this->getMana("card_ability_1_3");
+        $op->auto();
+        $this->assertEquals($manaBefore, $this->getMana("card_ability_1_3"));
+    }
+
+    public function testOptionalGainManaWithOneTargetAutoResolves(): void {
+        // Sure Shot I (card_ability_1_3, mana=1) is the only card with a mana field on Bjorn's
+        // starting tableau → the sole valid target → ?gainMana auto-picks it.
+        $op = $this->createOp("?gainMana");
+        $this->assertEquals(1, count($op->getArgsTarget()));
+        $this->assertTrue($op->canResolveAutomatically(), "single target should auto-resolve even with skip flag");
+        $op->auto();
+        $this->assertEquals(1, $this->getMana("card_ability_1_3"));
+    }
+
+    public function testOptionalGainManaWithMultipleTargetsAsksUser(): void {
+        // Add Sure Shot II (also has mana) to the tableau → 2 candidates, real choice.
+        $this->game->tokens->moveToken("card_ability_1_4", $this->getPlayersTableau());
+        $op = $this->createOp("?gainMana");
+        $this->assertEquals(2, count($op->getArgsTarget()));
+        $this->assertFalse(
+            $op->canResolveAutomatically(),
+            "with multiple valid targets the user must pick — auto-resolve must be disabled"
+        );
+    }
 }
