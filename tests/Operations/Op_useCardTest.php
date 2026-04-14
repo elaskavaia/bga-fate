@@ -8,7 +8,7 @@ declare(strict_types=1);
  * resolve queueing, void detection.
  */
 final class Op_useCardTest extends AbstractOpTestCase {
-    /** card_ability_1_7 = Stitching I (hero 1, r=1heal(adj)) */
+    /** card_ability_1_7 = Stitching I (hero 1, r=spendUse:(heal(adj)/repairCard)) */
     private string $abilityCard = "card_ability_1_7";
     /** card_equip_1_19 = Leather Purse (hero 1, durability 3, r=costDamage:2heal(adj)) */
     private string $equipCard = "card_equip_1_19";
@@ -86,6 +86,8 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
         $this->assertValidTarget($this->abilityCard);
         $this->call_resolve($this->abilityCard);
+        // Drive the queued spendUse op to completion so the card state flips to "used"
+        $this->game->machine->dispatchAll();
         $this->createOp();
         $this->assertNotValidTarget($this->abilityCard);
     }

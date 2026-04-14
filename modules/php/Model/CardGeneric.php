@@ -63,14 +63,6 @@ class CardGeneric extends Card {
             return false;
         }
         $cardId = $this->id;
-        $on = $this->game->material->getRulesFor($cardId, "on", "");
-
-        // Cards without a published-event trigger can only be used once per turn
-        if (!$on && $this->getState() == 1) {
-            $errorRes["q"] = Material::ERR_OCCUPIED;
-            $errorRes["err"] = clienttranslate("Already Used");
-            return false;
-        }
 
         $r = $this->game->material->getRulesFor($cardId, "r", "");
         if ($r === "") {

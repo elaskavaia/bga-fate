@@ -206,12 +206,6 @@ class Card {
 
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);
-        } else {
-            $on = $this->game->material->getRulesFor($cardId, "on", "");
-            if (!$on) {
-                //mark card as used, as these can only be used once per turn
-                $this->setUsed(true);
-            }
         }
     }
 
