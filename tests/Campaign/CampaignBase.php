@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Bga\Games\Fate\StateConstants;
 use PHPUnit\Framework\TestCase;
 
+use function Bga\Games\Fate\toJson;
+
 require_once __DIR__ . "/../Harness/HarnessGameInterface.php";
 require_once __DIR__ . "/../Harness/GameWrapper.php";
 require_once __DIR__ . "/../Harness/GameDriver.php";
@@ -74,6 +76,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /** Send a player response (action_resolve with target) */
     protected function respond(string $target): void {
+        $this->game->hexMap->invalidateOccupancy();
         $this->driver->runStep("action_resolve", ["data" => ["target" => $target]]);
     }
 
@@ -101,12 +104,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /** Dump current operation type, prompt, and valid targets for debugging */
     protected function dumpState(string $label = ""): void {
-        $args = $this->getOpArgs();
-        $type = $args["type"] ?? "?";
-        $prompt = $args["prompt"] ?? "?";
-        $targets = $args["target"] ?? [];
-        $info = $label ? "[$label] " : "";
-        fwrite(STDERR, "{$info}op={$type} prompt=\"{$prompt}\" targets=[" . implode(", ", $targets) . "]\n");
+        echo "state: $label ", toJson($this->getStateArgs()), "\n";
     }
 
     /** Assert that a target is valid (appears in target list with q=0) */

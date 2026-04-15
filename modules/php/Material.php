@@ -345,7 +345,11 @@ class Material {
 ],
     "Op_spendUse" => [ 
         "type" => "spendUse",
-        "name" => clienttranslate("Spend Use"),
+        "name" => clienttranslate("Use Card"),
+],
+    "Op_on" => [ 
+        "type" => "on",
+        "name" => clienttranslate("Triggered Effect"),
 ],
     "Op_costDamage" => [ 
         "type" => "costDamage",
@@ -3606,7 +3610,8 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Flexibility I"),
         "mana" => 1,
-        "r" => "custom",
+        "r" => "(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(EventActionAttack):2spendMana:2addDamage)",
+        "on" => "custom",
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.",
 ],
     "card_ability_2_14" => [ 
@@ -3617,7 +3622,8 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Flexibility II"),
         "mana" => 2,
-        "r" => "custom",
+        "r" => "(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(EventActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)",
+        "on" => "custom",
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.",
 ],
     "card_ability_2_3" => [ 
@@ -4186,7 +4192,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Bloodline Crystal"),
         "mana" => 2,
-        "r" => "(3spendMana:2addDamage)/(3spendMana:drawEvent)",
+        "r" => "(on(EventActionAttack):3spendMana:2addDamage)/(spendUse:3spendMana:drawEvent)",
         "on" => "custom",
         "quest" => "<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.",
         "effect" => "3[MANA]: Add 2 damage to this attack action.<br>3[MANA]: Draw 1 card.",

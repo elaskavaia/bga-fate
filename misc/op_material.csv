@@ -59,7 +59,8 @@ dealDamage|Deal Damage
 gainMana|Gain Mana
 spendMana|Spend Mana
 spendGold|Spend Gold
-spendUse|Spend Use
+spendUse|Use Card
+on|Triggered Effect
 costDamage|Take Damage
 spendAction|Spend Action
 roll|Roll Dice

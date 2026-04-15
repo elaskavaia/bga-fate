@@ -24,7 +24,6 @@ final class MonsterTest extends TestCase {
     public function testDamageKillsMonsterWhenEnough(): void {
         // Goblin: health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place damage crystals
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
@@ -42,7 +41,6 @@ final class MonsterTest extends TestCase {
     public function testDamageDoesNotKillWhenInsufficient(): void {
         // Goblin: health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place 1 damage crystal
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
@@ -59,7 +57,6 @@ final class MonsterTest extends TestCase {
     public function testDamageAccumulates(): void {
         // Troll: health=7
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // First attack: 3 damage
         $this->game->effect_moveCrystals("monster_troll_1", "red", 3, "monster_troll_1", ["message" => ""]);
@@ -81,7 +78,6 @@ final class MonsterTest extends TestCase {
 
     public function testZeroDamageDoesNothing(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         $remaining = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(0, "hero_1");
         $this->assertGreaterThan(0, $remaining);
@@ -133,7 +129,6 @@ final class MonsterTest extends TestCase {
 
     public function testCountHitHit(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         $monster = $this->game->getMonster("monster_goblin_1");
         $this->assertEquals(1, $monster->countHit("hit", "hero_1"));
@@ -172,7 +167,6 @@ final class MonsterTest extends TestCase {
 
     public function testCountHitReturnsHits(): void {
         $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         $monster = $this->game->getMonster("monster_draugr_1");
 

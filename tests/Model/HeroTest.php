@@ -39,7 +39,6 @@ final class HeroTest extends TestCase {
     public function testXpAwardedOnKill(): void {
         // Goblin: xp=1, health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place enough damage crystals to kill
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
@@ -56,7 +55,6 @@ final class HeroTest extends TestCase {
 
     public function testXpNotAwardedOnSurvive(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place 1 damage crystal (not enough to kill goblin with health=2)
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
@@ -75,7 +73,6 @@ final class HeroTest extends TestCase {
     public function testBruteGivesMoreXp(): void {
         // Brute: health=3, xp=2
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Pre-place enough damage crystals to kill
         $this->game->effect_moveCrystals("monster_brute_1", "red", 3, "monster_brute_1", ["message" => ""]);

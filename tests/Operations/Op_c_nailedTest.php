@@ -35,14 +35,14 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
     public function testFindsMonsterBehindTarget(): void {
         // Hero at hex_8_9, killed at hex_7_9, monster behind at hex_6_9 (distance 2 from hero)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
-        $this->game->hexMap->invalidateOccupancy();
+
         $this->setAttackMarker("hex_7_9", 2);
         $this->assertValidTarget("hex_6_9");
     }
 
     public function testResolveDealsDamage(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
-        $this->game->hexMap->invalidateOccupancy();
+
         $this->setAttackMarker("hex_7_9", 1);
         $this->call_resolve("hex_6_9");
 
@@ -53,7 +53,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
     public function testResolveKillsMonsterWithEnoughOverkill(): void {
         // Goblin (health=2), pre-place 1 damage, overkill=3 → total 4 >= 2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
-        $this->game->hexMap->invalidateOccupancy();
+
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
         $this->setAttackMarker("hex_7_9", 3);
         $this->call_resolve("hex_6_9");
@@ -64,7 +64,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
     public function testChainQueuesNextNailedTogether(): void {
         // Goblin (health=2), overkill=3 → kills with 1 overkill, chains
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
-        $this->game->hexMap->invalidateOccupancy();
+
         $this->setAttackMarker("hex_7_9", 3);
 
         $this->createOp("c_nailed(chain)");
@@ -83,7 +83,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
     public function testNoChainForLevelI(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
-        $this->game->hexMap->invalidateOccupancy();
+
         $this->setAttackMarker("hex_7_9", 3);
 
         $this->call_resolve("hex_6_9");

@@ -22,7 +22,7 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 23|2|Alva's Bracers||||1|spendUse:3spendMana:performAction(actionAttack)||<i>Pay 5 gold [XP] on a road</i> to have them imported from Alfheim.|3[MANA]: Perform an attack action.|Brace for impact!|
 15|2|Alva's First Bow|1|||||||This is your Main Weapon. Attack range 2.||2
 22|2|Belt of Youth||2|||spendUse:1heal(self)||<i>Enter 8 forest areas</i> to gather support from the Elders.|Heal 1 damage from Alva.|Ironically known as the Waist of Time, it actually carries rejuvenating powers.|
-25|2|Bloodline Crystal||||2|(3spendMana:2addDamage)/(3spendMana:drawEvent)|custom|<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.|3[MANA]: Add 2 damage to this attack action.<br>3[MANA]: Draw 1 card.|I'm … a princess? I knew it!|
+25|2|Bloodline Crystal||||2|(on(EventActionAttack):3spendMana:2addDamage)/(spendUse:3spendMana:drawEvent)|custom|<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.|3[MANA]: Add 2 damage to this attack action.<br>3[MANA]: Draw 1 card.|I'm … a princess? I knew it!|
 24|2|Elven Arrows|2||||||<i>Stand in the Troll Caves and spawn an adjacent troll.</i> Oops!||Elven treasures long forgotten. Used as toothpicks for ages.|
 21|2|Elven Blade|||||dealDamage(adj)|EventActionAttack|<i>Kill 3 adjacent monsters</i> to practice switching weapons.|After each attack action, deal 1 damage to a monster adjacent to Alva.||
 18|2|Quiver|1||3||costDamage:addDamage|EventActionAttack|<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.|[DAMAGE]: Add 1 damage to this attack action.|Makes your enemies quiver in their boots.|

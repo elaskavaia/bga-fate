@@ -212,6 +212,16 @@ Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quo
 **Not separate operations** (handled as modifiers/hooks on existing operations):
 - "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 
+### Cost and Gate Operations
+
+These are stateless "guard" ops that sit at the leftmost position of a paygain chain. They void the whole chain when their precondition fails, so the effect never runs.
+
+- `spendUse` — Mark the context card as used this turn (flips the card token's state to 1). Voids with `ERR_OCCUPIED` if already used. Reset by `Op_turnEnd`. Use in card `r` expressions to enforce the "once per turn" cap explicitly, e.g. `spendUse:heal(adj)` (Stitching I). Cards with multiple clauses can place `spendUse` on a per-clause basis, but typically share one use for the whole card — put `spendUse` inside each branch of an `or` so picking any branch burns the card's turn slot.
+
+- `on(EventXxx)` — Runtime event gate. Voids with `ERR_PREREQ` unless the `event` data field seeded by `Card::useCard()` matches the expected event. Used inside card `r` expressions to restrict a clause to a specific trigger context. Example (Flexibility I): `(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(EventActionAttack):2spendMana:2addDamage)` — the first two branches are voluntary free-action activations that burn the card's use; the third branch fires mid-attack (gated on the attack trigger) and does NOT burn the use.
+
+**Important**: both `spendUse` and `on(...)` must be the **leftmost** element of their paygain chain. `Op_paygain::getPossibleMoves()` pre-flights all delegates for void state — a void cost at any position propagates up, but if a non-void sub runs before the machine reaches the void one, the earlier side-effects will have already applied. Left-anchor the guards so the whole chain is caught before any sub resolves.
+
 
 ### Trigger System
 
@@ -219,52 +229,60 @@ Cards (events, abilities, equipment) can have an **`on`** field in Material spec
 At key points during gameplay, an `Op_trigger` is queued which walks every card on the active player's tableau and hand, instantiates a `Card` object for each, and calls `onTrigger($triggerType)`.
 
 **`on` column** — timing trigger for when the card can be played:
-- (empty) — play anytime during your turn (once per turn; tracked via token state=1, reset in turnEnd)
-- `actionAttack` — play during/after an attack action
-- `roll` — play after a dice roll
-- `monsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
-- `resolveHits` — play before damage is applied (for damage prevention)
+- (empty) — play anytime during your turn as a free action. The "once per turn" cap is **not** implicit — cards that want it must include `spendUse` in their `r` expression. Without `spendUse`, the card is usable an unlimited number of times (e.g. damage-prevention equipment, or cards whose text says "any number of times per turn").
+- `EventActionAttack` — play during/after an attack action
+- `EventRoll` — play after a dice roll
+- `EventMonsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
+- `EventResolveHits` — play before damage is applied (for damage prevention)
+- `EventTurnEnd`, `EventTurnStart`, `EventActionMove`, `EventMonsterKilled`, `EventEnter` — other game events; see `Event` enum in `modules/php/Model/Event.php` for the full list
 - `custom` — card has a bespoke class under `modules/php/Cards/` that handles its own trigger logic
 
 **How triggers fire:**
 
-1. An operation calls `$this->queueTrigger("triggerType")` (or `queueTrigger()` which defaults to the operation's own type).
-2. This queues `Op_trigger(triggerType)` for the current player.
-3. `Op_trigger::resolve()` walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($triggerType)`.
-4. For each card, `Card::onTrigger()` routes to `on<TriggerName>()` if the subclass defines it, else to `onTriggerDefault()`.
+1. An operation calls `$this->queueTrigger(Event::Xxx)` — the `Event` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
+2. This queues `Op_trigger(EventXxx)` for the current player.
+3. `Op_trigger::resolve()` converts the wire string back to an `Event` case via `Event::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($event)`.
+4. For each card, `Card::onTrigger()` routes to `on<EventName>()` if the subclass defines it (derived from the enum case name: `Event::ActionAttack → onActionAttack`), else to `onTriggerDefault()`.
 5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
-6. **Generic cards** (`CardGeneric`) check `canBePlayed($triggerType)` — verifying the `on` field matches, the card hasn't been used this turn, the `r` field is non-empty, and the effect has valid targets. If playable, queues a single `useCard` op with `on=$triggerType` and `prompt=true`. The dedup logic ensures only one `useCard` is queued per trigger type — subsequent cards matching the same trigger share the same prompt.
+6. **Generic cards** (`CardGeneric`) check `canBePlayed($event)` — verifying the `on` field matches and the effect has valid targets. If playable, queues a single `useCard` op with `on=[$event->value]` and `prompt=true`. The dedup logic ensures only one `useCard` is queued per trigger type — subsequent cards matching the same trigger share the same prompt.
+7. When `Card::useCard()` queues the card's `r` expression, it seeds `event` in the queued op's data. `ComplexOperation::withData()` propagates this down to every sub-op, so guards like `Op_on` can read it via `getDataField("event")`.
 
 The `useCard` op collects all playable cards (tableau + hand) that match the trigger, presenting them in a single "choose a card or skip" prompt. After a card is played, the prompt reappears for remaining cards (via the machine's standard dispatch loop).
 
-**Where triggers are queued (operation → trigger → description):**
+**Where triggers are queued (operation → Event → description):**
 
 ```
 Op_turnStart
-  → trigger(turnStart)       — at start of player turn (passive start-of-turn effects)
+  → Event::TurnStart        — at start of player turn (passive start-of-turn effects)
 Op_roll
-  → trigger(roll)            — after a hero rolls attack dice
-  → trigger(actionAttack)    — after a roll initiated by Op_actionAttack
+  → Event::Roll             — after a hero rolls attack dice
+  → Event::ActionAttack     — after a roll initiated by Op_actionAttack
 Op_actionMove
-  → trigger(actionMove)      — after hero movement resolves
+  → Event::ActionMove       — after an actionMove resolves (move-action specific)
+Op_move
+  → Event::Move             — after ANY movement resolves (action or card-driven)
 Op_resolveHits
-  → trigger(resolveHits)     — before damage is applied to a hero (for damage prevention)
+  → Event::ResolveHits      — before damage is applied to a hero (for damage prevention)
 Op_dealDamage
-  → trigger(monsterKilled)   — when a monster is killed
+  → Event::MonsterKilled    — when a monster is killed
 Op_turnEnd
-  → trigger(turnEnd)         — at end of player turn
+  → Event::TurnEnd          — at end of player turn
+Op_turnMonster
+  → Event::MonsterMove      — before the Monsters Move step
+Op_gainEquip
+  → Event::Enter            — when a card enters play (direct onTrigger call, not via Op_trigger)
 ```
 
 **Attack action trigger sequence (example):**
 
 ```
 actionAttack → player picks target → roll dice
-  → trigger(roll)          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
-  → trigger(actionAttack)  — same: each matching card is offered as a separate confirm-or-skip
-  → resolveHits            — converts dice to damage
-    → trigger(resolveHits) — damage prevention cards offered individually
-  → dealDamage             — applies damage to monster
-    → trigger(monsterKilled) — if monster died, each matching card reacts
+  → Event::Roll          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
+  → Event::ActionAttack  — same: each matching card is offered as a separate confirm-or-skip
+  → resolveHits          — converts dice to damage
+    → Event::ResolveHits — damage prevention cards offered individually
+  → dealDamage           — applies damage to monster
+    → Event::MonsterKilled — if monster died, each matching card reacts
 ```
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
@@ -377,7 +395,7 @@ In Fate: Defenders of Grimheim, card effects are tightly integrated into the her
 1. Activated / Free Action Effects (Abilities & Equipment)
 Most character-specific benefits fall into this category. They are generally treated as Free Actions that can be used at any time during your turn, but not during a main action unless specified. [3] 
 
-* Once-Per-Turn Limit: Standard Equipment and Ability cards can only be used once per turn.
+* Once-Per-Turn Limit: Standard Equipment and Ability cards can only be used once per turn. Enforced explicitly via `spendUse` in each card's `r` expression (not implicit). Cards that are *not* once-per-turn — damage-prevention equipment, `r=custom` bespoke classes, cards whose text says "any number of times" — simply omit `spendUse` from their rule.
 * Mana-Activated: Some cards require spending Mana to trigger their effect (e.g., "Spend 2 Mana to add 2 damage").
 * Action Modifiers: These are used within the context of another action, such as adding damage to an Attack Action after the dice are rolled. [3, 4, 5, 6] 
 

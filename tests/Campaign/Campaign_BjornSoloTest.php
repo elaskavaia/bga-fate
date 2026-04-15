@@ -621,7 +621,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $goblinHex = "hex_7_9";
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
         $this->game->tokens->dbSetTokenLocation($this->heroId, $heroHex);
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed dice: goblin strength=1 → 1 die, roll a hit (side 5)
         $this->seedRand([5]);

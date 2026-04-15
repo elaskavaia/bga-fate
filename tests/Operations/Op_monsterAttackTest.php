@@ -29,7 +29,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testNoAdjacentHeroesDoesNothing(): void {
         // Monster not adjacent to any hero
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->resolveMonsterAttack("monster_goblin_1");
 
@@ -41,7 +40,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testDeadMonsterSkipsAttack(): void {
         // Monster not on map (killed before attack phase)
         $this->game->tokens->moveToken("monster_goblin_1", "supply_monster");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->resolveMonsterAttack("monster_goblin_1");
 
@@ -57,7 +55,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testMonsterAttacksAdjacentHero(): void {
         // Goblin strength=1, adjacent to hero on hex_11_8
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed dice: 1 die (strength=1), side 5 = hit
         $this->game->randQueue = [5];
@@ -71,7 +68,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testMonsterAllMissesNoDamage(): void {
         // Goblin strength=1, side 1 = miss
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->game->randQueue = [1];
         $this->resolveMonsterAttack("monster_goblin_1");
@@ -83,7 +79,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testBruteAttacksWithHigherStrength(): void {
         // Brute strength=3
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed 3 dice: hit, miss, hit → 2 damage
         $this->game->randQueue = [5, 1, 6];
@@ -102,7 +97,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         // brute on hex_12_7 (adjacent to goblin). Goblin attacks → +1 for adjacent trollkin brute = strength 2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_7");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed 2 dice (strength 1 + 1 bonus): hit, hit → 2 damage
         $this->game->randQueue = [5, 5];
@@ -116,7 +110,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         // Sprite (firehorde) + goblin (trollkin) adjacent to hero — sprite gets no trollkin bonus
         $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_11_7");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed 1 die (sprite strength=1, no bonus): hit → 1 damage
         $this->game->randQueue = [5];
@@ -133,7 +126,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testFireHordeAttacksAtRange2(): void {
         // Sprite (firehorde) has range 2, hero_1 at hex_11_8, sprite at hex_13_7 (distance 2)
         $this->game->tokens->moveToken("monster_sprite_1", "hex_13_7");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->game->randQueue = [5]; // 1 hit
         $this->resolveMonsterAttack("monster_sprite_1");
@@ -145,7 +137,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testTrollkinDoesNotAttackAtRange2(): void {
         // Goblin (trollkin) has range 1, hero_1 at hex_11_8, goblin at hex_13_7 (distance 2)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->resolveMonsterAttack("monster_goblin_1");
 
@@ -166,7 +157,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         $this->game->effect_moveCrystals("hero_1", "red", 7, "hero_1", ["message" => ""]);
 
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Seed: 1 hit
         $this->game->randQueue = [5];
@@ -194,7 +184,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         // Pre-place 8 damage on Bjorn (health=9), goblin hits for 1 → knocked out
         $this->game->effect_moveCrystals("hero_1", "red", 8, "hero_1", ["message" => ""]);
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         $this->game->randQueue = [5]; // 1 hit
         $this->resolveMonsterAttack("monster_goblin_1");
@@ -211,7 +200,6 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     public function testTurnMonsterQueuesAttacks(): void {
         // Place monster adjacent to hero — check that monsterAttack is queued
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Need time track setup for turnMonster
         $this->game->tokens->moveToken("rune_stone", "timetrack_1", 0);

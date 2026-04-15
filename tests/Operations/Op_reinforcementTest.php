@@ -200,6 +200,14 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
     }
 
     public function testCleanupMovesCardToBottomOfDeck(): void {
+        // Deterministic deck states: other yellow cards at states 1..N, so min = 1.
+        // (setUp shuffles the deck, giving random states — pin them here.)
+        $yellowCards = $this->game->tokens->getTokensOfTypeInLocation("card_monster", "deck_monster_yellow");
+        $i = 1;
+        foreach ($yellowCards as $card) {
+            $this->game->tokens->setTokenState($card["key"], $i++);
+        }
+
         // Place a card on display as if reinforcement just happened
         $this->game->tokens->moveToken("card_monster_36", "display_monsterturn");
 
@@ -210,9 +218,9 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
 
         $loc = $this->game->tokens->getTokenLocation("card_monster_36");
         $this->assertEquals("deck_monster_yellow", $loc);
-        // Should be at the bottom (below min of other cards)
+        // Should be at the bottom: below min state of all other cards (min was 1 → expect 0)
         $state = $this->game->tokens->getTokenState("card_monster_36");
-        $this->assertLessThan(0, $state);
+        $this->assertEquals(0, $state);
     }
 
     // -------------------------------------------------------------------------

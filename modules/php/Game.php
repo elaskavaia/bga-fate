@@ -670,7 +670,7 @@ class Game extends Base {
                 $placed++;
             }
         }
-        $this->hexMap->invalidateOccupancy();
+
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
@@ -695,7 +695,7 @@ class Game extends Base {
                 $placed++;
             }
         }
-        $this->hexMap->invalidateOccupancy();
+
         $this->machine->push("c_sureshotII", $color, ["card" => $cardId]);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }

@@ -202,7 +202,7 @@ class Card {
         if ($r === null) {
             $r = $this->game->material->getRulesFor($cardId, "r", "nop");
         }
-        $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId]);
+        $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId, "event" => $event->value]);
 
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);

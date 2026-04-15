@@ -103,7 +103,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Move hero out to a non-location hex with a known named location reachable within 2.
         // From hex_11_8 the hero can reach Grimheim within 2 steps.
         $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_11_8");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Sanity: before playing Seek Shelter, the hero's move tracker should be > 0.
         $hero = $this->game->getHero($color);
@@ -149,7 +148,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // Move hero away from Grimheim so monsters can be closer
         $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_9");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Place a goblin (rank 1) closer to Grimheim than hero
         $goblin = "monster_goblin_20";
@@ -191,7 +189,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // Move hero away from Grimheim
         $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_9");
-        $this->game->hexMap->invalidateOccupancy();
 
         // Place a troll (rank 3) closer to Grimheim — should not be targetable
         $troll = "monster_troll_1";

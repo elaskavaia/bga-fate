@@ -56,6 +56,19 @@ class CardGeneric extends Card {
             return true;
         }
 
+        if ($on === "custom") {
+            $r = $this->game->material->getRulesFor($cardId, "r", "");
+            if ($r) {
+                $op = $this->op->instantiateOperation($r, $this->owner, [
+                    "card" => $cardId,
+                    "event" => $event->value,
+                ]);
+                if (!$op->noValidTargets()) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
     public function canBePlayed(Event $event, ?array &$errorRes = null): bool {
@@ -71,7 +84,7 @@ class CardGeneric extends Card {
             return false;
         }
 
-        $op = $this->op->instantiateOperation($r, $this->owner, ["card" => $cardId]);
+        $op = $this->op->instantiateOperation($r, $this->owner, ["card" => $cardId, "event" => $event->value]);
         if ($op->noValidTargets()) {
             $errorRes = array_merge($errorRes, $op->getErrorInfo());
             return false;
