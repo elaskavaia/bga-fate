@@ -182,13 +182,11 @@ class Card {
         return true;
     }
 
-    public function useCard(Event $event, ?string $r = null, ?string $effect = null) {
+    public function useCard(Event $event) {
         $this->checkPlayability($event);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
-        if ($effect === null) {
-            $effect = $this->game->material->getRulesFor($cardId, "effect", clienttranslate("custom"));
-        }
+        ["r" => $r, "effect" => $effect] = $this->getCardRulesForEvent($event);
         if ($this->isEvent()) {
             $message = clienttranslate('${char_name} plays event ${token_name}: ${effect_text}');
         } else {
@@ -199,14 +197,21 @@ class Card {
             "token_name" => $cardId,
             "effect_text" => $effect,
         ]);
-        if ($r === null) {
-            $r = $this->game->material->getRulesFor($cardId, "r", "nop");
-        }
-        $this->queue($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId, "event" => $event->value]);
+
+        $op = $this->op->instantiateOperation($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId, "event" => $event->value]);
+        $this->op->queueOp($op);
 
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);
         }
+    }
+
+    function getCardRulesForEvent(Event $event) {
+        $cardId = $this->id;
+        return [
+            "r" => $this->game->material->getRulesFor($cardId, "r", "nop"),
+            "effect" => $this->game->material->getRulesFor($cardId, "effect", clienttranslate("custom")),
+        ];
     }
 
     function promptUseCard(Event $event) {

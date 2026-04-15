@@ -22,9 +22,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useCard extends Operation {
     function getPrompt() {
-        if ($this->isOneChoice()) {
-            return clienttranslate("You can use this ability now or skip"); // XXX adjust wording for events
-        }
         return clienttranslate("Choose a card to use or play");
     }
 

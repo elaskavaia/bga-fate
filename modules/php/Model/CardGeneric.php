@@ -57,16 +57,7 @@ class CardGeneric extends Card {
         }
 
         if ($on === "custom") {
-            $r = $this->game->material->getRulesFor($cardId, "r", "");
-            if ($r) {
-                $op = $this->op->instantiateOperation($r, $this->owner, [
-                    "card" => $cardId,
-                    "event" => $event->value,
-                ]);
-                if (!$op->noValidTargets()) {
-                    return true;
-                }
-            }
+            return true; // tested by canBePlayed
         }
 
         return false;
