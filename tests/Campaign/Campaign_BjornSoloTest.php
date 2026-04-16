@@ -61,7 +61,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Attack goblin — all dice miss (bgaRand returns 1=miss by default)
         $this->respond($goblinHexTurn1);
-        $this->skipTriggers(); // Bjorn hero card triggers on roll
 
         // Goblin should still be alive (no damage from misses)
         $this->assertEquals($goblinHexTurn1, $this->tokenLocation($goblin));
@@ -98,7 +97,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertValidTarget($goblinHexTurn1);
 
         $this->respond($goblinHexTurn1);
-        $this->skipTriggers(); // Bjorn hero card triggers on roll — no actions left to spend
 
         // Goblin is dead (health=2, took 2 hits)
         $this->assertNotEquals($goblinHexTurn1, $this->tokenLocation($goblin));
@@ -124,6 +122,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Trigger fires — Bjorn I hero card offered (1 action remaining, focus not taken)
         $this->assertValidTarget("card_hero_1_1");
         $this->respond("card_hero_1_1");
+        $this->confirmCardEffect();
         // paygain expands: spendAction(actionFocus) + 2dealDamage both auto-resolve (single targets)
 
         // Troll took 2 damage from hero card + 3 hits from roll = 5 total (health=7, alive)
@@ -252,6 +251,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Use Nailed Together I — auto-resolves since only one monster behind
         $this->respond("card_ability_1_13");
+        $this->confirmCardEffect();
 
         // Brute should have 1 damage (overkill from goblin)
         $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 overkill damage");
@@ -342,7 +342,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Trigger fires — Bjorn II hero card offered
         $this->assertValidTarget("card_hero_1_2");
         $this->respond("card_hero_1_2");
-        $this->skipTriggers(); // skip any remaining triggers (actionAttack, etc.)
+        $this->confirmCardEffect();
 
         // Troll took 3 damage from hero card + 3 hits from roll = 6 total (health=7, alive)
         $this->assertEquals($trollHex, $this->tokenLocation($troll));
@@ -557,7 +557,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->assertValidTarget("card_ability_1_7", "Stitching I should be offered");
         $this->respond("card_ability_1_7");
-        // Auto-resolved: heal(adj) picked (repairCard void), sole hero picked → back at turn
+        $this->confirmCardEffect();
+        // heal(adj) picked (repairCard void), sole hero auto-picked → back at turn
         $this->assertEquals(1, $this->countDamage($this->heroId));
     }
 
@@ -570,7 +571,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals($this->heroId, "red", 1, $equipCard, ["message" => ""]);
 
         $this->respond("card_ability_1_7");
-        $this->respond("choice_0"); // choose heal
+        $this->confirmCardEffect();
+        $this->respond("choice_0"); // choose heal over repair
         // heal(adj) with sole hero → auto-resolves
 
         $this->assertEquals(1, $this->countDamage($this->heroId));
@@ -586,6 +588,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals($this->heroId, "red", 1, $equipCard, ["message" => ""]);
 
         $this->respond("card_ability_1_7");
+        $this->confirmCardEffect();
         $this->respond("choice_1"); // choose repairCard
         // repairCard with sole damaged card → auto-resolves
 
@@ -607,6 +610,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
 
         $this->respond("card_ability_1_7");
+        $this->confirmCardEffect();
         $this->assertEquals(2, $this->countDamage($this->heroId));
 
         $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be usable twice per turn");
@@ -633,9 +637,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Skip drawEvent if queued by turnEnd
         $this->skipIfOp("drawEvent");
 
-        // Skip triggers (monsterMove)
-        $this->skipTriggers();
-
         // Monster turn runs: move + attack + reinforcement → back to player turn
         $state = $this->getStateArgs();
         $this->assertEquals("PlayerTurn", $state["name"]);
@@ -661,6 +662,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Sure Shot I should be offered as a free action
         $this->assertValidTarget($sureShotId);
         $this->respond($sureShotId);
+        $this->confirmCardEffect();
 
         // spendMana auto-resolves (only one card with enough mana)
         // dealDamage auto-resolves (only one monster in range) → goblin killed (health=2, 3 damage)
@@ -718,11 +720,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Sure Shot II should be offered as a free action
         $this->assertValidTarget($sureShotId);
         $this->respond($sureShotId);
+        $this->confirmCardEffect();
 
         // Step 1 auto-resolves (only one monster in range)
         // Step 2: choose mana amount — brute health=3, so max=3
-        $args = $this->getOpArgs();
-        $this->assertEquals("c_sureshotII", $args["type"] ?? "");
+        $this->assertOperation("c_sureshotII");
         $this->assertValidTarget("choice_2");
         $this->assertValidTarget("choice_3");
         $this->assertNotValidTarget("choice_4");
@@ -741,6 +743,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
 
         $this->respond("card_ability_1_8");
+        $this->confirmCardEffect();
         // Stitching II r=2heal(adj)/2repairCard/(heal(adj),repairCard) — pick the 2heal branch
         $this->respond("choice_0");
         $this->assertEquals(1, $this->countDamage($this->heroId));

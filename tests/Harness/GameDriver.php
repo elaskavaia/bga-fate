@@ -106,7 +106,7 @@ class GameDriver {
         ];
     }
 
-    private function privateFilter(array &$state, int $currentPlayerId) {
+    public function privateFilter(array &$state, int $currentPlayerId, bool $merge = false) {
         $private = $state["args"]["_private"] ?? null;
         if ($private === null) {
             return;
@@ -114,8 +114,13 @@ class GameDriver {
         $forPlayer =
             $private[$currentPlayerId] ?? ($this->game->gamestate->isPlayerActive($currentPlayerId) ? $private["active"] ?? null : null);
         unset($state["args"]["_private"]);
+
         if ($forPlayer !== null) {
-            $state["args"]["_private"] = $forPlayer;
+            if ($merge) {
+                $state["args"] = array_merge($state["args"], $forPlayer);
+            } else {
+                $state["args"]["_private"] = $forPlayer;
+            }
         }
     }
     public function game_getAllDatas() {

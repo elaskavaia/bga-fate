@@ -50,6 +50,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Play Rest — r=2heal(self), auto-resolves (self target)
         $this->assertValidTarget($restCard);
         $this->respond($restCard);
+        $this->confirmCardEffect();
 
         // Hero should have 1 damage (3 - 2 healed)
         $this->assertEquals(1, $this->countDamage($this->heroId));
@@ -83,6 +84,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Play Sewing — r=1repairCard(all), auto-resolves (single "confirm" target)
         $this->assertValidTarget($sewing);
         $this->respond($sewing);
+        $this->confirmCardEffect();
 
         // Each damaged card loses 1 damage; undamaged card stays at 0.
         $this->assertEquals(1, $this->countDamage("card_equip_1_15"));
@@ -111,6 +113,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Play Seek Shelter — r=[0,2]move(locationOnly),0setAtt(move). Prompts for a location hex.
         $this->assertValidTarget($seekShelter);
         $this->respond($seekShelter);
+        $this->confirmCardEffect();
 
         // Every offered target must be a named-location hex.
         $args = $this->getOpArgs();
@@ -307,10 +310,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $trollHex = "hex_7_9";
         $this->game->getMonster($troll)->moveTo($trollHex, "");
 
-        // Use both action markers so only attack is available
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
-
         // Bjorn strength=3, all hits
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
@@ -326,6 +325,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->assertValidTarget($masterShot);
 
         $this->respond($masterShot);
+        $this->confirmCardEffect();
 
         // Master Shot adds 2 damage dice → troll takes 3 hits + 2 bonus = 5 total damage
         $this->assertEquals(5, $this->countDamage($troll), "Troll should have 5 damage (3 hits + 2 from Master Shot)");
@@ -356,6 +356,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Play Limber Bow — auto-resolves (no target needed)
         $this->assertValidTarget($limberBow);
         $this->respond($limberBow);
+        $this->confirmCardEffect();
 
         // Range should be +2
         $this->assertEquals($baseRange + 2, $hero->getAttackRange());
@@ -386,9 +387,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $trollHex = "hex_7_9";
         $this->game->getMonster($troll)->moveTo($trollHex, "");
 
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
-
         // Roll: 2 runes (3) + 1 hit (5) → 1 base damage + 2 from Piercing Arrows = 3 total
         $this->seedRand([3, 3, 5]);
         $this->respond("actionAttack");
@@ -400,9 +398,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // Play Piercing Arrows (hero card also offered but we pick the event)
         $this->respond($piercingArrows);
-
-        // Skip remaining triggers (actionAttack) — then resolveHits applies all dice as damage
-        $this->skipTriggers();
+        $this->confirmCardEffect();
 
         // Troll should have 1 hit + 2 rune damage = 3 total damage
         $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (1 hit + 2 from Piercing Arrows)");
@@ -421,9 +417,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $trollHex = "hex_7_9";
         $this->game->getMonster($troll)->moveTo($trollHex, "");
 
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
-
         // Roll: all hits (5), 0 runes → counter(countRunes) evaluates to 0, card should not be offered
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
@@ -440,8 +433,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
             $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be offered with 0 runes");
         }
         // Otherwise we're already past the trigger phase — also correct
-
-        $this->skipTriggers();
 
         // Troll should have 3 hits only (no rune bonus damage)
         $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (3 hits, no Piercing Arrows)");

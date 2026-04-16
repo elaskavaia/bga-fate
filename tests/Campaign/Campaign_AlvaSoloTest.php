@@ -143,10 +143,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 5]);
         // turn op inlines useCard as a delegate — pick the card directly from the turn prompt
         $this->respond("card_equip_2_17");
-
-        // Any chained useCard triggers (e.g. Alva hero card on=roll) — skip them
-        $this->skipTriggers();
-        $this->skipIfOp("useCard");
+        $this->respond("1");
 
         // Durability spent: 1 red crystal on the card
         $this->assertEquals(1, $this->countDamage("card_equip_2_17"));
@@ -167,11 +164,8 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         // (addDamage requires dice on display_battle).
         $this->assertValidTarget("card_equip_2_25");
         $this->respond("card_equip_2_25");
-
-        // drawEvent op queues a confirm prompt — accept it
-        if (($this->getOpArgs()["type"] ?? "") === "drawEvent") {
-            $this->respond("confirm");
-        }
+        $this->respond("1");
+        $this->respond("confirm");
 
         // 3 mana spent
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_equip_2_25"));
@@ -195,16 +189,12 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         //$this->respond("actionAttack");
         $this->respond("hex_5_9");
 
-        // The actionAttack trigger offers Bloodline Crystal as a single-choice useCard,
-        // which auto-collapses into the or op. Pick the add-damage branch.
-        $this->assertEquals("useCard", $this->getOpArgs()["type"] ?? "");
+        // The actionAttack trigger offers Bloodline Crystal
+        $this->assertOperation("useCard");
+
         $this->respond("card_equip_2_25");
-
-        // Drain any remaining free-action useCard prompts back to the turn state
-        while (($this->getOpArgs()["type"] ?? "") !== "turn") {
-            $this->skip();
-        }
-
+        $this->respond("choice_2");
+        $this->skipIfOp("drawEvent");
         // 3 mana spent (branch A)
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_equip_2_25"));
         // Brute took 2 damage from branch A (base attack missed, so damage = 0 + 2 = 2);
@@ -307,6 +297,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
 
         $this->respond("card_ability_2_13");
         // Only one branch is viable (1 mana, not in attack) → or op auto-collapses
+        $this->respond("choice_0");
 
         // Mana drained and tracker_move incremented
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_ability_2_13"));
@@ -362,6 +353,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         $this->respond("hex_5_9");
         // Mid-attack trigger offers Flexibility I via on(EventActionAttack)
         $this->respond("card_ability_2_13");
+        $this->respond("coice_2");
 
         // 2 mana spent; brute took 2 damage (base=0 + addDamage 2)
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_ability_2_13"));

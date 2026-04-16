@@ -57,7 +57,9 @@ class CardGeneric extends Card {
         }
 
         if ($on === "custom") {
-            return true; // tested by canBePlayed
+            // Custom-triggered cards (e.g. Bloodline Crystal) accept any event here;
+            // canBePlayed() narrows by instantiating the r expression.
+            return true;
         }
 
         return false;

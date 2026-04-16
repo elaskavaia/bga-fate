@@ -76,6 +76,7 @@ abstract class Operation {
         if ($merge) {
             unset($xdata["count"]);
             unset($xdata["mcount"]);
+            unset($xdata["confirm"]); // special structural arg, do not propagate to children
         }
         if ($this->data === null) {
             $this->data = $xdata;
@@ -596,7 +597,7 @@ abstract class Operation {
 
     /** If operation require confirmation it will be sent to user and not auto-resolved */
     function requireConfirmation() {
-        return false;
+        return (bool) $this->getDataField("confirm", false);
     }
 
     function getUiArgs() {

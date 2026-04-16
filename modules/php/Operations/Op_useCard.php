@@ -46,7 +46,7 @@ class Op_useCard extends Operation {
     }
 
     function requireConfirmation() {
-        return (bool) $this->getDataField("prompt", false);
+        return (bool) $this->getDataField("confirm", false);
     }
     public function getSkipName() {
         return clienttranslate("Not now");

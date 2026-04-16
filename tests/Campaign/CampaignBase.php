@@ -85,26 +85,40 @@ abstract class CampaignBaseTest extends TestCase {
         $this->driver->runStep("action_skip", []);
     }
 
+    /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true). */
+    protected function confirmCardEffect(): void {
+        $this->respond("1");
+    }
+
     /** Get current game state (id, name, active_player, args) */
-    protected function getStateArgs(): array {
+    protected function getStateArgs(bool $merge = true): array {
         $stateId = $this->game->gamestate->getCurrentMainStateId();
-        return $this->driver->getGameState($stateId);
+        $state = $this->driver->getGameState($stateId);
+        if ($merge) {
+            $this->driver->privateFilter($state, (int) $this->game->getCurrentPlayerId(), true);
+        }
+        return $state;
     }
 
     /** Get current operation args (targets, prompt, etc.) */
     protected function getOpArgs(): array {
         $state = $this->getStateArgs();
-        $private = $state["args"]["_private"] ?? null;
-        if (is_array($private)) {
-            // _private is keyed by player ID — return the first (active) player's args
-            return reset($private) ?: [];
-        }
         return $state["args"] ?? [];
+    }
+
+    function assertOperation(string $type) {
+        $this->assertEquals($type, $this->getOpArgs()["type"] ?? "", "Expected operation");
     }
 
     /** Dump current operation type, prompt, and valid targets for debugging */
     protected function dumpState(string $label = ""): void {
         echo "state: $label ", toJson($this->getStateArgs()), "\n";
+    }
+    protected function dumpArgsInfo(string $label = ""): void {
+        $args = $this->getStateArgs()["args"];
+        $prompt = $args["prompt"];
+        $type = $args["type"];
+        echo "state: $label $type: $prompt: ", toJson($args["info"]), "\n";
     }
 
     /** Assert that a target is valid (appears in target list with q=0) */
@@ -172,15 +186,6 @@ abstract class CampaignBaseTest extends TestCase {
             $this->game->tokens->moveToken($m["key"], "supply_monster");
         }
         $this->game->hexMap->invalidateOccupancy();
-    }
-
-    /** Skip any pending trigger operations (e.g. on=roll reactions) */
-    protected function skipTriggers(): void {
-        $args = $this->getOpArgs();
-        while (($args["type"] ?? "") === "trigger") {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
     }
 
     protected function skipIfOp(string $optype): bool {

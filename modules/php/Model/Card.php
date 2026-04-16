@@ -198,7 +198,14 @@ class Card {
             "effect_text" => $effect,
         ]);
 
-        $op = $this->op->instantiateOperation($r, $this->getOwner(), ["card" => $cardId, "reason" => $cardId, "event" => $event->value]);
+        $op = $this->op->instantiateOperation($r, $this->getOwner(), [
+            "card" => $cardId,
+            "reason" => $cardId,
+            "event" => $event->value,
+        ]);
+        $op->withDataField("mcount", "0"); // skippable
+        $op->withDataField("confirm", "true"); // do not auto-resolve single choice
+
         $this->op->queueOp($op);
 
         if ($this->isEvent()) {
@@ -220,7 +227,7 @@ class Card {
 
         $alreadyOp = $this->game->machine->findOperation($owner, $action);
         if (!$alreadyOp) {
-            $this->queue($action, null, ["prompt" => true, "on" => [$event->value]]);
+            $this->queue($action, null, ["confirm" => true, "on" => [$event->value]]);
         } else {
             $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
             $onarr = $op->getDataField("on", []);

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\OpCommon\Operation;
+
 /**
  * Tests for Op_useCard — the unified base for useAbility, useEquipment, playEvent.
  * Tests shared behavior: candidate discovery, trigger filtering, preset targets,
@@ -86,7 +88,10 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
         $this->assertValidTarget($this->abilityCard);
         $this->call_resolve($this->abilityCard);
-        // Drive the queued spendUse op to completion so the card state flips to "used"
+        // Card::useCard queues r wrapped in confirm=true paygain — confirm it so spendUse runs
+        $top = $this->game->machine->createTopOperationFromDbForOwner($this->owner);
+        $this->assertNotNull($top);
+        $top->action_resolve([Operation::ARG_TARGET => "1"]);
         $this->game->machine->dispatchAll();
         $this->createOp();
         $this->assertNotValidTarget($this->abilityCard);

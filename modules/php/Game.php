@@ -63,6 +63,7 @@ class Game extends Base {
             }
             return $args;
         });
+        $this->notify->alwaysMergePrivate();
     }
 
     /*
