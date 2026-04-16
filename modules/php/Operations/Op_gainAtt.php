@@ -16,12 +16,14 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
+use function Bga\Games\Fate\getPart;
+
 /**
  * gain attribute (temp)
  */
 class Op_gainAtt extends CountableOperation {
     function getAttribute() {
-        return $this->getParam(0, "strength");
+        return getPart($this->getType(), 1, true) ?: $this->getParam() ?: "strength";
     }
 
     function resolve(): void {

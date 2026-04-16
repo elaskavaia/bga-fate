@@ -14,7 +14,7 @@ final class Op_gainAttTest extends AbstractOpTestCase {
 
     public function testGainStrength(): void {
         $before = $this->game->tokens->getTrackerValue(PCOLOR, "strength");
-        $op = $this->createOp("gainAtt(strength)");
+        $op = $this->createOp("gainAtt_strength");
         $op->resolve();
         $after = $this->game->tokens->getTrackerValue(PCOLOR, "strength");
         $this->assertEquals($before + 1, $after);

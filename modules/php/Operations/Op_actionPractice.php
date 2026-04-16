@@ -21,6 +21,13 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionPractice extends Operation {
     function resolve(): void {
-        $this->queue("gainXp");
+        $this->queue($this->getDelegateOperation());
+    }
+
+    function getDelegateOperation(): string {
+        return "gainXp";
+    }
+    function getPrompt() {
+        return $this->instantiateOperation($this->getDelegateOperation())->getPrompt();
     }
 }

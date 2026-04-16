@@ -91,7 +91,7 @@ abstract class AbstractOpTestCase extends TestCase {
     //  Helper methods
     // -------------------------------------------------------------------------
 
-    function call_resolve(mixed $target = []) {
+    function call_resolve(mixed $target = "confirm") {
         return $this->op->action_resolve([Operation::ARG_TARGET => $target]);
     }
 

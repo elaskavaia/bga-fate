@@ -163,14 +163,14 @@ class OpMachine {
             throw new SystemException("Cannot instantiate op");
         }
 
-        $operandclass = $this->game->getRulesFor("Op_$type", "class", "Op_$type");
+        $operandclass = "Op_" . $this->game->getRulesFor("Op_$type", "class", "$type");
 
         // Instantiate the class with constructor arguments
         try {
             $reflectionClass = new ReflectionClass("Bga\\Games\\Fate\\Operations\\$operandclass");
             $instance = $reflectionClass->newInstance($type, $owner, $data);
         } catch (Throwable $e) {
-            throw new SystemException("Cannot instantiate $type: " . $e->getMessage());
+            throw new SystemException("Cannot instantiate $type ($operandclass): " . $e->getMessage());
         }
 
         return $instance;

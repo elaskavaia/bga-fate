@@ -87,6 +87,12 @@ gainEquip|Gain Equipment
 drawEvent|Draw Event
 discardEvent|Discard Event
 
+#set class=gainAtt
+gainAtt_range|Gain Range
+gainAtt_move|Gain Move
+gainAtt_strength|Gain Strength
+#set class=
+
 #rare operations
 c_supfire|Suppressive Fire
 c_arrows|Burning Arrows

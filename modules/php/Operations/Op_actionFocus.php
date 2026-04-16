@@ -21,6 +21,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Delegates to gainMana operation.
  */
 class Op_actionFocus extends Operation {
+    function getPrompt() {
+        return $this->instantiateOperation($this->getDelegateOperation())->getPrompt();
+    }
+
     function getDelegateOperation(): string {
         return "gainMana";
     }
@@ -30,6 +34,7 @@ class Op_actionFocus extends Operation {
     }
 
     function resolve(): void {
-        $this->queue($this->getDelegateOperation());
+        $res = $this->getCheckedArg();
+        $this->queue($this->getDelegateOperation(), null, ["target" => $res]);
     }
 }

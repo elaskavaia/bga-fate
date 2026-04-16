@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Material;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
@@ -116,6 +115,13 @@ class Op_dealDamage extends CountableOperation {
         if ($remaining <= 0 && str_starts_with($defenderId, "monster_")) {
             $this->queueTrigger(Trigger::MonsterKilled);
         }
+    }
+
+    public function canSkip() {
+        if ($this->noValidTargets()) {
+            return parent::canSkip();
+        }
+        return false; // mandatory if possible
     }
 
     public function getUiArgs() {

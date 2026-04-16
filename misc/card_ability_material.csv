@@ -21,9 +21,9 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 3|1|Sure Shot I|||1|spendUse:3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
 4|1|Sure Shot II|||2|spendUse:c_sureshotII||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
-13|2|Flexibility I|||1|(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.|
-14|2|Flexibility II|||2|(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.|
-3|2|Hail of Arrows I|||1|custom||3[MANA]: Deal 1 damage to 3 monsters within attack range.|
+13|2|Flexibility I|||1|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.|
+14|2|Flexibility II|||2|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.|
+3|2|Hail of Arrows I|||1|spendUse:3spendMana:dealDamage(inRange),dealDamage(inRange),dealDamage(inRange)||3[MANA]: Deal 1 damage to 3 monsters within attack range.|
 4|2|Hail of Arrows II|||2|custom||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.|
 11|2|Snipe I||||spendUse:2roll(inRange)||Roll 2[DIE_ATTACK] against a monster within attack range.|
 12|2|Snipe II||||spendUse:5roll(inRange)||Roll 5[DIE_ATTACK] against a monster within attack range.|

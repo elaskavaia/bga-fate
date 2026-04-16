@@ -21,6 +21,12 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_actionPrepare extends Operation {
     function resolve(): void {
-        $this->queue("drawEvent");
+        $this->queue($this->getDelegateOperation());
+    }
+    function getDelegateOperation(): string {
+        return "drawEvent";
+    }
+    function getPrompt() {
+        return $this->instantiateOperation($this->getDelegateOperation())->getPrompt();
     }
 }

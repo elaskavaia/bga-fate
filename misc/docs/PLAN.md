@@ -542,7 +542,7 @@ Same rules as Bjorn validation (see below):
 
 <!-- r=custom — needs custom operation implementation -->
 
-[x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
+[x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
 [ ] card_ability_2_14 Flexibility II — r=Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch. Needs integration tests.
 [ ] card_ability_2_3 Hail of Arrows I — custom: 3[MANA]: deal 1 damage to 3 monsters in range
 [ ] card_ability_2_4 Hail of Arrows II — custom: 1-4[MANA]: deal 1 damage to that many different monsters in range

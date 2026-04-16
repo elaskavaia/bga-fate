@@ -447,6 +447,21 @@ class Material {
         "type" => "discardEvent",
         "name" => clienttranslate("Discard Event"),
 ],
+    "Op_gainAtt_range" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_range",
+        "name" => clienttranslate("Gain Range"),
+],
+    "Op_gainAtt_move" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_move",
+        "name" => clienttranslate("Gain Move"),
+],
+    "Op_gainAtt_strength" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_strength",
+        "name" => clienttranslate("Gain Strength"),
+],
 // #rare operations
     "Op_c_supfire" => [ 
         "type" => "c_supfire",
@@ -3610,7 +3625,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Flexibility I"),
         "mana" => 1,
-        "r" => "(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage)",
+        "r" => "(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)",
         "on" => "custom",
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.",
 ],
@@ -3622,7 +3637,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Flexibility II"),
         "mana" => 2,
-        "r" => "(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)",
+        "r" => "(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)",
         "on" => "custom",
         "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.",
 ],
@@ -3634,7 +3649,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Hail of Arrows I"),
         "mana" => 1,
-        "r" => "custom",
+        "r" => "spendUse:3spendMana:dealDamage(inRange),dealDamage(inRange),dealDamage(inRange)",
         "effect" => "3[MANA]: Deal 1 damage to 3 monsters within attack range.",
 ],
     "card_ability_2_4" => [ 

@@ -30,7 +30,7 @@ class Op_gainMana extends CountableOperation {
     function getPossibleMoves() {
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
-            return [$presetTarget => ["q" => Material::RET_OK]];
+            return [$presetTarget];
         }
         $owner = $this->getOwner();
         $cards = $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner");

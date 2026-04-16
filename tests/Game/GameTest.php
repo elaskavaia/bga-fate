@@ -435,9 +435,6 @@ final class GameTest extends TestCase {
     function subTestOp($key, $info = []) {
         $type = substr($key, 3);
         $this->assertTrue(!!$type);
-        if ($info["notimpl"] ?? false) {
-            return;
-        }
 
         /** @var \Bga\Games\Fate\OpCommon\Operation */
         $op = $this->game->machine->instantiateOperation($type, PCOLOR);

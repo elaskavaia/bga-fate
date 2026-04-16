@@ -263,7 +263,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
     }
 
     // --- Flexibility I (card_ability_2_13) ---
-    // r=(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage)
+    // r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)
     // 1[MANA]: Move +1 (once/turn) | 2[MANA]: Range +1 this turn (once/turn) | 2[MANA]: +2 dmg mid-attack (per-attack)
 
     private function placeFlexibility(int $mana = 2): void {

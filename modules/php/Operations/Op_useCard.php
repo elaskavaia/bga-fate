@@ -22,7 +22,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useCard extends Operation {
     function getPrompt() {
-        return clienttranslate("Choose a card to use or play");
+        return clienttranslate("You may choose a card to use or play");
     }
 
     /** Return array of token rows (each with "key") that are candidates for this action. */
