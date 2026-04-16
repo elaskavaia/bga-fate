@@ -35,7 +35,7 @@ class CardGeneric extends Card {
         $this->onTriggerDefault($event);
     }
     public function onTriggerDefault(Trigger $event): void {
-        if ($event === Trigger::Enter) {
+        if ($event === Trigger::CardEnter) {
             return; // lifecycle event - handled only by card on itself
         }
 
@@ -56,7 +56,7 @@ class CardGeneric extends Card {
         if ($event === Trigger::Manual && $on === "") {
             return true;
         }
-        // A card with on=EventRoll should also fire when the dispatched trigger is
+        // A card with on=TRoll should also fire when the dispatched trigger is
         // Trigger::ActionAttack (Roll is in ActionAttack's chain). Walk the chain.
         foreach ($event->chain() as $t) {
             if ($on === $t->value) {

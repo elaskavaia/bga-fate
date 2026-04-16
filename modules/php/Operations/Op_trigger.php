@@ -7,14 +7,14 @@ use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * Trigger operation — fires automatically in response to a published game event.
+ * Trigger operation — fires automatically in response to a published game trigger.
  *
  * Params:
- * - param(0): the Event wire value (e.g. "EventActionAttack", "EventRoll", "EventMonsterMove")
+ * - param(0): the Trigger wire value (e.g. "TActionAttack", "TRoll", "TMonsterMove")
  *
  * Behaviour:
- * - Converts the wire string back into an Event case at the boundary, then
- *   walks every card in the owner's tableau + hand and dispatches onTrigger($event).
+ * - Converts the wire string back into a Trigger case at the boundary, then
+ *   walks every card in the owner's tableau + hand and dispatches onTrigger($trigger).
  */
 class Op_trigger extends Operation {
     function resolve(): void {

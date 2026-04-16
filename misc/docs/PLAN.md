@@ -373,7 +373,7 @@ See CLAUDE.md for project overview
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 - [x] `spendGold` — Remove X yellow crystals (gold/arrows) from the context card as a cost. Parallel to `spendMana`. Used by: Black Arrows (`spendGold:3addDamage`), future "spend token from card" effects.
 - [x] `spendUse` — Cost op that marks the context card as used this turn (flips card token state→1). Voids with `ERR_OCCUPIED` if already used; reset by `Op_turnEnd`. Replaces the implicit `Card::setUsed()` path so once-per-turn is explicit in each card's `r` expression. Used by: most voluntary free-action abilities/equipment (Stitching, Sure Shot, Snipe, Fleetfoot, Fortified, Rapid Strike I, Leather Purse, Throwing Axes/Darts/Knives, Belt of Youth, etc.). NOT used by: on-triggered cards (trigger-on-other-actions exception), damage-prevention equipment, "any number of times" cards, `r=custom` bespoke classes, Rapid Strike II (explicit "several times per turn"), Black Arrows (spendGold naturally throttles).
-- [x] `on(EventXxx)` — Runtime event gate. Voids with `ERR_PREREQ` unless the `event` data field (seeded by `Card::useCard()`) matches the expected event. Used inside `r` expressions to restrict a clause to a specific trigger context. Must be the leftmost element of its paygain chain so `Op_paygain::getPossibleMoves` catches the void before any sub runs. Used by: Flexibility I/II (`on(EventActionAttack):2spendMana:2addDamage` — add-damage branch fires only mid-attack and does NOT consume the card's spendUse slot).
+- [x] `on(EventXxx)` — Runtime event gate. Voids with `ERR_PREREQ` unless the `event` data field (seeded by `Card::useCard()`) matches the expected event. Used inside `r` expressions to restrict a clause to a specific trigger context. Must be the leftmost element of its paygain chain so `Op_paygain::getPossibleMoves` catches the void before any sub runs. Used by: Flexibility I/II (`on(TActionAttack):2spendMana:2addDamage` — add-damage branch fires only mid-attack and does NOT consume the card's spendUse slot).
 
 ### Extensions to existing ops
 
@@ -542,7 +542,7 @@ Same rules as Bjorn validation (see below):
 
 <!-- r=custom — needs custom operation implementation -->
 
-[x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(EventActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(EventActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
+[x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt(move))/(spendUse:2spendMana:gainAtt(range))/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
 [ ] card_ability_2_14 Flexibility II — r=Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch. Needs integration tests.
 [ ] card_ability_2_3 Hail of Arrows I — custom: 3[MANA]: deal 1 damage to 3 monsters in range
 [ ] card_ability_2_4 Hail of Arrows II — custom: 1-4[MANA]: deal 1 damage to that many different monsters in range

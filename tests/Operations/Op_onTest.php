@@ -7,36 +7,36 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Tests for Op_on — runtime event gate used inside r expressions.
- * Example: `(2spendMana:on(EventActionAttack):2addDamage)` — the clause only
+ * Example: `(2spendMana:on(TActionAttack):2addDamage)` — the clause only
  * resolves when the enclosing useCard was triggered by Trigger::ActionAttack.
  */
 final class Op_onTest extends AbstractOpTestCase {
     public function testGatePassesWhenEventMatches(): void {
-        $this->createOp("on(EventActionAttack)", ["event" => "EventActionAttack"]);
+        $this->createOp("on(TActionAttack)", ["event" => "TActionAttack"]);
         $this->assertFalse($this->op->isVoid());
         $this->assertFalse($this->op->noValidTargets());
     }
 
     public function testGateVoidsWhenEventMismatches(): void {
-        $this->createOp("on(EventActionAttack)", ["event" => "EventRoll"]);
+        $this->createOp("on(TActionAttack)", ["event" => "TRoll"]);
         $this->assertNoValidTargetsAndError(Material::ERR_PREREQ);
     }
 
     public function testGateVoidsWhenEventMissing(): void {
         // No event data field (e.g. queued outside the useCard flow).
-        $this->createOp("on(EventActionAttack)");
+        $this->createOp("on(TActionAttack)");
         $this->assertNoValidTargetsAndError(Material::ERR_PREREQ);
     }
 
     public function testGateVoidsWhenParamMissing(): void {
         // Param is the expected event; without it we can't match anything.
-        $this->createOp("on", ["event" => "EventActionAttack"]);
+        $this->createOp("on", ["event" => "TActionAttack"]);
         $this->assertNoValidTargetsAndError(Material::ERR_PREREQ);
     }
 
     public function testResolveIsNoOp(): void {
         // Passing gate should resolve silently — no token moves, no side effects.
-        $this->createOp("on(EventActionAttack)", ["event" => "EventActionAttack"]);
+        $this->createOp("on(TActionAttack)", ["event" => "TActionAttack"]);
         $before = $this->countGreenCrystals("supply_crystal_green");
         $this->op->action_resolve([Operation::ARG_TARGET => "confirm"]);
         $after = $this->countGreenCrystals("supply_crystal_green");
@@ -48,7 +48,7 @@ final class Op_onTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testChainWithGatePassingRunsEffect(): void {
-        // on(EventActionAttack):spendMana:gainMana — when event matches, should:
+        // on(TActionAttack):spendMana:gainMana — when event matches, should:
         //   1) pass the gate (no-op)
         //   2) spend 1 mana from the source card
         //   3) add 1 mana to a target card (auto-picks the only mana card)
@@ -59,9 +59,9 @@ final class Op_onTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
 
         $manaBefore = $this->countGreenCrystals($cardId);
-        $this->game->machine->push("on(EventActionAttack):spendMana:gainMana", $this->owner, [
+        $this->game->machine->push("on(TActionAttack):spendMana:gainMana", $this->owner, [
             "card" => $cardId,
-            "event" => "EventActionAttack",
+            "event" => "TActionAttack",
         ]);
         $this->game->machine->dispatchAll();
 
@@ -74,7 +74,7 @@ final class Op_onTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
 
         $manaBefore = $this->countGreenCrystals($cardId);
-        $this->game->machine->push("on(EventActionAttack):spendMana:gainMana", $this->owner, ["card" => $cardId, "event" => "EventRoll"]);
+        $this->game->machine->push("on(TActionAttack):spendMana:gainMana", $this->owner, ["card" => $cardId, "event" => "TRoll"]);
         $this->game->machine->dispatchAll();
 
         $this->assertEquals($manaBefore, $this->countGreenCrystals($cardId), "no mana movement when chain voids");

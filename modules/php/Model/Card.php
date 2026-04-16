@@ -102,8 +102,8 @@ class Card {
     }
 
     /**
-     * Single entry point called by Op_trigger when an event fires for this card.
-     * Routes to on<EventName>() — e.g. Trigger::Enter → onEnter().
+     * Single entry point called by Op_trigger when a trigger fires for this card.
+     * Routes to on<TriggerName>() — e.g. Trigger::CardEnter → onCardEnter().
      *
      * Walks the trigger chain most-specific → least-specific and calls the first
      * matching hook. This preserves the contract that a bespoke card defining
@@ -146,9 +146,9 @@ class Card {
     }
 
     /**
-     * Derive the on<EventName>() hook method name from an Event case.
+     * Derive the on<TriggerName>() hook method name from a Trigger case.
      * Uses the case `name` (e.g. Trigger::ActionAttack → "ActionAttack") so the hook
-     * derivation does not depend on the `Event` prefix in the wire-format value.
+     * derivation does not depend on the `T` prefix in the wire-format value.
      */
     protected function getTriggerMethod(Trigger $event): string {
         return "on" . $event->name;
@@ -163,7 +163,7 @@ class Card {
         foreach ($event->chain() as $t) {
             $method = $this->getTriggerMethod($t);
             if (method_exists($this, $method)) {
-                if ($t === Trigger::Enter) {
+                if ($t === Trigger::CardEnter) {
                     // Lifecycle event only fires for the card that just entered play.
                     return $this->op->getDataField("card", "") == $this->id;
                 }

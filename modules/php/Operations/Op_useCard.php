@@ -34,11 +34,11 @@ class Op_useCard extends Operation {
     }
 
     /**
-     * Returns the list of Event cases this useCard prompt is offering.
-     * `on` data field stores wire-format strings (e.g. "EventActionAttack");
-     * convert them back to Event cases at this boundary.
+     * Returns the list of Trigger cases this useCard prompt is offering.
+     * `on` data field stores wire-format strings (e.g. "TActionAttack");
+     * convert them back to Trigger cases at this boundary.
      *
-     * @return Event[]
+     * @return Trigger[]
      */
     function getTriggers(): array {
         $wire = $this->getDataField("on", []);
@@ -59,7 +59,7 @@ class Op_useCard extends Operation {
     }
 
     function getPossibleMoves() {
-        /** @var Event[] $triggers */
+        /** @var Trigger[] $triggers */
         $triggers = $this->getTriggers();
         if (empty($triggers)) {
             $triggers = [Trigger::Manual]; // manual activation — cards without `on` field match

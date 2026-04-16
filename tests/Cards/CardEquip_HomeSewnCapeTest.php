@@ -20,7 +20,7 @@ class CardEquip_HomeSewnCapeTest extends AbstractCardTestCase {
 
     /** No runes on display → no mana gained. */
     public function testNoRunesNoMana(): void {
-        $this->createOp("trigger(EventRoll)");
+        $this->createOp("trigger(TRoll)");
         $this->call_resolve(); // no voluntary cards; auto-fire happens in skip path
 
         $this->assertEquals(0, $this->countGreenCrystals(self::CAPE));
@@ -31,7 +31,7 @@ class CardEquip_HomeSewnCapeTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken(self::CAPE, "deck_equip_" . $this->owner);
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 3);
 
-        $this->createOp("trigger(EventRoll)");
+        $this->createOp("trigger(TRoll)");
         $this->call_resolve();
 
         $this->assertEquals(0, $this->countGreenCrystals(self::CAPE));

@@ -15,35 +15,35 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Model;
 
 /**
- * Published game events that cards can react to via on<EventName>() hooks.
+ * Published game triggers that cards can react to via on<TriggerName>() hooks.
  *
  * The case `name` (e.g. "ActionAttack") is used by Card::getTriggerMethod() to derive
- * the hook method name ("onActionAttack"). The case `value` (e.g. "EventActionAttack")
+ * the hook method name ("onActionAttack"). The case `value` (e.g. "TActionAttack")
  * is the wire format used in CSV `on` columns and serialized op-machine expressions
- * like trigger(EventActionAttack).
+ * like trigger(TActionAttack).
  *
- * The `Event` prefix exists to disambiguate event names from operation type names,
- * which previously shared the same string namespace (e.g. both an Op_actionAttack
- * operation and an "actionAttack" trigger).
+ * The `T` prefix exists to disambiguate trigger names from operation type names,
+ * which share the same string namespace (e.g. both an Op_actionAttack operation
+ * and an actionAttack-flavored trigger).
  */
 enum Trigger: string {
-    case ActionAttack = "EventActionAttack";
-    case ActionMove = "EventActionMove"; // move with action move
-    case Move = "EventMove"; // any move
-    case Roll = "EventRoll";
-    case ResolveHits = "EventResolveHits";
-    case TurnEnd = "EventTurnEnd";
-    case TurnStart = "EventTurnStart";
-    case MonsterMove = "EventMonsterMove";
-    case MonsterKilled = "EventMonsterKilled";
-    case Enter = "EventEnter";
+    case ActionAttack = "TActionAttack";
+    case ActionMove = "TActionMove"; // move with action move
+    case Move = "TMove"; // any move
+    case Roll = "TRoll";
+    case ResolveHits = "TResolveHits";
+    case TurnEnd = "TTurnEnd";
+    case TurnStart = "TTurnStart";
+    case MonsterMove = "TMonsterMove";
+    case MonsterKilled = "TMonsterKilled";
+    case CardEnter = "TCardEnter";
     /**
      * Synthetic "event" representing manual activation from the useCard free-action
      * prompt. Never published via Op_trigger and never appears in the CSV `on` column —
      * it exists so that `getTriggerMethod(Trigger::Manual)` derives the `onManual` hook
      * the same way real events derive `onRoll`, `onActionAttack`, etc.
      */
-    case Manual = "EventManual";
+    case Manual = "TManual";
 
     /**
      * Parent trigger, or null if this trigger is a root. A parent relationship means
@@ -65,7 +65,7 @@ enum Trigger: string {
      *
      * Used by card-matching (CardGeneric::canTriggerEffectOn) and the on(...) gate
      * (Op_on) to resolve a dispatched trigger against a card's `on` field or an
-     * r-expression guard. A card with `on=EventRoll` matches a dispatched ActionAttack
+     * r-expression guard. A card with `on=TRoll` matches a dispatched ActionAttack
      * because Roll is in the ActionAttack chain.
      *
      * @return self[]

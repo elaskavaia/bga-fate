@@ -11,7 +11,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  *
  * Behaviour:
  * - Automated: picks top card from deck_equip_{owner}, places on tableau via effect_gainEquipment,
- *   which fires onEnter (e.g. Black Arrows seeds 3 arrows, Tiara seeds 6 gold).
+ *   which fires onCardEnter (e.g. Black Arrows seeds 3 arrows, Tiara seeds 6 gold).
  * - If deck is empty, auto-skips silently.
  *
  * Used by: quest completion, upgrade flow, debug_equip.
@@ -44,11 +44,11 @@ class Op_gainEquip extends Operation {
     }
 
     /**
-     * Place an equipment card on a player's tableau and fire its onEnter hook.
+     * Place an equipment card on a player's tableau and fire its onCardEnter hook.
      *
      * @param string $cardId  Token id of the equipment card (e.g. "card_equip_1_20")
      * @param string $owner   Player color
-     * @param Operation|null $op  Calling operation — required for onEnter to queue sub-ops.
+     * @param Operation|null $op  Calling operation — required for onCardEnter to queue sub-ops.
      *                            Pass null during setupNewGame (no triggers fire).
      */
     function effect_gainEquipment(array $card): void {
@@ -66,6 +66,6 @@ class Op_gainEquip extends Operation {
         }
 
         $cardObj = $this->game->instantiateCard($card, $this);
-        $cardObj->onTrigger(Trigger::Enter);
+        $cardObj->onTrigger(Trigger::CardEnter);
     }
 }

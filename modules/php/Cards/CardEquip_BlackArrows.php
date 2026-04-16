@@ -20,7 +20,7 @@ use Bga\Games\Fate\Model\CardGeneric;
 // custon on enter trigger + generit manual play effect using r
 
 class CardEquip_BlackArrows extends CardGeneric {
-    public function onEnter(): void {
+    public function onCardEnter(): void {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = 3;

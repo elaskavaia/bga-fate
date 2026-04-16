@@ -89,7 +89,7 @@ class Op_move extends CountableOperation {
         }
         $hero->moveTo($target);
         // Emit the most specific trigger; ActionMove chains through Move so cards
-        // listening on EventMove are still offered during action-move resolutions.
+        // listening on TMove are still offered during action-move resolutions.
         $trigger = $this->getReason() == "Op_actionMove" ? Trigger::ActionMove : Trigger::Move;
         $this->queueTrigger($trigger);
     }

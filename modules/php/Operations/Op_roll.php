@@ -102,7 +102,7 @@ class Op_roll extends CountableOperation {
 
         // Only trigger on player rolls (hero is attacker), not monster rolls.
         // Emit the most specific trigger; ActionAttack chains through Roll so cards
-        // listening on EventRoll are still offered during attack rolls (Trigger::chain).
+        // listening on TRoll are still offered during attack rolls (Trigger::chain).
         if (str_starts_with($attackerId, "hero_")) {
             $trigger = $this->getReason() == "Op_actionAttack" ? Trigger::ActionAttack : Trigger::Roll;
             $this->queueTrigger($trigger);

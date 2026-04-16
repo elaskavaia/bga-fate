@@ -24,12 +24,12 @@ use Bga\Games\Fate\OpCommon\Operation;
  * useCard invocation's event does not match the param.
  *
  * Example (Flexibility I mid-attack branches):
- *   (1spendMana:move) / (2spendMana:on(EventActionAttack):1gainAtt(range))
+ *   (1spendMana:move) / (2spendMana:on(TActionAttack):1gainAtt(range))
  *
  * Reads getDataField("event") seeded by Card::useCard() at queue time.
  *
- * The match walks the trigger chain (Trigger::chain()), so `on(EventRoll)` is
- * satisfied when the dispatched trigger is EventActionAttack — Roll is a parent
+ * The match walks the trigger chain (Trigger::chain()), so `on(TRoll)` is
+ * satisfied when the dispatched trigger is TActionAttack — Roll is a parent
  * of ActionAttack.
  */
 class Op_on extends Operation {
