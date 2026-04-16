@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\Model\CardGeneric;
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +26,7 @@ final class CardGenericTest extends AbstractCardTestCase {
     }
 
     /** Build a CardGeneric for $cardId, parented to a fresh trigger op of $event (null = nop). */
-    private function createCard(string $cardId, ?Event $event = null): CardGeneric {
+    private function createCard(string $cardId, ?Trigger $event = null): CardGeneric {
         $opType = $event !== null ? "trigger({$event->value})" : "nop";
         $parentOp = $this->game->machine->instantiateOperation($opType, $this->owner);
         return new CardGeneric($this->game, $cardId, $parentOp);
@@ -43,20 +43,20 @@ final class CardGenericTest extends AbstractCardTestCase {
     public function testCanTriggerReturnsTrueWhenOnFieldMatches(): void {
         // Riposte I has on=resolveHits
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
-        $card = $this->createCard("card_ability_3_3", Event::ResolveHits);
-        $this->assertTrue($card->canTriggerEffectOn(Event::ResolveHits));
+        $card = $this->createCard("card_ability_3_3", Trigger::ResolveHits);
+        $this->assertTrue($card->canTriggerEffectOn(Trigger::ResolveHits));
     }
 
     public function testCanTriggerReturnsFalseWhenOnFieldDoesNotMatch(): void {
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
-        $card = $this->createCard("card_ability_3_3", Event::Roll);
-        $this->assertFalse($card->canTriggerEffectOn(Event::Roll));
+        $card = $this->createCard("card_ability_3_3", Trigger::Roll);
+        $this->assertFalse($card->canTriggerEffectOn(Trigger::Roll));
     }
 
     public function testCanTriggerReturnsFalseForCardWithNoOnField(): void {
         // Sure Shot I (card_ability_1_3) has no `on` field
-        $card = $this->createCard("card_ability_1_3", Event::Roll);
-        $this->assertFalse($card->canTriggerEffectOn(Event::Roll));
+        $card = $this->createCard("card_ability_1_3", Trigger::Roll);
+        $this->assertFalse($card->canTriggerEffectOn(Trigger::Roll));
     }
 
     // -------------------------------------------------------------------------
@@ -71,14 +71,14 @@ final class CardGenericTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
 
-        $card = $this->createCard("card_ability_3_3", Event::ResolveHits);
-        $this->assertTrue($card->canBePlayed(Event::ResolveHits));
+        $card = $this->createCard("card_ability_3_3", Trigger::ResolveHits);
+        $this->assertTrue($card->canBePlayed(Trigger::ResolveHits));
     }
 
     public function testCanBePlayedReturnsFalseWhenTriggerDoesNotMatch(): void {
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
-        $card = $this->createCard("card_ability_3_3", Event::Roll);
-        $this->assertFalse($card->canBePlayed(Event::Roll));
+        $card = $this->createCard("card_ability_3_3", Trigger::Roll);
+        $this->assertFalse($card->canBePlayed(Trigger::Roll));
     }
 
     public function testCanBePlayedReturnsFalseWhenCannotPayCost(): void {
@@ -86,28 +86,28 @@ final class CardGenericTest extends AbstractCardTestCase {
         $hero = $this->game->getHero($this->owner);
         $hero->placeActionMarker("actionMove");
         $hero->placeActionMarker("actionAttack");
-        $card = $this->createCard("card_hero_1_1", Event::Roll);
-        $this->assertFalse($card->canBePlayed(Event::Roll));
+        $card = $this->createCard("card_hero_1_1", Trigger::Roll);
+        $this->assertFalse($card->canBePlayed(Trigger::Roll));
     }
 
     public function testCanBePlayedReturnsFalseWhenAlreadyUsedThisTurn(): void {
         // Sure Shot I (card_ability_1_3) has no `on` field → once-per-turn, state=1 means used
         $this->game->tokens->setTokenState("card_ability_1_3", 1);
         $card = $this->createCard("card_ability_1_3");
-        $this->assertFalse($card->canBePlayed(Event::Manual));
+        $this->assertFalse($card->canBePlayed(Trigger::Manual));
     }
 
     public function testCanBePlayedReturnsFalseWhenRFieldEmpty(): void {
         // Bjorn's First Bow (card_equip_1_15) has no `r` field — passive stats only
-        $card = $this->createCard("card_equip_1_15", Event::Roll);
-        $this->assertFalse($card->canBePlayed(Event::Roll));
+        $card = $this->createCard("card_equip_1_15", Trigger::Roll);
+        $this->assertFalse($card->canBePlayed(Trigger::Roll));
     }
 
     public function testCanBePlayedPopulatesErrorInfo(): void {
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
-        $card = $this->createCard("card_ability_3_3", Event::Roll);
+        $card = $this->createCard("card_ability_3_3", Trigger::Roll);
         $errorRes = [];
-        $result = $card->canBePlayed(Event::Roll, $errorRes);
+        $result = $card->canBePlayed(Trigger::Roll, $errorRes);
         $this->assertFalse($result);
         $this->assertNotEquals(0, $errorRes["q"] ?? 0);
     }
@@ -124,8 +124,8 @@ final class CardGenericTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
 
-        $card = $this->createCard("card_ability_3_3", Event::ResolveHits);
-        $card->onTrigger(Event::ResolveHits);
+        $card = $this->createCard("card_ability_3_3", Trigger::ResolveHits);
+        $card->onTrigger(Trigger::ResolveHits);
 
         $this->assertContains("useCard", $this->queuedOpTypes());
     }
@@ -135,8 +135,8 @@ final class CardGenericTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken("card_event_1_31", "hand_$this->owner");
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 2);
 
-        $card = $this->createCard("card_event_1_31", Event::Roll);
-        $card->onTrigger(Event::Roll);
+        $card = $this->createCard("card_event_1_31", Trigger::Roll);
+        $card->onTrigger(Trigger::Roll);
 
         $this->assertContains("useCard", $this->queuedOpTypes());
     }
@@ -149,8 +149,8 @@ final class CardGenericTest extends AbstractCardTestCase {
         // Riposte I has on=resolveHits — should not react to trigger(roll).
         $this->game->tokens->moveToken("card_ability_3_3", "tableau_$this->owner");
 
-        $card = $this->createCard("card_ability_3_3", Event::Roll);
-        $card->onTrigger(Event::Roll);
+        $card = $this->createCard("card_ability_3_3", Trigger::Roll);
+        $card->onTrigger(Trigger::Roll);
 
         $opTypes = $this->queuedOpTypes();
 
@@ -160,8 +160,8 @@ final class CardGenericTest extends AbstractCardTestCase {
     public function testCardWithoutOnFieldDoesNothing(): void {
         // Sure Shot I (card_ability_1_3) has no `on` field — voluntary-anytime.
         // CardGeneric only reacts when `on` matches; for empty `on` it never fires.
-        $card = $this->createCard("card_ability_1_3", Event::Roll);
-        $card->onTrigger(Event::Roll);
+        $card = $this->createCard("card_ability_1_3", Trigger::Roll);
+        $card->onTrigger(Trigger::Roll);
 
         $this->assertNotContains("useCard", $this->queuedOpTypes());
     }
@@ -176,8 +176,8 @@ final class CardGenericTest extends AbstractCardTestCase {
         $hero = $this->game->getHero($this->owner);
         $hero->placeActionMarker("actionMove");
         $hero->placeActionMarker("actionAttack");
-        $card = $this->createCard("card_hero_1_1", Event::Roll);
-        $card->onTrigger(Event::Roll);
+        $card = $this->createCard("card_hero_1_1", Trigger::Roll);
+        $card->onTrigger(Trigger::Roll);
 
         $this->assertNotContains("useCard", $this->queuedOpTypes());
     }

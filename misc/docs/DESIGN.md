@@ -239,10 +239,10 @@ At key points during gameplay, an `Op_trigger` is queued which walks every card 
 
 **How triggers fire:**
 
-1. An operation calls `$this->queueTrigger(Event::Xxx)` — the `Event` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
+1. An operation calls `$this->queueTrigger(Trigger::Xxx)` — the `Event` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
 2. This queues `Op_trigger(EventXxx)` for the current player.
-3. `Op_trigger::resolve()` converts the wire string back to an `Event` case via `Event::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($event)`.
-4. For each card, `Card::onTrigger()` routes to `on<EventName>()` if the subclass defines it (derived from the enum case name: `Event::ActionAttack → onActionAttack`), else to `onTriggerDefault()`.
+3. `Op_trigger::resolve()` converts the wire string back to an `Event` case via `Trigger::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($event)`.
+4. For each card, `Card::onTrigger()` routes to `on<EventName>()` if the subclass defines it (derived from the enum case name: `Trigger::ActionAttack → onActionAttack`), else to `onTriggerDefault()`.
 5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
 6. **Generic cards** (`CardGeneric`) check `canBePlayed($event)` — verifying the `on` field matches and the effect has valid targets. If playable, queues a single `useCard` op with `on=[$event->value]` and `prompt=true`. The dedup logic ensures only one `useCard` is queued per trigger type — subsequent cards matching the same trigger share the same prompt.
 7. When `Card::useCard()` queues the card's `r` expression, it seeds `event` in the queued op's data. `ComplexOperation::withData()` propagates this down to every sub-op, so guards like `Op_on` can read it via `getDataField("event")`.
@@ -253,36 +253,36 @@ The `useCard` op collects all playable cards (tableau + hand) that match the tri
 
 ```
 Op_turnStart
-  → Event::TurnStart        — at start of player turn (passive start-of-turn effects)
+  → Trigger::TurnStart        — at start of player turn (passive start-of-turn effects)
 Op_roll
-  → Event::Roll             — after a hero rolls attack dice
-  → Event::ActionAttack     — after a roll initiated by Op_actionAttack
+  → Trigger::Roll             — after a hero rolls attack dice
+  → Trigger::ActionAttack     — after a roll initiated by Op_actionAttack
 Op_actionMove
-  → Event::ActionMove       — after an actionMove resolves (move-action specific)
+  → Trigger::ActionMove       — after an actionMove resolves (move-action specific)
 Op_move
-  → Event::Move             — after ANY movement resolves (action or card-driven)
+  → Trigger::Move             — after ANY movement resolves (action or card-driven)
 Op_resolveHits
-  → Event::ResolveHits      — before damage is applied to a hero (for damage prevention)
+  → Trigger::ResolveHits      — before damage is applied to a hero (for damage prevention)
 Op_dealDamage
-  → Event::MonsterKilled    — when a monster is killed
+  → Trigger::MonsterKilled    — when a monster is killed
 Op_turnEnd
-  → Event::TurnEnd          — at end of player turn
+  → Trigger::TurnEnd          — at end of player turn
 Op_turnMonster
-  → Event::MonsterMove      — before the Monsters Move step
+  → Trigger::MonsterMove      — before the Monsters Move step
 Op_gainEquip
-  → Event::Enter            — when a card enters play (direct onTrigger call, not via Op_trigger)
+  → Trigger::Enter            — when a card enters play (direct onTrigger call, not via Op_trigger)
 ```
 
 **Attack action trigger sequence (example):**
 
 ```
 actionAttack → player picks target → roll dice
-  → Event::Roll          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
-  → Event::ActionAttack  — same: each matching card is offered as a separate confirm-or-skip
+  → Trigger::Roll          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
+  → Trigger::ActionAttack  — same: each matching card is offered as a separate confirm-or-skip
   → resolveHits          — converts dice to damage
-    → Event::ResolveHits — damage prevention cards offered individually
+    → Trigger::ResolveHits — damage prevention cards offered individually
   → dealDamage           — applies damage to monster
-    → Event::MonsterKilled — if monster died, each matching card reacts
+    → Trigger::MonsterKilled — if monster died, each matching card reacts
 ```
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).

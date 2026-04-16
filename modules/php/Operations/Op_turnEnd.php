@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -33,7 +33,7 @@ class Op_turnEnd extends Operation {
             $dieKeys = array_map(fn($d) => $d["key"], $dice);
             $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
         }
-        $this->queueTrigger(Event::TurnEnd);
+        $this->queueTrigger(Trigger::TurnEnd);
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
         $this->queue("upgrade");

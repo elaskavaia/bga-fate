@@ -21,7 +21,7 @@ use Bga\Games\Fate\Material;
  * modules/php/Cards/. Inherits all default Card behavior.
  */
 class CardGeneric extends Card {
-    public function onTrigger(Event $event): void {
+    public function onTrigger(Trigger $event): void {
         $method = $this->getTriggerMethod($event);
         if (!method_exists($this, $method)) {
             $this->onTriggerDefault($event);
@@ -30,8 +30,8 @@ class CardGeneric extends Card {
 
         $this->callOnTriggerMethod($method, $event);
     }
-    public function onTriggerDefault(Event $event): void {
-        if ($event === Event::Enter) {
+    public function onTriggerDefault(Trigger $event): void {
+        if ($event === Trigger::Enter) {
             return; // lifecycle event - handled only by card on itself
         }
 
@@ -42,14 +42,14 @@ class CardGeneric extends Card {
         $this->promptUseCard($event);
     }
 
-    public function canTriggerEffectOn(Event $event): bool {
+    public function canTriggerEffectOn(Trigger $event): bool {
         if (parent::canTriggerEffectOn($event)) {
             return true;
         }
         $cardId = $this->id;
         $on = $this->game->material->getRulesFor($cardId, "on", "");
         // Manual play: generic cards with no `on` field are offered as free-action useCard targets.
-        if ($event === Event::Manual && $on === "") {
+        if ($event === Trigger::Manual && $on === "") {
             return true;
         }
         if ($on === $event->value) {
@@ -64,7 +64,7 @@ class CardGeneric extends Card {
 
         return false;
     }
-    public function canBePlayed(Event $event, ?array &$errorRes = null): bool {
+    public function canBePlayed(Trigger $event, ?array &$errorRes = null): bool {
         if (!parent::canBePlayed($event, $errorRes)) {
             return false;
         }

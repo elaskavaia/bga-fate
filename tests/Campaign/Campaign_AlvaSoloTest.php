@@ -205,7 +205,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
 
     // --- Alva Hero I (card_hero_2_1) ---
     // "End your move action in a forest to add 1 mana [MANA] to any card."
-    // Listens on Event::ActionMove; queues ?gainMana when Alva ends the move action in a forest.
+    // Listens on Trigger::ActionMove; queues ?gainMana when Alva ends the move action in a forest.
 
     public function testAlvaHeroIAddsManaWhenMoveActionEndsInForest(): void {
         // Hail of Arrows I (card_ability_2_3, mana=1) is on Alva's starting tableau and is the
@@ -227,7 +227,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
 
     // --- Alva Hero II (card_hero_2_2) ---
     // "End any movement in a forest to add 1 mana [MANA] to any card."
-    // Listens on Event::Move (any movement, not just action move).
+    // Listens on Trigger::Move (any movement, not just action move).
 
     public function testAlvaHeroIIAddsManaWhenMoveActionEndsInForest(): void {
         $color = $this->getActivePlayerColor();
@@ -242,8 +242,8 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
 
         $this->respond("hex_5_8");
 
-        // Hero II listens on Event::Move (any movement). Op_actionMove queues Op_move which
-        // emits Event::Move on completion → ?gainMana auto-resolves on Hail of Arrows I.
+        // Hero II listens on Trigger::Move (any movement). Op_actionMove queues Op_move which
+        // emits Trigger::Move on completion → ?gainMana auto-resolves on Hail of Arrows I.
         $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
         $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));
@@ -353,7 +353,7 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
         $this->respond("hex_5_9");
         // Mid-attack trigger offers Flexibility I via on(EventActionAttack)
         $this->respond("card_ability_2_13");
-        $this->respond("coice_2");
+        $this->respond("choice_2");
 
         // 2 mana spent; brute took 2 damage (base=0 + addDamage 2)
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_ability_2_13"));

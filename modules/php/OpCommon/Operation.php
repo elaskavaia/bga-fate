@@ -19,7 +19,7 @@ use Bga\GameFramework\SystemException;
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\States\GameDispatch;
 use Bga\Games\Fate\States\PlayerTurn;
 use Bga\Games\Fate\OpCommon\OpExpression;
@@ -256,7 +256,7 @@ abstract class Operation {
         $this->queueRank++;
     }
 
-    function queueTrigger(Event $event, $owner = null, mixed $data = null) {
+    function queueTrigger(Trigger $event, $owner = null, mixed $data = null) {
         $this->queue("trigger({$event->value})", $owner, $data);
     }
 

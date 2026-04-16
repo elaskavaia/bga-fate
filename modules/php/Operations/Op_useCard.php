@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -42,7 +42,7 @@ class Op_useCard extends Operation {
      */
     function getTriggers(): array {
         $wire = $this->getDataField("on", []);
-        return array_map(fn($w) => Event::from((string) $w), $wire);
+        return array_map(fn($w) => Trigger::from((string) $w), $wire);
     }
 
     function requireConfirmation() {
@@ -62,7 +62,7 @@ class Op_useCard extends Operation {
         /** @var Event[] $triggers */
         $triggers = $this->getTriggers();
         if (empty($triggers)) {
-            $triggers = [Event::Manual]; // manual activation — cards without `on` field match
+            $triggers = [Trigger::Manual]; // manual activation — cards without `on` field match
         }
         $presetTarget = $this->getDataField("target");
         if ($presetTarget) {
@@ -94,8 +94,8 @@ class Op_useCard extends Operation {
         $cardInst = $this->game->instantiateCard($cardId, $this);
 
         $info = $this->getArgsInfo()[$cardId];
-        $triggerWire = $info["trigger"] ?? Event::Manual->value;
-        $trigger = Event::from($triggerWire);
+        $triggerWire = $info["trigger"] ?? Trigger::Manual->value;
+        $trigger = Trigger::from($triggerWire);
         $cardInst->useCard($trigger);
     }
 

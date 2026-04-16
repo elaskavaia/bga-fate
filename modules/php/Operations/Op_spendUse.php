@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -36,7 +36,7 @@ class Op_spendUse extends Operation {
         // never fires from a trigger context. Void on non-manual events so branches using
         // spendUse are filtered out of trigger-driven useCard offerings.
         $event = (string) $this->getDataField("event", "");
-        if ($event !== "" && $event !== Event::Manual->value) {
+        if ($event !== "" && $event !== Trigger::Manual->value) {
             return ["q" => Material::ERR_PREREQ];
         }
 

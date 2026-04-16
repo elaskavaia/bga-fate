@@ -26,7 +26,7 @@ namespace Bga\Games\Fate\Model;
  * which previously shared the same string namespace (e.g. both an Op_actionAttack
  * operation and an "actionAttack" trigger).
  */
-enum Event: string {
+enum Trigger: string {
     case ActionAttack = "EventActionAttack";
     case ActionMove = "EventActionMove"; // move with action move
     case Move = "EventMove"; // any move
@@ -40,7 +40,7 @@ enum Event: string {
     /**
      * Synthetic "event" representing manual activation from the useCard free-action
      * prompt. Never published via Op_trigger and never appears in the CSV `on` column —
-     * it exists so that `getTriggerMethod(Event::Manual)` derives the `onManual` hook
+     * it exists so that `getTriggerMethod(Trigger::Manual)` derives the `onManual` hook
      * the same way real events derive `onRoll`, `onActionAttack`, etc.
      */
     case Manual = "EventManual";

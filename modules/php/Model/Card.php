@@ -103,11 +103,11 @@ class Card {
 
     /**
      * Single entry point called by Op_trigger when an event fires for this card.
-     * Routes to on<EventName>() — e.g. Event::Enter → onEnter().
+     * Routes to on<EventName>() — e.g. Trigger::Enter → onEnter().
      *
      * If the subclass does not implement the hook, falls back to onTriggerDefault().
      */
-    public function onTrigger(Event $event): void {
+    public function onTrigger(Trigger $event): void {
         if (!$this->canTriggerEffectOn($event)) {
             return;
         }
@@ -119,7 +119,7 @@ class Card {
      * Invoke a hook method, optionally passing $event as a named argument
      * if the method declares a parameter with that name.
      */
-    protected function callOnTriggerMethod(string $method, Event $event): void {
+    protected function callOnTriggerMethod(string $method, Trigger $event): void {
         $ref = new \ReflectionMethod($this, $method);
         foreach ($ref->getParameters() as $param) {
             if ($param->getName() === "event") {
@@ -130,7 +130,7 @@ class Card {
         $this->$method();
     }
 
-    function checkPlayability(Event $event) {
+    function checkPlayability(Trigger $event) {
         $errorRes = [];
         if (!$this->canBePlayed($event, $errorRes)) {
             throw new UserException($errorRes["err"] ?? clienttranslate("Operation cannot be performed now"));
@@ -139,10 +139,10 @@ class Card {
 
     /**
      * Derive the on<EventName>() hook method name from an Event case.
-     * Uses the case `name` (e.g. Event::ActionAttack → "ActionAttack") so the hook
+     * Uses the case `name` (e.g. Trigger::ActionAttack → "ActionAttack") so the hook
      * derivation does not depend on the `Event` prefix in the wire-format value.
      */
-    protected function getTriggerMethod(Event $event): string {
+    protected function getTriggerMethod(Trigger $event): string {
         return "on" . $event->name;
     }
 
@@ -150,10 +150,10 @@ class Card {
      * Returns true if this card has a hook for the given event (and any extra
      * preconditions on the event are met).
      */
-    public function canTriggerEffectOn(Event $event): bool {
+    public function canTriggerEffectOn(Trigger $event): bool {
         $method = $this->getTriggerMethod($event);
         if (method_exists($this, $method)) {
-            if ($event === Event::Enter) {
+            if ($event === Trigger::Enter) {
                 // Lifecycle event only fires for the card that just entered play.
                 return $this->op->getDataField("card", "") == $this->id;
             }
@@ -167,7 +167,7 @@ class Card {
      * Checks if card can be played and sets the error code. The difference is UX - it's better
      * to explain to the user why the card cannot be played, sometimes it's subtle
      */
-    public function canBePlayed(Event $event, ?array &$errorRes = null): bool {
+    public function canBePlayed(Trigger $event, ?array &$errorRes = null): bool {
         if (!$errorRes) {
             $errorRes = [];
         }
@@ -182,13 +182,13 @@ class Card {
         return true;
     }
 
-    public function useCard(Event $event) {
+    public function useCard(Trigger $event) {
         $this->checkPlayability($event);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
         ["r" => $r, "effect" => $effect] = $this->getCardRulesForEvent($event);
         if ($this->isEvent()) {
-            $message = clienttranslate('${char_name} plays event ${token_name}: ${effect_text}');
+            $message = clienttranslate('${char_name} plays Trigger ${token_name}: ${effect_text}');
         } else {
             $message = clienttranslate('${char_name} uses ability of ${token_name}: ${effect_text}');
         }
@@ -213,7 +213,7 @@ class Card {
         }
     }
 
-    function getCardRulesForEvent(Event $event) {
+    function getCardRulesForEvent(Trigger $event) {
         $cardId = $this->id;
         return [
             "r" => $this->game->material->getRulesFor($cardId, "r", "nop"),
@@ -221,7 +221,7 @@ class Card {
         ];
     }
 
-    function promptUseCard(Event $event) {
+    function promptUseCard(Trigger $event) {
         $owner = $this->getOwner();
         $action = "useCard";
 

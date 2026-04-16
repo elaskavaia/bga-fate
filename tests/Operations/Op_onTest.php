@@ -8,7 +8,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 /**
  * Tests for Op_on — runtime event gate used inside r expressions.
  * Example: `(2spendMana:on(EventActionAttack):2addDamage)` — the clause only
- * resolves when the enclosing useCard was triggered by Event::ActionAttack.
+ * resolves when the enclosing useCard was triggered by Trigger::ActionAttack.
  */
 final class Op_onTest extends AbstractOpTestCase {
     public function testGatePassesWhenEventMatches(): void {
@@ -59,11 +59,10 @@ final class Op_onTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
 
         $manaBefore = $this->countGreenCrystals($cardId);
-        $this->game->machine->push(
-            "on(EventActionAttack):spendMana:gainMana",
-            $this->owner,
-            ["card" => $cardId, "event" => "EventActionAttack"]
-        );
+        $this->game->machine->push("on(EventActionAttack):spendMana:gainMana", $this->owner, [
+            "card" => $cardId,
+            "event" => "EventActionAttack",
+        ]);
         $this->game->machine->dispatchAll();
 
         $this->assertEquals($manaBefore, $this->countGreenCrystals($cardId), "mana spent then regained");
@@ -75,11 +74,7 @@ final class Op_onTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
 
         $manaBefore = $this->countGreenCrystals($cardId);
-        $this->game->machine->push(
-            "on(EventActionAttack):spendMana:gainMana",
-            $this->owner,
-            ["card" => $cardId, "event" => "EventRoll"]
-        );
+        $this->game->machine->push("on(EventActionAttack):spendMana:gainMana", $this->owner, ["card" => $cardId, "event" => "EventRoll"]);
         $this->game->machine->dispatchAll();
 
         $this->assertEquals($manaBefore, $this->countGreenCrystals($cardId), "no mana movement when chain voids");

@@ -21,7 +21,7 @@ use Bga\Games\Fate\Model\CardGeneric;
  *
  * Effect: "End any movement in a forest to add 1 mana [MANA] to any card."
  *
- * Like Alva Hero I but listens on Event::Move (any movement, not just the move action),
+ * Like Alva Hero I but listens on Trigger::Move (any movement, not just the move action),
  * so card-driven movement (Treetreader, Fleetfoot, Seek Shelter, …) also triggers it.
  */
 class CardHero_AlvaHeroII extends CardGeneric {

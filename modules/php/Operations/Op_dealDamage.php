@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -114,7 +114,7 @@ class Op_dealDamage extends CountableOperation {
         $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, -$remaining, "");
 
         if ($remaining <= 0 && str_starts_with($defenderId, "monster_")) {
-            $this->queueTrigger(Event::MonsterKilled);
+            $this->queueTrigger(Trigger::MonsterKilled);
         }
     }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 
 /**
  * Tests for Op_useAbility — filters to ability and hero cards only.
@@ -32,7 +32,7 @@ final class Op_useAbilityTest extends AbstractOpTestCase {
         // but IS included in candidate list (not filtered out by type).
         // When triggered during roll, it should be offered.
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 1);
-        $this->createOp("useCard", ["on" => [Event::Roll->value]]);
+        $this->createOp("useCard", ["on" => [Trigger::Roll->value]]);
         $this->assertValidTarget("card_hero_1_1");
     }
 

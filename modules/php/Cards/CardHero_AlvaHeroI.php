@@ -21,7 +21,7 @@ use Bga\Games\Fate\Model\CardGeneric;
  *
  * Effect: "End your move action in a forest to add 1 mana [MANA] to any card."
  *
- * Listens on Event::ActionMove (move-action specifically). When the action ends,
+ * Listens on Trigger::ActionMove (move-action specifically). When the action ends,
  * if Alva is on a forest hex, queue a gainMana op so the player picks a target card.
  */
 class CardHero_AlvaHeroI extends CardGeneric {

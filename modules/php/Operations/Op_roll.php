@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Event;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 use function Bga\Games\Fate\getPart;
@@ -102,11 +102,11 @@ class Op_roll extends CountableOperation {
 
         // Only trigger on player rolls (hero is attacker), not monster rolls
         if (str_starts_with($attackerId, "hero_")) {
-            $this->queueTrigger(Event::Roll);
+            $this->queueTrigger(Trigger::Roll);
         }
 
         if ($this->getReason() == "Op_actionAttack") {
-            $this->queueTrigger(Event::ActionAttack);
+            $this->queueTrigger(Trigger::ActionAttack);
         }
 
         // Queue resolveHits to convert dice into dealDamage
