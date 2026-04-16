@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -26,6 +27,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  *   (1spendMana:move) / (2spendMana:on(EventActionAttack):1gainAtt(range))
  *
  * Reads getDataField("event") seeded by Card::useCard() at queue time.
+ *
+ * The match walks the trigger chain (Trigger::chain()), so `on(EventRoll)` is
+ * satisfied when the dispatched trigger is EventActionAttack — Roll is a parent
+ * of ActionAttack.
  */
 class Op_on extends Operation {
     private function getExpectedEvent(): string {
@@ -34,11 +39,20 @@ class Op_on extends Operation {
 
     function getPossibleMoves() {
         $expected = $this->getExpectedEvent();
-        $current = (string) $this->getDataField("event", "");
-        if ($expected === "" || $current !== $expected) {
+        if ($expected === "") {
             return ["q" => Material::ERR_PREREQ];
         }
-        return parent::getPossibleMoves();
+        $current = (string) $this->getDataField("event", "");
+        $currentCase = Trigger::tryFrom($current);
+        if ($currentCase === null) {
+            return ["q" => Material::ERR_PREREQ];
+        }
+        foreach ($currentCase->chain() as $t) {
+            if ($t->value === $expected) {
+                return parent::getPossibleMoves();
+            }
+        }
+        return ["q" => Material::ERR_PREREQ];
     }
 
     function resolve(): void {

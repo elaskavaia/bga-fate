@@ -105,14 +105,22 @@ class Card {
      * Single entry point called by Op_trigger when an event fires for this card.
      * Routes to on<EventName>() — e.g. Trigger::Enter → onEnter().
      *
-     * If the subclass does not implement the hook, falls back to onTriggerDefault().
+     * Walks the trigger chain most-specific → least-specific and calls the first
+     * matching hook. This preserves the contract that a bespoke card defining
+     * onRoll still fires during an attack roll (dispatched as ActionAttack, whose
+     * chain contains Roll).
      */
     public function onTrigger(Trigger $event): void {
         if (!$this->canTriggerEffectOn($event)) {
             return;
         }
-        $method = $this->getTriggerMethod($event);
-        $this->callOnTriggerMethod($method, $event);
+        foreach ($event->chain() as $t) {
+            $method = $this->getTriggerMethod($t);
+            if (method_exists($this, $method)) {
+                $this->callOnTriggerMethod($method, $event);
+                return;
+            }
+        }
     }
 
     /**
@@ -148,16 +156,19 @@ class Card {
 
     /**
      * Returns true if this card has a hook for the given event (and any extra
-     * preconditions on the event are met).
+     * preconditions on the event are met). Walks the trigger chain — a card with
+     * an onRoll hook returns true for a dispatched ActionAttack (Roll is in chain).
      */
     public function canTriggerEffectOn(Trigger $event): bool {
-        $method = $this->getTriggerMethod($event);
-        if (method_exists($this, $method)) {
-            if ($event === Trigger::Enter) {
-                // Lifecycle event only fires for the card that just entered play.
-                return $this->op->getDataField("card", "") == $this->id;
+        foreach ($event->chain() as $t) {
+            $method = $this->getTriggerMethod($t);
+            if (method_exists($this, $method)) {
+                if ($t === Trigger::Enter) {
+                    // Lifecycle event only fires for the card that just entered play.
+                    return $this->op->getDataField("card", "") == $this->id;
+                }
+                return true;
             }
-            return true;
         }
 
         return false;

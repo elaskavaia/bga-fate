@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -48,8 +47,9 @@ class Op_actionMove extends Operation {
     }
 
     function resolve(): void {
+        // Op_move reads getReason() == "Op_actionMove" and emits Trigger::ActionMove
+        // on completion (chains through Trigger::Move). One trigger per move.
         $this->queue($this->getDelegateOperation(), null, ["target" => $this->getDataField("target", "")]);
-        $this->queueTrigger(Trigger::ActionMove);
     }
 
     public function getUiArgs() {

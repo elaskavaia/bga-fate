@@ -88,7 +88,10 @@ class Op_move extends CountableOperation {
             $target = $hero->getRulesFor("location", $target);
         }
         $hero->moveTo($target);
-        $this->queueTrigger(Trigger::Move);
+        // Emit the most specific trigger; ActionMove chains through Move so cards
+        // listening on EventMove are still offered during action-move resolutions.
+        $trigger = $this->getReason() == "Op_actionMove" ? Trigger::ActionMove : Trigger::Move;
+        $this->queueTrigger($trigger);
     }
 
     public function getUiArgs() {

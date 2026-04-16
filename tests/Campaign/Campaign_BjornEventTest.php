@@ -314,14 +314,9 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // New flow: each matching reaction is queued as its own prompt.
-        // Bjorn hero card (on=roll) is offered first; skip it.
-
-        $this->skipIfOp("useCard");
-        $args = $this->getOpArgs();
-
-        // Master Shot  — useCard prompt with card preset.
-        $this->assertEquals("useCard", $args["type"] ?? "");
+        // Hierarchical dispatch: one merged useCard prompt offers Bjorn Hero I
+        // (on=Roll) alongside Master Shot (on=ActionAttack).
+        $this->assertOperation("useCard");
         $this->assertValidTarget($masterShot);
 
         $this->respond($masterShot);

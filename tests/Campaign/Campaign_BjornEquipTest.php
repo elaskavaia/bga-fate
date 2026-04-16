@@ -145,33 +145,24 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
     // --- Trollbane (card_equip_1_22) ---
 
     public function testTrollbaneOfferedWhenAttackingTrollkin(): void {
-        $this->markTestSkipped("Trigger useCard auto-collapses into card paygain — needs test rewrite for new flow");
+        $trollbane = "card_equip_1_22";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
-        // $trollbane = "card_equip_1_22";
-        // $color = $this->getActivePlayerColor();
-        // $this->game->tokens->moveToken($trollbane, "tableau_$color");
+        // Place a goblin (trollkin) adjacent
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_7_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
-        // // Place a goblin (trollkin) adjacent
-        // $goblin = "monster_goblin_20";
-        // $goblinHex = "hex_7_9";
-        // $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+        // Hero at hex_8_9 (default), adjacent to goblin
+        $this->seedRand([5, 5, 5]);
+        $this->respond($goblinHex);
 
-        // // Hero at hex_8_9 (default), adjacent to goblin
-        // $this->seedRand([5, 5, 5]);
-
-        // $this->respond($goblinHex);
-
-        // // Skip hero card trigger if offered
-        // // $args = $this->getOpArgs();
-        // // if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
-        // //     $this->skip();
-        // //     $args = $this->getOpArgs();
-        // // }
-
-        // // Trollbane should be offered via trigger(actionAttack)
-        // $this->dumpState();
-        // $this->assertOperation("useCard");
-        // $this->assertValidTarget($trollbane, "Trollbane should be offered when attacking trollkin");
+        // Hierarchical dispatch: Trigger::ActionAttack chains through Roll, so
+        // Bjorn Hero I (on=Roll) and Trollbane (on=ActionAttack) share one
+        // useCard prompt. Trollbane should be a valid target directly.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($trollbane, "Trollbane should be offered when attacking trollkin");
     }
 
     public function testTrollbaneNotOfferedAgainstNonTrollkin(): void {

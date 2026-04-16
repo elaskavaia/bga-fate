@@ -176,14 +176,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered first; skip it.
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
-        $this->assertEquals("useCard", $args["type"] ?? "");
-        $targets = $args["target"] ?? [];
+        // Hierarchical dispatch: Trigger::ActionAttack chains through Roll, so
+        // Bjorn Hero I (on=Roll) and the Long Shot cards (on=ActionAttack) share
+        // a single useCard prompt. Verify the merged target list directly.
+        $this->assertOperation("useCard");
+        $targets = $this->getOpArgs()["target"] ?? [];
         $this->assertNotContains("card_ability_1_11", $targets, "Long Shot I should not be offered at range 1");
         $this->assertContains("card_ability_1_12", $targets, "Long Shot II should be offered at range 1");
     }
@@ -204,16 +201,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // New flow: trigger(roll) and trigger(actionAttack) auto-resolve.
-        // CardGeneric queues useCard per matching card. Bjorn hero card (on=roll)
-        // comes first; skip it. Then Long Shot I (on=actionAttack) is offered.
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
-        $this->assertEquals("useCard", $args["type"] ?? "");
-        $targets = $args["target"] ?? [];
+        // Hierarchical dispatch: Trigger::ActionAttack chains through Roll, so
+        // Bjorn Hero I (on=Roll) and Long Shot I (on=ActionAttack) share one
+        // useCard prompt. Verify both are in the merged target list.
+        $this->assertOperation("useCard");
+        $targets = $this->getOpArgs()["target"] ?? [];
         $this->assertContains("card_ability_1_11", $targets, "Long Shot I should be offered at range 2");
     }
 

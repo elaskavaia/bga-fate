@@ -100,13 +100,12 @@ class Op_roll extends CountableOperation {
         $add = $this->isAddition();
         $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount, $add);
 
-        // Only trigger on player rolls (hero is attacker), not monster rolls
+        // Only trigger on player rolls (hero is attacker), not monster rolls.
+        // Emit the most specific trigger; ActionAttack chains through Roll so cards
+        // listening on EventRoll are still offered during attack rolls (Trigger::chain).
         if (str_starts_with($attackerId, "hero_")) {
-            $this->queueTrigger(Trigger::Roll);
-        }
-
-        if ($this->getReason() == "Op_actionAttack") {
-            $this->queueTrigger(Trigger::ActionAttack);
+            $trigger = $this->getReason() == "Op_actionAttack" ? Trigger::ActionAttack : Trigger::Roll;
+            $this->queueTrigger($trigger);
         }
 
         // Queue resolveHits to convert dice into dealDamage

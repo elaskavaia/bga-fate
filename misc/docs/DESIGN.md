@@ -226,41 +226,48 @@ These are stateless "guard" ops that sit at the leftmost position of a paygain c
 ### Trigger System
 
 Cards (events, abilities, equipment) can have an **`on`** field in Material specifying when they can be activated.
-At key points during gameplay, an `Op_trigger` is queued which walks every card on the active player's tableau and hand, instantiates a `Card` object for each, and calls `onTrigger($triggerType)`.
+At key points during gameplay, an `Op_trigger` is queued which walks every card on the active player's tableau and hand, instantiates a `Card` object for each, and calls `onTrigger($trigger)`.
 
 **`on` column** — timing trigger for when the card can be played:
 - (empty) — play anytime during your turn as a free action. The "once per turn" cap is **not** implicit — cards that want it must include `spendUse` in their `r` expression. Without `spendUse`, the card is usable an unlimited number of times (e.g. damage-prevention equipment, or cards whose text says "any number of times per turn").
 - `EventActionAttack` — play during/after an attack action
-- `EventRoll` — play after a dice roll
+- `EventRoll` — play after a dice roll (fires during attack rolls too; see trigger chain below)
 - `EventMonsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
 - `EventResolveHits` — play before damage is applied (for damage prevention)
-- `EventTurnEnd`, `EventTurnStart`, `EventActionMove`, `EventMonsterKilled`, `EventEnter` — other game events; see `Event` enum in `modules/php/Model/Event.php` for the full list
+- `EventTurnEnd`, `EventTurnStart`, `EventActionMove`, `EventMonsterKilled`, `EventEnter` — other game events; see `Trigger` enum in `modules/php/Model/Trigger.php` for the full list
 - `custom` — card has a bespoke class under `modules/php/Cards/` that handles its own trigger logic
+
+**Trigger hierarchy (chain):** some triggers are more specific flavors of others. `ActionAttack` is a `Roll` that came from an attack action; `ActionMove` is a `Move` that came from a move action. Formally, each `Trigger` case has an optional `parent()`, and `chain()` returns the ancestry `[self, parent, grandparent, …]`. A card with `on=EventRoll` matches a dispatched `ActionAttack` because `Roll` is in the chain; a card with `on=EventActionAttack` only matches when the dispatched trigger is specifically `ActionAttack`. One dispatch per gameplay moment — no more double-emission.
+
+The chain is consulted at two boundaries:
+- `CardGeneric::canTriggerEffectOn` walks the chain when matching the card's `on` field against the dispatched trigger.
+- `Op_on` (the `on(EventXxx)` gate used inside `r` expressions) walks the chain when matching the expected gate against the `event` data field seeded by `Card::useCard()`.
+
+For bespoke cards with per-event hook methods (`onRoll()`, `onActionAttack()`, …), `Card::onTrigger` walks the chain most-specific → least-specific and calls the **first** matching hook. A card defining only `onRoll` will still fire during an attack roll.
 
 **How triggers fire:**
 
-1. An operation calls `$this->queueTrigger(Trigger::Xxx)` — the `Event` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
+1. An operation calls `$this->queueTrigger(Trigger::Xxx)` — the `Trigger` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
 2. This queues `Op_trigger(EventXxx)` for the current player.
-3. `Op_trigger::resolve()` converts the wire string back to an `Event` case via `Trigger::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($event)`.
-4. For each card, `Card::onTrigger()` routes to `on<EventName>()` if the subclass defines it (derived from the enum case name: `Trigger::ActionAttack → onActionAttack`), else to `onTriggerDefault()`.
+3. `Op_trigger::resolve()` converts the wire string back to a `Trigger` case via `Trigger::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($trigger)`.
+4. For each card, `Card::onTrigger()` walks the trigger chain and routes to the first `on<TriggerName>()` method that exists (derived from the enum case name), else to `onTriggerDefault()`.
 5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
-6. **Generic cards** (`CardGeneric`) check `canBePlayed($event)` — verifying the `on` field matches and the effect has valid targets. If playable, queues a single `useCard` op with `on=[$event->value]` and `prompt=true`. The dedup logic ensures only one `useCard` is queued per trigger type — subsequent cards matching the same trigger share the same prompt.
+6. **Generic cards** (`CardGeneric`) check `canBePlayed($trigger)` — verifying the card's `on` field matches any trigger in the dispatched chain and the effect has valid targets. If playable, `promptUseCard` queues (or extends) a single `useCard` op with `on=[$trigger->value]` and `confirm=true`. The dedup logic ensures only one `useCard` is queued per trigger — subsequent cards matching the same trigger share the same prompt.
 7. When `Card::useCard()` queues the card's `r` expression, it seeds `event` in the queued op's data. `ComplexOperation::withData()` propagates this down to every sub-op, so guards like `Op_on` can read it via `getDataField("event")`.
 
-The `useCard` op collects all playable cards (tableau + hand) that match the trigger, presenting them in a single "choose a card or skip" prompt. After a card is played, the prompt reappears for remaining cards (via the machine's standard dispatch loop).
+The `useCard` op collects all playable cards (tableau + hand) that match the dispatched trigger (via chain), presenting them in a single "choose a card or skip" prompt. Under the hierarchical model, all cards listening anywhere in the chain share **one** prompt: e.g. during an attack roll, cards with `on=EventRoll` and cards with `on=EventActionAttack` appear in the same useCard target list.
 
-**Where triggers are queued (operation → Event → description):**
+**Where triggers are queued (operation → Trigger → description):**
 
 ```
 Op_turnStart
   → Trigger::TurnStart        — at start of player turn (passive start-of-turn effects)
 Op_roll
-  → Trigger::Roll             — after a hero rolls attack dice
-  → Trigger::ActionAttack     — after a roll initiated by Op_actionAttack
-Op_actionMove
-  → Trigger::ActionMove       — after an actionMove resolves (move-action specific)
+  → Trigger::ActionAttack     — rolls initiated by Op_actionAttack (chains through Roll)
+  → Trigger::Roll             — all other hero rolls
 Op_move
-  → Trigger::Move             — after ANY movement resolves (action or card-driven)
+  → Trigger::ActionMove       — moves queued by Op_actionMove (chains through Move)
+  → Trigger::Move             — all other movements (card-driven, forced moves, etc.)
 Op_resolveHits
   → Trigger::ResolveHits      — before damage is applied to a hero (for damage prevention)
 Op_dealDamage
@@ -277,10 +284,13 @@ Op_gainEquip
 
 ```
 actionAttack → player picks target → roll dice
-  → Trigger::Roll          — each card reacts: bespoke cards auto-fire, generic cards prompt individually
-  → Trigger::ActionAttack  — same: each matching card is offered as a separate confirm-or-skip
+  → Trigger::ActionAttack  — single dispatch; chains through Roll.
+                             One useCard prompt offers every card whose `on`
+                             is anywhere in {ActionAttack, Roll} — e.g. Bjorn
+                             Hero I (on=Roll) and Trollbane (on=ActionAttack)
+                             in one list.
   → resolveHits          — converts dice to damage
-    → Trigger::ResolveHits — damage prevention cards offered individually
+    → Trigger::ResolveHits — damage prevention cards offered
   → dealDamage           — applies damage to monster
     → Trigger::MonsterKilled — if monster died, each matching card reacts
 ```

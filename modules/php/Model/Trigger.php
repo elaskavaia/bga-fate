@@ -44,4 +44,39 @@ enum Trigger: string {
      * the same way real events derive `onRoll`, `onActionAttack`, etc.
      */
     case Manual = "EventManual";
+
+    /**
+     * Parent trigger, or null if this trigger is a root. A parent relationship means
+     * "this trigger is a more specific flavor of its parent" — e.g. an ActionAttack is
+     * a Roll that came from an attack action. A card listening on the parent fires for
+     * its children too; a card listening on a child does not fire for the parent alone.
+     */
+    public function parent(): ?self {
+        return match ($this) {
+            self::ActionAttack => self::Roll,
+            self::ActionMove => self::Move,
+            default => null,
+        };
+    }
+
+    /**
+     * Returns the trigger chain from most-specific to least-specific.
+     * For ActionAttack: [ActionAttack, Roll]. For a root trigger: [self].
+     *
+     * Used by card-matching (CardGeneric::canTriggerEffectOn) and the on(...) gate
+     * (Op_on) to resolve a dispatched trigger against a card's `on` field or an
+     * r-expression guard. A card with `on=EventRoll` matches a dispatched ActionAttack
+     * because Roll is in the ActionAttack chain.
+     *
+     * @return self[]
+     */
+    public function chain(): array {
+        $out = [];
+        $t = $this;
+        while ($t !== null) {
+            $out[] = $t;
+            $t = $t->parent();
+        }
+        return $out;
+    }
 }

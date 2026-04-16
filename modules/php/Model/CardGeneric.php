@@ -22,13 +22,17 @@ use Bga\Games\Fate\Material;
  */
 class CardGeneric extends Card {
     public function onTrigger(Trigger $event): void {
-        $method = $this->getTriggerMethod($event);
-        if (!method_exists($this, $method)) {
-            $this->onTriggerDefault($event);
-            return;
+        // Walk the trigger chain most-specific → least-specific and call the first
+        // hook that exists. A card defining onRoll will still fire during an attack
+        // roll even though the dispatched trigger is Trigger::ActionAttack.
+        foreach ($event->chain() as $t) {
+            $method = $this->getTriggerMethod($t);
+            if (method_exists($this, $method)) {
+                $this->callOnTriggerMethod($method, $event);
+                return;
+            }
         }
-
-        $this->callOnTriggerMethod($method, $event);
+        $this->onTriggerDefault($event);
     }
     public function onTriggerDefault(Trigger $event): void {
         if ($event === Trigger::Enter) {
@@ -52,8 +56,12 @@ class CardGeneric extends Card {
         if ($event === Trigger::Manual && $on === "") {
             return true;
         }
-        if ($on === $event->value) {
-            return true;
+        // A card with on=EventRoll should also fire when the dispatched trigger is
+        // Trigger::ActionAttack (Roll is in ActionAttack's chain). Walk the chain.
+        foreach ($event->chain() as $t) {
+            if ($on === $t->value) {
+                return true;
+            }
         }
 
         if ($on === "custom") {
