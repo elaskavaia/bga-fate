@@ -513,7 +513,7 @@ Same rules as Bjorn validation (see below):
 [x] card_equip_2_25 Bloodline Crystal — r=(3spendMana:2addDamage)/(3spendMana:drawEvent), on=custom, bespoke class routes actionAttack+manual via CardGeneric. Has tests
 [x] card_equip_2_21 Elven Blade — after each attack, deal 1 damage to monster adjacent to Alva, on=TAfterActionAttack, has tests
 [x] card_equip_2_20 Singing Bow — main weapon, after each attack add 1 mana to any card, on=TAfterActionAttack, has tests
-[ ] card_equip_2_16 Tiara — starts with 6 gold, gain 1 gold per turn (bespoke onEnter + turnStart)
+[x] card_equip_2_16 Tiara — starts with 6 gold, gain 1 gold per turn (bespoke CardEquip_Tiara: onCardEnter + onTurnStart), has tests
 [x] card_equip_2_19 Windbite — main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune, r=counter(countRunes):addRoll on=TRoll, has tests
 
 #### Ability Cards
@@ -532,12 +532,12 @@ Same rules as Bjorn validation (see below):
 
 [x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
 [ ] card_ability_2_14 Flexibility II — r=Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch. Needs integration tests.
-[ ] card_ability_2_3 Hail of Arrows I — custom: 3[MANA]: deal 1 damage to 3 monsters in range
-[ ] card_ability_2_4 Hail of Arrows II — custom: 1-4[MANA]: deal 1 damage to that many different monsters in range
-[ ] card_ability_2_7 Starsong I — custom: draw 1 additional card at turn end, on=turnEnd
-[ ] card_ability_2_8 Starsong II — custom: draw 2 additional cards at turn end + 5 card hand max, on=turnEnd
-[ ] card_ability_2_5 Treetreader I — custom: move into or out of adjacent forest
-[ ] card_ability_2_6 Treetreader II — custom: Treetreader I + heal 1 when moving into forest
+[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range
+[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range
+[ ] card_ability_2_7 Starsong I — draw 1 additional card at turn end, on=turnEnd
+[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd
+[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest
+[ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest
 
 #### Event Cards
 
@@ -556,10 +556,10 @@ Same rules as Bjorn validation (see below):
 
 <!-- r=custom — needs custom operation implementation -->
 
-[ ] card_event_2_27 Mastery — custom: add 4[DIE_ATTACK] to this attack, on=actionAttack
-[ ] card_event_2_26 Multi-Shot — custom: roll 2[DIE_ATTACK] against each of up to 2 monsters in range
-[ ] card_event_2_33 Speedy Attack — custom: discard another card to perform attack action
-[ ] card_event_2_29 Take a Knee — custom: prevent non-Legend monster in range from moving this monster turn
+[ ] card_event_2_27 Mastery — add 4[DIE_ATTACK] to this attack, on=actionAttack
+[ ] card_event_2_26 Multi-Shot — roll 2[DIE_ATTACK] against each of up to 2 monsters in range
+[ ] card_event_2_33 Speedy Attack — discard another card to perform attack action
+[ ] card_event_2_29 Take a Knee — prevent non-Legend monster in range from moving this monster turn
 
 ### Server Hero 3
 
@@ -658,10 +658,10 @@ Hero, Abilities and Equipment:
 
 <!-- r=custom — needs custom operation implementation -->
 
-[ ] card_equip_1_18 Quiver — custom: durability: add 1 damage to attack
+[ ] card_equip_1_18 Quiver — durability: add 1 damage to attack
 [x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
-[ ] card_equip_1_16 Bone Bane Bow — custom: main weapon, rune damage to adjacent
-[ ] card_equip_1_24 Home Sewn Cape — custom: mana from runes, move, prevent damage
+[ ] card_equip_1_16 Bone Bane Bow — main weapon, rune damage to adjacent
+[ ] card_equip_1_24 Home Sewn Cape — mana from runes, move, prevent damage
 [x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
 
 ---

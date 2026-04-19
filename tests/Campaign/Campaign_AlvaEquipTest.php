@@ -341,4 +341,74 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($brute));
         $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
     }
+
+    // --- Tiara (card_equip_2_16) ---
+    // r="" (bespoke class only), on="".
+    // CardEquip_Tiara::onCardEnter seeds 6 yellow on the card.
+    // CardEquip_Tiara::onTurnStart: while card has yellow, move 1 off and gainXp(1) for Alva.
+
+    public function testTiaraOnEnterSeeds6Gold(): void {
+        $tiara = "card_equip_2_16";
+        $color = $this->getActivePlayerColor();
+
+        // Card starts in supply — no yellow crystals on it
+        $this->assertEquals(0, $this->countTokens("crystal_yellow", $tiara));
+
+        // Gain equipment via Op_gainEquip — onCardEnter seeds 6 gold
+        $this->seedDeck("deck_equip_$color", [$tiara]);
+        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
+        $op->resolve();
+
+        $this->assertEquals("tableau_$color", $this->tokenLocation($tiara));
+        $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara));
+    }
+
+    public function testTiaraTurnStartMovesOneGoldFromCardToAlva(): void {
+        $tiara = "card_equip_2_16";
+        $color = $this->getActivePlayerColor();
+
+        // Seed monster + event decks so turnEnd/monster turn don't stall on empty decks
+        $this->seedDeck("deck_monster_yellow", ["card_monster_7", "card_monster_8"]);
+        $this->seedDeck("deck_event_$color", ["card_event_2_31_1", "card_event_2_31_2"]); // Rest
+
+        // Place Tiara with 6 gold already on it (skip the gainEquip path; covered separately).
+        $this->game->tokens->moveToken($tiara, "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 6, $tiara, ["message" => ""]);
+        $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara));
+
+        $xpBefore = $this->countXp();
+
+        // Burn Alva's two actions, skip free actions → monster turn → Alva's next turnStart fires.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        // After the round: Tiara lost 1 gold, Alva's XP gained 1 from Tiara (plus 1 from Practice).
+        $this->assertEquals(5, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals($xpBefore + 2, $this->countXp(), "Practice (+1) + Tiara (+1) = +2 XP on Alva");
+    }
+
+    public function testTiaraEmptyIsNoOpAtTurnStart(): void {
+        $tiara = "card_equip_2_16";
+        $color = $this->getActivePlayerColor();
+
+        $this->seedDeck("deck_monster_yellow", ["card_monster_7", "card_monster_8"]);
+        $this->seedDeck("deck_event_$color", ["card_event_2_31_1", "card_event_2_31_2"]);
+
+        // Place Tiara with 0 gold
+        $this->game->tokens->moveToken($tiara, "tableau_$color");
+        $this->assertEquals(0, $this->countTokens("crystal_yellow", $tiara));
+
+        $xpBefore = $this->countXp();
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        // Still 0 on Tiara; Alva's XP grew only by Practice's +1 (no Tiara contribution).
+        $this->assertEquals(0, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals($xpBefore + 1, $this->countXp(), "Only Practice's +1 XP; Tiara is empty");
+    }
 }

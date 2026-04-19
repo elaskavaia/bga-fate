@@ -4286,7 +4286,6 @@ class Material {
         "num" => 16,
         "hno" => 2,
         "name" => clienttranslate("Tiara"),
-        "r" => "custom",
         "quest" => "<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!",
         "effect" => "Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.",
 ],
