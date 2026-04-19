@@ -376,4 +376,21 @@ class Campaign_AlvaSoloTest extends CampaignBaseTest {
             "Used Flexibility I should not be offered outside of attack (addDamage branch needs dice)"
         );
     }
+
+    // --- Belt of Youth (card_equip_2_22) ---
+    // r=spendUse:1heal(self) — flip card as used, then heal 1 damage from Alva.
+
+    public function testBeltOfYouthResolveHealsAlvaAndMarksUsed(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_2_22", "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+        $this->assertValidTarget("card_equip_2_22");
+        // Turn op inlines useCard targets; pick the card then confirm the effect.
+        $this->respond("card_equip_2_22");
+        $this->confirmCardEffect();
+
+        $this->assertEquals(1, $this->countDamage($this->heroId), "Belt of Youth should heal 1 damage from Alva");
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_equip_2_22"), "card should be marked used (state=1)");
+    }
 }

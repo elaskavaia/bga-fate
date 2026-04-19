@@ -502,22 +502,13 @@ Same rules as Bjorn validation (see below):
 
 #### Equipment Cards (use)
 
-<!-- r=passive: no r field, just stat bonuses -->
+
 
 [x] card_equip_2_15 Alva's First Bow — passive (strength + range bonus), r=(none), has tests
 [x] card_equip_2_24 Elven Arrows — passive (strength +2), r=(none), has tests
-
-<!-- r=costDamage:effect — standard durability-cost ops -->
-
 [x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
-
-<!-- r=heal/addDamage — direct effects -->
-
-[ ] card_equip_2_22 Belt of Youth — durability: heal 1 from Alva, r=1heal(self)
-
-<!-- r=spendMana:effect — mana-cost activations -->
-
-[ ] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action, r=3spendMana:performAction(actionAttack)
+[x] card_equip_2_22 Belt of Youth 
+[ ] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action
 
 <!-- r=custom — needs custom operation implementation -->
 
@@ -690,9 +681,6 @@ Hero, Abilities and Equipment:
   [ ] Legend monster special display
   [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
   [ ] Flip animation for upgrades
-
-  [ ] Design issue - all useCard should be stacked together even triggered by different triggers, currely I cannot pick between 2 cards if one triggered on roll and anoher on actionAttack
   [ ] Main weapon - restriction only one main weapon allowed
-  [ ] Enforce "no Play Event mid-action" rule — per RULES.md:187, event cards may not be played while performing an action (e.g. mid-move, mid-mend). Carve-outs: events with text "this attack action" may be played *after* the dice roll in an attack action; damage-prevention events (and events that explicitly say so) may be played outside your turn. Abilities and equipment are unaffected — they can be used mid-action. Today `Op_useCard` offers event cards in any free-action slot including mid-action triggers. Likely fix: filter out `card_event_*` candidates from `Op_useCard::getCandidateCards` when the parent op is an in-progress action (e.g. endOfAttack on stack, actionMove in-flight), keeping the after-the-roll and reactive carve-outs.
-  [x] Migrate all cards to use `spendUse` in their `r` expressions where the "once per turn" cap applies. Currently `Card::useCard()` calls `setUsed(true)` implicitly for any card with no `on` field, which burns the whole card even when the card has multiple independent clauses (e.g. Flexibility I has 4 separate mana-spend options, each of which should mark its own "use"). The new `Op_spendUse` provides the per-clause cost. Task: audit every `r` column in `card_ability_material.csv`, `card_equip_material.csv`, `card_event_material.csv` and rewrite once-per-turn effects to wrap them with `spendUse:...`. Then remove the implicit `setUsed(true)` path from `Card::useCard()` so it becomes purely explicit. Skip: cards with `on`-field triggers that are exempted by RULES.md:420 (permanent upgrades, trigger-on-other-actions, damage prevention).
-  [ ] Rename `Bga\Games\Fate\Model\Event` enum to avoid collision with the game concept "Event card". The enum represents published game events (ActionAttack, Roll, TurnEnd, etc.) — both the backing values (EventXxx) and the symbol name collide conceptually with event cards (`card_event_*.csv`, `Op_playEvent`, `Op_drawEvent`, `Op_discardEvent`, `Card::isEvent()`, `deck_event_*`, `hand_*` event filtering). Candidates: `GameEvent`, `Trigger`, `EventType`, `Signal`. Mechanical rename once chosen — touches the enum declaration, all `Trigger::*` callsites, CSV `on` column wire-values if we want them un-prefixed, and `Card::isEvent()` to something like `isEventCard()` for clarity.
+
+
