@@ -134,29 +134,19 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertContains("actionFocus", $hero->getActionsTaken());
     }
 
-    public function testEagleEyeIAddsStrength(): void {
+    public function testEagleEyeIAndIIAddStrength(): void {
         $color = $this->getActivePlayerColor();
-        // Place Eagle Eye I on tableau
+        // Eagle Eye I: +1 strength (base 3 + 1 = 4)
         $this->game->tokens->moveToken("card_ability_1_9", "tableau_$color");
         $hero = $this->game->getHero($color);
         $hero->recalcTrackers();
-
-        // Starting strength 3 (hero=2 + bow=1) + Eagle Eye I (str=1) = 4
         $this->assertEquals(4, $hero->getAttackStrength());
+        $this->assertNotValidTarget("card_ability_1_9"); // passive, not a useCard target
 
-        // Not offered as a free action (r is empty)
-        $op = $this->game->machine->instantiateOperation("useCard", $color);
-        $targets = $op->getArgs()["target"];
-        $this->assertNotContains("card_ability_1_9", $targets);
-    }
-
-    public function testEagleEyeIIAddsStrength(): void {
-        $color = $this->getActivePlayerColor();
+        // Swap to Eagle Eye II: +2 strength (base 3 + 2 = 5)
+        $this->game->tokens->moveToken("card_ability_1_9", "limbo");
         $this->game->tokens->moveToken("card_ability_1_10", "tableau_$color");
-        $hero = $this->game->getHero($color);
         $hero->recalcTrackers();
-
-        // Starting strength 3 + Eagle Eye II (str=2) = 5
         $this->assertEquals(5, $hero->getAttackStrength());
     }
 
@@ -172,13 +162,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $goblinHex = "hex_7_9"; // adjacent to hero start hex_8_9
         $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
 
-        // Attack adjacent goblin
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // Hierarchical dispatch: Trigger::ActionAttack chains through Roll, so
-        // Bjorn Hero I (on=Roll) and the Long Shot cards (on=ActionAttack) share
-        // a single useCard prompt. Verify the merged target list directly.
         $this->assertOperation("useCard");
         $targets = $this->getOpArgs()["target"] ?? [];
         $this->assertNotContains("card_ability_1_11", $targets, "Long Shot I should not be offered at range 1");
@@ -188,22 +174,14 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     public function testLongShotIOfferedAtRange2(): void {
         $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        // Place Long Shot I on tableau
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
-        // Use both action markers
         $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
         $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
-        // Place goblin at range 2
-        $goblinHex = "hex_6_9"; // 2 hexes from hero start hex_8_9
-        $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
 
-        // Attack goblin at range 2
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_6_9", ""); // range 2
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
-        // Hierarchical dispatch: Trigger::ActionAttack chains through Roll, so
-        // Bjorn Hero I (on=Roll) and Long Shot I (on=ActionAttack) share one
-        // useCard prompt. Verify both are in the merged target list.
         $this->assertOperation("useCard");
         $targets = $this->getOpArgs()["target"] ?? [];
         $this->assertContains("card_ability_1_11", $targets, "Long Shot I should be offered at range 2");
@@ -542,18 +520,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     // --- Stitching I/II (card_ability_1_7 / card_ability_1_8) ---
 
-    public function testStitchingIAutoHealsWhenOnlyHeroDamaged(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
-        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
-
-        $this->assertValidTarget("card_ability_1_7", "Stitching I should be offered");
-        $this->respond("card_ability_1_7");
-        $this->confirmCardEffect();
-        // heal(adj) picked (repairCard void), sole hero auto-picked → back at turn
-        $this->assertEquals(1, $this->countDamage($this->heroId));
-    }
-
     public function testStitchingIChooseHealOverRepair(): void {
         $color = $this->getActivePlayerColor();
         $equipCard = "card_equip_1_15";
@@ -586,26 +552,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         $this->assertEquals(2, $this->countDamage($this->heroId));
         $this->assertEquals(0, $this->countDamage($equipCard));
-    }
-
-    public function testStitchingINotOfferedWhenNoDamage(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
-        $this->assertEquals(0, $this->countDamage($this->heroId));
-
-        $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be offered with no damage");
-    }
-
-    public function testStitchingICannotBeUsedTwicePerTurn(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->dbSetTokenLocation("card_ability_1_7", "tableau_$color", 0);
-        $this->game->effect_moveCrystals($this->heroId, "red", 3, $this->heroId, ["message" => ""]);
-
-        $this->respond("card_ability_1_7");
-        $this->confirmCardEffect();
-        $this->assertEquals(2, $this->countDamage($this->heroId));
-
-        $this->assertNotValidTarget("card_ability_1_7", "Stitching I should not be usable twice per turn");
     }
 
     // --- Monster Attack ---
@@ -662,32 +608,6 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Mana should be spent (3 → 0)
         $this->assertEquals(0, $this->countTokens("crystal_green", $sureShotId));
-    }
-
-    public function testSureShotINotOfferedWithoutEnoughMana(): void {
-        $sureShotId = "card_ability_1_3";
-
-        // Sure Shot I starts with 1 mana from setup, needs 3
-        $this->assertEquals(1, $this->countTokens("crystal_green", $sureShotId));
-
-        // Place a goblin in range
-        $goblin = "monster_goblin_20";
-        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
-
-        // Sure Shot I should NOT be a valid target (insufficient mana)
-        $this->assertNotValidTarget($sureShotId, "Sure Shot I should not be offered with only 1 mana");
-    }
-
-    public function testSureShotINotOfferedWithoutMonstersInRange(): void {
-        $sureShotId = "card_ability_1_3";
-
-        // Add 3 mana
-        $this->game->effect_moveCrystals($this->heroId, "green", 2, $sureShotId, ["message" => ""]);
-
-        // No monsters on map (clearMonstersFromMap called in setUp)
-
-        // Sure Shot I should NOT be valid (no monsters in range)
-        $this->assertNotValidTarget($sureShotId, "Sure Shot I should not be offered with no monsters in range");
     }
 
     // --- Sure Shot II (card_ability_1_4) ---

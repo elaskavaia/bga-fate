@@ -508,16 +508,13 @@ Same rules as Bjorn validation (see below):
 [x] card_equip_2_24 Elven Arrows — passive (strength +2), r=(none), has tests
 [x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
 [x] card_equip_2_22 Belt of Youth 
-[ ] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action
-
-<!-- r=custom — needs custom operation implementation -->
-
-[ ] card_equip_2_18 Quiver — custom: durability: add 1 damage to attack, on=actionAttack
+[x] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action, has tests
+[ ] card_equip_2_18 Quiver — durability: add 1 damage to attack, on=actionAttack
 [x] card_equip_2_25 Bloodline Crystal — r=(3spendMana:2addDamage)/(3spendMana:drawEvent), on=custom, bespoke class routes actionAttack+manual via CardGeneric. Has tests
-[ ] card_equip_2_21 Elven Blade — custom: after each attack, deal 1 damage to monster adjacent to Alva, on=actionAttack
-[ ] card_equip_2_20 Singing Bow — custom: main weapon, after each attack add 1 mana to any card, on=actionAttack
-[ ] card_equip_2_16 Tiara — custom: starts with 6 gold, gain 1 gold per turn (bespoke onEnter + turnStart)
-[ ] card_equip_2_19 Windbite — custom: main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune
+[x] card_equip_2_21 Elven Blade — after each attack, deal 1 damage to monster adjacent to Alva, on=TAfterActionAttack, has tests
+[ ] card_equip_2_20 Singing Bow — main weapon, after each attack add 1 mana to any card, on=actionAttack
+[ ] card_equip_2_16 Tiara — starts with 6 gold, gain 1 gold per turn (bespoke onEnter + turnStart)
+[ ] card_equip_2_19 Windbite — main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune
 
 #### Ability Cards
 

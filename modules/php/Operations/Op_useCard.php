@@ -97,6 +97,10 @@ class Op_useCard extends Operation {
         $triggerWire = $info["trigger"] ?? Trigger::Manual->value;
         $trigger = Trigger::from($triggerWire);
         $cardInst->useCard($trigger);
+        // re-queue itself - XXX todo fix trigger semantics, do not remove commented out code
+        //if (!$this->isOneChoice()) {
+        //$this->queue($this->getType(), $this->getOwner(), $this->getDataForDb());
+        //}
     }
 
     public function getUiArgs() {

@@ -55,12 +55,9 @@ Examine the `r` field:
 
 ### 5. Create missing integration tests
 
-If the card is implemented (r is not `custom`) but integration tests are missing or incomplete, create them in the appropriate `tests/Campaign/` file. Follow the existing test patterns (see `tests/Campaign/Campaign_BjornSoloTest.php` for examples). Tests should:
+If the card is implemented (r is not `custom`) but integration tests are missing or incomplete, **delegate to the `game-create-itest` skill**, passing the card ID as argument. That skill owns the test patterns, scaffolding, debug workflow, and hex/flow cheat-sheets — don't duplicate that logic here.
 
-- Set up the game state (place monsters, seed decks, place card on tableau)
-- If the card has an `on` (trigger) field: verify the card IS offered when the trigger fires, and is NOT offered when conditions don't match
-- Resolve the card and verify the effect applies correctly
-- Run the tests to confirm they pass
+After `game-create-itest` returns, include its test method name(s) in the Output Format's "Tests found" field.
 
 ### 6. When done check the card in the plan
 
