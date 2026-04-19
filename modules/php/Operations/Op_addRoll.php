@@ -27,4 +27,9 @@ class Op_addRoll extends Op_roll {
     function isAddition() {
         return true;
     }
+    function shouldEmitTrigger() {
+        // Added dice must not re-fire TRoll/TActionAttack, otherwise cards that respond to
+        // those triggers by calling addRoll (e.g. Windbite) would loop on their own dice.
+        return false;
+    }
 }

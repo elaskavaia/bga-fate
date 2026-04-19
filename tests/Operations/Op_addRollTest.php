@@ -49,12 +49,14 @@ final class Op_addRollTest extends AbstractOpTestCase {
         $this->assertCount(5, $this->diceOnBattle());
     }
 
-    public function testResolveQueuesResolveHits(): void {
+    public function testResolveDoesNotQueueResolveHits(): void {
+        // addRoll does not queue its own resolveHits — the already-pending resolveHits
+        // from the original Op_roll will count the newly-added dice too.
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 6);
         $this->createOp("2addRoll");
         $this->call_resolve("hex_12_8");
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations(PCOLOR));
-        $this->assertContains("resolveHits", $opTypes);
+        $this->assertNotContains("resolveHits", $opTypes);
     }
 
     public function testOriginalDicePreserved(): void {

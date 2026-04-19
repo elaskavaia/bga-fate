@@ -29,7 +29,7 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 20|2|Singing Bow|3||||gainMana|TAfterActionAttack|<i>When you have rolled 10[DIE_ATTACK] in forests</i>, you have learned the songs of the trees.|This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card.|Sings your swan song.|2
 17|2|Throwing Darts|||2||spendUse:costDamage:3roll(adj)||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.|I'm ready to try it blindfolded…|
 16|2|Tiara|||||custom||<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!|Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.||
-19|2|Windbite|3||||custom||<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.|This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].|It anticipates your wishes.|2
+19|2|Windbite|3||||counter(countRunes):addRoll|TRoll|<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.|This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].|It anticipates your wishes.|2
 # Equipment - Embla (hno=3)
 19|3|Blade Decorations|1||||custom||<i>Pay 2 gold [XP] in Grimheim</i> to decorate your sword.||Now this is what I call a broad sword.|
 25|3|Custom Armor|||3||costDamage:2preventDamage||<i>Pay 4 gold [XP]</i> to have it made. Then get anormored with it.|[DAMAGE]: Prevent 2 damage.|Armor is the blacksmith's strong suit.|

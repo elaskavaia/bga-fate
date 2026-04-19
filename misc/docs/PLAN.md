@@ -509,12 +509,12 @@ Same rules as Bjorn validation (see below):
 [x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
 [x] card_equip_2_22 Belt of Youth 
 [x] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action, has tests
-[ ] card_equip_2_18 Quiver — durability: add 1 damage to attack, on=actionAttack
+[x] card_equip_2_18 Quiver — durability: add 1 damage to attack, on=TActionAttack, has tests
 [x] card_equip_2_25 Bloodline Crystal — r=(3spendMana:2addDamage)/(3spendMana:drawEvent), on=custom, bespoke class routes actionAttack+manual via CardGeneric. Has tests
 [x] card_equip_2_21 Elven Blade — after each attack, deal 1 damage to monster adjacent to Alva, on=TAfterActionAttack, has tests
-[ ] card_equip_2_20 Singing Bow — main weapon, after each attack add 1 mana to any card, on=actionAttack
+[x] card_equip_2_20 Singing Bow — main weapon, after each attack add 1 mana to any card, on=TAfterActionAttack, has tests
 [ ] card_equip_2_16 Tiara — starts with 6 gold, gain 1 gold per turn (bespoke onEnter + turnStart)
-[ ] card_equip_2_19 Windbite — main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune
+[x] card_equip_2_19 Windbite — main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune, r=counter(countRunes):addRoll on=TRoll, has tests
 
 #### Ability Cards
 

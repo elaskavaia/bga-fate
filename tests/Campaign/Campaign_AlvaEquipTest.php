@@ -230,4 +230,115 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         // Brute dead
         $this->assertEquals("supply_monster", $this->tokenLocation($brute));
     }
+
+    // --- Windbite (card_equip_2_19) ---
+    // r=counter(countRunes):addRoll, on=TRoll, strength=3, range=2.
+    // Passive main weapon. After any hero roll, count runes rolled and add that many
+    // new attack dice to the roll.
+
+    public function testWindbiteAddsDicePerRuneRolled(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap First Bow → Windbite (both are Main Weapons)
+        $this->game->tokens->moveToken("card_equip_2_15", "limbo");
+        $this->game->tokens->moveToken("card_equip_2_19", "tableau_$color");
+
+        // Passive stats: Alva hero I (str=2) + Windbite (str=3) → 5; range 1 + 2 → 2
+        $hero = $this->game->getHeroById($this->heroId);
+        $hero->recalcTrackers();
+        $this->assertEquals(5, $hero->getAttackStrength());
+        $this->assertEquals(2, $hero->getAttackRange());
+
+        // Alva out of Grimheim, brute (health=3) at range 2
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // Seed 5 dice for the initial attack roll: 1 rune, 4 misses (side 3=rune, 1=miss).
+        // Then seed 1 die for the Windbite addRoll: hit (side 5).
+        // Expected: base roll gives 0 hits; addRoll gives 1 hit → brute takes 1 damage (health=3, survives).
+        $this->seedRand([3, 1, 1, 1, 1, 5]);
+        $this->respond("actionAttack"); // single target in range → auto-picks brute
+
+        // TRoll trigger fires → useCard prompt for Windbite
+        $this->assertOperation("useCard");
+        $this->assertValidTarget("card_equip_2_19");
+        $this->respond("card_equip_2_19");
+        $this->confirmCardEffect();
+
+        // Brute took 1 damage from the 1 hit on the Windbite-added die; still alive.
+        $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
+        $this->assertEquals(1, $this->countDamage($brute));
+    }
+
+    // --- Singing Bow (card_equip_2_20) ---
+    // r=gainMana, on=TAfterActionAttack, strength=3, range=2.
+    // Passive main weapon; after each attack action, add 1 mana to any card.
+
+    public function testSingingBowPassiveStatsAndAfterAttackMana(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap First Bow (Main Weapon) → Singing Bow (Main Weapon) to avoid double main-weapon
+        $this->game->tokens->moveToken("card_equip_2_15", "limbo");
+        $this->game->tokens->moveToken("card_equip_2_20", "tableau_$color");
+
+        // Passive stats: Alva hero I (str=2) + Singing Bow (str=3) → 5; range 1 + 2 → 2
+        $hero = $this->game->getHeroById($this->heroId);
+        $hero->recalcTrackers();
+        $this->assertEquals(5, $hero->getAttackStrength());
+        $this->assertEquals(2, $hero->getAttackRange());
+
+        // Hail of Arrows I (card_ability_2_3, mana=1) is on Alva's starting tableau → sole mana target.
+        $hailId = "card_ability_2_3";
+        $manaBefore = $this->countTokens("crystal_green", $hailId);
+
+        // Alva out of Grimheim, brute at range 2 (health=3, survives)
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        $this->seedRand([1, 1, 1, 1, 1, 1]); // misses; don't care about damage this test
+        $this->respond("hex_5_9");
+
+        // TAfterActionAttack trigger offers Singing Bow as a useCard option post-attack
+        $this->assertOperation("useCard");
+        $this->assertValidTarget("card_equip_2_20");
+        $this->respond("card_equip_2_20");
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard"); // dismiss any further trigger prompts
+
+        // 1 mana added to Hail of Arrows I
+        $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));
+    }
+
+    // --- Quiver (card_equip_2_18) ---
+    // r=costDamage:addDamage, on=TActionAttack, durability=3, strength=1.
+    // Passive +1 strength; during an attack, spend 1 durability (red crystal on card)
+    // → add 1 hit die to the attack.
+
+    public function testQuiverAddsDamageDuringAttackAtDurabilityCost(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_2_18", "tableau_$color");
+
+        // Place Alva out of Grimheim, brute (health=3) at range 2
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // Seed 3 miss dice so base attack damage = 0; Quiver adds 1 guaranteed hit.
+        // Strength = Alva I(2) + First Bow(1) + Quiver(1) = 4 → 4 dice rolled.
+        $this->seedRand([1, 1, 1, 1]);
+        $this->respond("hex_5_9");
+
+        // TActionAttack trigger offers Quiver as a useCard option mid-attack
+        $this->assertOperation("useCard");
+        $this->assertValidTarget("card_equip_2_18");
+        $this->respond("card_equip_2_18");
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard"); // dismiss any further trigger prompts
+
+        // 1 durability spent (1 red crystal on the card)
+        $this->assertEquals(1, $this->countDamage("card_equip_2_18"));
+        // Brute takes 1 damage (base=0 + addDamage 1)
+        $this->assertEquals(1, $this->countDamage($brute));
+        $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
+    }
 }

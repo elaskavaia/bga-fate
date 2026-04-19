@@ -103,19 +103,28 @@ class Op_roll extends CountableOperation {
         // Only trigger on player rolls (hero is attacker), not monster rolls.
         // Emit the most specific trigger; ActionAttack chains through Roll so cards
         // listening on TRoll are still offered during attack rolls (Trigger::chain).
-        if (str_starts_with($attackerId, "hero_")) {
+        // Op_addRoll overrides shouldEmitTrigger() to suppress re-firing — otherwise cards
+        // like Windbite (counter(countRunes):addRoll on TRoll) would loop on their own dice.
+        if ($this->shouldEmitTrigger() && str_starts_with($attackerId, "hero_")) {
             $trigger = $this->getReason() == "Op_actionAttack" ? Trigger::ActionAttack : Trigger::Roll;
             $this->queueTrigger($trigger);
         }
 
-        // Queue resolveHits to convert dice into dealDamage
-        $this->queue("resolveHits", null, [
-            "attacker" => $attackerId,
-            "target" => $targetHex,
-        ]);
+        // Queue resolveHits to convert dice into dealDamage.
+        // addRoll skips this — the already-queued resolveHits from the original roll will
+        // count the newly-added dice too.
+        if (!$this->isAddition()) {
+            $this->queue("resolveHits", null, [
+                "attacker" => $attackerId,
+                "target" => $targetHex,
+            ]);
+        }
     }
     function isAddition() {
         return false;
+    }
+    function shouldEmitTrigger() {
+        return true;
     }
     public function getUiArgs() {
         return ["buttons" => false];
