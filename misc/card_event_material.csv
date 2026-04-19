@@ -22,7 +22,7 @@ num|hno|name|count|r|on|effect|flavour
 35|2|Back Down!|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
 30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
 27|2|Mastery|3|4addRoll|TActionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
-26|2|Multi-Shot|3|custom||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
+26|2|Multi-Shot|3|2roll(inRange),2roll(inRange)||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
 34|2|Piercing Arrows|2|counter(countRunes):addDamage|TRoll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
 32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
 36|2|Prey|1|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.

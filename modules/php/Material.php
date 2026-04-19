@@ -4791,7 +4791,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Multi-Shot"),
         "count" => 3,
-        "r" => "custom",
+        "r" => "2roll(inRange),2roll(inRange)",
         "effect" => "Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.",
         "flavour" => "Two-for-one deal, express delivery.",
 ],
