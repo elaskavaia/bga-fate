@@ -220,6 +220,8 @@ These are stateless "guard" ops that sit at the leftmost position of a paygain c
 
 - `on(EventXxx)` — Runtime event gate. Voids with `ERR_PREREQ` unless the `event` data field seeded by `Card::useCard()` matches the expected event. Used inside card `r` expressions to restrict a clause to a specific trigger context. Example (Flexibility I): `(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)` — the first two branches are voluntary free-action activations that burn the card's use; the third branch fires mid-attack (gated on the attack trigger) and does NOT burn the use.
 
+- `in(Location)` — Hero location gate. Voids with `ERR_PREREQ` unless the acting hero's hex matches the param against either its named loc field (e.g. `Grimheim`) or terrain (e.g. `forest`, `mountain`, `plains`, `lake`). Used inside card `r` expressions to restrict effects to a specific terrain or place. Example (Blade Decorations): `in(Grimheim):2spendXp:upgrade`. Like `on(...)`, must be left-anchored in its paygain chain.
+
 **Important**: both `spendUse` and `on(...)` must be the **leftmost** element of their paygain chain. `Op_paygain::getPossibleMoves()` pre-flights all delegates for void state — a void cost at any position propagates up, but if a non-void sub runs before the machine reaches the void one, the earlier side-effects will have already applied. Left-anchor the guards so the whole chain is caught before any sub resolves.
 
 

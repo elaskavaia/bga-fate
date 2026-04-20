@@ -61,6 +61,7 @@ spendMana|Spend Mana
 spendGold|Spend Gold
 spendUse|Use Card
 on|Triggered Effect
+in|Hero In Location
 costDamage|Take Damage
 spendAction|Spend Action
 roll|Roll Dice
