@@ -53,61 +53,7 @@ final class Op_gainXpTest extends AbstractOpTestCase {
         $this->assertEquals(3, $this->getXp());
     }
 
-    // -------------------------------------------------------------------------
-    // condition: grimheim
-    // -------------------------------------------------------------------------
-
-    public function testGrimheimConditionPassesInGrimheim(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim
-
-        $this->createOp("2gainXp(grimheim)");
-        $this->assertEquals(0, $this->op->getErrorCode());
-    }
-
-    public function testGrimheimConditionFailsOutsideGrimheim(): void {
-        // hero_1 is on hex_11_8 (plains, not Grimheim)
-        $this->createOp("2gainXp(grimheim)");
-        $this->assertNoValidTargets();
-    }
-
-    public function testGrimheimConditionResolves(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_9_9");
-
-        $this->createOp("2gainXp(grimheim)");
-        $this->call_resolve();
-        $this->assertEquals(2, $this->getXp());
-    }
-
-    // -------------------------------------------------------------------------
-    // condition: adjMountain
-    // -------------------------------------------------------------------------
-
-    public function testAdjMountainConditionPassesWhenAdjacent(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_14_2"); // adjacent to hex_14_1 (mountain)
-
-        $this->createOp("2gainXp(adjMountain)");
-        $this->assertEquals(0, $this->op->getErrorCode());
-    }
-
-    public function testAdjMountainConditionFailsWhenNotAdjacent(): void {
-        // hero_1 is on hex_11_8 — no adjacent mountains
-        $this->createOp("2gainXp(adjMountain)");
-        $this->assertNoValidTargets();
-    }
-
-    public function testAdjMountainConditionResolves(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_14_2");
-
-        $this->createOp("2gainXp(adjMountain)");
-        $this->call_resolve();
-        $this->assertEquals(2, $this->getXp());
-    }
-
-    // -------------------------------------------------------------------------
-    // no condition: always works
-    // -------------------------------------------------------------------------
-
-    public function testNoConditionAlwaysValid(): void {
+    public function testAlwaysValid(): void {
         $this->createOp("2gainXp");
         $this->assertEquals(0, $this->op->getErrorCode());
     }

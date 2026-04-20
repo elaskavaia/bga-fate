@@ -176,13 +176,18 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Stun (green crystal — Suppressive Fire)
+    // Stun (stunmarker — Suppressive Fire)
     // -------------------------------------------------------------------------
+
+    private function placeStunMarker(string $monsterId): void {
+        $this->game->tokens->createTokenIfNot("stunmarker_c", $monsterId);
+        $this->game->tokens->moveToken("stunmarker_c", $monsterId);
+    }
 
     public function testStunnedMonsterDoesNotMove(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        // Place a green crystal on the monster (stunned)
-        $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
+        // Place a stun marker on the monster
+        $this->placeStunMarker("monster_goblin_1");
 
         $this->call_resolve();
 
@@ -190,18 +195,18 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals("hex_12_8", $loc, "Stunned monster should not move");
     }
 
-    public function testStunCrystalStaysAfterSkippingMovement(): void {
+    public function testStunMarkerStaysAfterSkippingMovement(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
+        $this->placeStunMarker("monster_goblin_1");
 
         $this->call_resolve();
-        $crystalsAfter = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "monster_goblin_1");
-        $this->assertCount(1, $crystalsAfter, "Green crystal should stay on monster (removed by next c_supfire trigger)");
+        $markersAfter = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", "monster_goblin_1");
+        $this->assertCount(1, $markersAfter, "Stun marker should stay on monster (removed by next c_supfire trigger)");
     }
 
     public function testStunnedMonsterDoesNotMoveOnChargeTurn(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
+        $this->placeStunMarker("monster_goblin_1");
 
         $op = $this->createOp(null, ["charge" => true]);
         $op->resolve();
@@ -213,7 +218,7 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
     public function testOnlyStunnedMonsterIsSkipped(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // stunned
         $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7"); // not stunned
-        $this->game->effect_moveCrystals("hero_1", "green", 1, "monster_goblin_1", ["message" => ""]);
+        $this->placeStunMarker("monster_goblin_1");
 
         $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
         $g2Before = $distMap["hex_13_7"];

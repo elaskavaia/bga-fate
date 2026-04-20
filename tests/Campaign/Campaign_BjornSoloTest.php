@@ -388,9 +388,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $state["name"]);
         $this->assertEquals($goblinHex, $this->tokenLocation($goblin), "Suppressed goblin should not have moved");
 
-        // Green crystal should still be on the goblin
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $goblin);
-        $this->assertCount(1, $crystals, "Green crystal should remain on goblin after movement phase");
+        // Stun marker should still be on the goblin
+        $markers = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $goblin);
+        $this->assertCount(1, $markers, "Stun marker should remain on goblin after movement phase");
 
         // Brute (not suppressed) should have moved closer to Grimheim
 
@@ -441,7 +441,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Goblin should NOT be a valid target (still has green crystal)
         $args = $this->getOpArgs();
         $this->assertEquals("c_supfire", $args["type"] ?? "");
-        $this->assertNotValidTarget($goblinHex, "Goblin should be excluded (has green crystal from last turn)");
+        $this->assertNotValidTarget($goblinHex, "Goblin should be excluded (has stun marker from last turn)");
         // Brute moved toward Grimheim after turn 1 — use its current hex
         $bruteCurrentHex = $this->tokenLocation($brute);
         $this->assertValidTarget($bruteCurrentHex, "Brute should be available");
@@ -511,11 +511,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("c_supfire", $args["type"] ?? "");
         $this->skip();
 
-        // After monster turn, crystal should be removed from goblin
+        // After monster turn, marker should be removed from goblin
         $state = $this->getStateArgs();
         $this->assertEquals("PlayerTurn", $state["name"]);
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $goblin);
-        $this->assertCount(0, $crystals, "Crystal should be removed when player skips Suppressive Fire");
+        $markers = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $goblin);
+        $this->assertCount(0, $markers, "Marker should be removed when player skips Suppressive Fire");
     }
 
     // --- Stitching I/II (card_ability_1_7 / card_ability_1_8) ---

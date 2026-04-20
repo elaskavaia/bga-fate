@@ -365,7 +365,7 @@ See CLAUDE.md for project overview
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
 - [x] `costDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
-- [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`2spendMana(grimheim):addTownPiece`)
+- [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`in(Grimheim):2spendManaAny:addTownPiece`)
 - [x] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
 - [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
@@ -566,28 +566,26 @@ Same rules as Bjorn validation (see below):
 s
 [ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range. **Triage: new op** — needs new `Op_c_hail` (multi-target damage with distinctness); same pattern as `Op_c_sureshotII`.
 [ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range. **Triage: new op** — needs new `Op_c_hailII` (variable count 1-4, N distinct targets). DSL `N*dealDamage(inRange)` can't enforce cross-invocation distinctness.
-[ ] card_ability_2_7 Starsong I — draw 1 additional card at turn end, on=turnEnd. **Triage: DSL** — `r=drawEvent`, `on=TTurnEnd`.
+[ ] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Needs integration test.
 [ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. **Triage: extend op** — draw half is DSL (`r=2drawEvent on=TTurnEnd`); hand-limit override needs extending `Hero::getHandLimit()` to consult equipped cards (new `handLimit` CSV column or card attribute).
-[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs `CardAbility_Treetreader` because it alters `Op_move::getReachableHexes` pathing. Requires new passive hook (e.g. `modifyReachable($hero, &$hexes)`) that cards can override.
+[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs special op.
 [ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest. **Triage: bespoke** — same `CardAbility_Treetreader` class (II variant), adds on-TMove handler to queue `1heal` when destination is forest.
 
-#### Event Cards
+#### Alva's Event Cards
 
 
-[ ] card_event_2_28 Agility — move 2 areas, r=2move
-[ ] card_event_2_35 Back Down! — kill rank<=2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
-[ ] card_event_2_30 Inspire Defense — spend 2[MANA] in Grimheim to add town piece, r=2spendMana(grimheim):addTownPiece
-[ ] card_event_2_32 Popular — gain 2[XP] in Grimheim, r=2gainXp(grimheim)
-[ ] card_event_2_31 Rest — heal 2 from Alva, r=2heal(self)
-[ ] card_event_2_34 Piercing Arrows — add 1 damage per [RUNE], r=counter(countRunes):addDamage, on=roll
-[ ] card_event_2_36 Prey — mark undamaged rank 3/Legend with 2 gold, r=c_prey
+[x] card_event_2_28 Agility — r=2move, has tests.
+[x] card_event_2_35 Back Down! — r=killMonster(inRange,'rank<=2 and closerToGrimheim'), has tests.
+[x] card_event_2_30 Inspire Defense — r=in(Grimheim):2spendManaAny:addTownPiece, has tests. New `Op_spendManaAny` prompts per mana, cross-card; `in(Grimheim)` replaces the old `(grimheim)` param on spendMana/gainXp.
+[x] card_event_2_32 Popular — r=in(Grimheim):2gainXp, has tests.
+[x] card_event_2_31 Rest — r=2heal(self), has tests.
+[x] card_event_2_34 Piercing Arrows — r=counter(countRunes):addDamage on=TRoll, has tests.
+[x] card_event_2_36 Prey — r=c_prey, has tests.
 
-<!-- r=custom — needs custom operation implementation -->
-
-[ ] card_event_2_27 Mastery — add 4[DIE_ATTACK] to this attack, on=actionAttack
-[ ] card_event_2_26 Multi-Shot — roll 2[DIE_ATTACK] against each of up to 2 monsters in range
-[ ] card_event_2_33 Speedy Attack — discard another card to perform attack action
-[ ] card_event_2_29 Take a Knee — prevent non-Legend monster in range from moving this monster turn. **Triage: DSL (or small op extension)** — `r=c_supfire('rank<=3')` reuses existing `Op_c_supfire`; if its range is hard-coded to 3 and the event needs caster's range, extend `Op_c_supfire` to accept a range param.
+[x] card_event_2_27 Mastery — r=4addRoll on=TActionAttack, has tests.
+[x] card_event_2_26 Multi-Shot — r=2roll(inRange),2roll(inRange), has tests.
+[x] card_event_2_33 Speedy Attack — r=discardEvent:actionAttack, has tests.
+[x] card_event_2_29 Take a Knee — r=c_supfire(inRange,not_legend), has tests.
 
 ### Server Hero 3 - Embla
 
@@ -604,9 +602,9 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 #### Equipment Cards
 
-[ ] card_equip_3_19 Blade Decorations — passive +1 strength. **Triage: DSL** — `r=` empty; the `strength=1` column already handles it. Drop the `custom` placeholder.
-[ ] card_equip_3_22 Raven's Claw — main weapon, +2 damage per attack. **Triage: DSL** — `r=2addDamage` on=TActionAttack.
-[ ] card_equip_3_21 Wildfire Blade — main weapon, 1 damage to an adjacent monster after each attack. **Triage: DSL** — `r=dealDamage(adj)` on=TAfterActionAttack (identical pattern to Elven Blade `card_equip_2_21`).
+[ ] card_equip_3_19 Blade Decorations — passive +1 strength, r= empty (strength column handles it). Needs integration test.
+[ ] card_equip_3_22 Raven's Claw — main weapon, r=2addDamage on=TActionAttack. Needs integration test.
+[ ] card_equip_3_21 Wildfire Blade — main weapon, r=dealDamage(adj) on=TAfterActionAttack. Needs integration test.
 
 #### Event Cards
 
@@ -626,8 +624,8 @@ Triage of r=custom cards:
 
 #### Equipment Cards
 
-[ ] card_equip_4_20 Dvalin's Pick — spend attack action → gain XP + mana + draw card. **Triage: DSL** — `r=spendAction(actionAttack):gainXp:gainMana:drawEvent`. All four primitives exist.
-[ ] card_equip_4_25 Dwarf Pick — main weapon, +2 strength passive. **Triage: DSL** — `r=` empty; `strength=2` column already handles it (same pattern as `card_equip_4_15 Boldur's First Pick`).
+[ ] card_equip_4_20 Dvalin's Pick — r=spendAction(actionAttack):gainXp:gainMana:drawEvent. Needs integration test.
+[ ] card_equip_4_25 Dwarf Pick — main weapon, r= empty (strength column handles it). Needs integration test.
 [ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
 [ ] card_equip_4_19 Orebiter — attack adjacent mountain areas, gain XP per damage. **Triage: bespoke** — needs `CardEquip_Orebiter`. Attacking terrain (not a monster) has no primitive; plus per-damage XP hook via TResolveHits. Could split into `Op_attackTerrain` + a TResolveHits hook, but the terrain-attack alone warrants a bespoke class.
 [ ] card_equip_4_21 Smiterbiter — main weapon, stores up to 3 excess damage on kill, spend stored to add damage. **Triage: bespoke** — needs `CardEquip_Smiterbiter`. Stateful card-local crystal bank (like `CardEquip_Tiara`) + two flows (store-on-kill, spend-to-add-damage).
@@ -635,8 +633,8 @@ Triage of r=custom cards:
 #### Event Cards
 
 [ ] card_event_4_32 Berserk — add 3[DIE_ATTACK] to this attack, take 1 unpreventable damage. **Triage: extend op** — `r=3addDamage:costDamage(self,unpreventable)` on=TActionAttack; needs `Op_costDamage` to accept an `unpreventable` flag. (If already supported it's pure DSL.)
-[ ] card_event_4_36 Boldur's Gate — spend 2 gold in Grimheim → gain town piece. **Triage: DSL** — `r=2spendGold:addTownPiece` with `(grimheim)` self-location guard, assuming `(grimheim)` filter applies to the self-hero's hex. Verify filter semantics.
-[ ] card_event_4_38 Portable Smithy — spend prepare action to repair all equipment. **Triage: DSL** — `r=spendAction(actionPrepare):repairCard(all)`; `Op_repairCard` already handles `all` (see `card_event_1_30 Sewing`).
+[ ] card_event_4_36 Boldur's Gate — r=in(Grimheim):2spendGold:addTownPiece. Needs integration test.
+[ ] card_event_4_38 Portable Smithy — r=spendAction(actionPrepare):gainEquip ("complete quest" = gain top of equip deck). Needs integration test.
 
 
 ---
@@ -717,5 +715,6 @@ See misc/docs/CHECKLIST.md
   [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
   [ ] Flip animation for upgrades
   [ ] Main weapon - restriction only one main weapon allowed
+  [ ] **Manually test: double-confirm on comma-chained event card rules.** Multi-Shot (`r=2roll(inRange),2roll(inRange)`) creates a `seq` op for the comma-chain. Test via `Campaign_AlvaEventTest::testMultiShotRollsAgainstTwoDifferentMonsters` shows an extra `confirm` step is required after the card pick, before the first sub-op prompts. The root paygain already has `confirm=true` from `Card::useCard`; seq's expandOperation correctly strips confirm from children. Expected UX: click card → prompt for first monster hex (no intermediate confirm). Actual: click card → confirm button → prompt for first monster hex. Verify in the harness whether this is a UX bug (double-click) or intentional. If UX bug, likely fix is in `Op_seq::expandOperation` or how useCard wraps the op.
 
 

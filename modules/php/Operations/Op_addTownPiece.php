@@ -20,11 +20,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 /**
  * Add 1 Town Piece to Grimheim: move the first destroyed house (in limbo) back to its home hex.
  *
- * Behaviour:
- * - Normal case: moves first house in limbo back to its material-defined home hex.
- * - No destroyed houses: ERR_NOT_APPLICABLE (should not happen — caller must guard).
- *
- * Used by: Inspire Defense (2spendMana(grimheim):addTownPiece).
+ * Used by: Inspire Defense (in(Grimheim):2spendManaAny:addTownPiece).
  */
 class Op_addTownPiece extends Operation {
     function getPossibleMoves() {

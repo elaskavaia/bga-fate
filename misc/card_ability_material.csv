@@ -16,8 +16,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 14|1|Nailed Together II|2|||c_nailed(chain)|TMonsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.|
 7|1|Stitching I||||spendUse:(heal(adj)/repairCard)||Remove 1 damage from any hero or equipment within range 1.|If you're in a pinch, Bjorn can patch.
 8|1|Stitching II||||spendUse:(2heal(adj)/2repairCard/(heal(adj),repairCard))||Remove a total of 2 damage from heroes and equipment within range 1.|
-5|1|Suppressive Fire I||||c_supfire('rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
-6|1|Suppressive Fire II||||c_supfire|TMonsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
+5|1|Suppressive Fire I||||c_supfire(inRange3,'rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
+6|1|Suppressive Fire II||||c_supfire(inRange3)|TMonsterMove|Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.|
 3|1|Sure Shot I|||1|spendUse:3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
 4|1|Sure Shot II|||2|spendUse:c_sureshotII||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
@@ -27,10 +27,10 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 4|2|Hail of Arrows II|||2|custom||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.|
 11|2|Snipe I||||spendUse:2roll(inRange)||Roll 2[DIE_ATTACK] against a monster within attack range.|
 12|2|Snipe II||||spendUse:5roll(inRange)||Roll 5[DIE_ATTACK] against a monster within attack range.|
-7|2|Starsong I||||custom|TTurnEnd|At the end of your turn, draw 1 additional card.|
-8|2|Starsong II||||custom|TTurnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
-9|2|Suppressive Fire I||||c_supfire('rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
-10|2|Suppressive Fire II||||c_supfire|TMonsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
+7|2|Starsong I||||drawEvent|TTurnEnd|At the end of your turn, draw 1 additional card.|
+8|2|Starsong II||||2drawEvent|TTurnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
+9|2|Suppressive Fire I||||c_supfire(inRange3,'rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
+10|2|Suppressive Fire II||||c_supfire(inRange3)|TMonsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
 5|2|Treetreader I||2||custom||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
 6|2|Treetreader II||2||custom||Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.
 # Abilities - Embla (hno=3)

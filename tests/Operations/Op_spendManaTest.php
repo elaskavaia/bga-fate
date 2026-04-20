@@ -58,31 +58,4 @@ final class Op_spendManaTest extends AbstractOpTestCase {
         $this->call_resolve("card_ability_1_3");
     }
 
-    // -------------------------------------------------------------------------
-    // condition: grimheim
-    // -------------------------------------------------------------------------
-
-    public function testGrimheimConditionPassesInGrimheim(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim
-        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
-        $this->assertEquals(0, $this->op->getErrorCode());
-    }
-
-    public function testGrimheimConditionFailsOutsideGrimheim(): void {
-        // hero_1 is on hex_11_8 (not Grimheim)
-        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
-        $this->assertNoValidTargets();
-    }
-
-    public function testGrimheimConditionResolves(): void {
-        $this->game->tokens->moveToken("hero_1", "hex_9_9");
-        $this->createOp("2spendMana(grimheim)", ["card" => "card_ability_1_3"]);
-        $this->call_resolve("card_ability_1_3");
-        $this->assertEquals(1, $this->getMana("card_ability_1_3"));
-    }
-
-    public function testNoConditionAlwaysValid(): void {
-        $this->createOp("2spendMana", ["card" => "card_ability_1_3"]);
-        $this->assertEquals(0, $this->op->getErrorCode());
-    }
 }

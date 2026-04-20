@@ -8,13 +8,6 @@ use Bga\Games\Fate\OpCommon\Operation;
 /**
  * Monster Movement Phase — move all monsters toward Grimheim.
  *
- * Automated operation extracted from Op_turnMonster.
- * Each monster moves toward Grimheim along the shortest path.
- * Order: closest to Grimheim first.
- * Charge: on skull turns, all monsters get +1 movement step.
- * Charge rule C: any monster that can reach a hero with 1 extra step charges.
- * Monsters with a green crystal (stunned by Suppressive Fire) skip movement.
- *
  * Data Fields:
  * - charge: bool — whether this is a charge (skull) turn (+1 movement step)
  */
@@ -46,10 +39,8 @@ class Op_monsterMoveAll extends Operation {
             $monsterId = $m["key"];
             $currentHex = $m["hex"];
 
-            // Check if monster is stunned (green crystal = Suppressive Fire)
-            // Crystal stays on the monster until next trigger (enforces "cannot choose same monster next turn")
-            $stunCrystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", $monsterId);
-            if (count($stunCrystals) > 0) {
+            $stunMarkers = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $monsterId);
+            if (count($stunMarkers) > 0) {
                 $this->game->notifyMessage(clienttranslate('${token_name} is suppressed and cannot move this turn'), [
                     "token_name" => $monsterId,
                 ]);

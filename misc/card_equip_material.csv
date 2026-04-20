@@ -31,25 +31,25 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 16|2|Tiara|||||||<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!|Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.||
 19|2|Windbite|3||||counter(countRunes):addRoll|TRoll|<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.|This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].|It anticipates your wishes.|2
 # Equipment - Embla (hno=3)
-19|3|Blade Decorations|1||||custom||<i>Pay 2 gold [XP] in Grimheim</i> to decorate your sword.||Now this is what I call a broad sword.|
+19|3|Blade Decorations|1||||||<i>Pay 2 gold [XP] in Grimheim</i> to decorate your sword.||Now this is what I call a broad sword.|
 25|3|Custom Armor|||3||costDamage:2preventDamage||<i>Pay 4 gold [XP]</i> to have it made. Then get anormored with it.|[DAMAGE]: Prevent 2 damage.|Armor is the blacksmith's strong suit.|
 15|3|Flimsy Blade|1||||||||This miserable heirloom doesn't look like much, and it's not nearly as good as it looks...|
 16|3|Healing Potion|||4||costDamage:1heal(adj)||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|This mead is barely legal.|
 17|3|Heels|||||spendUse:dealDamage(adj)||<i>Spend 1 mend action and discard 2 cards in the Witch Cabin.</i> That witch had style!|Deal 1 damage to an adjacent monster.|High heels can be sooo painful.|
 20|3|Helmet|||3||costDamage:1preventDamage||<i>Kill a brute or a skeleton. Take this instead of the gold [XP].</i>|[DAMAGE]: Prevent 1 damage.|Heading for trouble.|
 23|3|Leg Guards|1||||||<i>Spend 1 focus action.</i> They're that tight.||Keeps my legs pretty, and leaves funny marks on their faces.|
-22|3|Raven's Claw|1||||custom|TActionAttack|<i>Enter 10 forest areas</i> to search for the long-forgotten sword.|This is your Main Weapon. Add 2 damage to each attack action.|The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.|
+22|3|Raven's Claw|1||||2addDamage|TActionAttack|<i>Enter 10 forest areas</i> to search for the long-forgotten sword.|This is your Main Weapon. Add 2 damage to each attack action.|The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.|
 18|3|Tailored Boots|||2||spendUse:costDamage:1move||<i>Pay the shoemaker 2 gold [XP] in town.</i> He'll heel your shoes and save their soles.|[DAMAGE]: Move 1 area.|Fooling your foes with fancy footwork.|
 26|3|Throwing Knives|||2||spendUse:costDamage:3roll(adj)||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster.|Now between the fingers...|
 24|3|Warrior Shield|||2||costDamage:1preventDamage,drawEvent||"<i>Spend 1 attack action</i>, ""negotiating"" with the traveling merchant."|[DAMAGE]: Prevent 1 damage and draw 1 card.|A backup disc to save your life.|
-21|3|Wildfire Blade|2||||custom|TActionAttack|<i>Spend 1 mend action in the Spewing Mountain</i> to forge it.|This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster.|Forged in the flames of kidnapped sprites.|
+21|3|Wildfire Blade|2||||dealDamage(adj)|TAfterActionAttack|<i>Spend 1 mend action in the Spewing Mountain</i> to forge it.|This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster.|Forged in the flames of kidnapped sprites.|
 # Equipment - Boldur (hno=4)
 24|4|Battle Boots|1||||||<i>Spend 1 focus action</i> to permanently attach them to your feet.||Stepping on every toe within range.|
 15|4|Boldur's First Pick|1|||||||This is your Main Weapon.|Picks anything, even noses.|
-20|4|Dvalin's Pick|||||custom||<i>End your movement adjacent to 3 mountain areas.</i> The tomb had better be there!|Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card.|Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.|
+20|4|Dvalin's Pick|||||spendAction(actionAttack):gainXp,gainMana,drawEvent||<i>End your movement adjacent to 3 mountain areas.</i> The tomb had better be there!|Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card.|Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.|
 23|4|Dwarf Helm|||4||costDamage:1preventDamage||<i>Spend 2 gold [XP] in the Temple Ruins.</i> A bowl is a good start.|[DAMAGE]: Prevent 1 damage.|People hit what they can reach. On Boldur, that's mainly his head.|
 18|4|Dwarf Mail|||||preventDamage|TResolveHits|<i>Enter 7 areas adjacent to mountains.</i> Silly family tradition!|Prevent the first damage dealt to Boldur each monster turn.|Wearing this, Boldur is quite a hot male.|
-25|4|Dwarf Pick|1||||custom||<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.||Boldur, this is for you, so you know I would always pick you! X O X O|
+25|4|Dwarf Pick|1||||||<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.||Boldur, this is for you, so you know I would always pick you! X O X O|
 22|4|Eitri's Pick|2||||custom||<i>End your movement adjacent to 4 monsters or 1 legend</i> to pick a fight.|This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action.|Used by Eitiri, who forged Thor's hammer Mjölnir.|
 17|4|Mining Equipment|||2||costDamage:custom||<i>Pay 1 gold</i> [XP] for the equipment. Then <i>pay 2 gold</i> [XP] for insureance and taxes.|[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas.|I'm digging this gold rush…|
 19|4|Orebiter|||||custom||<i>Lose 2 gold</i>[XP]. The potential gain is endless.|You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP].|It's an auto-pick.|

@@ -20,15 +20,15 @@ num|hno|name|count|r|on|effect|flavour
 # Events - Alva (hno=2)
 28|2|Agility|2|2move||Move 2 areas. Just because you can.|
 35|2|Back Down!|2|killMonster(inRange,'rank<=2 and closerToGrimheim')||Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.|Let's call it a warning shot.
-30|2|Inspire Defense|2|2spendMana(grimheim):addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
+30|2|Inspire Defense|2|in(Grimheim):2spendManaAny:addTownPiece||Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.|Anything for you, Alva!
 27|2|Mastery|3|4addRoll|TActionAttack|Add 4[DIE_ATTACK] to this attack action.|When they don't get the hint at the first arrow, add some more…
 26|2|Multi-Shot|3|2roll(inRange),2roll(inRange)||Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.|Two-for-one deal, express delivery.
 34|2|Piercing Arrows|2|counter(countRunes):addDamage|TRoll|Play after one of your dice rolls. Add 1 damage for each [RUNE].|Make sure the arrow head is sterilized!
-32|2|Popular|2|2gainXp(grimheim)||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
+32|2|Popular|2|in(Grimheim):2gainXp||Play in Grimheim to gain 2 gold [XP].|I could get used to this…
 36|2|Prey|1|c_prey||Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].|Pray for your life.
 31|2|Rest|2|2heal(self)||Heal 2 damage from Alva.|If you defend the village, I'll take care of the rest.
 33|2|Speedy Attack|2|discardEvent:actionAttack||Discard another card from hand to perform an attack action.|
-29|2|Take a Knee|2|custom||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.
+29|2|Take a Knee|2|c_supfire(inRange,not_legend)||Choose a non-Legend monster within attack range. It may not move during the monster turn.|Just what he kneeded.
 # Events - Embla (hno=3)
 30|3|Courage|2|2dealDamage(adj,'(rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
 36|3|Durability|1|repairCard(max)||Remove all damage from an equipment card.|
@@ -43,14 +43,14 @@ num|hno|name|count|r|on|effect|flavour
 32|3|Vigilance|2|dealDamage(adj)|TMonsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
 # Events - Boldur (hno=4)
 32|4|Berserk|3|custom|TActionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
-36|4|Boldur's Gate|1|custom||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
+36|4|Boldur's Gate|1|in(Grimheim):2spendGold:addTownPiece||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
 35|4|Dodge|1|2preventDamage||Prevent up to 2 damage.|Did you miss me?
 34|4|Durability|1|repairCard(max)||Remove all damage from an equipment card.|Can't even handle the mead?
-33|4|Focus|2|spendAction(actionFocus):gainXp:gainMana(1):drawEvent||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
+33|4|Focus|2|spendAction(actionFocus):gainXp:gainMana:drawEvent||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
 31|4|Kick|3|dealDamage(adj),moveMonster(marked)||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
 29|4|Maneuver|2|1move||Move 1 area.|
-27|4|Miner|2|2gainXp(adjMountain)||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.
-38|4|Portable Smithy|1|custom||Spend 1 prepare action to complete your quest.|Travel-sized anvil. Check!
+27|4|Miner|2|adj(mountain):2gainXp||Gain 2 gold [XP] if you are adjacent to a mountain area.|All dwarves are minors until they turn fifty.
+38|4|Portable Smithy|1|spendAction(actionPrepare):gainEquip||Spend 1 prepare action to complete your quest.|Travel-sized anvil. Check!
 30|4|Rest|2|2heal(self)||Heal 2 damage from Boldur.|I need a hospital… no, I need a tavern…
 37|4|Seek Shelter|1|[0,2]move(locationOnly),0setAtt(move)||Move up to 2 areas into a location. You may not move more this turn.|It's not fleeing, it's a tactical retreat.
 28|4|Short Temper|3|killMonster(adj,'healthRem<=2')||Kill an adjacent monster with no more than 2 remaining health.|Beware! Boldur's brutal blows bring bad bruises.

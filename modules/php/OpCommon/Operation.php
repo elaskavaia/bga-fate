@@ -115,7 +115,6 @@ abstract class Operation {
         }
         return $this->getType();
     }
-
     public static function str(mixed $expr, $topop = ";") {
         if ($expr instanceof Operation) {
             $res = $expr->getTypeFullExpr();

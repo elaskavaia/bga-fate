@@ -24,15 +24,11 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  *         That mana must be taken from the same card; you may not pay with mana from other cards."
  * Used by: mana-activated abilities (e.g. Sure Shot, Dreadnought, Rapid Strike, Fire Spark).
  *
- * Optional param(0): location condition
- *   - "grimheim" — hero must be in Grimheim
+ * Location preconditions are expressed via the `in(Grimheim):` prefix in the rule, not
+ * via a param on this op.
  */
 class Op_spendMana extends CountableOperation {
     function getPossibleMoves() {
-        $condition = $this->getParam(0, "");
-        if ($condition !== "" && !$this->checkCondition($condition)) {
-            return ["q" => Material::ERR_PREREQ];
-        }
         $cardId = $this->getDataField("card");
         if (!$cardId) {
             return [];
@@ -40,19 +36,6 @@ class Op_spendMana extends CountableOperation {
         $amount = (int) $this->getCount();
         $mana = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
         return [$cardId => ["q" => $mana >= $amount ? Material::RET_OK : Material::ERR_NOT_APPLICABLE]];
-    }
-
-    private function checkCondition(string $condition): bool {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $heroHex = $this->game->hexMap->getCharacterHex($heroId);
-        if ($heroHex === null) {
-            return false;
-        }
-        return match ($condition) {
-            "grimheim" => $this->game->hexMap->isInGrimheim($heroHex),
-            default => true,
-        };
     }
 
     function resolve(): void {
