@@ -146,4 +146,36 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         // addDamage branch has no spendUse — card state should still be 0
         $this->assertEquals(0, $this->game->tokens->getTokenState("card_ability_2_13"));
     }
+
+    // --- Flexibility II (card_ability_2_14) ---
+    // Superset of Flexibility I with a 4th branch: 2[MANA]: Draw 1 card.
+    // r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)
+    // Branches 1-3 are already covered by Flexibility I tests; this test covers the new draw branch only.
+
+    public function testFlexibilityIIDrawBranch(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Flexibility I → Flexibility II
+        $this->game->tokens->moveToken("card_ability_2_13", "limbo");
+        $cardId = "card_ability_2_14";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $cardId, ["message" => ""]);
+
+        // Seed event deck so drawEvent has a card to give
+        $restCard = "card_event_2_31_1";
+        $this->seedDeck("deck_event_$color", [$restCard]);
+
+        // Park Alva on plains far from any forest so Alva Hero I doesn't fire mid-test
+        $this->game->tokens->moveToken($this->heroId, "hex_9_9");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // Branches 0=move, 1=range, 2=addDamage (filtered out, not in attack), 3=drawEvent
+        $this->respond("choice_3");
+        $this->respond("confirm"); // drawEvent requires confirmation
+
+        // Card marked used, 2 mana consumed, Rest card drawn into hand
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
+        $this->assertEquals(0, $this->countTokens("crystal_green", $cardId));
+        $this->assertEquals("hand_$color", $this->tokenLocation($restCard));
+    }
 }

@@ -477,6 +477,39 @@ See CLAUDE.md for project overview
 
 ## Iteration 13: Remaining Heroes
 
+## Bjorn Card Validation
+
+Verify each of Bjorn's cards works correctly.
+Hero, Abilities and Equipment:
+
+- custom should not part of r it should be implemented first
+- the rule (r) actuall does what text description say
+- if triggered, test should exists for all trigger conditions and negative conditions
+- make sure it resolves propertly using integration test
+
+
+### Equipment Cards (use)
+
+<!-- r=passive: no r field, just stat bonuses — needs validation that stats apply correctly -->
+
+[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
+
+<!-- r=costDamage:effect — standard ops, needs integration test -->
+
+[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=costDamage:2heal(adj), has tests
+[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
+
+<!-- r=custom — needs custom operation implementation -->
+
+[ ] card_equip_1_18 Quiver — durability: add 1 damage to attack. **Triage: DSL (already designed)** — `r=costDamage:addDamage` on=TActionAttack. Rule exists; needs only integration test (same pattern as Alva's Quiver `card_equip_2_18`).
+[x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
+[ ] card_equip_1_16 Bone Bane Bow — main weapon, deal countRunes damage to a monster adjacent to attack target. **Triage: DSL (already designed)** — `r=counter(countRunes):dealDamage(adj_attack)` on=TActionAttack (CSV bug fixed: `TActionAttack` was in durability column). Needs integration test.
+[ ] card_equip_1_24 Home Sewn Cape — mana from runes (onRoll), 2[MANA]:move / 3[MANA]:prevent damage. **Triage: bespoke (exists)** — `CardEquip_HomeSewnCape` class already implements the onRoll→gain-mana hook; `r=(2spendMana:1move)/(3spendMana:2preventDamage)` handles the manual branches; `on=custom` routes through the class. Needs integration test for the mana-from-runes hook (there's already one for the rune-count behavior — see Campaign_BjornEquipTest).
+[x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
+
+
 **Goal**: Implement heroes 2, 3, 4 with full card decks.
 
 ### Game Elements
@@ -518,39 +551,34 @@ Same rules as Bjorn validation (see below):
 
 #### Ability Cards
 
-<!-- r=standard — direct effects -->
+
 
 [ ] card_ability_2_11 Snipe I — roll 2 dice vs monster in range, r=2roll(inRange)
 [ ] card_ability_2_12 Snipe II — roll 5 dice vs monster in range, r=5roll(inRange)
-
-<!-- r=triggered — c_supfire (shared with Bjorn) -->
-
 [ ] card_ability_2_9 Suppressive Fire I — r=c_supfire('rank<=2'), on=monsterMove
 [ ] card_ability_2_10 Suppressive Fire II — r=c_supfire, on=monsterMove
 
-<!-- r=custom — needs custom operation implementation -->
+
 
 [x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
-[ ] card_ability_2_14 Flexibility II — r=Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch. Needs integration tests.
-[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range
-[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range
-[ ] card_ability_2_7 Starsong I — draw 1 additional card at turn end, on=turnEnd
-[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd
-[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest
-[ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest
+[x] card_ability_2_14 Flexibility II — Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch, has tests (draw branch only; branches 1-3 covered by Flexibility I)
+<!-- r=custom — needs custom operation implementation -->
+s
+[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range. **Triage: new op** — needs new `Op_c_hail` (multi-target damage with distinctness); same pattern as `Op_c_sureshotII`.
+[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range. **Triage: new op** — needs new `Op_c_hailII` (variable count 1-4, N distinct targets). DSL `N*dealDamage(inRange)` can't enforce cross-invocation distinctness.
+[ ] card_ability_2_7 Starsong I — draw 1 additional card at turn end, on=turnEnd. **Triage: DSL** — `r=drawEvent`, `on=TTurnEnd`.
+[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. **Triage: extend op** — draw half is DSL (`r=2drawEvent on=TTurnEnd`); hand-limit override needs extending `Hero::getHandLimit()` to consult equipped cards (new `handLimit` CSV column or card attribute).
+[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs `CardAbility_Treetreader` because it alters `Op_move::getReachableHexes` pathing. Requires new passive hook (e.g. `modifyReachable($hero, &$hexes)`) that cards can override.
+[ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest. **Triage: bespoke** — same `CardAbility_Treetreader` class (II variant), adds on-TMove handler to queue `1heal` when destination is forest.
 
 #### Event Cards
 
-<!-- r=standard — direct effects -->
 
 [ ] card_event_2_28 Agility — move 2 areas, r=2move
 [ ] card_event_2_35 Back Down! — kill rank<=2 monster in range closer to Grimheim, r=killMonster(inRange,'rank<=2 and closerToGrimheim')
 [ ] card_event_2_30 Inspire Defense — spend 2[MANA] in Grimheim to add town piece, r=2spendMana(grimheim):addTownPiece
 [ ] card_event_2_32 Popular — gain 2[XP] in Grimheim, r=2gainXp(grimheim)
 [ ] card_event_2_31 Rest — heal 2 from Alva, r=2heal(self)
-
-<!-- r=triggered -->
-
 [ ] card_event_2_34 Piercing Arrows — add 1 damage per [RUNE], r=counter(countRunes):addDamage, on=roll
 [ ] card_event_2_36 Prey — mark undamaged rank 3/Legend with 2 gold, r=c_prey
 
@@ -559,15 +587,56 @@ Same rules as Bjorn validation (see below):
 [ ] card_event_2_27 Mastery — add 4[DIE_ATTACK] to this attack, on=actionAttack
 [ ] card_event_2_26 Multi-Shot — roll 2[DIE_ATTACK] against each of up to 2 monsters in range
 [ ] card_event_2_33 Speedy Attack — discard another card to perform attack action
-[ ] card_event_2_29 Take a Knee — prevent non-Legend monster in range from moving this monster turn
+[ ] card_event_2_29 Take a Knee — prevent non-Legend monster in range from moving this monster turn. **Triage: DSL (or small op extension)** — `r=c_supfire('rank<=3')` reuses existing `Op_c_supfire`; if its range is hard-coded to 3 and the event needs caster's range, extend `Op_c_supfire` to accept a range param.
 
-### Server Hero 3
+### Server Hero 3 - Embla
 
-[ ] Hero 3: same
+Triage of r=custom cards (DSL = composable rule expression; extend op = small op change; bespoke = needs Card* class):
 
-### Server Hero 4
+#### Ability Cards
 
-[ ] Hero 4: same
+[ ] card_ability_3_5 In Charge I — when you use action move, lead 1 adjacent hero along. **Triage: extend op** — extend `Op_actionMove` with a "lead-hero" sub-choice after destination pick (co-move legality requires shared target, can't compose in DSL).
+[ ] card_ability_3_6 In Charge II — lead up to 2 adjacent heroes. **Triage: extend op** — same extension as 3_5 with count=2.
+[ ] card_ability_3_11 Queen of the Hill I — passive aura: heroes in your hex get +1 [DIE_ATTACK]. **Triage: bespoke** — needs `CardAbility_QueenOfTheHillI` with onRoll hook that checks rolling hero shares hex with card's owner; no cross-owner positional predicate in existing ops.
+[ ] card_ability_3_12 Queen of the Hill II — same aura, radius 1. **Triage: bespoke** — `CardAbility_QueenOfTheHillII` with `sameOrAdj` check; share base class with I.
+[ ] card_ability_3_9 Reaper Swing I — after attack, deal 1 to all other adjacent monsters. **Triage: extend op** — extend `Op_dealDamage` with a multi-target broadcast filter (e.g. `adj_all,not_attack_target`), then `r=dealDamage(adj_all,not_attack_target)` on=TAfterActionAttack.
+[ ] card_ability_3_10 Reaper Swing II — 2 damage to all adjacent monsters (confirm inclusion of attack target). **Triage: extend op** — same multi-target filter as 3_9; `r=2dealDamage(adj_all)` on=TAfterActionAttack.
+
+#### Equipment Cards
+
+[ ] card_equip_3_19 Blade Decorations — passive +1 strength. **Triage: DSL** — `r=` empty; the `strength=1` column already handles it. Drop the `custom` placeholder.
+[ ] card_equip_3_22 Raven's Claw — main weapon, +2 damage per attack. **Triage: DSL** — `r=2addDamage` on=TActionAttack.
+[ ] card_equip_3_21 Wildfire Blade — main weapon, 1 damage to an adjacent monster after each attack. **Triage: DSL** — `r=dealDamage(adj)` on=TAfterActionAttack (identical pattern to Elven Blade `card_equip_2_21`).
+
+#### Event Cards
+
+[ ] card_event_3_34 Magic Runes — runes always count as hits for you (one-shot). **Triage: bespoke** — needs `CardEvent_MagicRunes`. Rune-as-hit is currently a faction rule hardcoded in `Character::countHit()`. Bespoke class sets a per-attack flag consumed by `countHit`, or on=TRoll adds countRunes extra hits. Small hook needed in Character to read the card flag.
+[ ] card_event_3_29 Sophisticated — perform a focus action, then perform another main action. **Triage: extend op** — extend `Op_performAction` to accept a "main" category that prompts among attack/move/practice/mend. Then `r=performAction(actionFocus),performAction(main)`.
+
+### Server Hero 4 - Boldur
+
+Triage of r=custom cards:
+
+#### Ability Cards
+
+[ ] card_ability_4_5 Sweeping Strike I — passive +1 damage per attack + chain-on-kill to "clockwise" next adjacent monster. **Triage: bespoke** — needs `CardAbility_SweepingStrikeI`. Spatial "clockwise" neighbor selection has no primitive (c_nailed is "behind", not clockwise); combines passive addDamage with custom TMonsterKilled routing.
+[ ] card_ability_4_6 Sweeping Strike II — same + damage scales with number of adjacent monsters. **Triage: bespoke** — `CardAbility_SweepingStrikeII`; no `addDamage(countAdjMonsters)` counter primitive. Share base with I.
+[ ] card_ability_4_7 Wrecking Ball I — move into occupied hex, deal 1 and push occupant. **Triage: extend op** — extend `Op_actionMove` (or new `Op_c_wrecking` invoked from move) to permit occupied-hex entry and push (dealDamage + moveMonster/moveHero). CSV text differs from early prompt — verify with Victoria.
+[ ] card_ability_4_8 Wrecking Ball II — Wrecking Ball I + passive +1 move. **Triage: extend op** — reuse 4_7 extension for ram; +1 move is DSL (`1gainAtt(move)` on turn start).
+
+#### Equipment Cards
+
+[ ] card_equip_4_20 Dvalin's Pick — spend attack action → gain XP + mana + draw card. **Triage: DSL** — `r=spendAction(actionAttack):gainXp:gainMana:drawEvent`. All four primitives exist.
+[ ] card_equip_4_25 Dwarf Pick — main weapon, +2 strength passive. **Triage: DSL** — `r=` empty; `strength=2` column already handles it (same pattern as `card_equip_4_15 Boldur's First Pick`).
+[ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
+[ ] card_equip_4_19 Orebiter — attack adjacent mountain areas, gain XP per damage. **Triage: bespoke** — needs `CardEquip_Orebiter`. Attacking terrain (not a monster) has no primitive; plus per-damage XP hook via TResolveHits. Could split into `Op_attackTerrain` + a TResolveHits hook, but the terrain-attack alone warrants a bespoke class.
+[ ] card_equip_4_21 Smiterbiter — main weapon, stores up to 3 excess damage on kill, spend stored to add damage. **Triage: bespoke** — needs `CardEquip_Smiterbiter`. Stateful card-local crystal bank (like `CardEquip_Tiara`) + two flows (store-on-kill, spend-to-add-damage).
+
+#### Event Cards
+
+[ ] card_event_4_32 Berserk — add 3[DIE_ATTACK] to this attack, take 1 unpreventable damage. **Triage: extend op** — `r=3addDamage:costDamage(self,unpreventable)` on=TActionAttack; needs `Op_costDamage` to accept an `unpreventable` flag. (If already supported it's pure DSL.)
+[ ] card_event_4_36 Boldur's Gate — spend 2 gold in Grimheim → gain town piece. **Triage: DSL** — `r=2spendGold:addTownPiece` with `(grimheim)` self-location guard, assuming `(grimheim)` filter applies to the self-hero's hex. Verify filter semantics.
+[ ] card_event_4_38 Portable Smithy — spend prepare action to repair all equipment. **Triage: DSL** — `r=spendAction(actionPrepare):repairCard(all)`; `Op_repairCard` already handles `all` (see `card_event_1_30 Sewing`).
 
 
 ---
@@ -632,37 +701,6 @@ Same rules as Bjorn validation (see below):
 Source: https://en.doc.boardgamearena.com/Pre-release_checklist
 See misc/docs/CHECKLIST.md
 
-## Bjorn Card Validation
-
-Verify each of Bjorn's cards works correctly.
-Hero, Abilities and Equipment:
-
-- custom should not part of r it should be implemented first
-- the rule (r) actuall does what text description say
-- if triggered, test should exists for all trigger conditions and negative conditions
-- make sure it resolves propertly using integration test
-
-
-### Equipment Cards (use)
-
-<!-- r=passive: no r field, just stat bonuses — needs validation that stats apply correctly -->
-
-[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
-
-<!-- r=costDamage:effect — standard ops, needs integration test -->
-
-[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=costDamage:2heal(adj), has tests
-[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
-
-<!-- r=custom — needs custom operation implementation -->
-
-[ ] card_equip_1_18 Quiver — durability: add 1 damage to attack
-[x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
-[ ] card_equip_1_16 Bone Bane Bow — main weapon, rune damage to adjacent
-[ ] card_equip_1_24 Home Sewn Cape — mana from runes, move, prevent damage
-[x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
 
 ---
 
