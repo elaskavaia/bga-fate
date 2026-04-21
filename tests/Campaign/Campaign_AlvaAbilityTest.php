@@ -355,4 +355,63 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertEquals($trollHex, $this->tokenLocation($troll));
         $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $troll));
     }
+
+    // --- Starsong I (card_ability_2_7) ---
+    // r=drawEvent, on=TTurnEnd — at end of your turn, draw 1 additional card.
+
+    public function testStarsongIDrawsExtraCardAtTurnEnd(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_7";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Seed the event deck so the trigger's drawEvent has a specific card to draw.
+        $extraCard = "card_event_2_31_1"; // Rest
+        $this->seedDeck("deck_event_$color", [$extraCard]);
+
+        // Burn a turn — practice + focus → end turn fires TTurnEnd.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+
+        // TTurnEnd → useCard prompt for Starsong I (confirm=true even with single card).
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        // drawEvent prompts for confirm before pulling the card.
+        $this->respond("confirm");
+
+        // Starsong's seeded card landed in hand.
+        $this->assertEquals("hand_$color", $this->tokenLocation($extraCard));
+    }
+
+    // --- Starsong II (card_ability_2_8) ---
+    // r=2drawEvent, on=TTurnEnd — draw 2 cards at turn end; hand limit becomes 5.
+    // (Hand-limit assertion is covered by HeroTest::testStarsongIIRaisesHandLimitTo5.)
+
+    public function testStarsongIIDrawsTwoExtraCardsAtTurnEnd(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Starsong I → Starsong II so only the II trigger fires.
+        $this->game->tokens->moveToken("card_ability_2_7", "limbo");
+        $cardId = "card_ability_2_8";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        $first = "card_event_2_31_1"; // Rest
+        $second = "card_event_2_31_2"; // Rest
+        $this->seedDeck("deck_event_$color", [$first, $second]);
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        // 2drawEvent loops internally on a single confirm — both cards drawn in one resolve.
+        $this->respond("confirm");
+
+        $this->assertEquals("hand_$color", $this->tokenLocation($first));
+        $this->assertEquals("hand_$color", $this->tokenLocation($second));
+    }
 }

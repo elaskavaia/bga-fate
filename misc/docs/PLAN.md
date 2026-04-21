@@ -554,8 +554,8 @@ Same rules as Bjorn validation (see below):
 
 [x] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to up to 3 monsters in range via `Op_c_hail` (token_array multi-select). Has tests.
 [x] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range via `Op_c_hailII extends Op_c_hail` (cost = N selected). Has tests.
-[ ] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Needs integration test.
-[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. Hack in placed already for maxHand
+[x] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Has tests.
+[x] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=TTurnEnd. Has tests (integration + HeroTest hand-limit unit).
 [ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs special op.
 [ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest. **Triage: bespoke** — same `CardAbility_Treetreader` class (II variant), adds on-TMove handler to queue `1heal` when destination is forest.
 
