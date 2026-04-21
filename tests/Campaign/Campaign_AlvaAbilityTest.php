@@ -356,6 +356,52 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $troll));
     }
 
+    // --- Treetreader II (card_ability_2_6) ---
+    // r=(in(forest):move)/move(forest), on=custom — manual free-action.
+    // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
+    // Passive: each time the hero moves into a forest area, heal 1 damage (onStep handler).
+
+    public function testTreetreaderIIHealsWhenMovingIntoForest(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_6";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Alva on plains (hex_5_9), 2 damage on hero. Adjacent forest: hex_5_8.
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+        $this->game->effect_moveCrystals("supply_red", "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // Branches: 0=in(forest):move (not applicable here), 1=move(forest). Only branch 1 viable.
+        $this->respond("choice_1");
+        $this->respond("hex_5_8");
+
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
+
+    public function testTreetreaderIIDoesNotHealWhenLeavingForest(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_6";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Alva already in forest (hex_5_8) with 2 damage; moving out to plains (hex_5_9).
+        $this->game->tokens->moveToken($this->heroId, "hex_5_8");
+        $this->game->effect_moveCrystals("supply_red", "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // Branches: 0=in(forest):move (applicable, Alva is in forest), 1=move(forest). Pick 0.
+        $this->respond("choice_0");
+        $this->respond("hex_5_9");
+
+        // Hero stepped into plains, not forest → heal guard returns early, no damage removed.
+        $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+    }
+
     // --- Starsong I (card_ability_2_7) ---
     // r=drawEvent, on=TTurnEnd — at end of your turn, draw 1 additional card.
 

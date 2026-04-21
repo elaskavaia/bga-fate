@@ -80,4 +80,11 @@ class Op_heal extends CountableOperation {
             "token_name" => $heroId,
         ]);
     }
+
+    public function canSkip() {
+        if ($this->noValidTargets()) {
+            return parent::canSkip();
+        }
+        return false; // mandatory if possible
+    }
 }

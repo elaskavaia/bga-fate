@@ -14,8 +14,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Material;
-use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -30,19 +28,19 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * number of steps from mcount to count.
  *
  * Params:
- * - param(0): "locationOnly" — destinations restricted to hexes that belong to a
- *   named location (DarkForest, Grimheim, TempleRuins, …).
+ * - param(0):
+ *   - "locationOnly" — destinations restricted to hexes belonging to any named
+ *     location (DarkForest, Grimheim, TempleRuins, …).
+ *   - "<name>" — destinations restricted to hexes whose terrain or named
+ *     location equals <name>, e.g. "forest" for Treetreader's move(forest).
  *
  * Used by: Agility (2move), Maneuver (1move), Fleetfoot (1move),
- * Quick Reflexes (1move), Seek Shelter ([0,2]move(locationOnly)).
+ * Quick Reflexes (1move), Seek Shelter ([0,2]move(locationOnly)),
+ * Treetreader (move(forest)).
  */
 class Op_move extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Select where to move");
-    }
-
-    private function isLocationOnly(): bool {
-        return $this->getParam(0, "") === "locationOnly";
     }
 
     function getPossibleMoves(): array {
@@ -65,19 +63,23 @@ class Op_move extends CountableOperation {
             $reachable = array_filter($reachable, fn($dist) => $dist == $requiredDist);
         }
 
-        if ($this->isLocationOnly()) {
+        $filter = $this->getParam(0, "");
+        if ($filter === "locationOnly") {
             $reachable = array_filter(
                 $reachable,
                 fn($_dist, $hexId) => $this->game->hexMap->getHexNamedLocation($hexId) !== "",
                 ARRAY_FILTER_USE_BOTH
             );
+        } elseif ($filter !== "") {
+            $reachable = array_filter(
+                $reachable,
+                fn($_dist, $hexId) => $this->game->hexMap->getHexTerrain($hexId) === $filter ||
+                    $this->game->hexMap->getHexNamedLocation($hexId) === $filter,
+                ARRAY_FILTER_USE_BOTH
+            );
         }
 
-        $moves = [];
-        foreach (array_keys($reachable) as $hexId) {
-            $moves[$hexId] = ["q" => Material::RET_OK];
-        }
-        return $moves;
+        return array_keys($reachable);
     }
 
     function resolve(): void {
@@ -87,11 +89,16 @@ class Op_move extends CountableOperation {
         if ($this->game->hexMap->isInGrimheim($target)) {
             $target = $hero->getRulesFor("location", $target);
         }
-        $hero->moveTo($target);
-        // Emit the most specific trigger; ActionMove chains through Move so cards
-        // listening on TMove are still offered during action-move resolutions.
-        $trigger = $this->getReason() == "Op_actionMove" ? Trigger::ActionMove : Trigger::Move;
-        $this->queueTrigger($trigger);
+        $path = $this->game->hexMap->getPath($hero->getHex(), $target, "hero");
+
+        foreach ($path as $hex) {
+            $isFinal = $hex === $target;
+            $this->queue("step", null, [
+                "hex" => $hex,
+                "final" => $isFinal,
+                "reason" => $this->getReason(),
+            ]);
+        }
     }
 
     public function getUiArgs() {

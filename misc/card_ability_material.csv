@@ -31,8 +31,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 8|2|Starsong II||||2drawEvent|TTurnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
 9|2|Suppressive Fire I||||c_supfire(inRange3,'rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
 10|2|Suppressive Fire II||||c_supfire(inRange3)|TMonsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
-5|2|Treetreader I||2||custom||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
-6|2|Treetreader II||2||custom||Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.
+5|2|Treetreader I||2||(in(forest):move)/move(forest)||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
+6|2|Treetreader II||2||(in(forest):move)/move(forest)|custom|Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.
 # Abilities - Embla (hno=3)
 7|3|Fleetfoot I||1||spendUse:move||Move 1 area.|Oh no, she's surrounding us!
 8|3|Fleetfoot II||3||spendUse:move||Move 1 area. You may always move into mountains and through occupied areas.|

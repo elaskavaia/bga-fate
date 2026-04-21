@@ -107,6 +107,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // Move). Invoke the move op directly with that reason to verify.
         $this->createOp("move", ["reason" => "Op_actionMove"]);
         $this->call_resolve("hex_10_9");
+        $this->dispatchOne();
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("trigger(TActionMove)", $opTypes);
@@ -116,6 +117,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         // Op_move without an Op_actionMove reason emits the plain Move trigger.
         $this->createOp("move", ["reason" => "card_event_1_34_1"]);
         $this->call_resolve("hex_10_9");
+        $this->dispatchOne();
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("trigger(TMove)", $opTypes);

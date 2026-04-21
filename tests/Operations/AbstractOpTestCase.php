@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\Operation;
+use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -93,6 +94,13 @@ abstract class AbstractOpTestCase extends TestCase {
 
     function call_resolve(mixed $target = "confirm") {
         return $this->op->action_resolve([Operation::ARG_TARGET => $target]);
+    }
+
+    function dispatchAll(int $n = OpMachine::MA_GAME_DISPATCH_MAX) {
+        $this->game->machine->dispatchAll($n);
+    }
+    function dispatchOne() {
+        $this->game->machine->dispatchOne();
     }
 
     protected function getPlayersTableau(): string {

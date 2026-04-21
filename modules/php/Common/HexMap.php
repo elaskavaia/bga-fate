@@ -423,6 +423,71 @@ class HexMap {
     }
 
     /**
+     * BFS shortest path from $from to $to using the same traversal rules as
+     * getReachableHexes (Grimheim is marked as reachable on first touch from outside
+     * but BFS does not expand within it; from inside Grimheim, all Grimheim hexes
+     * are seeded at distance 0).
+     *
+     * @return string[] ordered steps starting with the first hex after $from, ending
+     * with $to. Empty array if $to == $from or if $to is unreachable.
+     */
+    function getPath(string $from, string $to, string $characterType = "hero"): array {
+        if ($from === $to) {
+            return [];
+        }
+        $startInGrimheim = $this->isInGrimheim($from);
+        // Grimheim is a single area — moving between its hexes is a no-op.
+        if ($startInGrimheim && $this->isInGrimheim($to)) {
+            return [];
+        }
+        // parent[hex] = predecessor hex (null for seeded starts)
+        $parent = [$from => null];
+        $queue = [$from];
+        if ($startInGrimheim) {
+            foreach ($this->getHexesInGrimheim() as $gHex) {
+                if (!isset($parent[$gHex])) {
+                    $parent[$gHex] = $from;
+                    $queue[] = $gHex;
+                }
+            }
+        }
+        while ($queue) {
+            $current = array_shift($queue);
+            if ($current === $to) {
+                break;
+            }
+            foreach ($this->getAdjacentHexes($current) as $neighbor) {
+                if (isset($parent[$neighbor])) {
+                    continue;
+                }
+                if (!$this->canEnterHex($neighbor, $characterType)) {
+                    continue;
+                }
+                if (!$startInGrimheim && $this->isInGrimheim($neighbor)) {
+                    // Entering Grimheim: mark every Grimheim hex as reachable via this border,
+                    // but don't expand further (matches getReachableHexes).
+                    foreach ($this->getHexesInGrimheim() as $gHex) {
+                        if (!isset($parent[$gHex])) {
+                            $parent[$gHex] = $current;
+                        }
+                    }
+                } else {
+                    $parent[$neighbor] = $current;
+                    $queue[] = $neighbor;
+                }
+            }
+        }
+        if (!isset($parent[$to])) {
+            return [];
+        }
+        $path = [];
+        for ($cur = $to; $cur !== $from && $cur !== null; $cur = $parent[$cur]) {
+            array_unshift($path, $cur);
+        }
+        return $path;
+    }
+
+    /**
      * Returns all monster token IDs currently on the map (on hex_* locations),
      * sorted by distance to Grimheim (closest first).
      */

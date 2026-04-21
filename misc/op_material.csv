@@ -72,6 +72,7 @@ resolveHits|Resolve Hits
 endOfAttack|End of Attack
 heal|Heal
 move|Move Hero
+step|Step
 moveMonster|Move Monster
 performAction|Perform Action
 repairCard|Repair Card

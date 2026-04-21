@@ -48,6 +48,7 @@ final class Op_moveTest extends AbstractOpTestCase {
         $target = $this->op->getArgsTarget()[0] ?? null;
         $this->assertNotNull($target);
         $this->call_resolve($target);
+        $this->dispatchAll();
         $this->assertEquals($target, $this->getHeroHex());
     }
 
@@ -118,6 +119,7 @@ final class Op_moveTest extends AbstractOpTestCase {
         }
         $this->assertNotNull($grimheimHex, "Should be able to reach Grimheim from hex_8_8");
         $this->call_resolve($grimheimHex);
+        $this->dispatchAll();
         // Hero should be at their home hex in Grimheim, not the clicked hex
         $heroHex = $this->getHeroHex();
         $this->assertTrue($this->game->hexMap->isInGrimheim($heroHex));

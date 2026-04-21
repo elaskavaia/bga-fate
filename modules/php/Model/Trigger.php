@@ -30,7 +30,8 @@ enum Trigger: string {
     case ActionAttack = "TActionAttack";
     case AfterActionAttack = "TAfterActionAttack";
     case ActionMove = "TActionMove"; // move with action move
-    case Move = "TMove"; // any move
+    case Move = "TMove"; // move (target only, i.e. last step)
+    case Step = "TStep"; // every step of the move
     case Roll = "TRoll";
     case ResolveHits = "TResolveHits";
     case TurnEnd = "TTurnEnd";
@@ -56,6 +57,7 @@ enum Trigger: string {
         return match ($this) {
             self::ActionAttack => self::Roll,
             self::ActionMove => self::Move,
+            self::Move => self::Step, // Move is a specialization of Step — the final step
             default => null,
         };
     }

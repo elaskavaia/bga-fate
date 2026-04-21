@@ -556,8 +556,8 @@ Same rules as Bjorn validation (see below):
 [x] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range via `Op_c_hailII extends Op_c_hail` (cost = N selected). Has tests.
 [x] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Has tests.
 [x] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=TTurnEnd. Has tests (integration + HeroTest hand-limit unit).
-[ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs special op.
-[ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest. **Triage: bespoke** — same `CardAbility_Treetreader` class (II variant), adds on-TMove handler to queue `1heal` when destination is forest.
+[x] card_ability_2_5 Treetreader I — move into or out of adjacent forest, implemented via `r=(in(forest):move)/move(forest)` after generalizing Op_move's param(0) to accept a terrain/location name. Covered by Treetreader II tests (same `r`).
+[x] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest via `CardAbility_TreetreaderII::onStep` (listens on TStep from Op_step). Has tests.
 
 #### Alva's Event Cards
 

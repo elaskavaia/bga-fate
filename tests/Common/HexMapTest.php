@@ -448,4 +448,96 @@ final class HexMapTest extends TestCase {
         $behind = $this->game->hexMap->getHexesBehind("hex_9_9", "hex_8_9");
         $this->assertGreaterThanOrEqual(1, count($behind));
     }
+
+    // -------------------------------------------------------------------------
+    // getPath
+    // -------------------------------------------------------------------------
+
+    public function testGetPathSameHexIsEmpty(): void {
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_11_8"));
+    }
+
+    public function testGetPathAdjacent(): void {
+        // hex_11_8 -> hex_12_8 is one step (both plains, adjacent)
+        $this->assertSame(["hex_12_8"], $this->game->hexMap->getPath("hex_11_8", "hex_12_8"));
+    }
+
+    public function testGetPathTwoStepsStraight(): void {
+        // hex_11_8 -> hex_13_8 passes through hex_12_8
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8");
+        $this->assertCount(2, $path);
+        $this->assertSame("hex_13_8", end($path));
+        // Middle hex must be adjacent to both endpoints
+        $this->assertContains($path[0], $this->game->hexMap->getAdjacentHexes("hex_11_8"));
+        $this->assertContains($path[0], $this->game->hexMap->getAdjacentHexes("hex_13_8"));
+    }
+
+    public function testGetPathStepsAreAdjacent(): void {
+        // Every consecutive pair in the returned path must be adjacent
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_14_9");
+        $this->assertNotEmpty($path);
+        $prev = "hex_11_8";
+        foreach ($path as $hex) {
+            $this->assertContains($hex, $this->game->hexMap->getAdjacentHexes($prev), "$prev -> $hex should be adjacent");
+            $prev = $hex;
+        }
+    }
+
+    public function testGetPathUnreachableReturnsEmpty(): void {
+        // hex_5_5 is a lake — no character can enter it
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_5_5"));
+    }
+
+    public function testGetPathHeroCannotCrossMountain(): void {
+        // hex_13_1 is a mountain — impassable to heroes
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_13_1", "hero"));
+    }
+
+    public function testGetPathMonsterCanCrossMountain(): void {
+        // Same target is reachable by monster (mountains ok)
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_1", "monster");
+        $this->assertNotEmpty($path);
+        $this->assertSame("hex_13_1", end($path));
+    }
+
+    public function testGetPathAvoidsOccupiedHex(): void {
+        // Block the direct corridor — hero on hex_12_8 forces a detour
+        $this->game->tokens->moveToken("hero_2", "hex_12_8");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8");
+        $this->assertNotEmpty($path);
+        $this->assertNotContains("hex_12_8", $path);
+        $this->assertSame("hex_13_8", end($path));
+    }
+
+    public function testGetPathIntoGrimheimEndsAtTarget(): void {
+        // hex_10_8 is a Grimheim border hex adjacent to hex_11_8.
+        // hero_3 spawns there by default — clear it so it doesn't block.
+        $this->game->tokens->moveToken("hero_3", "limbo");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_10_8");
+        $this->assertSame(["hex_10_8"], $path);
+    }
+
+    public function testGetPathToDeepGrimheimHex(): void {
+        // hex_9_9 is deep Grimheim; getReachableHexes marks it reachable from hex_11_8
+        // Path must terminate at hex_9_9 (the requested destination)
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_9_9");
+        $this->assertNotEmpty($path);
+        $this->assertSame("hex_9_9", end($path));
+    }
+
+    public function testGetPathOutOfGrimheim(): void {
+        // Start inside Grimheim, exit to a non-Grimheim hex
+        $path = $this->game->hexMap->getPath("hex_9_9", "hex_11_8");
+        $this->assertNotEmpty($path);
+        $this->assertSame("hex_11_8", end($path));
+    }
+
+    public function testGetPathWithinGrimheimIsEmpty(): void {
+        // Grimheim is a single area — moving between its hexes is a no-op.
+        $this->assertSame([], $this->game->hexMap->getPath("hex_9_9", "hex_8_9"));
+    }
 }
