@@ -85,6 +85,12 @@ abstract class CampaignBaseTest extends TestCase {
         $this->driver->runStep("action_skip", []);
     }
 
+    /** Send a multi-select response (token_array or token_count ops). */
+    protected function respondMulti(array $targets): void {
+        $this->game->hexMap->invalidateOccupancy();
+        $this->driver->runStep("action_resolve", ["data" => ["target" => $targets]]);
+    }
+
     /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true). */
     protected function confirmCardEffect(): void {
         $this->respond("1");

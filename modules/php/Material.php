@@ -495,6 +495,14 @@ class Material {
         "type" => "c_prey",
         "name" => clienttranslate("Prey"),
 ],
+    "Op_c_hail" => [ 
+        "type" => "c_hail",
+        "name" => clienttranslate("Hail of Arrows"),
+],
+    "Op_c_hailII" => [ 
+        "type" => "c_hailII",
+        "name" => clienttranslate("Hail of Arrows II"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -3661,8 +3669,8 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Hail of Arrows I"),
         "mana" => 1,
-        "r" => "spendUse:3spendMana:dealDamage(inRange),dealDamage(inRange),dealDamage(inRange)",
-        "effect" => "3[MANA]: Deal 1 damage to 3 monsters within attack range.",
+        "r" => "spendUse:c_hail",
+        "effect" => "3[MANA]: Deal 1 damage to up to 3 monsters within attack range.",
 ],
     "card_ability_2_4" => [ 
         "ctype" => "ability",
@@ -3672,7 +3680,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Hail of Arrows II"),
         "mana" => 2,
-        "r" => "custom",
+        "r" => "spendUse:c_hailII",
         "effect" => "1-4[MANA]: Deal 1 damage to that many different monsters within attack range.",
 ],
     "card_ability_2_11" => [ 

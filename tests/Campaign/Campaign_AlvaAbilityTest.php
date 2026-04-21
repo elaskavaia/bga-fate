@@ -230,6 +230,68 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
     }
 
+    // --- Hail of Arrows I (card_ability_2_3) ---
+    // r=spendUse:c_hail, no trigger — manual free-action, once per turn.
+    // 3[MANA]: deal 1 damage to up to 3 different monsters within attack range (fixed cost).
+
+    public function testHailOfArrowsIDealsOneDamageTo3Targets(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_3"; // Hail I is on Alva's starting tableau with 1 mana by default
+        $currentMana = $this->countTokens("crystal_green", $cardId);
+        $this->game->effect_moveCrystals($this->heroId, "green", 3 - $currentMana, $cardId, ["message" => ""]);
+        $this->assertEquals(3, $this->countTokens("crystal_green", $cardId));
+
+        // Alva at hex_7_9; 3 brutes (health=3, survive 1 damage) adjacent.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_7_8", "");
+        $this->game->getMonster("monster_brute_2")->moveTo("hex_6_9", "");
+        $this->game->getMonster("monster_brute_3")->moveTo("hex_8_9", "");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->confirmCardEffect(); // useCard paygain asks to confirm before resolving r
+        // c_hail multi-select prompt: pick all 3 hexes at once.
+        $this->respondMulti(["hex_7_8", "hex_6_9", "hex_8_9"]);
+
+        // Each brute took 1 damage; all 3 mana spent; card marked used.
+        $this->assertEquals(1, $this->countDamage("monster_brute_1"));
+        $this->assertEquals(1, $this->countDamage("monster_brute_2"));
+        $this->assertEquals(1, $this->countDamage("monster_brute_3"));
+        $this->assertEquals(0, $this->countTokens("crystal_green", $cardId));
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
+    }
+
+    // --- Hail of Arrows II (card_ability_2_4) ---
+    // r=spendUse:c_hailII, no trigger — manual free-action, once per turn.
+    // 1-4[MANA]: deal 1 damage to N different monsters within attack range (pays N mana).
+
+    public function testHailOfArrowsIISpendsManaEqualToTargetsPicked(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Hail I → Hail II on tableau.
+        $this->game->tokens->moveToken("card_ability_2_3", "limbo");
+        $cardId = "card_ability_2_4";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+        $this->game->effect_moveCrystals($this->heroId, "green", 4, $cardId, ["message" => ""]);
+
+        // 4 brutes adjacent to Alva; we'll only hit 2 of them.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_7_8", "");
+        $this->game->getMonster("monster_brute_2")->moveTo("hex_6_9", "");
+        $this->game->getMonster("monster_brute_3")->moveTo("hex_8_9", "");
+        $this->game->getMonster("monster_brute_4")->moveTo("hex_7_10", "");
+
+        $this->respond($cardId);
+        $this->confirmCardEffect();
+        $this->respondMulti(["hex_7_8", "hex_8_9"]);
+
+        // Only 2 mana spent (= targets picked); only brute_1 and brute_3 damaged.
+        $this->assertEquals(2, $this->countTokens("crystal_green", $cardId));
+        $this->assertEquals(1, $this->countDamage("monster_brute_1"));
+        $this->assertEquals(0, $this->countDamage("monster_brute_2"));
+        $this->assertEquals(1, $this->countDamage("monster_brute_3"));
+        $this->assertEquals(0, $this->countDamage("monster_brute_4"));
+    }
+
     // --- Suppressive Fire I (card_ability_2_9) ---
     // r=c_supfire(inRange3,'rank<=2'), on=TMonsterMove.
     // On monster turn, once per turn, pick a rank 1/2 monster within range 3 — it cannot move.

@@ -551,9 +551,9 @@ Same rules as Bjorn validation (see below):
 [x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
 [x] card_ability_2_14 Flexibility II — Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch, has tests (draw branch only; branches 1-3 covered by Flexibility I)
 <!-- r=custom — needs custom operation implementation -->
-s
-[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range. **Triage: new op** — needs new `Op_c_hail` (multi-target damage with distinctness); 
-[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range. **Triage: new op** — needs 
+
+[x] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to up to 3 monsters in range via `Op_c_hail` (token_array multi-select). Has tests.
+[x] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range via `Op_c_hailII extends Op_c_hail` (cost = N selected). Has tests.
 [ ] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Needs integration test.
 [ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. Hack in placed already for maxHand
 [ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs special op.

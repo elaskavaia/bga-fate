@@ -1781,7 +1781,10 @@ class GameMachine {
     onMultiCount(tid, opInfo, clicknode) {
         if (!tid)
             return false;
-        let node = clicknode ?? $(tid);
+        // Prefer the element whose id matches tid. clicknode may be a child element
+        // of the real target (e.g. a monster inside a hex) and must not receive the
+        // selection class.
+        let node = $(tid) ?? clicknode;
         let altnode;
         if (clicknode) {
             altnode = $(clicknode.dataset.primaryId);
@@ -1844,7 +1847,7 @@ class GameMachine {
         }
     }
     completeOpInfo(opInfo) {
-        var _a, _b;
+        var _a, _b, _c;
         try {
             // server may skip sending some data, this will feel all omitted fields
             if (opInfo.data?.count !== undefined && opInfo.count === undefined)
@@ -1887,11 +1890,11 @@ class GameMachine {
                 opInfo.info.skip.name = _("Skip");
             }
             if (this.isMultiSelectArgs(opInfo)) {
-                opInfo.ui.replicate = true;
-                (_a = opInfo.ui).color ?? (_a.color = "secondary");
+                (_a = opInfo.ui).replicate ?? (_a.replicate = true);
+                (_b = opInfo.ui).color ?? (_b.color = "secondary");
             }
             else {
-                (_b = opInfo.ui).color ?? (_b.color = "primary");
+                (_c = opInfo.ui).color ?? (_c.color = "primary");
             }
             if (opInfo.ui.buttons === undefined && !opInfo.ui.replicate) {
                 opInfo.ui.buttons = true;

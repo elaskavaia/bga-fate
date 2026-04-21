@@ -420,7 +420,10 @@ export class GameMachine {
 
   onMultiCount(tid: string, opInfo: OpInfo, clicknode: HTMLElement | undefined) {
     if (!tid) return false;
-    let node = clicknode ?? $(tid);
+    // Prefer the element whose id matches tid. clicknode may be a child element
+    // of the real target (e.g. a monster inside a hex) and must not receive the
+    // selection class.
+    let node = $(tid) ?? clicknode;
     let altnode: HTMLElement;
     if (clicknode) {
       altnode = $(clicknode.dataset.primaryId);
@@ -525,7 +528,7 @@ export class GameMachine {
         opInfo.info.skip.name = _("Skip");
       }
       if (this.isMultiSelectArgs(opInfo)) {
-        opInfo.ui.replicate = true;
+        opInfo.ui.replicate ??= true;
         opInfo.ui.color ??= "secondary";
       } else {
         opInfo.ui.color ??= "primary";

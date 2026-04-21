@@ -97,6 +97,17 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%2319bedb' stroke-width='3' stroke-dasharray='8,5'/%3E%3C/svg%3E");
   background-size: 100% 100%;
 }
+.hex.gg_selected, .hex.gg_selected_alt {
+  box-shadow: none;
+  outline: none;
+}
+.hex.gg_selected::after, .hex.gg_selected_alt::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%233f51b5' stroke-width='5'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+.hex.active_slot.gg_selected, .hex.active_slot.gg_selected_alt {
+  outline: none;
+}
 
 /**
  * fate.scss

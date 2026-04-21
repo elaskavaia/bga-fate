@@ -35,7 +35,7 @@ class Op_spendMana extends CountableOperation {
         }
         $amount = (int) $this->getCount();
         $mana = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
-        return [$cardId => ["q" => $mana >= $amount ? Material::RET_OK : Material::ERR_NOT_APPLICABLE]];
+        return [$cardId => ["q" => $mana >= $amount ? Material::RET_OK : Material::ERR_COST]];
     }
 
     function resolve(): void {

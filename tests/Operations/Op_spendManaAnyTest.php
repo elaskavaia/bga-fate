@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
-
 final class Op_spendManaAnyTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
@@ -100,5 +97,4 @@ final class Op_spendManaAnyTest extends AbstractOpTestCase {
         $this->assertEquals(1, $this->getMana("card_ability_1_3"));
         $this->assertEquals(0, $this->getMana("card_ability_1_11"));
     }
-
 }

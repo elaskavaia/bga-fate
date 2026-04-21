@@ -701,6 +701,55 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    function debug_Op_c_hail() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $cardId = "card_ability_2_3"; // Hail of Arrows I
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
+        $this->effect_moveCrystals($heroId, "green", 3, $cardId);
+        // Place 3 monsters adjacent to the hero
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_brute_1"];
+        $placed = 0;
+        foreach ($adjHexes as $hex) {
+            if ($placed >= 3) {
+                break;
+            }
+            if (!$this->hexMap->isOccupied($hex)) {
+                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
+                $placed++;
+            }
+        }
+        // $this->hexMap->invalidateOccupancy();
+        // $this->machine->push("c_hail", $color, ["card" => $cardId]);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    function debug_Op_c_hailII() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $cardId = "card_ability_2_4"; // Hail of Arrows II
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
+        $this->effect_moveCrystals($heroId, "green", 4, $cardId);
+        $heroHex = $this->hexMap->getCharacterHex($heroId);
+        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
+        $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_brute_1", "monster_brute_2"];
+        $placed = 0;
+        foreach ($adjHexes as $hex) {
+            if ($placed >= 4) {
+                break;
+            }
+            if (!$this->hexMap->isOccupied($hex)) {
+                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
+                $placed++;
+            }
+        }
+        // $this->hexMap->invalidateOccupancy();
+        // $this->machine->push("c_hailII", $color, ["card" => $cardId]);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_Op_gainMana() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("2gainMana", $color);

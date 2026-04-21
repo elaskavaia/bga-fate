@@ -63,6 +63,24 @@ $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     }
   }
 
+  // Multi-select picked state: use hex-shaped SVG border instead of the
+  // generic square box-shadow/outline. Active+selected gets a thicker solid
+  // magenta border; plain selected (non-interactive) gets a thinner one.
+  &.gg_selected,
+  &.gg_selected_alt {
+    box-shadow: none;
+    outline: none;
+    &::after {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpolygon points='50,3 97,26.5 97,73.5 50,97 3,73.5 3,26.5' fill='none' stroke='%233f51b5' stroke-width='5'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+    }
+  }
+
+  &.active_slot.gg_selected,
+  &.active_slot.gg_selected_alt {
+    outline: none;
+  }
+
   // --- Terrain types ---
 }
 // .hex.terrain_lake,

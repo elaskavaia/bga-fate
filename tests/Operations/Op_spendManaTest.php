@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
 
 final class Op_spendManaTest extends AbstractOpTestCase {
     protected function setUp(): void {
@@ -24,7 +23,7 @@ final class Op_spendManaTest extends AbstractOpTestCase {
 
     public function testCardWithInsufficientManaIsNotApplicable(): void {
         $this->createOp("4spendMana", ["card" => "card_ability_1_3"]);
-        $this->assertTargetError("card_ability_1_3", Material::ERR_NOT_APPLICABLE);
+        $this->assertTargetError("card_ability_1_3", Material::ERR_COST);
     }
 
     public function testNoCardReturnsEmpty(): void {
@@ -57,5 +56,4 @@ final class Op_spendManaTest extends AbstractOpTestCase {
         $this->expectException(\Bga\GameFramework\UserException::class);
         $this->call_resolve("card_ability_1_3");
     }
-
 }
