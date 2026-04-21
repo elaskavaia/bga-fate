@@ -439,10 +439,10 @@ class OpMachine {
         return $result;
     }
 
-    function findOperation($owner = null, $type = null, ?callable $filter = null) {
+    function findOperation($owner = null, $type = null, ?callable $filter = null): ?array {
         $ops = $this->findOperations($owner, $type, $filter);
         $op = reset($ops);
-        return $op;
+        return $op ?: null;
     }
 
     function findOperations($owner = null, $type = null, ?callable $filter = null): array {

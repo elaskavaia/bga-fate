@@ -488,33 +488,21 @@ Hero, Abilities and Equipment:
 - make sure it resolves propertly using integration test
 
 
-### Equipment Cards (use)
+### Bjorn Equipment Cards 
 
-<!-- r=passive: no r field, just stat bonuses — needs validation that stats apply correctly -->
 
-[ ] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
 
-<!-- r=costDamage:effect — standard ops, needs integration test -->
-
-[ ] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[ ] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[ ] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=costDamage:2heal(adj), has tests
-[ ] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
-
-<!-- r=custom — needs custom operation implementation -->
-
-[ ] card_equip_1_18 Quiver — durability: add 1 damage to attack. **Triage: DSL (already designed)** — `r=costDamage:addDamage` on=TActionAttack. Rule exists; needs only integration test (same pattern as Alva's Quiver `card_equip_2_18`).
+[x] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
+[x] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[x] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
+[x] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=spendUse:costDamage:2heal(adj), has tests
+[x] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=spendUse:costDamage:3roll(adj), has tests
+[x] card_equip_1_18 Quiver — durability: add 1 damage to attack, r=costDamage:addDamage on=TActionAttack, has tests
 [x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
-[ ] card_equip_1_16 Bone Bane Bow — main weapon, deal countRunes damage to a monster adjacent to attack target. **Triage: DSL (already designed)** — `r=counter(countRunes):dealDamage(adj_attack)` on=TActionAttack (CSV bug fixed: `TActionAttack` was in durability column). Needs integration test.
-[ ] card_equip_1_24 Home Sewn Cape — mana from runes (onRoll), 2[MANA]:move / 3[MANA]:prevent damage. **Triage: bespoke (exists)** — `CardEquip_HomeSewnCape` class already implements the onRoll→gain-mana hook; `r=(2spendMana:1move)/(3spendMana:2preventDamage)` handles the manual branches; `on=custom` routes through the class. Needs integration test for the mana-from-runes hook (there's already one for the rune-count behavior — see Campaign_BjornEquipTest).
+[x] card_equip_1_16 Bone Bane Bow — main weapon, deal countRunes damage to a monster adjacent to attack target.
+[x] card_equip_1_24 Home Sewn Cape — mana from runes (onRoll), 2[MANA]:move / 3[MANA]:prevent damage. 
 [x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
 
-
-**Goal**: Implement heroes 2, 3, 4 with full card decks.
-
-### Game Elements
-
-[ ] Add hero card sprites for heroes 2, 3, 4 — img/<hero>\_hero_cards.jpg
 
 ### Server Hero 2 - Alva
 
@@ -553,10 +541,10 @@ Same rules as Bjorn validation (see below):
 
 
 
-[ ] card_ability_2_11 Snipe I — roll 2 dice vs monster in range, r=2roll(inRange)
-[ ] card_ability_2_12 Snipe II — roll 5 dice vs monster in range, r=5roll(inRange)
-[ ] card_ability_2_9 Suppressive Fire I — r=c_supfire('rank<=2'), on=monsterMove
-[ ] card_ability_2_10 Suppressive Fire II — r=c_supfire, on=monsterMove
+[x] card_ability_2_11 Snipe I — roll 2 dice vs monster in range, r=spendUse:2roll(inRange), has tests
+[x] card_ability_2_12 Snipe II — roll 5 dice vs monster in range, r=spendUse:5roll(inRange), has tests
+[x] card_ability_2_9 Suppressive Fire I — r=c_supfire(inRange3,'rank<=2'), on=TMonsterMove, has tests
+[x] card_ability_2_10 Suppressive Fire II — r=c_supfire(inRange3), on=TMonsterMove, has tests
 
 
 
@@ -564,10 +552,10 @@ Same rules as Bjorn validation (see below):
 [x] card_ability_2_14 Flexibility II — Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch, has tests (draw branch only; branches 1-3 covered by Flexibility I)
 <!-- r=custom — needs custom operation implementation -->
 s
-[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range. **Triage: new op** — needs new `Op_c_hail` (multi-target damage with distinctness); same pattern as `Op_c_sureshotII`.
-[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range. **Triage: new op** — needs new `Op_c_hailII` (variable count 1-4, N distinct targets). DSL `N*dealDamage(inRange)` can't enforce cross-invocation distinctness.
+[ ] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to 3 monsters in range. **Triage: new op** — needs new `Op_c_hail` (multi-target damage with distinctness); 
+[ ] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range. **Triage: new op** — needs 
 [ ] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Needs integration test.
-[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. **Triage: extend op** — draw half is DSL (`r=2drawEvent on=TTurnEnd`); hand-limit override needs extending `Hero::getHandLimit()` to consult equipped cards (new `handLimit` CSV column or card attribute).
+[ ] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=turnEnd. Hack in placed already for maxHand
 [ ] card_ability_2_5 Treetreader I — move into or out of adjacent forest. **Triage: bespoke** — needs special op.
 [ ] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest. **Triage: bespoke** — same `CardAbility_Treetreader` class (II variant), adds on-TMove handler to queue `1heal` when destination is forest.
 

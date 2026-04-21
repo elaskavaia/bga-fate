@@ -178,4 +178,119 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countTokens("crystal_green", $cardId));
         $this->assertEquals("hand_$color", $this->tokenLocation($restCard));
     }
+
+    // --- Snipe I (card_ability_2_11) ---
+    // r=spendUse:2roll(inRange), no trigger — manual free-action, once per turn.
+    // Rolls 2 attack dice against a monster within Alva's attack range (2 via First Bow).
+
+    public function testSnipeIRolls2DiceAtMonsterInRange(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_11";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Alva at hex_7_9, brute (health=3) at hex_5_9 (range 2, inside First Bow's range).
+        // Brute survives 2 damage so crystals stay on the token.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // 2 dice, both hits.
+        $this->seedRand([5, 5]);
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->respond("hex_5_9"); // roll sub-op prompts for target hex
+
+        // 2 hits × 1 damage each → brute takes 2 damage
+        $this->assertEquals(2, $this->countDamage($brute));
+        // Card marked used (spendUse flipped state to 1)
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
+    }
+
+    // --- Snipe II (card_ability_2_12) ---
+    // r=spendUse:5roll(inRange), no trigger — same pattern as Snipe I but 5 dice.
+
+    public function testSnipeIIRolls5DiceAtMonsterInRange(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_12";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Troll (health=6) survives 5 hits so damage sticks to the token.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_5_9", "");
+
+        $this->seedRand([5, 5, 5, 5, 5]);
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->respond("hex_5_9");
+
+        $this->assertEquals(5, $this->countDamage($troll));
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
+    }
+
+    // --- Suppressive Fire I (card_ability_2_9) ---
+    // r=c_supfire(inRange3,'rank<=2'), on=TMonsterMove.
+    // On monster turn, once per turn, pick a rank 1/2 monster within range 3 — it cannot move.
+
+    public function testSuppressiveFireIPreventsRank1MonsterMovement(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_9";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Goblin (rank 1) within range 3 of Alva's starting hex.
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_7_8";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Burn the player turn → monster turn.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        // useCard prompt for Suppressive Fire I on TMonsterMove.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        // c_supfire prompts for the target hex.
+        $this->assertOperation("c_supfire");
+        $this->respond($goblinHex);
+
+        // Goblin stayed put; stun marker remains for the "can't pick again next turn" rule.
+        $this->assertEquals($goblinHex, $this->tokenLocation($goblin));
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $goblin));
+    }
+
+    // --- Suppressive Fire II (card_ability_2_10) ---
+    // r=c_supfire(inRange3), on=TMonsterMove. No rank filter — can stun any monster in range 3.
+
+    public function testSuppressiveFireIIPreventsRank3MonsterMovement(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_10";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Troll (rank 3) within range 3 — Suppressive Fire I would reject this, II accepts it.
+        $troll = "monster_troll_1";
+        $trollHex = "hex_7_8";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        $this->assertOperation("c_supfire");
+        $this->assertValidTarget($trollHex);
+        $this->respond($trollHex);
+
+        $this->assertEquals($trollHex, $this->tokenLocation($troll));
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $troll));
+    }
 }

@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Cards;
 
-use Bga\Games\Fate\Model\Card;
+use Bga\Games\Fate\Model\CardGeneric;
 
 /**
  * Home Sewn Cape (card_equip_1_24)
@@ -29,7 +29,7 @@ use Bga\Games\Fate\Model\Card;
  * Voluntary: spend clauses come from the CSV `r` field via standard
  * `useCard` activation — this class does not need to override that path.
  */
-class CardEquip_HomeSewnCape extends Card {
+class CardEquip_HomeSewnCape extends CardGeneric {
     public function onRoll(): void {
         $runes = $this->game->countRunes();
         if ($runes <= 0) {

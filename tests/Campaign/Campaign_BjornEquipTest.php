@@ -165,6 +165,138 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertValidTarget($trollbane, "Trollbane should be offered when attacking trollkin");
     }
 
+    // --- Quiver (card_equip_1_18) ---
+    // r=costDamage:addDamage, on=TActionAttack, durability=3, strength=1.
+    // Passive +1 strength; during an attack, spend 1 durability (red crystal on card)
+    // → add 1 hit die to the attack.
+
+    public function testQuiverAddsDamageDuringAttackAtDurabilityCost(): void {
+        $quiver = "card_equip_1_18";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($quiver, "tableau_$color");
+
+        // Place Bjorn out of Grimheim, brute (health=3) at range 2
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // Seed all miss dice so base attack damage = 0; Quiver adds 1 guaranteed hit.
+        // Strength = Bjorn I(2) + First Bow(1) + Quiver(1) = 4 → 4 dice rolled.
+        $this->seedRand([1, 1, 1, 1]);
+        $this->respond("hex_5_9");
+
+        // TActionAttack + TRoll chain share one useCard prompt that lists both
+        // Quiver and Bjorn Hero I as options — pick Quiver directly.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($quiver);
+        $this->respond($quiver);
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard"); // dismiss any further trigger prompts
+
+        // 1 durability spent (1 red crystal on the card)
+        $this->assertEquals(1, $this->countDamage($quiver));
+        // Brute takes 1 damage (base=0 + addDamage 1)
+        $this->assertEquals(1, $this->countDamage($brute));
+        $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
+    }
+
+    // --- Bone Bane Bow (card_equip_1_16) ---
+    // r=counter(countRunes):dealDamage(adj_attack), on=TActionAttack, strength=3, range=2.
+    // Main weapon. On attack: count runes rolled → deal that much damage to a
+    // monster adjacent to the attack target hex.
+
+    public function testBoneBaneBowDealsRuneCountDamageToAdjacentMonster(): void {
+        $bow = "card_equip_1_16";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($bow, "tableau_$color");
+        // Remove First Bow so Bone Bane Bow is the sole main weapon.
+        $this->game->tokens->moveToken("card_equip_1_15", "limbo");
+
+        // Bjorn at hex_7_9, primary target at hex_5_9 (range 2),
+        // secondary (adjacent to primary) at hex_4_9.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $primary = "monster_brute_1"; // health=3, survives 1 damage
+        $secondary = "monster_brute_2"; // health=3, survives 2 damage
+        $this->game->getMonster($primary)->moveTo("hex_5_9", "");
+        $this->game->getMonster($secondary)->moveTo("hex_4_9", "");
+
+        // Seed 2 runes + 1 hit. Strength = Bjorn I(2) + Bone Bane Bow(3) = 5 dice.
+        // 2 runes (3), 1 hit (5), 2 miss (1) → primary takes 1 damage, 2 runes count.
+        $this->seedRand([3, 3, 5, 1, 1]);
+        $this->respond("hex_5_9");
+
+        // TActionAttack useCard prompt — pick Bone Bane Bow.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($bow);
+        $this->respond($bow);
+        $this->confirmCardEffect();
+
+        // Primary took 1 damage from attack roll; secondary took 2 (rune count) from bow.
+        $this->assertEquals(1, $this->countDamage($primary));
+        $this->assertEquals(2, $this->countDamage($secondary));
+    }
+
+    // --- Home Sewn Cape (card_equip_1_24) spend branches ---
+    // r=(spendUse:2spendMana:1move)/(on(TResolveHits):3spendMana:2preventDamage), on=custom.
+
+    public function testHomeSewnCapeSpendManaToMove(): void {
+        $cape = "card_equip_1_24";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cape, "tableau_$color", 0);
+        // Seed 2 mana on the cape (required to spend).
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $cape, ["message" => ""]);
+
+        // Place Bjorn outside Grimheim so move has somewhere to go.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+
+        $this->assertValidTarget($cape);
+        $this->respond($cape);
+
+        // Two branches: choice_0 = 2spendMana:1move, choice_1 = 3spendMana:2preventDamage.
+        // Only choice_0 is valid (2 mana available, no pending dealDamage for prevent).
+        $this->assertValidTarget("choice_0");
+        $this->assertNotValidTarget("choice_1");
+        $this->respond("choice_0");
+
+        // 1move sub-op prompts for destination hex.
+        $this->respond("hex_6_9");
+
+        $this->assertEquals(0, $this->countTokens("crystal_green", $cape));
+        $this->assertEquals("hex_6_9", $this->tokenLocation($this->heroId));
+    }
+
+    public function testHomeSewnCapeSpendManaToPreventDamage(): void {
+        $cape = "card_equip_1_24";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cape, "tableau_$color");
+        // Seed 3 mana on the cape (required for the prevent branch).
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, $cape, ["message" => ""]);
+
+        // Place Bjorn adjacent to a goblin that will attack him on the monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5]); // goblin str=1, one hit
+
+        // Burn two real actions → end of player turn → monster turn → goblin attacks Bjorn.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+
+        $this->skipOp("turn"); // end turn → monster turn
+        $this->skipOp("drawEvent");
+
+        // Monster attack should now have a pending dealDamage → cape prevent branch is valid.
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cape);
+        $this->respond($cape);
+
+        $this->respond("choice_1");
+
+        $this->assertEquals(0, $this->countTokens("crystal_green", $cape));
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+    }
+
     public function testTrollbaneNotOfferedAgainstNonTrollkin(): void {
         $trollbane = "card_equip_1_22";
         $color = $this->getActivePlayerColor();

@@ -30,9 +30,16 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Used by: Dodge, Stoneskin, Riposte, Dreadnought (1spendMana:1preventDamage).
  */
 class Op_preventDamage extends CountableOperation {
+    private function findDealDamage(): ?array {
+        return $this->game->machine->findOperation(
+            null,
+            null,
+            fn($row) => $this->game->machine->instantiateOperationFromDbRow($row)->getType() === "dealDamage"
+        );
+    }
+
     function getPossibleMoves() {
-        $op = $this->game->machine->findOperation(null, "dealDamage");
-        if (!$op) {
+        if (!$this->findDealDamage()) {
             return ["q" => Material::ERR_NOT_APPLICABLE];
         }
         return parent::getPossibleMoves();
@@ -40,8 +47,7 @@ class Op_preventDamage extends CountableOperation {
     function resolve(): void {
         $amount = (int) $this->getCount();
 
-        // Find the pending dealDamage on the stack
-        $dealDamageRow = $this->game->machine->findOperation(null, "dealDamage");
+        $dealDamageRow = $this->findDealDamage();
         $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageRow);
         /** @var Op_dealDamage */
         $dealDamageOp = $this->game->machine->instantiateOperationFromDbRow($dealDamageRow);

@@ -153,6 +153,14 @@ $this->respond("<card_id>");
 $this->respond("<hex_or_choice>");
 ```
 
+### Pitfall: Hierarchical triggers share one `useCard` prompt
+
+`TActionAttack` chains through `TRoll` hierarchically. Cards with `on=TRoll` (e.g. Bjorn Hero I) and `on=TActionAttack` (e.g. Quiver, Trollbane) **don't produce separate prompts** — they appear together in a single `useCard` prompt's `target` list. Consequences:
+
+- Don't `skip()` to dismiss a phantom "earlier" trigger — that call consumes the real prompt you wanted.
+- Just `assertValidTarget($cardId)` and `respond($cardId)` directly; unrelated options coexist in the same list and don't need dismissing first.
+- If you need to confirm a specific card ISN'T offered (e.g. Trollbane vs non-trollkin), check the current op's `target` array, not the next prompt.
+
 ### Pitfall: `useCard` with `confirm=true`
 
 When a trigger queues `useCard`, the prompt has `confirm=true`. **Even if there's a single eligible card, the player must click it.** Do not expect auto-resolve. Pattern:
@@ -169,6 +177,27 @@ After picking the card in `useCard`, child ops (`dealDamage`, `heal`, `spendMana
 ### Pitfall: Hero starts in Grimheim
 
 Default hero start is `hex_8_9` (or similar Grimheim hex). Heroes **cannot attack from inside Grimheim**. For attack tests, always `moveToken($this->heroId, "hex_7_9")` first.
+
+### Pitfall: Seed the dice before any attack
+
+Any attack — hero or monster — rolls dice via `bgaRand()` and is non-deterministic unless seeded. If the test expects a hit (or a miss), call `seedRand([...])` **before** the op that triggers the roll. One value per die: `5` = hit, `3` = rune, `1` = miss. For monster attacks, seed before `skipOp("turn")`; for hero attacks, seed before `respond("actionAttack")`.
+
+```php
+$this->seedRand([5]); // goblin str=1, one hit
+$this->skipOp("turn"); // end turn → monster turn attacks
+```
+
+Symptom when missing: flow sails past the expected `useCard`/`dealDamage` window because the roll whiffed, and the test ends up in the next turn's `turn` op.
+
+### Pitfall: When testing damage make sure monster survived the attack
+
+If total damage >= monster health, the token is removed from the map and `countDamage($monster)` reads **0** — the crystals don't hang around on the corpse. Either pick a beefier monster or seed fewer hits so the damage tokens stick. Quick health reference:
+
+- sprite: 1, goblin: 2
+- brute: 3, skeleton: 3
+- troll: 6
+
+If you actually want to assert the monster died, check `tokenLocation($monster) === "supply_monster"` (or similar) instead of reading damage.
 
 ## Debug workflow
 

@@ -4098,7 +4098,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Home Sewn Cape"),
         "durability" => 0,
-        "r" => "(2spendMana:1move)/(3spendMana:2preventDamage)",
+        "r" => "(spendUse:2spendMana:1move)/(on(TResolveHits):3spendMana:2preventDamage)",
         "on" => "custom",
         "quest" => "<i>Spend 1 attack action when not adjacent to a monster.</i> Your very own fabrication.",
         "effect" => "Add 1 [MANA] here very time you roll a [RUNE].<br>2[MANA]: Move 1 area.<br>3[MANA]: Prevent 2 damage.",

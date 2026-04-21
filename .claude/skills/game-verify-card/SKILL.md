@@ -14,6 +14,8 @@ The user provides a card ID as argument (e.g., `card_event_1_33`, `card_equip_1_
 
 The card ID format is `card_{type}_{heroNumber}_{cardNumber}`. Extract the type from the second segment to find the right CSV file.
 
+Note: if this skill is launched with multiple ids just apply this skill for each card individually
+
 ## Verification Steps
 
 Perform all these steps. Use parallel tool calls where possible to speed things up.
