@@ -22,7 +22,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * spendUse: Mark the context card used this turn (card token state → 1).
  * Voids with ERR_OCCUPIED if already used. Reset by Op_turnEnd.
  *
- * Composable with other costs via paygain, e.g. `spendUse:costDamage:gainXp`
+ * Composable with other costs via paygain, e.g. `spendUse:spendDurab:gainXp`
  *   or `spendMana:spendUse:2addDamage`.
  */
 class Op_spendUse extends Operation {

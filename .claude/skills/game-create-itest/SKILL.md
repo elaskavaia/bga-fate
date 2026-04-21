@@ -41,7 +41,7 @@ Write ONE test unless the card has **multiple effect choices** or **multiple tri
 
 - Split the `r` field on `/` (top-level alternation) — each branch gets its own test (e.g. Flexibility I: `(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)` → 3 tests).
 - If `on` field has multiple triggers (usually when `custom` is used), cover each. Most cards have one trigger.
-- **Do NOT** write separate tests for "offered when conditions met" vs "not offered when missing X" — those are unit tests for `Op_spendMana`, `Op_costDamage`, etc. A campaign test asserts the _effect_, not the gating.
+- **Do NOT** write separate tests for "offered when conditions met" vs "not offered when missing X" — those are unit tests for `Op_spendMana`, `Op_spendDurab`, etc. A campaign test asserts the _effect_, not the gating.
 
 ## Test scaffold template
 
@@ -278,6 +278,6 @@ The goal is to grow the skill from real friction, not to inflate it.
 
 ## Important
 
-- Never write offering/gating negative tests (`testCardNotOfferedWhenNoMana`, etc.) — those duplicate Op_spendMana / Op_costDamage / Op_spendUse unit tests. Only write them if the gating logic is card-specific (e.g. Long Shot I's range ≥ 2 filter is unique to the card).
+- Never write offering/gating negative tests (`testCardNotOfferedWhenNoMana`, etc.) — those duplicate Op_spendMana / Op_spendDurab / Op_spendUse unit tests. Only write them if the gating logic is card-specific (e.g. Long Shot I's range ≥ 2 filter is unique to the card).
 - Don't ask the user about flow specifics before writing — it's faster to write a best guess, run it, use dumpState to diagnose, and fix. Reserve questions for genuinely ambiguous scenarios (multi-hero, non-obvious target monster).
 - Keep test bodies tight. One blank-line section per step (place → seed → drive → assert).

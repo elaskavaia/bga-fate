@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
-final class Op_costDamageTest extends AbstractOpTestCase {
+final class Op_spendDurabTest extends AbstractOpTestCase {
     /** card_equip_1_21 = Helmet (hero 1, durability 3) */
     private string $cardId = "card_equip_1_21";
 

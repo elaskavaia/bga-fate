@@ -56,7 +56,7 @@ final class Op_spendUseTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testChainSpendUseCostDamageGainXp(): void {
-        // Leather Purse (card_equip_1_19) has durability=3 so costDamage has room.
+        // Leather Purse (card_equip_1_19) has durability=3 so spendDurab has room.
         // Chain: spend the card's use, then place 1 red on the card, then gain 1 gold.
         $cardId = "card_equip_1_19";
         $this->game->tokens->moveToken($cardId, "tableau_" . $this->owner);
@@ -66,23 +66,23 @@ final class Op_spendUseTest extends AbstractOpTestCase {
         $this->assertEquals(0, $this->countRedCrystals($cardId));
         $xpBefore = $this->countYellowCrystals("tableau_" . $this->owner);
 
-        $this->game->machine->push("spendUse:costDamage:gainXp", $this->owner, ["card" => $cardId]);
+        $this->game->machine->push("spendUse:spendDurab:gainXp", $this->owner, ["card" => $cardId]);
         $this->game->machine->dispatchAll();
 
         $this->assertEquals(1, (int) $this->game->tokens->getTokenInfo($cardId)["state"], "spendUse flipped card state");
-        $this->assertEquals(1, $this->countRedCrystals($cardId), "costDamage placed a red crystal");
+        $this->assertEquals(1, $this->countRedCrystals($cardId), "spendDurab placed a red crystal");
         $this->assertEquals($xpBefore + 1, $this->countYellowCrystals("tableau_" . $this->owner), "gainXp added 1 gold");
     }
 
     public function testChainVoidsIfCardAlreadyUsed(): void {
-        // Already-used card → chain voids at spendUse → no costDamage, no gainXp.
+        // Already-used card → chain voids at spendUse → no spendDurab, no gainXp.
         $cardId = "card_equip_1_19";
         $this->game->tokens->moveToken($cardId, "tableau_" . $this->owner);
         $this->game->tokens->dbSetTokenState($cardId, 1, "");
         $damageBefore = $this->countRedCrystals($cardId);
         $xpBefore = $this->countYellowCrystals("tableau_" . $this->owner);
 
-        $this->game->machine->push("spendUse:costDamage:gainXp", $this->owner, ["card" => $cardId]);
+        $this->game->machine->push("spendUse:spendDurab:gainXp", $this->owner, ["card" => $cardId]);
         $this->game->machine->dispatchAll();
 
         $this->assertEquals($damageBefore, $this->countRedCrystals($cardId), "no damage added when chain voids");

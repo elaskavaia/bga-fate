@@ -166,7 +166,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
     }
 
     // --- Quiver (card_equip_1_18) ---
-    // r=costDamage:addDamage, on=TActionAttack, durability=3, strength=1.
+    // r=spendDurab:addDamage, on=TActionAttack, durability=3, strength=1.
     // Passive +1 strength; during an attack, spend 1 durability (red crystal on card)
     // → add 1 hit die to the attack.
 

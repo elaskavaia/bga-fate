@@ -364,7 +364,7 @@ See CLAUDE.md for project overview
 - [x] `gainXp` (Countable) — Gain X gold/XP. Used by: Miner, Popular, Discipline
 - [x] `gainMana` — Add X mana to target card. Used by: Power Surge, Elementary Student
 - [x] `spendMana` — Remove X mana from source card (cost). Used by: mana-activated abilities
-- [x] `costDamage` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
+- [x] `spendDurab` — Add 1 damage to equipment card (durability cost). Used by: equipment activated effects
 - [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`in(Grimheim):2spendManaAny:addTownPiece`)
 - [x] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
@@ -412,7 +412,7 @@ See CLAUDE.md for project overview
 [x] Ability: once-per-turn activation — same mechanism
 [X] Ability: costs mana
 [x] Hero card effect applies during relevant actions — trigger system handles on=roll etc, hero cards in candidate list
-[x] `useEquipment` resolve: parse `r` column, handle `costDamage:effect` cost
+[x] `useEquipment` resolve: parse `r` column, handle `spendDurab:effect` cost
 [x] `useAbility` resolve: parse `r` column, handle `spendMana:effect` cost
 
 ### Tests
@@ -491,89 +491,15 @@ Hero, Abilities and Equipment:
 ### Bjorn Equipment Cards 
 
 
-
-[x] card_equip_1_15 Bjorn's First Bow — passive (strength + range bonus), r=(none), has tests
-[x] card_equip_1_21 Helmet — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[x] card_equip_1_23 Home Sewn Tunic — durability: prevent 1 damage, r=costDamage:1preventDamage, has tests
-[x] card_equip_1_19 Leather Purse — durability: heal 2 adjacent, r=spendUse:costDamage:2heal(adj), has tests
-[x] card_equip_1_17 Throwing Axes — durability: roll 3 dice vs adjacent, r=spendUse:costDamage:3roll(adj), has tests
-[x] card_equip_1_18 Quiver — durability: add 1 damage to attack, r=costDamage:addDamage on=TActionAttack, has tests
-[x] card_equip_1_20 Black Arrows — r=spendGold:3addDamage, bespoke onEnter seeds 3 arrows. Has tests.
-[x] card_equip_1_16 Bone Bane Bow — main weapon, deal countRunes damage to a monster adjacent to attack target.
-[x] card_equip_1_24 Home Sewn Cape — mana from runes (onRoll), 2[MANA]:move / 3[MANA]:prevent damage. 
-[x] card_equip_1_22 Trollbane — r=addDamage(true,trollkin), on=actionAttack. Has tests.
+All verified
+(All equipment missing quests)
 
 
 ### Server Hero 2 - Alva
 
-Verify each of Alva's cards works correctly.
-Same rules as Bjorn validation (see below):
+All verified
+(All equipment missing quests)
 
-- custom should not be part of r — it should be implemented first
-- the rule (r) actually does what the text description says
-- if triggered, tests should exist for all trigger conditions and negative conditions
-- make sure it resolves properly using integration test
-
-#### Hero Cards
-
-<!-- r=passive (bonus triggers via effect text, not r column) — needs custom handling -->
-
-[x] card_hero_2_1 Alva Hero I — bespoke CardHero_AlvaHeroI on Trigger::ActionMove, queues ?gainMana when ending move action in forest. Has tests
-[x] card_hero_2_2 Alva Hero II — bespoke CardHero_AlvaHeroII on Trigger::Move, queues ?gainMana when ending any movement in forest. Has tests
-
-#### Equipment Cards (use)
-
-
-
-[x] card_equip_2_15 Alva's First Bow — passive (strength + range bonus), r=(none), has tests
-[x] card_equip_2_24 Elven Arrows — passive (strength +2), r=(none), has tests
-[x] card_equip_2_17 Throwing Darts — durability: roll 3 dice vs adjacent, r=costDamage:3roll(adj), has tests
-[x] card_equip_2_22 Belt of Youth 
-[x] card_equip_2_23 Alva's Bracers — 3[MANA]: perform attack action, has tests
-[x] card_equip_2_18 Quiver — durability: add 1 damage to attack, on=TActionAttack, has tests
-[x] card_equip_2_25 Bloodline Crystal — r=(3spendMana:2addDamage)/(3spendMana:drawEvent), on=custom, bespoke class routes actionAttack+manual via CardGeneric. Has tests
-[x] card_equip_2_21 Elven Blade — after each attack, deal 1 damage to monster adjacent to Alva, on=TAfterActionAttack, has tests
-[x] card_equip_2_20 Singing Bow — main weapon, after each attack add 1 mana to any card, on=TAfterActionAttack, has tests
-[x] card_equip_2_16 Tiara — starts with 6 gold, gain 1 gold per turn (bespoke CardEquip_Tiara: onCardEnter + onTurnStart), has tests
-[x] card_equip_2_19 Windbite — main weapon, whenever you roll [RUNE] add another [DIE_ATTACK] per rune, r=counter(countRunes):addRoll on=TRoll, has tests
-
-#### Ability Cards
-
-
-
-[x] card_ability_2_11 Snipe I — roll 2 dice vs monster in range, r=spendUse:2roll(inRange), has tests
-[x] card_ability_2_12 Snipe II — roll 5 dice vs monster in range, r=spendUse:5roll(inRange), has tests
-[x] card_ability_2_9 Suppressive Fire I — r=c_supfire(inRange3,'rank<=2'), on=TMonsterMove, has tests
-[x] card_ability_2_10 Suppressive Fire II — r=c_supfire(inRange3), on=TMonsterMove, has tests
-
-
-
-[x] card_ability_2_13 Flexibility I — r=(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage). First two branches burn the card's use via spendUse; mid-attack damage branch is gated on `on(TActionAttack)` and does NOT consume the use. Integration tests in Campaign_AlvaSoloTest.
-[x] card_ability_2_14 Flexibility II — Flexibility I + (spendUse:2spendMana:drawEvent) fourth branch, has tests (draw branch only; branches 1-3 covered by Flexibility I)
-<!-- r=custom — needs custom operation implementation -->
-
-[x] card_ability_2_3 Hail of Arrows I — 3[MANA]: deal 1 damage to up to 3 monsters in range via `Op_c_hail` (token_array multi-select). Has tests.
-[x] card_ability_2_4 Hail of Arrows II — 1-4[MANA]: deal 1 damage to that many different monsters in range via `Op_c_hailII extends Op_c_hail` (cost = N selected). Has tests.
-[x] card_ability_2_7 Starsong I — r=drawEvent, on=TTurnEnd. Has tests.
-[x] card_ability_2_8 Starsong II — draw 2 additional cards at turn end + 5 card hand max, on=TTurnEnd. Has tests (integration + HeroTest hand-limit unit).
-[x] card_ability_2_5 Treetreader I — move into or out of adjacent forest, implemented via `r=(in(forest):move)/move(forest)` after generalizing Op_move's param(0) to accept a terrain/location name. Covered by Treetreader II tests (same `r`).
-[x] card_ability_2_6 Treetreader II — Treetreader I + heal 1 when moving into forest via `CardAbility_TreetreaderII::onStep` (listens on TStep from Op_step). Has tests.
-
-#### Alva's Event Cards
-
-
-[x] card_event_2_28 Agility — r=2move, has tests.
-[x] card_event_2_35 Back Down! — r=killMonster(inRange,'rank<=2 and closerToGrimheim'), has tests.
-[x] card_event_2_30 Inspire Defense — r=in(Grimheim):2spendManaAny:addTownPiece, has tests. New `Op_spendManaAny` prompts per mana, cross-card; `in(Grimheim)` replaces the old `(grimheim)` param on spendMana/gainXp.
-[x] card_event_2_32 Popular — r=in(Grimheim):2gainXp, has tests.
-[x] card_event_2_31 Rest — r=2heal(self), has tests.
-[x] card_event_2_34 Piercing Arrows — r=counter(countRunes):addDamage on=TRoll, has tests.
-[x] card_event_2_36 Prey — r=c_prey, has tests.
-
-[x] card_event_2_27 Mastery — r=4addRoll on=TActionAttack, has tests.
-[x] card_event_2_26 Multi-Shot — r=2roll(inRange),2roll(inRange), has tests.
-[x] card_event_2_33 Speedy Attack — r=discardEvent:actionAttack, has tests.
-[x] card_event_2_29 Take a Knee — r=c_supfire(inRange,not_legend), has tests.
 
 ### Server Hero 3 - Embla
 
@@ -620,7 +546,7 @@ Triage of r=custom cards:
 
 #### Event Cards
 
-[ ] card_event_4_32 Berserk — add 3[DIE_ATTACK] to this attack, take 1 unpreventable damage. **Triage: extend op** — `r=3addDamage:costDamage(self,unpreventable)` on=TActionAttack; needs `Op_costDamage` to accept an `unpreventable` flag. (If already supported it's pure DSL.)
+[ ] card_event_4_32 Berserk — add 3[DIE_ATTACK] to this attack, take 1 unpreventable damage. **Triage: extend op** — `r=3addDamage:spendDurab(self,unpreventable)` on=TActionAttack; needs `Op_spendDurab` to accept an `unpreventable` flag. (If already supported it's pure DSL.)
 [ ] card_event_4_36 Boldur's Gate — r=in(Grimheim):2spendGold:addTownPiece. Needs integration test.
 [ ] card_event_4_38 Portable Smithy — r=spendAction(actionPrepare):gainEquip ("complete quest" = gain top of equip deck). Needs integration test.
 

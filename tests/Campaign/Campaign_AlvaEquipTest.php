@@ -62,7 +62,7 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
     }
 
     // --- Throwing Darts (card_equip_2_17) ---
-    // r=costDamage:3roll(adj), durability 2: pay 1 durability → roll 3 dice vs adjacent monster
+    // r=spendDurab:3roll(adj), durability 2: pay 1 durability → roll 3 dice vs adjacent monster
 
     private function placeAdjacentGoblin(string $goblinId = "monster_goblin_20"): string {
         // Move Alva out of Grimheim (heroes can't fight from inside the Grimheim location),
@@ -310,7 +310,7 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
     }
 
     // --- Quiver (card_equip_2_18) ---
-    // r=costDamage:addDamage, on=TActionAttack, durability=3, strength=1.
+    // r=spendDurab:addDamage, on=TActionAttack, durability=3, strength=1.
     // Passive +1 strength; during an attack, spend 1 durability (red crystal on card)
     // → add 1 hit die to the attack.
 

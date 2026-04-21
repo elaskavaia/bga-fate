@@ -18,7 +18,7 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * costDamage: Add 1 damage (red crystal) to an equipment card as a durability cost.
+ * spendDurab: Add 1 damage (red crystal) to an equipment card as a durability cost.
  *
  * Data Fields:
  * - card - the equipment card to place damage on (set by useCard)
@@ -27,10 +27,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - Normal case: places 1 red crystal on card, automated (no user choice)
  * - Precondition failure: card already at max durability → ERR_NOT_APPLICABLE
  *
- * Used by: Helmet (costDamage:1preventDamage), Leather Purse (costDamage:2heal(adj)),
- *          Throwing Axes (costDamage:3roll(adj)), Shield (costDamage:2preventDamage), etc.
+ * Used by: Helmet (spendDurab:1preventDamage), Leather Purse (spendDurab:2heal(adj)),
+ *          Throwing Axes (spendDurab:3roll(adj)), Shield (spendDurab:2preventDamage), etc.
  */
-class Op_costDamage extends Operation {
+class Op_spendDurab extends Operation {
     function getPossibleMoves() {
         $cardId = $this->getDataField("card");
         if (!$cardId) {

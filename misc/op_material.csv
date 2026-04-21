@@ -64,7 +64,7 @@ spendUse|Use Card
 on|Triggered Effect
 in|Hero In Location
 adj|Hero Adjacent To Terrain
-costDamage|Take Damage
+spendDurab|Take Damage
 spendAction|Spend Action
 roll|Roll Dice
 addRoll|Add Roll Dice
