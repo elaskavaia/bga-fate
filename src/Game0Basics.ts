@@ -29,7 +29,18 @@ export class Game0Basics {
   }
 
   format_string_recursive(log: string, args: any): string {
-    return gameui.format_string_recursive(log, args);
+    const gameacc = gameui as any;
+    const save = gameacc.prevent_error_rentry;
+    try {
+      // hack to hide errors
+      gameacc.prevent_error_rentry = 11;
+      return gameui.format_string_recursive(log, args);
+    } catch (e) {
+      console.error(e);
+      return log;
+    } finally {
+      gameacc.prevent_error_rentry = save;
+    }
   }
 
   addTooltipHtml(nodeId: string, html: string, delay?: number): void {

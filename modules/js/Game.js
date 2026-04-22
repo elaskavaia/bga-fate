@@ -21,7 +21,20 @@ class Game0Basics {
         return gameui.player_id;
     }
     format_string_recursive(log, args) {
-        return gameui.format_string_recursive(log, args);
+        const gameacc = gameui;
+        const save = gameacc.prevent_error_rentry;
+        try {
+            // hack to hide errors
+            gameacc.prevent_error_rentry = 11;
+            return gameui.format_string_recursive(log, args);
+        }
+        catch (e) {
+            console.error(e);
+            return log;
+        }
+        finally {
+            gameacc.prevent_error_rentry = save;
+        }
     }
     addTooltipHtml(nodeId, html, delay) {
         gameui.addTooltipHtml(nodeId, html, delay);
