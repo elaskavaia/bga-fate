@@ -447,3 +447,9 @@ Less common but present in specialized hero builds, these change one outcome for
 4. **moveMonster cannot push into Grimheim**: When a player moves a monster via card effects (Kick, Swift Kick, etc.), we assume the player will not select a Grimheim hex as the destination. No `monsterEntersGrimheim` logic is implemented for player-initiated monster movement.
 5. **Stitching can heal adjacent heroes but only repair own equipment**: The card says "Remove damage from any hero or equipment within range 1." We assume "within range 1" applies to heroes (can heal any adjacent hero including self), but equipment repair is limited to the acting player's own tableau.
 6. **Windbite does not trigger on its own added dice**: The card says "Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]." Read literally this could chain (added dice may roll runes, triggering more added dice). We assume one-shot: count runes on the initial roll, add that many dice, done. Enforced by `Op_addRoll::shouldEmitTrigger()` returning false — added dice don't re-emit `TRoll`/`TActionAttack`.
+
+## Rule clarifications (resolved with designer)
+
+1. **Queen of the Hill I/II — the movement is the tactic, damage is thematic**: "Deal X damage to an adjacent monster and switch places with it." Clarified by the designer: the movement is a maneuver — Embla appears behind the monster and gently pushes them down the hill, which is what deals the damage thematically. Consequences:
+   - The hero **always moves** into the target hex, even if the damage kills the monster (no "stay put on kill" fallback).
+   - The target hex must be one the hero could legally enter — mountain-adjacent monsters are not valid targets (unless Fleetfoot II is in play, where the hero can enter mountain areas). Enforced by `Op_c_queen::getPossibleMoves()` filtering on `HexMap::isImpassable($hex, "hero")` with `ERR_PREREQ` / "You cannot enter that terrain".

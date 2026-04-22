@@ -225,7 +225,7 @@ class HexMap {
     // -------------------------------------------------------------------------
     // Occupancy-dependent queries (may trigger lazy DB load)
     // -------------------------------------------------------------------------
-    /** @var array<string, array{character: string|null, stuff: string[]}> | null  hex => occupancy info */
+    /** @var array<string, array<string, int>> | null  hex => (tokenId => state); characters and stuff share one hash, distinguished by getPart($id, 0) */
     private ?array $map = null;
     /**
      * Invalidate the occupancy cache. Call when tokens are moved outside of HexMap.
@@ -241,7 +241,7 @@ class HexMap {
     function getCharacterHex(string $tokenId): ?string {
         $occ = $this->getOccupancyMap();
         foreach ($occ as $hex => $entry) {
-            if ($entry["character"] === $tokenId) {
+            if (isset($entry[$tokenId])) {
                 return $hex;
             }
         }
@@ -255,25 +255,16 @@ class HexMap {
 
     /**
      * Update the occupancy cache for a token. Automatically removes the token from its current hex.
-     * @param string $tokenId The token to move
+     * Multi-occupancy is allowed during a resolve() (e.g. Queen of the Hill swap, Wrecking Ball push).
+     * @param string $tokenId The token to move (must be a character: hero or monster)
      * @param string|null $hex Target hex, or null to remove from map entirely
      */
     function moveCharacterOnMap(string $tokenId, ?string $hex): void {
-        $fromHex = $this->getCharacterHex($tokenId);
-        // Remove from current hex
-        if ($fromHex !== null) {
-            $this->map[$fromHex]["character"] = null;
+        $characterType = getPart($tokenId, 0);
+        if ($characterType !== "hero" && $characterType !== "monster") {
+            $this->game->systemAssert("$tokenId is not a character");
         }
-        // Place on new hex
-        if ($this->isValidHex($hex)) {
-            $characterType = getPart($tokenId, 0);
-            if ($characterType === "hero" || $characterType === "monster") {
-                $this->game->systemAssert("collission on $hex", $this->map[$hex]["character"] == null);
-                $this->map[$hex]["character"] = $tokenId;
-            } else {
-                $this->game->systemAssert("$tokenId is not a character");
-            }
-        }
+        $this->placeOnMap($tokenId, $hex);
     }
 
     private function moveStuffOnMap(string $tokenId, ?string $hex): void {
@@ -281,30 +272,39 @@ class HexMap {
         if ($characterType === "hero" || $characterType === "monster") {
             $this->game->systemAssert("moveStuffOnMap should not be used for character tokens");
         }
+        $this->placeOnMap($tokenId, $hex);
+    }
+
+    /**
+     * Low-level token placement on the flat occupancy hash. Removes the token from
+     * its current hex (if any) and places it on $hex (if valid). State is always 0
+     * for characters; stuff state tracking is done at cache-load time.
+     */
+    private function placeOnMap(string $tokenId, ?string $hex): void {
         $occ = $this->getOccupancyMap();
-        // Remove from current hex
         foreach ($occ as $h => $entry) {
-            if (isset($entry["stuff"][$tokenId])) {
-                unset($this->map[$h]["stuff"][$tokenId]);
+            if (isset($entry[$tokenId])) {
+                unset($this->map[$h][$tokenId]);
                 break;
             }
         }
-        // Place on new hex
         if ($this->isValidHex($hex)) {
-            $this->map[$hex]["stuff"][$tokenId] = 0;
+            $this->map[$hex][$tokenId] = 0;
         }
     }
     /**
      * Lazy-load occupancy map: one DB query for all tokens on hex_* locations.
-     * Each hex maps to: character (hero/monster token key, or null) and stuff (other token keys).
-     * @return array<string, array{character: string|null, stuff: string[]}>
+     * Each hex maps to a flat hash of tokenId => state. Characters (hero/monster)
+     * and stuff (crystals, houses, markers) share the hash; getPart($id, 0)
+     * discriminates. Multi-occupancy is allowed (transient, during a resolve()).
+     * @return array<string, array<string, int>>
      */
     function getOccupancyMap(): array {
         if ($this->map === null) {
             $this->map = [];
             // Seed all valid hexes as empty
             foreach (array_keys($this->game->material->getTokensWithPrefix("hex")) as $hexId) {
-                $this->map[$hexId] = ["character" => null, "stuff" => []];
+                $this->map[$hexId] = [];
             }
             // Populate with actual tokens on the map
             $tokens = $this->game->tokens->getTokensOfTypeInLocation(null, "hex%");
@@ -313,52 +313,60 @@ class HexMap {
                 if (!isset($this->map[$hex])) {
                     continue; // token on a non-material hex (e.g. test-only locations)
                 }
-                $supertype = getPart($token["key"], 0);
-                if (($supertype === "hero" || $supertype === "monster") && $this->map[$hex]["character"] === null) {
-                    $this->map[$hex]["character"] = $token["key"];
-                } else {
-                    $this->map[$hex]["stuff"][$token["key"]] = $token["state"];
-                }
+                $this->map[$hex][$token["key"]] = (int) $token["state"];
             }
         }
         return $this->map;
     }
 
+    /**
+     * Find a character (hero or monster) on the hex entry. If multiple exist
+     * (transient during a resolve() — e.g. Queen of the Hill swap), returns the
+     * first one hash iteration yields. Callers that need a specific token should
+     * look it up directly by id.
+     * @param array<string, int> $entry flat tokenId => state hash for one hex
+     * @param string|null $characterType optional filter: "hero" or "monster"
+     */
+    private function firstCharacter(array $entry, ?string $characterType = null): ?string {
+        foreach (array_keys($entry) as $id) {
+            $p = getPart($id, 0);
+            if ($p !== "hero" && $p !== "monster") {
+                continue;
+            }
+            if ($characterType !== null && $p !== $characterType) {
+                continue;
+            }
+            return $id;
+        }
+        return null;
+    }
+
     function isOccupied(string $hexId): bool {
         $occ = $this->getOccupancyMap();
-        return isset($occ[$hexId]) && $occ[$hexId]["character"] !== null;
+        return $this->firstCharacter($occ[$hexId] ?? []) !== null;
     }
 
     /**
-     * Returns the token ID of the character on this hex if it matches the given type, or null.
+     * Returns the token ID of a character on this hex matching the given type, or null.
+     * If multiple characters of that type share the hex (transient overlap), returns
+     * one arbitrarily.
      * @param string $hexId hex to check
      * @param string $characterType "hero" or "monster"
      */
     function isOccupiedByCharacterType(string $hexId, string $characterType): ?string {
         $occ = $this->getOccupancyMap();
-        $char = $occ[$hexId]["character"] ?? null;
-        if ($char !== null && getPart($char, 0) === $characterType) {
-            return $char;
-        }
-        return null;
+        return $this->firstCharacter($occ[$hexId] ?? [], $characterType);
     }
 
     /**
-     * Returns the token ID of the character on this hex
+     * Returns the token ID of a character on this hex, optionally filtered by type.
+     * If multiple characters share the hex (transient overlap), returns one arbitrarily.
      * @param string $hexId hex to check
+     * @param string|null $characterType optional filter: "hero" or "monster"
      */
     function getCharacterOnHex(string $hexId, ?string $characterType = null): ?string {
         $occ = $this->getOccupancyMap();
-        $char = $occ[$hexId]["character"] ?? null;
-        if ($char !== null) {
-            if (!$characterType) {
-                return $char;
-            }
-            if (getPart($char, 0) === $characterType) {
-                return $char;
-            }
-        }
-        return null;
+        return $this->firstCharacter($occ[$hexId] ?? [], $characterType);
     }
 
     function canEnterHex(string $hexId, string $characterType): bool {
@@ -496,9 +504,11 @@ class HexMap {
         $occ = $this->getOccupancyMap();
         $result = [];
         foreach ($occ as $hex => $entry) {
-            $char = $entry["character"];
-            if ($char !== null && getPart($char, 0) === "monster") {
-                $result[] = ["key" => $char, "hex" => $hex, "dist" => $distMap[$hex] ?? PHP_INT_MAX];
+            foreach (array_keys($entry) as $id) {
+                if (getPart($id, 0) !== "monster") {
+                    continue;
+                }
+                $result[] = ["key" => $id, "hex" => $hex, "dist" => $distMap[$hex] ?? PHP_INT_MAX];
             }
         }
         // Sort closest to Grimheim first, ties broken by hex id

@@ -509,8 +509,8 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 [ ] card_ability_3_5 In Charge I — when you use action move, lead 1 adjacent hero along. **Triage: extend op** — extend `Op_actionMove` with a "lead-hero" sub-choice after destination pick (co-move legality requires shared target, can't compose in DSL).
 [ ] card_ability_3_6 In Charge II — lead up to 2 adjacent heroes. **Triage: extend op** — same extension as 3_5 with count=2.
-[ ] card_ability_3_11 Queen of the Hill I — passive aura: heroes in your hex get +1 [DIE_ATTACK]. **Triage: bespoke** — needs `CardAbility_QueenOfTheHillI` with onRoll hook that checks rolling hero shares hex with card's owner; no cross-owner positional predicate in existing ops.
-[ ] card_ability_3_12 Queen of the Hill II — same aura, radius 1. **Triage: bespoke** — `CardAbility_QueenOfTheHillII` with `sameOrAdj` check; share base class with I.
+[x] card_ability_3_11 Queen of the Hill I — "Deal 2 damage to an adjacent monster and switch places with it." `r=2c_queen`. Implemented via `Op_c_queen` (extends `Op_dealDamage`, adds swap via `Op_step`). Multi-occupancy supported after HexMap refactor. has tests
+[x] card_ability_3_12 Queen of the Hill II — "Deal 4 damage to an adjacent monster and switch places with it." `r=4c_queen`. Implemented via `Op_c_queen` (same op as I, count=4). has tests
 [ ] card_ability_3_9 Reaper Swing I — after attack, deal 1 to all other adjacent monsters. **Triage: extend op** — extend `Op_dealDamage` with a multi-target broadcast filter (e.g. `adj_all,not_attack_target`), then `r=dealDamage(adj_all,not_attack_target)` on=TAfterActionAttack.
 [ ] card_ability_3_10 Reaper Swing II — 2 damage to all adjacent monsters (confirm inclusion of attack target). **Triage: extend op** — same multi-target filter as 3_9; `r=2dealDamage(adj_all)` on=TAfterActionAttack.
 
@@ -546,9 +546,28 @@ Triage of r=custom cards:
 
 #### Event Cards
 
-[ ] card_event_4_32 Berserk — add 3[DIE_ATTACK] to this attack, take 1 unpreventable damage. **Triage: extend op** — `r=3addDamage:spendDurab(self,unpreventable)` on=TActionAttack; needs `Op_spendDurab` to accept an `unpreventable` flag. (If already supported it's pure DSL.)
+[x] card_event_4_32 Berserk — "Take 1 unpreventable damage to add 3 damage to this attack." `r=spendHealth:3addDamage` on=TActionAttack. Implemented via new `Op_spendHealth` (bypasses the dealDamage→preventDamage pipeline). has tests
 [ ] card_event_4_36 Boldur's Gate — r=in(Grimheim):2spendGold:addTownPiece. Needs integration test.
 [ ] card_event_4_38 Portable Smithy — r=spendAction(actionPrepare):gainEquip ("complete quest" = gain top of equip deck). Needs integration test.
+
+#### Summary — new ops and op extensions (Embla + Boldur)
+
+**New ops:**
+- `Op_c_reaper` (Reaper Swing) — standalone op that **replaces** normal attack damage resolution: prompts the player to divide the attack's damage budget between the primary target and a second adjacent monster. Triggered by the card on TActionAttack.
+  - card_ability_3_9 Reaper Swing I: *"In each attack action, you may divide the damage you deal between the target and another adjacent monster."*
+  - card_ability_3_10 Reaper Swing II: same text, strength +3.
+
+**Op extensions:**
+- `Op_actionMove` — allow entering occupied hex with ram/push semantics.
+  - card_ability_4_7 Wrecking Ball I: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area."*
+  - card_ability_4_8 Wrecking Ball II: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."*
+  - May be factored as `Op_c_wrecking` invoked from move.
+- `Op_performAction` — accept a "main" category that prompts among attack/move/practice/mend.
+  - card_event_3_29 Sophisticated: *"Play in Grimheim to perform a mend, focus, prepare, or practice action."*
+
+**No new op (bespoke `Card*` classes):** Sweeping Strike I/II (clockwise neighbor + adj-count), Eitri's Pick (source-conditioned trigger), Orebiter (terrain attack + per-damage XP), Smiterbiter (stateful excess-damage bank).
+
+**DSL-only (no code changes beyond existing ops):** Blade Decorations, Raven's Claw, Wildfire Blade, Dvalin's Pick, Dwarf Pick, Boldur's Gate, Portable Smithy, Magic Runes (`r=3addDamage(rolledRune)` on=TRoll), In Charge I/II (`r=killMonster(adj,'rank<=1')` / `rank<=2` on=TActionMove — uses existing `Op_killMonster`), +1 move on Wrecking Ball II. All need integration tests only.
 
 
 ---

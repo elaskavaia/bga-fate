@@ -65,6 +65,7 @@ on|Triggered Effect
 in|Hero In Location
 adj|Hero Adjacent To Terrain
 spendDurab|Take Damage
+spendHealth|Take Unpreventable Damage
 spendAction|Spend Action
 roll|Roll Dice
 addRoll|Add Roll Dice
@@ -105,6 +106,7 @@ c_sureshotII|Sure Shot II
 c_prey|Prey
 c_hail|Hail of Arrows
 c_hailII|Hail of Arrows II
+c_queen|Queen of the Hill
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger

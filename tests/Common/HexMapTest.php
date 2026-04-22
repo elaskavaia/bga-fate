@@ -142,23 +142,19 @@ final class HexMapTest extends TestCase {
 
     public function testGetOccupancyMapShowsHeroes(): void {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-
-        $occ = $this->game->hexMap->getOccupancyMap();
-        $this->assertEquals("hero_1", $occ["hex_11_8"]["character"]);
+        $this->assertEquals("hero_1", $this->game->hexMap->getCharacterOnHex("hex_11_8"));
     }
 
     public function testGetOccupancyMapShowsMonsters(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        $occ = $this->game->hexMap->getOccupancyMap();
-        $this->assertEquals("monster_goblin_1", $occ["hex_12_8"]["character"]);
+        $this->assertEquals("monster_goblin_1", $this->game->hexMap->getCharacterOnHex("hex_12_8"));
     }
 
     public function testGetOccupancyMapEmptyHex(): void {
         $occ = $this->game->hexMap->getOccupancyMap();
         // hex_13_7 should be empty (no tokens placed there in setup)
-        $this->assertNull($occ["hex_13_7"]["character"]);
-        $this->assertEmpty($occ["hex_13_7"]["stuff"]);
+        $this->assertEmpty($occ["hex_13_7"]);
+        $this->assertNull($this->game->hexMap->getCharacterOnHex("hex_13_7"));
     }
 
     public function testGetOccupancyMapHousesInStuff(): void {
@@ -166,14 +162,14 @@ final class HexMapTest extends TestCase {
         // Houses are placed in Grimheim hexes during createAllTokens
         $foundHouse = false;
         foreach ($occ as $entry) {
-            foreach (array_keys($entry["stuff"]) as $key) {
+            foreach (array_keys($entry) as $key) {
                 if (str_starts_with($key, "house")) {
                     $foundHouse = true;
                     break 2;
                 }
             }
         }
-        $this->assertTrue($foundHouse, "Houses should appear in stuff field");
+        $this->assertTrue($foundHouse, "Houses should appear on map hex entries");
     }
 
     public function testInvalidateOccupancyRefreshesCache(): void {
@@ -183,8 +179,7 @@ final class HexMapTest extends TestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         // Invalidate and reload
         $this->game->hexMap->invalidateOccupancy();
-        $occ2 = $this->game->hexMap->getOccupancyMap();
-        $this->assertEquals("monster_goblin_1", $occ2["hex_12_8"]["character"]);
+        $this->assertEquals("monster_goblin_1", $this->game->hexMap->getCharacterOnHex("hex_12_8"));
     }
 
     // -------------------------------------------------------------------------

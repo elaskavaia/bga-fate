@@ -108,6 +108,12 @@ public function test<CardName><Effect>(): void {
 
 For trigger-activated cards (on != empty): trigger the source action (`respond("actionAttack")`, `respond("<hex>")` for move, etc.) and then drive the useCard prompt the trigger queues.
 
+### Event card token ids have an auto-suffix
+
+The CSV key (e.g. `card_event_4_32`) is the card *type*, not a token id. Each copy (per `count`) is created as a separate token with an `_<i>` suffix: `card_event_4_32_1`, `_2`, `_3`. When you `seedHand($cardId, $color)` or `seedDeck($deck, [$cardIds])` for event cards, use the suffixed token id — typically `_1` — not the bare CSV key. Symptom if you forget: token-move call fails with "token not found", or the card never shows up in the `useCard` target list.
+
+Ability and equip cards have `count=1` and no suffix; their CSV key is the token id directly.
+
 ## Hex cheat-sheet (Iteration 0+ map)
 
 Use these hexes to avoid spelunking through `misc/map_material.csv`:

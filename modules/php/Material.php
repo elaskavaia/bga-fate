@@ -367,6 +367,10 @@ class Material {
         "type" => "spendDurab",
         "name" => clienttranslate("Take Damage"),
 ],
+    "Op_spendHealth" => [ 
+        "type" => "spendHealth",
+        "name" => clienttranslate("Take Unpreventable Damage"),
+],
     "Op_spendAction" => [ 
         "type" => "spendAction",
         "name" => clienttranslate("Spend Action"),
@@ -506,6 +510,10 @@ class Material {
     "Op_c_hailII" => [ 
         "type" => "c_hailII",
         "name" => clienttranslate("Hail of Arrows II"),
+],
+    "Op_c_queen" => [ 
+        "type" => "c_queen",
+        "name" => clienttranslate("Queen of the Hill"),
 ],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
@@ -3829,7 +3837,7 @@ class Material {
         "num" => 11,
         "hno" => 3,
         "name" => clienttranslate("Queen of the Hill I"),
-        "r" => "custom",
+        "r" => "2c_queen",
         "effect" => "Deal 2 damage to an adjacent monster and switch places with it.",
         "flavour" => "Let's dance...",
 ],
@@ -3840,7 +3848,7 @@ class Material {
         "num" => 12,
         "hno" => 3,
         "name" => clienttranslate("Queen of the Hill II"),
-        "r" => "custom",
+        "r" => "4c_queen",
         "effect" => "Deal 4 damage to an adjacent monster and switch places with it.",
         "flavour" => "Another round? Ok!",
 ],
@@ -5032,7 +5040,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Berserk"),
         "count" => 3,
-        "r" => "custom",
+        "r" => "spendHealth:3addDamage",
         "on" => "TActionAttack",
         "effect" => "Take 1 unpreventable damage to add 3 damage to this attack.",
         "flavour" => "Grr… Wraaaaaaah!",

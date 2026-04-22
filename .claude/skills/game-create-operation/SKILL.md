@@ -26,47 +26,46 @@ Before starting read docs/DESIGN.md understand what Operation (concept) means an
    - Add a comment block at the top with relevant rules from RULES.md
 2. Add operation definition to `misc/op_material.csv`
 3. Run `npm run genmat` to update Material.php
-4. Run `npm run tests` — **verify everything passes before continuing**
-5. **Present design to user for approval** — before implementing logic, outline:
+4. **Present design to user for approval** — before implementing logic, outline:
    - Which rules apply (quote from RULES.md)
    - Operation type (automated / user-facing / countable)
    - What `getPossibleMoves()` will return (valid targets, error cases)
    - What `resolve()` will do (token moves, state changes, sub-operations)
    - Any new game elements or helpers needed
-6. Determine operation type:
+5. Determine operation type:
    - **Automated** — no user choice (e.g. reinforcement, turn end)
    - **User-facing** — player selects a target (e.g. move, attack)
    - **Countable** — repeatable or customizable X (e.g. gain X gold) → switch base class to `CountableOperation`
-7. For **user-facing** operations, start from the Operation Template below (copy `Op_xxx` and rename). Implement:
+6. For **user-facing** operations, start from the Operation Template below (copy `Op_xxx` and rename). Implement:
    - `getPossibleMoves()` — valid targets as assoc array
      - Keys are token IDs so the client can highlight them for clicking
      - Valid: `["q" => Material::RET_OK]`, invalid: `["q" => ERR_CODE]`
    - `canSkip()` — return `true` if action is optional
    - `getPrompt()` — prompt text shown to the player (use `clienttranslate()`)
-8. Implement `resolve()` — executes the game logic
+7. Implement `resolve()` — executes the game logic
    - Use `$this->getCheckedArg()` to get the validated user selection
    - Use `$this->dbSetTokenLocation()` to move tokens with notifications
    - Use `$this->queue()` to chain sub-operations
    - For multi-step operations, the operation may re-queue itself with extra data
    - For **automated** operations, `resolve()` may be the only required method
-9. If the operation needs custom client-side behavior, override:
+8. If the operation needs custom client-side behavior, override:
    - `getUiArgs()` — UI hints (e.g. `["buttons" => false]` when player clicks map/tokens instead of buttons)
    - `getExtraArgs()` — extra data sent to client (e.g. `["token_div" => $id]`)
-10. Ask user to code review before moving to next step
-11. Add tests in `tests/`
+9. Ask user to code review before moving to next step
+10. Add tests in `tests/`
     - Instantiate via `$this->game->machine->instantiateOperation($type, $owner, $data)`
     - Test `getPossibleMoves()` returns expected valid/invalid targets
     - Test `resolve()` produces correct side effects (token moves, state changes)
-12. Add a `debug_Op_<name>` function in `Game.php` that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:
+11. Add a `debug_Op_<name>` function in `Game.php` that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:
     ```bash
     php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json
     # Then run the renderer and read staging/snapshot.html to verify layout, buttons, and tooltips
     npx ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts
     ```
-13. If new game elements are introduced, follow the "Adding New Game Element" checklist in `misc/docs/PROCEDURES.md`
-14. Update DESIGN.md if needed
-15. Update PLAN.md if needed
-16. If you learned anything new update CLAUDE.md
+12. If new game elements are introduced, follow the "Adding New Game Element" checklist in `misc/docs/PROCEDURES.md`
+13. Update DESIGN.md if needed
+14. Update PLAN.md if needed
+15. If you learned anything new update CLAUDE.md
 
 ## Operation Template
 
