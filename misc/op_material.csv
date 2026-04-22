@@ -91,6 +91,7 @@ upgrade|Upgrade
 gainEquip|Gain Equipment
 drawEvent|Draw Event
 discardEvent|Discard Event
+multiTarget|Target Multiple
 
 #set class=gainAtt
 gainAtt_range|Gain Range

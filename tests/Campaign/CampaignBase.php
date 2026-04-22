@@ -75,7 +75,7 @@ abstract class CampaignBaseTest extends TestCase {
     }
 
     /** Send a player response (action_resolve with target) */
-    protected function respond(string $target): void {
+    protected function respond(mixed $target): void {
         $this->game->hexMap->invalidateOccupancy();
         $this->driver->runStep("action_resolve", ["data" => ["target" => $target]]);
     }
@@ -83,12 +83,6 @@ abstract class CampaignBaseTest extends TestCase {
     /** Send action_skip */
     protected function skip(): void {
         $this->driver->runStep("action_skip", []);
-    }
-
-    /** Send a multi-select response (token_array or token_count ops). */
-    protected function respondMulti(array $targets): void {
-        $this->game->hexMap->invalidateOccupancy();
-        $this->driver->runStep("action_resolve", ["data" => ["target" => $targets]]);
     }
 
     /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true). */

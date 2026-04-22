@@ -51,4 +51,31 @@ class Campaign_BoldurEventTest extends CampaignBaseTest {
         // Troll took 3 damage from addDamage (base roll = 0 hits)
         $this->assertEquals(3, $this->countDamage($troll));
     }
+
+    // --- Boldur's Gate (card_event_4_36) ---
+    // r=in(Grimheim):2spendXp:addTownPiece — spend 2 XP in Grimheim to restore a town piece.
+
+    public function testBoldursGateSpendsTwoXpToRestoreTownPiece(): void {
+        $color = $this->getActivePlayerColor();
+        $gate = "card_event_4_36_1";
+        $this->seedHand($gate, $color);
+
+        // Boldur starts in Grimheim — confirm.
+        $this->assertTrue($this->game->hexMap->isInGrimheim($this->tokenLocation($this->heroId)));
+
+        // Seed 2 gold/XP on the tableau.
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
+        $xpBefore = $this->countXp();
+
+        // Destroy a house so addTownPiece has something to restore.
+        $house = array_key_first($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+        $this->game->tokens->moveToken($house, "limbo");
+
+        $this->assertValidTarget($gate);
+        $this->respond($gate);
+        $this->confirmCardEffect();
+
+        $this->assertEquals($xpBefore - 2, $this->countXp());
+        $this->assertNotEquals("limbo", $this->tokenLocation($house));
+    }
 }

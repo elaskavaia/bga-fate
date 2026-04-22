@@ -251,7 +251,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->respond($cardId);
         $this->confirmCardEffect(); // useCard paygain asks to confirm before resolving r
         // c_hail multi-select prompt: pick all 3 hexes at once.
-        $this->respondMulti(["hex_7_8", "hex_6_9", "hex_8_9"]);
+        $this->respond(["hex_7_8", "hex_6_9", "hex_8_9"]);
 
         // Each brute took 1 damage; all 3 mana spent; card marked used.
         $this->assertEquals(1, $this->countDamage("monster_brute_1"));
@@ -282,7 +282,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
         $this->respond($cardId);
         $this->confirmCardEffect();
-        $this->respondMulti(["hex_7_8", "hex_8_9"]);
+        $this->respond(["hex_7_8", "hex_8_9"]);
 
         // Only 2 mana spent (= targets picked); only brute_1 and brute_3 damaged.
         $this->assertEquals(2, $this->countTokens("crystal_green", $cardId));

@@ -246,10 +246,8 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
         $this->assertValidTarget($multishot);
         $this->respond($multishot);
         $this->confirmCardEffect(); // seq op wraps the two rolls, confirm first
-        // First 2roll: pick goblin's hex
-        $this->respond("hex_5_9");
-        // Second 2roll: pick brute's hex
-        $this->respond("hex_7_8");
+        // Pick attacked hexes
+        $this->respond(["hex_5_9", "hex_7_8"]);
 
         // Goblin (health=2) dead; brute (health=3) took 2 damage
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));

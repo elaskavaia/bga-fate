@@ -69,20 +69,11 @@ Present a structured report AFTER creating the tests:
 - **Trigger (on)**: {on field value, or "none" if empty}
 - **Effect**: {effect text}
 - **Stats**: {any non-empty stat fields}
-
-### PLAN.md Status
-- {[x] or [ ]} {description from PLAN.md}
 - Notes: {any additional notes}
 
 ### Implementation
 - **Operations used**: {list of Op_*.php files involved}
 - **Custom operation**: {if r=custom: "NOT IMPLEMENTED — r field needs to be designed"; if r=c_*: whether Op file exists}
-
-### Test Coverage
-- **Tests found**: {list of test files and methods referencing this card}
-- **Trigger positive test**: {Yes/No/N/A}
-- **Trigger negative test**: {Yes/No/N/A}
-- **Integration test**: {Yes/No}
 
 ### Validation Checklist
 - [ ] r field matches effect text description

@@ -507,18 +507,15 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 #### Ability Cards
 
-[x] card_ability_3_5 In Charge I — After each move action, you may kill an adjacent rank 1 monster. has tests
-[x] card_ability_3_6 In Charge II — After each move action, you may kill an adjacent rank 1 or rank 2 monster. has tests
-[x] card_ability_3_11 Queen of the Hill I — "Deal 2 damage to an adjacent monster and switch places with it." `r=2c_queen`. Implemented via `Op_c_queen` (extends `Op_dealDamage`, adds swap via `Op_step`). Multi-occupancy supported after HexMap refactor. has tests
-[x] card_ability_3_12 Queen of the Hill II — "Deal 4 damage to an adjacent monster and switch places with it." `r=4c_queen`. Implemented via `Op_c_queen` (same op as I, count=4). has tests
-[ ] card_ability_3_9 Reaper Swing I — after attack, deal 1 to all other adjacent monsters. **Triage: extend op** — extend `Op_dealDamage` with a multi-target broadcast filter (e.g. `adj_all,not_attack_target`), then `r=dealDamage(adj_all,not_attack_target)` on=TAfterActionAttack.
-[ ] card_ability_3_10 Reaper Swing II — 2 damage to all adjacent monsters (confirm inclusion of attack target). **Triage: extend op** — same multi-target filter as 3_9; `r=2dealDamage(adj_all)` on=TAfterActionAttack.
+
+[ ] card_ability_3_9 Reaper Swing I 
+[ ] card_ability_3_10 Reaper Swing II 
 
 #### Equipment Cards
 
-[ ] card_equip_3_19 Blade Decorations — passive +1 strength, r= empty (strength column handles it). Needs integration test.
-[ ] card_equip_3_22 Raven's Claw — main weapon, r=2addDamage on=TActionAttack. Needs integration test.
-[ ] card_equip_3_21 Wildfire Blade — main weapon, r=dealDamage(adj) on=TAfterActionAttack. Needs integration test.
+[ ] card_equip_3_19 Blade Decorations 
+[ ] card_equip_3_22 Raven's Claw 
+[ ] card_equip_3_21 Wildfire Blade 
 
 #### Event Cards
 
@@ -538,17 +535,17 @@ Triage of r=custom cards:
 
 #### Equipment Cards
 
-[ ] card_equip_4_20 Dvalin's Pick — r=spendAction(actionAttack):gainXp:gainMana:drawEvent. Needs integration test.
-[ ] card_equip_4_25 Dwarf Pick — main weapon, r= empty (strength column handles it). Needs integration test.
+[x] card_equip_4_20 Dvalin's Pick — Spend attack action for 1 XP, 1 mana, 1 card draw. has tests
+[ ] card_equip_4_25 Dwarf Pick 
 [ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
-[ ] card_equip_4_19 Orebiter — attack adjacent mountain areas, gain XP per damage. **Triage: bespoke** — needs `CardEquip_Orebiter`. Attacking terrain (not a monster) has no primitive; plus per-damage XP hook via TResolveHits. Could split into `Op_attackTerrain` + a TResolveHits hook, but the terrain-attack alone warrants a bespoke class.
-[ ] card_equip_4_21 Smiterbiter — main weapon, stores up to 3 excess damage on kill, spend stored to add damage. **Triage: bespoke** — needs `CardEquip_Smiterbiter`. Stateful card-local crystal bank (like `CardEquip_Tiara`) + two flows (store-on-kill, spend-to-add-damage).
+[ ] card_equip_4_19 Orebiter — attack adjacent mountain areas, gain XP per damage. **Triage: custom op** 
+[ ] card_equip_4_21 Smiterbiter — This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action. **Triage: bespoke + new op** 
 
 #### Event Cards
 
-[x] card_event_4_32 Berserk — "Take 1 unpreventable damage to add 3 damage to this attack." `r=spendHealth:3addDamage` on=TActionAttack. Implemented via new `Op_spendHealth` (bypasses the dealDamage→preventDamage pipeline). has tests
-[ ] card_event_4_36 Boldur's Gate — r=in(Grimheim):2spendGold:addTownPiece. Needs integration test.
-[ ] card_event_4_38 Portable Smithy — r=spendAction(actionPrepare):gainEquip ("complete quest" = gain top of equip deck). Needs integration test.
+[x] card_event_4_32 Berserk — "Take 1 unpreventable damage to add 3 damage to this attack."
+[x] card_event_4_36 Boldur's Gate — Spend 2 XP in Grimheim to restore a town piece. has tests
+[ ] card_event_4_38 Portable Smithy
 
 #### Summary — new ops and op extensions (Embla + Boldur)
 
@@ -556,6 +553,8 @@ Triage of r=custom cards:
 - `Op_c_reaper` (Reaper Swing) — standalone op that **replaces** normal attack damage resolution: prompts the player to divide the attack's damage budget between the primary target and a second adjacent monster. Triggered by the card on TActionAttack.
   - card_ability_3_9 Reaper Swing I: *"In each attack action, you may divide the damage you deal between the target and another adjacent monster."*
   - card_ability_3_10 Reaper Swing II: same text, strength +3.
+
+- `Op_c_orebiter`
 
 **Op extensions:**
 - `Op_actionMove` — allow entering occupied hex with ram/push semantics.
