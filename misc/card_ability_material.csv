@@ -36,8 +36,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 # Abilities - Embla (hno=3)
 7|3|Fleetfoot I||1||spendUse:move||Move 1 area.|Oh no, she's surrounding us!
 8|3|Fleetfoot II||3||spendUse:move||Move 1 area. You may always move into mountains and through occupied areas.|
-5|3|In Charge I||||custom|TActionMove|After each move action, you may kill an adjacent rank 1 monster.|
-6|3|In Charge II||||custom|TActionMove|After each move action, you may kill an adjacent rank 1 or rank 2 monster.|
+5|3|In Charge I||||killMonster(adj,'rank==1')|TActionMove|After each move action, you may kill an adjacent rank 1 monster.|
+6|3|In Charge II||||killMonster(adj,'rank<=2')|TActionMove|After each move action, you may kill an adjacent rank 1 or rank 2 monster.|
 11|3|Queen of the Hill I||||2c_queen||Deal 2 damage to an adjacent monster and switch places with it.|Let's dance...
 12|3|Queen of the Hill II||||4c_queen||Deal 4 damage to an adjacent monster and switch places with it.|Another round? Ok!
 9|3|Reaper Swing I||||custom|TActionAttack|In each attack action, you may divide the damage you deal between the target and another adjacent monster.|

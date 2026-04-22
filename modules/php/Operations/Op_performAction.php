@@ -19,7 +19,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 /**
  * performAction: Queue an additional main action.
  * Parameter specifies which action to queue (e.g., actionAttack, actionMend).
- * Used by: Speedy Attack, Rapid Strike, Sophisticated, Trinket.
+ * Used by: Speedy Attack, Rapid Strike, Trinket.
  */
 class Op_performAction extends Operation {
     function getPossibleMoves() {

@@ -38,7 +38,7 @@ num|hno|name|count|r|on|effect|flavour
 37|3|Preparations|1|spendAction(actionPrepare):drawEvent(max)||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.
 31|3|Retaliation|3|2dealDamage(adj)|TResolveHits|Play after an adjacent monster attacked you to deal 2 damage to it.|
-29|3|Sophisticated|2|custom||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
+29|3|Sophisticated|2|in(Grimheim):(actionMend/actionFocus/actionPrepare/actionPractice)||Play in Grimheim to perform a mend, focus, prepare, or practice action.|That's my cup of tea.
 33|3|Speedy Attack|2|discardEvent:actionAttack||Discard another card from hand to perform an attack action.|
 32|3|Vigilance|2|dealDamage(adj)|TMonsterMove|Play after the Monsters Move step. Deal 1 damage to an adjacent monster.|Under cover, over confident.
 # Events - Boldur (hno=4)

@@ -368,7 +368,7 @@ See CLAUDE.md for project overview
 - [x] `addTownPiece` — Add 1 Town Piece to Grimheim. Used by: Inspire Defense (`in(Grimheim):2spendManaAny:addTownPiece`)
 - [x] `preventDamage` (Countable) — Prevent up to X incoming damage. Used by: Dodge, Stoneskin, Riposte, Dreadnought
 - [x] `repairCard` — Remove X damage from target card. Used by: Durability, Sewing
-- [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike, Sophisticated
+- [x] `performAction` — Queue an additional main action. Used by: Speedy Attack, Rapid Strike
 - [x] `spendAction` — Consume a main action slot without performing it. Used by: event cards that cost an action
 - [x] `drawEvent` — already exists, make Countable for multi-draw (Starsong)
 - [x] `spendGold` — Remove X yellow crystals (gold/arrows) from the context card as a cost. Parallel to `spendMana`. Used by: Black Arrows (`spendGold:3addDamage`), future "spend token from card" effects.
@@ -507,8 +507,8 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 #### Ability Cards
 
-[ ] card_ability_3_5 In Charge I — when you use action move, lead 1 adjacent hero along. **Triage: extend op** — extend `Op_actionMove` with a "lead-hero" sub-choice after destination pick (co-move legality requires shared target, can't compose in DSL).
-[ ] card_ability_3_6 In Charge II — lead up to 2 adjacent heroes. **Triage: extend op** — same extension as 3_5 with count=2.
+[x] card_ability_3_5 In Charge I — After each move action, you may kill an adjacent rank 1 monster. has tests
+[x] card_ability_3_6 In Charge II — After each move action, you may kill an adjacent rank 1 or rank 2 monster. has tests
 [x] card_ability_3_11 Queen of the Hill I — "Deal 2 damage to an adjacent monster and switch places with it." `r=2c_queen`. Implemented via `Op_c_queen` (extends `Op_dealDamage`, adds swap via `Op_step`). Multi-occupancy supported after HexMap refactor. has tests
 [x] card_ability_3_12 Queen of the Hill II — "Deal 4 damage to an adjacent monster and switch places with it." `r=4c_queen`. Implemented via `Op_c_queen` (same op as I, count=4). has tests
 [ ] card_ability_3_9 Reaper Swing I — after attack, deal 1 to all other adjacent monsters. **Triage: extend op** — extend `Op_dealDamage` with a multi-target broadcast filter (e.g. `adj_all,not_attack_target`), then `r=dealDamage(adj_all,not_attack_target)` on=TAfterActionAttack.
@@ -523,7 +523,7 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 #### Event Cards
 
 [ ] card_event_3_34 Magic Runes — runes always count as hits for you (one-shot). **Triage: bespoke** — needs `CardEvent_MagicRunes`. Rune-as-hit is currently a faction rule hardcoded in `Character::countHit()`. Bespoke class sets a per-attack flag consumed by `countHit`, or on=TRoll adds countRunes extra hits. Small hook needed in Character to read the card flag.
-[ ] card_event_3_29 Sophisticated — perform a focus action, then perform another main action. **Triage: extend op** — extend `Op_performAction` to accept a "main" category that prompts among attack/move/practice/mend. Then `r=performAction(actionFocus),performAction(main)`.
+[x] card_event_3_29 Sophisticated — has tests
 
 ### Server Hero 4 - Boldur
 
@@ -562,8 +562,7 @@ Triage of r=custom cards:
   - card_ability_4_7 Wrecking Ball I: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area."*
   - card_ability_4_8 Wrecking Ball II: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."*
   - May be factored as `Op_c_wrecking` invoked from move.
-- `Op_performAction` — accept a "main" category that prompts among attack/move/practice/mend.
-  - card_event_3_29 Sophisticated: *"Play in Grimheim to perform a mend, focus, prepare, or practice action."*
+
 
 **No new op (bespoke `Card*` classes):** Sweeping Strike I/II (clockwise neighbor + adj-count), Eitri's Pick (source-conditioned trigger), Orebiter (terrain attack + per-damage XP), Smiterbiter (stateful excess-damage bank).
 

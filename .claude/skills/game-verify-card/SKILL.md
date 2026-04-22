@@ -12,7 +12,7 @@ Verify that a Fate card is correctly implemented by cross-referencing its defini
 
 The user provides a card ID as argument (e.g., `card_event_1_33`, `card_equip_1_15`, `card_ability_1_5`, `card_hero_1_1`).
 
-The card ID format is `card_{type}_{heroNumber}_{cardNumber}`. Extract the type from the second segment to find the right CSV file.
+The card ID format is `card_{type}_{heroNumber}_{cardNumber}`.
 
 Note: if this skill is launched with multiple ids just apply this skill for each card individually
 
@@ -22,14 +22,7 @@ Perform all these steps. Use parallel tool calls where possible to speed things 
 
 ### 1. Look up the card definition
 
-Read the appropriate CSV file based on card type:
-
-- `card_ability_*` -> `misc/card_ability_material.csv`
-- `card_event_*` -> `misc/card_event_material.csv`
-- `card_equip_*` -> `misc/card_equip_material.csv`
-- `card_hero_*` -> `misc/card_hero_material.csv`
-
-The CSV uses `|` as delimiter. The header row defines fields. Find the row where `num` matches the card number and `hno` matches the hero number. Extract all fields, especially:
+Search `modules/php/Material.php` for the card to get details (+20 lines of context).
 
 - **name**: card name
 - **r**: the rule/operation string (the machine-readable implementation)

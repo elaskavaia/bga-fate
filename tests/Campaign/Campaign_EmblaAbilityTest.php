@@ -84,4 +84,69 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_7_9", $this->tokenLocation($troll));
         $this->assertEquals("hex_7_8", $this->tokenLocation($this->heroId));
     }
+
+    // --- In Charge I (card_ability_3_5) ---
+    // r=killMonster(adj,'rank==1'), on=TActionMove — after each move action, may kill
+    // an adjacent rank 1 monster.
+
+    public function testInChargeIKillsAdjacentRank1MonsterAfterMove(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_5";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Park Embla at hex_6_9 (plains). After move to hex_7_9, goblin at hex_7_8 is adjacent
+        // and is rank 1; brute at hex_6_9's old neighbor would be rank 2 — non-eligible.
+        $this->game->tokens->moveToken($this->heroId, "hex_6_9");
+        $goblin = "monster_goblin_20";
+        $brute = "monster_brute_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->game->getMonster($brute)->moveTo("hex_8_9", ""); // adjacent to hex_7_9 (in Grimheim, but rank 2)
+
+        // Move Embla — turn op inlines hex targets for actionMove
+        $this->respond("hex_7_9");
+
+        // TActionMove trigger queues useCard with In Charge I
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // killMonster(adj, rank==1) prompts for a hex — only the goblin qualifies
+        $this->assertValidTarget("hex_7_8");
+        $this->assertNotValidTarget("hex_8_9"); // brute is rank 2, not offered
+        $this->respond("hex_7_8");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+        $this->assertEquals("hex_8_9", $this->tokenLocation($brute)); // brute untouched
+        $this->assertEquals("hex_7_9", $this->tokenLocation($this->heroId));
+    }
+
+    // --- In Charge II (card_ability_3_6) ---
+    // r=killMonster(adj,'rank<=2'), on=TActionMove — after each move action, may kill
+    // an adjacent rank 1 OR rank 2 monster. Superset of In Charge I.
+
+    public function testInChargeIIKillsAdjacentRank2MonsterAfterMove(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_6";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Park Embla at hex_6_9. After move to hex_7_9: brute (rank 2) at hex_7_8 adjacent,
+        // troll (rank 3) at hex_8_9 also adjacent but non-eligible.
+        $this->game->tokens->moveToken($this->heroId, "hex_6_9");
+        $brute = "monster_brute_1";
+        $troll = "monster_troll_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+        $this->game->getMonster($troll)->moveTo("hex_8_9", "");
+
+        $this->respond("hex_7_9");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->assertValidTarget("hex_7_8"); // brute eligible (rank 2)
+        $this->assertNotValidTarget("hex_8_9"); // troll is rank 3, not offered
+        $this->respond("hex_7_8");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($brute));
+        $this->assertEquals("hex_8_9", $this->tokenLocation($troll)); // troll untouched
+        $this->assertEquals("hex_7_9", $this->tokenLocation($this->heroId));
+    }
 }
