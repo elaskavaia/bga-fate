@@ -1325,7 +1325,7 @@
   background-position: 80% 102%;
 }
 
-#mainarea {
+#thething_wrap {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -1333,48 +1333,10 @@
   z-index: 0;
   position: relative;
   container-type: inline-size;
-  container-name: fate_mainarea;
+  container-name: fate_thething_wrap;
 }
 
-.board_layout_controls {
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  z-index: 1000;
-  padding: 4px;
-}
-.board_layout_controls .layout_button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  background: white;
-  color: #2d5a3d;
-  cursor: pointer;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-}
-.board_layout_controls .layout_button:hover {
-  background: #e0e0e0;
-  border-color: #999;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
-}
-.board_layout_controls .layout_button.active {
-  background: #2d5a3d;
-  border-color: #2d5a3d;
-  color: white;
-}
-
-#ebd-body[data-board-zoom=manual] #mainarea {
+#ebd-body[data-board-zoom=manual] #thething_wrap {
   overflow-x: auto;
   overflow-y: visible;
 }
@@ -1598,6 +1560,44 @@
   min-height: 32px;
 }
 
+.board_layout_controls {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 1000;
+  padding: 4px;
+}
+.board_layout_controls .layout_button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: white;
+  color: #2d5a3d;
+  cursor: pointer;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+.board_layout_controls .layout_button:hover {
+  background: #e0e0e0;
+  border-color: #999;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
+}
+.board_layout_controls .layout_button.active {
+  background: #2d5a3d;
+  border-color: #2d5a3d;
+  color: white;
+}
+
 /* tooltips */
 .tundra .dijitTooltipContainer,
 .tooltipcontainer {
@@ -1704,21 +1704,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-right: 2px;
 }
 
-#board_area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-@container fate_mainarea (min-width: 1696px) {
+@container fate_thething_wrap (min-width: 1696px) {
   #thething {
     flex-direction: row;
     align-items: flex-start;
     justify-content: center;
   }
 }
+#board_area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .bgabutton_gray {
   border: 1px solid rgba(6, 6, 6, 0.368627451);
   box-shadow: 0 1px 0 #000;

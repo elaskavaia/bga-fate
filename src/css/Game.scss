@@ -11,6 +11,7 @@
 @use "Minis";
 @use "Cards";
 @use "Board";
+@use "LaZoom";
 @use "Tooltip";
 
 // @import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
@@ -63,6 +64,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-right: 2px; // overflow buffer
+}
+// Wide layout: panels left, board area right
+@container fate_thething_wrap (min-width: 1696px) {
+  #thething {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
 }
 
 // Board area: map + monster turn + supply, stacked vertically
@@ -72,14 +82,6 @@
   align-items: center;
 }
 
-// Wide layout: panels left, board area right
-@container fate_mainarea (min-width: 1696px) {
-  #thething {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-  }
-}
 // BUTTONS
 
 .bgabutton_gray {
