@@ -60,7 +60,7 @@ gainMana|Gain Mana
 spendMana|Spend Mana
 spendManaAny|Spend Mana (from any card)
 spendGold|Spend Gold
-spendUse|Use Card
+spendUse|Once per Turn
 on|Triggered Effect
 in|Hero In Location
 adj|Hero Adjacent To Terrain

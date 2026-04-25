@@ -349,7 +349,7 @@ class Material {
 ],
     "Op_spendUse" => [ 
         "type" => "spendUse",
-        "name" => clienttranslate("Use Card"),
+        "name" => clienttranslate("Once per Turn"),
 ],
     "Op_on" => [ 
         "type" => "on",
