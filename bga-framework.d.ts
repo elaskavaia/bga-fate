@@ -51,7 +51,7 @@ declare function _(str: string): string;
  * Get an HTML element using its "id" attribute.
  * @param text element id
  */
-declare function $(text: ElementOrId): HTMLElement;
+declare function $(text: ElementOrId | undefined): HTMLElement | undefined;
 
 /**
  * Loads a versionned BGA game lib.

@@ -220,15 +220,12 @@ export class Game0Basics {
 
     //return this.clienttranslate_string(name);
   }
-  setSubPrompt(text: string, args: any = {}) {
+  setActionStatus(text: string, args: any = {}) {
     if (!text) text = "";
-    if (!args) args = [];
-    const message = this.format_string_recursive(this.getTr(text, args), args);
-
-    // have to set after otherwise status update wipes it
-    setTimeout(() => {
-      $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
-    }, 100);
+    const message = this.getTr(text, args);
+    const node = document.querySelector("#gameaction_status");
+    if (node) node.innerHTML = message;
+    this.bga.statusBar.setTitle(message);
   }
 
   reloadCss() {

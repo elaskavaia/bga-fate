@@ -20,16 +20,6 @@
 //   --accent-game-font: "MedievalSharp", cursive;
 // }
 
-#gameaction_status_wrap {
-  display: block !important; // prevent flickering of top bar
-
-  img {
-    display: none;
-  }
-}
-.subtitle {
-  font-size: x-small;
-}
 
 #oversurface {
   position: absolute;
@@ -256,22 +246,8 @@ $logsBgColor: #b5e6e3;
 }
 
 #page-title {
-  min-height: 76px !important;
   line-height: 24px;
   background-color: $logsBgColor !important;
-  // &::before {
-  //   content: "";
-  //   width: 100%;
-  //   height: 100%;
-  //   top: 0;
-  //   left: 0;
-  //   position: absolute;
-  //   background-image: url(img/bg2.webp);
-  //   opacity: 0.6;
-  // }
-}
-#pagemaintitle_wrap {
-  min-height: 42px !important;
 }
 
 .selection_area {

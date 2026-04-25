@@ -28,7 +28,7 @@ class PlayerTurnConfirm {
           console.log("action complete", x);
         })
         .catch((e: any) => {
-          this.game.setSubPrompt(e.message, e.args);
+          this.game.setActionStatus(e.message, e.args);
         });
     });
   }
@@ -608,9 +608,9 @@ export class Game extends Game1Tokens {
       //logger: console.log, // show notif debug informations on console. Could be console.warn or any custom debug function (default null = no logs)
       //handlers: [this, this.tokens],
       onStart: (notifName, msg, args) => {
-        if (msg) this.setSubPrompt(msg, args);
+        if (msg) this.setActionStatus(msg, args);
       }
-      // onEnd: (notifName, msg, args) => this.setSubPrompt("", args)
+      // onEnd: (notifName, msg, args) => this.setActionStatus("", args)
     });
   }
 

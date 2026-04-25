@@ -16,7 +16,7 @@ import { OpInfo, ParamInfo } from "./types";
 export class GameMachine {
   game: Game;
   bga: Bga;
-  opInfo: OpInfo;
+  opInfo?: OpInfo;
 
   constructor(game: Game, bga: Bga) {
     this.game = game;
@@ -32,22 +32,28 @@ export class GameMachine {
   }
 
   onEnteringStatePrivate(opInfo: OpInfo) {
-    console.log("onEnteringState_PlayerTurn", opInfo);
+    console.log("onEnteringStatePrivate", opInfo);
     if (!this.bga.players.isCurrentPlayerActive()) {
       if (opInfo?.description) this.bga.statusBar.setTitle(this.game.getTr(opInfo.description, opInfo));
-      this.game.setSubPrompt("");
-      this.addUndoButton(opInfo.ui?.undo);
+      this.addUndoButton(opInfo?.ui?.undo); // opInfo not sanitized on this path
       return;
     }
     this.completeOpInfo(opInfo);
     this.opInfo = opInfo;
-    if (opInfo.prompt) {
-      this.bga.statusBar.setTitle(this.game.getTr(opInfo.prompt, opInfo));
+
+    const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
+    let subprompt = "";
+    if (opInfo.err) {
+      subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
+    } else if (opInfo.data?.reason) {
+      subprompt = this.getReasonText(opInfo.data.reason);
     }
-    if (opInfo.subtitle) this.game.setSubPrompt(this.game.getTr(opInfo.subtitle, opInfo), opInfo);
-    else if (opInfo.err) {
-      this.game.setSubPrompt(_("Error: ") + this.game.getTr(opInfo.err, opInfo));
-    } else this.game.setSubPrompt(this.getReasonText(opInfo.data.reason));
+
+    if (subprompt && prompt) {
+      this.bga.statusBar.setTitle(`[${subprompt}] ${prompt}`);
+    } else if (prompt) {
+      this.bga.statusBar.setTitle(prompt);
+    }
 
     const multiselect = this.isMultiSelectArgs(opInfo);
 
@@ -74,7 +80,7 @@ export class GameMachine {
       }
 
       // we also can have one addition way of selection (possibly)
-      let altNode: HTMLElement;
+      let altNode: HTMLElement | undefined;
 
       if (opInfo.ui.replicate == true || paramInfo.replicate == true) {
         altNode = this.replicateTargetOnSelectionArea(target, paramInfo);
@@ -108,10 +114,6 @@ export class GameMachine {
       }
     }
 
-    if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
-      this.game.addShowMeButton(true);
-    }
-
     // secondary buttons
     for (const target of sortedTargets) {
       const paramInfo = opInfo.info[target];
@@ -140,6 +142,14 @@ export class GameMachine {
       this.activateMultiSelectPrompt(opInfo);
     }
 
+    if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
+      this.game.addShowMeButton(true);
+    }
+
+    if (opInfo.subtitle) {
+      this.addInfoButton(this.game.getTr(opInfo.subtitle, opInfo));
+    }
+
     // need a global condition when this can be added
     this.addUndoButton(this.bga.players.isCurrentPlayerActive() || opInfo.ui.undo);
   }
@@ -147,7 +157,7 @@ export class GameMachine {
   createTargetButton(target: string, paramInfo: ParamInfo): HTMLElement | undefined {
     const q = paramInfo.q;
     const active = q == 0;
-    const color: any = paramInfo.color ?? this.opInfo.ui.color;
+    const color: any = paramInfo.color ?? this.opInfo?.ui.color;
     const button = this.bga.statusBar.addActionButton(this.getTargetButtonName(target, paramInfo), (event: Event) => this.onToken(event), {
       color: color,
       disabled: !active,
@@ -224,7 +234,7 @@ export class GameMachine {
 
   getReasonText(reason: string) {
     if (!reason) return "";
-    return _("Reason:") + " " + this.game.getTokenName(reason);
+    return this.game.getTokenName(reason);
   }
   getTargetButtonName(target: string, paramInfo: ParamInfo) {
     const div = $(target);
@@ -290,10 +300,12 @@ export class GameMachine {
   }
 
   onToken_token_array(target: string, node: HTMLElement) {
+    if (!this.opInfo) return false;
     return this.onMultiCount(target, this.opInfo, node);
   }
 
   onToken_token_count(target: string, node: HTMLElement) {
+    if (!this.opInfo) return false;
     return this.onMultiCount(target, this.opInfo, node);
   }
 
@@ -363,8 +375,25 @@ export class GameMachine {
         console.log("action complete", x);
       })
       .catch((e: any) => {
-        this.game.setSubPrompt(e.message, e.args);
+        this.game.setActionStatus(e.message, e.args);
       });
+  }
+
+  addInfoButton(helpText: string) {
+    const escaped = document.createElement("div");
+    escaped.textContent = helpText;
+    const div = this.bga.statusBar.addActionButton(
+      _("Info"),
+      () => {
+        this.game.showPopin(escaped.innerHTML);
+      },
+      {
+        color: "secondary",
+        id: "button_info"
+      }
+    );
+    div.classList.add("button_info");
+    div.title = _("Click to see additional information about this prompt");
   }
 
   addUndoButton(cond: boolean = true) {
@@ -377,7 +406,7 @@ export class GameMachine {
               checkAction: false
             })
             ?.catch((e: any) => {
-              this.game.setSubPrompt(e.message, e.args);
+              this.game.setActionStatus(e.message, e.args);
             }),
         {
           color: "alert",
@@ -424,7 +453,7 @@ export class GameMachine {
     // of the real target (e.g. a monster inside a hex) and must not receive the
     // selection class.
     let node = $(tid) ?? clicknode;
-    let altnode: HTMLElement;
+    let altnode: HTMLElement | undefined | null;
     if (clicknode) {
       altnode = $(clicknode.dataset.primaryId);
     }
@@ -470,7 +499,7 @@ export class GameMachine {
         doneButton.classList.remove(this.game.classButtonDisabled);
         doneButton.title = "";
       }
-      $(doneButtonId).innerHTML = buttonName + ": " + count;
+      doneButton.innerHTML = buttonName + ": " + count;
     }
     if (count > 0) {
       $(resetButtonId)?.classList.remove(this.game.classButtonDisabled);

@@ -203,16 +203,14 @@ class Game0Basics {
         }
         //return this.clienttranslate_string(name);
     }
-    setSubPrompt(text, args = {}) {
+    setActionStatus(text, args = {}) {
         if (!text)
             text = "";
-        if (!args)
-            args = [];
-        const message = this.format_string_recursive(this.getTr(text, args), args);
-        // have to set after otherwise status update wipes it
-        setTimeout(() => {
-            $("gameaction_status").innerHTML = `<div class="subtitle">${message}</div>`;
-        }, 100);
+        const message = this.getTr(text, args);
+        const node = document.querySelector("#gameaction_status");
+        if (node)
+            node.innerHTML = message;
+        this.bga.statusBar.setTitle(message);
     }
     reloadCss() {
         var links = document.getElementsByTagName("link");
@@ -1564,26 +1562,29 @@ class GameMachine {
         return undefined;
     }
     onEnteringStatePrivate(opInfo) {
-        console.log("onEnteringState_PlayerTurn", opInfo);
+        console.log("onEnteringStatePrivate", opInfo);
         if (!this.bga.players.isCurrentPlayerActive()) {
             if (opInfo?.description)
                 this.bga.statusBar.setTitle(this.game.getTr(opInfo.description, opInfo));
-            this.game.setSubPrompt("");
-            this.addUndoButton(opInfo.ui?.undo);
+            this.addUndoButton(opInfo?.ui?.undo); // opInfo not sanitized on this path
             return;
         }
         this.completeOpInfo(opInfo);
         this.opInfo = opInfo;
-        if (opInfo.prompt) {
-            this.bga.statusBar.setTitle(this.game.getTr(opInfo.prompt, opInfo));
+        const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
+        let subprompt = "";
+        if (opInfo.err) {
+            subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
         }
-        if (opInfo.subtitle)
-            this.game.setSubPrompt(this.game.getTr(opInfo.subtitle, opInfo), opInfo);
-        else if (opInfo.err) {
-            this.game.setSubPrompt(_("Error: ") + this.game.getTr(opInfo.err, opInfo));
+        else if (opInfo.data?.reason) {
+            subprompt = this.getReasonText(opInfo.data.reason);
         }
-        else
-            this.game.setSubPrompt(this.getReasonText(opInfo.data.reason));
+        if (subprompt && prompt) {
+            this.bga.statusBar.setTitle(`[${subprompt}] ${prompt}`);
+        }
+        else if (prompt) {
+            this.bga.statusBar.setTitle(prompt);
+        }
         const multiselect = this.isMultiSelectArgs(opInfo);
         const sortedTargets = Object.keys(opInfo.info);
         sortedTargets.sort((a, b) => opInfo.info[a].o - opInfo.info[b].o);
@@ -1637,9 +1638,6 @@ class GameMachine {
                 altNode.dataset.max = "1";
             }
         }
-        if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
-            this.game.addShowMeButton(true);
-        }
         // secondary buttons
         for (const target of sortedTargets) {
             const paramInfo = opInfo.info[target];
@@ -1662,13 +1660,19 @@ class GameMachine {
         if (multiselect) {
             this.activateMultiSelectPrompt(opInfo);
         }
+        if (opInfo.ui.buttons == false || opInfo.ui.replicate) {
+            this.game.addShowMeButton(true);
+        }
+        if (opInfo.subtitle) {
+            this.addInfoButton(this.game.getTr(opInfo.subtitle, opInfo));
+        }
         // need a global condition when this can be added
         this.addUndoButton(this.bga.players.isCurrentPlayerActive() || opInfo.ui.undo);
     }
     createTargetButton(target, paramInfo) {
         const q = paramInfo.q;
         const active = q == 0;
-        const color = paramInfo.color ?? this.opInfo.ui.color;
+        const color = paramInfo.color ?? this.opInfo?.ui.color;
         const button = this.bga.statusBar.addActionButton(this.getTargetButtonName(target, paramInfo), (event) => this.onToken(event), {
             color: color,
             disabled: !active,
@@ -1743,7 +1747,7 @@ class GameMachine {
     getReasonText(reason) {
         if (!reason)
             return "";
-        return _("Reason:") + " " + this.game.getTokenName(reason);
+        return this.game.getTokenName(reason);
     }
     getTargetButtonName(target, paramInfo) {
         const div = $(target);
@@ -1807,9 +1811,13 @@ class GameMachine {
         return true;
     }
     onToken_token_array(target, node) {
+        if (!this.opInfo)
+            return false;
         return this.onMultiCount(target, this.opInfo, node);
     }
     onToken_token_count(target, node) {
+        if (!this.opInfo)
+            return false;
         return this.onMultiCount(target, this.opInfo, node);
     }
     activateMultiSelectPrompt(opInfo) {
@@ -1862,8 +1870,20 @@ class GameMachine {
             console.log("action complete", x);
         })
             .catch((e) => {
-            this.game.setSubPrompt(e.message, e.args);
+            this.game.setActionStatus(e.message, e.args);
         });
+    }
+    addInfoButton(helpText) {
+        const escaped = document.createElement("div");
+        escaped.textContent = helpText;
+        const div = this.bga.statusBar.addActionButton(_("Info"), () => {
+            this.game.showPopin(escaped.innerHTML);
+        }, {
+            color: "secondary",
+            id: "button_info"
+        });
+        div.classList.add("button_info");
+        div.title = _("Click to see additional information about this prompt");
     }
     addUndoButton(cond = true) {
         if (!$("button_undo") && !this.bga.players.isCurrentPlayerSpectator() && cond) {
@@ -1872,7 +1892,7 @@ class GameMachine {
                 checkAction: false
             })
                 ?.catch((e) => {
-                this.game.setSubPrompt(e.message, e.args);
+                this.game.setActionStatus(e.message, e.args);
             }), {
                 color: "alert",
                 id: "button_undo"
@@ -1959,7 +1979,7 @@ class GameMachine {
                 doneButton.classList.remove(this.game.classButtonDisabled);
                 doneButton.title = "";
             }
-            $(doneButtonId).innerHTML = buttonName + ": " + count;
+            doneButton.innerHTML = buttonName + ": " + count;
         }
         if (count > 0) {
             $(resetButtonId)?.classList.remove(this.game.classButtonDisabled);
@@ -2121,7 +2141,7 @@ class PlayerTurnConfirm {
                 console.log("action complete", x);
             })
                 .catch((e) => {
-                this.game.setSubPrompt(e.message, e.args);
+                this.game.setActionStatus(e.message, e.args);
             });
         });
     }
@@ -2658,9 +2678,9 @@ class Game extends Game1Tokens {
             //handlers: [this, this.tokens],
             onStart: (notifName, msg, args) => {
                 if (msg)
-                    this.setSubPrompt(msg, args);
+                    this.setActionStatus(msg, args);
             }
-            // onEnd: (notifName, msg, args) => this.setSubPrompt("", args)
+            // onEnd: (notifName, msg, args) => this.setActionStatus("", args)
         });
     }
     async notif_tokenMoved(args) {

@@ -76,5 +76,5 @@ export interface OpInfo {
 
   count?: number;
   mcount?: number;
-  ui?: UiOptions;
+  ui: UiOptions;
 }

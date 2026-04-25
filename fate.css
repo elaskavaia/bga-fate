@@ -1661,17 +1661,6 @@
   height: 400px;
 }
 
-#gameaction_status_wrap {
-  display: block !important;
-}
-#gameaction_status_wrap img {
-  display: none;
-}
-
-.subtitle {
-  font-size: x-small;
-}
-
 #oversurface {
   position: absolute;
   width: 100%;
@@ -1869,13 +1858,8 @@ html:before {
 }
 
 #page-title {
-  min-height: 76px !important;
   line-height: 24px;
   background-color: #b5e6e3 !important;
-}
-
-#pagemaintitle_wrap {
-  min-height: 42px !important;
 }
 
 .selection_area {
