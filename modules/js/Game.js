@@ -2012,9 +2012,10 @@ class PlayerTurnConfirm {
 class Game extends Game1Tokens {
     constructor(bga) {
         super(bga);
-        this.boardLayout = "scale";
-        this.boundUpdateBoardScale = () => {
-            this.updateBoardScale($("thething"));
+        this.boardZoomMode = "fit";
+        this.boardZoomScale = 1;
+        this.boundOnResize = () => {
+            this.applyCurrentZoom();
         };
         //console.log("fate constructor");
         this.playerTurn = new PlayerTurn(this, bga);
@@ -2038,8 +2039,9 @@ class Game extends Game1Tokens {
       </div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
         placeHtml(`<div id="board_layout_controls" class="board_layout_controls">
-        <button id="layout_scale" class="layout_button active">\u2922</button>
-        <button id="layout_scroll" class="layout_button">\u2194</button>
+        <button id="layout_home" class="layout_button active"><i class="fa6 fa6-arrows-to-dot"></i></button>
+        <button id="layout_zoom_in" class="layout_button"><i class="fa fa-search-plus"></i></button>
+        <button id="layout_zoom_out" class="layout_button"><i class="fa fa-search-minus"></i></button>
       </div>`, "limbo");
         // Players panels (left side in wide layout, top in narrow)
         placeHtml(`<div id="players_panels"></div>`, "thething");
@@ -2581,68 +2583,77 @@ class Game extends Game1Tokens {
         //this.gamedatas.lastTurn = true;
         //this.updateBanner();
     }
-    // --- Layout controls: scale-to-fit vs horizontal scroll ---
+    // --- Layout controls: fit-to-screen / zoom-in / zoom-out ---
     setupLayoutControls() {
-        super.setupLocalControls("board_layout_controls");
-        const savedLayout = localStorage.getItem("fate_board_layout") || "scale";
-        this.boardLayout = savedLayout;
-        this.applyBoardLayout();
-        $("layout_scale").addEventListener("click", () => this.setBoardLayout("scale"));
-        $("layout_scroll").addEventListener("click", () => this.setBoardLayout("scroll"));
-        $("layout_scale").title = _("Board Layout: Scale to fit");
-        $("layout_scroll").title = _("Board Layout: Horizontal scroll");
+        this.destroyDivOtherCopies("board_layout_controls");
+        const host = document.getElementById("page-title") ?? document.getElementById("ebd-body") ?? document.body;
+        host.appendChild($("board_layout_controls"));
+        const savedMode = localStorage.getItem("fate_board_zoom_mode");
+        const savedScale = parseFloat(localStorage.getItem("fate_board_zoom_scale") ?? "");
+        this.boardZoomMode = savedMode === "manual" ? "manual" : "fit";
+        this.boardZoomScale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
+        $("layout_home").addEventListener("click", () => this.setZoomMode("fit"));
+        $("layout_zoom_in").addEventListener("click", () => this.zoomByFactor(1.1));
+        $("layout_zoom_out").addEventListener("click", () => this.zoomByFactor(1 / 1.1));
+        $("layout_home").title = _("Fit to screen");
+        $("layout_zoom_in").title = _("Zoom in");
+        $("layout_zoom_out").title = _("Zoom out");
+        window.addEventListener("resize", this.boundOnResize);
+        this.applyCurrentZoom();
     }
-    setBoardLayout(layout) {
-        this.boardLayout = layout;
-        localStorage.setItem("fate_board_layout", layout);
-        this.applyBoardLayout();
+    setZoomMode(mode) {
+        this.boardZoomMode = mode;
+        localStorage.setItem("fate_board_zoom_mode", mode);
+        this.applyCurrentZoom();
     }
-    applyBoardLayout() {
-        $("ebd-body").dataset.boardLayout = this.boardLayout;
-        this.boundUpdateBoardScale();
+    zoomByFactor(factor) {
+        const scalecontrol = $("thething");
+        const current = this.boardZoomMode === "fit" ? parseFloat(scalecontrol.dataset.scale ?? "1") || 1 : this.boardZoomScale;
+        const next = Math.min(4.0, Math.max(0.3, current * factor));
+        this.boardZoomScale = next;
+        localStorage.setItem("fate_board_zoom_scale", String(next));
+        this.setZoomMode("manual");
+    }
+    applyCurrentZoom() {
+        const scalecontrol = $("thething");
+        $("ebd-body").dataset.boardZoom = this.boardZoomMode;
         document.querySelectorAll(".layout_button").forEach((btn) => btn.classList.remove("active"));
-        $(`layout_${this.boardLayout}`)?.classList.add("active");
-        if (this.boardLayout === "scale") {
-            window.addEventListener("resize", this.boundUpdateBoardScale);
+        if (this.boardZoomMode === "fit") {
+            $("layout_home")?.classList.add("active");
+            this.applyFitZoom(scalecontrol);
         }
         else {
-            window.removeEventListener("resize", this.boundUpdateBoardScale);
+            this.applyManualZoom(scalecontrol);
         }
     }
-    updateBoardScale(scalecontrol) {
-        const set = this.boardLayout === "scale";
-        const parent = scalecontrol.parentElement;
-        scalecontrol.style.transform = "none";
-        scalecontrol.style.width = "";
-        scalecontrol.style.minWidth = "";
-        scalecontrol.style.height = "";
-        scalecontrol.style.marginBottom = "";
-        scalecontrol.style.transformOrigin = "";
-        scalecontrol.scrollLeft = 0;
+    resetScale(scalecontrol) {
+        scalecontrol.style.zoom = "";
         scalecontrol.dataset.scale = "1";
-        parent.scrollLeft = 0;
-        if (!set) {
-            scalecontrol.style.minWidth = "unset";
-            scalecontrol.style.width = "100%";
-            return;
-        }
-        const naturalWidth = scalecontrol.scrollWidth;
-        const availableWidth = parent.clientWidth;
-        let scale = 1;
-        if (naturalWidth > availableWidth) {
-            scale = availableWidth / naturalWidth;
-        }
-        this.applyScale(scalecontrol, scale);
+        if (scalecontrol.parentElement)
+            scalecontrol.parentElement.scrollLeft = 0;
     }
-    applyScale(scalecontrol, scale) {
-        if (Math.abs(scale - 1) < 0.01)
+    applyFitZoom(scalecontrol) {
+        this.resetScale(scalecontrol);
+        const parent = scalecontrol.parentElement;
+        if (!parent)
             return;
-        const naturalHeight = scalecontrol.offsetHeight;
+        const availableWidth = parent.clientWidth;
+        const naturalWidth = scalecontrol.scrollWidth;
+        if (naturalWidth <= availableWidth)
+            return;
+        this.applyZoom(scalecontrol, availableWidth / naturalWidth);
+    }
+    applyManualZoom(scalecontrol) {
+        this.resetScale(scalecontrol);
+        this.applyZoom(scalecontrol, this.boardZoomScale);
+        const wrap = scalecontrol.parentElement;
+        if (wrap.scrollWidth > wrap.clientWidth) {
+            wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+        }
+    }
+    applyZoom(scalecontrol, scale) {
         scalecontrol.dataset.scale = String(scale);
-        scalecontrol.style.transform = `scale(${scale})`;
-        scalecontrol.style.transformOrigin = "top center";
-        const reducedHeight = naturalHeight * (1 - scale);
-        scalecontrol.style.marginBottom = `-${reducedHeight}px`;
+        scalecontrol.style.zoom = String(scale);
     }
 }
 

@@ -195,58 +195,53 @@
   container-name: fate_mainarea;
 }
 
-// Layout controls - moved to player board by setupLocalControls
+$layout_button_color: #2d5a3d;
+// Layout controls - vertical bar anchored to bottom-left of #page-title
 .board_layout_controls {
-  position: relative;
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  margin-top: 8px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  z-index: 10;
-  padding: 4px 8px;
-  margin: 5px;
+  gap: 6px;
+  z-index: 1000;
+  padding: 4px;
 
   .layout_button {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 50%;
     background: white;
+    color: $layout_button_color;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
 
     &:hover {
       background: #e0e0e0;
       border-color: #999;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.5);
     }
 
     &.active {
-      background: v.$activeColor;
-      border-color: v.$activeColor;
+      background: $layout_button_color;
+      border-color: $layout_button_color;
       color: white;
     }
   }
 }
 
-// Layout mode: Scale to fit
-#ebd-body[data-board-layout="scale"] #mainarea {
-  overflow: visible;
-  justify-content: center;
-}
-
-// Layout mode: Horizontal scroll
-#ebd-body[data-board-layout="scroll"] #mainarea {
+// In manual zoom mode, let #mainarea scroll horizontally
+#ebd-body[data-board-zoom="manual"] #mainarea {
   overflow-x: auto;
   overflow-y: visible;
-  justify-content: safe center;
-
-  #thething {
-    min-width: max-content;
-  }
 }
 
 .map_wrapper {
