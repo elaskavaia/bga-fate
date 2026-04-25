@@ -44,7 +44,7 @@ class Game extends Base {
         Game::$instance = $this;
         parent::__construct();
         self::initGameStateLabels([
-            // "variant_solo_board" => 101,
+            "var_solo_hero" => 100,
         ]);
 
         $this->material = new Material();
@@ -162,6 +162,13 @@ class Game extends Base {
     protected function getHeroOrder() {
         $heroNos = range(1, 4);
         shuffle($heroNos);
+        if ($this->getPlayersNumber() === 1) {
+            $chosen = (int) $this->getGameStateValue("var_solo_hero");
+            if ($chosen >= 1 && $chosen <= 4) {
+                $heroNos = array_values(array_diff($heroNos, [$chosen]));
+                array_unshift($heroNos, $chosen);
+            }
+        }
         return $heroNos;
     }
 
@@ -854,7 +861,7 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    function debug_game_variant(string $type = "variant_multi", int $value = 1) {
+    function debug_game_variant(string $type = "var_solo_hero", int $value = 1) {
         $this->setGameStateValue($type, $value);
     }
     // /**

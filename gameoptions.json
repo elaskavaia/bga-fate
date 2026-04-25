@@ -1,1 +1,29 @@
-{}
+{
+  "100": {
+    "name": "Solo Hero",
+    "values": {
+      "0": {
+        "name": "Random"
+      },
+      "1": {
+        "name": "Bjorn"
+      },
+      "2": {
+        "name": "Alva"
+      },
+      "3": {
+        "name": "Embla"
+      },
+      "4": {
+        "name": "Boldur"
+      }
+    },
+    "default": 0,
+    "displaycondition": [
+      {
+        "type": "maxplayers",
+        "value": 1
+      }
+    ]
+  }
+}
