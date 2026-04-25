@@ -55,7 +55,11 @@ class Op_seq extends ComplexOperation {
         }
 
         if ($this->isRangedChoice()) {
-            return parent::getRangeMoves();
+            $max = $this->getCount();
+            if ($max > 1) {
+                return parent::getRangeMoves();
+            }
+            return ["confirm"];
         }
 
         return $sub->getPossibleMoves();
@@ -65,20 +69,23 @@ class Op_seq extends ComplexOperation {
         if ($this->isRangedChoice()) {
             $max = $this->getCount();
             if ($max > 1) {
-                return clienttranslate('Select how many times to perform ${name}');
+                return clienttranslate('Select how many times to perform ${img_name}');
             }
-            return clienttranslate('Perform ${name}');
+            return '${img_name}';
         }
         return parent::getPrompt();
     }
 
-    function getOpName() {
-        return $this->getRecName(", ");
+    function getJoiner(): string {
+        return ", ";
     }
 
     public function resolve(): void {
         if ($this->isRangedChoice()) {
             $c = $this->getCheckedArg();
+            if ($c === "confirm") {
+                $c = 1;
+            }
             $this->withDataField("count", $c);
             $this->withDataField("mcount", $c);
 

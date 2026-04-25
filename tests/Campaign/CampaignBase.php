@@ -87,7 +87,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true). */
     protected function confirmCardEffect(): void {
-        $this->respond("1");
+        $this->respond("confirm");
     }
 
     /** Get current game state (id, name, active_player, args) */

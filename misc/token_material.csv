@@ -44,6 +44,13 @@ die_attack|Attack Die|20|die|2|supply_die_attack|"state"=>6
 # monster die (optional variant, 1 die)
 die_monster|Monster Die|1|die|1|supply_die_monster|"state"=>6
 
+# bracket-icon aliases for card text (create=0, not real tokens)
+XP|Gold/XP|0|wicon wicon_xp|0||
+MANA|Mana|0|wicon wicon_mana|0||
+DAMAGE|Damage|0|wicon wicon_damage|0||
+RUNE|Rune|0|wicon wicon_rune|0||
+DIE_ATTACK|Attack Die|0|wicon wicon_die_attack|0||
+
 # hero attribute trackers (created per hero in setupGameTables, not auto-created)
 tracker_strength|Strength|0|tracker wicon wicon_strength|4|tableau_{COLOR}
 tracker_range|Attack Range|0|tracker wicon wicon_range|4|tableau_{COLOR}

@@ -309,12 +309,12 @@ class Hero extends Character {
     /**
      * Award XP (yellow crystals) from supply to tableau.
      */
-    function gainXp(int $amount): void {
+    function gainXp(int $amount, string $message = "*"): void {
         if ($amount <= 0) {
             return;
         }
         $this->moveCrystals("yellow", $amount, "tableau_{$this->owner}", [
-            "message" => clienttranslate('${char_name} gains ${count} XP'),
+            "message" => $message == "*" ? clienttranslate('${char_name} gains ${count} [XP]') : $message,
         ]);
     }
 

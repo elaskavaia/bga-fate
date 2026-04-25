@@ -148,6 +148,16 @@
   background-position: 20% 0%;
 }
 
+.monster.monster_goldvein {
+  background-image: url("img/tokens.webp");
+  background-size: 600% auto;
+  background-position: 20% 0%;
+}
+
+#supply_monster_goldvein {
+  display: none;
+}
+
 .gsupply .crystal {
   visibility: hidden;
   display: block;
@@ -265,6 +275,11 @@
   background-size: 600% 300%;
   background-repeat: no-repeat;
 }
+.log .wicon, #page-title .wicon {
+  vertical-align: middle;
+  height: 24px;
+  line-height: 24px;
+}
 
 .tracker::after,
 .counter::after,
@@ -377,7 +392,20 @@
 
 .wicon_mana,
 .wicon_green {
-  background-position: 100% 0%;
+  background-position: 97% 5%;
+  background-size: 800% auto;
+}
+
+.wicon_die_attack {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 0% 0%;
+}
+
+.wicon_rune {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 40% 0%;
 }
 
 /**
@@ -1556,7 +1584,6 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 8px;
   min-height: 32px;
 }
 
@@ -1862,17 +1889,28 @@ html:before {
   background-color: #b5e6e3 !important;
 }
 
-.selection_area {
+.game_top_bar {
+  width: 100%;
   position: sticky;
   top: 86px;
   align-self: flex-start;
-  width: 100%;
+  min-height: 46px;
+  z-index: 20;
   display: flex;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
-  min-height: 46px;
-  z-index: 20;
+}
+.game_top_bar > * {
+  position: relative;
+  display: inline-block;
+}
+
+.selection_area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .selection_area > * {
   position: relative;

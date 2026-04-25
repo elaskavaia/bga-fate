@@ -467,7 +467,7 @@ abstract class Operation {
     }
 
     function getIconicName() {
-        return $this->getOpName();
+        return "[" . $this->getOpId() . "]";
     }
 
     function getOpName() {

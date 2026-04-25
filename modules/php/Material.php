@@ -334,31 +334,7 @@ class Material {
         "name" => clienttranslate("Use Card"),
 ],
 // #shareGold|Share Gold|
-// # Card effect operations (building blocks for card effects)
-    "Op_dealDamage" => [ 
-        "type" => "dealDamage",
-        "name" => clienttranslate("Deal Damage"),
-],
-    "Op_gainMana" => [ 
-        "type" => "gainMana",
-        "name" => clienttranslate("Gain Mana"),
-],
-    "Op_spendMana" => [ 
-        "type" => "spendMana",
-        "name" => clienttranslate("Spend Mana"),
-],
-    "Op_spendManaAny" => [ 
-        "type" => "spendManaAny",
-        "name" => clienttranslate("Spend Mana (from any card)"),
-],
-    "Op_spendGold" => [ 
-        "type" => "spendGold",
-        "name" => clienttranslate("Spend Gold"),
-],
-    "Op_spendUse" => [ 
-        "type" => "spendUse",
-        "name" => clienttranslate("Once per Turn"),
-],
+// # Predicates (stateless guards — void chain on failure)
     "Op_on" => [ 
         "type" => "on",
         "name" => clienttranslate("Triggered Effect"),
@@ -371,65 +347,56 @@ class Material {
         "type" => "adj",
         "name" => clienttranslate("Hero Adjacent To Terrain"),
 ],
+// # Costs (spend* — also void on failure, double as guards)
+    "Op_spendMana" => [ 
+        "type" => "spendMana",
+        "name" => clienttranslate("Spend Mana"),
+        "wicon" => "wicon_mana",
+],
+    "Op_spendManaAny" => [ 
+        "type" => "spendManaAny",
+        "name" => clienttranslate("Spend Mana (from any card)"),
+        "wicon" => "wicon_mana",
+],
+    "Op_spendGold" => [ 
+        "type" => "spendGold",
+        "name" => clienttranslate("Spend Gold"),
+        "wicon" => "wicon_xp",
+],
+    "Op_spendXp" => [ 
+        "type" => "spendXp",
+        "name" => clienttranslate("Spend XP"),
+        "wicon" => "wicon_xp",
+],
     "Op_spendDurab" => [ 
         "type" => "spendDurab",
         "name" => clienttranslate("Take Damage"),
+        "wicon" => "wicon_damage",
 ],
     "Op_spendHealth" => [ 
         "type" => "spendHealth",
         "name" => clienttranslate("Take Unpreventable Damage"),
+        "wicon" => "wicon_damage",
+],
+    "Op_spendUse" => [ 
+        "type" => "spendUse",
+        "name" => clienttranslate("Once per turn"),
 ],
     "Op_spendAction" => [ 
         "type" => "spendAction",
         "name" => clienttranslate("Spend Action"),
 ],
-    "Op_roll" => [ 
-        "type" => "roll",
-        "name" => clienttranslate("Roll Dice"),
-],
-    "Op_addRoll" => [ 
-        "type" => "addRoll",
-        "name" => clienttranslate("Add Roll Dice"),
-],
-    "Op_resolveHits" => [ 
-        "type" => "resolveHits",
-        "name" => clienttranslate("Resolve Hits"),
-],
-    "Op_endOfAttack" => [ 
-        "type" => "endOfAttack",
-        "name" => clienttranslate("End of Attack"),
-],
-    "Op_heal" => [ 
-        "type" => "heal",
-        "name" => clienttranslate("Heal"),
-],
-    "Op_move" => [ 
-        "type" => "move",
-        "name" => clienttranslate("Move Hero"),
-],
-    "Op_step" => [ 
-        "type" => "step",
-        "name" => clienttranslate("Step"),
-],
-    "Op_moveMonster" => [ 
-        "type" => "moveMonster",
-        "name" => clienttranslate("Move Monster"),
-],
-    "Op_performAction" => [ 
-        "type" => "performAction",
-        "name" => clienttranslate("Perform Action"),
-],
-    "Op_repairCard" => [ 
-        "type" => "repairCard",
-        "name" => clienttranslate("Repair Card"),
+// #Card effect operations:
+// # gains
+    "Op_gainMana" => [ 
+        "type" => "gainMana",
+        "name" => clienttranslate("Gain Mana"),
+        "wicon" => "wicon_mana",
 ],
     "Op_gainXp" => [ 
         "type" => "gainXp",
         "name" => clienttranslate("Gain XP"),
-],
-    "Op_spendXp" => [ 
-        "type" => "spendXp",
-        "name" => clienttranslate("Spend XP"),
+        "wicon" => "wicon_xp",
 ],
     "Op_gainAtt" => [ 
         "type" => "gainAtt",
@@ -439,25 +406,102 @@ class Material {
         "type" => "setAtt",
         "name" => clienttranslate("Set Attribute"),
 ],
-    "Op_killMonster" => [ 
-        "type" => "killMonster",
-        "name" => clienttranslate("Kill Monster"),
+    "Op_gainAtt_range" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_range",
+        "name" => clienttranslate("Gain Range"),
+        "wicon" => "wicon_range",
 ],
-    "Op_preventDamage" => [ 
-        "type" => "preventDamage",
-        "name" => clienttranslate("Prevent Damage"),
+    "Op_gainAtt_move" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_move",
+        "name" => clienttranslate("Gain Move"),
+        "wicon" => "wicon_move",
+],
+    "Op_gainAtt_strength" => [ 
+        "class" => "gainAtt",
+        "type" => "gainAtt_strength",
+        "name" => clienttranslate("Gain Strength"),
+        "wicon" => "wicon_strength",
+],
+// # damage / health
+    "Op_dealDamage" => [ 
+        "type" => "dealDamage",
+        "name" => clienttranslate("Deal Damage"),
+        "wicon" => "wicon_damage",
 ],
     "Op_addDamage" => [ 
         "type" => "addDamage",
         "name" => clienttranslate("Add Damage"),
+        "wicon" => "wicon_damage",
 ],
-    "Op_addTownPiece" => [ 
-        "type" => "addTownPiece",
-        "name" => clienttranslate("Add Town Piece"),
+    "Op_preventDamage" => [ 
+        "type" => "preventDamage",
+        "name" => clienttranslate("Prevent Damage"),
+        "wicon" => "wicon_damage",
+],
+    "Op_heal" => [ 
+        "type" => "heal",
+        "name" => clienttranslate("Heal"),
+        "wicon" => "wicon_health",
+],
+    "Op_killMonster" => [ 
+        "type" => "killMonster",
+        "name" => clienttranslate("Kill Monster"),
+        "wicon" => "wicon_strength",
+],
+    "Op_repairCard" => [ 
+        "type" => "repairCard",
+        "name" => clienttranslate("Repair Card"),
+],
+// # movement
+    "Op_move" => [ 
+        "type" => "move",
+        "name" => clienttranslate("Move Hero"),
+        "wicon" => "wicon_move",
+],
+    "Op_step" => [ 
+        "type" => "step",
+        "name" => clienttranslate("Step"),
+        "wicon" => "wicon_move",
+],
+    "Op_moveMonster" => [ 
+        "type" => "moveMonster",
+        "name" => clienttranslate("Move Monster"),
+        "wicon" => "wicon_move",
+],
+// # dice/attack
+    "Op_roll" => [ 
+        "type" => "roll",
+        "name" => clienttranslate("Roll Dice"),
+        "wicon" => "wicon_die_attack",
+],
+    "Op_addRoll" => [ 
+        "type" => "addRoll",
+        "name" => clienttranslate("Add Roll Dice"),
+        "wicon" => "wicon_die_attack",
 ],
     "Op_rerollMisses" => [ 
         "type" => "rerollMisses",
         "name" => clienttranslate("Reroll Misses"),
+        "wicon" => "wicon_die_attack",
+],
+    "Op_resolveHits" => [ 
+        "type" => "resolveHits",
+        "name" => clienttranslate("Resolve Hits"),
+],
+    "Op_endOfAttack" => [ 
+        "type" => "endOfAttack",
+        "name" => clienttranslate("End of Attack"),
+],
+// # misc
+    "Op_performAction" => [ 
+        "type" => "performAction",
+        "name" => clienttranslate("Perform Action"),
+],
+    "Op_addTownPiece" => [ 
+        "type" => "addTownPiece",
+        "name" => clienttranslate("Add Town Piece"),
 ],
     "Op_upgrade" => [ 
         "type" => "upgrade",
@@ -478,21 +522,6 @@ class Material {
     "Op_multiTarget" => [ 
         "type" => "multiTarget",
         "name" => clienttranslate("Target Multiple"),
-],
-    "Op_gainAtt_range" => [ 
-        "class" => "gainAtt",
-        "type" => "gainAtt_range",
-        "name" => clienttranslate("Gain Range"),
-],
-    "Op_gainAtt_move" => [ 
-        "class" => "gainAtt",
-        "type" => "gainAtt_move",
-        "name" => clienttranslate("Gain Move"),
-],
-    "Op_gainAtt_strength" => [ 
-        "class" => "gainAtt",
-        "type" => "gainAtt_strength",
-        "name" => clienttranslate("Gain Strength"),
 ],
 // #rare operations
     "Op_c_supfire" => [ 
@@ -704,6 +733,42 @@ class Material {
         "create" => 1,
         "location" => "supply_die_monster",
         "state"=>6,
+],
+// # bracket-icon aliases for card text (create=0, not real tokens)
+    "XP" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Gold/XP"),
+        "count" => 0,
+        "type" => "wicon wicon_xp",
+        "create" => 0,
+],
+    "MANA" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Mana"),
+        "count" => 0,
+        "type" => "wicon wicon_mana",
+        "create" => 0,
+],
+    "DAMAGE" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Damage"),
+        "count" => 0,
+        "type" => "wicon wicon_damage",
+        "create" => 0,
+],
+    "RUNE" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Rune"),
+        "count" => 0,
+        "type" => "wicon wicon_rune",
+        "create" => 0,
+],
+    "DIE_ATTACK" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Attack Die"),
+        "count" => 0,
+        "type" => "wicon wicon_die_attack",
+        "create" => 0,
 ],
 // # hero attribute trackers (created per hero in setupGameTables, not auto-created)
     "tracker_strength" => [ 

@@ -85,8 +85,8 @@ class Op_or extends ComplexOperation {
     function getDescription() {
         return clienttranslate('${actplayer} chooses one of the options');
     }
-    function getOpName() {
-        return $this->getRecName(" / ");
+    function getJoiner(): string {
+        return " / ";
     }
 
     function getOperator() {

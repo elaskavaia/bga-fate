@@ -658,9 +658,20 @@ export class Game1Tokens extends Game0Basics {
     return tokenInfo;
   }
 
-  getTokenPresentaton(type: string, value: string, _args: any = {}): string {
+  getTokenPresentaton(type: string, value: string, args?: any, strict?: false): string;
+  getTokenPresentaton(type: string, value: string, args: any, strict: true): string | null;
+  getTokenPresentaton(type: string, value: string, _args: any = {}, strict: boolean = false): string | null {
     if (type.includes("_div")) return this.createTokenImage(value);
     if (value.includes("wicon")) return this.createTokenImage(value);
+    const wicon = this.getRulesFor(value, "wicon", "");
+    if (wicon) return this.createTokenImage(value, 0, wicon);
+    if (this.getRulesFor(value, "type", "").includes("wicon")) return this.createTokenImage(value);
+    if (strict) {
+      const rules = this.getRulesFor(value, "*", null);
+      if (rules === null) return null;
+      if (rules.name) return this.game.getTr(rules.name);
+      return null;
+    }
     if (type == "reason" && value) {
       return "(" + this.getTokenName(value) + ")";
     }
@@ -676,11 +687,13 @@ export class Game1Tokens extends Game0Basics {
   iiSection(text: string) {
     return `<p><i>${text}</i></p>`;
   }
-  createTokenImage(tokenId: string, state: number = 0) {
+  createTokenImage(tokenId: string, state: number = 0, extraClass: string = "") {
     const div = document.createElement("div");
     div.id = tokenId + "_tt_" + this.globlog++;
     this.updateToken(div, { key: tokenId, location: "log", state });
-    div.title = this.getTokenName(tokenId, false) ?? "";
+    if (extraClass) div.classList.add("wicon", ...extraClass.split(/ +/));
+    const name = this.getRulesFor(tokenId, "name", null);
+    if (name) div.title = this.game.getTr(name);
     return div.outerHTML;
   }
 
@@ -731,14 +744,29 @@ export class Game1Tokens extends Game0Basics {
             if (res) args[key] = res;
             continue;
           }
-          var res = this.getTokenPresentaton(key, arg_value, args);
+          res = this.getTokenPresentaton(key, arg_value, args);
           if (res) args[key] = res;
         }
       }
     } catch (e) {
       console.error(log, args, "Exception thrown", e.stack);
     }
+    log = this.replaceSimpleIconsInLog(log, args);
     return { log, args };
+  }
+
+  replaceSimpleIconsInLog(log: string, args: any = {}): string {
+    if (!log || !log.includes("[")) return log;
+    return log.replace(/\[([^\]]+)\]/g, (match, keyExpr) => {
+      try {
+        const x = this.getTokenPresentaton(keyExpr, keyExpr, args, true);
+        if (!x) return match;
+        return x;
+      } catch (e) {
+        console.error(`Failed to get token presentation for [${keyExpr}]`, e);
+        return match;
+      }
+    });
   }
 
   async slideAndPlace(
@@ -757,7 +785,7 @@ export class Game1Tokens extends Game0Basics {
     }
     if (delay) await gameui.wait(delay);
     this.animationLa.phantomMove(token, finalPlace, duration, mobileStyle, onEnd);
-    return gameui.wait(duration);
+    return gameui.wait(duration ?? 0);
   }
 
   showHiddenContent(id: ElementOrId, title: string, selectedId?: string | number, sort?: any) {

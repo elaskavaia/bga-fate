@@ -54,50 +54,64 @@ useCard|Use Card
 #set kind=
 #set inline=
 
-# Card effect operations (building blocks for card effects)
-dealDamage|Deal Damage
-gainMana|Gain Mana
-spendMana|Spend Mana
-spendManaAny|Spend Mana (from any card)
-spendGold|Spend Gold
-spendUse|Once per Turn
+# Predicates (stateless guards — void chain on failure)
 on|Triggered Effect
 in|Hero In Location
 adj|Hero Adjacent To Terrain
-spendDurab|Take Damage
-spendHealth|Take Unpreventable Damage
+
+# Costs (spend* — also void on failure, double as guards)
+spendMana|Spend Mana|wicon_mana
+spendManaAny|Spend Mana (from any card)|wicon_mana
+spendGold|Spend Gold|wicon_xp
+spendXp|Spend XP|wicon_xp
+spendDurab|Take Damage|wicon_damage
+spendHealth|Take Unpreventable Damage|wicon_damage
+spendUse|Once per turn
 spendAction|Spend Action
-roll|Roll Dice
-addRoll|Add Roll Dice
-resolveHits|Resolve Hits
-endOfAttack|End of Attack
-heal|Heal
-move|Move Hero
-step|Step
-moveMonster|Move Monster
-performAction|Perform Action
-repairCard|Repair Card
-gainXp|Gain XP
-spendXp|Spend XP
+
+#Card effect operations:
+# gains
+gainMana|Gain Mana|wicon_mana
+gainXp|Gain XP|wicon_xp
 gainAtt|Gain Attribute
 setAtt|Set Attribute
-killMonster|Kill Monster
-preventDamage|Prevent Damage
-addDamage|Add Damage
-addTownPiece|Add Town Piece
-rerollMisses|Reroll Misses
 
+#set class=gainAtt
+gainAtt_range|Gain Range|wicon_range
+gainAtt_move|Gain Move|wicon_move
+gainAtt_strength|Gain Strength|wicon_strength
+#set class=
+
+# damage / health
+dealDamage|Deal Damage|wicon_damage
+addDamage|Add Damage|wicon_damage
+preventDamage|Prevent Damage|wicon_damage
+heal|Heal|wicon_health
+killMonster|Kill Monster|wicon_strength
+repairCard|Repair Card
+
+# movement
+move|Move Hero|wicon_move
+step|Step|wicon_move
+moveMonster|Move Monster|wicon_move
+
+# dice/attack
+roll|Roll Dice|wicon_die_attack
+addRoll|Add Roll Dice|wicon_die_attack
+rerollMisses|Reroll Misses|wicon_die_attack
+resolveHits|Resolve Hits
+endOfAttack|End of Attack
+
+# misc
+performAction|Perform Action
+addTownPiece|Add Town Piece
 upgrade|Upgrade
 gainEquip|Gain Equipment
 drawEvent|Draw Event
 discardEvent|Discard Event
 multiTarget|Target Multiple
 
-#set class=gainAtt
-gainAtt_range|Gain Range
-gainAtt_move|Gain Move
-gainAtt_strength|Gain Strength
-#set class=
+
 
 #rare operations
 c_supfire|Suppressive Fire

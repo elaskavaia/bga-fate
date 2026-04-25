@@ -20,7 +20,6 @@
 //   --accent-game-font: "MedievalSharp", cursive;
 // }
 
-
 #oversurface {
   position: absolute;
   width: 100%;
@@ -250,18 +249,31 @@ $logsBgColor: #b5e6e3;
   background-color: $logsBgColor !important;
 }
 
-.selection_area {
+.game_top_bar {
+  width: 100%;
   position: sticky;
   top: 86px;
   align-self: flex-start;
-  width: 100%;
+  min-height: 46px;
+  z-index: 20;
+
   display: flex;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
-  min-height: 46px;
 
-  z-index: 20;
+  & > * {
+    position: relative;
+    display: inline-block;
+  }
+}
+
+.selection_area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
   & > * {
     position: relative;
     display: inline-block;

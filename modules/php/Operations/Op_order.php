@@ -76,7 +76,7 @@ class Op_order extends ComplexOperation {
         return "+";
     }
 
-    function getOpName() {
-        return $this->getRecName(" + ");
+    function getJoiner(): string {
+        return " + ";
     }
 }

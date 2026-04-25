@@ -38,10 +38,12 @@ abstract class CountableOperation extends Operation {
     }
 
     function getIconicName() {
-        if ($this->getCount() == 1) {
-            return '${name}';
+        $count = $this->getCount();
+        $icon = $this->getOpId();
+        if ($count == 1) {
+            return "[$icon]";
         }
-        return clienttranslate('${name} x ${count}');
+        return "$count [$icon]"; // match game visuals
     }
 
     function getPossibleMoves() {
@@ -49,7 +51,12 @@ abstract class CountableOperation extends Operation {
     }
 
     public function getExtraArgs() {
-        return ["count" => $this->getCount(), "mcount" => $this->getMinCount(), "name" => $this->getOpName()];
+        return [
+            "count" => $this->getCount(),
+            "mcount" => $this->getMinCount(),
+            "name" => $this->getOpName(),
+            "img_name" => $this->getIconicName(),
+        ];
     }
 
     function getCount() {

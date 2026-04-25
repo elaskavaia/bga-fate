@@ -27,8 +27,8 @@ class Op_paygain extends Op_seq {
     public function requireConfirmation() {
         return true;
     }
-    function getOpName() {
-        return $this->getRecName(" ⤇ ");
+    function getJoiner(): string {
+        return ": ";
     }
     function getOperator() {
         return ":";

@@ -109,7 +109,13 @@ abstract class ComplexOperation extends CountableOperation {
         return false;
     }
 
-    function getRecName($join) {
+    /** Display joiner for delegate names (e.g. " + ", " / "). Override per subclass. */
+    function getJoiner(): string {
+        return $this->getOperator();
+    }
+
+    function getRecName($join = null) {
+        $join ??= $this->getJoiner();
         $args = [];
         $pars = [];
         if (count($this->delegates) == 0) {
@@ -117,7 +123,7 @@ abstract class ComplexOperation extends CountableOperation {
         }
         foreach ($this->delegates as $i => $sub) {
             $pars[] = "p$i";
-            $args["p$i"] = ["log" => $sub->getIconicName(), "args" => $sub->getExtraArgs()];
+            $args["p$i"] = ["log" => $sub->getOpName(), "args" => $sub->getExtraArgs()];
         }
         $log = implode(
             $join,
@@ -127,6 +133,21 @@ abstract class ComplexOperation extends CountableOperation {
         );
 
         return ["log" => $log, "args" => $args];
+    }
+
+    function getOpName() {
+        return $this->getRecName();
+    }
+
+    function getIconicName() {
+        if (count($this->delegates) == 0) {
+            return parent::getIconicName();
+        }
+        $names = [];
+        foreach ($this->delegates as $sub) {
+            $names[] = $sub->getIconicName();
+        }
+        return implode($this->getJoiner(), $names);
     }
 
     function getTypeFullExpr() {

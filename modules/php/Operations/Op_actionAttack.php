@@ -38,11 +38,15 @@ class Op_actionAttack extends Operation {
         if ($this->game->tokens->getTokenLocation(self::OREBITER) === "tableau_{$this->getOwner()}") {
             $op = $this->instantiateOperation("c_orebiter", $this->getOwner(), ["card" => self::OREBITER]);
             if (!$op->isVoid()) {
-                $hexes[] = self::OREBITER;
+                $hexes[self::OREBITER] = ["q" => 0, "buttons" => true];
             }
         }
 
         return $hexes;
+    }
+
+    public function getIconicName() {
+        return clienttranslate("Attack [Op_actionAttack]");
     }
 
     public function getPrompt() {

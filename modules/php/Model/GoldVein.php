@@ -12,13 +12,12 @@ namespace Bga\Games\Fate\Model;
 class GoldVein extends Monster {
     function applyDamageEffects(int $amount, string $attackerId): int {
         $this->game->systemAssert("cannot be negative amount", $amount >= 0);
-        $this->game->notifyMessage(clienttranslate('${char_name} gains ${count} [XP] (Gold extracted from Mountain)'), [
-            "char_name" => $attackerId,
-            "count" => $amount,
-        ]);
+
         $this->moveTo("supply_monster", "");
         if ($amount > 0) {
-            $this->game->getHeroById($attackerId)->gainXp($amount);
+            $this->game
+                ->getHeroById($attackerId)
+                ->gainXp($amount, clienttranslate('${char_name} gains ${count} [XP] (Gold extracted from Mountain)'));
         }
         return 0;
     }

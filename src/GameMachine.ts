@@ -92,7 +92,7 @@ export class GameMachine {
         altNode = this.replicateTargetOnToolbar(target, paramInfo);
       }
 
-      if (!altNode && (opInfo.ui.buttons || !div)) {
+      if ((!altNode && (opInfo.ui.buttons || !div)) || paramInfo.buttons == true) {
         altNode = this.createTargetButton(target, paramInfo);
       }
 
@@ -226,7 +226,7 @@ export class GameMachine {
     const parent = document.createElement("div");
     parent.classList.add("target_container");
     parent.innerHTML = cloneHtml;
-    $("selection_area").appendChild(parent);
+    $("selection_area")?.appendChild(parent);
     const child = parent.children.item(0) as HTMLElement;
     child.classList.remove(this.game.classActiveSlot);
     child.classList.add(this.game.classActiveSlotHidden);
@@ -264,7 +264,7 @@ export class GameMachine {
     }
     $("button_undo")?.remove();
     // remove children
-    $("selection_area").replaceChildren();
+    $("selection_area")?.replaceChildren();
   }
 
   /** default click processor */

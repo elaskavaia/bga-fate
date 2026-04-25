@@ -1219,11 +1219,24 @@ class Game1Tokens extends Game0Basics {
         //console.log("cached", tokenId);
         return tokenInfo;
     }
-    getTokenPresentaton(type, value, _args = {}) {
+    getTokenPresentaton(type, value, _args = {}, strict = false) {
         if (type.includes("_div"))
             return this.createTokenImage(value);
         if (value.includes("wicon"))
             return this.createTokenImage(value);
+        const wicon = this.getRulesFor(value, "wicon", "");
+        if (wicon)
+            return this.createTokenImage(value, 0, wicon);
+        if (this.getRulesFor(value, "type", "").includes("wicon"))
+            return this.createTokenImage(value);
+        if (strict) {
+            const rules = this.getRulesFor(value, "*", null);
+            if (rules === null)
+                return null;
+            if (rules.name)
+                return this.game.getTr(rules.name);
+            return null;
+        }
         if (type == "reason" && value) {
             return "(" + this.getTokenName(value) + ")";
         }
@@ -1240,11 +1253,15 @@ class Game1Tokens extends Game0Basics {
     iiSection(text) {
         return `<p><i>${text}</i></p>`;
     }
-    createTokenImage(tokenId, state = 0) {
+    createTokenImage(tokenId, state = 0, extraClass = "") {
         const div = document.createElement("div");
         div.id = tokenId + "_tt_" + this.globlog++;
         this.updateToken(div, { key: tokenId, location: "log", state });
-        div.title = this.getTokenName(tokenId, false) ?? "";
+        if (extraClass)
+            div.classList.add("wicon", ...extraClass.split(/ +/));
+        const name = this.getRulesFor(tokenId, "name", null);
+        if (name)
+            div.title = this.game.getTr(name);
         return div.outerHTML;
     }
     isMarkedForTranslation(key, args) {
@@ -1297,7 +1314,7 @@ class Game1Tokens extends Game0Basics {
                             args[key] = res;
                         continue;
                     }
-                    var res = this.getTokenPresentaton(key, arg_value, args);
+                    res = this.getTokenPresentaton(key, arg_value, args);
                     if (res)
                         args[key] = res;
                 }
@@ -1306,7 +1323,24 @@ class Game1Tokens extends Game0Basics {
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
         }
+        log = this.replaceSimpleIconsInLog(log, args);
         return { log, args };
+    }
+    replaceSimpleIconsInLog(log, args = {}) {
+        if (!log || !log.includes("["))
+            return log;
+        return log.replace(/\[([^\]]+)\]/g, (match, keyExpr) => {
+            try {
+                const x = this.getTokenPresentaton(keyExpr, keyExpr, args, true);
+                if (!x)
+                    return match;
+                return x;
+            }
+            catch (e) {
+                console.error(`Failed to get token presentation for [${keyExpr}]`, e);
+                return match;
+            }
+        });
     }
     async slideAndPlace(token, finalPlace, duration, delay = 0, mobileStyle, onEnd) {
         if (!$(token))
@@ -1320,7 +1354,7 @@ class Game1Tokens extends Game0Basics {
         if (delay)
             await gameui.wait(delay);
         this.animationLa.phantomMove(token, finalPlace, duration, mobileStyle, onEnd);
-        return gameui.wait(duration);
+        return gameui.wait(duration ?? 0);
     }
     showHiddenContent(id, title, selectedId, sort) {
         let dialog = new ebg.popindialog();
@@ -1614,7 +1648,7 @@ class GameMachine {
             if (opInfo.ui.imagebuttons == true || paramInfo.imagebuttons == true) {
                 altNode = this.replicateTargetOnToolbar(target, paramInfo);
             }
-            if (!altNode && (opInfo.ui.buttons || !div)) {
+            if ((!altNode && (opInfo.ui.buttons || !div)) || paramInfo.buttons == true) {
                 altNode = this.createTargetButton(target, paramInfo);
             }
             if (!altNode)
@@ -1738,7 +1772,7 @@ class GameMachine {
         const parent = document.createElement("div");
         parent.classList.add("target_container");
         parent.innerHTML = cloneHtml;
-        $("selection_area").appendChild(parent);
+        $("selection_area")?.appendChild(parent);
         const child = parent.children.item(0);
         child.classList.remove(this.game.classActiveSlot);
         child.classList.add(this.game.classActiveSlotHidden);
@@ -1775,7 +1809,7 @@ class GameMachine {
         }
         $("button_undo")?.remove();
         // remove children
-        $("selection_area").replaceChildren();
+        $("selection_area")?.replaceChildren();
     }
     /** default click processor */
     onToken(event, fromMethod) {
@@ -2166,7 +2200,11 @@ class Game extends Game1Tokens {
         console.log("Starting game setup");
         super.setup(gamedatas);
         placeHtml(`
-      <div id='selection_area' class='selection_area'></div>
+      <div id='game_top_bar' class='game_top_bar'>
+        <div id='selection_area' class='selection_area'>
+        </div>
+
+      </div>
       <div id="thething_wrap">
         <div id="thething"></div>
       </div>`, this.bga.gameArea.getElement());
@@ -2176,7 +2214,7 @@ class Game extends Game1Tokens {
         // Board area: map + monster turn display + supply (right side in wide layout)
         const mapWrapper = "map_wrapper";
         placeHtml(`<div id="board_area">
-      <div id="display_battle"></div>
+      <div id="display_battle"> </div>
       <div id="${mapWrapper}" class="map_wrapper"></div>
       <div id="display_monsterturn">
         <div id="deck_monster_yellow" class="deck deck_monster"></div>
@@ -2436,8 +2474,10 @@ class Game extends Game1Tokens {
             }
         }
     }
-    getTokenPresentaton(type, tokenKey, args = {}) {
-        const res = super.getTokenPresentaton(type, tokenKey, args);
+    getTokenPresentaton(type, tokenKey, args = {}, strict = false) {
+        const res = strict ? super.getTokenPresentaton(type, tokenKey, args, true) : super.getTokenPresentaton(type, tokenKey, args);
+        if (res === null)
+            return null;
         const tc = this.getRulesFor(tokenKey, "tc");
         if (tc)
             return `<span style="color:${tc};font-weight:bold">${res}</span>`;

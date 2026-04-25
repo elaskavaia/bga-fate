@@ -60,7 +60,11 @@ export class Game extends Game1Tokens {
     super.setup(gamedatas);
     placeHtml(
       `
-      <div id='selection_area' class='selection_area'></div>
+      <div id='game_top_bar' class='game_top_bar'>
+        <div id='selection_area' class='selection_area'>
+        </div>
+
+      </div>
       <div id="thething_wrap">
         <div id="thething"></div>
       </div>`,
@@ -73,7 +77,7 @@ export class Game extends Game1Tokens {
     const mapWrapper = "map_wrapper";
     placeHtml(
       `<div id="board_area">
-      <div id="display_battle"></div>
+      <div id="display_battle"> </div>
       <div id="${mapWrapper}" class="map_wrapper"></div>
       <div id="display_monsterturn">
         <div id="deck_monster_yellow" class="deck deck_monster"></div>
@@ -357,8 +361,11 @@ export class Game extends Game1Tokens {
     }
   }
 
-  getTokenPresentaton(type: string, tokenKey: string, args: any = {}): string {
-    const res = super.getTokenPresentaton(type, tokenKey, args);
+  getTokenPresentaton(type: string, tokenKey: string, args?: any, strict?: false): string;
+  getTokenPresentaton(type: string, tokenKey: string, args: any, strict: true): string | null;
+  getTokenPresentaton(type: string, tokenKey: string, args: any = {}, strict: boolean = false): string | null {
+    const res = strict ? super.getTokenPresentaton(type, tokenKey, args, true) : super.getTokenPresentaton(type, tokenKey, args);
+    if (res === null) return null;
     const tc = this.getRulesFor(tokenKey, "tc");
     if (tc) return `<span style="color:${tc};font-weight:bold">${res}</span>`;
     return res;
