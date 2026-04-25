@@ -45,7 +45,7 @@ class Op_turnEnd extends Operation {
             $manaGen = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
             if ($manaGen > 0) {
                 $hero->moveCrystals("green", $manaGen, $cardId, [
-                    "message" => clienttranslate('${place_name} generates ${count} mana'),
+                    "message" => clienttranslate('${place_name} generates ${count} [MANA]'),
                 ]);
             }
         }

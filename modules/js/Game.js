@@ -1246,7 +1246,7 @@ class Game1Tokens extends Game0Basics {
     updateTokenDisplayInfo(tokenDisplayInfo) { }
     ttSection(prefix, text) {
         if (prefix)
-            return `<p><b>${prefix}</b>: ${text}</p>`;
+            return `<p><b>${prefix}:</b> ${text}</p>`;
         else
             return `<p>${text}</p>`;
     }
@@ -1254,15 +1254,15 @@ class Game1Tokens extends Game0Basics {
         return `<p><i>${text}</i></p>`;
     }
     createTokenImage(tokenId, state = 0, extraClass = "") {
-        const div = document.createElement("div");
-        div.id = tokenId + "_tt_" + this.globlog++;
-        this.updateToken(div, { key: tokenId, location: "log", state });
+        const span = document.createElement("span");
+        span.id = tokenId + "_tt_" + this.globlog++;
+        this.updateToken(span, { key: tokenId, location: "log", state });
         if (extraClass)
-            div.classList.add("wicon", ...extraClass.split(/ +/));
+            span.classList.add("wicon", ...extraClass.split(/ +/));
         const name = this.getRulesFor(tokenId, "name", null);
         if (name)
-            div.title = this.game.getTr(name);
-        return div.outerHTML;
+            span.title = this.game.getTr(name);
+        return span.outerHTML;
     }
     isMarkedForTranslation(key, args) {
         if (!args.i18n) {
@@ -2510,6 +2510,10 @@ class Game extends Game1Tokens {
                 break;
             }
             case "monster": {
+                if (subType === "goldvein") {
+                    tokenInfo.tooltip = this.ttSection(_("Effect"), _("Mountain gold deposit. Damage dealt converts to [XP]."));
+                    break;
+                }
                 tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
                 if (subType === "legend") {
                     this.buildLegendTooltip(tokenInfo);

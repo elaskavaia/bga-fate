@@ -25,7 +25,7 @@ class Op_spendXp extends CountableOperation {
         $heroId = $this->game->getHeroTokenId($owner);
         $cost = (int) $this->getCount();
         $this->game->effect_moveCrystals($heroId, "yellow", -$cost, "tableau_$owner", [
-            "message" => clienttranslate('${char_name} spends ${count} XP ${reason}'),
+            "message" => clienttranslate('${char_name} spends ${count} [XP] ${reason}'),
             "reason" => $this->getReason(),
         ]);
     }

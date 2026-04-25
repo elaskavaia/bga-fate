@@ -99,6 +99,8 @@ class Op_roll extends CountableOperation {
         // Roll dice onto display_battle
         $add = $this->isAddition();
         $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount, $add);
+        $hits = $this->game->countHits($attackerId, $defenderId);
+        $this->notifyMessage(clienttranslate('total hits ${hits}'), ["hits" => $hits]);
 
         // Only trigger on player rolls (hero is attacker), not monster rolls.
         // Emit the most specific trigger; ActionAttack chains through Roll so cards

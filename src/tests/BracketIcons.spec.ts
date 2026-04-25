@@ -47,10 +47,10 @@ describe("Game.replaceSimpleIconsInLog", () => {
     expect(out).to.equal("no brackets here");
   });
 
-  it("substitutes [XP] with a wicon_xp div", () => {
+  it("substitutes [XP] with a wicon_xp span", () => {
     const out = game.replaceSimpleIconsInLog("Gain 2 [XP].");
     expect(out).to.include("wicon_xp");
-    expect(out).to.include("<div");
+    expect(out).to.include("<span");
     expect(out).to.not.include("[XP]");
   });
 
@@ -77,5 +77,12 @@ describe("Game.replaceSimpleIconsInLog", () => {
   it("[XXX] stays [XXX] when not a defined token", () => {
     const out = game.replaceSimpleIconsInLog("hello [XXX] world");
     expect(out).to.equal("hello [XXX] world");
+  });
+
+  it("renders rapid-strike-style cost prefix", () => {
+    const out = game.replaceSimpleIconsInLog("3[MANA]: Perform an attack action.");
+    expect(out).to.match(/^3<span /);
+    expect(out).to.include("wicon_mana");
+    expect(out).to.include(": Perform an attack action.");
   });
 });

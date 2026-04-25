@@ -15,6 +15,8 @@ class GoldVein extends Monster {
 
         $this->moveTo("supply_monster", "");
         if ($amount > 0) {
+            // Remove red crystals from monster back to supply
+            $this->moveCrystals("red", -$amount, $this->id, ["message" => ""]);
             $this->game
                 ->getHeroById($attackerId)
                 ->gainXp($amount, clienttranslate('${char_name} gains ${count} [XP] (Gold extracted from Mountain)'));

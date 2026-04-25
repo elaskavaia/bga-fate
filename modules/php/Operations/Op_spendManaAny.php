@@ -55,7 +55,7 @@ class Op_spendManaAny extends Op_spendMana {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $this->game->effect_moveCrystals($heroId, "green", -1, $cardId, [
-            "message" => clienttranslate('${char_name} spends 1 mana from ${place_name}'),
+            "message" => clienttranslate('${char_name} spends 1 [MANA] from ${place_name}'),
         ]);
         $remaining = (int) $this->getCount() - 1;
         if ($remaining > 0) {

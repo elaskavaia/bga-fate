@@ -52,7 +52,7 @@ class Op_gainMana extends CountableOperation {
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = (int) $this->getCount();
         $this->game->effect_moveCrystals($heroId, "green", $amount, $cardId, [
-            "message" => clienttranslate('${char_name} adds ${count} mana to ${place_name}'),
+            "message" => clienttranslate('${char_name} adds ${count} [MANA] to ${place_name}'),
         ]);
     }
 

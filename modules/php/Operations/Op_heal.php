@@ -76,7 +76,7 @@ class Op_heal extends CountableOperation {
         $amount = min($amount, $currentDamage);
 
         $this->game->effect_moveCrystals($actingHeroId, "red", -$amount, $heroId, [
-            "message" => clienttranslate('${char_name} heals ${count} damage from ${token_name}'),
+            "message" => clienttranslate('${char_name} heals ${count} [DAMAGE] from ${token_name}'),
             "token_name" => $heroId,
         ]);
     }

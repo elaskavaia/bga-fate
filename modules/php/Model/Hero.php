@@ -330,7 +330,7 @@ class Hero extends Character {
         $health = $this->getMaxHealth();
         $remaining = $health - $totalDamage;
 
-        $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} damage (${totalDamage}/${health})'), [
+        $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} [DAMAGE] (${totalDamage}/${health})'), [
             "char_name" => $this->id,
             "amount" => $amount,
             "totalDamage" => $totalDamage,

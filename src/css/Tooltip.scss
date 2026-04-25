@@ -42,6 +42,11 @@
   .tooltiptext {
     max-width: 500px;
     top: unset;
+    .wicon {
+      vertical-align: middle;
+      line-height: 24px;
+      height: 24px;
+    }
   }
 }
 

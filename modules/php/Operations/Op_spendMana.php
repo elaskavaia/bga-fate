@@ -44,7 +44,7 @@ class Op_spendMana extends CountableOperation {
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = (int) $this->getCount();
         $this->game->effect_moveCrystals($heroId, "green", -$amount, $cardId, [
-            "message" => clienttranslate('${char_name} spends ${count} mana from ${place_name}'),
+            "message" => clienttranslate('${char_name} spends ${count} [MANA] from ${place_name}'),
         ]);
     }
 }

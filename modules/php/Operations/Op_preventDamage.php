@@ -61,11 +61,11 @@ class Op_preventDamage extends CountableOperation {
 
         if ($newCount <= 0) {
             $this->game->machine->db->hide($dealDamageRow);
-            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} damage (all damage is prevented)'), [
+            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} [DAMAGE] (all [DAMAGE] is prevented)'), [
                 "count" => $prevented,
             ]);
         } else {
-            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} damage'), [
+            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} [DAMAGE]'), [
                 "count" => $prevented,
             ]);
         }

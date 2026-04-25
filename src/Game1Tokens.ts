@@ -681,20 +681,20 @@ export class Game1Tokens extends Game0Basics {
   updateTokenDisplayInfo(tokenDisplayInfo: TokenDisplayInfo) {}
 
   ttSection(prefix: string, text: string) {
-    if (prefix) return `<p><b>${prefix}</b>: ${text}</p>`;
+    if (prefix) return `<p><b>${prefix}:</b> ${text}</p>`;
     else return `<p>${text}</p>`;
   }
   iiSection(text: string) {
     return `<p><i>${text}</i></p>`;
   }
   createTokenImage(tokenId: string, state: number = 0, extraClass: string = "") {
-    const div = document.createElement("div");
-    div.id = tokenId + "_tt_" + this.globlog++;
-    this.updateToken(div, { key: tokenId, location: "log", state });
-    if (extraClass) div.classList.add("wicon", ...extraClass.split(/ +/));
+    const span = document.createElement("span");
+    span.id = tokenId + "_tt_" + this.globlog++;
+    this.updateToken(span, { key: tokenId, location: "log", state });
+    if (extraClass) span.classList.add("wicon", ...extraClass.split(/ +/));
     const name = this.getRulesFor(tokenId, "name", null);
-    if (name) div.title = this.game.getTr(name);
-    return div.outerHTML;
+    if (name) span.title = this.game.getTr(name);
+    return span.outerHTML;
   }
 
   isMarkedForTranslation(key: string, args: any) {

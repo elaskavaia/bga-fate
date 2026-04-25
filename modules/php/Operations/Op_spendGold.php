@@ -41,7 +41,7 @@ class Op_spendGold extends CountableOperation {
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = (int) $this->getCount();
         $this->game->effect_moveCrystals($heroId, "yellow", -$amount, $cardId, [
-            "message" => clienttranslate('${char_name} spends ${count} gold from ${place_name}'),
+            "message" => clienttranslate('${char_name} spends ${count} [XP] from ${place_name}'),
         ]);
     }
 }

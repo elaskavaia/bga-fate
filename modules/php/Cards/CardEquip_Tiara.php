@@ -27,7 +27,7 @@ class CardEquip_Tiara extends CardGeneric {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $this->game->effect_moveCrystals($heroId, "yellow", 6, $this->id, [
-            "message" => clienttranslate('${char_name} places ${count} gold on ${place_name}'),
+            "message" => clienttranslate('${char_name} places ${count} [XP] on ${place_name}'),
         ]);
     }
 
@@ -40,7 +40,7 @@ class CardEquip_Tiara extends CardGeneric {
         $heroId = $this->game->getHeroTokenId($owner);
         // Remove 1 gold from the card, then gain 1 XP for Alva.
         $this->game->effect_moveCrystals($heroId, "yellow", -1, $this->id, [
-            "message" => clienttranslate('${char_name} takes 1 gold from ${place_name}'),
+            "message" => clienttranslate('${char_name} takes 1 [XP] from ${place_name}'),
         ]);
         $this->queue("gainXp", $owner);
     }

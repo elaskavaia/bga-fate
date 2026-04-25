@@ -116,7 +116,7 @@ class Op_upgrade extends Operation {
         if ($manaGen > 0) {
             $hero = $this->game->getHero($owner);
             $hero->moveCrystals("green", $manaGen, $cardId, [
-                "message" => clienttranslate('${place_name} generates ${count} mana'),
+                "message" => clienttranslate('${place_name} generates ${count} [MANA]'),
             ]);
         }
 

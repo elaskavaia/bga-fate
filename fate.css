@@ -1667,6 +1667,11 @@
   max-width: 500px;
   top: unset;
 }
+.tooltipcontainer .tooltiptext .wicon {
+  vertical-align: middle;
+  line-height: 24px;
+  height: 24px;
+}
 
 .tooltip-left {
   padding: 0.5em;

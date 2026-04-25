@@ -393,6 +393,10 @@ export class Game extends Game1Tokens {
         break;
       }
       case "monster": {
+        if (subType === "goldvein") {
+          tokenInfo.tooltip = this.ttSection(_("Effect"), _("Mountain gold deposit. Damage dealt converts to [XP]."));
+          break;
+        }
         tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
         if (subType === "legend") {
           this.buildLegendTooltip(tokenInfo);

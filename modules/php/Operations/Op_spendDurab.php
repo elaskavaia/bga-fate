@@ -48,7 +48,7 @@ class Op_spendDurab extends Operation {
         $cardId = $this->getCheckedArg();
         $heroId = $this->game->getHeroTokenId($this->getOwner());
         $this->game->effect_moveCrystals($heroId, "red", 1, $cardId, [
-            "message" => clienttranslate('${char_name} adds damage to ${place_name}'),
+            "message" => clienttranslate('${char_name} adds [DAMAGE] to ${place_name}'),
         ]);
     }
 }
