@@ -35,7 +35,7 @@ class Op_actionAttack extends Operation {
 
         // Orebiter equipment: extends the attack target list with a "mine a mountain" choice.
         // Picking it dispatches to Op_c_orebiter which prompts for the actual mountain hex.
-        if ($this->game->tokens->getTokenLocation(self::OREBITER) === "tableau_{$this->getOwner()}") {
+        if ($hero->heroHasCardsOnTableau(self::OREBITER)) {
             $op = $this->instantiateOperation("c_orebiter", $this->getOwner(), ["card" => self::OREBITER]);
             if (!$op->isVoid()) {
                 $hexes[self::OREBITER] = ["q" => 0, "buttons" => true];

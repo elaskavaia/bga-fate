@@ -78,6 +78,16 @@ class Hero extends Character {
         return $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_{$this->owner}");
     }
 
+    /** True if any of the given cards are on this hero's tableau. */
+    function heroHasCardsOnTableau(string ...$cardIds): bool {
+        foreach ($cardIds as $cardId) {
+            if ($this->game->tokens->getTokenLocation($cardId) === "tableau_{$this->owner}") {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** Returns all cards in this hero's hand. */
     function getHandCards(): array {
         return $this->game->tokens->getTokensOfTypeInLocation("card", "hand_{$this->owner}");
@@ -89,11 +99,7 @@ class Hero extends Character {
 
     /** Compute base hand limit. Default 4, Starsong II raises to 5. */
     function calcBaseHand(): int {
-        $loc = $this->game->tokens->getTokenLocation("card_ability_2_8");
-        if ($loc === "tableau_{$this->owner}") {
-            return 5;
-        }
-        return 4;
+        return $this->heroHasCardsOnTableau("card_ability_2_8") ? 5 : 4;
     }
 
     /**

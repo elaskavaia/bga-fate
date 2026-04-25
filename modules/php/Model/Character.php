@@ -83,10 +83,16 @@ class Character {
         $isHit = $rule === "hit" || ($rule === "hitcov" && !$this->hasCover());
         // Dead faction: rune counts as hit
         if ($rule === "rune") {
-            // TODO: handle other rune effects (some cards trigger on rune)
             $attackerFaction = $this->game->material->getRulesFor($attackerId, "faction", "");
             if ($attackerFaction === "dead") {
                 $isHit = true;
+            }
+            // Beefy Berserker I/II (Boldur ability): runes count as hits for owning hero
+            if (str_starts_with($attackerId, "hero_")) {
+                $hero = $this->game->getHero($this->game->getHeroOwner($attackerId));
+                if ($hero->heroHasCardsOnTableau("card_ability_4_9", "card_ability_4_10")) {
+                    $isHit = true;
+                }
             }
         }
         return $isHit ? 1 : 0;
