@@ -1,5 +1,28 @@
 ## Architecture
 
+### Definitions
+
+#### General Framework definitions
+
+- **Operation (Simple)** — atomic game action with no sub-operations (e.g. move a token, draw a card)
+- **Operation (Complex)** — operation that delegates to sub-operations like OR choice, sequence, etc
+- **Effect** — what an ability/card *does* when triggered or played, expressed as operation DSL
+- **Precondition** — predicate that must hold before an effect can trigger, expressed as operation DSL evaluated for success/failure
+- **DSL (Operation DSL)** — mini-language used in CSVs (effect/precondition columns) that compiles into a queue of operations. Full grammar and examples in [EFFECTS_DSL.md](EFFECTS_DSL.md) (covers both the Op DSL and the Math DSL used in `pre` fields and predicate arguments).
+- **Token** — every physical game piece (hero, monster, card, crystal, die, marker); has an id, location, and state
+- **Location** — where a token lives (a hex, a deck, a hand, a tableau, supply, limbo); a string key, not a coordinate
+- **Token State** — small integer attached to a token (e.g. die face value, timetrack step, card side)
+- **Material** — static information about the game, the "rulebook data" vs. runtime token instances
+- **Owner** — player color string (e.g. `"ff0000"`), not player id — used in this game to identify players
+
+#### Game specific
+
+- **Hero vs. Player** — Hero is the in-game character; player is the seat. 
+- **Limbo** — special location for tokens that exist but aren't on the board yet, or are "out of the game" already
+- **Supply** — pool of unowned tokens available to draw/spawn from
+- **Tableau** — a player's personal area where their hero card, abilities, equipment, and earned crystals live
+- **Grimheim** — the town the heroes defend; a 7-hex cluster, also a location key on town pieces
+
 ### Operation-Based State Machine
 
 The game logic is built around an operation-based state machine:
@@ -10,7 +33,7 @@ The game logic is built around an operation-based state machine:
 - **ComplexOperation** — Operations that can contain sub-operations (delegates)
 - **CountableOperation** — Operations that can be repeated a specific number of times
 
-Operations are queued in the database (DbMachine) and executed sequentially, enabling complex game flows with undo/redo support.
+Operations are queued, pushed or inserted in the Machine and executed sequentially based on rank, enabling complex game flows.
 
 ### Token Management
 
@@ -30,7 +53,7 @@ State classes in `modules/php/States/` handle different game phases:
 - GameDispatch — Main game flow dispatcher
 - PlayerTurn — Individual player turn handling
 - MultiPlayerMaster/MultiPlayerTurnPrivate/MultiPlayerWaitPrivate — Multiplayer coordination
-- PlayerTurnConfirm — Turn confirmation state
+- PlayerTurnConfirm — Turn confirmation state (Non-Machine state)
 - MachineHalted — Error/debug state
 
 ### Client-Side Code
@@ -42,6 +65,7 @@ TypeScript files in `src/` compile to a single `Game.js`:
 - **Game1Tokens.ts** — Token rendering and management
 - **GameMachine.ts** — Client-side state machine handling
 - **LaAnimations.ts** — Animation utilities
+- **LaZoom.ts** — Zoom
 
 SCSS files in `src/css/` compile to `fate.css` with `GameXBody.scss` as the entry point.
 
@@ -58,21 +82,17 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 - `card_hero_<hero>_<n>` — Hero card (e.g. `card_hero_1_1` = Level I starting, `card_hero_1_2` = Level II upgraded). Odd `<n>` = front (Level I), even `<n>` = back (Level II). Two-sided card.
 - `card_ability_<hero>_<n>` — Ability card (e.g. `card_ability_1_3`). Odd `<n>` = Level I, even `<n>` = Level II (flipped side). These are two-sided cards.
 - `card_equip_<hero>_<n>` — Equipment card (e.g. `card_equip_1_7`)
-- `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) - last <i> some even cards are duplicated, so it tell them apart
+- `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) — trailing `<i>` distinguishes duplicate copies of the same card
 - `marker_<color>_<n>` — Player marker (e.g. `marker_ff0000_1`)
 - `monster_legend_<n>_<level>` — Legend monster tile. 6 legends numbered 1–6 (1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr). `_1` = yellow (Level I), `_2` = red (Level II) — same two-sided pattern as ability cards. `_1` starts in `supply_monster`, `_2` starts in `limbo`. When a red legend card is drawn, swap `_1` out and place `_2` on the map. Stats in `monster_material.csv`. Legends destroy 3 town pieces on entering Grimheim and can swap places with blocking monsters during movement.
 - `crystal_green_<n>` — Mana crystal (individual tokens on cards). Also used as stun marker on monsters (Suppressive Fire): a green crystal on a monster means it skips its next movement and the crystal is removed.
 - `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
 - `crystal_red_<n>` — Damage crystal (individual tokens on cards and things)
 - `rune_stone` — Time track marker (singleton)
-### Dice
-The "state" of the die token is the dice value (1-6). These side values will map to sides of real die.
-- `die_attack_<n>` — Attack die (1..20).
-- `die_monster_<n>` — Monster die
-
 
 Shortening of words:
 - Equipment -> equip
+
 
 **Location naming:**
 
@@ -89,61 +109,36 @@ Shortening of words:
 - `deck_monster_yellow` / `deck_monster_red` — Monster card decks
 - `timetrack_<n>` — Time track step slot; actual step tracked as `token_state` on `rune_stone`
 
+
+### Dice
+
+The "state" of the die token is the dice value (1-6). These side values will map to sides of real die.
+- `die_attack_<n>` — Attack die (1..20).
+- `die_monster_<n>` — Monster die
+
+
 ---
 
 
 
 ## Model Classes (`modules/php/Model/`)
 
-Domain model objects for game characters. Created via factory methods on `Game`:
-- `$game->getHero($owner)` — Hero by player color
-- `$game->getHeroById($heroId)` — Hero by token id (e.g. `"hero_1"`)
-- `$game->getMonster($monsterId)` — Monster by token id
-- `$game->getCharacter($id)` — Returns Hero or Monster based on id prefix
+Domain model objects wrapping game tokens. Obtain instances via factory methods on `Game`: `getHero($owner)`, `getHeroById($heroId)`, `getMonster($monsterId)`, `getCharacter($id)`.
 
-### Character (base)
-- `getId()`, `getHex()`, `getAttackRange()` (default 1), `moveCrystals()`, `getRulesFor()`
-- `getArmor()` — armor value from material (default 0, Draugr=1)
-- `hasCover()` — true if on a forest hex (blocks "hitcov" results)
-- `beginDefense()` — call before rolling dice against this character. Resets per-attack state (armor remaining). **Important**: Character instances carry attack state (`armorRemaining`), so the same instance must be used for `beginDefense()` + all `applyDamage()` calls within one attack.
-- `applyDamage($rule, $attackerId)` — process a single die result ("hit", "hitcov", "miss", "rune"). Handles cover, Dead faction rune-as-hit, and armor absorption. Places a red crystal if hit lands. Returns 1 (hit) or 0 (miss/absorbed).
-- `moveTo($location, $message, $args)` — move character token + update hex map cache
+- **Character** — base class for anything that occupies a hex (heroes, monsters). Provides position, crystals, armor, cover, and damage-resolution helpers shared between heroes and monsters.
+- **Hero** — extends Character. Adds owner (player color), tableau/hand access, attribute trackers (strength/range/move/health/hand), action markers, XP gain, and knock-out handling (move to Grimheim + destroy 2 houses).
+- **Monster** — extends Character. Adds faction, health, XP reward, and kill handling (remove from map, award XP to attacker).
 
-### Hero extends Character
-- `getOwner()` — player color
-- `getAttackStrength()` — sum of hero card + equipment + ability strength on tableau
-- `getMaxHealth()` — from hero card on tableau
-- `getAttackRange()` — max attack_range from equipment cards (default 1)
-- `gainXp($amount)` — move yellow crystals from supply to tableau
-- `applyDamageEffects($amount)` — apply damage; if knocked out: reset to 5 damage, move to Grimheim, destroy 2 houses
-
-### Monster extends Character
-- `getFaction()`, `getHealth()`, `getXpReward()`
-- `getAttackRange()` — firehorde=2, others=1
-- `applyDamageEffects($amount, $attackerId)` — check if killed: remove crystals, move to supply, log kill with attacker name. Caller handles XP award separately.
-
-**Faction effects** (handled in `Character::applyDamage`):
-- Dead: rune die results count as hits when Dead monsters attack
-- Draugr: armor=1, absorbs 1 hit per attack (via `beginDefense` + `armorRemaining` state)
+Faction effects are handled inside `Character` damage resolution: 
+Dead faction's rune die results count as hits; Draugr have armor=1.
 
 ### Card (`modules/php/Model/Card.php`)
 
-Base class for card instances created on the fly during trigger dispatch. Each card on a player's tableau or hand is instantiated as a `Card` (or subclass) by `Op_trigger::resolve()` via `Game::instantiateCard($card, $op)`.
+Wrapper around a card token, instantiated on the fly during trigger dispatch. `Op_trigger::resolve()` calls `Game::instantiateCard($card, $op)`, which picks a bespoke subclass when available and falls back to `CardGeneric` otherwise.
 
-- Constructor: `(Game $game, string|array $cardOrId, Operation $op)` — accepts token ID or full token row (with `key`, `location`, `state`). Owner comes from `$op->getOwner()`.
-- `getId()`, `getOwner()`, `getRulesFor($field)`, `getDamage()`, `getMana()`, `getGold()`
-- `queue($type, $owner, $data)` — delegates to the parent operation's `queue()` with this card preset in `data["card"]`
-- `onTrigger($triggerName)` — routes to `on<TriggerName>()` if the subclass defines it, else falls back to `onTriggerDefault()`
-- `canTriggerEffectOn($triggerName)` — returns true if the card can react to this trigger type (base: checks if `on<TriggerName>` method exists)
-- `canBePlayed($triggerName, &$errorRes)` — returns true if the card is actually playable. Base returns true; `CardGeneric` overrides with full checks.
-- `useCard()` — executes the card: sends notification, marks once-per-turn cards as used, queues the `r` expression, discards event cards
-
-**CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class when no bespoke subclass exists. Implements the standard voluntary trigger flow:
-- `canTriggerEffectOn()` — also returns true when the Material `on` field matches the trigger type
-- `canBePlayed()` — checks trigger match, once-per-turn state, non-empty `r` field, and whether the `r` expression's op has valid targets
-- `onTriggerDefault()` — if `canBePlayed()`, queues a single `useCard` op per trigger type (deduplicated: checks if a `useCard` with the same `on` trigger already exists on the machine). The `useCard` op then offers all matching cards from tableau and hand in one prompt.
-
-**Bespoke card classes** (`modules/php/Cards/CardEquip_<Name>.php`, etc.) — per-card classes that override `on<TriggerName>()` hooks for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name derived from Material `name` field: `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Created via `Game::instantiateCard()` which tries the bespoke class first, then falls back to `CardGeneric`.
+- **Card** — base class. Provides id/owner/state accessors, crystal counters (damage/mana/gold), trigger routing (walks the trigger chain most-specific → least-specific and calls the first matching `on<TriggerName>` hook), playability checks, and `useCard` (notify + queue the `r` expression + discard if event).
+- **CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class for cards driven entirely by Material data. Implements the standard voluntary trigger flow: matches the Material `on` field, validates the `r` expression has targets, and queues a deduplicated `useCard` op that offers all matching cards in one prompt.
+- **Bespoke card classes** (`modules/php/Cards/Card<Type>_<Name>.php`, etc.) — per-card subclasses for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name is derived from the Material `name` field, e.g. `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Override `on<TriggerName>()` hooks; can still delegate to the CSV `r` field via `queue($r)`.
 
 ---
 
@@ -212,54 +207,39 @@ Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quo
 **Not separate operations** (handled as modifiers/hooks on existing operations):
 - "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 
-### Cost and Gate Operations
+### Cost and Predicate Operations
 
-These are stateless "guard" ops that sit at the leftmost position of a paygain chain. They void the whole chain when their precondition fails, so the effect never runs.
+**Predicates** are stateless guard ops — void the chain when their condition fails:
 
-- `spendUse` — Mark the context card as used this turn (flips the card token's state to 1). Voids with `ERR_OCCUPIED` if already used. Reset by `Op_turnEnd`. Use in card `r` expressions to enforce the "once per turn" cap explicitly, e.g. `spendUse:heal(adj)` (Stitching I). Cards with multiple clauses can place `spendUse` on a per-clause basis, but typically share one use for the whole card — put `spendUse` inside each branch of an `or` so picking any branch burns the card's turn slot.
+- `on(EventXxx)` — runtime event gate (matches the trigger that fired)
+- `in(Location)` — hero is on a hex matching `loc` or terrain (e.g. `Grimheim`, `forest`)
+- `adj(Location)` — hero is adjacent to such a hex
 
-- `on(EventXxx)` — Runtime event gate. Voids with `ERR_PREREQ` unless the `event` data field seeded by `Card::useCard()` matches the expected event. Used inside card `r` expressions to restrict a clause to a specific trigger context. Example (Flexibility I): `(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)` — the first two branches are voluntary free-action activations that burn the card's use; the third branch fires mid-attack (gated on the attack trigger) and does NOT burn the use.
+**Costs** start with `spend` (e.g. `spendUse`, `spendMana`, `spendXp`). They also void on failure (e.g. `spendUse` voids if the card was already used this turn), so they double as guards.
 
-- `in(Location)` — Hero location gate. Voids with `ERR_PREREQ` unless the acting hero's hex matches the param against either its named loc field (e.g. `Grimheim`) or terrain (e.g. `forest`, `mountain`, `plains`, `lake`). Used inside card `r` expressions to restrict effects to a specific terrain or place. Example (Blade Decorations): `in(Grimheim):2spendXp:upgrade`. Like `on(...)`, must be left-anchored in its paygain chain.
+**Placement rule**: predicates and costs must be the **leftmost** element of a paygain chain (predicates fist). `Op_paygain` pre-flights for void state, but any sub that runs before a void one has already applied its side-effects. Left-anchor to fail fast.
 
-- `adj(Location)` — Hero adjacency gate. Voids with `ERR_PREREQ` unless at least one hex adjacent to the hero's hex matches the param against either its named loc or terrain field. Parallel to `in(...)` but for neighbor hexes. Example (Miner): `adj(mountain):2gainXp`. Like the other gates, must be left-anchored in its paygain chain.
+Examples:
 
-**Important**: both `spendUse` and `on(...)` must be the **leftmost** element of their paygain chain. `Op_paygain::getPossibleMoves()` pre-flights all delegates for void state — a void cost at any position propagates up, but if a non-void sub runs before the machine reaches the void one, the earlier side-effects will have already applied. Left-anchor the guards so the whole chain is caught before any sub resolves.
+- `spendUse:spendMana:gainAtt_move` — once per turn, pay 1 mana to gain +1 move
+- `on(TActionAttack):2spendMana:2addDamage` — during attack, pay 2 mana for +2 damage
+- `in(Grimheim):2spendXp:upgrade` — in Grimheim, pay 2 XP to upgrade
 
 
 ### Trigger System
 
-Cards (events, abilities, equipment) can have an **`on`** field in Material specifying when they can be activated.
-At key points during gameplay, an `Op_trigger` is queued which walks every card on the active player's tableau and hand, instantiates a `Card` object for each, and calls `onTrigger($trigger)`.
+Cards declare when they can be activated via the **`on`** field in Material. At key gameplay moments, an operation calls `$this->queueTrigger(Trigger::Xxx)`, which queues `Op_trigger`. The op walks every card on the active player's tableau and hand, instantiates each via `Game::instantiateCard()`, and calls `$card->onTrigger($trigger)`.
 
-**`on` column** — timing trigger for when the card can be played:
-- (empty) — play anytime during your turn as a free action. The "once per turn" cap is **not** implicit — cards that want it must include `spendUse` in their `r` expression. Without `spendUse`, the card is usable an unlimited number of times (e.g. damage-prevention equipment, or cards whose text says "any number of times per turn").
-- `TActionAttack` — play during/after an attack action
-- `TRoll` — play after a dice roll (fires during attack rolls too; see trigger chain below)
-- `TMonsterMove` — play *before* the Monsters Move step (fires per player, allows Suppressive Fire)
-- `TResolveHits` — play before damage is applied (for damage prevention)
-- `TTurnEnd`, `TTurnStart`, `TActionMove`, `TMonsterKilled`, `TCardEnter` — other game events; see `Trigger` enum in `modules/php/Model/Trigger.php` for the full list
-- `custom` — card has a bespoke class under `modules/php/Cards/` that handles its own trigger logic
+If `on` is empty, the card is a free-action play (no "once per turn" cap unless `r` includes `spendUse`). If it's `custom`, the card has a bespoke class under [modules/php/Cards/](../../modules/php/Cards/) handling its own logic. Otherwise it's a `Trigger` enum case from the table below.
 
-**Trigger hierarchy (chain):** some triggers are more specific flavors of others. `ActionAttack` is a `Roll` that came from an attack action; `ActionMove` is a `Move` that came from a move action. Formally, each `Trigger` case has an optional `parent()`, and `chain()` returns the ancestry `[self, parent, grandparent, …]`. A card with `on=TRoll` matches a dispatched `ActionAttack` because `Roll` is in the chain; a card with `on=TActionAttack` only matches when the dispatched trigger is specifically `ActionAttack`. One dispatch per gameplay moment — no more double-emission.
+**Trigger chain.** Triggers form a hierarchy: `ActionAttack` is a more specific `Roll`; `ActionMove` is a more specific `Move`. Each `Trigger` case has an optional `parent()`, and `chain()` returns `[self, parent, …]`. The chain is matched at two points:
 
-The chain is consulted at two boundaries:
-- `CardGeneric::canTriggerEffectOn` walks the chain when matching the card's `on` field against the dispatched trigger.
-- `Op_on` (the `on(EventXxx)` gate used inside `r` expressions) walks the chain when matching the expected gate against the `event` data field seeded by `Card::useCard()`.
+- `CardGeneric::canTriggerEffectOn` — matches the card's `on` field against any trigger in the dispatched chain (so `on=TRoll` fires during a dispatched `ActionAttack`).
+- `Op_on` — the `on(EventXxx)` predicate in `r` expressions matches the same way against the `event` data field seeded by `Card::useCard()`.
 
-For bespoke cards with per-event hook methods (`onRoll()`, `onActionAttack()`, …), `Card::onTrigger` walks the chain most-specific → least-specific and calls the **first** matching hook. A card defining only `onRoll` will still fire during an attack roll.
+For bespoke cards with per-event hooks, `Card::onTrigger` walks most-specific → least-specific and calls the first matching `on<TriggerName>()`.
 
-**How triggers fire:**
-
-1. An operation calls `$this->queueTrigger(Trigger::Xxx)` — the `Trigger` enum argument is required (no default). Wire-serialized as `trigger(EventXxx)`.
-2. This queues `Op_trigger(EventXxx)` for the current player.
-3. `Op_trigger::resolve()` converts the wire string back to a `Trigger` case via `Trigger::from()`, walks every card on the player's tableau and hand, instantiates each via `Game::instantiateCard($card, $this)`, and calls `$card->onTrigger($trigger)`.
-4. For each card, `Card::onTrigger()` walks the trigger chain and routes to the first `on<TriggerName>()` method that exists (derived from the enum case name), else to `onTriggerDefault()`.
-5. **Bespoke cards** (with a class under `Cards/`) handle their own logic in the hook method — they may queue ops, read game state, or do nothing.
-6. **Generic cards** (`CardGeneric`) check `canBePlayed($trigger)` — verifying the card's `on` field matches any trigger in the dispatched chain and the effect has valid targets. If playable, `promptUseCard` queues (or extends) a single `useCard` op with `on=[$trigger->value]` and `confirm=true`. The dedup logic ensures only one `useCard` is queued per trigger — subsequent cards matching the same trigger share the same prompt.
-7. When `Card::useCard()` queues the card's `r` expression, it seeds `event` in the queued op's data. `ComplexOperation::withData()` propagates this down to every sub-op, so guards like `Op_on` can read it via `getDataField("event")`.
-
-The `useCard` op collects all playable cards (tableau + hand) that match the dispatched trigger (via chain), presenting them in a single "choose a card or skip" prompt. Under the hierarchical model, all cards listening anywhere in the chain share **one** prompt: e.g. during an attack roll, cards with `on=TRoll` and cards with `on=TActionAttack` appear in the same useCard target list.
+**Dispatch.** `CardGeneric::onTrigger` checks `canBePlayed`, then `promptUseCard` queues (or extends) a single dedup'd `useCard` op per trigger. All cards matching anywhere in the chain share one prompt — e.g. during an attack roll, `on=TRoll` and `on=TActionAttack` cards appear together.
 
 **Where triggers are queued (operation → Trigger → description):**
 
@@ -405,37 +385,31 @@ Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = bl
 
 ## Overview of card effects
 
-In Fate: Defenders of Grimheim, card effects are tightly integrated into the hero's development and the "tower defense" rhythm of the game. They are primarily categorized by the type of card (Ability, Equipment, or Event) and how they interact with the game's action economy. [1, 2] 
-1. Activated / Free Action Effects (Abilities & Equipment)
-Most character-specific benefits fall into this category. They are generally treated as Free Actions that can be used at any time during your turn, but not during a main action unless specified. [3] 
+Card effects are categorized by card type (Ability, Equipment, Event) and how they interact with the action economy.
 
-* Once-Per-Turn Limit: Standard Equipment and Ability cards can only be used once per turn. Enforced explicitly via `spendUse` in each card's `r` expression (not implicit). Cards that are *not* once-per-turn — damage-prevention equipment, `r=custom` bespoke classes, cards whose text says "any number of times" — simply omit `spendUse` from their rule.
-* Mana-Activated: Some cards require spending Mana to trigger their effect (e.g., "Spend 2 Mana to add 2 damage").
-* Action Modifiers: These are used within the context of another action, such as adding damage to an Attack Action after the dice are rolled. [3, 4, 5, 6] 
+**1. Activated / Free Action Effects (Abilities & Equipment)** — used as free actions any time during your turn (outside a main action, unless the card says otherwise).
 
-2. Triggered / Reactive Effects
-These effects occur automatically or can be played in response to specific game states, particularly during the Monster Turn. [7, 8] 
+* *Once-per-turn limit*: enforced explicitly via `spendUse` in the card's `r`, not implicit. Cards without `spendUse` (damage-prevention equipment, bespoke `r=custom` classes, "any number of times" cards) are unlimited.
+* *Mana-activated*: pay mana to trigger, e.g. `spendMana:addDamage`.
+* *Action modifiers*: used inside another action — e.g. add damage after the attack roll.
 
-* Damage Prevention: A major exception to the "once per turn" rule. Cards that prevent damage can be used once each time you receive damage, allowing multiple uses per round if attacked multiple times.
-* Reaction Events: Certain Event cards are specifically designated as Reaction cards, which can be played during the monster turn to deal damage or defend. [5, 7, 9] 
+**2. Triggered / Reactive Effects** — fire automatically or play in response to a game event, especially during the Monster Turn.
 
-3. Static / Persistent Effects
-These are "always-on" rules or modifications that don't require activation but change your hero's base stats or rules. [10] 
+* *Damage prevention*: triggers on `TResolveHits`. These cards typically omit `spendUse`, so they fire each time you take damage.
+* *Reaction events*: event cards with an `on=` trigger (e.g. `TMonsterMove`) — playable from hand during that window only.
 
-* Rule Changes: For example, a card might state your hero moves 4 spaces instead of the standard 3, or provide a permanent Strength Bonus to every attack action you take.
-* Mana Regeneration: Static effects at the end of the turn that automatically add mana to specific cards. [3, 8, 10] 
+**3. Static / Persistent Effects** — always-on modifications to base stats or rules.
 
-4. Instant / One-Time Effects (Events)
-These are found on Event Cards, which are drawn into your hand rather than placed in your tableau. [2] 
+* *Rule changes*: e.g. Embla moves 4 instead of 3; permanent strength bonuses from equipment on the tableau. Computed by `Hero::calcBaseStrength/Range/Move/Health` and stored in attribute trackers.
+* *Mana regeneration*: end-of-turn refill, applied during `Op_turnEnd`.
 
-* Immediate Resolution: You play them, resolve the text (e.g., "Move 2 steps" or "Deal damage"), and then discard them.
-* Flexibility: You can play any number of event cards during your turn as long as they don't interrupt a main action. [3, 7, 11] 
-* Conditional: Some of them can only be played during some other events which is similar to Triggered ability 
+**4. Instant / One-Time Effects (Events)** — drawn into hand, played from hand, discarded after resolving.
 
-5. Replacement Effects
-Less common but present in specialized hero builds, these change one outcome for another. [10] 
+* *Immediate resolution*: play, resolve `r`, discard.
+* *Flexibility*: any number per turn, outside a main action.
+* *Conditional*: some events have an `on=` trigger and only play during that window — same mechanism as triggered abilities.
 
-* Example: Syndra's "Circle of Life" allows damage that would be dealt to her to be placed on the card instead, where it can later be repaired. [4] 
+**5. Replacement Effects** — replace one outcome with another; rare, used for specialized hero builds.
 
 
 
