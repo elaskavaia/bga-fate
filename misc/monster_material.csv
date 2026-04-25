@@ -16,6 +16,10 @@ hero_4|Boldur|1|hero|1|hex_10_9|#c62828|||||||
 #hero_5|Finkel|1|hero|1|limbo||||||||
 #hero_6|Sindra|1|hero|1|limbo||||||||
 
+# Gold Vein - synthetic "monster" target for Orebiter (Op_c_orebiter). Always dies, no XP reward;
+# the GoldVein subclass converts damage dealt directly to XP for the attacker.
+monster_goldvein|Gold Vein|1|monster goldvein|1|supply_monster|#caa12e|goldvein|0|0|0|0||
+
 # Trollkin faction monsters|
 monster_goblin|Goblin|20|monster trollkin rank1|2|supply_monster|#4a7a3a|trollkin|1|1|2|1|2|
 monster_brute|Brute|15|monster trollkin rank2|2|supply_monster|#226622|trollkin|2|3|3|2||

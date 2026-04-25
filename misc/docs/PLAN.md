@@ -509,7 +509,10 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 
 [x] card_ability_3_9 Reaper Swing I — has tests
-[ ] card_ability_3_10 Reaper Swing II 
+[x] card_ability_3_10 Reaper Swing II — has tests
+
+- [x] card_ability_3_5 In Charge I — `r=killMonster(adj,'rank==1')` on=TActionMove, has tests
+- [x] card_ability_3_6 In Charge II — `r=killMonster(adj,'rank<=2')` on=TActionMove, has tests
 
 #### Equipment Cards
 
@@ -521,6 +524,9 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 [ ] card_event_3_34 Magic Runes — runes always count as hits for you (one-shot). **Triage: bespoke** — needs `CardEvent_MagicRunes`. Rune-as-hit is currently a faction rule hardcoded in `Character::countHit()`. Bespoke class sets a per-attack flag consumed by `countHit`, or on=TRoll adds countRunes extra hits. Small hook needed in Character to read the card flag.
 [x] card_event_3_29 Sophisticated — has tests
+
+
+
 
 ### Server Hero 4 - Boldur
 
@@ -536,23 +542,18 @@ Triage of r=custom cards:
 #### Equipment Cards
 
 [x] card_equip_4_20 Dvalin's Pick — Spend attack action for 1 XP, 1 mana, 1 card draw. has tests
-[ ] card_equip_4_25 Dwarf Pick 
+[x] card_equip_4_25 Dwarf Pick — has tests
 [ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
-[ ] card_equip_4_19 Orebiter — attack adjacent mountain areas, gain XP per damage. **Triage: custom op** 
+[x] card_equip_4_19 Orebiter — has tests
 [ ] card_equip_4_21 Smiterbiter — This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action. **Triage: bespoke + new op** 
 
 #### Event Cards
 
 [x] card_event_4_32 Berserk — "Take 1 unpreventable damage to add 3 damage to this attack."
 [x] card_event_4_36 Boldur's Gate — Spend 2 XP in Grimheim to restore a town piece. has tests
-[ ] card_event_4_38 Portable Smithy
+[x] card_event_4_38 Portable Smithy — Spend 1 prepare action to complete your quest. has tests
 
 #### Summary — new ops and op extensions (Embla + Boldur)
-
-**New ops:**
-- `Op_c_reaper` (Reaper Swing) — standalone op that **replaces** normal attack damage resolution: prompts the player to divide the attack's damage budget between the primary target and a second adjacent monster. Triggered by the card on TActionAttack.
-  - card_ability_3_9 Reaper Swing I: *"In each attack action, you may divide the damage you deal between the target and another adjacent monster."*
-  - card_ability_3_10 Reaper Swing II: same text, strength +3.
 
 - `Op_c_orebiter`
 
@@ -562,10 +563,6 @@ Triage of r=custom cards:
   - card_ability_4_8 Wrecking Ball II: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."*
   - May be factored as `Op_c_wrecking` invoked from move.
 
-
-**No new op (bespoke `Card*` classes):** Sweeping Strike I/II (clockwise neighbor + adj-count), Eitri's Pick (source-conditioned trigger), Orebiter (terrain attack + per-damage XP), Smiterbiter (stateful excess-damage bank).
-
-**DSL-only (no code changes beyond existing ops):** Blade Decorations, Raven's Claw, Wildfire Blade, Dvalin's Pick, Dwarf Pick, Boldur's Gate, Portable Smithy, Magic Runes (`r=3addDamage(rolledRune)` on=TRoll), In Charge I/II (`r=killMonster(adj,'rank<=1')` / `rank<=2` on=TActionMove — uses existing `Op_killMonster`), +1 move on Wrecking Ball II. All need integration tests only.
 
 
 ---
@@ -647,5 +644,6 @@ See misc/docs/CHECKLIST.md
   [ ] Flip animation for upgrades
   [ ] Main weapon - restriction only one main weapon allowed
   [ ] **Manually test: double-confirm on comma-chained event card rules.** Multi-Shot (`r=2roll(inRange),2roll(inRange)`) creates a `seq` op for the comma-chain. Test via `Campaign_AlvaEventTest::testMultiShotRollsAgainstTwoDifferentMonsters` shows an extra `confirm` step is required after the card pick, before the first sub-op prompts. The root paygain already has `confirm=true` from `Card::useCard`; seq's expandOperation correctly strips confirm from children. Expected UX: click card → prompt for first monster hex (no intermediate confirm). Actual: click card → confirm button → prompt for first monster hex. Verify in the harness whether this is a UX bug (double-click) or intentional. If UX bug, likely fix is in `Op_seq::expandOperation` or how useCard wraps the op.
+  [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
 
 

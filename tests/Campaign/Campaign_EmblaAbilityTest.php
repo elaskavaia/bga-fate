@@ -191,4 +191,38 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_7_8", $this->tokenLocation($primary));
         $this->assertEquals("hex_6_8", $this->tokenLocation($secondary));
     }
+
+    // --- Reaper Swing II (card_ability_3_10) ---
+    // Same r=c_reaper as I, but strength +3 — boosts the attack's die count.
+    // Embla I(3) + Flimsy Blade(1) + Reaper II(3) = 7 dice.
+
+    public function testReaperSwingIISplitsBoostedDamage(): void {
+        $cardId = "card_ability_3_10";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        // Trolls (health=6) so a 3+4 split leaves both alive — easier to assert damage.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $primary = "monster_troll_1";
+        $secondary = "monster_troll_2";
+        $this->game->getMonster($primary)->moveTo("hex_7_8", "");
+        $this->game->getMonster($secondary)->moveTo("hex_6_8", "");
+
+        // 7 dice, all hits — proves strength bonus is applied.
+        $this->seedRand([5, 5, 5, 5, 5, 5, 5]);
+        $this->respond("hex_7_8");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        $this->respond("hex_6_8");
+        $this->respond("choice_3"); // 3 to primary, 4 to secondary
+
+        $this->assertEquals(3, $this->countDamage($primary));
+        $this->assertEquals(4, $this->countDamage($secondary));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($primary));
+        $this->assertEquals("hex_6_8", $this->tokenLocation($secondary));
+    }
 }

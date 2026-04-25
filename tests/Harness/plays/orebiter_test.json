@@ -1,0 +1,10 @@
+{
+  "current_player_id": 10,
+  "reset": true,
+  "steps": [
+    { "endpoint": "debug_setupGame_h4", "reload": true },
+    { "endpoint": "debug_Op_c_orebiter" },
+    { "endpoint": "action_resolve", "data": { "target": "actionAttack" }, "reload": true },
+    { "endpoint": "action_resolve", "data": { "target": "hex_5_7" }, "reload": true }
+  ]
+}

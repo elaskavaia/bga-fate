@@ -24,6 +24,7 @@ use Bga\Games\Fate\OpCommon\AiOperation;
 use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\Model\Character;
+use Bga\Games\Fate\Model\GoldVein;
 use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\OpCommon\Operation;
@@ -523,6 +524,9 @@ class Game extends Base {
 
     /** Factory: create a Monster model from a monster token id. */
     function getMonster(string $monsterId): Monster {
+        if (str_starts_with($monsterId, "monster_goldvein")) {
+            return new GoldVein($this, $monsterId);
+        }
         return new Monster($this, $monsterId);
     }
 
@@ -743,6 +747,34 @@ class Game extends Base {
 
         $this->machine->push("c_reaper", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    /**
+     * Orebiter harness setup. Places Orebiter on Boldur's tableau and parks the hero
+     * on a forest hex adjacent to a mountain so the regular Attack action surfaces both
+     * monster targets and the Orebiter card option.
+     *
+     * Also places Rapid Strike I + 3 mana so the user can launch a free attack via the
+     * card to verify the orebiter branch fires regardless of how Op_actionAttack was
+     * launched. Does NOT push any op — user drives the flow.
+     */
+    function debug_Op_c_orebiter() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+
+        // Park Boldur on a forest hex with an adjacent mountain.
+        // hex_5_8 (forest) is adjacent to hex_5_7 (mountain).
+        $this->tokens->dbSetTokenLocation($heroId, "hex_5_8", 0, "");
+
+        // Orebiter onto tableau.
+        $this->tokens->dbSetTokenLocation("card_equip_4_19", "tableau_$color", 0, "");
+
+        // Rapid Strike I in tableau + 3 mana for an alternate launch path.
+        $rapid = "card_ability_4_3";
+        $this->tokens->dbSetTokenLocation($rapid, "tableau_$color", 0, "");
+        $this->effect_moveCrystals($heroId, "green", 3, $rapid);
+
+        $this->hexMap->invalidateOccupancy();
     }
 
     function debug_Op_c_hail() {

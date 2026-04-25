@@ -52,4 +52,84 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         // Event drawn into hand.
         $this->assertEquals("hand_$color", $this->tokenLocation($drawnCard));
     }
+
+    // --- Dwarf Pick (card_equip_4_25) ---
+    // Passive +1 strength, no r, no on. Pure stat boost.
+    // Base Boldur I = 3 + Boldur's First Pick(1) = 4 → with Dwarf Pick = 5 dice.
+
+    public function testDwarfPickAddsOneStrengthDie(): void {
+        $cardId = "card_equip_4_25";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        // Recompute strength tracker — calcBaseStrength only runs on setup/turnEnd/upgrade.
+        $this->game->getHero($color)->recalcTrackers();
+
+        $this->assertEquals(5, $this->game->getHero($color)->getAttackStrength());
+
+        // Boldur outside Grimheim, troll (health=6) adjacent — survives 5 hits.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // Seed exactly 5 dice — confirms Dwarf Pick added the 5th die.
+        $this->seedRand([5, 5, 5, 5, 5]);
+        $this->respond("hex_7_8");
+
+        // Troll took 5 damage (survives, health=6).
+        $this->assertEquals(5, $this->countDamage($troll));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
+        // Rand queue exhausted — confirms exactly 5 dice were rolled.
+        $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 5 dice");
+    }
+
+    // --- Orebiter (card_equip_4_19) ---
+    // No r/on — Op_actionAttack scans for Orebiter on tableau and adds it to the attack
+    // target list. Picking the card dispatches to Op_c_orebiter, which prompts for an
+    // adjacent mountain hex, places monster_goldvein there, and runs the standard pipeline
+    // (roll → resolveHits → dealDamage). GoldVein converts each damage point into 1 XP and
+    // despawns. Full pipeline keeps amplifying cards (Berserk, Quiver) reactive.
+
+    public function testOrebiterMinesGoldFromAdjacentMountain(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_equip_4_19";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Boldur on hex_5_8 (forest) — adjacent mountain at hex_5_7.
+        $this->game->tokens->moveToken($this->heroId, "hex_5_8");
+
+        $xpBefore = $this->countXp();
+
+        // Boldur I(3) + Boldur's First Pick(1) = 4 dice. Seed 3 hits, 1 miss → 3 XP.
+        $this->seedRand([5, 5, 5, 1]);
+
+        // No monsters in range → Op_actionAttack auto-resolves on the sole target (the
+        // Orebiter card), then prompts for the mountain hex via Op_c_orebiter.
+        $this->respond("actionAttack");
+        $this->respond("hex_5_7"); // pick mountain hex
+
+        $this->assertEquals($xpBefore + 3, $this->countXp());
+        // Vein returned to supply after the attack regardless of hits.
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goldvein"));
+        // Attack action slot consumed.
+        $this->assertContains("actionAttack", $this->game->getHero($color)->getActionsTaken());
+    }
+
+    public function testOrebiterAwardsZeroXpOnFullMiss(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_equip_4_19";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_5_8");
+
+        $xpBefore = $this->countXp();
+
+        // 4 dice all missing.
+        $this->seedRand([1, 1, 1, 1]);
+
+        $this->respond("actionAttack");
+        $this->respond("hex_5_7");
+
+        $this->assertEquals($xpBefore, $this->countXp());
+        // Even on a full miss, the gold vein despawns (zero-hit dealDamage still fires).
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goldvein"));
+    }
 }

@@ -64,13 +64,23 @@ class GameWrapper extends Game implements HarnessGameInterface {
 
     /** Reset and set up a 1-player game with hero 1 (Bjorn). */
     public function debug_setupGame_h1(): void {
+        $this->setupGameWithHero(1);
+    }
+
+    /** Reset and set up a 1-player game with hero 4 (Boldur). */
+    public function debug_setupGame_h4(): void {
+        $this->setupGameWithHero(4);
+    }
+
+    private function setupGameWithHero(int $heroNum): void {
         $this->setPlayersNumber(1);
-        $this->heroOrder = [1, 2, 3, 4];
+        $rest = array_values(array_diff([1, 2, 3, 4], [$heroNum]));
+        $this->heroOrder = array_merge([$heroNum], $rest);
         $this->tokens->deleteAll();
         $this->machine->db->loadRows([]);
         $this->setupGameTables();
         $this->heroOrder = null;
-        $this->notify->all("message", "setup h1 done", []);
+        $this->notify->all("message", "setup h$heroNum done", []);
         $this->sendReloadAllNotification();
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
         $this->machine->dispatchAll();

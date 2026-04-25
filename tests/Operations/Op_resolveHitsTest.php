@@ -49,10 +49,13 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
         ]);
         $op->resolve();
 
-        // 1 hit - 1 armor = 0 → no dealDamage queued, attack missed
+        // 1 hit - 1 armor = 0 → dealDamage queued with count=0 (per-defender side effects still fire,
+        // amount=0 is benign: effect_moveCrystals no-ops on 0, applyDamageEffects(0) is harmless).
         $ops = $this->game->machine->getAllOperations(PCOLOR);
-        $dealDamageOps = array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage"));
-        $this->assertEmpty($dealDamageOps, "No dealDamage should be queued when armor absorbs all hits");
+        $dealDamageOps = array_values(array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage")));
+        $this->assertCount(1, $dealDamageOps, "dealDamage queued even when armor absorbs all hits");
+        $d = $this->opData($dealDamageOps[0]);
+        $this->assertEquals(0, (int) $d["count"]);
     }
 
     public function testNoArmorMonsterTakesFullDamage(): void {
@@ -140,12 +143,17 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
 
         $this->call_resolve("choice_4"); // 4 to primary, 0 to secondary
 
+        // Both legs queue dealDamage; secondary's leg has count=0 (benign).
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $dealDamageOps = array_values(array_filter($ops, fn($o) => $o["type"] === "dealDamage"));
-        $this->assertCount(1, $dealDamageOps, "0-count secondary leg should be suppressed");
-        $d = $this->opData($dealDamageOps[0]);
-        $this->assertEquals("hex_12_8", $d["target"]);
-        $this->assertEquals(4, (int) $d["count"]);
+        $this->assertCount(2, $dealDamageOps);
+        $byTarget = [];
+        foreach ($dealDamageOps as $op) {
+            $d = $this->opData($op);
+            $byTarget[$d["target"]] = (int) $d["count"];
+        }
+        $this->assertEquals(4, $byTarget["hex_12_8"]);
+        $this->assertEquals(0, $byTarget["hex_12_7"]);
     }
 
     public function testSplitAllToSecondarySuppressesPrimaryLeg(): void {
@@ -160,9 +168,13 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
 
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $dealDamageOps = array_values(array_filter($ops, fn($o) => $o["type"] === "dealDamage"));
-        $this->assertCount(1, $dealDamageOps);
-        $d = $this->opData($dealDamageOps[0]);
-        $this->assertEquals("hex_12_7", $d["target"]);
-        $this->assertEquals(4, (int) $d["count"]);
+        $this->assertCount(2, $dealDamageOps);
+        $byTarget = [];
+        foreach ($dealDamageOps as $op) {
+            $d = $this->opData($op);
+            $byTarget[$d["target"]] = (int) $d["count"];
+        }
+        $this->assertEquals(0, $byTarget["hex_12_8"]);
+        $this->assertEquals(4, $byTarget["hex_12_7"]);
     }
 }

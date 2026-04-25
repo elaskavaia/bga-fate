@@ -78,4 +78,29 @@ class Campaign_BoldurEventTest extends CampaignBaseTest {
         $this->assertEquals($xpBefore - 2, $this->countXp());
         $this->assertNotEquals("limbo", $this->tokenLocation($house));
     }
+
+    // --- Portable Smithy (card_event_4_38) ---
+    // r=spendAction(actionPrepare):gainEquip — spend prepare action to draw top of equip deck onto tableau.
+
+    public function testPortableSmithySpendsPrepareActionToGainEquipment(): void {
+        $color = $this->getActivePlayerColor();
+        $smithy = "card_event_4_38_1";
+        $this->seedHand($smithy, $color);
+
+        // Seed a known equip card on top of the deck so gainEquip is deterministic.
+        $equip = "card_equip_4_25"; // Dwarf Pick — passive +1 strength, no onCardEnter side effects
+        $this->seedDeck("deck_equip_$color", [$equip]);
+
+        $hero = $this->game->getHero($color);
+        $this->assertNotContains("actionPrepare", $hero->getActionsTaken());
+
+        $this->assertValidTarget($smithy);
+        $this->respond($smithy);
+        $this->confirmCardEffect(); // spendAction(actionPrepare) confirm
+
+        // Prepare action consumed.
+        $this->assertContains("actionPrepare", $hero->getActionsTaken());
+        // Equip card moved to tableau.
+        $this->assertEquals("tableau_$color", $this->tokenLocation($equip));
+    }
 }

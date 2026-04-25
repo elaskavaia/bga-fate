@@ -523,6 +523,10 @@ class Material {
         "type" => "c_reaper",
         "name" => clienttranslate("Reaper Swing"),
 ],
+    "Op_c_orebiter" => [ 
+        "type" => "c_orebiter",
+        "name" => clienttranslate("Orebiter"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -773,6 +777,21 @@ class Material {
 // # Expansion heroes - not implemented
 // #hero_5|Finkel|1|hero|1|limbo||||||||
 // #hero_6|Sindra|1|hero|1|limbo||||||||
+// # Gold Vein - synthetic "monster" target for Orebiter (Op_c_orebiter). Always dies, no XP reward;
+// # the GoldVein subclass converts damage dealt directly to XP for the attacker.
+    "monster_goldvein" => [ 
+        "name" => clienttranslate("Gold Vein"),
+        "count" => 1,
+        "type" => "monster goldvein",
+        "create" => 1,
+        "location" => "supply_monster",
+        "tc" => "#caa12e",
+        "faction" => "goldvein",
+        "rank" => 0,
+        "strength" => 0,
+        "health" => 0,
+        "xp" => 0,
+],
 // # Trollkin faction monsters|
     "monster_goblin" => [ 
         "name" => clienttranslate("Goblin"),
@@ -4601,7 +4620,6 @@ class Material {
         "num" => 19,
         "hno" => 4,
         "name" => clienttranslate("Orebiter"),
-        "r" => "spendAction(actionAttack):custom",
         "quest" => "<i>Lose 2 gold</i>[XP]. The potential gain is endless.",
         "effect" => "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP].",
         "flavour" => "It's an auto-pick.",

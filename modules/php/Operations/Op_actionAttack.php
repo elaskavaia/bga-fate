@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -22,13 +23,26 @@ use Bga\Games\Fate\OpCommon\Operation;
  * roll → resolveHits → dealDamage.
  */
 class Op_actionAttack extends Operation {
+    private const OREBITER = "card_equip_4_19";
+
     function getPossibleMoves(): array {
         $target = $this->getDataField("target", "");
         if ($target) {
             return [$target];
         }
         $hero = $this->game->getHero($this->getOwner());
-        return $hero->getMonsterHexesInRange($hero->getAttackRange());
+        $hexes = $hero->getMonsterHexesInRange($hero->getAttackRange());
+
+        // Orebiter equipment: extends the attack target list with a "mine a mountain" choice.
+        // Picking it dispatches to Op_c_orebiter which prompts for the actual mountain hex.
+        if ($this->game->tokens->getTokenLocation(self::OREBITER) === "tableau_{$this->getOwner()}") {
+            $op = $this->instantiateOperation("c_orebiter", $this->getOwner(), ["card" => self::OREBITER]);
+            if (!$op->isVoid()) {
+                $hexes[] = self::OREBITER;
+            }
+        }
+
+        return $hexes;
     }
 
     public function getPrompt() {
@@ -46,11 +60,18 @@ class Op_actionAttack extends Operation {
         $strength = $hero->getAttackStrength();
         $this->game->systemAssert("Hero has no attack strength", $strength > 0);
 
-        $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, 0, "");
-        $this->queue("roll", null, [
-            "target" => $targetHex,
-            "count" => $strength,
-        ]);
+        if ($targetHex === self::OREBITER) {
+            // Orebiter sub-op picks a mountain hex and places monster_goldvein on it,
+            // then seeds back its hex via data field "target" for roll/endOfAttack below.
+            $this->queue("c_orebiter", null, ["card" => self::OREBITER]);
+        } else {
+            $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, 0, "");
+            $this->queue("roll", null, [
+                "target" => $targetHex,
+                "count" => $strength,
+            ]);
+        }
+
         $this->queue("endOfAttack");
     }
 }

@@ -207,6 +207,17 @@ If total damage >= monster health, the token is removed from the map and `countD
 
 If you actually want to assert the monster died, check `tokenLocation($monster) === "supply_monster"` (or similar) instead of reading damage.
 
+### Pitfall: Manually placing a stat-bearing card on tableau requires `recalcTrackers()`
+
+Hero attribute trackers (`strength`, `range`, `move`, `health`, `hand`) are recomputed only at setup and end-of-turn (`Hero::recalcTrackers`). When a test does `moveToken($cardId, "tableau_$color")` for a card with a `strength` (or other stat) field, the tracker stays stale — the new dice/range/etc. won't show up. Pattern:
+
+```php
+$this->game->tokens->moveToken($cardId, "tableau_$color");
+$this->game->getHero($color)->recalcTrackers();
+```
+
+Symptom: damage assertions short by exactly the card's stat bonus; range/move asserts off by the bonus. Applies to any tableau card with `strength`, `attack_range`, `move`, `health`, or `hand` — not just ability cards. Real game flow goes through `Op_upgrade`, which already recalcs, so production code doesn't need this; it's purely a test-setup shortcut.
+
 ## Debug workflow
 
 When the test fails or stalls:
