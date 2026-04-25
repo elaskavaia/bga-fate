@@ -23,6 +23,7 @@ class Material {
     const ERR_NONE_LEFT = 5;
     const ERR_NOT_APPLICABLE = 6;
     const ERR_NO_PLACE = 7;
+    const ERR_SILENT = 100;
 
     const MA_PREF_CONFIRM_TURN = 101;
 
@@ -97,6 +98,13 @@ class Material {
                 "code" => Material::ERR_NO_PLACE,
                 "type" => "err",
                 "name" => clienttranslate("Not valid placement"),
+            ],
+
+            "err_8" => [
+                //
+                "code" => Material::ERR_SILENT,
+                "type" => "err",
+                "name" => clienttranslate("Ok"),
             ],
         ];
         $this->addGeneratedTokens();
@@ -4024,7 +4032,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Rapid Strike I"),
         "mana" => 1,
-        "r" => "spendUse:3spendMana:performAction(actionAttack)",
+        "r" => "spendUse:3spendMana:actionAttack",
         "effect" => "3[MANA]: Perform an attack action.",
 ],
     "card_ability_4_4" => [ 
@@ -4035,7 +4043,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Rapid Strike II"),
         "mana" => 1,
-        "r" => "2spendMana:performAction(actionAttack)",
+        "r" => "2spendMana:actionAttack",
         "effect" => "2[MANA]: Perform an attack action. May be used several times per turn.",
 ],
     "card_ability_4_5" => [ 

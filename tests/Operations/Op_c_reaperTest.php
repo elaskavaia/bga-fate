@@ -97,6 +97,11 @@ final class Op_c_reaperTest extends AbstractOpTestCase {
         $this->createOp();
 
         $this->expectExceptionMessage("ERR:c_reaper:noPendingResolveHits");
-        $this->call_resolve("hex_6_9");
+        ob_start();
+        try {
+            $this->call_resolve("hex_6_9");
+        } finally {
+            ob_end_clean();
+        }
     }
 }

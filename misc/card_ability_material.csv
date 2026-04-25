@@ -53,8 +53,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 12|4|Dreadnought II|||1|spendMana:(preventDamage,custom)|TResolveHits|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
 13|4|Fortified I||||spendUse:1heal(self)||Heal 1 damage from Boldur.|It's not hiding, it's strategic positioning.
 14|4|Fortified II|1|2||spendUse:1heal(self)||Heal 1 damage from Boldur.|
-3|4|Rapid Strike I|||1|spendUse:3spendMana:performAction(actionAttack)||3[MANA]: Perform an attack action.|
-4|4|Rapid Strike II|||1|2spendMana:performAction(actionAttack)||2[MANA]: Perform an attack action. May be used several times per turn.|
+3|4|Rapid Strike I|||1|spendUse:3spendMana:actionAttack||3[MANA]: Perform an attack action.|
+4|4|Rapid Strike II|||1|2spendMana:actionAttack||2[MANA]: Perform an attack action. May be used several times per turn.|
 5|4|Sweeping Strike I||||custom|TActionAttack|Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
 6|4|Sweeping Strike II||||custom|TActionAttack|Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.|
 7|4|Wrecking Ball I||||custom||Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area.|He's on a roll!

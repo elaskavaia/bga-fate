@@ -73,6 +73,7 @@ export interface OpInfo {
   subtitle?: string; // sub prompt when op is single/active (rended small subtext)
 
   err?: string | NotificationMessage; // error string or notification object XXX
+  q?: number; // error code (0 = ok); see Material::ERR_* in PHP
 
   count?: number;
   mcount?: number;

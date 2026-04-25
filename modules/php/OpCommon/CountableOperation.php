@@ -43,6 +43,7 @@ abstract class CountableOperation extends Operation {
         }
         return clienttranslate('${name} x ${count}');
     }
+
     function getPossibleMoves() {
         return $this->getRangeMoves();
     }

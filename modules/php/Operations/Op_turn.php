@@ -105,7 +105,16 @@ class Op_turn extends Operation {
                 }
             }
         }
-
+        $hasValid = false;
+        foreach ($res as $entry) {
+            if (($entry["q"] ?? 0) == 0) {
+                $hasValid = true;
+                break;
+            }
+        }
+        if (!$hasValid) {
+            $res["q"] = Material::ERR_SILENT;
+        }
         return $res;
     }
 

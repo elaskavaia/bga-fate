@@ -12,6 +12,8 @@
 import type { Game } from "./Game";
 import { OpInfo, ParamInfo } from "./types";
 
+const ERR_SILENT = 100;
+
 /**  Generic processing related to Operation Machine */
 export class GameMachine {
   game: Game;
@@ -43,7 +45,7 @@ export class GameMachine {
 
     const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
     let subprompt = "";
-    if (opInfo.err) {
+    if (opInfo.err && opInfo.q !== ERR_SILENT) {
       subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
     } else if (opInfo.data?.reason) {
       subprompt = this.getReasonText(opInfo.data.reason);

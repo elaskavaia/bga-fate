@@ -1548,6 +1548,7 @@ class LaZoom {
  * -----
  *
  */
+const ERR_SILENT = 100;
 /**  Generic processing related to Operation Machine */
 class GameMachine {
     constructor(game, bga) {
@@ -1573,7 +1574,7 @@ class GameMachine {
         this.opInfo = opInfo;
         const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
         let subprompt = "";
-        if (opInfo.err) {
+        if (opInfo.err && opInfo.q !== ERR_SILENT) {
             subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
         }
         else if (opInfo.data?.reason) {
