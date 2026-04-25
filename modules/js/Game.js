@@ -1866,11 +1866,11 @@ class GameMachine {
             .performAction("action_resolve", {
             data: JSON.stringify(args)
         })
-            ?.then((x) => {
+            .then((x) => {
             console.log("action complete", x);
         })
             .catch((e) => {
-            this.game.setActionStatus(e.message, e.args);
+            console.error(e);
         });
     }
     addInfoButton(helpText) {
@@ -1891,8 +1891,8 @@ class GameMachine {
                 .performAction("action_undo", [], {
                 checkAction: false
             })
-                ?.catch((e) => {
-                this.game.setActionStatus(e.message, e.args);
+                .catch((e) => {
+                console.error(e);
             }), {
                 color: "alert",
                 id: "button_undo"
@@ -2141,7 +2141,7 @@ class PlayerTurnConfirm {
                 console.log("action complete", x);
             })
                 .catch((e) => {
-                this.game.setActionStatus(e.message, e.args);
+                console.error(e);
             });
         });
     }
@@ -2680,7 +2680,6 @@ class Game extends Game1Tokens {
                 if (msg)
                     this.setActionStatus(msg, args);
             }
-            // onEnd: (notifName, msg, args) => this.setActionStatus("", args)
         });
     }
     async notif_tokenMoved(args) {

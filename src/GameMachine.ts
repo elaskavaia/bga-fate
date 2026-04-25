@@ -371,11 +371,11 @@ export class GameMachine {
       .performAction("action_resolve", {
         data: JSON.stringify(args)
       })
-      ?.then((x) => {
+      .then((x) => {
         console.log("action complete", x);
       })
       .catch((e: any) => {
-        this.game.setActionStatus(e.message, e.args);
+        console.error(e);
       });
   }
 
@@ -405,8 +405,8 @@ export class GameMachine {
             .performAction("action_undo", [], {
               checkAction: false
             })
-            ?.catch((e: any) => {
-              this.game.setActionStatus(e.message, e.args);
+            .catch((e: any) => {
+              console.error(e);
             }),
         {
           color: "alert",

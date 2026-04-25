@@ -28,7 +28,7 @@ class PlayerTurnConfirm {
           console.log("action complete", x);
         })
         .catch((e: any) => {
-          this.game.setActionStatus(e.message, e.args);
+          console.error(e);
         });
     });
   }
@@ -610,7 +610,6 @@ export class Game extends Game1Tokens {
       onStart: (notifName, msg, args) => {
         if (msg) this.setActionStatus(msg, args);
       }
-      // onEnd: (notifName, msg, args) => this.setActionStatus("", args)
     });
   }
 
