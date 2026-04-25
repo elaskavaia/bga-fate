@@ -784,55 +784,6 @@ class Game extends Base {
         $this->hexMap->invalidateOccupancy();
     }
 
-    function debug_Op_c_hail() {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $heroId = $this->getHeroTokenId($color);
-        $cardId = "card_ability_2_3"; // Hail of Arrows I
-        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
-        $this->effect_moveCrystals($heroId, "green", 3, $cardId);
-        // Place 3 monsters adjacent to the hero
-        $heroHex = $this->hexMap->getCharacterHex($heroId);
-        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
-        $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_brute_1"];
-        $placed = 0;
-        foreach ($adjHexes as $hex) {
-            if ($placed >= 3) {
-                break;
-            }
-            if (!$this->hexMap->isOccupied($hex)) {
-                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
-                $placed++;
-            }
-        }
-        // $this->hexMap->invalidateOccupancy();
-        // $this->machine->push("c_hail", $color, ["card" => $cardId]);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    function debug_Op_c_hailII() {
-        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-        $heroId = $this->getHeroTokenId($color);
-        $cardId = "card_ability_2_4"; // Hail of Arrows II
-        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
-        $this->effect_moveCrystals($heroId, "green", 4, $cardId);
-        $heroHex = $this->hexMap->getCharacterHex($heroId);
-        $adjHexes = $this->hexMap->getAdjacentHexes($heroHex);
-        $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_brute_1", "monster_brute_2"];
-        $placed = 0;
-        foreach ($adjHexes as $hex) {
-            if ($placed >= 4) {
-                break;
-            }
-            if (!$this->hexMap->isOccupied($hex)) {
-                $this->tokens->dbSetTokenLocation($monsters[$placed], $hex, 0, "");
-                $placed++;
-            }
-        }
-        // $this->hexMap->invalidateOccupancy();
-        // $this->machine->push("c_hailII", $color, ["card" => $cardId]);
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
     function debug_Op_gainMana() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("2gainMana", $color);
@@ -918,90 +869,12 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
-    // Debug functions below: kept commented out, uncomment as needed for BGA Studio testing
-    // function debug_monster() {
-    //     // Place monsters on the map for visual testing
-    //     // Trollkin faction
-    //     $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_7_7");
-    //     $this->tokens->dbSetTokenLocation("monster_goblin_2", "hex_12_6");
-    //     $this->tokens->dbSetTokenLocation("monster_goblin_3", "hex_5_10");
-    //     $this->tokens->dbSetTokenLocation("monster_brute_1", "hex_6_8");
-    //     $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_11_5");
-    //     $this->tokens->dbSetTokenLocation("monster_troll_1", "hex_4_9");
-    //     $this->tokens->dbSetTokenLocation("monster_troll_2", "hex_13_7");
-    //     // Fire Horde faction
-    //     $this->tokens->dbSetTokenLocation("monster_sprite_1", "hex_8_3");
-    //     $this->tokens->dbSetTokenLocation("monster_sprite_2", "hex_13_5");
-    //     $this->tokens->dbSetTokenLocation("monster_elemental_1", "hex_6_4");
-    //     $this->tokens->dbSetTokenLocation("monster_elemental_2", "hex_14_6");
-    //     $this->tokens->dbSetTokenLocation("monster_jotunn_1", "hex_4_7");
-    //     $this->tokens->dbSetTokenLocation("monster_jotunn_2", "hex_12_9");
-    //     // Dead faction
-    //     $this->tokens->dbSetTokenLocation("monster_imp_1", "hex_3_6");
-    //     $this->tokens->dbSetTokenLocation("monster_imp_2", "hex_14_4");
-    //     $this->tokens->dbSetTokenLocation("monster_skeleton_1", "hex_5_5");
-    //     $this->tokens->dbSetTokenLocation("monster_skeleton_2", "hex_12_3");
-    //     $this->tokens->dbSetTokenLocation("monster_draugr_1", "hex_7_4");
-    //     $this->tokens->dbSetTokenLocation("monster_draugr_2", "hex_11_8");
-    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    // }
-
     function debug_reinforcement(string $cardId = "card_monster_1") {
         // Run reinforcement with a specific monster card (e.g. "card_monster_1" = Queen of the Dead yellow)
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("reinforcement", $color, ["card" => $cardId]);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
-
-    function debug_legends() {
-        // Place all 6 legend miniatures on the map for visual testing
-        $this->tokens->dbSetTokenLocation("monster_legend_1_1", "hex_7_7"); // Queen of the Dead (I)
-        $this->tokens->dbSetTokenLocation("monster_legend_2_1", "hex_5_5"); // Seer of Odin (I)
-        $this->tokens->dbSetTokenLocation("monster_legend_3_1", "hex_12_6"); // Grendel (I)
-        $this->tokens->dbSetTokenLocation("monster_legend_4_1", "hex_8_3"); // Surt (I)
-        $this->tokens->dbSetTokenLocation("monster_legend_5_1", "hex_4_9"); // Hrungbald (I)
-        $this->tokens->dbSetTokenLocation("monster_legend_6_1", "hex_13_7"); // Nidhuggr (I)
-        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    }
-
-    // function debug_houses() {
-    //     // Move a couple houses out of Grimheim to test removal visuals
-    //     $this->tokens->dbSetTokenLocation("house_0", "hex_8_9");
-    //     $this->tokens->dbSetTokenLocation("house_2", "hex_8_9");
-    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    // }
-
-    // function debug_monsterCards() {
-    //     // Place a few monster cards on display_monsterturn for visual testing
-    //     $this->tokens->dbSetTokenLocation("card_monster_28", "display_monsterturn", 0); // Flanking (yellow)
-    //     $this->tokens->dbSetTokenLocation("card_monster_36", "display_monsterturn", 0); // Viral Trolls (yellow)
-    //     $this->tokens->dbSetTokenLocation("card_monster_22", "display_monsterturn", 1); // Imp-ressive Swarm (skipped)
-    //     $this->tokens->dbSetTokenLocation("card_monster_43", "display_monsterturn", 0); // Feed the Flames (red)
-    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    // }
-
-    // function debug_heroCards(int $hno = 1) {
-    //     // Place all cards for hero $hno on the current player's tableau for visual testing
-    //     // Creates cards if they don't exist (e.g. testing a hero nobody is playing)
-    //     $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
-    //     foreach ($this->material->getTokensWithPrefix("card_") as $cardId => $info) {
-    //         if (($info["hno"] ?? null) != $hno) {
-    //             continue;
-    //         }
-    //         $tokens = $this->tokens->getTokensOfTypeInLocation($cardId, null);
-    //         if (!$tokens) {
-    //             // Card doesn't exist yet — create it (count>1 needs indexed tokens)
-    //             $count = $info["count"] ?? 1;
-    //             $info["location"] = "tableau_{$color}";
-    //             $info["create"] = $count > 1 ? 2 : 1;
-    //             $this->tokens->createTokenFromInfo($cardId, $info);
-    //         } else {
-    //             $firstKey = array_key_first($tokens);
-    //             $this->tokens->dbSetTokenLocation($firstKey, "tableau_{$color}", 0, "", ["noa" => true]);
-    //         }
-    //     }
-    //     $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
-    // }
 
     function debug_dumpMachineDb() {
         $t = $this->machine->gettablearr();
