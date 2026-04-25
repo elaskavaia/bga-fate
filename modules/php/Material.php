@@ -519,6 +519,10 @@ class Material {
         "type" => "c_queen",
         "name" => clienttranslate("Queen of the Hill"),
 ],
+    "Op_c_reaper" => [ 
+        "type" => "c_reaper",
+        "name" => clienttranslate("Reaper Swing"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -3863,7 +3867,7 @@ class Material {
         "num" => 9,
         "hno" => 3,
         "name" => clienttranslate("Reaper Swing I"),
-        "r" => "custom",
+        "r" => "c_reaper",
         "on" => "TActionAttack",
         "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
 ],
@@ -3875,7 +3879,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Reaper Swing II"),
         "strength" => 3,
-        "r" => "custom",
+        "r" => "c_reaper",
         "on" => "TActionAttack",
         "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
 ],

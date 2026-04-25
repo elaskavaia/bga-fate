@@ -350,7 +350,7 @@ class Game extends Base {
     }
 
     /**
-     * Roll attack dice onto display_battle. Does NOT count hits — that's done later by effect_resolveHits.
+     * Roll attack dice onto display_battle. Does NOT count hits — that's done later by countHits.
      * Cleans up leftover dice, announces the attack, picks dice from supply and rolls them.
      */
     function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength, bool $add = false): void {
@@ -407,7 +407,7 @@ class Game extends Base {
      * Dice remain on display_battle so the player can see them.
      * @return int number of hits
      */
-    function effect_resolveHits(string $attackerId, string $defenderId): int {
+    function countHits(string $attackerId, string $defenderId): int {
         $defender = $this->getCharacter($defenderId);
         $hits = 0;
         $diceOnDisplay = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
@@ -698,6 +698,50 @@ class Game extends Base {
         }
 
         $this->machine->push("c_sureshotII", $color, ["card" => $cardId]);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    /**
+     * Reaper Swing harness setup. Places primary monster + a secondary adjacent to primary,
+     * rolls 4 dice (all hits) onto display_battle, sets marker_attack on primary, queues a
+     * pending Op_resolveHits, then pushes Op_c_reaper. This mimics the mid-attack state
+     * where Op_roll has fired the TActionAttack trigger and is about to resolveHits.
+     */
+    function debug_Op_c_reaper() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+
+        // Park hero outside Grimheim so the attack setup makes sense.
+        $heroHex = "hex_7_9";
+        $this->tokens->dbSetTokenLocation($heroId, $heroHex, 0, "");
+
+        // Primary defender adjacent to hero, plus two candidate secondaries adjacent
+        // to primary so the player gets a real choice (single-target auto-resolves).
+        $primaryHex = "hex_7_8";
+        $this->tokens->dbSetTokenLocation("monster_brute_1", $primaryHex, 0, "");
+        $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_6_8", 0, "");
+        $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_8_8", 0, "");
+
+        // Place 4 hit-side dice on display_battle so resolveHits has a 4-hit budget.
+        // Side 5 = hit; placing directly avoids depending on the harness's randQueue.
+        $diceTokens = $this->tokens->pickTokensForLocation(4, "supply_die_attack", "display_battle");
+        foreach ($diceTokens as $die) {
+            $this->tokens->dbSetTokenLocation($die["key"], "display_battle", 5, "");
+        }
+
+        // Mark the active attack on the primary hex (what Op_actionAttack would have done).
+        $this->tokens->dbSetTokenLocation("marker_attack", $primaryHex, 0, "");
+
+        // Debug setups bypass the normal occupancy invalidation that Op_roll triggers.
+        $this->hexMap->invalidateOccupancy();
+
+        // Queue the pending resolveHits that c_reaper will mutate (what Op_roll would queue).
+        $this->machine->push("resolveHits", $color, [
+            "attacker" => $heroId,
+            "target" => $primaryHex,
+        ]);
+
+        $this->machine->push("c_reaper", $color);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

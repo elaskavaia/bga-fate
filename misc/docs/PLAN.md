@@ -508,14 +508,14 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 #### Ability Cards
 
 
-[ ] card_ability_3_9 Reaper Swing I 
+[x] card_ability_3_9 Reaper Swing I — has tests
 [ ] card_ability_3_10 Reaper Swing II 
 
 #### Equipment Cards
 
-[ ] card_equip_3_19 Blade Decorations 
-[ ] card_equip_3_22 Raven's Claw 
-[ ] card_equip_3_21 Wildfire Blade 
+[x] card_equip_3_19 Blade Decorations — has tests
+[x] card_equip_3_22 Raven's Claw — has tests
+[x] card_equip_3_21 Wildfire Blade — has tests
 
 #### Event Cards
 

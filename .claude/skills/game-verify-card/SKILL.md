@@ -1,7 +1,7 @@
 ---
 name: game-verify-card
 description: Verify a game card works correctly by checking its CSV definition, operation implementation, test coverage, and PLAN.md status. Use this skill when the user wants to verify, validate, or check a card (e.g., "/game-verify-card card_event_1_33"), or when they ask about a card's implementation status, test coverage, or readiness.
-argument-hint: card ID
+argument-hint: card ID or multiple card IDs
 ---
 
 # Card Verification Skill
@@ -14,7 +14,7 @@ The user provides a card ID as argument (e.g., `card_event_1_33`, `card_equip_1_
 
 The card ID format is `card_{type}_{heroNumber}_{cardNumber}`.
 
-Note: if this skill is launched with multiple ids just apply this skill for each card individually
+Note: if this skill is launched with multiple ids just apply this skill for each card individually - launch subagents for each but tell them not to modify plan directly, they can analyze and write tests, but not run and debug them (that will collide). You can run all tests later when all agents finish and update the PLAN.md.
 
 ## Verification Steps
 

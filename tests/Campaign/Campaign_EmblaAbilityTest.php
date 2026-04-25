@@ -149,4 +149,46 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_8_9", $this->tokenLocation($troll)); // troll untouched
         $this->assertEquals("hex_7_9", $this->tokenLocation($this->heroId));
     }
+
+    // --- Reaper Swing I (card_ability_3_9) ---
+    // r=c_reaper, on=TActionAttack. "In each attack action, you may divide the damage
+    // you deal between the target and another adjacent monster."
+    // c_reaper picks a monster adjacent to PRIMARY (may be out of hero's reach),
+    // then Op_resolveHits prompts for the split via choice_N buttons (primary hit count).
+
+    public function testReaperSwingISplitsDamageBetweenPrimaryAndSecondary(): void {
+        $cardId = "card_ability_3_9";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Embla at hex_7_9. Primary brute adjacent to hero; secondary brute adjacent to
+        // primary (but NOT to hero — exercises the out-of-reach convention).
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $primary = "monster_brute_1";
+        $secondary = "monster_brute_2";
+        $this->game->getMonster($primary)->moveTo("hex_7_8", "");
+        $this->game->getMonster($secondary)->moveTo("hex_6_8", "");
+
+        // Embla I(3) + Flimsy Blade(1) = 4 dice, all hits.
+        $this->seedRand([5, 5, 5, 5]);
+        $this->respond("hex_7_8");
+
+        // TActionAttack trigger queues useCard with Reaper Swing as a target.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        // Op_c_reaper prompts for the secondary (adjacent to primary). hex_6_8 is
+        // adjacent to primary hex_7_8 but NOT to the hero at hex_7_9.
+        $this->respond("hex_6_8");
+
+        // Op_resolveHits now has secondary set — prompts for split. choice_2 = 2 to primary.
+        $this->respond("choice_2");
+
+        // 2 damage to each brute (both survive, health=3).
+        $this->assertEquals(2, $this->countDamage($primary));
+        $this->assertEquals(2, $this->countDamage($secondary));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($primary));
+        $this->assertEquals("hex_6_8", $this->tokenLocation($secondary));
+    }
 }

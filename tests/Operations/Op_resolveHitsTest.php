@@ -75,4 +75,94 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
         $dealDamage = reset($dealDamageOps);
         $this->assertEquals("dealDamage", $dealDamage["type"]);
     }
+
+    // -------------------------------------------------------------------------
+    // Split path: when `secondary` data field is set (Reaper Swing)
+    // -------------------------------------------------------------------------
+
+    /** DB rows store `data` as a JSON string — decode for assertions. */
+    private function opData(array $row): array {
+        return is_string($row["data"]) ? json_decode($row["data"], true) : $row["data"] ?? [];
+    }
+
+    /** Place two goblins, roll 4 hits — gives the test a 4-hit budget to split. */
+    private function setupReaperFourHits(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // primary
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_12_7"); // secondary
+        $this->game->randQueue = [5, 5, 5, 5];
+        $this->game->effect_rollAttackDice("hero_1", "monster_goblin_1", 4);
+    }
+
+    public function testSplitPathListsChoiceTargets(): void {
+        $this->setupReaperFourHits();
+        $this->createOp("resolveHits", [
+            "attacker" => "hero_1",
+            "target" => "hex_12_8",
+            "secondary" => "hex_12_7",
+        ]);
+
+        // 4 hits → 5 split options (0..4 inclusive)
+        $this->assertValidTargetCount(5);
+        $this->assertValidTarget("choice_0");
+        $this->assertValidTarget("choice_4");
+    }
+
+    public function testSplitTwoTwoQueuesBothDealDamages(): void {
+        $this->setupReaperFourHits();
+        $this->createOp("resolveHits", [
+            "attacker" => "hero_1",
+            "target" => "hex_12_8",
+            "secondary" => "hex_12_7",
+        ]);
+
+        $this->call_resolve("choice_2"); // 2 to primary, 2 to secondary
+
+        $ops = $this->game->machine->getAllOperations(PCOLOR);
+        $dealDamageOps = array_values(array_filter($ops, fn($o) => $o["type"] === "dealDamage"));
+        $this->assertCount(2, $dealDamageOps, "both legs should queue dealDamage");
+
+        $byTarget = [];
+        foreach ($dealDamageOps as $o) {
+            $d = $this->opData($o);
+            $byTarget[$d["target"]] = (int) $d["count"];
+        }
+        $this->assertEquals(2, $byTarget["hex_12_8"]);
+        $this->assertEquals(2, $byTarget["hex_12_7"]);
+    }
+
+    public function testSplitAllToPrimarySuppressesSecondaryLeg(): void {
+        $this->setupReaperFourHits();
+        $this->createOp("resolveHits", [
+            "attacker" => "hero_1",
+            "target" => "hex_12_8",
+            "secondary" => "hex_12_7",
+        ]);
+
+        $this->call_resolve("choice_4"); // 4 to primary, 0 to secondary
+
+        $ops = $this->game->machine->getAllOperations(PCOLOR);
+        $dealDamageOps = array_values(array_filter($ops, fn($o) => $o["type"] === "dealDamage"));
+        $this->assertCount(1, $dealDamageOps, "0-count secondary leg should be suppressed");
+        $d = $this->opData($dealDamageOps[0]);
+        $this->assertEquals("hex_12_8", $d["target"]);
+        $this->assertEquals(4, (int) $d["count"]);
+    }
+
+    public function testSplitAllToSecondarySuppressesPrimaryLeg(): void {
+        $this->setupReaperFourHits();
+        $this->createOp("resolveHits", [
+            "attacker" => "hero_1",
+            "target" => "hex_12_8",
+            "secondary" => "hex_12_7",
+        ]);
+
+        $this->call_resolve("choice_0"); // 0 to primary, 4 to secondary
+
+        $ops = $this->game->machine->getAllOperations(PCOLOR);
+        $dealDamageOps = array_values(array_filter($ops, fn($o) => $o["type"] === "dealDamage"));
+        $this->assertCount(1, $dealDamageOps);
+        $d = $this->opData($dealDamageOps[0]);
+        $this->assertEquals("hex_12_7", $d["target"]);
+        $this->assertEquals(4, (int) $d["count"]);
+    }
 }

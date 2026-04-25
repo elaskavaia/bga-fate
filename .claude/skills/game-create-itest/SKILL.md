@@ -180,6 +180,8 @@ $this->respond("<card_id>");
 
 After picking the card in `useCard`, child ops (`dealDamage`, `heal`, `spendMana`) can still prompt for their target even when there's only one valid choice. Don't assume auto-resolve — if the flow stalls, **dumpState to see what op is waiting**.
 
+If the child op is a *target-picking* op (`dealDamage`, `heal`, `moveHero`) with multiple valid targets, **don't call `confirmCardEffect()`** — picking the target IS the confirmation. `confirmCardEffect` only applies when the child op has no further target choices (e.g. `2addDamage`, `2heal(self)`). Symptom if you call it incorrectly: `checkUserTargetSelection:01` error, because `"1"` isn't a valid hex/target.
+
 ### Pitfall: Hero starts in Grimheim
 
 Default hero start is `hex_8_9` (or similar Grimheim hex). Heroes **cannot attack from inside Grimheim**. For attack tests, always `moveToken($this->heroId, "hex_7_9")` first.
