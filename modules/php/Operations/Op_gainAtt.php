@@ -22,6 +22,9 @@ use function Bga\Games\Fate\getPart;
  * gain attribute (temp)
  */
 class Op_gainAtt extends CountableOperation {
+    public function getPossibleMoves() {
+        return ["confirm"]; // overrid parent because we don't need to confirm count
+    }
     function getAttribute() {
         return getPart($this->getType(), 1, true) ?: $this->getParam() ?: "strength";
     }

@@ -86,7 +86,7 @@ class Op_addDamage extends CountableOperation {
         if (count($diceOnDisplay) == 0) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
         }
-        return parent::getPossibleMoves();
+        return ["confirm"];
     }
 
     function resolve(): void {

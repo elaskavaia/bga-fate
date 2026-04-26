@@ -41,7 +41,6 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
         $this->confirmCardEffect(); // spendAction(actionAttack) confirm
-        $this->respond("confirm");  // drawEvent confirm
 
         // Attack action slot consumed — can't re-take it this turn.
         $hero = $this->game->getHero($color);

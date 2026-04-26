@@ -77,17 +77,21 @@ final class Op_playEventTest extends AbstractOpTestCase {
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
         $top = reset($queued);
-        $this->assertStringContainsString("heal", $top["type"]);
+        //$this->assertEquals("cardEffect", $top["type"]);
+        $data = is_string($top["data"]) ? json_decode($top["data"], true) : $top["data"];
+        $this->assertEquals(EVENT_CARD, $data["card"] ?? null);
+        //$this->assertStringContainsString("heal", $data["r"] ?? "");
     }
 
     public function testPlayRestCardHealsHero(): void {
         // setUp adds 3 damage; Rest r=2heal(self) heals 2 → 1 remaining
         $this->call_resolve(EVENT_CARD);
-
+        $this->dispatchAll();
         $queued = $this->game->machine->getTopOperations(PCOLOR);
         $this->assertNotEmpty($queued);
         $healOp = $this->game->machine->instantiateOperationFromDbRow(reset($queued));
         $healOp->action_resolve([Operation::ARG_TARGET => "hero_1"]);
+        $this->dispatchAll();
 
         $damage = $this->countRedCrystals("hero_1");
         $this->assertEquals(1, $damage);

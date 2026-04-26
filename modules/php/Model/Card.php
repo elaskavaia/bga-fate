@@ -214,7 +214,7 @@ class Card {
             "reason" => $cardId,
             "event" => $event->value,
         ]);
-        $op->withDataField("mcount", "0"); // skippable
+
         $op->withDataField("confirm", "true"); // do not auto-resolve single choice
 
         $this->op->queueOp($op);

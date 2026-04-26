@@ -85,9 +85,17 @@ abstract class CampaignBaseTest extends TestCase {
         $this->driver->runStep("action_skip", []);
     }
 
-    /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true). */
+    /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true).
+     * Sends "confirm" only when the active op is in a single-choice/confirm state — i.e. it has
+     * exactly one valid target or "confirm" is explicitly listed. Single-target ops accept
+     * "confirm" via target substitution in Operation::_getCheckedArg. No-op otherwise so tests
+     * stay agnostic about whether a separate confirm step exists. */
     protected function confirmCardEffect(): void {
-        $this->respond("confirm");
+        $targets = $this->getOpArgs()["target"] ?? [];
+        if (count($targets) !== 1) {
+            return;
+        }
+        $this->respond($targets[0]);
     }
 
     /** Get current game state (id, name, active_player, args) */

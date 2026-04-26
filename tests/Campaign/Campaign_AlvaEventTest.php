@@ -66,13 +66,11 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
         $agility = "card_event_2_28_1";
         $this->seedHand($agility, $color);
 
-        // Start Alva at a hex with a clear 2-step path — hex_7_9 → hex_6_9 → hex_5_9
+        // Start Alva at hex_7_9; 2move resolves to a single 2-step destination
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
 
         $this->assertValidTarget($agility);
         $this->respond($agility);
-        // 2move prompts twice, one hex per step
-        $this->respond("hex_6_9");
         $this->respond("hex_5_9");
 
         $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
@@ -273,9 +271,9 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
 
         $this->assertValidTarget($speedy);
         $this->respond($speedy);
-        // discardEvent prompts for a card to discard
-        $this->respond($toDiscard);
-        // actionAttack auto-picks the sole adjacent goblin
+        // Speedy is discarded by useCard before its effect runs; only $toDiscard
+        // is left in hand, so discardEvent auto-resolves; actionAttack auto-picks
+        // the lone adjacent goblin.
         $this->skipIfOp("useCard"); // any post-attack triggers
 
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));

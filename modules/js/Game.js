@@ -1319,11 +1319,12 @@ class Game1Tokens extends Game0Basics {
                         args[key] = res;
                 }
             }
+            if (log && typeof log == "string")
+                log = this.replaceSimpleIconsInLog(log, args);
         }
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
         }
-        log = this.replaceSimpleIconsInLog(log, args);
         return { log, args };
     }
     replaceSimpleIconsInLog(log, args = {}) {
@@ -1375,6 +1376,8 @@ class Game1Tokens extends Game0Basics {
             parent.replaceChildren(...children);
         }
         children.forEach((node, index) => {
+            if (!node.id)
+                return;
             const origId = node.id.replace("_tt", "");
             node.addEventListener("click", (e) => {
                 const selected_html = this.getTooltipHtmlForToken(origId);

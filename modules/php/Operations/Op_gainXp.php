@@ -34,7 +34,9 @@ class Op_gainXp extends CountableOperation {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = (int) $this->getCount();
-        $this->game->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner");
+        $this->game->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner", [
+            "message" => clienttranslate('${char_name} gains ${count} [XP]'),
+        ]);
     }
 
     public function isTrivial(): bool {

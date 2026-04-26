@@ -94,9 +94,10 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
 
         // Seed all-hit dice (5=hit, 1=miss); 3 dice, all hits
         $this->seedRand([5, 5, 5]);
-        // turn op inlines useCard as a delegate — pick the card directly from the turn prompt
+        // turn op inlines useCard as a delegate — pick the card directly from the turn prompt.
+        // The full effect (spendUse:spendDurab:3roll(adj)) auto-resolves: only one adjacent
+        // goblin so Op_roll(adj) has no target choice, and the chain runs end-to-end.
         $this->respond("card_equip_2_17");
-        $this->respond("1");
 
         // Durability spent: 1 red crystal on the card
         $this->assertEquals(1, $this->countDamage("card_equip_2_17"));

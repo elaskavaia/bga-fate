@@ -14,7 +14,7 @@ The user provides a card ID as argument (e.g., `card_event_1_33`, `card_equip_1_
 
 The card ID format is `card_{type}_{heroNumber}_{cardNumber}`.
 
-**Multi-card mode** (and single-card when the user wants to keep chatting): dispatch the work to the `game-card-verifier` agent instead of doing it yourself. Always use `run_in_background: true` so the user can keep talking to you while agents run — you'll be notified when each completes.
+Dispatch the work to the `@game-card-verifier` agent instead of doing it yourself. Always use `run_in_background: true` so the user can keep talking to you while agents run — you'll be notified when each completes.
 
 ```
 Agent({
@@ -25,9 +25,7 @@ Agent({
 })
 ```
 
-For multi-card batches, fire all `Agent(...)` calls in a single message so they run concurrently. The agent (defined in `.claude/agents/game-card-verifier.md`) wraps this skill with parallel-safety rules: it runs only its own targeted test (no full suite), and it does NOT touch `PLAN.md`. After all agents finish, you (the dispatcher) flip the relevant `PLAN.md` lines based on their reports and surface a combined summary to the user.
-
-For a *single* card when the user is happy waiting, foreground (no `run_in_background`) is also fine — pick based on whether mid-flight chat matters.
+Fire all `Agent(...)` calls in a single message so they run concurrently. The agent (defined in `.claude/agents/game-card-verifier.md`) wraps this skill with parallel-safety rules: it runs only its own targeted test (no full suite), and it does NOT touch `PLAN.md`. After all agents finish, you (the dispatcher) flip the relevant `PLAN.md` lines based on their reports and surface a combined summary to the user.
 
 Caveat — same-hero serialization: two agents verifying cards for the same hero may both edit the same `Campaign_<Hero><Category>Test.php` file and clobber each other. When dispatching a batch that includes multiple cards for the same hero, run those serially (one agent at a time) while parallelizing across different heroes.
 

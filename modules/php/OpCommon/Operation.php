@@ -710,9 +710,7 @@ abstract class Operation {
         if ($this->canSkip()) {
             return false;
         }
-        // if ($this->getArgType() == Operation::TTYPE_AUTO) {
-        //     return true;
-        // }
+
         if ($this->isOneChoice()) {
             return true;
         }
@@ -774,14 +772,14 @@ abstract class Operation {
         return $state;
     }
 
-    function getPossibleMovesDelegate(string|array $opTypes) {
+    function getPossibleMovesDelegate(string|array $opTypes, mixed $data = null) {
         if (!is_array($opTypes)) {
             $opTypes = [$opTypes];
         }
         $res = [];
         $errinfo = [];
         foreach ($opTypes as $operationType) {
-            $op = $this->instantiateOperation($operationType);
+            $op = $this->instantiateOperation($operationType, null, $data);
             $moves = $op->getArgsInfo();
             foreach ($moves as &$move) {
                 $move["delegate"] = $operationType;

@@ -88,10 +88,6 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
         $this->assertValidTarget($this->abilityCard);
         $this->call_resolve($this->abilityCard);
-        // Card::useCard queues r wrapped in confirm=true paygain — confirm it so spendUse runs
-        $top = $this->game->machine->createTopOperationFromDbForOwner($this->owner);
-        $this->assertNotNull($top);
-        $top->action_resolve([Operation::ARG_TARGET => "1"]);
         $this->game->machine->dispatchAll();
         $this->createOp();
         $this->assertNotValidTarget($this->abilityCard);

@@ -123,7 +123,7 @@ abstract class ComplexOperation extends CountableOperation {
         }
         foreach ($this->delegates as $i => $sub) {
             $pars[] = "p$i";
-            $args["p$i"] = ["log" => $sub->getOpName(), "args" => $sub->getExtraArgs()];
+            $args["p$i"] = $sub->getOpName();
         }
         $log = implode(
             $join,
@@ -175,5 +175,12 @@ abstract class ComplexOperation extends CountableOperation {
         }
 
         return $base;
+    }
+
+    public function getUiArgs() {
+        foreach ($this->delegates as $sub) {
+            return $sub->getUiArgs();
+        }
+        return parent::getUiArgs();
     }
 }
