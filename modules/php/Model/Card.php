@@ -197,31 +197,35 @@ class Card {
         $this->checkPlayability($event);
         $cardId = $this->id;
         $hero = $this->game->getHero($this->getOwner());
-        ["r" => $r, "effect" => $effect] = $this->getCardRulesForEvent($event);
+
         if ($this->isEvent()) {
-            $message = clienttranslate('${char_name} plays Trigger ${token_name}: ${effect_text}');
+            $message = clienttranslate('${char_name} plays event ${token_name}');
         } else {
-            $message = clienttranslate('${char_name} uses ability of ${token_name}: ${effect_text}');
+            $message = clienttranslate('${char_name} activates ${token_name}');
         }
         $this->game->notifyMessage($message, [
             "char_name" => $hero->getId(),
             "token_name" => $cardId,
-            "effect_text" => $effect,
         ]);
 
-        $op = $this->op->instantiateOperation($r, $this->getOwner(), [
-            "card" => $cardId,
-            "reason" => $cardId,
-            "event" => $event->value,
-        ]);
-
-        $op->withDataField("confirm", "true"); // do not auto-resolve single choice
-
+        $op = $this->createOperationForCardEffect($event);
         $this->op->queueOp($op);
 
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);
         }
+    }
+
+    function createOperationForCardEffect($event) {
+        $cardId = $this->id;
+        ["r" => $r] = $this->getCardRulesForEvent($event);
+        $op = $this->op->instantiateOperation($r, $this->getOwner(), [
+            "card" => $cardId,
+            "reason" => $cardId,
+            "event" => $event->value,
+        ]);
+        $op->withDataField("confirm", "true"); // do not auto-resolve single choice
+        return $op;
     }
 
     function getCardRulesForEvent(Trigger $event) {

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -90,7 +91,7 @@ class Op_cardEffect extends Operation {
         }
     }
 
-    public function getOpName() {
+    public function getOpName(): string|NotificationMessage {
         $cardId = $this->getCard();
         // this mean its the only effect on the card
         if ($this->isInline()) {

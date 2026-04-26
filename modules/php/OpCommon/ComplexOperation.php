@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\OpCommon;
 
+use Bga\GameFramework\NotificationMessage;
 use Bga\Games\Fate\Material;
 
 abstract class ComplexOperation extends CountableOperation {
@@ -78,7 +79,7 @@ abstract class ComplexOperation extends CountableOperation {
 
         $args = $sub->getExtraArgs();
         $res = [
-            "name" => $sub->getIconicName(),
+            "name" => $sub->getChoiceName(),
             "args" => $args,
             "err" => $err,
             "r" => $sub->getTypeFullExpr(),
@@ -114,7 +115,7 @@ abstract class ComplexOperation extends CountableOperation {
         return $this->getOperator();
     }
 
-    function getRecName($join = null) {
+    function getRecName($join = null): string|NotificationMessage {
         $join ??= $this->getJoiner();
         $args = [];
         $pars = [];
@@ -132,14 +133,14 @@ abstract class ComplexOperation extends CountableOperation {
             }, $pars)
         );
 
-        return ["log" => $log, "args" => $args];
+        return new NotificationMessage($log, $args);
     }
 
-    function getOpName() {
+    function getOpName(): string|NotificationMessage {
         return $this->getRecName();
     }
 
-    function getIconicName() {
+    function getIconicName(): string {
         if (count($this->delegates) == 0) {
             return parent::getIconicName();
         }

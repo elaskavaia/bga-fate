@@ -37,7 +37,7 @@ abstract class CountableOperation extends Operation {
         return $res;
     }
 
-    function getIconicName() {
+    function getIconicName(): string {
         $count = $this->getCount();
         $icon = $this->getOpId();
         if ($count == 1) {

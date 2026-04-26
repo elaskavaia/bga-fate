@@ -466,13 +466,28 @@ abstract class Operation {
         return clienttranslate("Skip");
     }
 
-    function getIconicName() {
+    /**
+     * Name of operation with icons
+     */
+    function getIconicName(): string {
         return "[" . $this->getOpId() . "]";
     }
 
-    function getOpName() {
+    /**
+     * Name of operation when presented as choice in multi-choice selector, up to operation to decide, default is Iconic
+     */
+    function getChoiceName(): string|NotificationMessage {
+        return $this->getIconicName();
+    }
+
+    /**
+     * Name of operation as text ONLY (no icons). Returns NotificationMessage when
+     * the name embeds nested args that themselves need translation (recursive).
+     */
+    function getOpName(): string|NotificationMessage {
         return $this->game->getTokenName($this->getOpId(), $this->getType());
     }
+
     private function extractPossibleMoves(array &$res, array $details) {
         $targets = [];
         $error = "";

@@ -45,7 +45,7 @@ class Op_actionAttack extends Operation {
         return $hexes;
     }
 
-    public function getIconicName() {
+    public function getIconicName(): string {
         return clienttranslate("Attack [Op_actionAttack]");
     }
 
