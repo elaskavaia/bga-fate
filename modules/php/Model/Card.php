@@ -218,22 +218,17 @@ class Card {
 
     function createOperationForCardEffect($event) {
         $cardId = $this->id;
-        ["r" => $r] = $this->getCardRulesForEvent($event);
+        $r = $this->game->material->getRulesFor($cardId, "r", "nop");
         $op = $this->op->instantiateOperation($r, $this->getOwner(), [
             "card" => $cardId,
             "reason" => $cardId,
             "event" => $event->value,
         ]);
-        $op->withDataField("confirm", "true"); // do not auto-resolve single choice
+        $op->withDataField("l_confirm", "true"); // do not auto-resolve single choice
+        if (!$this->isEvent()) {
+            $op->withDataField("l_skip", "true");
+        }
         return $op;
-    }
-
-    function getCardRulesForEvent(Trigger $event) {
-        $cardId = $this->id;
-        return [
-            "r" => $this->game->material->getRulesFor($cardId, "r", "nop"),
-            "effect" => $this->game->material->getRulesFor($cardId, "effect", clienttranslate("custom")),
-        ];
     }
 
     function promptUseCard(Trigger $event) {
@@ -242,7 +237,7 @@ class Card {
 
         $alreadyOp = $this->game->machine->findOperation($owner, $action);
         if (!$alreadyOp) {
-            $this->queue($action, null, ["confirm" => true, "on" => [$event->value]]);
+            $this->queue($action, null, ["l_confirm" => true, "on" => [$event->value]]);
         } else {
             $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
             $onarr = $op->getDataField("on", []);

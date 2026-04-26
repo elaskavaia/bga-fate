@@ -118,7 +118,7 @@ abstract class CountableOperation extends Operation {
     }
 
     function canSkip() {
-        return $this->isOptional();
+        return $this->isOptional() || parent::canSkip();
     }
 
     function isOptional() {

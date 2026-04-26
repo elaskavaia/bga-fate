@@ -73,10 +73,15 @@ abstract class Operation {
     }
     function withData(mixed $data, bool $merge = false) {
         $xdata = self::decodeData($data);
-        if ($merge) {
+        if ($merge && $xdata) {
             unset($xdata["count"]);
             unset($xdata["mcount"]);
-            unset($xdata["confirm"]); // special structural arg, do not propagate to children
+            // special structural args (l_*), do not propagate to children
+            foreach (array_keys($xdata) as $k) {
+                if (is_string($k) && str_starts_with($k, "l_")) {
+                    unset($xdata[$k]);
+                }
+            }
         }
         if ($this->data === null) {
             $this->data = $xdata;
@@ -611,7 +616,7 @@ abstract class Operation {
 
     /** If operation require confirmation it will be sent to user and not auto-resolved */
     function requireConfirmation() {
-        return (bool) $this->getDataField("confirm", false);
+        return (bool) $this->getDataField("l_confirm", false);
     }
 
     function getUiArgs() {
@@ -757,7 +762,8 @@ abstract class Operation {
 
     /** Called on operation to see if we can skip this one */
     function canSkip() {
-        return false;
+        $skip = $this->getDataField("l_skip", false) ? true : false;
+        return $skip;
     }
     /** Called on operation to skip this one */
     function skip() {
