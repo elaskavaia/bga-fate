@@ -3621,7 +3621,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Eagle Eye I"),
         "strength" => 1,
-        "effect" => "You have attack range +1",
+        "effect" => clienttranslate("You have attack range +1"),
         "flavour" => "If I can see it, I can hit it.",
 ],
     "card_ability_1_10" => [ 
@@ -3632,7 +3632,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Eagle Eye II"),
         "strength" => 2,
-        "effect" => "You have attack range +2. Always ignore the armor",
+        "effect" => clienttranslate("You have attack range +2. Always ignore the armor"),
         "flavour" => "Yeah, why shoot the armor?",
 ],
     "card_ability_1_11" => [ 
@@ -3644,7 +3644,7 @@ class Material {
         "name" => clienttranslate("Long Shot I"),
         "r" => "2addDamage(2)",
         "on" => "TActionAttack",
-        "effect" => "Add 2 damage to your attack action if target is at range 2 or more.",
+        "effect" => clienttranslate("Add 2 damage to your attack action if target is at range 2 or more."),
         "flavour" => "Sure, it's a long shot. But Bjorn enjoys a challenge.",
 ],
     "card_ability_1_12" => [ 
@@ -3656,7 +3656,7 @@ class Material {
         "name" => clienttranslate("Long Shot II"),
         "r" => "addDamage(dist)",
         "on" => "TActionAttack",
-        "effect" => "Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).",
+        "effect" => clienttranslate("Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away)."),
         "flavour" => "Oh, and always ignore cover.",
 ],
     "card_ability_1_13" => [ 
@@ -3668,7 +3668,7 @@ class Material {
         "name" => clienttranslate("Nailed Together I"),
         "r" => "c_nailed",
         "on" => "TMonsterKilled",
-        "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).",
+        "effect" => clienttranslate("If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away)."),
 ],
     "card_ability_1_14" => [ 
         "ctype" => "ability",
@@ -3680,7 +3680,7 @@ class Material {
         "strength" => 2,
         "r" => "c_nailed(chain)",
         "on" => "TMonsterKilled",
-        "effect" => "If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on.",
+        "effect" => clienttranslate("If you kill a monster in an attack action, all remaining damage may be dealt to the next monster behind it (adjacent and further away), and so on."),
 ],
     "card_ability_1_7" => [ 
         "ctype" => "ability",
@@ -3690,7 +3690,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Stitching I"),
         "r" => "spendUse:(heal(adj)/repairCard)",
-        "effect" => "Remove 1 damage from any hero or equipment within range 1.",
+        "effect" => clienttranslate("Remove 1 damage from any hero or equipment within range 1."),
         "flavour" => "If you're in a pinch, Bjorn can patch.",
 ],
     "card_ability_1_8" => [ 
@@ -3701,7 +3701,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Stitching II"),
         "r" => "spendUse:(2heal(adj)/2repairCard/(heal(adj),repairCard))",
-        "effect" => "Remove a total of 2 damage from heroes and equipment within range 1.",
+        "effect" => clienttranslate("Remove a total of 2 damage from heroes and equipment within range 1."),
 ],
     "card_ability_1_5" => [ 
         "ctype" => "ability",
@@ -3712,7 +3712,7 @@ class Material {
         "name" => clienttranslate("Suppressive Fire I"),
         "r" => "c_supfire(inRange3,'rank<=2')",
         "on" => "TMonsterMove",
-        "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
+        "effect" => clienttranslate("Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn."),
 ],
     "card_ability_1_6" => [ 
         "ctype" => "ability",
@@ -3723,7 +3723,7 @@ class Material {
         "name" => clienttranslate("Suppressive Fire II"),
         "r" => "c_supfire(inRange3)",
         "on" => "TMonsterMove",
-        "effect" => "Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn.",
+        "effect" => clienttranslate("Once per monster turn, prevent a monster within range 3 from moving. You cannot choose the same monster next turn."),
 ],
     "card_ability_1_3" => [ 
         "ctype" => "ability",
@@ -3734,7 +3734,7 @@ class Material {
         "name" => clienttranslate("Sure Shot I"),
         "mana" => 1,
         "r" => "spendUse:3spendMana:3dealDamage(inRange)",
-        "effect" => "3[MANA]: Deal 3 damage to a monster within attack range.",
+        "effect" => clienttranslate("3[MANA]: Deal 3 damage to a monster within attack range."),
         "flavour" => "Who needs luck when you have certainty?",
 ],
     "card_ability_1_4" => [ 
@@ -3746,7 +3746,7 @@ class Material {
         "name" => clienttranslate("Sure Shot II"),
         "mana" => 2,
         "r" => "spendUse:c_sureshotII",
-        "effect" => "2-4[MANA]: Deal that much damage to a monster within attack range.",
+        "effect" => clienttranslate("2-4[MANA]: Deal that much damage to a monster within attack range."),
 ],
 // # Abilities - Alva (hno=2)
     "card_ability_2_13" => [ 
@@ -3759,7 +3759,10 @@ class Material {
         "mana" => 1,
         "r" => "(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)",
         "on" => "custom",
-        "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.",
+        "effect" => clienttranslate("<ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li></ul>"),
+        "effect_1" => clienttranslate("1[MANA]: Move +1"),
+        "effect_2" => clienttranslate("2[MANA]: Attack range +1 this turn"),
+        "effect_3" => clienttranslate("2[MANA]: Add 2 damage to your attack action"),
 ],
     "card_ability_2_14" => [ 
         "ctype" => "ability",
@@ -3771,7 +3774,11 @@ class Material {
         "mana" => 2,
         "r" => "(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)",
         "on" => "custom",
-        "effect" => "1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.",
+        "effect" => clienttranslate("<ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li><li>2[MANA]: Draw 1 card</li></ul>"),
+        "effect_1" => clienttranslate("1[MANA]: Move +1"),
+        "effect_2" => clienttranslate("2[MANA]: Attack range +1 this turn"),
+        "effect_3" => clienttranslate("2[MANA]: Add 2 damage to your attack action"),
+        "effect_4" => clienttranslate("2[MANA]: Draw 1 card"),
 ],
     "card_ability_2_3" => [ 
         "ctype" => "ability",
@@ -3782,7 +3789,7 @@ class Material {
         "name" => clienttranslate("Hail of Arrows I"),
         "mana" => 1,
         "r" => "spendUse:c_hail",
-        "effect" => "3[MANA]: Deal 1 damage to up to 3 monsters within attack range.",
+        "effect" => clienttranslate("3[MANA]: Deal 1 damage to up to 3 monsters within attack range."),
 ],
     "card_ability_2_4" => [ 
         "ctype" => "ability",
@@ -3793,7 +3800,7 @@ class Material {
         "name" => clienttranslate("Hail of Arrows II"),
         "mana" => 2,
         "r" => "spendUse:c_hailII",
-        "effect" => "1-4[MANA]: Deal 1 damage to that many different monsters within attack range.",
+        "effect" => clienttranslate("1-4[MANA]: Deal 1 damage to that many different monsters within attack range."),
 ],
     "card_ability_2_11" => [ 
         "ctype" => "ability",
@@ -3803,7 +3810,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Snipe I"),
         "r" => "spendUse:2roll(inRange)",
-        "effect" => "Roll 2[DIE_ATTACK] against a monster within attack range.",
+        "effect" => clienttranslate("Roll 2[DIE_ATTACK] against a monster within attack range."),
 ],
     "card_ability_2_12" => [ 
         "ctype" => "ability",
@@ -3813,7 +3820,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Snipe II"),
         "r" => "spendUse:5roll(inRange)",
-        "effect" => "Roll 5[DIE_ATTACK] against a monster within attack range.",
+        "effect" => clienttranslate("Roll 5[DIE_ATTACK] against a monster within attack range."),
 ],
     "card_ability_2_7" => [ 
         "ctype" => "ability",
@@ -3824,7 +3831,7 @@ class Material {
         "name" => clienttranslate("Starsong I"),
         "r" => "drawEvent",
         "on" => "TTurnEnd",
-        "effect" => "At the end of your turn, draw 1 additional card.",
+        "effect" => clienttranslate("At the end of your turn, draw 1 additional card."),
 ],
     "card_ability_2_8" => [ 
         "ctype" => "ability",
@@ -3835,7 +3842,7 @@ class Material {
         "name" => clienttranslate("Starsong II"),
         "r" => "2drawEvent",
         "on" => "TTurnEnd",
-        "effect" => "At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.",
+        "effect" => clienttranslate("At the end of your turn, draw 2 additional cards. You may have 5 cards in hand."),
 ],
     "card_ability_2_9" => [ 
         "ctype" => "ability",
@@ -3846,7 +3853,7 @@ class Material {
         "name" => clienttranslate("Suppressive Fire I"),
         "r" => "c_supfire(inRange3,'rank<=2')",
         "on" => "TMonsterMove",
-        "effect" => "Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.",
+        "effect" => clienttranslate("Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn."),
 ],
     "card_ability_2_10" => [ 
         "ctype" => "ability",
@@ -3857,7 +3864,7 @@ class Material {
         "name" => clienttranslate("Suppressive Fire II"),
         "r" => "c_supfire(inRange3)",
         "on" => "TMonsterMove",
-        "effect" => "Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.",
+        "effect" => clienttranslate("Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn."),
 ],
     "card_ability_2_5" => [ 
         "ctype" => "ability",
@@ -3868,7 +3875,9 @@ class Material {
         "name" => clienttranslate("Treetreader I"),
         "health" => 2,
         "r" => "(in(forest):move)/move(forest)",
-        "effect" => "Move into an adjacent forest area, or move out of a forest area.",
+        "effect" => clienttranslate("<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>"),
+        "effect_1" => clienttranslate("Move into an adjacent forest area"),
+        "effect_2" => clienttranslate("Move out of a forest area"),
         "flavour" => "I will make like a tree and leave.",
 ],
     "card_ability_2_6" => [ 
@@ -3881,7 +3890,9 @@ class Material {
         "health" => 2,
         "r" => "(in(forest):move)/move(forest)",
         "on" => "custom",
-        "effect" => "Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.",
+        "effect" => clienttranslate("<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>Each time you move into a forest area, heal 1 damage."),
+        "effect_1" => clienttranslate("Move into an adjacent forest area"),
+        "effect_2" => clienttranslate("Move out of a forest area"),
         "flavour" => "All good things are tree.",
 ],
 // # Abilities - Embla (hno=3)
@@ -3894,7 +3905,7 @@ class Material {
         "name" => clienttranslate("Fleetfoot I"),
         "health" => 1,
         "r" => "spendUse:move",
-        "effect" => "Move 1 area.",
+        "effect" => clienttranslate("Move 1 area."),
         "flavour" => "Oh no, she's surrounding us!",
 ],
     "card_ability_3_8" => [ 
@@ -3906,7 +3917,7 @@ class Material {
         "name" => clienttranslate("Fleetfoot II"),
         "health" => 3,
         "r" => "spendUse:move",
-        "effect" => "Move 1 area. You may always move into mountains and through occupied areas.",
+        "effect" => clienttranslate("Move 1 area. You may always move into mountains and through occupied areas."),
 ],
     "card_ability_3_5" => [ 
         "ctype" => "ability",
@@ -3917,7 +3928,7 @@ class Material {
         "name" => clienttranslate("In Charge I"),
         "r" => "killMonster(adj,'rank==1')",
         "on" => "TActionMove",
-        "effect" => "After each move action, you may kill an adjacent rank 1 monster.",
+        "effect" => clienttranslate("After each move action, you may kill an adjacent rank 1 monster."),
 ],
     "card_ability_3_6" => [ 
         "ctype" => "ability",
@@ -3928,7 +3939,7 @@ class Material {
         "name" => clienttranslate("In Charge II"),
         "r" => "killMonster(adj,'rank<=2')",
         "on" => "TActionMove",
-        "effect" => "After each move action, you may kill an adjacent rank 1 or rank 2 monster.",
+        "effect" => clienttranslate("After each move action, you may kill an adjacent rank 1 or rank 2 monster."),
 ],
     "card_ability_3_11" => [ 
         "ctype" => "ability",
@@ -3938,7 +3949,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Queen of the Hill I"),
         "r" => "2c_queen",
-        "effect" => "Deal 2 damage to an adjacent monster and switch places with it.",
+        "effect" => clienttranslate("Deal 2 damage to an adjacent monster and switch places with it."),
         "flavour" => "Let's dance...",
 ],
     "card_ability_3_12" => [ 
@@ -3949,7 +3960,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Queen of the Hill II"),
         "r" => "4c_queen",
-        "effect" => "Deal 4 damage to an adjacent monster and switch places with it.",
+        "effect" => clienttranslate("Deal 4 damage to an adjacent monster and switch places with it."),
         "flavour" => "Another round? Ok!",
 ],
     "card_ability_3_9" => [ 
@@ -3961,7 +3972,7 @@ class Material {
         "name" => clienttranslate("Reaper Swing I"),
         "r" => "c_reaper",
         "on" => "TActionAttack",
-        "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
+        "effect" => clienttranslate("In each attack action, you may divide the damage you deal between the target and another adjacent monster."),
 ],
     "card_ability_3_10" => [ 
         "ctype" => "ability",
@@ -3973,7 +3984,7 @@ class Material {
         "strength" => 3,
         "r" => "c_reaper",
         "on" => "TActionAttack",
-        "effect" => "In each attack action, you may divide the damage you deal between the target and another adjacent monster.",
+        "effect" => clienttranslate("In each attack action, you may divide the damage you deal between the target and another adjacent monster."),
 ],
     "card_ability_3_3" => [ 
         "ctype" => "ability",
@@ -3985,7 +3996,7 @@ class Material {
         "mana" => 1,
         "r" => "2spendMana:(2preventDamage:2dealDamage)",
         "on" => "TResolveHits",
-        "effect" => "2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it.",
+        "effect" => clienttranslate("2[MANA]: Prevent up to 2 damage dealt by an adjacent monster, and deal 2 damage to it."),
 ],
     "card_ability_3_4" => [ 
         "ctype" => "ability",
@@ -3997,7 +4008,7 @@ class Material {
         "mana" => 2,
         "r" => "3spendMana:(3preventDamage:3dealDamage)",
         "on" => "TResolveHits",
-        "effect" => "3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it.",
+        "effect" => clienttranslate("3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it."),
         "flavour" => "What goes around comes around... with interest.",
 ],
     "card_ability_3_13" => [ 
@@ -4008,7 +4019,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Swift Kick I"),
         "r" => "spendUse:(dealDamage(adj,not_legend),moveMonster(marked))",
-        "effect" => "Deal 1 damage to an adjacent non-legend monster and move it 1 area.",
+        "effect" => clienttranslate("Deal 1 damage to an adjacent non-legend monster and move it 1 area."),
 ],
     "card_ability_3_14" => [ 
         "ctype" => "ability",
@@ -4018,7 +4029,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Swift Kick II"),
         "r" => "spendUse:(2dealDamage(adj,not_legend),2moveMonster(marked))",
-        "effect" => "Deal 2 damage to an adjacent non-legend monster and move it 2 areas.",
+        "effect" => clienttranslate("Deal 2 damage to an adjacent non-legend monster and move it 2 areas."),
 ],
 // # Abilities - Boldur (hno=4)
     "card_ability_4_9" => [ 
@@ -4029,7 +4040,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Beefy Berserker I"),
         "strength" => 1,
-        "effect" => "Runes [RUNE] always count as hits for you. Because that's the way you roll.",
+        "effect" => clienttranslate("Runes [RUNE] always count as hits for you. Because that's the way you roll."),
 ],
     "card_ability_4_10" => [ 
         "ctype" => "ability",
@@ -4039,7 +4050,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Beefy Berserker II"),
         "strength" => 3,
-        "effect" => "Runes [RUNE] always count as hits for you. It runes in the family.",
+        "effect" => clienttranslate("Runes [RUNE] always count as hits for you. It runes in the family."),
 ],
     "card_ability_4_11" => [ 
         "ctype" => "ability",
@@ -4051,7 +4062,7 @@ class Material {
         "mana" => 1,
         "r" => "spendMana:preventDamage",
         "on" => "TResolveHits",
-        "effect" => "1[MANA]: Prevent 1 damage.",
+        "effect" => clienttranslate("1[MANA]: Prevent 1 damage."),
         "flavour" => "Armor so heavy that even gravity's jealous.",
 ],
     "card_ability_4_12" => [ 
@@ -4064,7 +4075,7 @@ class Material {
         "mana" => 1,
         "r" => "spendMana:(preventDamage,custom)",
         "on" => "TResolveHits",
-        "effect" => "1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.",
+        "effect" => clienttranslate("1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack."),
 ],
     "card_ability_4_13" => [ 
         "ctype" => "ability",
@@ -4074,7 +4085,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Fortified I"),
         "r" => "spendUse:1heal(self)",
-        "effect" => "Heal 1 damage from Boldur.",
+        "effect" => clienttranslate("Heal 1 damage from Boldur."),
         "flavour" => "It's not hiding, it's strategic positioning.",
 ],
     "card_ability_4_14" => [ 
@@ -4087,7 +4098,7 @@ class Material {
         "strength" => 1,
         "health" => 2,
         "r" => "spendUse:1heal(self)",
-        "effect" => "Heal 1 damage from Boldur.",
+        "effect" => clienttranslate("Heal 1 damage from Boldur."),
 ],
     "card_ability_4_3" => [ 
         "ctype" => "ability",
@@ -4098,7 +4109,7 @@ class Material {
         "name" => clienttranslate("Rapid Strike I"),
         "mana" => 1,
         "r" => "spendUse:3spendMana:actionAttack",
-        "effect" => "3[MANA]: Perform an attack action.",
+        "effect" => clienttranslate("3[MANA]: Perform an attack action."),
 ],
     "card_ability_4_4" => [ 
         "ctype" => "ability",
@@ -4109,7 +4120,7 @@ class Material {
         "name" => clienttranslate("Rapid Strike II"),
         "mana" => 1,
         "r" => "2spendMana:actionAttack",
-        "effect" => "2[MANA]: Perform an attack action. May be used several times per turn.",
+        "effect" => clienttranslate("2[MANA]: Perform an attack action. May be used several times per turn."),
 ],
     "card_ability_4_5" => [ 
         "ctype" => "ability",
@@ -4120,7 +4131,7 @@ class Material {
         "name" => clienttranslate("Sweeping Strike I"),
         "r" => "custom",
         "on" => "TActionAttack",
-        "effect" => "Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.",
+        "effect" => clienttranslate("Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order."),
 ],
     "card_ability_4_6" => [ 
         "ctype" => "ability",
@@ -4131,7 +4142,7 @@ class Material {
         "name" => clienttranslate("Sweeping Strike II"),
         "r" => "custom",
         "on" => "TActionAttack",
-        "effect" => "Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.",
+        "effect" => clienttranslate("Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order."),
 ],
     "card_ability_4_7" => [ 
         "ctype" => "ability",
@@ -4141,7 +4152,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Wrecking Ball I"),
         "r" => "custom",
-        "effect" => "Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area.",
+        "effect" => clienttranslate("Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area."),
         "flavour" => "He's on a roll!",
 ],
     "card_ability_4_8" => [ 
@@ -4152,7 +4163,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Wrecking Ball II"),
         "r" => "custom",
-        "effect" => "Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1.",
+        "effect" => clienttranslate("Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."),
 ],
             /* --- gen php end card_ability_material --- */
             /* --- gen php begin card_equip_material --- */
@@ -4167,7 +4178,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Bjorn's First Bow"),
         "strength" => 1,
-        "effect" => "This is your Main Weapon. Attack range 2.",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2."),
         "flavour" => "Not something he's proud of. Still not bad for a five-year-old.",
         "attack_range" => 2,
 ],
@@ -4180,7 +4191,7 @@ class Material {
         "name" => clienttranslate("Black Arrows"),
         "r" => "spendGold:3addDamage",
         "quest" => "<i>Spend 1 attack action in the Robber Camp</i> to loot it.",
-        "effect" => "Starts with 3 arrows here (use [XP] markers).<br>Spend 1 arrow to add 3 damage to this attack action.",
+        "effect" => clienttranslate("Starts with 3 arrows here (use [XP] markers).<br>Spend 1 arrow to add 3 damage to this attack action."),
         "flavour" => "Painted black for the funeral they are about to attend.",
 ],
     "card_equip_1_16" => [ 
@@ -4194,7 +4205,7 @@ class Material {
         "r" => "counter(countRunes):dealDamage(adj_attack)",
         "on" => "TActionAttack",
         "quest" => "<i>Spend a mend action on Nailfare</i> to bind the relics.",
-        "effect" => "This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target.",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target."),
         "flavour" => "This bunch of bones, bound by braided bamboo became the bane of the banished breathless.",
         "attack_range" => 2,
 ],
@@ -4208,7 +4219,7 @@ class Material {
         "durability" => 3,
         "r" => "spendDurab:1preventDamage",
         "quest" => "<i>Kill a brute or a skeleton. Take this helmet instead of the gold</i> [XP].",
-        "effect" => "[DAMAGE]: Prevent 1 damage.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "Radiating forcefulness.",
 ],
     "card_equip_1_24" => [ 
@@ -4222,7 +4233,9 @@ class Material {
         "r" => "(spendUse:2spendMana:1move)/(on(TResolveHits):3spendMana:2preventDamage)",
         "on" => "custom",
         "quest" => "<i>Spend 1 attack action when not adjacent to a monster.</i> Your very own fabrication.",
-        "effect" => "Add 1 [MANA] here very time you roll a [RUNE].<br>2[MANA]: Move 1 area.<br>3[MANA]: Prevent 2 damage.",
+        "effect" => clienttranslate("Add 1 [MANA] here every time you roll a [RUNE].<ul><li>2[MANA]: Move 1 area</li><li>3[MANA]: Prevent 2 damage</li></ul>"),
+        "effect_1" => clienttranslate("2[MANA]: Move 1 area"),
+        "effect_2" => clienttranslate("3[MANA]: Prevent 2 damage"),
         "flavour" => '"Did Bjorn make this?""<br>""Sew it seams…"',
 ],
     "card_equip_1_23" => [ 
@@ -4235,7 +4248,7 @@ class Material {
         "durability" => 3,
         "r" => "spendDurab:1preventDamage",
         "quest" => "Practice makes perfect. <i>Spend 1 practice action and 1 experience</i> [XP] to make it.",
-        "effect" => "[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remove all damage from this card.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remove all damage from this card."),
         "flavour" => "When your life hangs by a thread, this is sturdier than it seams.",
 ],
     "card_equip_1_19" => [ 
@@ -4248,7 +4261,7 @@ class Material {
         "durability" => 3,
         "r" => "spendUse:spendDurab:2heal(adj)",
         "quest" => "<i>After killing a trollkin, take this bag and spawn 2 brutes next to you.</i> They want the bag back.",
-        "effect" => "[DAMAGE]: Heal 2 damage from yourself or any adjacent hero.",
+        "effect" => clienttranslate("[DAMAGE]: Heal 2 damage from yourself or any adjacent hero."),
         "flavour" => "Keeping your tools handy: thread, needles, bandages, herbs, and a pocket-sized mead sack.",
 ],
     "card_equip_1_18" => [ 
@@ -4263,7 +4276,7 @@ class Material {
         "r" => "spendDurab:addDamage",
         "on" => "TActionAttack",
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
-        "effect" => "[DAMAGE]: Add 1 damage to this attack action.",
+        "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
 ],
     "card_equip_1_17" => [ 
@@ -4276,7 +4289,7 @@ class Material {
         "durability" => 2,
         "r" => "spendUse:spendDurab:3roll(adj)",
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
-        "effect" => "[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.",
+        "effect" => clienttranslate("[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster."),
         "flavour" => "I keep missing him…",
 ],
     "card_equip_1_22" => [ 
@@ -4290,7 +4303,7 @@ class Material {
         "r" => "on(TActionAttack):addDamage(true,trollkin)",
         "on" => "TActionAttack",
         "quest" => "<i>Collect 5 gold</i> [XP] <i>from killing trollkin</i> to get a fearsome reputation.",
-        "effect" => "This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin.",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin."),
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",
         "attack_range" => 2,
 ],
@@ -4305,7 +4318,7 @@ class Material {
         "mana" => 1,
         "r" => "spendUse:3spendMana:performAction(actionAttack)",
         "quest" => "<i>Pay 5 gold [XP] on a road</i> to have them imported from Alfheim.",
-        "effect" => "3[MANA]: Perform an attack action.",
+        "effect" => clienttranslate("3[MANA]: Perform an attack action."),
         "flavour" => "Brace for impact!",
 ],
     "card_equip_2_15" => [ 
@@ -4316,7 +4329,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Alva's First Bow"),
         "strength" => 1,
-        "effect" => "This is your Main Weapon. Attack range 2.",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2."),
         "attack_range" => 2,
 ],
     "card_equip_2_22" => [ 
@@ -4329,7 +4342,7 @@ class Material {
         "health" => 2,
         "r" => "spendUse:1heal(self)",
         "quest" => "<i>Enter 8 forest areas</i> to gather support from the Elders.",
-        "effect" => "Heal 1 damage from Alva.",
+        "effect" => clienttranslate("Heal 1 damage from Alva."),
         "flavour" => "Ironically known as the Waist of Time, it actually carries rejuvenating powers.",
 ],
     "card_equip_2_25" => [ 
@@ -4343,7 +4356,9 @@ class Material {
         "r" => "(on(TActionAttack):(3spendMana:2addDamage))/(spendUse:3spendMana:drawEvent)",
         "on" => "custom",
         "quest" => "<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.",
-        "effect" => "3[MANA]: Add 2 damage to this attack action.<br>3[MANA]: Draw 1 card.",
+        "effect" => clienttranslate("<ul><li>3[MANA]: Add 2 damage to this attack action</li><li>3[MANA]: Draw 1 card</li></ul>"),
+        "effect_1" => clienttranslate("3[MANA]: Add 2 damage to this attack action"),
+        "effect_2" => clienttranslate("3[MANA]: Draw 1 card"),
         "flavour" => "I'm … a princess? I knew it!",
 ],
     "card_equip_2_24" => [ 
@@ -4367,7 +4382,7 @@ class Material {
         "r" => "dealDamage(adj)",
         "on" => "TAfterActionAttack",
         "quest" => "<i>Kill 3 adjacent monsters</i> to practice switching weapons.",
-        "effect" => "After each attack action, deal 1 damage to a monster adjacent to Alva.",
+        "effect" => clienttranslate("After each attack action, deal 1 damage to a monster adjacent to Alva."),
 ],
     "card_equip_2_18" => [ 
         "ctype" => "equip",
@@ -4381,7 +4396,7 @@ class Material {
         "r" => "spendDurab:addDamage",
         "on" => "TActionAttack",
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
-        "effect" => "[DAMAGE]: Add 1 damage to this attack action.",
+        "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
 ],
     "card_equip_2_20" => [ 
@@ -4395,7 +4410,7 @@ class Material {
         "r" => "gainMana",
         "on" => "TAfterActionAttack",
         "quest" => "<i>When you have rolled 10[DIE_ATTACK] in forests</i>, you have learned the songs of the trees.",
-        "effect" => "This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card.",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card."),
         "flavour" => "Sings your swan song.",
         "attack_range" => 2,
 ],
@@ -4409,7 +4424,7 @@ class Material {
         "durability" => 2,
         "r" => "spendUse:spendDurab:3roll(adj)",
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
-        "effect" => "[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster.",
+        "effect" => clienttranslate("[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster."),
         "flavour" => "I'm ready to try it blindfolded…",
 ],
     "card_equip_2_16" => [ 
@@ -4420,7 +4435,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Tiara"),
         "quest" => "<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!",
-        "effect" => "Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn.",
+        "effect" => clienttranslate("Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn."),
 ],
     "card_equip_2_19" => [ 
         "ctype" => "equip",
@@ -4433,7 +4448,7 @@ class Material {
         "r" => "counter(countRunes):addRoll",
         "on" => "TRoll",
         "quest" => "<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.",
-        "effect" => "This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE].",
+        "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]."),
         "flavour" => "It anticipates your wishes.",
         "attack_range" => 2,
 ],
@@ -4459,7 +4474,7 @@ class Material {
         "durability" => 3,
         "r" => "spendDurab:2preventDamage",
         "quest" => "<i>Pay 4 gold [XP]</i> to have it made. Then get anormored with it.",
-        "effect" => "[DAMAGE]: Prevent 2 damage.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 2 damage."),
         "flavour" => "Armor is the blacksmith's strong suit.",
 ],
     "card_equip_3_15" => [ 
@@ -4482,7 +4497,7 @@ class Material {
         "durability" => 4,
         "r" => "spendDurab:1heal(adj)",
         "quest" => "<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.",
-        "effect" => "[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.",
+        "effect" => clienttranslate("[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn."),
         "flavour" => "This mead is barely legal.",
 ],
     "card_equip_3_17" => [ 
@@ -4494,7 +4509,7 @@ class Material {
         "name" => clienttranslate("Heels"),
         "r" => "spendUse:dealDamage(adj)",
         "quest" => "<i>Spend 1 mend action and discard 2 cards in the Witch Cabin.</i> That witch had style!",
-        "effect" => "Deal 1 damage to an adjacent monster.",
+        "effect" => clienttranslate("Deal 1 damage to an adjacent monster."),
         "flavour" => "High heels can be sooo painful.",
 ],
     "card_equip_3_20" => [ 
@@ -4507,7 +4522,7 @@ class Material {
         "durability" => 3,
         "r" => "spendDurab:1preventDamage",
         "quest" => "<i>Kill a brute or a skeleton. Take this instead of the gold [XP].</i>",
-        "effect" => "[DAMAGE]: Prevent 1 damage.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "Heading for trouble.",
 ],
     "card_equip_3_23" => [ 
@@ -4532,7 +4547,7 @@ class Material {
         "r" => "2addDamage",
         "on" => "TActionAttack",
         "quest" => "<i>Enter 10 forest areas</i> to search for the long-forgotten sword.",
-        "effect" => "This is your Main Weapon. Add 2 damage to each attack action.",
+        "effect" => clienttranslate("This is your Main Weapon. Add 2 damage to each attack action."),
         "flavour" => "The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.",
 ],
     "card_equip_3_18" => [ 
@@ -4545,7 +4560,7 @@ class Material {
         "durability" => 2,
         "r" => "spendUse:spendDurab:1move",
         "quest" => "<i>Pay the shoemaker 2 gold [XP] in town.</i> He'll heel your shoes and save their soles.",
-        "effect" => "[DAMAGE]: Move 1 area.",
+        "effect" => clienttranslate("[DAMAGE]: Move 1 area."),
         "flavour" => "Fooling your foes with fancy footwork.",
 ],
     "card_equip_3_26" => [ 
@@ -4558,7 +4573,7 @@ class Material {
         "durability" => 2,
         "r" => "spendUse:spendDurab:3roll(adj)",
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
-        "effect" => "[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster.",
+        "effect" => clienttranslate("[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster."),
         "flavour" => "Now between the fingers...",
 ],
     "card_equip_3_24" => [ 
@@ -4571,7 +4586,7 @@ class Material {
         "durability" => 2,
         "r" => "spendDurab:1preventDamage,drawEvent",
         "quest" => '"<i>Spend 1 attack action</i>, ""negotiating"" with the traveling merchant."',
-        "effect" => "[DAMAGE]: Prevent 1 damage and draw 1 card.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage and draw 1 card."),
         "flavour" => "A backup disc to save your life.",
 ],
     "card_equip_3_21" => [ 
@@ -4585,7 +4600,7 @@ class Material {
         "r" => "dealDamage(adj)",
         "on" => "TAfterActionAttack",
         "quest" => "<i>Spend 1 mend action in the Spewing Mountain</i> to forge it.",
-        "effect" => "This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster.",
+        "effect" => clienttranslate("This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster."),
         "flavour" => "Forged in the flames of kidnapped sprites.",
 ],
 // # Equipment - Boldur (hno=4)
@@ -4608,7 +4623,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Boldur's First Pick"),
         "strength" => 1,
-        "effect" => "This is your Main Weapon.",
+        "effect" => clienttranslate("This is your Main Weapon."),
         "flavour" => "Picks anything, even noses.",
 ],
     "card_equip_4_20" => [ 
@@ -4620,7 +4635,7 @@ class Material {
         "name" => clienttranslate("Dvalin's Pick"),
         "r" => "spendAction(actionAttack):gainXp,gainMana,drawEvent",
         "quest" => "<i>End your movement adjacent to 3 mountain areas.</i> The tomb had better be there!",
-        "effect" => "Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card.",
+        "effect" => clienttranslate("Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card."),
         "flavour" => "Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.",
 ],
     "card_equip_4_23" => [ 
@@ -4633,7 +4648,7 @@ class Material {
         "durability" => 4,
         "r" => "spendDurab:1preventDamage",
         "quest" => "<i>Spend 2 gold [XP] in the Temple Ruins.</i> A bowl is a good start.",
-        "effect" => "[DAMAGE]: Prevent 1 damage.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "People hit what they can reach. On Boldur, that's mainly his head.",
 ],
     "card_equip_4_18" => [ 
@@ -4646,7 +4661,7 @@ class Material {
         "r" => "preventDamage",
         "on" => "TResolveHits",
         "quest" => "<i>Enter 7 areas adjacent to mountains.</i> Silly family tradition!",
-        "effect" => "Prevent the first damage dealt to Boldur each monster turn.",
+        "effect" => clienttranslate("Prevent the first damage dealt to Boldur each monster turn."),
         "flavour" => "Wearing this, Boldur is quite a hot male.",
 ],
     "card_equip_4_25" => [ 
@@ -4670,7 +4685,7 @@ class Material {
         "strength" => 2,
         "r" => "custom",
         "quest" => "<i>End your movement adjacent to 4 monsters or 1 legend</i> to pick a fight.",
-        "effect" => "This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action.",
+        "effect" => clienttranslate("This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action."),
         "flavour" => "Used by Eitiri, who forged Thor's hammer Mjölnir.",
 ],
     "card_equip_4_17" => [ 
@@ -4683,7 +4698,7 @@ class Material {
         "durability" => 2,
         "r" => "spendDurab:custom",
         "quest" => "<i>Pay 1 gold</i> [XP] for the equipment. Then <i>pay 2 gold</i> [XP] for insureance and taxes.",
-        "effect" => "[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas.",
+        "effect" => clienttranslate("[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas."),
         "flavour" => "I'm digging this gold rush…",
 ],
     "card_equip_4_19" => [ 
@@ -4694,7 +4709,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Orebiter"),
         "quest" => "<i>Lose 2 gold</i>[XP]. The potential gain is endless.",
-        "effect" => "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP].",
+        "effect" => clienttranslate("You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]."),
         "flavour" => "It's an auto-pick.",
 ],
     "card_equip_4_26" => [ 
@@ -4707,7 +4722,7 @@ class Material {
         "durability" => 3,
         "r" => "spendUse:spendDurab:dealDamage(adj)",
         "quest" => "<i>Spend 1 practice action in a forest</i> to get access to these.",
-        "effect" => "[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster.",
+        "effect" => clienttranslate("[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster."),
         "flavour" => "Boldur is not happy until he can fell a tree in one throw.",
 ],
     "card_equip_4_16" => [ 
@@ -4720,7 +4735,7 @@ class Material {
         "durability" => 2,
         "r" => "spendDurab:2preventDamage",
         "quest" => "<i>Enter the Ogre Valley or skip the gold [XP] from killing a troll.</i>",
-        "effect" => "[DAMAGE]: Prevent 2 damage.",
+        "effect" => clienttranslate("[DAMAGE]: Prevent 2 damage."),
         "flavour" => "Breaking off one side of a troll breastplate should do the trick",
 ],
     "card_equip_4_21" => [ 
@@ -4733,7 +4748,7 @@ class Material {
         "strength" => 1,
         "r" => "custom",
         "quest" => "<i>End your movementin the Marsh of Sorrow</i>, covered to the beard in yuck.",
-        "effect" => "This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action.",
+        "effect" => clienttranslate("This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action."),
         "flavour" => "I axed your first.",
 ],
             /* --- gen php end card_equip_material --- */
@@ -4750,7 +4765,7 @@ class Material {
         "name" => clienttranslate("Back Down"),
         "count" => 2,
         "r" => "killMonster(inRange,'rank<=2 and closerToGrimheim')",
-        "effect" => "Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.",
+        "effect" => clienttranslate("Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it."),
         "flavour" => "Let's call it a warning shot.",
 ],
     "card_event_1_28" => [ 
@@ -4762,7 +4777,7 @@ class Material {
         "name" => clienttranslate("Burning Arrows"),
         "count" => 4,
         "r" => "c_arrows",
-        "effect" => "Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest.",
+        "effect" => clienttranslate("Deal 1 damage to a monster within attack range, or 2 damage if that monster stands in a forest."),
         "flavour" => "Don't aim for too long!",
 ],
     "card_event_1_32" => [ 
@@ -4774,7 +4789,7 @@ class Material {
         "name" => clienttranslate("Limber Bow"),
         "count" => 2,
         "r" => "2gainAtt(range)",
-        "effect" => "You have attack range +2 this turn.",
+        "effect" => clienttranslate("You have attack range +2 this turn."),
         "flavour" => "Twannng!",
 ],
     "card_event_1_26" => [ 
@@ -4787,7 +4802,7 @@ class Material {
         "count" => 4,
         "r" => "2addDamage",
         "on" => "TActionAttack",
-        "effect" => "Add 2 damage to this attack action.",
+        "effect" => clienttranslate("Add 2 damage to this attack action."),
         "flavour" => "I wondered where the arrow went. Then it hit me…",
 ],
     "card_event_1_31" => [ 
@@ -4800,7 +4815,7 @@ class Material {
         "count" => 2,
         "r" => "rerollMisses",
         "on" => "TRoll",
-        "effect" => "Reroll all misses.",
+        "effect" => clienttranslate("Reroll all misses."),
         "flavour" => "Hitting where it hurts, not always in the head.",
 ],
     "card_event_1_33" => [ 
@@ -4813,7 +4828,7 @@ class Material {
         "count" => 2,
         "r" => "counter(countRunes):addDamage",
         "on" => "TRoll",
-        "effect" => "Play after one of your dice rolls. Add 1 damage for each [RUNE].",
+        "effect" => clienttranslate("Play after one of your dice rolls. Add 1 damage for each [RUNE]."),
         "flavour" => "Make sure the arrow head is sterilized!",
 ],
     "card_event_1_25" => [ 
@@ -4825,7 +4840,7 @@ class Material {
         "name" => clienttranslate("Prey"),
         "count" => 2,
         "r" => "c_prey",
-        "effect" => "Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].",
+        "effect" => clienttranslate("Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP]."),
         "flavour" => "Pray for your life.",
 ],
     "card_event_1_27" => [ 
@@ -4837,7 +4852,7 @@ class Material {
         "name" => clienttranslate("Rest"),
         "count" => 2,
         "r" => "2heal(self)",
-        "effect" => "Heal 2 damage from Bjorn.",
+        "effect" => clienttranslate("Heal 2 damage from Bjorn."),
         "flavour" => "Sea therapy, works every time...",
 ],
     "card_event_1_34" => [ 
@@ -4849,7 +4864,7 @@ class Material {
         "name" => clienttranslate("Seek Shelter"),
         "count" => 1,
         "r" => "[0,2]move(locationOnly),0setAtt(move)",
-        "effect" => "Move up to 2 areas into a location. You may not move more this turn.",
+        "effect" => clienttranslate("Move up to 2 areas into a location. You may not move more this turn."),
         "flavour" => "Phew, lucky there was a cave here… Who's snoring?",
 ],
     "card_event_1_30" => [ 
@@ -4861,7 +4876,7 @@ class Material {
         "name" => clienttranslate("Sewing"),
         "count" => 2,
         "r" => "repairCard(all)",
-        "effect" => "Remove 1 damage from each of your cards.",
+        "effect" => clienttranslate("Remove 1 damage from each of your cards."),
         "flavour" => "Needles to say, sewing has been a common thread in Bjorn's crafts.",
 ],
 // # Events - Alva (hno=2)
@@ -4874,7 +4889,7 @@ class Material {
         "name" => clienttranslate("Agility"),
         "count" => 2,
         "r" => "2move",
-        "effect" => "Move 2 areas. Just because you can.",
+        "effect" => clienttranslate("Move 2 areas. Just because you can."),
 ],
     "card_event_2_35" => [ 
         "ctype" => "event",
@@ -4885,7 +4900,7 @@ class Material {
         "name" => clienttranslate("Back Down!"),
         "count" => 2,
         "r" => "killMonster(inRange,'rank<=2 and closerToGrimheim')",
-        "effect" => "Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it.",
+        "effect" => clienttranslate("Choose a rank 1 or rank 2 monster within attack range that is closer to Grimheim than you. Kill it."),
         "flavour" => "Let's call it a warning shot.",
 ],
     "card_event_2_30" => [ 
@@ -4897,7 +4912,7 @@ class Material {
         "name" => clienttranslate("Inspire Defense"),
         "count" => 2,
         "r" => "in(Grimheim):2spendManaAny:addTownPiece",
-        "effect" => "Spend 2 mana [MANA] in Grimheim to add 1 Town Piece.",
+        "effect" => clienttranslate("Spend 2 mana [MANA] in Grimheim to add 1 Town Piece."),
         "flavour" => "Anything for you, Alva!",
 ],
     "card_event_2_27" => [ 
@@ -4910,7 +4925,7 @@ class Material {
         "count" => 3,
         "r" => "4addRoll",
         "on" => "TActionAttack",
-        "effect" => "Add 4[DIE_ATTACK] to this attack action.",
+        "effect" => clienttranslate("Add 4[DIE_ATTACK] to this attack action."),
         "flavour" => "When they don't get the hint at the first arrow, add some more…",
 ],
     "card_event_2_26" => [ 
@@ -4922,7 +4937,7 @@ class Material {
         "name" => clienttranslate("Multi-Shot"),
         "count" => 3,
         "r" => "2multiTarget(inRange):2roll",
-        "effect" => "Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each.",
+        "effect" => clienttranslate("Choose up to 2 monsters within attack range. Roll 2[DIE_ATTACK] against each."),
         "flavour" => "Two-for-one deal, express delivery.",
 ],
     "card_event_2_34" => [ 
@@ -4935,7 +4950,7 @@ class Material {
         "count" => 2,
         "r" => "counter(countRunes):addDamage",
         "on" => "TRoll",
-        "effect" => "Play after one of your dice rolls. Add 1 damage for each [RUNE].",
+        "effect" => clienttranslate("Play after one of your dice rolls. Add 1 damage for each [RUNE]."),
         "flavour" => "Make sure the arrow head is sterilized!",
 ],
     "card_event_2_32" => [ 
@@ -4947,7 +4962,7 @@ class Material {
         "name" => clienttranslate("Popular"),
         "count" => 2,
         "r" => "in(Grimheim):2gainXp",
-        "effect" => "Play in Grimheim to gain 2 gold [XP].",
+        "effect" => clienttranslate("Play in Grimheim to gain 2 gold [XP]."),
         "flavour" => "I could get used to this…",
 ],
     "card_event_2_36" => [ 
@@ -4959,7 +4974,7 @@ class Material {
         "name" => clienttranslate("Prey"),
         "count" => 1,
         "r" => "c_prey",
-        "effect" => "Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP].",
+        "effect" => clienttranslate("Mark an undamaged rank 3 monster or an undamaged Legend with 2 gold [XP] markers. It is worth +2 gold [XP]."),
         "flavour" => "Pray for your life.",
 ],
     "card_event_2_31" => [ 
@@ -4971,7 +4986,7 @@ class Material {
         "name" => clienttranslate("Rest"),
         "count" => 2,
         "r" => "2heal(self)",
-        "effect" => "Heal 2 damage from Alva.",
+        "effect" => clienttranslate("Heal 2 damage from Alva."),
         "flavour" => "If you defend the village, I'll take care of the rest.",
 ],
     "card_event_2_33" => [ 
@@ -4983,7 +4998,7 @@ class Material {
         "name" => clienttranslate("Speedy Attack"),
         "count" => 2,
         "r" => "discardEvent:actionAttack",
-        "effect" => "Discard another card from hand to perform an attack action.",
+        "effect" => clienttranslate("Discard another card from hand to perform an attack action."),
 ],
     "card_event_2_29" => [ 
         "ctype" => "event",
@@ -4994,7 +5009,7 @@ class Material {
         "name" => clienttranslate("Take a Knee"),
         "count" => 2,
         "r" => "c_supfire(inRange,not_legend)",
-        "effect" => "Choose a non-Legend monster within attack range. It may not move during the monster turn.",
+        "effect" => clienttranslate("Choose a non-Legend monster within attack range. It may not move during the monster turn."),
         "flavour" => "Just what he kneeded.",
 ],
 // # Events - Embla (hno=3)
@@ -5007,7 +5022,7 @@ class Material {
         "name" => clienttranslate("Courage"),
         "count" => 2,
         "r" => "2dealDamage(adj,'(rank==3 or legend)')",
-        "effect" => "Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.",
+        "effect" => clienttranslate("Choose an adjacent legend or rank 3 monster. Deal 2 damage to it."),
         "flavour" => "The bigger they are, the harder they fall.",
 ],
     "card_event_3_36" => [ 
@@ -5019,7 +5034,7 @@ class Material {
         "name" => clienttranslate("Durability"),
         "count" => 1,
         "r" => "repairCard(max)",
-        "effect" => "Remove all damage from an equipment card.",
+        "effect" => clienttranslate("Remove all damage from an equipment card."),
 ],
     "card_event_3_28" => [ 
         "ctype" => "event",
@@ -5030,7 +5045,7 @@ class Material {
         "name" => clienttranslate("Kick"),
         "count" => 3,
         "r" => "dealDamage(adj),moveMonster(marked)",
-        "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
+        "effect" => clienttranslate("Deal 1 damage to an adjacent monster and move it 1 area."),
         "flavour" => "I get a kick out of you.",
 ],
     "card_event_3_34" => [ 
@@ -5043,7 +5058,7 @@ class Material {
         "count" => 2,
         "r" => "custom",
         "on" => "TRoll",
-        "effect" => "If you rolled a [RUNE], add 3 damage.",
+        "effect" => clienttranslate("If you rolled a [RUNE], add 3 damage."),
         "flavour" => "These runes were made by the famous Blade Runer.",
 ],
     "card_event_3_27" => [ 
@@ -5055,7 +5070,7 @@ class Material {
         "name" => clienttranslate("Maneuver"),
         "count" => 2,
         "r" => "1move",
-        "effect" => "Move 1 area.",
+        "effect" => clienttranslate("Move 1 area."),
         "flavour" => "Embla has a way of tackling her problems from many angles.",
 ],
     "card_event_3_37" => [ 
@@ -5067,7 +5082,7 @@ class Material {
         "name" => clienttranslate("Preparations"),
         "count" => 1,
         "r" => "spendAction(actionPrepare):drawEvent(max)",
-        "effect" => "Spend a prepare action to draw cards until you have 4.",
+        "effect" => clienttranslate("Spend a prepare action to draw cards until you have 4."),
         "flavour" => "Ready, set... Wait - you're still getting dressed?",
 ],
     "card_event_3_35" => [ 
@@ -5079,7 +5094,7 @@ class Material {
         "name" => clienttranslate("Rest"),
         "count" => 2,
         "r" => "2heal(self)",
-        "effect" => "Heal 2 damage from Embla.",
+        "effect" => clienttranslate("Heal 2 damage from Embla."),
         "flavour" => "If you defend the village, I'll take care of the rest.",
 ],
     "card_event_3_31" => [ 
@@ -5092,7 +5107,7 @@ class Material {
         "count" => 3,
         "r" => "2dealDamage(adj)",
         "on" => "TResolveHits",
-        "effect" => "Play after an adjacent monster attacked you to deal 2 damage to it.",
+        "effect" => clienttranslate("Play after an adjacent monster attacked you to deal 2 damage to it."),
 ],
     "card_event_3_29" => [ 
         "ctype" => "event",
@@ -5103,7 +5118,7 @@ class Material {
         "name" => clienttranslate("Sophisticated"),
         "count" => 2,
         "r" => "in(Grimheim):(actionMend/actionFocus/actionPrepare/actionPractice)",
-        "effect" => "Play in Grimheim to perform a mend, focus, prepare, or practice action.",
+        "effect" => clienttranslate("Play in Grimheim to perform a mend, focus, prepare, or practice action."),
         "flavour" => "That's my cup of tea.",
 ],
     "card_event_3_33" => [ 
@@ -5115,7 +5130,7 @@ class Material {
         "name" => clienttranslate("Speedy Attack"),
         "count" => 2,
         "r" => "discardEvent:actionAttack",
-        "effect" => "Discard another card from hand to perform an attack action.",
+        "effect" => clienttranslate("Discard another card from hand to perform an attack action."),
 ],
     "card_event_3_32" => [ 
         "ctype" => "event",
@@ -5127,7 +5142,7 @@ class Material {
         "count" => 2,
         "r" => "dealDamage(adj)",
         "on" => "TMonsterMove",
-        "effect" => "Play after the Monsters Move step. Deal 1 damage to an adjacent monster.",
+        "effect" => clienttranslate("Play after the Monsters Move step. Deal 1 damage to an adjacent monster."),
         "flavour" => "Under cover, over confident.",
 ],
 // # Events - Boldur (hno=4)
@@ -5141,7 +5156,7 @@ class Material {
         "count" => 3,
         "r" => "spendHealth:3addDamage",
         "on" => "TActionAttack",
-        "effect" => "Take 1 unpreventable damage to add 3 damage to this attack.",
+        "effect" => clienttranslate("Take 1 unpreventable damage to add 3 damage to this attack."),
         "flavour" => "Grr… Wraaaaaaah!",
 ],
     "card_event_4_36" => [ 
@@ -5153,7 +5168,7 @@ class Material {
         "name" => clienttranslate("Boldur's Gate"),
         "count" => 1,
         "r" => "in(Grimheim):2spendXp:addTownPiece",
-        "effect" => "Spend 2 gold [XP] in Grimheim to gain 1 town piece.",
+        "effect" => clienttranslate("Spend 2 gold [XP] in Grimheim to gain 1 town piece."),
         "flavour" => "Narrow is the gate that leads to the inn.",
 ],
     "card_event_4_35" => [ 
@@ -5165,7 +5180,7 @@ class Material {
         "name" => clienttranslate("Dodge"),
         "count" => 1,
         "r" => "2preventDamage",
-        "effect" => "Prevent up to 2 damage.",
+        "effect" => clienttranslate("Prevent up to 2 damage."),
         "flavour" => "Did you miss me?",
 ],
     "card_event_4_34" => [ 
@@ -5177,7 +5192,7 @@ class Material {
         "name" => clienttranslate("Durability"),
         "count" => 1,
         "r" => "repairCard(max)",
-        "effect" => "Remove all damage from an equipment card.",
+        "effect" => clienttranslate("Remove all damage from an equipment card."),
         "flavour" => "Can't even handle the mead?",
 ],
     "card_event_4_33" => [ 
@@ -5189,7 +5204,7 @@ class Material {
         "name" => clienttranslate("Focus"),
         "count" => 2,
         "r" => "spendAction(actionFocus):gainXp:gainMana:drawEvent",
-        "effect" => "Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.",
+        "effect" => clienttranslate("Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card."),
         "flavour" => "Think, think… think.",
 ],
     "card_event_4_31" => [ 
@@ -5201,7 +5216,7 @@ class Material {
         "name" => clienttranslate("Kick"),
         "count" => 3,
         "r" => "dealDamage(adj),moveMonster(marked)",
-        "effect" => "Deal 1 damage to an adjacent monster and move it 1 area.",
+        "effect" => clienttranslate("Deal 1 damage to an adjacent monster and move it 1 area."),
         "flavour" => "I get a kick out of you.",
 ],
     "card_event_4_29" => [ 
@@ -5213,7 +5228,7 @@ class Material {
         "name" => clienttranslate("Maneuver"),
         "count" => 2,
         "r" => "1move",
-        "effect" => "Move 1 area.",
+        "effect" => clienttranslate("Move 1 area."),
 ],
     "card_event_4_27" => [ 
         "ctype" => "event",
@@ -5224,7 +5239,7 @@ class Material {
         "name" => clienttranslate("Miner"),
         "count" => 2,
         "r" => "adj(mountain):2gainXp",
-        "effect" => "Gain 2 gold [XP] if you are adjacent to a mountain area.",
+        "effect" => clienttranslate("Gain 2 gold [XP] if you are adjacent to a mountain area."),
         "flavour" => "All dwarves are minors until they turn fifty.",
 ],
     "card_event_4_38" => [ 
@@ -5236,7 +5251,7 @@ class Material {
         "name" => clienttranslate("Portable Smithy"),
         "count" => 1,
         "r" => "spendAction(actionPrepare):gainEquip",
-        "effect" => "Spend 1 prepare action to complete your quest.",
+        "effect" => clienttranslate("Spend 1 prepare action to complete your quest."),
         "flavour" => "Travel-sized anvil. Check!",
 ],
     "card_event_4_30" => [ 
@@ -5248,7 +5263,7 @@ class Material {
         "name" => clienttranslate("Rest"),
         "count" => 2,
         "r" => "2heal(self)",
-        "effect" => "Heal 2 damage from Boldur.",
+        "effect" => clienttranslate("Heal 2 damage from Boldur."),
         "flavour" => "I need a hospital… no, I need a tavern…",
 ],
     "card_event_4_37" => [ 
@@ -5260,7 +5275,7 @@ class Material {
         "name" => clienttranslate("Seek Shelter"),
         "count" => 1,
         "r" => "[0,2]move(locationOnly),0setAtt(move)",
-        "effect" => "Move up to 2 areas into a location. You may not move more this turn.",
+        "effect" => clienttranslate("Move up to 2 areas into a location. You may not move more this turn."),
         "flavour" => "It's not fleeing, it's a tactical retreat.",
 ],
     "card_event_4_28" => [ 
@@ -5272,7 +5287,7 @@ class Material {
         "name" => clienttranslate("Short Temper"),
         "count" => 3,
         "r" => "killMonster(adj,'healthRem<=2')",
-        "effect" => "Kill an adjacent monster with no more than 2 remaining health.",
+        "effect" => clienttranslate("Kill an adjacent monster with no more than 2 remaining health."),
         "flavour" => "Beware! Boldur's brutal blows bring bad bruises.",
 ],
             /* --- gen php end card_event_material --- */
@@ -5291,7 +5306,7 @@ class Material {
         "health" => 9,
         "r" => "spendAction(actionFocus):2addDamage",
         "on" => "TRoll",
-        "effect" => "After any dice roll, you may spend 1 focus action to add 2 damage.",
+        "effect" => clienttranslate("After any dice roll, you may spend 1 focus action to add 2 damage."),
         "flavour" => "Bjorn is the self-made man. At least, his clothes are self-made.<br>Not much of them remain - he learned from an early age that he must rip what he has sewn.<br>With his great strength, his needles and arrows can pierce anything.",
 ],
     "card_hero_1_2" => [ 
@@ -5305,7 +5320,7 @@ class Material {
         "health" => 10,
         "r" => "spendAction(actionFocus):3addDamage",
         "on" => "TRoll",
-        "effect" => "After any dice roll, you may spend 1 focus action to add 3 damage.",
+        "effect" => clienttranslate("After any dice roll, you may spend 1 focus action to add 3 damage."),
         "flavour" => "Bjorn can solve any problem, including the problems caused by his previous solutions.",
 ],
     "card_hero_2_1" => [ 
@@ -5317,7 +5332,7 @@ class Material {
         "name" => clienttranslate("Alva Hero I"),
         "strength" => 2,
         "health" => 9,
-        "effect" => "End your move action in a forest to add 1 mana [MANA] to any card.",
+        "effect" => clienttranslate("End your move action in a forest to add 1 mana [MANA] to any card."),
         "flavour" => "Alva learned archery from her father at an early age. She can hit a butterfly at 50 paces, but she would never dream of doing that - butterflies are pretty!",
 ],
     "card_hero_2_2" => [ 
@@ -5329,7 +5344,7 @@ class Material {
         "name" => clienttranslate("Alva Hero II"),
         "strength" => 4,
         "health" => 10,
-        "effect" => "End any movement in a forest to add 1 mana [MANA] to any card.",
+        "effect" => clienttranslate("End any movement in a forest to add 1 mana [MANA] to any card."),
         "flavour" => "I don't understand why I should keep my distance? After all, they are only three trolls, and I have many more than three arrows.",
 ],
     "card_hero_3_1" => [ 
@@ -5341,7 +5356,7 @@ class Material {
         "name" => clienttranslate("Embla Hero I"),
         "strength" => 3,
         "health" => 9,
-        "effect" => "Move 4.",
+        "effect" => clienttranslate("Move 4."),
         "flavour" => "Embla is fast, really tough, and passionately competetive. She is inarguably the best defender of Grimheim... because you just don't argue with her.",
 ],
     "card_hero_3_2" => [ 
@@ -5353,7 +5368,7 @@ class Material {
         "name" => clienttranslate("Embla Hero II"),
         "strength" => 5,
         "health" => 10,
-        "effect" => "Move 4.",
+        "effect" => clienttranslate("Move 4."),
         "flavour" => "All creatures are precious to Embla. Their exact worth is determined by the bounty.",
 ],
     "card_hero_4_1" => [ 
@@ -5365,7 +5380,7 @@ class Material {
         "name" => clienttranslate("Boldur Hero I"),
         "strength" => 3,
         "health" => 6,
-        "effect" => "Armor. (Always prevents 1 damage)",
+        "effect" => clienttranslate("Armor. (Always prevents 1 damage)"),
         "flavour" => "Ants can carry several times their own body weight. So can Boldur. He's forging his thick armor to prove this point, and promote heavy metal.",
 ],
     "card_hero_4_2" => [ 
@@ -5377,7 +5392,7 @@ class Material {
         "name" => clienttranslate("Boldur Hero II"),
         "strength" => 5,
         "health" => 7,
-        "effect" => "Armor. (Always prevents 1 damage)",
+        "effect" => clienttranslate("Armor. (Always prevents 1 damage)"),
         "flavour" => "Going berserk at the local inn, Boldur spent a drunken evening challenging all visitors to arm-wrestling. He broke the tavern record as well as fifteen arms, earning him the nickname the Arm-y.",
 ],
             /* --- gen php end card_hero_material --- */

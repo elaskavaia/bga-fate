@@ -21,8 +21,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 3|1|Sure Shot I|||1|spendUse:3spendMana:3dealDamage(inRange)||3[MANA]: Deal 3 damage to a monster within attack range.|Who needs luck when you have certainty?
 4|1|Sure Shot II|||2|spendUse:c_sureshotII||2-4[MANA]: Deal that much damage to a monster within attack range.|
 # Abilities - Alva (hno=2)
-13|2|Flexibility I|||1|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.|
-14|2|Flexibility II|||2|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)|custom|1[MANA]: Move +1.<br>2[MANA]: Attack range +1 this turn.<br>2[MANA]: Add 2 damage to your attack action.<br>2[MANA]: Draw 1 card.|
+13|2|Flexibility I|||1|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)|custom|<ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li></ul>|
+14|2|Flexibility II|||2|(spendUse:1spendMana:gainAtt_move)/(spendUse:2spendMana:gainAtt_range)/(on(TActionAttack):2spendMana:2addDamage)/(spendUse:2spendMana:drawEvent)|custom|<ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li><li>2[MANA]: Draw 1 card</li></ul>|
 3|2|Hail of Arrows I|||1|spendUse:c_hail||3[MANA]: Deal 1 damage to up to 3 monsters within attack range.|
 4|2|Hail of Arrows II|||2|spendUse:c_hailII||1-4[MANA]: Deal 1 damage to that many different monsters within attack range.|
 11|2|Snipe I||||spendUse:2roll(inRange)||Roll 2[DIE_ATTACK] against a monster within attack range.|
@@ -31,8 +31,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 8|2|Starsong II||||2drawEvent|TTurnEnd|At the end of your turn, draw 2 additional cards. You may have 5 cards in hand.|
 9|2|Suppressive Fire I||||c_supfire(inRange3,'rank<=2')|TMonsterMove|Once per monster turn, prevent a rank 1 or rank 2 monster within range 3 from moving. You cannot choose the same monster next turn.|
 10|2|Suppressive Fire II||||c_supfire(inRange3)|TMonsterMove|Once per monster turn, prevent any monster within range 3 from moving. You cannot choose the same monster next turn.|
-5|2|Treetreader I||2||(in(forest):move)/move(forest)||Move into an adjacent forest area, or move out of a forest area.|I will make like a tree and leave.
-6|2|Treetreader II||2||(in(forest):move)/move(forest)|custom|Move into an adjacent forest area, or move out of a forest area. Each time you move into a forest area, heal 1 damage.|All good things are tree.
+5|2|Treetreader I||2||(in(forest):move)/move(forest)||<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>|I will make like a tree and leave.
+6|2|Treetreader II||2||(in(forest):move)/move(forest)|custom|<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>Each time you move into a forest area, heal 1 damage.|All good things are tree.
 # Abilities - Embla (hno=3)
 7|3|Fleetfoot I||1||spendUse:move||Move 1 area.|Oh no, she's surrounding us!
 8|3|Fleetfoot II||3||spendUse:move||Move 1 area. You may always move into mountains and through occupied areas.|

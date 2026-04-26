@@ -67,9 +67,25 @@ class GameWrapper extends Game implements HarnessGameInterface {
         $this->setupGameWithHero(1);
     }
 
+    /** Reset and set up a 1-player game with hero 2 (Alva). */
+    public function debug_setupGame_h2(): void {
+        $this->setupGameWithHero(2);
+    }
+
     /** Reset and set up a 1-player game with hero 4 (Boldur). */
     public function debug_setupGame_h4(): void {
         $this->setupGameWithHero(4);
+    }
+
+    /** Solo Alva, give Flexibility I 2 mana, place hero on plains so the OR has multiple viable branches. */
+    public function debug_Flexibility_I(): void {
+        $this->setupGameWithHero(2);
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $cardId = "card_ability_2_13";
+        $heroId = $this->getHeroTokenId($color);
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
+        $this->effect_moveCrystals($heroId, "green", 2, $cardId, ["message" => ""]);
+        $this->tokens->dbSetTokenLocation($heroId, "hex_9_9");
     }
 
     private function setupGameWithHero(int $heroNum): void {

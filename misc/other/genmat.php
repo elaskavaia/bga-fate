@@ -78,7 +78,7 @@ function reset_globals() {
     $g_field_names = null;
     $g_field_extra = [];
     $g_index = 1;
-    $g_trans = ["name", "tooltip", "tooltip_action", "text"];
+    $g_trans = ["name", "tooltip", "tooltip_action", "text", "effect"];
     $g_separator = "|";
     $g_separator_sub = "";
     $g_noquotes = [];
@@ -266,6 +266,16 @@ function genbody($incsv, $conout) {
                 if ($value) {
                     //$value = str_replace("'", "\\'", $value);
                     $exp = "clienttranslate(\"$value\")";
+                    if (stripos($value, "<li") !== false) {
+                        $items = extractListItems($value, $incsv, $key);
+                        fwrite($out, "{$tabstop}{$tabstop}\"$key\" => $exp,\n");
+                        foreach ($items as $idx1 => $item) {
+                            $itemValue = trim($item);
+                            $itemValue = preg_replace('/[.!?]+\s*$/', "", $itemValue);
+                            fwrite($out, "{$tabstop}{$tabstop}\"{$key}_$idx1\" => clienttranslate(\"$itemValue\"),\n");
+                        }
+                        continue;
+                    }
                 } else {
                     continue;
                 }
@@ -286,6 +296,22 @@ function genbody($incsv, $conout) {
 function startsWith($haystack, $needle) {
     // search backwards starting from haystack length characters from the end
     return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== false;
+}
+
+/**
+ * Extract <li>...</li> contents from $value. Returns a 1-indexed array (callers
+ * use the value directly as <field>_N). Dies if no closed <li>...</li> matches.
+ * Does not require <ul> — any translatable field can have an inline <li> list.
+ */
+function extractListItems($value, $incsv, $key) {
+    if (!preg_match_all('#<li[^>]*>(.*?)</li>#is', $value, $im)) {
+        die("genmat: $incsv: $key field contains <li but no closed <li>...</li> items in: $value\n");
+    }
+    $items = [];
+    foreach ($im[1] as $i => $item) {
+        $items[$i + 1] = $item;
+    }
+    return $items;
 }
 
 function endsWith($haystack, $needle) {

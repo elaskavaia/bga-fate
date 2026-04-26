@@ -58,7 +58,7 @@ class Op_or extends ComplexOperation {
         $res = [];
         $totalLimit = 0;
         foreach ($this->delegates as $i => $sub) {
-            $arg = $this->paramInfo($sub);
+            $arg = $this->paramInfo($sub, $i);
             $totalLimit += $arg["max"] ?? 0;
             $res["choice_$i"] = $arg;
         }
@@ -66,6 +66,24 @@ class Op_or extends ComplexOperation {
             return ["q" => Material::ERR_COST];
         }
         return $res;
+    }
+
+    // Game specific override to inject proper names for buttons from card rules
+    function paramInfo(Operation $sub, ?int $i = null) {
+        $arg = parent::paramInfo($sub);
+        if ($i === null) {
+            return $arg;
+        }
+        $cardId = $this->getDataField("card", "");
+        if ($cardId) {
+            $name = $this->game->getRulesFor($cardId, "effect_" . ($i + 1), null);
+            if ($name) {
+                $arg["name"] = $name;
+                // Tooltip would just repeat the button label.
+                unset($arg["tooltip"]);
+            }
+        }
+        return $arg;
     }
 
     function getArgType() {

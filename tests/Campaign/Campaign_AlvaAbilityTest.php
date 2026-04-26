@@ -114,8 +114,12 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, "hex_9_9");
 
         $this->respond("card_ability_2_13");
-        // Two branches viable (1-mana move and 2-mana range) → pick branch 1 (range)
 
+        // Choice button names should come from per-<li> effect strings, not iconic [Op_…] fallbacks.
+        $info = $this->getOpArgs()["info"] ?? [];
+        $this->assertStringContainsString("Attack range", $info["choice_1"]["name"] ?? "");
+
+        // Two branches viable (1-mana move and 2-mana range) → pick branch 1 (range)
         $this->respond("choice_1"); // range branch
 
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_ability_2_13"));

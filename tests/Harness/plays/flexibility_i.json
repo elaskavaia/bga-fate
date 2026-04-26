@@ -1,0 +1,8 @@
+{
+  "current_player_id": 10,
+  "reset": true,
+  "steps": [
+    { "endpoint": "debug_Flexibility_I", "reload": true },
+    { "endpoint": "action_resolve", "data": { "target": "card_ability_2_13" }, "reload": true }
+  ]
+}
