@@ -382,6 +382,82 @@ Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = bl
 9. **Monster AI**: Fully deterministic (no choices for monsters), so monster turn can be auto-resolved on server. Client just animates notifications.
 10. ~~**Event deck exhaustion**~~: See Assumptions section.
 
+### Card effect text
+
+Card `effect` text in CSVs is the canonical, designer-facing description of what the card does. For cards whose **top-level rule is `Op_or`**, the `effect` column contains an HTML `<ul><li>…</li></ul>` list, with one `<li>` per OR branch. `genmat` consumes the list and emits per-choice translatable strings into `Material.php`, used by `Op_or` to label choice buttons.
+
+**In scope**: cards whose top-level rule operator is `/` (Op_or). Examples: Flexibility I/II, Treetreader I/II, Bloodline Crystal, Home Sewn Cape.
+
+**Out of scope (for now)**: cards with nested OR (e.g. Stitching `spendUse:(heal/repair)`, Ring of Au `spendDurab:(heal/dealDamage)`). They keep auto-derived button names until we extend markup to inner-OR cases.
+
+#### Markup syntax
+
+- Wrap each choice in a `<li>...</li>` tag inside the `effect` field, in OR-branch order. The surrounding `<ul>...</ul>` is recommended for client rendering but not required by the generator.
+- `<li>` tags are flat — no nesting, no attributes.
+- `<li>` content may include existing inline icon codes (`[MANA]`, `[DAMAGE]`, etc.) and other inline HTML.
+- Text outside the `<li>` items (preamble, trailing passive sentences, connectives) is allowed and is treated as non-choice text.
+
+The same rule applies generically to any translatable field that contains `<li>` markup: `genmat` extracts each `<li>` content as a numbered sub-field. For card effects this is OR choices; the mechanism is field-agnostic.
+
+#### Translation
+
+Two translatable artifacts per OR-card:
+
+- **The full `effect` string**, including the `<ul><li>` tags. Translators translate text and keep tags intact (same convention as keeping `[MANA]` icon codes today). Used by the client to render the card description.
+- **Each `<li>` content** as a separate translatable string. Used by `Op_or` for choice button labels.
+
+Cards without a `<ul>` block (single-effect cards, non-OR rules) translate the `effect` string as one unit — no per-choice strings emitted.
+
+#### Semantics — what goes where
+
+- **Inside `<li>`**: short, self-contained description of one choice. Should make sense as a button label. Typically cost + outcome (e.g. `2[MANA]: Move 1 area`).
+- **Outside `<ul>`**: passive text (effects that always apply, not tied to a choice), shared preamble. Translated as part of the full `effect` string; never used by the server.
+- Inline-OR prose ("Move into a forest area, or move out of a forest area.") must be rewritten as a list to be in scope. We control the text.
+- **Flavor text** stays in the `flavour` column. Never inside `effect`.
+
+Trailing periods inside `<li>` are not needed in the source — the list visually delimits items. Authoring convention: omit trailing punctuation inside `<li>`. Passive sentences outside `<ul>` keep their punctuation.
+
+#### Worked examples
+
+Flexibility I — three choices, no non-choice text:
+```
+<ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li></ul>
+```
+
+Treetreader I — rewritten as list:
+```
+<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>
+```
+
+Treetreader II — list plus a trailing passive sentence:
+```
+<ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>Each time you move into a forest area, heal 1 damage.
+```
+
+Home Sewn Cape — passive preamble, then list:
+```
+Add 1 [MANA] here every time you roll a [RUNE].<ul><li>2[MANA]: Move 1 area</li><li>3[MANA]: Prevent 2 damage</li></ul>
+```
+
+#### Generated artifacts
+
+For an OR-card with a `<ul>` block, `genmat` emits in the card's Material entry:
+- `"effect" => clienttranslate("…full string with tags…"),` — full text preserved verbatim, used by the client to render the card description as a list.
+- `"effect_1" => clienttranslate("1[MANA]: Move +1"),` — first choice text.
+- `"effect_2" => clienttranslate("2[MANA]: Attack range +1 this turn"),`
+- … one per `<li>`, indexed from 1.
+
+Indices are **1-based** to match natural human counting ("choice 1", "choice 2"). Internal `Op_or` branch index `i` maps to `effect_{i+1}`.
+
+For a card without a `<ul>` block:
+- `"effect" => clienttranslate("…"),`
+- No `effect_N` emitted.
+
+#### Validation (genmat)
+
+If a translatable field contains `<li`, `genmat` must find at least one closed `<li>...</li>` pair, otherwise it fails the build with a clear error.
+
+Genmat does NOT validate that the `<li>` count matches the OR branch count in the `r` expression — that's a runtime concern (`Op_or` falls back to auto-name if `effect_$i` is missing).
 
 ## Overview of card effects
 
