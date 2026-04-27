@@ -77,6 +77,12 @@ class GameWrapper extends Game implements HarnessGameInterface {
         $this->setupGameWithHero(4);
     }
 
+    /** Reset and set up a 1-player game with hero 1 on the long (16-step) time track. */
+    public function debug_setupGame_h1_long(): void {
+        $this->setGameStateValue("var_long_track", 1);
+        $this->setupGameWithHero(1);
+    }
+
     /** Solo Alva, give Flexibility I 2 mana, place hero on plains so the OR has multiple viable branches. */
     public function debug_Flexibility_I(): void {
         $this->setupGameWithHero(2);
