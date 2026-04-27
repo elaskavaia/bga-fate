@@ -45,16 +45,47 @@ class Op_gainEquip extends Operation {
 
     /**
      * Place an equipment card on a player's tableau and fire its onCardEnter hook.
+     * If the card is a Main Weapon, the player's existing Main Weapon (if any) is
+     * displaced to limbo first; any crystals parked on it are returned to supply.
      *
-     * @param string $cardId  Token id of the equipment card (e.g. "card_equip_1_20")
-     * @param string $owner   Player color
-     * @param Operation|null $op  Calling operation — required for onCardEnter to queue sub-ops.
-     *                            Pass null during setupNewGame (no triggers fire).
+     * @param array $card  Token info row (e.g. from getTokenInfo) — must include "key".
      */
     function effect_gainEquipment(array $card): void {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $cardId = $card["key"];
+
+        $isMainWeapon = $this->game->getRulesFor($cardId, "mw");
+        if ($isMainWeapon) {
+            $existing = array_keys($this->game->tokens->getTokensOfTypeInLocation("card_equip", "tableau_$owner"));
+            foreach ($existing as $existingId) {
+                if ($existingId === $cardId) {
+                    continue;
+                }
+                $existingMW = $this->game->getRulesFor($existingId, "mw");
+                if ($existingMW) {
+                    // Return crystals parked on the discarded card (e.g. Smiterbiter's stored
+                    // damage) to their supply so they don't linger in the DB.
+                    foreach (["red", "yellow", "green"] as $color) {
+                        $count = count($this->game->tokens->getTokensOfTypeInLocation("crystal_$color", $existingId));
+                        if ($count > 0) {
+                            $this->game->effect_moveCrystals($heroId, $color, -$count, $existingId, ["message" => ""]);
+                        }
+                    }
+                    $this->dbSetTokenLocation(
+                        $existingId,
+                        "limbo",
+                        0,
+                        clienttranslate('${char_name} replaces ${token_name} with ${token_name2} (Main Weapon)'),
+                        [
+                            "char_name" => $heroId,
+                            "token_name2" => $cardId,
+                        ]
+                    );
+                }
+            }
+        }
+
         $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains ${token_name}'), [
             "char_name" => $heroId,
         ]);
@@ -67,5 +98,7 @@ class Op_gainEquip extends Operation {
 
         $cardObj = $this->game->instantiateCard($card, $this);
         $cardObj->onTrigger(Trigger::CardEnter);
+        // equip changes attributes
+        $this->game->getHero($owner)->recalcTrackers();
     }
 }

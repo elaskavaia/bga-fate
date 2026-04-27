@@ -9,6 +9,7 @@ This is a Board Game Arena (BGA) implementation of the game "Fate: Defenders of 
 ## Architecture
 
 See [misc/docs/DESIGN.md](misc/docs/DESIGN.md) for architecture overview, token/location naming, and game design details.
+**Important** if you are exploration/reaseach agent please read of search this document first.
 
 
 ## Development Commands

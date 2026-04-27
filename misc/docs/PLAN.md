@@ -40,7 +40,7 @@ See CLAUDE.md for project overview
 ## Other rule gaps
 
 [ ] Encounters - there are crystals placed on map, we need to implement hero running into them
-[ ] Main weapon
+[x] Main weapon
 [ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control
 
 
@@ -147,7 +147,7 @@ See misc/docs/CHECKLIST.md
   [ ] Legend monster special display
   [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
   [ ] Flip animation for upgrades
-  [ ] Main weapon - restriction only one main weapon allowed
+  [x] Main weapon - restriction only one main weapon allowed
   [ ] **Manually test: double-confirm on comma-chained event card rules.** Multi-Shot (`r=2roll(inRange),2roll(inRange)`) creates a `seq` op for the comma-chain. Test via `Campaign_AlvaEventTest::testMultiShotRollsAgainstTwoDifferentMonsters` shows an extra `confirm` step is required after the card pick, before the first sub-op prompts. The root paygain already has `confirm=true` from `Card::useCard`; seq's expandOperation correctly strips confirm from children. Expected UX: click card → prompt for first monster hex (no intermediate confirm). Actual: click card → confirm button → prompt for first monster hex. Verify in the harness whether this is a UX bug (double-click) or intentional. If UX bug, likely fix is in `Op_seq::expandOperation` or how useCard wraps the op.
   [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
 

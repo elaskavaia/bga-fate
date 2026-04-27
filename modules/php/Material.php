@@ -4197,6 +4197,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2."),
         "flavour" => "Not something he's proud of. Still not bad for a five-year-old.",
         "attack_range" => 2,
+        "mw" => 1,
 ],
     "card_equip_1_20" => [ 
         "ctype" => "equip",
@@ -4224,6 +4225,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>Count the [RUNE] rolled in each attack action and deal that much damage to another monster adjacent to the target."),
         "flavour" => "This bunch of bones, bound by braided bamboo became the bane of the banished breathless.",
         "attack_range" => 2,
+        "mw" => 1,
 ],
     "card_equip_1_21" => [ 
         "ctype" => "equip",
@@ -4322,6 +4324,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2. Add 1 damage to attack actions against trollkin."),
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",
         "attack_range" => 2,
+        "mw" => 1,
 ],
 // # Equipment - Alva (hno=2)
     "card_equip_2_23" => [ 
@@ -4347,6 +4350,7 @@ class Material {
         "strength" => 1,
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2."),
         "attack_range" => 2,
+        "mw" => 1,
 ],
     "card_equip_2_22" => [ 
         "ctype" => "equip",
@@ -4429,6 +4433,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>After each attack action, add 1 mana [MANA] to any card."),
         "flavour" => "Sings your swan song.",
         "attack_range" => 2,
+        "mw" => 1,
 ],
     "card_equip_2_17" => [ 
         "ctype" => "equip",
@@ -4467,6 +4472,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]."),
         "flavour" => "It anticipates your wishes.",
         "attack_range" => 2,
+        "mw" => 1,
 ],
 // # Equipment - Embla (hno=3)
     "card_equip_3_19" => [ 
@@ -4565,6 +4571,7 @@ class Material {
         "quest" => "<i>Enter 10 forest areas</i> to search for the long-forgotten sword.",
         "effect" => clienttranslate("This is your Main Weapon. Add 2 damage to each attack action."),
         "flavour" => "The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.",
+        "mw" => 1,
 ],
     "card_equip_3_18" => [ 
         "ctype" => "equip",
@@ -4618,6 +4625,7 @@ class Material {
         "quest" => "<i>Spend 1 mend action in the Spewing Mountain</i> to forge it.",
         "effect" => clienttranslate("This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster."),
         "flavour" => "Forged in the flames of kidnapped sprites.",
+        "mw" => 1,
 ],
 // # Equipment - Boldur (hno=4)
     "card_equip_4_24" => [ 
@@ -4641,6 +4649,7 @@ class Material {
         "strength" => 1,
         "effect" => clienttranslate("This is your Main Weapon."),
         "flavour" => "Picks anything, even noses.",
+        "mw" => 1,
 ],
     "card_equip_4_20" => [ 
         "ctype" => "equip",
@@ -4703,6 +4712,7 @@ class Material {
         "quest" => "<i>End your movement adjacent to 4 monsters or 1 legend</i> to pick a fight.",
         "effect" => clienttranslate("This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action."),
         "flavour" => "Used by Eitri, who forged Thor's hammer Mjölnir.",
+        "mw" => 1,
 ],
     "card_equip_4_17" => [ 
         "ctype" => "equip",
@@ -4767,6 +4777,7 @@ class Material {
         "quest" => "<i>End your movement in the Marsh of Sorrow</i>, covered to the beard in yuck.",
         "effect" => clienttranslate("This is your Main Weapon. Spend stored damage to add that much damage to your attack action. If you kill a monster in an attack action, excess damage is stored here (max 3 stored)."),
         "flavour" => "I axed your first.",
+        "mw" => 1,
 ],
             /* --- gen php end card_equip_material --- */
             /* --- gen php begin card_event_material --- */
