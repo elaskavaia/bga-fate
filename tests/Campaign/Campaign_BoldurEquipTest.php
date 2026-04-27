@@ -131,4 +131,49 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         // Even on a full miss, the gold vein despawns (zero-hit dealDamage still fires).
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goldvein"));
     }
+
+    // --- Smiterbiter (card_equip_4_21) ---
+    // r=c_smiter, on=TActionAttack — useCard prompt to spend stored reds for added damage.
+    // Storage path: onMonsterKilled hook auto-pulls min(overkill, 3 - stored) reds onto the
+    // card directly (bypasses useCard / r entirely).
+
+    public function testSmiterbiterStoresOverkillThenSpendsOnNextAttack(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_equip_4_21";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        // Smiterbiter grants +1 strength; recalc since calcBaseStrength only runs at setup/turnEnd/upgrade.
+        $this->game->getHero($color)->recalcTrackers();
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_6_9", "");
+
+        // Turn 1 attack — Boldur I(3) + First Pick(1) + Smiterbiter(1) = 5 dice. 4 hits vs goblin (h=2) → overkill 2.
+        $this->seedRand([5, 5, 5, 5, 1]);
+        $this->respond("actionAttack");
+        $this->respond("hex_7_8");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+        $this->assertEquals(2, $this->countTokens("crystal_red", $cardId), "Smiterbiter should hold 2 reds after overkill 2");
+
+        // Burn the remaining 2 actions to advance the turn loop.
+        $this->respond("actionPractice");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        // Turn 2 attack — Smiterbiter offers a useCard prompt to spend stored reds.
+        $this->seedRand([5, 5, 5, 5, 1]); // 4 hits = 4 base damage on troll (h=6)
+        $this->respond("actionAttack");
+        $this->respond("hex_6_9");
+
+        $this->assertOperation("c_smiter");
+
+        // c_smiter prompts for spend amount (1..2). Spend both.
+        $this->respond("2");
+
+        $this->assertEquals(0, $this->countTokens("crystal_red", $cardId), "All reds spent off card");
+        $this->assertEquals(6, $this->countDamage($troll));
+    }
 }

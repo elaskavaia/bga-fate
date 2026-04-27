@@ -522,7 +522,7 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 #### Event Cards
 
-[ ] card_event_3_34 Magic Runes 
+[x] card_event_3_34 Magic Runes 
 [x] card_event_3_29 Sophisticated — has tests
 
 
@@ -545,7 +545,7 @@ Triage of r=custom cards:
 [x] card_equip_4_25 Dwarf Pick — has tests
 [ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
 [x] card_equip_4_19 Orebiter — has tests
-[ ] card_equip_4_21 Smiterbiter — This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action. **Triage: bespoke + new op** 
+[x] card_equip_4_21 Smiterbiter — has tests
 
 #### Event Cards
 

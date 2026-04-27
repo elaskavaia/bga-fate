@@ -564,6 +564,10 @@ class Material {
         "type" => "c_orebiter",
         "name" => clienttranslate("Orebiter"),
 ],
+    "Op_c_smiter" => [ 
+        "type" => "c_smiter",
+        "name" => clienttranslate("Smiterbiter"),
+],
     "Op_c_sweep" => [ 
         "type" => "c_sweep",
         "name" => clienttranslate("Sweeping Strike"),
@@ -4758,9 +4762,10 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Smiterbiter"),
         "strength" => 1,
-        "r" => "custom",
-        "quest" => "<i>End your movementin the Marsh of Sorrow</i>, covered to the beard in yuck.",
-        "effect" => clienttranslate("This is your Main Weapon. If you kill a monster in an attack action, any excess damage may be stored here (max 3 stored). Damage stored here may be added to your attack action."),
+        "r" => "c_smiter",
+        "on" => "TActionAttack",
+        "quest" => "<i>End your movement in the Marsh of Sorrow</i>, covered to the beard in yuck.",
+        "effect" => clienttranslate("This is your Main Weapon. Spend stored damage to add that much damage to your attack action. If you kill a monster in an attack action, excess damage is stored here (max 3 stored)."),
         "flavour" => "I axed your first.",
 ],
             /* --- gen php end card_equip_material --- */
