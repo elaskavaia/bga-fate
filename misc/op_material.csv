@@ -125,6 +125,7 @@ c_queen|Queen of the Hill
 c_reaper|Reaper Swing
 c_orebiter|Orebiter
 c_sweep|Sweeping Strike
+c_wrecking|Wrecking Ball
 
 # Trigger (automatic, fires in response to game events)
 trigger|Trigger

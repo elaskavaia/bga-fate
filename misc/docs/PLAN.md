@@ -536,8 +536,8 @@ Triage of r=custom cards:
 
 [x] card_ability_4_5 Sweeping Strike I — has tests
 [x] card_ability_4_6 Sweeping Strike II — has tests
-[ ] card_ability_4_7 Wrecking Ball I — move into occupied hex, deal 1 and push occupant. **Triage: extend op** — extend `Op_actionMove` (or new `Op_c_wrecking` invoked from move) to permit occupied-hex entry and push (dealDamage + moveMonster/moveHero). CSV text differs from early prompt — verify with Victoria.
-[ ] card_ability_4_8 Wrecking Ball II — Wrecking Ball I + passive +1 move. **Triage: extend op** — reuse 4_7 extension for ram; +1 move is DSL (`1gainAtt(move)` on turn start).
+[x] card_ability_4_7 Wrecking Ball I — has tests
+[x] card_ability_4_8 Wrecking Ball II — has tests
 
 #### Equipment Cards
 
@@ -552,16 +552,6 @@ Triage of r=custom cards:
 [x] card_event_4_32 Berserk — "Take 1 unpreventable damage to add 3 damage to this attack."
 [x] card_event_4_36 Boldur's Gate — Spend 2 XP in Grimheim to restore a town piece. has tests
 [x] card_event_4_38 Portable Smithy — Spend 1 prepare action to complete your quest. has tests
-
-#### Summary — new ops and op extensions (Embla + Boldur)
-
-- `Op_c_orebiter`
-
-**Op extensions:**
-- `Op_actionMove` — allow entering occupied hex with ram/push semantics.
-  - card_ability_4_7 Wrecking Ball I: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area."*
-  - card_ability_4_8 Wrecking Ball II: *"Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."*
-  - May be factored as `Op_c_wrecking` invoked from move.
 
 
 

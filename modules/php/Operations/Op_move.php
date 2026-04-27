@@ -39,6 +39,9 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Treetreader (move(forest)).
  */
 class Op_move extends CountableOperation {
+    private const WRECKING_BALL_I = "card_ability_4_7";
+    private const WRECKING_BALL_II = "card_ability_4_8";
+
     function getPrompt() {
         return clienttranslate("Select where to move");
     }
@@ -79,12 +82,33 @@ class Op_move extends CountableOperation {
             );
         }
 
-        return array_keys($reachable);
+        $targets = array_keys($reachable);
+
+        // Wrecking Ball: extends the move target list with a "ram into occupied"
+        // choice when the card is on the tableau and at least one adjacent hex
+        // is occupied by a character.
+        $wreckingCard = $this->getWreckingCard();
+        if ($wreckingCard !== null && $this->hasAdjacentOccupiedHex($currentHex)) {
+            $targets[] = $wreckingCard;
+        }
+
+        return $targets;
     }
 
     function resolve(): void {
         $target = $this->getDataField("target", "") ?: $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
+
+        // Wrecking Ball: dispatch to the pendulum loop instead of the precomputed path.
+        if ($target === self::WRECKING_BALL_I || $target === self::WRECKING_BALL_II) {
+            $this->queue("c_wrecking", null, [
+                "budget" => $hero->getNumberOfMoves(),
+                "card" => $target,
+                "reason" => $this->getReason(),
+            ]);
+            return;
+        }
+
         // When entering Grimheim, place hero at their home hex
         if ($this->game->hexMap->isInGrimheim($target)) {
             $target = $hero->getRulesFor("location", $target);
@@ -99,6 +123,26 @@ class Op_move extends CountableOperation {
                 "reason" => $this->getReason(),
             ]);
         }
+    }
+
+    private function getWreckingCard(): ?string {
+        $hero = $this->game->getHero($this->getOwner());
+        if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_II)) {
+            return self::WRECKING_BALL_II;
+        }
+        if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_I)) {
+            return self::WRECKING_BALL_I;
+        }
+        return null;
+    }
+
+    private function hasAdjacentOccupiedHex(string $heroHex): bool {
+        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
+            if ($this->game->hexMap->getCharacterOnHex($hex) !== null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function getUiArgs() {

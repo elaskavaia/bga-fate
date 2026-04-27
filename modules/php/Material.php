@@ -568,6 +568,10 @@ class Material {
         "type" => "c_sweep",
         "name" => clienttranslate("Sweeping Strike"),
 ],
+    "Op_c_wrecking" => [ 
+        "type" => "c_wrecking",
+        "name" => clienttranslate("Wrecking Ball"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -4159,7 +4163,7 @@ class Material {
         "num" => 7,
         "hno" => 4,
         "name" => clienttranslate("Wrecking Ball I"),
-        "r" => "custom",
+        "on" => "custom",
         "effect" => clienttranslate("Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area."),
         "flavour" => "He's on a roll!",
 ],
@@ -4170,7 +4174,7 @@ class Material {
         "num" => 8,
         "hno" => 4,
         "name" => clienttranslate("Wrecking Ball II"),
-        "r" => "custom",
+        "on" => "custom",
         "effect" => clienttranslate("Boldur may move into occupied areas. Deal 1 damage to that character and move it 1 area. You have move +1."),
 ],
             /* --- gen php end card_ability_material --- */

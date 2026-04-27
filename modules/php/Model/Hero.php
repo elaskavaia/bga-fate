@@ -226,9 +226,13 @@ class Hero extends Character {
         return $maxRange;
     }
 
-    /** Compute base move range. Default is 3, Embla (hero 3) has 4. */
+    /** Compute base move range. Default is 3, Embla (hero 3) has 4. Wrecking Ball II grants +1. */
     function calcBaseMove(): int {
-        return $this->heroNum === 3 ? 4 : 3;
+        $base = $this->heroNum === 3 ? 4 : 3;
+        if ($this->heroHasCardsOnTableau("card_ability_4_8")) {
+            $base += 1;
+        }
+        return $base;
     }
 
     /**
