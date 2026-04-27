@@ -85,6 +85,39 @@ class HexMap {
     }
 
     /**
+     * Adjacent hexes to $centerHex in clockwise screen order, starting from the
+     * neighbour just past $startHex (so $startHex itself is not in the result).
+     *
+     * Off-map directions are skipped; the result has up to 5 entries.
+     *
+     * "Clockwise" is screen-clockwise — derived from the same pointy-top axial→pixel
+     * mapping used by Game.ts createMap(): screen-x ∝ q + r/2, screen-y ∝ r (y down).
+     * Sorting the 6 direction vectors by atan2(dy, dx) gives clockwise order on screen.
+     *
+     * Used by Op_c_sweep (Sweeping Strike) to find the next monster clockwise around
+     * the hero after a kill.
+     */
+    function getAdjacentHexesClockwise(string $centerHex, string $startHex): array {
+        [$cq, $cr] = $this->getHexCoords($centerHex);
+        // Same axial directions as getAdjacentHexes(), pre-sorted clockwise on screen.
+        // Order: NW (-1,0) → NE (0,-1) → E (1,-1) → SE (1,0) → SW (0,1) → W (-1,1).
+        $cwDirs = [[-1, 0], [0, -1], [1, -1], [1, 0], [0, 1], [-1, 1]];
+        $ring = [];
+        foreach ($cwDirs as [$dq, $dr]) {
+            $hexId = "hex_" . ($cq + $dq) . "_" . ($cr + $dr);
+            if ($this->isValidHex($hexId)) {
+                $ring[] = $hexId;
+            }
+        }
+        $startIdx = array_search($startHex, $ring, true);
+        if ($startIdx === false) {
+            return [];
+        }
+        $rotated = array_merge(array_slice($ring, $startIdx + 1), array_slice($ring, 0, $startIdx));
+        return $rotated;
+    }
+
+    /**
      * Get valid hexes "behind" a target relative to an origin.
      * Returns hexes adjacent to $throughHex that are farther from $fromHex than $throughHex is.
      */

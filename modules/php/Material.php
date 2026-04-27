@@ -564,6 +564,10 @@ class Material {
         "type" => "c_orebiter",
         "name" => clienttranslate("Orebiter"),
 ],
+    "Op_c_sweep" => [ 
+        "type" => "c_sweep",
+        "name" => clienttranslate("Sweeping Strike"),
+],
 // # Trigger (automatic, fires in response to game events)
     "Op_trigger" => [ 
         "type" => "trigger",
@@ -4129,9 +4133,11 @@ class Material {
         "num" => 5,
         "hno" => 4,
         "name" => clienttranslate("Sweeping Strike I"),
-        "r" => "custom",
-        "on" => "TActionAttack",
-        "effect" => clienttranslate("Add 1 damage to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order."),
+        "r" => "(on(TActionAttack):addDamage)/(on(TMonsterKilled):c_sweep)",
+        "on" => "custom",
+        "effect" => clienttranslate("<ul><li>Add 1 damage to each attack action.</li><li>If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.</li></ul>"),
+        "effect_1" => clienttranslate("Add 1 damage to each attack action"),
+        "effect_2" => clienttranslate("If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order"),
 ],
     "card_ability_4_6" => [ 
         "ctype" => "ability",
@@ -4140,9 +4146,11 @@ class Material {
         "num" => 6,
         "hno" => 4,
         "name" => clienttranslate("Sweeping Strike II"),
-        "r" => "custom",
-        "on" => "TActionAttack",
-        "effect" => clienttranslate("Add 1 damage per adjacent monster to each attack action. If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order."),
+        "r" => "(on(TActionAttack):counter(countAdjMonsters):addDamage)/(on(TMonsterKilled):c_sweep)",
+        "on" => "custom",
+        "effect" => clienttranslate("<ul><li>Add 1 damage per adjacent monster to each attack action.</li><li>If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order.</li></ul>"),
+        "effect_1" => clienttranslate("Add 1 damage per adjacent monster to each attack action"),
+        "effect_2" => clienttranslate("If an adjacent monster is killed in your attack action, any remaining damage may be dealt to a second monster in clockwise order"),
 ],
     "card_ability_4_7" => [ 
         "ctype" => "ability",

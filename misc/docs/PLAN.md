@@ -534,8 +534,8 @@ Triage of r=custom cards:
 
 #### Ability Cards
 
-[ ] card_ability_4_5 Sweeping Strike I 
-[ ] card_ability_4_6 Sweeping Strike II 
+[x] card_ability_4_5 Sweeping Strike I — has tests
+[x] card_ability_4_6 Sweeping Strike II — has tests
 [ ] card_ability_4_7 Wrecking Ball I — move into occupied hex, deal 1 and push occupant. **Triage: extend op** — extend `Op_actionMove` (or new `Op_c_wrecking` invoked from move) to permit occupied-hex entry and push (dealDamage + moveMonster/moveHero). CSV text differs from early prompt — verify with Victoria.
 [ ] card_ability_4_8 Wrecking Ball II — Wrecking Ball I + passive +1 move. **Triage: extend op** — reuse 4_7 extension for ram; +1 move is DSL (`1gainAtt(move)` on turn start).
 

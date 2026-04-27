@@ -34,7 +34,7 @@ class Op_c_nailed extends Operation {
     }
 
     private function getOverkill(): int {
-        return (int) ($this->game->tokens->getTokenInfo("marker_attack")["state"] ?? 0);
+        return $this->game->tokens->getTokenState("marker_attack", 0);
     }
 
     private function getKilledHex(): ?string {

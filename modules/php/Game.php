@@ -427,6 +427,21 @@ class Game extends Base {
         return $hits;
     }
 
+    /** Count monsters on hexes adjacent to the active hero. Used by evaluateExpression("countAdjMonsters"). */
+    function countAdjMonsters($owner = null, $context = null, $options = null): int {
+        $heroHex = $this->getHero($owner)->getHex();
+        if ($heroHex === null) {
+            return 0;
+        }
+        $count = 0;
+        foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
+            if ($this->hexMap->isOccupiedByCharacterType($hex, "monster") !== null) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
     /** Count dice on display_battle showing a rune (side 3). Used by evaluateExpression("countRunes"). */
     function countRunes($owner = null, $context = null, $options = null): int {
         $count = 0;

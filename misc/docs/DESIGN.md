@@ -507,3 +507,13 @@ Card effects are categorized by card type (Ability, Equipment, Event) and how th
 2. **Orebiter — you attack the mountain, not a monster, and it consumes your attack action**: "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]." Clarified by the designer:
    - Orebiter is activated by spending the **attack action on the player board** — same slot the regular attack action uses. The target is an **adjacent mountain hex**, not a monster. You're rolling dice to hit the gold vein; every point of damage dealt becomes 1 gold [XP].
    - Because the attack action slot is consumed, you **cannot attack monsters with your attack action on the same turn**. Swift Strike (and any other free-action / triggered attack source) is still available — the restriction is on the main attack action only.
+
+
+3. **Sweeping Strike**
+Boldur is the center of the "clock", so he sweeps around himself, going clockwise around himself. However, he may only hit a maximum of 2 enemies with this effect, any excess damage after that is wasted. (We actually did have an unlimited version in betatesting, but it was simply too powerful.)
+
+4. **Wrecking Ball**
+- he can only push 1 character. However, he can move that character to the area he came from.
+-  the strangest thing with this card is that Boldur may push the other character to the area he came from, essentially swapping places with it. With that in mind, he can really get the wrecking ball pendulum going, moving back and forth and really demolish his opponents 
+- +1 Move the effect is passive, always active.
+- Yes, you may push another hero into Grimheim, giving them 1 damage. We worded this card with "character" rather than "monster" for this purpose. However, you cannot push someone out of there, as Grimheim is not an "occupied area" in that sense. Thematically, think of every character inside Grimheim to be inside one of the houses. Moving into Grimheim will not push anyone inside a building out of the building and also out into the surroundings. Not even Boldur has that force 😛 This way of reasoning will solve a lot of questions regarding Grimheim. If they are in Grimheim, they are inside one of the houses. That's why they are protected against attacks, that's why they cannot attack monsters outside, that's why they mend more effectively, etc.

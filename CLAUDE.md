@@ -84,3 +84,10 @@ Detailed step-by-step checklists are in separate files — read them when perfor
 - `src/types.d.ts` and `src/types/bga-animations.d.ts` provide BGA TypeScript type stubs
 - Follow BGA framework conventions for notifications, database queries, and state transitions
 - Game uses modern BGA framework with namespace support: `Bga\Games\Fate`
+
+
+## Other games for reference if needed 
+
+- `../bga-wayfares/`
+- `../bga-skarabrae/`
+- `../bga-mars/`
