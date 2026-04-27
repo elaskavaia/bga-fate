@@ -45,6 +45,7 @@ class Game extends Base {
         parent::__construct();
         self::initGameStateLabels([
             "var_solo_hero" => 100,
+            "var_long_track" => 101,
         ]);
 
         $this->material = new Material();
@@ -95,7 +96,7 @@ class Game extends Base {
 
         $this->game->tokens->dbSetTokenLocation(
             "rune_stone",
-            "timetrack_1",
+            $this->getTimeTrackId(),
             1,
             clienttranslate('Rune Stone advances to step ${new_state} of ${max}'),
             [
@@ -499,9 +500,16 @@ class Game extends Base {
         return (int) $this->getGameStateValue("variant_solo_board");
     }
 
+    function isLongTimeTrack(): bool {
+        return (int) $this->getGameStateValue("var_long_track") === 1;
+    }
+
+    function getTimeTrackId(): string {
+        return $this->isLongTimeTrack() ? "timetrack_2" : "timetrack_1";
+    }
+
     function getTimeTrackLength(): int {
-        // TODO: check game option for long track variant
-        return Material::TIME_TRACK_SHORT_LENGTH;
+        return $this->isLongTimeTrack() ? Material::TIME_TRACK_LONG_LENGTH : Material::TIME_TRACK_SHORT_LENGTH;
     }
 
     /**

@@ -57,10 +57,9 @@ See CLAUDE.md for project overview
 
 ### Client
 
-[ ] Show damage and mana on cards as crystal counters (unlike hero/monster damage buckets which are icons)
+
 [ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
 [ ] Quest progress display on equipment cards
-[ ] Upgrade prompt at end of turn
 [ ] Ability pile and equipment pile browsing
 
 ### Tests
@@ -84,8 +83,8 @@ See CLAUDE.md for project overview
 
 [ ] Monster die with 6 faces and effects
 [ ] Game options in gameoptions.json: time track (short/long), monster die (on/off), difficulty
-[ ] Long time track support
-[ ] 1-4 player support with correct town piece counts
+[x] Long time track support
+[x] 1-4 player support with correct town piece counts
 
 ### Client
 

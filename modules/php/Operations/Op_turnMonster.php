@@ -74,7 +74,7 @@ class Op_turnMonster extends Operation {
 
         $this->game->tokens->dbSetTokenLocation(
             "rune_stone",
-            "timetrack_1", // TODO: support timetrack_2 for long track variant
+            $this->game->getTimeTrackId(),
             $nextStep,
             clienttranslate('Rune Stone advances to step ${step} of ${max}'),
             [

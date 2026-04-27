@@ -25,5 +25,21 @@
         "value": 1
       }
     ]
+  },
+  "101": {
+    "name": "Time track",
+    "values": {
+      "0": {
+        "name": "Short",
+        "description": "12-turn track. Recommended for new players or shorter sessions.",
+        "tmdisplay": "Short track"
+      },
+      "1": {
+        "name": "Long",
+        "description": "16-turn track. More turns to grow heroes and tackle late-game encounters.",
+        "tmdisplay": "Long track"
+      }
+    },
+    "default": 0
   }
 }

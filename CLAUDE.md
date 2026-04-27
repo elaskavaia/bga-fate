@@ -12,6 +12,11 @@ See [misc/docs/DESIGN.md](misc/docs/DESIGN.md) for architecture overview, token/
 **Important** if you are exploration/reaseach agent please read of search this document first.
 
 
+## Planning
+
+- When planning individual features or fixes, create the plan in `misc/docs/` instead of a temp location.
+- After the plan is completed, update relevant documents in `misc/docs/` and delete the plan file.
+
 ## Development Commands
 
 ### Build 
