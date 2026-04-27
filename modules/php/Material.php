@@ -523,6 +523,10 @@ class Material {
         "type" => "multiTarget",
         "name" => clienttranslate("Target Multiple"),
 ],
+    "Op_encounter" => [ 
+        "type" => "encounter",
+        "name" => clienttranslate("Encounter"),
+],
 // #rare operations
     "Op_c_supfire" => [ 
         "type" => "c_supfire",

@@ -152,6 +152,12 @@ class Game extends Base {
                 $this->tokens->moveToken("hero_$i", "limbo");
             }
         }
+
+        // Encounter bonuses: 3 crystals per location for heroes to pick up on entry
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_red", "hex_6_7");      // Troll Caves
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_green", "hex_16_5");   // Nailfare
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_yellow", "hex_6_16");  // Wyrm Lair
+
         $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
         $this->machine->queue("turnStart", $color);

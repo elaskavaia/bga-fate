@@ -127,6 +127,22 @@ final class HexMapTest extends TestCase {
         $this->assertFalse($this->game->hexMap->isImpassable("hex_13_1"));
     }
 
+    public function testNailfareLakePassableToHero(): void {
+        // Nailfare lakes are explicitly passable per RULES.md:55 — named locations override terrain
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_16_5", "hero"));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_17_5", "hero"));
+    }
+
+    public function testTrollCavesMountainPassableToHero(): void {
+        // Troll Caves is a named mountain location heroes can enter (Elven Arrows quest)
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_6_6", "hero"));
+    }
+
+    public function testUnnamedLakeStillImpassable(): void {
+        // hex_5_5 is plain lake (no named location) — still blocked
+        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", "hero"));
+    }
+
     // -------------------------------------------------------------------------
     // getOccupancyMap / invalidateOccupancy
     // -------------------------------------------------------------------------

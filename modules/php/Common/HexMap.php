@@ -221,6 +221,9 @@ class HexMap {
     }
 
     function isImpassable(string $hexId, string $characterType = "monster") {
+        if ($characterType === "hero" && $this->getHexNamedLocation($hexId) !== "") {
+            return false;
+        }
         $terrain = $this->getHexTerrain($hexId);
         if ($terrain === "lake") {
             return true;

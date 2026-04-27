@@ -40,6 +40,7 @@ See CLAUDE.md for project overview
 ## Other rule gaps
 
 [ ] Encounters - there are crystals placed on map, we need to implement hero running into them
+[ ] Red encounter (Troll Caves) currently delegates to `heal` (hero only). Per rules "remove damage from his/her cards" should cover hero card AND equipment cards. Either extend `Op_heal` to accept card targets, or add a new op (e.g. `removeDamage`) that targets any damaged card the player owns. See Op_encounter::resolve FIXME.
 [x] Main weapon
 [ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control
 

@@ -43,14 +43,14 @@ abstract class AbstractOpTestCase extends TestCase {
     /**
      * Assert that $target appears among the current op's possible moves.
      */
-    protected function assertValidTarget(string $target, string $message = ""): void {
+    protected function assertValidTarget(string|int $target, string $message = ""): void {
         $op = $this->op;
         $candidates = $op->getArgsTarget();
         $this->assertContains($target, $candidates, $message ?: "$target should be a valid target");
     }
 
     /** Assert that $target is NOT a valid target of the current op. */
-    protected function assertNotValidTarget(string $target, string $message = ""): void {
+    protected function assertNotValidTarget(string|int $target, string $message = ""): void {
         $op = $this->op;
         $candidates = $op->getArgsTarget();
         $this->assertNotContains($target, $candidates, $message ?: "$target should not be a valid target");

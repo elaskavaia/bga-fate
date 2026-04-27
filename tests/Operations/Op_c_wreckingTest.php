@@ -105,20 +105,21 @@ final class Op_c_wreckingTest extends AbstractOpTestCase {
     }
 
     public function testPushPhaseExcludesMountainForHeroDisplacement(): void {
-        // hex_7_7 ring: hex_6_7 mountain, others plains. Heroes can't enter mountains.
-        $this->game->tokens->moveToken("hero_1", "hex_7_7");
-        $this->game->tokens->moveToken("hero_2", "hex_7_7");
+        // hex_13_3 ring includes hex_13_4 (unnamed mountain) — heroes can't enter unnamed mountains.
+        // (Named mountains like Troll Caves ARE passable to heroes per RULES.md:55.)
+        $this->game->tokens->moveToken("hero_1", "hex_13_3");
+        $this->game->tokens->moveToken("hero_2", "hex_13_3");
         $this->createOp("c_wrecking", ["budget" => 2, "displaced" => "hero_2"]);
-        $this->assertNotValidTarget("hex_6_7", "hero cannot be pushed onto a mountain");
+        $this->assertNotValidTarget("hex_13_4", "hero cannot be pushed onto an unnamed mountain");
         $this->assertValidTargetCount(5);
     }
 
     public function testPushPhaseAllowsMountainForMonsterDisplacement(): void {
         // Same ring as above but with a monster — monsters can enter mountains.
-        $this->game->tokens->moveToken("hero_1", "hex_7_7");
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_7_7");
+        $this->game->tokens->moveToken("hero_1", "hex_13_3");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_3");
         $this->createOp("c_wrecking", ["budget" => 2, "displaced" => "monster_goblin_1"]);
-        $this->assertValidTarget("hex_6_7", "monster can be pushed onto a mountain");
+        $this->assertValidTarget("hex_13_4", "monster can be pushed onto a mountain");
         $this->assertValidTargetCount(6);
     }
 

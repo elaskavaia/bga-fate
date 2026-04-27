@@ -43,6 +43,7 @@ class Op_step extends Operation {
             $trigger = Trigger::Step;
         }
 
+        $this->queue("encounter", $this->getOwner(), ["hex" => $hex]);
         $this->queueTrigger($trigger);
     }
 }
