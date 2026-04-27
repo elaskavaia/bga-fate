@@ -454,6 +454,11 @@ class Material {
         "type" => "repairCard",
         "name" => clienttranslate("Repair Card"),
 ],
+    "Op_removeDamage" => [ 
+        "type" => "removeDamage",
+        "name" => clienttranslate("Remove Damage"),
+        "wicon" => "wicon_health",
+],
 // # movement
     "Op_move" => [ 
         "type" => "move",

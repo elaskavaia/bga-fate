@@ -100,7 +100,7 @@ class Op_encounter extends Operation {
             ]
         );
         $delegate = match ($color) {
-            "red" => "heal", // FIXME: this has to be operation that can heal hero or cards
+            "red" => "removeDamage",
             "green" => "gainMana",
             "yellow" => "gainXp",
         };

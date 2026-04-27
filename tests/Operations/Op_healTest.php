@@ -25,6 +25,11 @@ final class Op_healTest extends AbstractOpTestCase {
         return $this->countRedCrystals($heroId);
     }
 
+    private function getQueuedOp(): ?array {
+        $ops = $this->game->machine->getTopOperations(PCOLOR);
+        return $ops ? reset($ops) : null;
+    }
+
     public function testHealSelfRemovesDamage(): void {
         $this->addDamage("hero_1", 4);
         $this->createOp("2heal(self)");
@@ -83,6 +88,27 @@ final class Op_healTest extends AbstractOpTestCase {
         $this->createOp("3heal(self)");
         $this->call_resolve("hex_11_8");
         $this->assertEquals(2, $this->getDamage("hero_1"));
+    }
+
+    public function testHealAdjSplitsAcrossDamagedHeroes(): void {
+        // Both heroes damaged — 2heal(adj) should remove 1 from the picked hero
+        // and re-queue heal(adj) for the remaining unit so the player may switch heroes.
+        $this->addDamage("hero_1", 2);
+        $this->addDamage("hero_2", 2);
+        $this->createOp("2heal(adj)");
+        $this->call_resolve("hex_11_8");
+
+        $this->assertEquals(1, $this->getDamage("hero_1"));
+        $this->assertEquals(2, $this->getDamage("hero_2"));
+
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("heal", $queued["type"]);
+
+        /** @var Op_heal $requeued */
+        $requeued = $this->game->machine->instantiateOperationFromDbRow($queued);
+        $this->assertEquals("adj", $requeued->getParam(0), "re-queue must preserve (adj) mode");
+        $this->assertEquals(1, (int) $requeued->getCount(), "re-queue must carry the remaining count");
     }
 
     public function testHealPresetTargetUsesHexId(): void {

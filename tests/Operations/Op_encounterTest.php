@@ -85,13 +85,13 @@ final class Op_encounterTest extends AbstractOpTestCase {
 
     // --- resolve: red ---
 
-    public function testRedPickQueuesHeal(): void {
+    public function testRedPickQueuesRemoveDamage(): void {
         $this->placeCrystals("red", 3, "hex_13_8");
         $this->makeOpForHex("hex_13_8");
         $this->call_resolve("1");
 
         $this->assertCount(2, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hex_13_8"));
         $queued = $this->getQueuedOp();
-        $this->assertEquals("1heal", $queued["type"]);
+        $this->assertEquals("1removeDamage", $queued["type"]);
     }
 }

@@ -57,8 +57,8 @@ final class OperationTest extends TestCase {
         $moves = $op->getPossibleMoves();
         $this->assertArrayHasKey("hex_9_9", $moves);
         $this->assertArrayHasKey("card_equip_1_21", $moves);
-        $this->assertEquals("5heal", $moves["hex_9_9"]["delegate"]);
-        $this->assertEquals("5repairCard", $moves["card_equip_1_21"]["delegate"]);
+        $this->assertEquals("5removeDamage", $moves["hex_9_9"]["delegate"]);
+        $this->assertEquals("5removeDamage", $moves["card_equip_1_21"]["delegate"]);
     }
 
     public function testDelegateMultiPartialTargets(): void {

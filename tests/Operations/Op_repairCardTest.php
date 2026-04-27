@@ -22,6 +22,11 @@ final class Op_repairCardTest extends AbstractOpTestCase {
         return $this->countRedCrystals($cardId);
     }
 
+    private function getQueuedOp(): ?array {
+        $ops = $this->game->machine->getTopOperations(PCOLOR);
+        return $ops ? reset($ops) : null;
+    }
+
     public function testNoDamagedCardsAllNotApplicable(): void {
         // Equipment cards should be listed but not applicable
         $this->assertTargetError("card_equip_1_21", Material::ERR_NOT_APPLICABLE);
@@ -68,6 +73,22 @@ final class Op_repairCardTest extends AbstractOpTestCase {
         $this->call_resolve("card_equip_1_21");
         // Should remove only 2 of 3 damage
         $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
+    }
+
+    public function testSplitPickAcrossMultipleDamagedCards(): void {
+        // Two damaged candidates → 2repairCard removes 1 from the pick and re-queues 1repairCard
+        // for the remaining unit, letting the player split across targets.
+        $this->addDamageToCard("card_equip_1_21", 2);
+        $this->addDamageToCard("card_equip_1_23", 1);
+        $this->createOp("2repairCard");
+        $this->call_resolve("card_equip_1_21");
+
+        $this->assertEquals(1, $this->getCardDamage("card_equip_1_21"));
+        $this->assertEquals(1, $this->getCardDamage("card_equip_1_23"));
+
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("repairCard", $queued["type"]);
     }
 
     public function testPresetTargetReturnsOnlyThatTarget(): void {

@@ -56,14 +56,14 @@ final class Op_actionMendTest extends AbstractOpTestCase {
 
     // --- In Grimheim ---
 
-    public function testMendInGrimheimQueuesHeal5ForHero(): void {
+    public function testMendInGrimheimQueuesRemoveDamageForHero(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage("hero_1", 5);
         $op = $this->op;
         $this->call_resolve("hex_9_9");
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
-        $this->assertEquals("5heal", $queued["type"]);
+        $this->assertEquals("5removeDamage", $queued["type"]);
     }
 
     public function testMendInGrimheimOffersHexAndCards(): void {
@@ -74,14 +74,14 @@ final class Op_actionMendTest extends AbstractOpTestCase {
         $this->assertValidTarget("card_equip_1_21");
     }
 
-    public function testMendInGrimheimQueuesRepairForCard(): void {
+    public function testMendInGrimheimQueuesRemoveDamageForCard(): void {
         $this->game->tokens->moveToken("hero_1", "hex_9_9");
         $this->addDamage("card_equip_1_21", 2);
         $op = $this->op;
         $this->call_resolve("card_equip_1_21");
         $queued = $this->getQueuedOp();
         $this->assertNotNull($queued);
-        $this->assertEquals("5repairCard", $queued["type"]);
+        $this->assertEquals("5removeDamage", $queued["type"]);
     }
 
     public function testMendInGrimheimAvailableWithOnlyCardDamage(): void {

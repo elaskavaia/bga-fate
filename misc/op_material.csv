@@ -89,6 +89,7 @@ preventDamage|Prevent Damage|wicon_damage
 heal|Heal|wicon_health
 killMonster|Kill Monster|wicon_strength
 repairCard|Repair Card
+removeDamage|Remove Damage|wicon_health
 
 # movement
 move|Move Hero|wicon_move

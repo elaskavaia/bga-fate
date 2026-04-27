@@ -38,11 +38,9 @@ class Op_actionMend extends Operation {
 
     function getPossibleMoves() {
         if (!$this->isInGrimheim()) {
-            $amount = 2;
-            return $this->getPossibleMovesDelegate("{$amount}heal");
+            return $this->getPossibleMovesDelegate("2heal");
         }
-        $amount = 5;
-        return $this->getPossibleMovesDelegate(["{$amount}heal", "{$amount}repairCard"]);
+        return $this->getPossibleMovesDelegate("5removeDamage");
     }
 
     function resolve(): void {
