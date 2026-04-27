@@ -93,4 +93,31 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
 
         $this->assertEquals($xpBefore + 1, $this->countXp());
     }
+
+    // --- Magic Runes (card_event_3_34) ---
+    // r=counter('3 * (countRunes>0)'):addDamage, on=TRoll
+    // After a roll that produced at least one [RUNE], add 3 damage to the attack.
+    public function testMagicRunesAddsThreeDamageWhenRuneRolled(): void {
+        $color = $this->getActivePlayerColor();
+        $magicRunes = "card_event_3_34_1";
+        $this->seedHand($magicRunes, $color);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // Embla strength = 3 dice. Seed 1 hit + 1 rune + 1 miss → 1 base damage, rune count > 0.
+        $this->seedRand([5, 3, 1]);
+        $this->respond("actionAttack");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($magicRunes);
+        $this->respond($magicRunes);
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard");
+
+        // 1 hit + 3 added damage = 4 total damage on the troll.
+        $this->assertEquals(4, $this->countDamage($troll), "Troll takes 1 base hit + 3 from Magic Runes");
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($magicRunes));
+    }
 }

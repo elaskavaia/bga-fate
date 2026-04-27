@@ -5056,7 +5056,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Magic Runes"),
         "count" => 2,
-        "r" => "custom",
+        "r" => "counter('3 * (countRunes>0)'):addDamage",
         "on" => "TRoll",
         "effect" => clienttranslate("If you rolled a [RUNE], add 3 damage."),
         "flavour" => "These runes were made by the famous Blade Runer.",

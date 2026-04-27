@@ -33,7 +33,7 @@ num|hno|name|count|r|on|effect|flavour
 30|3|Courage|2|2dealDamage(adj,'(rank==3 or legend)')||Choose an adjacent legend or rank 3 monster. Deal 2 damage to it.|The bigger they are, the harder they fall.
 36|3|Durability|1|repairCard(max)||Remove all damage from an equipment card.|
 28|3|Kick|3|dealDamage(adj),moveMonster(marked)||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
-34|3|Magic Runes|2|custom|TRoll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
+34|3|Magic Runes|2|counter('3 * (countRunes>0)'):addDamage|TRoll|If you rolled a [RUNE], add 3 damage.|These runes were made by the famous Blade Runer.
 27|3|Maneuver|2|1move||Move 1 area.|Embla has a way of tackling her problems from many angles.
 37|3|Preparations|1|spendAction(actionPrepare):drawEvent(max)||Spend a prepare action to draw cards until you have 4.|Ready, set... Wait - you're still getting dressed?
 35|3|Rest|2|2heal(self)||Heal 2 damage from Embla.|If you defend the village, I'll take care of the rest.

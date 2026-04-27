@@ -522,7 +522,7 @@ Triage of r=custom cards (DSL = composable rule expression; extend op = small op
 
 #### Event Cards
 
-[ ] card_event_3_34 Magic Runes — runes always count as hits for you (one-shot). **Triage: bespoke** — needs `CardEvent_MagicRunes`. Rune-as-hit is currently a faction rule hardcoded in `Character::countHit()`. Bespoke class sets a per-attack flag consumed by `countHit`, or on=TRoll adds countRunes extra hits. Small hook needed in Character to read the card flag.
+[ ] card_event_3_34 Magic Runes 
 [x] card_event_3_29 Sophisticated — has tests
 
 
@@ -534,8 +534,8 @@ Triage of r=custom cards:
 
 #### Ability Cards
 
-[ ] card_ability_4_5 Sweeping Strike I — passive +1 damage per attack + chain-on-kill to "clockwise" next adjacent monster. **Triage: bespoke** — needs `CardAbility_SweepingStrikeI`. Spatial "clockwise" neighbor selection has no primitive (c_nailed is "behind", not clockwise); combines passive addDamage with custom TMonsterKilled routing.
-[ ] card_ability_4_6 Sweeping Strike II — same + damage scales with number of adjacent monsters. **Triage: bespoke** — `CardAbility_SweepingStrikeII`; no `addDamage(countAdjMonsters)` counter primitive. Share base with I.
+[ ] card_ability_4_5 Sweeping Strike I 
+[ ] card_ability_4_6 Sweeping Strike II 
 [ ] card_ability_4_7 Wrecking Ball I — move into occupied hex, deal 1 and push occupant. **Triage: extend op** — extend `Op_actionMove` (or new `Op_c_wrecking` invoked from move) to permit occupied-hex entry and push (dealDamage + moveMonster/moveHero). CSV text differs from early prompt — verify with Victoria.
 [ ] card_ability_4_8 Wrecking Ball II — Wrecking Ball I + passive +1 move. **Triage: extend op** — reuse 4_7 extension for ram; +1 move is DSL (`1gainAtt(move)` on turn start).
 
