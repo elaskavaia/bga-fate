@@ -4699,10 +4699,10 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Eitri's Pick"),
         "strength" => 2,
-        "r" => "custom",
+        "on" => "custom",
         "quest" => "<i>End your movement adjacent to 4 monsters or 1 legend</i> to pick a fight.",
         "effect" => clienttranslate("This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action."),
-        "flavour" => "Used by Eitiri, who forged Thor's hammer Mjölnir.",
+        "flavour" => "Used by Eitri, who forged Thor's hammer Mjölnir.",
 ],
     "card_equip_4_17" => [ 
         "ctype" => "equip",

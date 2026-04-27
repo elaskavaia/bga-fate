@@ -543,7 +543,7 @@ Triage of r=custom cards:
 
 [x] card_equip_4_20 Dvalin's Pick — Spend attack action for 1 XP, 1 mana, 1 card draw. has tests
 [x] card_equip_4_25 Dwarf Pick — has tests
-[ ] card_equip_4_22 Eitri's Pick — +2 dice when using Rapid Strike. **Triage: bespoke** — needs `CardEquip_EitrisPick`. Trigger is conditioned on "action originated from Rapid Strike card" (card_ability_4_3/4_4). No DSL filter for "action triggered by a specific ability card" — multi-trigger routing like `CardEquip_BloodlineCrystal`.
+[x] card_equip_4_22 Eitri's Pick — has tests
 [x] card_equip_4_19 Orebiter — has tests
 [x] card_equip_4_21 Smiterbiter — has tests
 

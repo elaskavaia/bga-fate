@@ -176,4 +176,43 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countTokens("crystal_red", $cardId), "All reds spent off card");
         $this->assertEquals(6, $this->countDamage($troll));
     }
+
+    // --- Eitri's Pick (card_equip_4_22) ---
+    // Passive +2 strength + onActionAttack hook: when the running attack was
+    // queued from Rapid Strike I/II (card data field carries the card id),
+    // queue 2addRoll for 2 extra attack dice.
+
+    public function testEitrisPickAddsTwoDiceWhenAttackingViaRapidStrike(): void {
+        $color = $this->getActivePlayerColor();
+        $eitri = "card_equip_4_22";
+        $rapid = "card_ability_4_3";
+
+        $this->game->tokens->moveToken($eitri, "tableau_$color");
+        // Rapid Strike I starts on Boldur's tableau; needs 3 mana to spend.
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, $rapid, ["message" => ""]);
+        // Recalc strength after equipping Eitri's Pick (+2 strength).
+        $this->game->getHero($color)->recalcTrackers();
+
+        // Boldur outside Grimheim, troll (h=6) adjacent.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // Boldur I(3) + First Pick(1) + Eitri's Pick(2) = 6 base dice.
+        // Rapid Strike via Eitri's hook adds 2 more = 8 dice total.
+        // Seed 7 hits + 1 miss → 7 damage to the troll (kills it, h=7).
+        $this->seedRand([5, 5, 5, 5, 5, 5, 5, 1]);
+
+        // Activate Rapid Strike I via useCard.
+        $this->respond($rapid);
+
+        // Rapid Strike's r-chain auto-resolves spendUse + 3spendMana, then prompts for
+        // the actionAttack target.
+        $this->respond("hex_7_8");
+
+        // Troll dead — 7 hits matches its health exactly.
+        $this->assertEquals("supply_monster", $this->tokenLocation($troll));
+        // Confirm exactly 8 dice rolled — the 2 from Eitri's hook on top of 6 base.
+        $this->assertEmpty($this->game->randQueue, "Should have rolled exactly 8 dice");
+    }
 }
