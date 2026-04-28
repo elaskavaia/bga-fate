@@ -181,6 +181,33 @@ class HexMap {
         return $hexes;
     }
 
+    /**
+     * Axial offsets for clock directions on pointy-top hexes (q=x, r=y).
+     * 1=NE, 3=E, 5=SE, 7=SW, 9=W, 11=NW. Same convention as map_material.csv `dir` column.
+     */
+    private const CLOCK_OFFSETS = [
+        1  => [1, -1],
+        3  => [1, 0],
+        5  => [0, 1],
+        7  => [-1, 1],
+        9  => [-1, 0],
+        11 => [0, -1],
+    ];
+
+    /**
+     * Returns the adjacent hex from $hexId in clock direction $clockDir, or null
+     * if the result is off-map or $clockDir is not a valid clock value.
+     */
+    function stepInDirection(string $hexId, int $clockDir): ?string {
+        if (!isset(self::CLOCK_OFFSETS[$clockDir])) {
+            return null;
+        }
+        [$dq, $dr] = self::CLOCK_OFFSETS[$clockDir];
+        [$q, $r] = $this->getHexCoords($hexId);
+        $next = "hex_" . ($q + $dq) . "_" . ($r + $dr);
+        return $this->isValidHex($next) ? $next : null;
+    }
+
     /** @var array<string, int>|null cached distance map to Grimheim */
     private ?array $distMapToGrimheim = null;
 
@@ -220,6 +247,11 @@ class HexMap {
         return $dist;
     }
 
+    /** Clock direction (1/3/5/7/9/11) tagged on $hexId, or 0 if none. */
+    function getHexDir(string $hexId): int {
+        return (int) $this->game->material->getRulesFor($hexId, "dir", 0);
+    }
+
     function isImpassable(string $hexId, string $characterType = "monster") {
         if ($characterType === "hero" && $this->getHexNamedLocation($hexId) !== "") {
             return false;
@@ -235,27 +267,30 @@ class HexMap {
     }
 
     /**
-     * Returns the next hex a monster on $hexId should move to on the shortest path toward Grimheim.
-     * If monster is already in Grimheim, returns null.
-     * If no path exists (surrounded by lakes), returns null.
-     * Picks the adjacent hex with the smallest distance to Grimheim, breaking ties by hex id.
-     * Does NOT check occupancy — caller should handle blocked moves.
+     * Returns the next hex a monster on $hexId should move to on its way toward Grimheim.
+     * Pure data lookup: every non-Grimheim, non-lake hex has a `dir` clock value in
+     * `map_material.csv` — step in that direction.
+     *
+     * Returns null if: already in Grimheim, no `dir` set on the hex (e.g., monster
+     * pushed onto a lake), or the directed step lands off-map.
+     * Does NOT check occupancy — caller handles blocked moves.
      */
     function getMonsterNextHex(string $hexId): ?string {
         if ($this->isInGrimheim($hexId)) {
-            return null; // already there
+            return null;
         }
-        $distMap = $this->getDistanceMapToGrimheim();
-        $bestHex = null;
-        $bestDist = $distMap[$hexId] ?? PHP_INT_MAX;
+        // If adjacent to Grimheim, step in regardless of dir/road — monster is at
+        // the gates and goes for it. Hero-adjacency is checked by the caller.
         foreach ($this->getAdjacentHexes($hexId) as $neighbor) {
-            $nd = $distMap[$neighbor] ?? PHP_INT_MAX;
-            if ($nd < $bestDist || ($nd === $bestDist && $bestHex !== null && $neighbor < $bestHex)) {
-                $bestDist = $nd;
-                $bestHex = $neighbor;
+            if ($this->isInGrimheim($neighbor)) {
+                return $neighbor;
             }
         }
-        return $bestHex;
+        $dir = $this->getHexDir($hexId);
+        if ($dir === 0) {
+            return null;
+        }
+        return $this->stepInDirection($hexId, $dir);
     }
 
     // -------------------------------------------------------------------------

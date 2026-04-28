@@ -215,21 +215,16 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals("hex_12_8", $loc, "Stunned monster should not move even on charge turn");
     }
 
-    public function testOnlyStunnedMonsterIsSkipped(): void {
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // stunned
-        $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7"); // not stunned
+    public function testStunnedMonsterBlocksMonsterBehind(): void {
+        // hex_13_7 has dir=7/SW → hex_12_8. With goblin_1 stunned on hex_12_8,
+        // goblin_2's only path is blocked and it stays put (road-jam rule).
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_13_7");
         $this->placeStunMarker("monster_goblin_1");
-
-        $distMap = $this->game->hexMap->getDistanceMapToGrimheim();
-        $g2Before = $distMap["hex_13_7"];
 
         $this->call_resolve();
 
-        // Stunned monster stays
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-
-        // Non-stunned monster moves
-        $newLoc2 = $this->game->tokens->getTokenLocation("monster_goblin_2");
-        $this->assertLessThan($g2Before, $distMap[$newLoc2] ?? PHP_INT_MAX, "Non-stunned monster should move");
+        $this->assertEquals("hex_13_7", $this->game->tokens->getTokenLocation("monster_goblin_2"));
     }
 }

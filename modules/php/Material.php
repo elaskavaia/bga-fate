@@ -1799,6 +1799,7 @@ class Material {
         "loc" => "DarkForest",
         "c" => "red",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_13_1" => [ 
         "location" => "map_hexes",
@@ -1883,6 +1884,7 @@ class Material {
         "x" => 12,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_13_2" => [ 
         "location" => "map_hexes",
@@ -1972,6 +1974,7 @@ class Material {
         "x" => 12,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_13_3" => [ 
         "location" => "map_hexes",
@@ -2020,6 +2023,7 @@ class Material {
         "loc" => "DarkForest",
         "c" => "red",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_7_4" => [ 
         "location" => "map_hexes",
@@ -2067,6 +2071,7 @@ class Material {
         "terrain" => "forest",
         "loc" => "TempleRuins",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_13_4" => [ 
         "location" => "map_hexes",
@@ -2116,6 +2121,7 @@ class Material {
         "x" => 6,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_7_5" => [ 
         "location" => "map_hexes",
@@ -2158,6 +2164,7 @@ class Material {
         "x" => 12,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 7,
 ],
     "hex_13_5" => [ 
         "location" => "map_hexes",
@@ -2188,6 +2195,7 @@ class Material {
         "loc" => "Nailfare",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 7,
 ],
     "hex_17_5" => [ 
         "location" => "map_hexes",
@@ -2197,6 +2205,7 @@ class Material {
         "loc" => "Nailfare",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_4_6" => [ 
         "location" => "map_hexes",
@@ -2218,6 +2227,7 @@ class Material {
         "loc" => "TrollCaves",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_7_6" => [ 
         "location" => "map_hexes",
@@ -2253,6 +2263,7 @@ class Material {
         "x" => 11,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_12_6" => [ 
         "location" => "map_hexes",
@@ -2281,6 +2292,7 @@ class Material {
         "x" => 15,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 7,
 ],
     "hex_16_6" => [ 
         "location" => "map_hexes",
@@ -2325,6 +2337,7 @@ class Material {
         "loc" => "TrollCaves",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_7_7" => [ 
         "location" => "map_hexes",
@@ -2332,6 +2345,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 5,
 ],
     "hex_8_7" => [ 
         "location" => "map_hexes",
@@ -2360,6 +2374,7 @@ class Material {
         "x" => 11,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 7,
 ],
     "hex_12_7" => [ 
         "location" => "map_hexes",
@@ -2374,6 +2389,7 @@ class Material {
         "x" => 13,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 7,
 ],
     "hex_14_7" => [ 
         "location" => "map_hexes",
@@ -2381,6 +2397,7 @@ class Material {
         "x" => 14,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_15_7" => [ 
         "location" => "map_hexes",
@@ -2454,6 +2471,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_8_8" => [ 
         "location" => "map_hexes",
@@ -2461,6 +2479,7 @@ class Material {
         "x" => 8,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_9_8" => [ 
         "location" => "map_hexes",
@@ -2484,6 +2503,7 @@ class Material {
         "x" => 11,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_12_8" => [ 
         "location" => "map_hexes",
@@ -2491,6 +2511,7 @@ class Material {
         "x" => 12,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_13_8" => [ 
         "location" => "map_hexes",
@@ -2703,6 +2724,7 @@ class Material {
         "x" => 5,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_6_10" => [ 
         "location" => "map_hexes",
@@ -2710,6 +2732,7 @@ class Material {
         "x" => 6,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_7_10" => [ 
         "location" => "map_hexes",
@@ -2717,6 +2740,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_8_10" => [ 
         "location" => "map_hexes",
@@ -2740,6 +2764,7 @@ class Material {
         "x" => 10,
         "terrain" => "forest",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_11_10" => [ 
         "location" => "map_hexes",
@@ -2802,6 +2827,7 @@ class Material {
         "x" => 2,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_3_11" => [ 
         "location" => "map_hexes",
@@ -2809,6 +2835,7 @@ class Material {
         "x" => 3,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 3,
 ],
     "hex_4_11" => [ 
         "location" => "map_hexes",
@@ -2816,6 +2843,7 @@ class Material {
         "x" => 4,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_5_11" => [ 
         "location" => "map_hexes",
@@ -2845,6 +2873,7 @@ class Material {
         "x" => 8,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_9_11" => [ 
         "location" => "map_hexes",
@@ -2859,6 +2888,7 @@ class Material {
         "x" => 10,
         "terrain" => "forest",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_11_11" => [ 
         "location" => "map_hexes",
@@ -2867,6 +2897,7 @@ class Material {
         "terrain" => "forest",
         "loc" => "WitchCabin",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_12_11" => [ 
         "location" => "map_hexes",
@@ -2906,6 +2937,7 @@ class Material {
         "x" => 1,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_2_12" => [ 
         "location" => "map_hexes",
@@ -2948,6 +2980,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_8_12" => [ 
         "location" => "map_hexes",
@@ -2976,6 +3009,7 @@ class Material {
         "x" => 11,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_12_12" => [ 
         "location" => "map_hexes",
@@ -2983,6 +3017,7 @@ class Material {
         "x" => 12,
         "terrain" => "forest",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_13_12" => [ 
         "location" => "map_hexes",
@@ -3050,6 +3085,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_8_13" => [ 
         "location" => "map_hexes",
@@ -3085,6 +3121,7 @@ class Material {
         "x" => 12,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_13_13" => [ 
         "location" => "map_hexes",
@@ -3092,6 +3129,7 @@ class Material {
         "x" => 13,
         "terrain" => "forest",
         "road" => 1,
+        "dir" => 9,
 ],
     "hex_1_14" => [ 
         "location" => "map_hexes",
@@ -3145,6 +3183,7 @@ class Material {
         "x" => 7,
         "terrain" => "plains",
         "road" => 1,
+        "dir" => 11,
 ],
     "hex_8_14" => [ 
         "location" => "map_hexes",
@@ -3234,6 +3273,7 @@ class Material {
         "loc" => "WyrmLair",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_7_15" => [ 
         "location" => "map_hexes",
@@ -3318,6 +3358,7 @@ class Material {
         "loc" => "WyrmLair",
         "c" => "yellow",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_6_16" => [ 
         "location" => "map_hexes",
@@ -3393,6 +3434,7 @@ class Material {
         "x" => 4,
         "terrain" => "mountain",
         "road" => 1,
+        "dir" => 1,
 ],
     "hex_5_17" => [ 
         "location" => "map_hexes",

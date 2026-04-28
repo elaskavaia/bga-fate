@@ -227,6 +227,12 @@ If total damage >= monster health, the token is removed from the map and `countD
 
 If you actually want to assert the monster died, check `tokenLocation($monster) === "supply_monster"` (or similar) instead of reading damage.
 
+### Pitfall: Monster `move` stat affects steps-per-turn
+
+When a test drives a full monster turn (`actionPractice` → `actionFocus` → `skipOp("turn")`), the monster moves a number of hexes equal to its `move` stat. Goblin has `move=2`; all other monsters move 1 (the implicit default).
+
+If you assume move=1 and use a goblin, your expected post-move hex will be one step short. Either use a different monster or compute the expected hex by chaining `dir` lookups for the right number of steps.
+
 ### Pitfall: Manually placing a stat-bearing card on tableau requires `recalcTrackers()`
 
 Hero attribute trackers (`strength`, `range`, `move`, `health`, `hand`) are recomputed only at setup and end-of-turn (`Hero::recalcTrackers`). When a test does `moveToken($cardId, "tableau_$color")` for a card with a `strength` (or other stat) field, the tracker stays stale — the new dice/range/etc. won't show up. Pattern:
