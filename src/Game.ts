@@ -502,6 +502,9 @@ export class Game extends Game1Tokens {
     if (tokenInfo.strength) tokenInfo.tooltip += this.ttSection(_("Strength"), tokenInfo.strength);
     if (tokenInfo.health) tokenInfo.tooltip += this.ttSection(_("Health"), tokenInfo.health);
     if (tokenInfo.move) tokenInfo.tooltip += this.ttSection(_("Move"), tokenInfo.move);
+    // Range is not shipped in material; firehorde faction has range 2 per rules. Show only when > 1.
+    const range = tokenInfo.faction === "firehorde" ? 2 : 1;
+    if (range > 1) tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
     if (tokenInfo.armor) tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
     if (tokenInfo.xp) tokenInfo.tooltip += this.ttSection(_("XP"), tokenInfo.xp);
   }
