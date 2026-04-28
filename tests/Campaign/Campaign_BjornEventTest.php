@@ -395,9 +395,8 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // Play Piercing Arrows (hero card also offered but we pick the event)
         $this->respond($piercingArrows);
-        $this->confirmCardEffect();
-
-        $this->skipIfOp("useCard");
+        // 2addDamage auto-resolves; useCard re-queues offering Bjorn Hero I — dismiss it.
+        $this->skipUseCard("card_hero_1_1");
 
         // Troll should have 1 hit + 2 rune damage = 3 total damage
         $this->assertEquals(3, $this->countDamage($troll), "Troll should have 3 damage (1 hit + 2 from Piercing Arrows)");

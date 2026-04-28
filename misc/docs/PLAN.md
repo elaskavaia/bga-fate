@@ -81,15 +81,17 @@ See CLAUDE.md for project overview
 
 ### Server
 
-[ ] Monster die with 6 faces and effects
-[ ] Game options in gameoptions.json: time track (short/long), monster die (on/off), difficulty
+[ ] Monster die with effects
+[x] Game option: time track (short/long)
+[ ] Game option: monster die (on/off)
+[ ] Game option: difficulty
 [x] Long time track support
 [x] 1-4 player support with correct town piece counts
 
 ### Client
 
 [ ] Monster die roll display
-[ ] Game option selection in lobby
+
 
 ---
 
@@ -102,7 +104,7 @@ See CLAUDE.md for project overview
 [ ] Smooth movement animations (hero and monster)
 [ ] Dice roll animation
 [ ] Card play/draw animations
-[ ] Responsive layout
+[x] Responsive layout
 [ ] Card zoom on hover
 [ ] Visual indicators (current turn, threats, quest progress)
 
@@ -145,6 +147,7 @@ See misc/docs/CHECKLIST.md
   [ ] Range indicator for ranged monster attacks
   [ ] Legend monster special display
   [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
+  [ ] Visual display for stunmarker — currently the stun token sits on the monster but has no distinct UI (looks like any other token on the monster). Need a clear indicator (e.g. a halo, icon overlay, or position offset) so the player can see at a glance which monsters are stunned this turn.
   [ ] Flip animation for upgrades
   [x] Main weapon - restriction only one main weapon allowed
   [ ] **Manually test: double-confirm on comma-chained event card rules.** Multi-Shot (`r=2roll(inRange),2roll(inRange)`) creates a `seq` op for the comma-chain. Test via `Campaign_AlvaEventTest::testMultiShotRollsAgainstTwoDifferentMonsters` shows an extra `confirm` step is required after the card pick, before the first sub-op prompts. The root paygain already has `confirm=true` from `Card::useCard`; seq's expandOperation correctly strips confirm from children. Expected UX: click card → prompt for first monster hex (no intermediate confirm). Actual: click card → confirm button → prompt for first monster hex. Verify in the harness whether this is a UX bug (double-click) or intentional. If UX bug, likely fix is in `Op_seq::expandOperation` or how useCard wraps the op.

@@ -30,6 +30,9 @@ namespace Bga\Games\Fate\Operations;
  */
 class Op_heal extends Op_removeDamage {
     function getPrompt() {
+        if ($this->isOneChoice()) {
+            return clienttranslate('Confirm heal ${count} damage');
+        }
         return clienttranslate("Choose a hero to heal");
     }
 

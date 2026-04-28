@@ -1624,6 +1624,7 @@ class GameMachine {
             this.bga.statusBar.setTitle(prompt);
         }
         const multiselect = this.isMultiSelectArgs(opInfo);
+        const singleTarget = opInfo.target.length == 1;
         const sortedTargets = Object.keys(opInfo.info);
         sortedTargets.sort((a, b) => opInfo.info[a].o - opInfo.info[b].o);
         for (const target of sortedTargets) {
@@ -1651,7 +1652,7 @@ class GameMachine {
             if (opInfo.ui.imagebuttons == true || paramInfo.imagebuttons == true) {
                 altNode = this.replicateTargetOnToolbar(target, paramInfo);
             }
-            if ((!altNode && (opInfo.ui.buttons || !div)) || paramInfo.buttons == true) {
+            if ((!altNode && (opInfo.ui.buttons || !div)) || paramInfo.buttons == true || (singleTarget && active)) {
                 altNode = this.createTargetButton(target, paramInfo);
             }
             if (!altNode)
@@ -1745,7 +1746,7 @@ class GameMachine {
                 this.game.prepareToken(cardId);
                 tokenNode = $(cardId);
                 tokenNode.id = `${cardId}_temp`;
-                return tokenNode?.outerHTML;
+                return tokenNode.outerHTML;
             }
             return this.cloneForReplication(tokenNode);
         }

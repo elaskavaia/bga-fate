@@ -22,7 +22,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_useCard extends Operation {
     function getPrompt() {
-        return clienttranslate("You may choose a card to use or play");
+        return clienttranslate("You may choose a card to play or activate");
     }
 
     /** Return array of token rows (each with "key") that are candidates for this action. */
@@ -70,11 +70,15 @@ class Op_useCard extends Operation {
         }
 
         $owner = $this->getOwner();
+        $excluded = (array) $this->getDataField("excluded", []);
 
         $cards = $this->getCandidateCards($owner);
         $targets = [];
         foreach ($cards as $card) {
             $cardId = $card["key"];
+            if (in_array($cardId, $excluded, true)) {
+                continue;
+            }
             $cardIns = $this->game->instantiateCard($card, $this);
             foreach ($triggers as $trigger) {
                 $info = ["q" => 0, "trigger" => $trigger->value];
@@ -90,6 +94,7 @@ class Op_useCard extends Operation {
 
     function resolve(): void {
         $cardId = $this->getCheckedArg();
+        $wasTargeted = $this->getDataField("target") !== null;
 
         $cardInst = $this->game->instantiateCard($cardId, $this);
 
@@ -97,10 +102,19 @@ class Op_useCard extends Operation {
         $triggerWire = $info["trigger"] ?? Trigger::Manual->value;
         $trigger = Trigger::from($triggerWire);
         $cardInst->useCard($trigger);
-        // re-queue itself - XXX todo fix trigger semantics, do not remove commented out code
-        //if (!$this->isOneChoice()) {
-        //$this->queue($this->getType(), $this->getOwner(), $this->getDataForDb());
-        //}
+
+        // Re-queue so the player may chain a different card to the same trigger.
+        // Skip ends the chain (no resolve = no re-queue). The played card is excluded
+        // from the next prompt to avoid re-offering it.
+        // Targeted useCard (target preset) means a forced single-card play with no
+        // choice to chain — don't re-queue in that case.
+        if (!$wasTargeted && !$this->isOneChoice() && $trigger != Trigger::Manual) {
+            $excluded = (array) $this->getDataField("excluded", []);
+            $excluded[] = $cardId;
+            $data = $this->getDataForDb();
+            $data["excluded"] = $excluded;
+            $this->queue($this->getType(), $this->getOwner(), $data);
+        }
     }
 
     public function getUiArgs() {

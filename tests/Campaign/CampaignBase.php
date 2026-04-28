@@ -212,6 +212,23 @@ abstract class CampaignBaseTest extends TestCase {
         return true;
     }
 
+    /**
+     * Assert the current op is a useCard prompt that offers exactly $expectedCard, then skip it.
+     * Use this to explicitly dismiss a chained useCard prompt that legitimately appears after
+     * playing one trigger-eligible card and having another still available.
+     */
+    protected function skipUseCard(string $expectedCard): void {
+        $args = $this->getOpArgs();
+        $this->assertEquals("useCard", $args["type"] ?? "", "expected chained useCard prompt");
+        $targets = $args["target"] ?? [];
+        $this->assertContains(
+            $expectedCard,
+            $targets,
+            "expected chained useCard to offer $expectedCard (got: " . implode(",", $targets) . ")"
+        );
+        $this->skip();
+    }
+
     /** Seed upcoming bgaRand results (e.g. dice rolls: 5=hit, 1=miss) */
     protected function seedRand(array $values): void {
         $this->game->randQueue = array_merge($this->game->randQueue, $values);

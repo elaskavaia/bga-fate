@@ -110,9 +110,10 @@ class Op_removeDamage extends CountableOperation {
         foreach ($this->getCandidates() as $key => $tokenId) {
             $targets[$key] =
                 $this->damageOn($tokenId) > 0
-                    ? ["q" => Material::RET_OK]
+                    ? ["q" => Material::RET_OK, "name" => $this->game->getTokenName($tokenId)]
                     : ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No damage to remove")];
         }
+
         return $targets;
     }
 

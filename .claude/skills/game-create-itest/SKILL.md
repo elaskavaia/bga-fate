@@ -182,6 +182,26 @@ After picking the card in `useCard`, child ops (`dealDamage`, `heal`, `spendMana
 
 If the child op is a *target-picking* op (`dealDamage`, `heal`, `moveHero`) with multiple valid targets, **don't call `confirmCardEffect()`** — picking the target IS the confirmation. `confirmCardEffect` only applies when the child op has no further target choices (e.g. `2addDamage`, `2heal(self)`). Symptom if you call it incorrectly: `checkUserTargetSelection:01` error, because `"1"` isn't a valid hex/target.
 
+### Pitfall: `useCard` re-queues itself for chaining — `confirmCardEffect()` can play the wrong card
+
+After `Op_useCard.resolve()` runs the chosen card, it **re-queues itself** with the played card excluded so the player can chain another card on the same trigger. Skip ends the chain.
+
+Consequence: if any other card is still eligible (very common — e.g. Bjorn Hero I `on=TRoll` is offered alongside any `on=TActionAttack` card via the hierarchical chain), there will be a second `useCard` prompt after your card's effect resolves. If that prompt has exactly one target, **`confirmCardEffect()` will respond with it** (it just checks `count($targets) === 1`) and accidentally play that card. Symptoms: extra unexpected damage in assertions, monster dying when test expected it to live, an `actionFocus` consumed mid-attack, etc.
+
+Pattern to fix: after `respond($cardId)` and any sub-op resolution, **don't blindly call `confirmCardEffect()` followed by `skipIfOp("useCard")`**. Use `skipUseCard($expectedLeftoverCardId)` — it asserts the chained prompt offers the expected card, then skips to end the chain:
+
+```php
+$this->respond($quiver);
+// Quiver's addDamage auto-resolves; useCard re-queues offering Bjorn Hero I — dismiss it.
+$this->skipUseCard("card_hero_1_1");
+```
+
+When `confirmCardEffect()` IS still needed (e.g. the card's child op truly has a single confirm target like `2addDamage`), call it BEFORE the re-queued useCard prompt appears — i.e. only when you've verified via dumpState that the next op is the child op, not a chained `useCard`.
+
+### Pitfall: `skipIfOp("useCard")` is too coarse
+
+`skipIfOp("useCard")` blindly dismisses any useCard prompt regardless of contents — it can hide a real test failure (e.g. card unexpectedly offered, or the wrong card excluded). Prefer `skipUseCard($expectedCard)` which asserts the prompt offers `$expectedCard` before skipping. Reserve `skipIfOp` for ops where the contents don't matter to the test (e.g. `skipIfOp("drawEvent")` at turn end).
+
 ### Pitfall: Hero starts in Grimheim
 
 Default hero start is `hex_8_9` (or similar Grimheim hex). Heroes **cannot attack from inside Grimheim**. For attack tests, always `moveToken($this->heroId, "hex_7_9")` first.

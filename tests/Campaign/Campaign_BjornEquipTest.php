@@ -190,8 +190,8 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($quiver);
         $this->respond($quiver);
-        $this->confirmCardEffect();
-        $this->skipIfOp("useCard"); // dismiss any further trigger prompts
+        // Quiver's addDamage auto-resolves; useCard re-queues offering Bjorn Hero I — dismiss it.
+        $this->skipUseCard("card_hero_1_1");
 
         // 1 durability spent (1 red crystal on the card)
         $this->assertEquals(1, $this->countDamage($quiver));
@@ -229,7 +229,9 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($bow);
         $this->respond($bow);
-        $this->confirmCardEffect();
+        // dealDamage(adj_attack) auto-resolves (one adjacent target),
+        // then a chained useCard prompt offers Bjorn Hero I — dismiss it.
+        $this->skipUseCard("card_hero_1_1");
 
         // Primary took 1 damage from attack roll; secondary took 2 (rune count) from bow.
         $this->assertEquals(1, $this->countDamage($primary));
