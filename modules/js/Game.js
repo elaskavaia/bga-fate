@@ -2331,7 +2331,9 @@ class Game extends Game1Tokens {
                 const hexId = `hex_${q}_${r}`;
                 const terrain = this.getRulesFor(hexId, "terrain", "");
                 const loc = this.getRulesFor(hexId, "loc", "");
-                hexes.push(`<div class="hex terrain_${terrain}" id="${hexId}" style="left:${leftPct}%;top:${topPct}%;" data-q="${q}" data-r="${r}" data-loc="${loc}"></div>`);
+                const road = this.getRulesFor(hexId, "road", 0);
+                const roadCls = road ? " road" : "";
+                hexes.push(`<div class="hex terrain_${terrain}${roadCls}" id="${hexId}" style="left:${leftPct}%;top:${topPct}%;" data-q="${q}" data-r="${r}" data-loc="${loc}"></div>`);
             }
         }
         const hexHtml = hexes.join("\n");
@@ -2588,14 +2590,6 @@ class Game extends Game1Tokens {
                 if (!r)
                     return;
                 tokenInfo.imageTypes = "_nottimage";
-                //             "hex_9_1" => [
-                //         "location" => "map_hexes",
-                //         "x" => 9,
-                //         "y" => 1,
-                //         "terrain" => "forest",
-                //         "loc" => "DarkForest",
-                //         "c" => "red",
-                // ],
                 const locname = this.getTokenName(tokenInfo.loc);
                 const areacolor = this.getTokenName(tokenInfo.c);
                 const terrainname = this.getTokenName(tokenInfo.terrain);
@@ -2609,6 +2603,8 @@ class Game extends Game1Tokens {
                 }
                 if (tokenInfo.c)
                     tokenInfo.tooltip += this.ttSection(_("Location Color"), areacolor);
+                if (tokenInfo.road)
+                    tokenInfo.tooltip += this.ttSection(_("Road"), _("Yes"));
             }
         }
     }
