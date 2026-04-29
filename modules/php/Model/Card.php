@@ -138,7 +138,11 @@ class Card {
         }
         foreach ($event->chain() as $t) {
             if ($questOn === $t->value) {
-                $this->queue($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
+                $op = $this->op->instantiateOperation($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
+                if (!$op->isVoid()) {
+                    // if void we failed predicate, like in(forest)
+                    $this->op->queueOp($op);
+                }
                 return;
             }
         }

@@ -246,6 +246,10 @@ class Material {
         "type" => "counter",
         "name" => clienttranslate("Counter"),
 ],
+    "Op_check" => [ 
+        "type" => "check",
+        "name" => clienttranslate("Check"),
+],
     "Op_turn" => [ 
         "type" => "turn",
         "name" => clienttranslate("Turn"),
@@ -4625,7 +4629,7 @@ class Material {
         "effect" => clienttranslate("Heal 1 damage from Alva."),
         "flavour" => "Ironically known as the Waist of Time, it actually carries rejuvenating powers.",
         "quest_on" => "TStep",
-        "quest_r" => "in(forest):gainTracker:counter('countTracker>=8'):gainEquip",
+        "quest_r" => "in(forest):gainTracker:check('countTracker>=8'):gainEquip",
 ],
     "card_equip_2_25" => [ 
         "ctype" => "equip",

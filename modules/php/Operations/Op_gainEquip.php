@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Model\Trigger;
-use Bga\Games\Fate\OpCommon\CountableOperation;
 use Bga\Games\Fate\OpCommon\Operation;
+use Override;
 
 /**
  * gainEquip: Draw the top equipment card from the player's deck and place it on their tableau.
@@ -17,7 +17,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  *
  * Used by: quest completion, upgrade flow, debug_equip.
  */
-class Op_gainEquip extends CountableOperation {
+class Op_gainEquip extends Operation {
     private function getTargetCard(): ?string {
         return $this->getDataField("target");
     }
@@ -30,9 +30,6 @@ class Op_gainEquip extends CountableOperation {
         return ["confirm"];
     }
     function resolve(): void {
-        if ($this->getCount() == 0) {
-            return; // 0 means it was canceled automatically, likely by counter op
-        }
         $owner = $this->getOwner();
         $cardId = $this->getTargetCard();
         if (!$cardId) {
@@ -45,6 +42,14 @@ class Op_gainEquip extends CountableOperation {
             $card = $this->game->tokens->getTokenInfo($cardId);
         }
         $this->effect_gainEquipment($card);
+    }
+
+    #[Override]
+    public function canSkip() {
+        if (!$this->noValidTargets()) {
+            return false; // mandatory if possible
+        }
+        return parent::canSkip();
     }
 
     /**
@@ -108,7 +113,7 @@ class Op_gainEquip extends CountableOperation {
             $this->dbSetTokenLocation(
                 $newTop["key"],
                 "deck_equip_$owner",
-                0,
+                null, // preserve state so it keep top status
                 clienttranslate('${char_name} starts new quest for ${token_name}'),
                 ["char_name" => $heroId]
             );
