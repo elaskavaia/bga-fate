@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Model\Trigger;
+use Bga\Games\Fate\OpCommon\CountableOperation;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -16,7 +17,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  *
  * Used by: quest completion, upgrade flow, debug_equip.
  */
-class Op_gainEquip extends Operation {
+class Op_gainEquip extends CountableOperation {
     private function getTargetCard(): ?string {
         return $this->getDataField("target");
     }
@@ -26,9 +27,12 @@ class Op_gainEquip extends Operation {
         if ($card) {
             return [$card];
         }
-        return parent::getPossibleMoves();
+        return ["confirm"];
     }
     function resolve(): void {
+        if ($this->getCount() == 0) {
+            return; // 0 means it was canceled automatically, likely by counter op
+        }
         $owner = $this->getOwner();
         $cardId = $this->getTargetCard();
         if (!$cardId) {
@@ -86,6 +90,14 @@ class Op_gainEquip extends Operation {
             }
         }
 
+        // Sweep quest-progress crystals (red) parented to the card back to supply
+        // before it lands on the tableau. Crystals are accumulated by gainTracker
+        // while the card is on deck-top; they have no meaning once the equip is claimed.
+        $progress = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+        if ($progress > 0) {
+            $this->game->effect_moveCrystals($heroId, "red", -$progress, $cardId, ["message" => ""]);
+        }
+
         $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains ${token_name}'), [
             "char_name" => $heroId,
         ]);
@@ -93,7 +105,13 @@ class Op_gainEquip extends Operation {
         // Reveal the new top of the deck so the client can render it.
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
         if ($newTop !== null) {
-            $this->dbSetTokenLocation($newTop["key"], "deck_equip_$owner", (int) $newTop["state"], "");
+            $this->dbSetTokenLocation(
+                $newTop["key"],
+                "deck_equip_$owner",
+                0,
+                clienttranslate('${char_name} starts new quest for ${token_name}'),
+                ["char_name" => $heroId]
+            );
         }
 
         $cardObj = $this->game->instantiateCard($card, $this);

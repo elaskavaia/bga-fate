@@ -463,6 +463,18 @@ class Game extends Base {
         return $count;
     }
 
+    /** Count red crystals on the deck-top equip card (quest progress). Used by evaluateExpression("countTracker"). */
+    function countTracker($owner = null, $context = null, $options = null): int {
+        if ($owner === null) {
+            return 0;
+        }
+        $top = $this->tokens->getTokenOnTop("deck_equip_$owner");
+        if ($top === null) {
+            return 0;
+        }
+        return count($this->tokens->getTokensOfTypeInLocation("crystal_red", $top["key"]));
+    }
+
     /**
      * Destroy N town pieces (houses). Freyja's Well (house_0) is always destroyed last.
      * @param string $charId token causing the destruction (for log messages and animation)

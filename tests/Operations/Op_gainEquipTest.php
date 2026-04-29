@@ -65,6 +65,29 @@ final class Op_gainEquipTest extends AbstractOpTestCase {
         $this->assertEquals(0, $this->countRedCrystals("card_equip_4_21"), "stored damage swept off Smiterbiter");
     }
 
+    public function testQuestProgressCrystalsSweptOnGain(): void {
+        // Belt of Youth (card_equip_2_22) on Alva (hero 2). Park 8 quest-progress
+        // crystals on it (as if it sat on deck-top accumulating progress), then gain it.
+        // The crystals must return to supply, not linger on the card on tableau.
+        $this->game = new GameUT();
+        $this->game->initWithHero(2);
+        $this->game->clearHand();
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+
+        $belt = "card_equip_2_22";
+        // Park 8 progress crystals on Belt of Youth while it sits in deck.
+        $this->game->effect_moveCrystals("hero_2", "red", 8, $belt);
+        $this->assertEquals(8, $this->countRedCrystals($belt));
+        $supplyBefore = $this->countRedCrystals("supply_crystal_red");
+
+        $this->pushGain($belt);
+
+        $tableau = "tableau_" . $this->owner;
+        $this->assertEquals($tableau, $this->game->tokens->getTokenLocation($belt), "Belt of Youth landed on tableau");
+        $this->assertEquals(0, $this->countRedCrystals($belt), "progress crystals swept off");
+        $this->assertEquals($supplyBefore + 8, $this->countRedCrystals("supply_crystal_red"), "8 crystals returned to supply");
+    }
+
     public function testGainMainWeaponWithNoExistingNoError(): void {
         // Switch to Embla (hero 3) — starts with Flimsy Blade (3_15), which is NOT a Main Weapon.
         $this->game = new GameUT();

@@ -124,6 +124,27 @@ class Card {
     }
 
     /**
+     * Trigger entry for cards sitting on top of deck_equip while their quest is active.
+     * Default behavior reads quest_on / quest_r from material and queues quest_r if
+     * quest_on matches the dispatched event (along the trigger chain).
+     *
+     * Bespoke quest cards (e.g. Shield-Boldur, Elven Arrows) override this method.
+     */
+    public function onTriggerQuest(Trigger $event): void {
+        $questOn = $this->game->material->getRulesFor($this->id, "quest_on", "");
+        $questR = $this->game->material->getRulesFor($this->id, "quest_r", "");
+        if ($questOn === "" || $questR === "") {
+            return;
+        }
+        foreach ($event->chain() as $t) {
+            if ($questOn === $t->value) {
+                $this->queue($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
+                return;
+            }
+        }
+    }
+
+    /**
      * Invoke a hook method, optionally passing $event as a named argument
      * if the method declares a parameter with that name.
      */

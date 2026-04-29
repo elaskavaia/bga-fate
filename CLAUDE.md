@@ -64,6 +64,8 @@ The harness runs PHP server logic locally and renders a client snapshot (`stagin
 
 Game elements (tokens, cards, operations) are defined in CSV files in `misc/` and auto-generated into `Material.php`. Generated sections are marked with `--- gen php begin <name> ---` / `--- gen php end <name> ---`. When adding new game elements, update the CSV and run `npm run genmat` — do not edit generated sections directly.
 
+When editing a CSV file prefer the `awk` tool — otherwise it's easy to misplace columns.
+
 ## After completing a task
 
 - Check [misc/docs/PLAN.md](misc/docs/PLAN.md) and mark completed items with `[x]`

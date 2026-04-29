@@ -2,10 +2,7 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Operations\Op_trigger;
-use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for Op_trigger.
@@ -147,5 +144,93 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $ops = $this->game->machine->getAllOperations($this->owner);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         $this->assertContains("trigger(TMonsterMove)", $opTypes);
+    }
+
+    // -------------------------------------------------------------------------
+    // Deck-top quest dispatch — Card::onTriggerQuest reads quest_on / quest_r
+    // from material and queues the chain when the trigger matches.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Belt of Youth (card_equip_2_22): quest_on=TStep,
+     * quest_r=in(forest):gainTracker:counter('countTracker>=8'):gainEquip.
+     * On a TStep with the hero on a forest hex, the chain runs and lands
+     * 1 progress crystal on the deck-top card.
+     */
+    public function testDeckTopQuestDispatchAdvancesProgress(): void {
+        // Switch to Alva (hero 2) — Belt of Youth lives in her deck.
+        $this->game = new GameUT();
+        $this->game->initWithHero(2);
+        $this->game->clearHand();
+        $this->game->clearMachine();
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+
+        $belt = "card_equip_2_22";
+        $deck = "deck_equip_" . $this->owner;
+        $this->game->tokens->moveToken($belt, $deck, 9999); // top of deck
+        $this->game->tokens->moveToken("hero_2", "hex_9_1"); // forest hex
+
+        // Sanity: deck top is Belt of Youth, hex is forest, material has quest fields.
+        $top = $this->game->tokens->getTokenOnTop($deck);
+        $this->assertEquals($belt, $top["key"] ?? null, "Belt of Youth should be on top of deck_equip");
+        $this->assertEquals("forest", $this->game->hexMap->getHexTerrain("hex_9_1"));
+        $this->assertEquals("TStep", $this->game->material->getRulesFor($belt, "quest_on", ""));
+        $this->assertNotEmpty($this->game->material->getRulesFor($belt, "quest_r", ""));
+
+        $this->createOp("trigger(TStep)");
+        $this->call_resolve();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            1,
+            count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $belt)),
+            "TStep on a forest hex should add 1 quest progress to Belt of Youth"
+        );
+    }
+
+    /** Same setup but on a non-forest hex — gate voids the chain, no progress. */
+    public function testDeckTopQuestDispatchVoidedByGate(): void {
+        $this->game = new GameUT();
+        $this->game->initWithHero(2);
+        $this->game->clearHand();
+        $this->game->clearMachine();
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+
+        $belt = "card_equip_2_22";
+        $this->game->tokens->moveToken($belt, "deck_equip_" . $this->owner, 9999);
+        $this->game->tokens->moveToken("hero_2", "hex_11_8"); // plains, not forest
+
+        $this->createOp("trigger(TStep)");
+        $this->call_resolve();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            0,
+            count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $belt)),
+            "TStep on a non-forest hex should not advance progress"
+        );
+    }
+
+    /** A non-matching trigger (TMonsterKilled) should not fire Belt of Youth. */
+    public function testDeckTopQuestIgnoresNonMatchingTrigger(): void {
+        $this->game = new GameUT();
+        $this->game->initWithHero(2);
+        $this->game->clearHand();
+        $this->game->clearMachine();
+        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+
+        $belt = "card_equip_2_22";
+        $this->game->tokens->moveToken($belt, "deck_equip_" . $this->owner, 9999);
+        $this->game->tokens->moveToken("hero_2", "hex_9_1"); // forest
+
+        $this->createOp("trigger(TMonsterKilled)");
+        $this->call_resolve();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            0,
+            count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $belt)),
+            "Non-matching trigger should not advance Belt of Youth"
+        );
     }
 }

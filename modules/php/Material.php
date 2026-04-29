@@ -373,6 +373,11 @@ class Material {
         "name" => clienttranslate("Take Damage"),
         "wicon" => "wicon_damage",
 ],
+    "Op_gainTracker" => [ 
+        "type" => "gainTracker",
+        "name" => clienttranslate("Quest Progress"),
+        "wicon" => "wicon_damage",
+],
     "Op_spendHealth" => [ 
         "type" => "spendHealth",
         "name" => clienttranslate("Take Unpreventable Damage"),
@@ -4619,6 +4624,8 @@ class Material {
         "quest" => "<i>Enter 8 forest areas</i> to gather support from the Elders.",
         "effect" => clienttranslate("Heal 1 damage from Alva."),
         "flavour" => "Ironically known as the Waist of Time, it actually carries rejuvenating powers.",
+        "quest_on" => "TStep",
+        "quest_r" => "in(forest):gainTracker:counter('countTracker>=8'):gainEquip",
 ],
     "card_equip_2_25" => [ 
         "ctype" => "equip",
