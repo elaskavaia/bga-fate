@@ -15,9 +15,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Behaviour:
  * - Converts the wire string back into a Trigger case at the boundary.
  * - Walks every card in the owner's tableau + hand and dispatches onTrigger($event).
- * - Also dispatches onTriggerQuest($event) on the top card of deck_equip_{owner}.
+ * - Also dispatches triggerQuest($event) on the top card of deck_equip_{owner}.
  *   Default Card behavior reads quest_on / quest_r from material; bespoke quest
- *   cards (e.g. Shield-Boldur, Elven Arrows) override onTriggerQuest directly.
+ *   cards (e.g. Shield-Boldur, Elven Arrows) override triggerQuest directly.
  */
 class Op_trigger extends Operation {
     function resolve(): void {
@@ -38,7 +38,7 @@ class Op_trigger extends Operation {
         $card = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
         if ($card) {
             $cardObj = $this->game->instantiateCard($card, $this);
-            $cardObj->onTriggerQuest($event);
+            $cardObj->triggerQuest($event);
         }
     }
 }

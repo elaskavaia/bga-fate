@@ -59,7 +59,7 @@ See CLAUDE.md for project overview
 
 
 [ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
-[ ] Quest progress display on equipment cards
+[ ] Quest UI polish — see [QUESTS.md Phase Q6](QUESTS.md): progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion). Defer until Q4/Q5 quests are landed.
 [ ] Ability pile and equipment pile browsing
 
 ### Tests

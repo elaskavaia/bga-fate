@@ -124,28 +124,70 @@ class Card {
     }
 
     /**
-     * Trigger entry for cards sitting on top of deck_equip while their quest is active.
-     * Default behavior reads quest_on / quest_r from material and queues quest_r if
-     * quest_on matches the dispatched event (along the trigger chain).
+     * Predicate check for quest resolution against an event. Mirrors `canBePlayed`
+     * for useCard. True iff:
+     *  - quest_r is non-empty AND
+     *  - quest_on matches the event chain (trigger-driven) OR
+     *    event is Manual and quest_on is empty (player-initiated via completeQuest)
+     *  - and the chain itself is not void (leading gates like in(forest) pass).
      *
-     * Bespoke quest cards (e.g. Shield-Boldur, Elven Arrows) override this method.
+     * On false, $errorRes carries the reason ("q" + "err"), like canBePlayed.
+     * Bespoke quest cards override this method.
      */
-    public function onTriggerQuest(Trigger $event): void {
+    public function canResolveQuest(Trigger $event, ?array &$errorRes = null): bool {
+        if ($errorRes === null) {
+            $errorRes = [];
+        }
         $questOn = $this->game->material->getRulesFor($this->id, "quest_on", "");
         $questR = $this->game->material->getRulesFor($this->id, "quest_r", "");
-        if ($questOn === "" || $questR === "") {
-            return;
+        if ($questR === "") {
+            $errorRes["q"] = Material::ERR_PREREQ;
+            $errorRes["err"] = clienttranslate("No quest defined");
+            return false;
         }
-        foreach ($event->chain() as $t) {
-            if ($questOn === $t->value) {
-                $op = $this->op->instantiateOperation($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
-                if (!$op->isVoid()) {
-                    // if void we failed predicate, like in(forest)
-                    $this->op->queueOp($op);
+
+        $matches = false;
+        if ($event === Trigger::Manual && $questOn === "") {
+            $matches = true;
+        } elseif ($questOn !== "") {
+            foreach ($event->chain() as $t) {
+                if ($questOn === $t->value) {
+                    $matches = true;
+                    break;
                 }
-                return;
             }
         }
+        if (!$matches) {
+            $errorRes["q"] = Material::ERR_PREREQ;
+            $errorRes["err"] = clienttranslate("Quest does not match this event");
+            return false;
+        }
+
+        // Probe the chain — leading predicates (in(forest), terrain(forest)) make
+        // it void if they fail, but cost ops (spendAction, spendXp) prompt instead.
+        $op = $this->op->instantiateOperation($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
+        if ($op->isVoid()) {
+            $errorRes = array_merge($errorRes, $op->getErrorInfo());
+            return false;
+        }
+
+        $errorRes = array_merge($errorRes, ["q" => 0, "err" => ""]);
+        return true;
+    }
+
+    /**
+     * Resolve a quest for this event — queues quest_r onto the calling operation's
+     * frame. Mirrors `useCard` for cards. No-op if `canResolveQuest` returns false.
+     *
+     * Bespoke quest cards override this method.
+     */
+    public function triggerQuest(Trigger $event): void {
+        if (!$this->canResolveQuest($event)) {
+            return;
+        }
+        $questR = $this->game->material->getRulesFor($this->id, "quest_r", "");
+        $op = $this->op->instantiateOperation($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
+        $this->op->queueOp($op);
     }
 
     /**

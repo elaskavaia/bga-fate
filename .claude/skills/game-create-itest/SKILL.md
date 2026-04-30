@@ -159,6 +159,22 @@ $this->respond("<card_id>");
 $this->respond("<hex_or_choice>");
 ```
 
+### Pattern: Push a free-action / sub-step op directly onto the machine
+
+When testing a top-bar free action (`useCard`, `completeQuest`, future `shareGold`) or a single sub-step op (`move`, `gainTracker`) in isolation, bypass the `Op_turn` → free-actions menu by pushing the op directly onto the machine. The active turn op is already on the stack; `push` interrupts it LIFO so the queued op runs first.
+
+```php
+$this->game->machine->push("completeQuest", $color);
+$this->game->machine->dispatchAll();
+
+$this->assertOperation("completeQuest");
+$this->respond($cardId);
+```
+
+For multiple ops, `push` in **reverse** order — the last push runs first (LIFO). See `Campaign_AlvaQuestTest::testBeltOfYouthLandsOnTableauAfter8ForestSteps` for the multi-step `move` example.
+
+**Use `$this->game->machine->dispatchAll()`** — NOT the GameDriver's `dispatch()` / `runDispatchLoop()`. Those drive UI state transitions and don't drain the machine queue the way you want for direct-push tests. Symptom if you use the wrong one: the pushed op never runs, assertions about its effects all return zero.
+
 ### Pitfall: Hierarchical triggers share one `useCard` prompt
 
 `TActionAttack` chains through `TRoll` hierarchically. Cards with `on=TRoll` (e.g. Bjorn Hero I) and `on=TActionAttack` (e.g. Quiver, Trollbane) **don't produce separate prompts** — they appear together in a single `useCard` prompt's `target` list. Consequences:

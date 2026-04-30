@@ -37,7 +37,7 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 16|3|Healing Potion|||4||spendDurab:1heal(adj)||<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.|[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn.|This mead is barely legal.|
 17|3|Heels|||||spendUse:dealDamage(adj)||<i>Spend 1 mend action and discard 2 cards in the Witch Cabin.</i> That witch had style!|Deal 1 damage to an adjacent monster.|High heels can be sooo painful.|
 20|3|Helmet|||3||spendDurab:1preventDamage||<i>Kill a brute or a skeleton. Take this instead of the gold [XP].</i>|[DAMAGE]: Prevent 1 damage.|Heading for trouble.|
-23|3|Leg Guards|1||||||<i>Spend 1 focus action.</i> They're that tight.||Keeps my legs pretty, and leaves funny marks on their faces.|
+23|3|Leg Guards|1||||||<i>Spend 1 focus action.</i> They're that tight.||Keeps my legs pretty, and leaves funny marks on their faces.||||spendAction(actionFocus):gainEquip
 22|3|Raven's Claw|1||||2addDamage|TActionAttack|<i>Enter 10 forest areas</i> to search for the long-forgotten sword.|This is your Main Weapon. Add 2 damage to each attack action.|The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.||1
 18|3|Tailored Boots|||2||spendUse:spendDurab:1move||<i>Pay the shoemaker 2 gold [XP] in town.</i> He'll heel your shoes and save their soles.|[DAMAGE]: Move 1 area.|Fooling your foes with fancy footwork.|
 26|3|Throwing Knives|||2||spendUse:spendDurab:3roll(adj)||<i>Spend 1 practice action in a forest</i> to get your aim right.|[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster.|Now between the fingers...|

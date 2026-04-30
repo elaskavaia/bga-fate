@@ -337,6 +337,12 @@ class Material {
         "type" => "useCard",
         "name" => clienttranslate("Use Card"),
 ],
+    "Op_completeQuest" => [ 
+        "kind" => "free",
+        "inline" => 1,
+        "type" => "completeQuest",
+        "name" => clienttranslate("Complete Quest"),
+],
 // #shareGold|Share Gold|
 // # Predicates (stateless guards — void chain on failure)
     "Op_on" => [ 
@@ -4823,6 +4829,7 @@ class Material {
         "strength" => 1,
         "quest" => "<i>Spend 1 focus action.</i> They're that tight.",
         "flavour" => "Keeps my legs pretty, and leaves funny marks on their faces.",
+        "quest_r" => "spendAction(actionFocus):gainEquip",
 ],
     "card_equip_3_22" => [ 
         "ctype" => "equip",

@@ -96,12 +96,8 @@ class Op_gainEquip extends Operation {
         }
 
         // Sweep quest-progress crystals (red) parented to the card back to supply
-        // before it lands on the tableau. Crystals are accumulated by gainTracker
-        // while the card is on deck-top; they have no meaning once the equip is claimed.
-        $progress = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
-        if ($progress > 0) {
-            $this->game->effect_moveCrystals($heroId, "red", -$progress, $cardId, ["message" => ""]);
-        }
+        // before it lands on the tableau — they have no meaning once the equip is claimed.
+        $this->game->effect_clearQuestProgress($cardId, $heroId);
 
         $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains ${token_name}'), [
             "char_name" => $heroId,

@@ -293,6 +293,18 @@ class Game extends Base {
     //////////// Utility functions
     ////////////
 
+    /**
+     * Sweep red crystals (quest progress) parented to a card back to supply.
+     * Used by gainEquip (on quest completion) and demoteEquip (on quest reset).
+     * Silent — caller is responsible for the surrounding log message.
+     */
+    function effect_clearQuestProgress(string $cardId, string $charId): void {
+        $progress = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
+        if ($progress > 0) {
+            $this->effect_moveCrystals($charId, "red", -$progress, $cardId, ["message" => ""]);
+        }
+    }
+
     function effect_moveCrystals(string $charId, string $type, int $inc, string $location, array $options = []) {
         if ($inc == 0) {
             return;
