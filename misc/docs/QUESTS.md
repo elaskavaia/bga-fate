@@ -310,23 +310,85 @@ New ops/predicates referenced above (to be added during implementation):
 
 ---
 
-## 7. Implementation phases
+## 7. Implementation
 
-Suggested ordering, smallest viable shippable units first.
+The engine and infrastructure are landed. What remains is per-card authoring + tests.
 
-> **Per-card resolution.** Predicate ops, Math DSL terms, and op-call argument names referenced in §4 are intentionally not pre-cataloged. Each card's required primitives are resolved at implementation time for that card: existing ones are reused, missing ones are added (predicate op = new `Op_*` class; Math term = new `count*` / context-mapped function on `Game`; op arg = local convention in the receiving op). Naming (`terrain` vs `in`, `adj_monster` vs `adj(monster)`, etc.) is also settled at that point.
+### Per-card workflow
 
+For each card not yet checked off below:
 
-1. **Phase Q1 — Quest engine on the deck-top card.** Smallest end-to-end vertical: Belt of Youth (`TStep` counter quest) lands on tableau after 8 forest hexes. 
-2. **Phase Q2 — `completeQuest` free action.** Add the top-bar free action analogous to `useCard`. Surfaces the deck-top card if `quest_r` is non-empty and leading gates pass. Wire one player-initiated quest (Leg Guards: `spendAction(actionFocus):gainEquip`) end-to-end. 
-3. **Phase Q3 — Replacement quests.** Add `blockXp` op. Wire Helmet end-to-end (`counter('isKilled(brute) OR isSkilled(goblin)):(blockXp:gainEquip)` on `TMonsterKilled`). Test: killing a brute prompts; player can take Helmet over XP.
-4. **Phase Q4 — Remaining paid quests.** Wire Blade Decorations, Custom Armor, Tailored Boots, Alva's Bracers, Dwarf Helm, Orebiter, Mining Equipment through `completeQuest`. Then the spend-action-and-discard variants (Heels, Bloodline Crystal). Per-card tests.
-5. **Phase Q5 — Bespoke trio.** `CardEquip_Tiara` (already exists for the seed-gold behavior — extend), `CardEquip_ElvenArrows`, `CardEquip_ShieldBoldur`.
-6. **Phase Q6 — Client polish.** Progress badge on deck-top card (red-crystal count vs. target), `completeQuest` button styling on top bar, completion animation, log lines.
-7. **Phase Q7 — End-of-turn demote.** End-of-turn rule: a player may put the top equipment to the bottom of the equipment pile (a "quest flip"). Independent feature; quest engine survives both behaviors. Sub-steps:
-   1. **Q7.1 — Extract `effect_clearQuestProgress($cardId)` helper** from `Op_gainEquip::effect_gainEquipment` (currently the inline crystal-sweep block) so the demote op can reuse it. Update `gainEquip` to call the helper.
-   2. **Q7.2 — Demote op + UI.** Add `Op_demoteEquip` (or similar): moves deck-top to bottom of `deck_equip_{owner}`, calls `effect_clearQuestProgress` to drop accumulated progress (per resolved §6.1), reveals new top. End-of-turn UI surfaces it as a free action.
-   3. **Q7.3 — Tests.** Demote with progress in flight → crystals returned to supply, card lands at bottom, new top revealed. Demote with no progress → no-op crystal sweep, same placement behavior.
+1. Read the card's `quest` text (the italicised line in the `quest` column of [card_equip_material.csv](../card_equip_material.csv)) and the §4 mapping sketch.
+2. Pick the trigger (`quest_on`) and write `quest_r` as an Op DSL chain. Author both columns into the card's row. Run `npm run genmat`.
+3. If a new op is needed (predicate, cost, effect): add it via the [game-create-operation](../../.claude/skills/game-create-operation/SKILL.md) skill, with unit tests in [tests/Operations/](../../tests/Operations/).
+4. If a new Math DSL term is needed (e.g. `numDice`, `monster_gold`): add the resolver to `Game::evaluateTerm` (or `count*` method) with a unit test.
+5. Write a campaign test in `tests/Campaign/Campaign_<Hero>QuestTest.php` via the [game-create-itest](../../.claude/skills/game-create-itest/SKILL.md) skill — one test per quest, exercising the trigger or the `completeQuest` flow end-to-end.
+6. Run full suite (`npm run tests`). Green = tick the box.
+
+> **Per-card resolution.** Predicate ops, Math DSL terms, and op-call argument names in §4 are intentionally not pre-cataloged — resolved at implementation time per card. Naming (`terrain` vs `in`, `adj_monster` vs `adj(monster)`, etc.) is also settled then.
+
+### Engine + infrastructure (done)
+
+- [x] `Op_gainTracker`, `Op_completeQuest`, `Op_demote`, `effect_clearCrystals`
+- [x] `Card::canResolveQuest` / `Card::triggerQuest` (mirror of `canBePlayed`/`useCard`)
+- [x] `Op_trigger` walks deck-top equip
+- [x] `Op_turnEnd` queues `demote` (RULES.md §End-of-Turn step 5)
+
+### Cards
+
+Grouped by §2 mechanism. Tick on per-card test green.
+
+**A — Spend-action-at-location (player-initiated, optionally gated)**
+- [x] Leg Guards (`spendAction(actionFocus):gainEquip`) — Q2 canary
+- [ ] Battle Boots (`spendAction(actionFocus):gainEquip`)
+- [ ] Warrior Shield (`spendAction(actionAttack):gainEquip`)
+- [ ] Black Arrows (`in(RobberCamp):spendAction(actionAttack):gainEquip`)
+- [ ] Bone Bane Bow (`in(Nailfare):spendAction(actionMend):gainEquip`)
+- [ ] Healing Potion (`in(WitchCabin):spendAction(actionMend):gainEquip`)
+- [ ] Wildfire Blade (`in(SpewingMountain):spendAction(actionMend):gainEquip`)
+- [ ] Throwing Axes / Darts / Knives / Precision Axes (`terrain(forest):spendAction(actionPractice):gainEquip` — 4 cards, same shape)
+- [ ] Home Sewn Cape (`not_adj(monster):spendAction(actionAttack):gainEquip`)
+- [ ] Home Sewn Tunic (`spendAction(actionPractice):spendXp:gainEquip`)
+- [ ] Bloodline Crystal (`in(TempleRuins):2discardEvent:gainEquip`)
+- [ ] Heels (`in(WitchCabin):spendAction(actionMend):2discardEvent:gainEquip`)
+
+**B — Pay-gold (player-initiated)**
+- [ ] Blade Decorations (`in(Grimheim):2spendXp:gainEquip`) — already shipped via `r` field; migrate to `quest_r`
+- [ ] Custom Armor (`4spendXp:gainEquip`)
+- [ ] Tailored Boots (`in(Grimheim):2spendXp:gainEquip`)
+- [ ] Alva's Bracers (`on_road:5spendXp:gainEquip`) — needs `on_road` predicate
+- [ ] Dwarf Helm (`in(TempleRuins):2spendXp:gainEquip`)
+- [ ] Mining Equipment (`3spendXp:gainEquip`) — flavor joke, single payment
+- [ ] Orebiter (`2spendXp:gainEquip`)
+
+**C — Kill-monster, replaces XP (trigger-driven optional claim)**
+- [ ] Helmet ×2 (`?'brute or skeleton':gainEquip:blockXp` on `TMonsterKilled`) — needs `Op_blockXp`
+- [ ] Quiver ×2 (`?'rank>=3':gainEquip:blockXp`)
+- [ ] Leather Purse (`?'trollkin':gainEquip,2spawn(brute,adj)`) — bonus brute spawn
+
+**D — Counter / accumulating**
+- [x] Belt of Youth (`terrain(forest):gainTracker:check('countTracker>=8'):gainEquip` on `TStep`) — Q1 canary
+- [ ] Raven's Claw (`terrain(forest):gainTracker:check('countTracker>=10'):gainEquip` on `TStep`)
+- [ ] Dwarf Mail (`adj(mountain):gainTracker:check('countTracker>=7'):gainEquip` on `TStep`)
+- [ ] Dwarf Pick (`gainTracker:check('countTracker>=3'):gainEquip` on `TMonsterKilled`)
+- [ ] Elven Blade (`melee:gainTracker:check('countTracker>=3'):gainEquip` on `TMonsterKilled`) — needs `melee` predicate
+- [ ] Windbite (`'hero_range>=2':gainTracker:check('countTracker>=4'):gainEquip` on `TMonsterKilled`) — needs `hero_range` Math term
+- [ ] Trollbane (`'killed=trollkin':gainTracker(monster_gold):check('countTracker>=5'):gainEquip` on `TMonsterKilled`) — needs `monster_gold` Math term
+- [ ] Singing Bow (`in(forest):gainTracker(numDice):check('countTracker>=10'):gainEquip` on `TRoll(attackDice)`) — needs `numDice` Math term
+
+**E — End-of-movement positional (`TActionMove`)**
+- [ ] Smiterbiter (`in(MarshOfSorrow):gainEquip`)
+- [ ] Dvalin's Pick (`'adjCount(mountain)>=3':gainEquip`) — needs `adjCount` Math term
+- [ ] Eitri's Pick (`'adjCount(monster)>=4 or adjCount(legend)>=1':gainEquip`)
+
+**F — Bespoke (custom Card class)**
+- [ ] Tiara (extend existing `CardEquip_Tiara`) — quest_on=custom; "find in Dark Forest"
+- [ ] Elven Arrows (`CardEquip_ElvenArrows` new) — needs `Trigger::MonsterSpawn` or polling hook
+- [ ] Shield-Boldur (`CardEquip_ShieldBoldur` new) — OR of two predicates
+
+### Client polish
+
+Tracked in [PLAN.md](PLAN.md) under Quests → Client. Not required for the engine to function — defer until card coverage is broad enough that polish doesn't get redone.
 
 ---
 

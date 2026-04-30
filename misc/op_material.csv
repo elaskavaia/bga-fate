@@ -111,6 +111,7 @@ performAction|Perform Action
 addTownPiece|Add Town Piece
 upgrade|Upgrade
 gainEquip|Gain Equipment
+demote|Demote Top Card
 drawEvent|Draw Event
 discardEvent|Discard Event
 multiTarget|Target Multiple

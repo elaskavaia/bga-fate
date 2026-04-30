@@ -155,9 +155,9 @@ class Game extends Base {
         }
 
         // Encounter bonuses: 3 crystals per location for heroes to pick up on entry
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_red", "hex_6_7");      // Troll Caves
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_green", "hex_16_5");   // Nailfare
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_yellow", "hex_6_16");  // Wyrm Lair
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_red", "hex_6_7"); // Troll Caves
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_green", "hex_16_5"); // Nailfare
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_yellow", "hex_6_16"); // Wyrm Lair
 
         $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
@@ -294,14 +294,15 @@ class Game extends Base {
     ////////////
 
     /**
-     * Sweep red crystals (quest progress) parented to a card back to supply.
-     * Used by gainEquip (on quest completion) and demoteEquip (on quest reset).
-     * Silent — caller is responsible for the surrounding log message.
+     * Sweep all crystals parented to a card back to supply (red/yellow/green).
+     * Used when a card leaves play
      */
-    function effect_clearQuestProgress(string $cardId, string $charId): void {
-        $progress = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $cardId));
-        if ($progress > 0) {
-            $this->effect_moveCrystals($charId, "red", -$progress, $cardId, ["message" => ""]);
+    function effect_clearCrystals(string $cardId, string $charId): void {
+        foreach (["red", "yellow", "green"] as $color) {
+            $count = count($this->tokens->getTokensOfTypeInLocation("crystal_$color", $cardId));
+            if ($count > 0) {
+                $this->effect_moveCrystals($charId, $color, -$count, $cardId, ["message" => ""]);
+            }
         }
     }
 

@@ -58,8 +58,8 @@ class Op_turnEnd extends Operation {
         // 4. Draw 1 event card (handles hand limit internally)
         $this->queue("drawEvent");
 
-        // 5. Allow cycling top equipment or top ability card
-        // TODO
+        // 5. Allow demoting top equipment or top ability to the bottom of its pile (RULES.md §End-of-Turn step 5)
+        $this->queue("demote");
 
         // Reset attribute trackers to base values
         $hero->recalcTrackers();

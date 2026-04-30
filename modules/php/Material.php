@@ -531,6 +531,10 @@ class Material {
         "type" => "gainEquip",
         "name" => clienttranslate("Gain Equipment"),
 ],
+    "Op_demote" => [ 
+        "type" => "demote",
+        "name" => clienttranslate("Demote Top Card"),
+],
     "Op_drawEvent" => [ 
         "type" => "drawEvent",
         "name" => clienttranslate("Draw Event"),

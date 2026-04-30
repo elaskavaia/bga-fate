@@ -200,6 +200,17 @@ abstract class CampaignBaseTest extends TestCase {
         $args = $this->getOpArgs();
         if (($args["type"] ?? "") === $optype) {
             $this->skip();
+            // Op_turnEnd queues drawEvent (step 4) immediately followed by demote (step 5).
+            // Tests calling skipIfOp("drawEvent") at a turn boundary are dismissing turn-end
+            // housekeeping; auto-swallow the trailing demote so callers don't need a second
+            // boilerplate skipIfOp("demote"). Tests that actually exercise demote can still
+            // address it directly via respond(); it's only auto-skipped when it follows drawEvent.
+            if ($optype === "drawEvent") {
+                $next = $this->getOpArgs();
+                if (($next["type"] ?? "") === "demote") {
+                    $this->skip();
+                }
+            }
             return true;
         }
         return false;
@@ -209,6 +220,14 @@ abstract class CampaignBaseTest extends TestCase {
         $args = $this->getOpArgs();
         $this->assertEquals($args["type"] ?? "", $optype);
         $this->skip();
+        // See skipIfOp() — drawEvent and demote are queued back-to-back by Op_turnEnd;
+        // auto-swallow trailing demote so callers don't need a second boilerplate skip.
+        if ($optype === "drawEvent") {
+            $next = $this->getOpArgs();
+            if (($next["type"] ?? "") === "demote") {
+                $this->skip();
+            }
+        }
         return true;
     }
 

@@ -56,6 +56,7 @@ Before starting read docs/DESIGN.md understand what Operation (concept) means an
     - Instantiate via `$this->game->machine->instantiateOperation($type, $owner, $data)`
     - Test `getPossibleMoves()` returns expected valid/invalid targets
     - Test `resolve()` produces correct side effects (token moves, state changes)
+    - **Gotcha — auto-skip assertions.** When asserting that a pushed op auto-drained (e.g. `getPossibleMoves()` empty + `canSkip()` true), `assertEmpty($machine->getTopOperations())` fails: a pre-existing `turn` op (or whatever `initWithHero` set up) still sits beneath the one you pushed. Assert `assertNotEquals("<your op type>", $top["type"])` instead — the op you pushed is no longer at the top.
 11. Add a `debug_Op_<name>` function in `Game.php` that sets up the game state and pushes the operation to the machine, then run the harness to validate the UI:
     ```bash
     php8.4 tests/Harness/play.php --debug debug_Op_<name> --scenario tests/Harness/plays/setup.json

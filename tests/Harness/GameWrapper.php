@@ -94,6 +94,24 @@ class GameWrapper extends Game implements HarnessGameInterface {
         $this->tokens->dbSetTokenLocation($heroId, "hex_9_9");
     }
 
+    /**
+     * Solo Alva, seed Belt of Youth on top of equip deck with 5 red crystals
+     * (in-flight quest progress that demote will sweep), then push Op_demote.
+     * Surfaces both deck-tops as clickable targets for end-of-turn step 5.
+     */
+    public function debug_Op_demote(): void {
+        $this->setupGameWithHero(2);
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $belt = "card_equip_2_22";
+        // Force Belt of Youth onto the very top of Alva's equip deck.
+        $this->tokens->moveToken($belt, "deck_equip_$color", 9999);
+        // Park 5 red crystals on it as if it'd been ticking quest progress.
+        $this->effect_moveCrystals($heroId, "red", 5, $belt, ["message" => ""]);
+        $this->machine->push("demote", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     private function setupGameWithHero(int $heroNum): void {
         $this->setPlayersNumber(1);
         $rest = array_values(array_diff([1, 2, 3, 4], [$heroNum]));

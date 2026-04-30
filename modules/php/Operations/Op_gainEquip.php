@@ -75,12 +75,7 @@ class Op_gainEquip extends Operation {
                 if ($existingMW) {
                     // Return crystals parked on the discarded card (e.g. Smiterbiter's stored
                     // damage) to their supply so they don't linger in the DB.
-                    foreach (["red", "yellow", "green"] as $color) {
-                        $count = count($this->game->tokens->getTokensOfTypeInLocation("crystal_$color", $existingId));
-                        if ($count > 0) {
-                            $this->game->effect_moveCrystals($heroId, $color, -$count, $existingId, ["message" => ""]);
-                        }
-                    }
+                    $this->game->effect_clearCrystals($existingId, $heroId);
                     $this->dbSetTokenLocation(
                         $existingId,
                         "limbo",
@@ -95,9 +90,9 @@ class Op_gainEquip extends Operation {
             }
         }
 
-        // Sweep quest-progress crystals (red) parented to the card back to supply
-        // before it lands on the tableau — they have no meaning once the equip is claimed.
-        $this->game->effect_clearQuestProgress($cardId, $heroId);
+        // Sweep any crystals parented to the card back to supply before it lands on
+        // the tableau — accumulated quest progress has no meaning once the equip is claimed.
+        $this->game->effect_clearCrystals($cardId, $heroId);
 
         $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains ${token_name}'), [
             "char_name" => $heroId,
