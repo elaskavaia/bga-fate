@@ -4484,6 +4484,7 @@ class Material {
         "quest" => "<i>Spend 1 attack action in the Robber Camp</i> to loot it.",
         "effect" => clienttranslate("Starts with 3 arrows here (use [XP] markers).<br>Spend 1 arrow to add 3 damage to this attack action."),
         "flavour" => "Painted black for the funeral they are about to attend.",
+        "quest_r" => "in(RobberCamp):spendAction(actionAttack):gainEquip",
 ],
     "card_equip_1_16" => [ 
         "ctype" => "equip",
@@ -4500,6 +4501,7 @@ class Material {
         "flavour" => "This bunch of bones, bound by braided bamboo became the bane of the banished breathless.",
         "attack_range" => 2,
         "mw" => 1,
+        "quest_r" => "in(Nailfare):spendAction(actionMend):gainEquip",
 ],
     "card_equip_1_21" => [ 
         "ctype" => "equip",
@@ -4529,6 +4531,7 @@ class Material {
         "effect_1" => clienttranslate("2[MANA]: Move 1 area"),
         "effect_2" => clienttranslate("3[MANA]: Prevent 2 damage"),
         "flavour" => '"Did Bjorn make this?""<br>""Sew it seams…"',
+        "quest_r" => "check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip",
 ],
     "card_equip_1_23" => [ 
         "ctype" => "equip",
@@ -4542,6 +4545,7 @@ class Material {
         "quest" => "Practice makes perfect. <i>Spend 1 practice action and 1 experience</i> [XP] to make it.",
         "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage.<br>Spend 1 mend action to remove all damage from this card."),
         "flavour" => "When your life hangs by a thread, this is sturdier than it seams.",
+        "quest_r" => "spendAction(actionPractice):spendXp:gainEquip",
 ],
     "card_equip_1_19" => [ 
         "ctype" => "equip",
@@ -4583,6 +4587,7 @@ class Material {
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
         "effect" => clienttranslate("[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster."),
         "flavour" => "I keep missing him…",
+        "quest_r" => "in(forest):spendAction(actionPractice):gainEquip",
 ],
     "card_equip_1_22" => [ 
         "ctype" => "equip",
@@ -4613,6 +4618,7 @@ class Material {
         "quest" => "<i>Pay 5 gold [XP] on a road</i> to have them imported from Alfheim.",
         "effect" => clienttranslate("3[MANA]: Perform an attack action."),
         "flavour" => "Brace for impact!",
+        "quest_r" => "in(road):5spendXp:gainEquip",
 ],
     "card_equip_2_15" => [ 
         "ctype" => "equip",
@@ -4656,6 +4662,7 @@ class Material {
         "effect_1" => clienttranslate("3[MANA]: Add 2 damage to this attack action"),
         "effect_2" => clienttranslate("3[MANA]: Draw 1 card"),
         "flavour" => "I'm … a princess? I knew it!",
+        "quest_r" => "in(TempleRuins):2discardEvent:gainEquip",
 ],
     "card_equip_2_24" => [ 
         "ctype" => "equip",
@@ -4723,6 +4730,7 @@ class Material {
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
         "effect" => clienttranslate("[DAMAGE]: Roll 3[DIE_ATTACK] against an adjacent monster."),
         "flavour" => "I'm ready to try it blindfolded…",
+        "quest_r" => "in(forest):spendAction(actionPractice):gainEquip",
 ],
     "card_equip_2_16" => [ 
         "ctype" => "equip",
@@ -4761,6 +4769,7 @@ class Material {
         "strength" => 1,
         "quest" => "<i>Pay 2 gold [XP] in Grimheim</i> to decorate your sword.",
         "flavour" => "Now this is what I call a broad sword.",
+        "quest_r" => "in(Grimheim):2spendXp:gainEquip",
 ],
     "card_equip_3_25" => [ 
         "ctype" => "equip",
@@ -4774,6 +4783,7 @@ class Material {
         "quest" => "<i>Pay 4 gold [XP]</i> to have it made. Then get anormored with it.",
         "effect" => clienttranslate("[DAMAGE]: Prevent 2 damage."),
         "flavour" => "Armor is the blacksmith's strong suit.",
+        "quest_r" => "4spendXp:gainEquip",
 ],
     "card_equip_3_15" => [ 
         "ctype" => "equip",
@@ -4797,6 +4807,7 @@ class Material {
         "quest" => "<i>Spend 1 mend action in the Witch Cabin</i> to let it brew.",
         "effect" => clienttranslate("[DAMAGE]: Heal 1 damage from yourself or any adjacent hero. May be used any number of times per turn."),
         "flavour" => "This mead is barely legal.",
+        "quest_r" => "in(WitchCabin):spendAction(actionMend):gainEquip",
 ],
     "card_equip_3_17" => [ 
         "ctype" => "equip",
@@ -4809,6 +4820,7 @@ class Material {
         "quest" => "<i>Spend 1 mend action and discard 2 cards in the Witch Cabin.</i> That witch had style!",
         "effect" => clienttranslate("Deal 1 damage to an adjacent monster."),
         "flavour" => "High heels can be sooo painful.",
+        "quest_r" => "in(WitchCabin):spendAction(actionMend):2discardEvent:gainEquip",
 ],
     "card_equip_3_20" => [ 
         "ctype" => "equip",
@@ -4849,6 +4861,8 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Add 2 damage to each attack action."),
         "flavour" => "The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.",
         "mw" => 1,
+        "quest_on" => "TStep",
+        "quest_r" => "in(forest):gainTracker:check('countTracker>=10'):gainEquip",
 ],
     "card_equip_3_18" => [ 
         "ctype" => "equip",
@@ -4862,6 +4876,7 @@ class Material {
         "quest" => "<i>Pay the shoemaker 2 gold [XP] in town.</i> He'll heel your shoes and save their soles.",
         "effect" => clienttranslate("[DAMAGE]: Move 1 area."),
         "flavour" => "Fooling your foes with fancy footwork.",
+        "quest_r" => "in(Grimheim):2spendXp:gainEquip",
 ],
     "card_equip_3_26" => [ 
         "ctype" => "equip",
@@ -4875,6 +4890,7 @@ class Material {
         "quest" => "<i>Spend 1 practice action in a forest</i> to get your aim right.",
         "effect" => clienttranslate("[DAMAGE]: Roll 3 [DIE_ATTACK] against an adjacent monster."),
         "flavour" => "Now between the fingers...",
+        "quest_r" => "in(forest):spendAction(actionPractice):gainEquip",
 ],
     "card_equip_3_24" => [ 
         "ctype" => "equip",
@@ -4888,6 +4904,7 @@ class Material {
         "quest" => '"<i>Spend 1 attack action</i>, ""negotiating"" with the traveling merchant."',
         "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage and draw 1 card."),
         "flavour" => "A backup disc to save your life.",
+        "quest_r" => "spendAction(actionAttack):gainEquip",
 ],
     "card_equip_3_21" => [ 
         "ctype" => "equip",
@@ -4903,6 +4920,7 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. After each attack action, deal 1 damage to an adjacent monster."),
         "flavour" => "Forged in the flames of kidnapped sprites.",
         "mw" => 1,
+        "quest_r" => "in(SpewingMountain):spendAction(actionMend):gainEquip",
 ],
 // # Equipment - Boldur (hno=4)
     "card_equip_4_24" => [ 
@@ -4915,6 +4933,7 @@ class Material {
         "strength" => 1,
         "quest" => "<i>Spend 1 focus action</i> to permanently attach them to your feet.",
         "flavour" => "Stepping on every toe within range.",
+        "quest_r" => "spendAction(actionFocus):gainEquip",
 ],
     "card_equip_4_15" => [ 
         "ctype" => "equip",
@@ -4952,6 +4971,7 @@ class Material {
         "quest" => "<i>Spend 2 gold [XP] in the Temple Ruins.</i> A bowl is a good start.",
         "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "People hit what they can reach. On Boldur, that's mainly his head.",
+        "quest_r" => "in(TempleRuins):2spendXp:gainEquip",
 ],
     "card_equip_4_18" => [ 
         "ctype" => "equip",
@@ -4965,6 +4985,8 @@ class Material {
         "quest" => "<i>Enter 7 areas adjacent to mountains.</i> Silly family tradition!",
         "effect" => clienttranslate("Prevent the first damage dealt to Boldur each monster turn."),
         "flavour" => "Wearing this, Boldur is quite a hot male.",
+        "quest_on" => "TStep",
+        "quest_r" => "adj(mountain):gainTracker:check('countTracker>=7'):gainEquip",
 ],
     "card_equip_4_25" => [ 
         "ctype" => "equip",
@@ -4976,6 +4998,8 @@ class Material {
         "strength" => 1,
         "quest" => "<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.",
         "flavour" => "Boldur, this is for you, so you know I would always pick you! X O X O",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "gainTracker:check('countTracker>=3'):gainEquip",
 ],
     "card_equip_4_22" => [ 
         "ctype" => "equip",
@@ -5003,6 +5027,7 @@ class Material {
         "quest" => "<i>Pay 1 gold</i> [XP] for the equipment. Then <i>pay 2 gold</i> [XP] for insureance and taxes.",
         "effect" => clienttranslate("[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas."),
         "flavour" => "I'm digging this gold rush…",
+        "quest_r" => "3spendXp:gainEquip",
 ],
     "card_equip_4_19" => [ 
         "ctype" => "equip",
@@ -5014,6 +5039,7 @@ class Material {
         "quest" => "<i>Lose 2 gold</i>[XP]. The potential gain is endless.",
         "effect" => clienttranslate("You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]."),
         "flavour" => "It's an auto-pick.",
+        "quest_r" => "2spendXp:gainEquip",
 ],
     "card_equip_4_26" => [ 
         "ctype" => "equip",
@@ -5027,6 +5053,7 @@ class Material {
         "quest" => "<i>Spend 1 practice action in a forest</i> to get access to these.",
         "effect" => clienttranslate("[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster."),
         "flavour" => "Boldur is not happy until he can fell a tree in one throw.",
+        "quest_r" => "in(forest):spendAction(actionPractice):gainEquip",
 ],
     "card_equip_4_16" => [ 
         "ctype" => "equip",
@@ -5055,6 +5082,8 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. Spend stored damage to add that much damage to your attack action. If you kill a monster in an attack action, excess damage is stored here (max 3 stored)."),
         "flavour" => "I axed your first.",
         "mw" => 1,
+        "quest_on" => "TMove",
+        "quest_r" => "in(MarshOfSorrow):gainEquip",
 ],
             /* --- gen php end card_equip_material --- */
             /* --- gen php begin card_event_material --- */

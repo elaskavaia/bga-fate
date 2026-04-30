@@ -105,6 +105,6 @@ class Op_drawEvent extends CountableOperation {
     }
 
     function requireConfirmation() {
-        return $this->game->getHero($this->getOwner())->getCountOfCardsInEventDeck() > 0;
+        return !$this->noValidTargets();
     }
 }

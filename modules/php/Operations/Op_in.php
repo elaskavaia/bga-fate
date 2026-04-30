@@ -47,8 +47,15 @@ class Op_in extends Operation {
         $hex = $this->game->getHero($this->getOwner())->getHex();
         $this->game->systemAssert("ERR:in:heroNotOnMap", $hex !== null);
         $named = $this->game->hexMap->getHexNamedLocation($hex);
+        if ($named === $expected) {
+            return parent::getPossibleMoves();
+        }
         $terrain = $this->game->hexMap->getHexTerrain($hex);
-        if ($named === $expected || $terrain === $expected) {
+        if ($terrain === $expected) {
+            return parent::getPossibleMoves();
+        }
+
+        if ("road" === $expected && $this->game->getRulesFor($hex, "road", 0) == 1) {
             return parent::getPossibleMoves();
         }
         return ["q" => Material::ERR_PREREQ, "err" => "Incorrect location for the effect"];

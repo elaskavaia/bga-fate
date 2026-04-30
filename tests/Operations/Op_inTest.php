@@ -52,6 +52,12 @@ final class Op_inTest extends AbstractOpTestCase {
         $this->assertEquals($before, $after);
     }
 
+    public function testOnTheRoad(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_11_7");
+        $this->createOp("in(road)");
+        $this->assertFalse($this->op->noValidTargets());
+    }
+
     // -------------------------------------------------------------------------
     // Composition: gate chains with other costs/effects via paygain
     // -------------------------------------------------------------------------

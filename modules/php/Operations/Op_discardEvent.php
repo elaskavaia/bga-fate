@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
+use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
  * Discard an event card from hand to the discard pile.
@@ -27,8 +27,12 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Rules (Play Event):
  * "Play an event card from your hand. Perform its effect, then place it
  *  in your discard pile."
+ *
+ * Multiplicity (`NdiscardEvent`): the player picks one card per prompt; on
+ * resolve we re-queue `(N-1)discardEvent` until count is exhausted. Used by
+ * paid quests like Bloodline Crystal (`2discardEvent`) and Heels.
  */
-class Op_discardEvent extends Operation {
+class Op_discardEvent extends CountableOperation {
     function getPrompt() {
         return clienttranslate("Choose an Event card to discard from hand");
     }
@@ -47,6 +51,10 @@ class Op_discardEvent extends Operation {
         $target = $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
         $hero->discardEventCard($target);
+        $remaining = $this->getCount() - 1;
+        if ($remaining > 0) {
+            $this->queue("{$remaining}discardEvent");
+        }
     }
 
     public function getUiArgs() {
