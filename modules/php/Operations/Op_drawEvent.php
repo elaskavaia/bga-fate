@@ -23,11 +23,12 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Params:
  * - param(0) "max": draw until hand is full (handLimit - handSize draws); skips discard prompt
  *
- * Behaviour:
+ * Behaviour (non-max):
  * - Deck empty: returns error, auto-skips
- * - Hand under limit: offers confirm target, draws getCount() cards on resolve
- * - Hand at limit (non-max): delegates to discardEvent for card selection, then draws and re-queues remaining
- * - Max mode: draws (handLimit - handSize) cards in one resolve, no discard prompt
+ * - Hand under limit: offers confirm; on resolve draws cards until hand is full or count exhausted, re-queues remainder
+ * - Hand at limit: delegates to discardEvent; on resolve discards then draws 1, re-queues remainder
+ *
+ * Behaviour (max): draws (handLimit - handSize) cards in one resolve, no discard prompt.
  *
  * Used by: actionPrepare (drawEvent), Starsong (2drawEvent), Preparations (drawEvent(max)).
  */
@@ -62,33 +63,27 @@ class Op_drawEvent extends CountableOperation {
     function resolve(): void {
         $target = $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
-        $max = $this->isMax();
-        $requeue = null;
-        if ($target == "confirm") {
-            $count = $max ? $hero->getHandLimit() - $hero->getHandSize() : $this->getCount();
-            $drawn = 0;
-            for ($i = 0; $i < $count; $i++) {
-                if (!$hero->drawEventCard()) {
-                    break;
-                }
-                $drawn++;
-            }
-            if (!$max) {
-                $remaining = $count - $drawn;
-                if ($remaining > 0) {
-                    $requeue = "{$remaining}drawEvent";
-                }
-            }
-        } else {
+
+        if ($target !== "confirm") {
             $hero->discardEventCard($target);
-            $hero->drawEventCard();
-            $remaining = $this->getCount() - 1;
-            if ($remaining > 0) {
-                $requeue = "{$remaining}drawEvent";
+        }
+
+        $max = $this->isMax();
+        $count = $max ? $hero->getHandLimit() - $hero->getHandSize() : $this->getCount();
+        $drawn = 0;
+        while ($drawn < $count && $hero->drawEventCard()) {
+            $drawn++;
+            // stop drawing when hand fills up so user can discard before next draw
+            if (!$max && $hero->getHandSize() >= $hero->getHandLimit()) {
+                break;
             }
         }
-        if ($requeue !== null) {
-            $this->queue($requeue);
+
+        if (!$max) {
+            $remaining = $count - $drawn;
+            if ($remaining > 0) {
+                $this->queue("{$remaining}drawEvent");
+            }
         }
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 final class Op_killMonsterTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine(); // drop leftover reinforcement/turnStart so dispatchAll() only runs the queued applyDamage
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -86,6 +87,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->op;
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $this->assertEquals(0, $this->getDamage("monster_goblin_1"));
     }
@@ -95,6 +97,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $op = $this->op;
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_brute_1"));
     }
 
@@ -103,6 +106,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 1, $xpAfter);
     }
@@ -112,6 +116,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 2, $xpAfter);
     }
@@ -121,6 +126,7 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $this->game->tokens->moveToken("crystal_red_1", "monster_brute_1");
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_brute_1"));
         $this->assertEquals(0, $this->getDamage("monster_brute_1"));
     }

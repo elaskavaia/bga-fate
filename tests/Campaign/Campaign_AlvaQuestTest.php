@@ -14,7 +14,7 @@ require_once __DIR__ . "/CampaignBase.php";
 class Campaign_AlvaQuestTest extends CampaignBaseTest {
     /**
      * Belt of Youth (card_equip_2_22): quest_on=TStep,
-     * quest_r=in(forest):gainTracker:check('countTracker>=8'):gainEquip.
+     * quest_r=in(forest):gainTracker,check('countTracker>=8'):gainEquip.
      *
      * After 8 TStep firings on forest hexes, the card leaves deck_equip_<color>
      * and lands on tableau_<color>, with all progress crystals swept to supply.

@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 final class Op_c_arrowsTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine(); // drop leftover reinforcement/turnStart so dispatchAll() only runs the queued applyDamage
         // Place hero on plains hex_12_2, adjacent to forest hexes (hex_11_1, hex_12_1, hex_11_2)
         // and plains hex_13_2. Bjorn has attack range 2.
         $this->game->tokens->moveToken("hero_1", "hex_12_2");
@@ -61,6 +62,7 @@ final class Op_c_arrowsTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_1");
         $op = $this->op;
         $this->call_resolve("hex_12_1");
+        $this->dispatchAll();
         // Goblin health=2, 2 damage kills it
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }

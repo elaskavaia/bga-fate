@@ -223,7 +223,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
     /**
      * Dwarf Pick (card_equip_4_25): quest_on=TMonsterKilled,
-     * quest_r=gainTracker:check('countTracker>=3'):gainEquip.
+     * quest_r=gainTracker,check('countTracker>=3'):gainEquip.
      *
      * Trigger-driven counter quest. Every monster kill ticks the counter (no
      * predicate filter — any kill counts). After 3 kills the card leaves
@@ -263,11 +263,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->game->machine->push("dealDamage", $color, ["target" => $goblinHexes[0], "count" => 2]);
         $this->game->machine->dispatchAll();
         $this->assertEquals("supply_monster", $this->tokenLocation($goblins[0]), "Goblin 1 should be killed");
-        $this->assertEquals(
-            1,
-            $this->countTokens("crystal_red", $dwarfPick),
-            "After kill 1, Dwarf Pick should have 1 progress crystal"
-        );
+        $this->assertEquals(1, $this->countTokens("crystal_red", $dwarfPick), "After kill 1, Dwarf Pick should have 1 progress crystal");
         $this->assertEquals(
             "deck_equip_$color",
             $this->tokenLocation($dwarfPick),
@@ -278,11 +274,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->game->machine->push("dealDamage", $color, ["target" => $goblinHexes[1], "count" => 2]);
         $this->game->machine->dispatchAll();
         $this->assertEquals("supply_monster", $this->tokenLocation($goblins[1]), "Goblin 2 should be killed");
-        $this->assertEquals(
-            2,
-            $this->countTokens("crystal_red", $dwarfPick),
-            "After kill 2, Dwarf Pick should have 2 progress crystals"
-        );
+        $this->assertEquals(2, $this->countTokens("crystal_red", $dwarfPick), "After kill 2, Dwarf Pick should have 2 progress crystals");
         $this->assertEquals(
             "deck_equip_$color",
             $this->tokenLocation($dwarfPick),
@@ -294,16 +286,8 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
         $this->assertEquals("supply_monster", $this->tokenLocation($goblins[2]), "Goblin 3 should be killed");
 
-        $this->assertEquals(
-            "tableau_$color",
-            $this->tokenLocation($dwarfPick),
-            "Dwarf Pick should land on tableau after 3 monster kills"
-        );
-        $this->assertEquals(
-            0,
-            $this->countTokens("crystal_red", $dwarfPick),
-            "Op_gainEquip should sweep tracker crystals back to supply"
-        );
+        $this->assertEquals("tableau_$color", $this->tokenLocation($dwarfPick), "Dwarf Pick should land on tableau after 3 monster kills");
+        $this->assertEquals(0, $this->countTokens("crystal_red", $dwarfPick), "Op_gainEquip should sweep tracker crystals back to supply");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
@@ -312,7 +296,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
     /**
      * Dwarf Mail (card_equip_4_18): quest_on=TStep,
-     * quest_r=adj(mountain):gainTracker:check('countTracker>=7'):gainEquip.
+     * quest_r=adj(mountain):gainTracker,check('countTracker>=7'):gainEquip.
      *
      * Counter quest mirroring Belt of Youth / Raven's Claw, but the gate is
      * adj(mountain) instead of in(forest). Op_adj passes when the hero's hex
@@ -387,11 +371,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
             $this->tokenLocation($dwarfMail),
             "Dwarf Mail should land on tableau after 7 mountain-adjacent TSteps"
         );
-        $this->assertEquals(
-            0,
-            $this->countTokens("crystal_red", $dwarfMail),
-            "Op_gainEquip should sweep tracker crystals back to supply"
-        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $dwarfMail), "Op_gainEquip should sweep tracker crystals back to supply");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
@@ -452,5 +432,169 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
         $this->assertEquals($nextCard, $newTop["key"], "Dvalin's Pick should surface as the new deck-top");
+    }
+
+    /**
+     * Dvalin's Pick (card_equip_4_20): quest_on=TMove,
+     * quest_r=check('countAdjMountains>=3'):gainEquip.
+     *
+     * End-of-movement positional. When Boldur ends a move on hex_4_15 (plains),
+     * three of its six neighbors are mountains (hex_3_15, hex_5_15, hex_3_16 —
+     * SpewingMountain cluster), so countAdjMountains==3. The gate passes and
+     * gainEquip moves the card to tableau.
+     */
+    public function testDvalinsPickLandsOnTableauWhenMoveEndsAdjacentTo3Mountains(): void {
+        $this->setupGame([4]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $dvalinsPick = "card_equip_4_20";
+        $nextCard = "card_equip_4_19"; // Orebiter
+        $this->seedDeck("deck_equip_$color", [$dvalinsPick, $nextCard]);
+
+        $startHex = "hex_4_14"; // plains, only 1 adjacent mountain (hex_3_15)
+        $endHex = "hex_4_15"; // plains, 3 adjacent mountains (hex_3_15, hex_5_15, hex_3_16)
+        $this->game->tokens->moveToken($heroId, $startHex);
+
+        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($dvalinsPick),
+            "Dvalin's Pick should land on tableau after move ends adjacent to 3 mountains"
+        );
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
+    }
+
+    /**
+     * Eitri's Pick (card_equip_4_22): quest_on=TMove,
+     * quest_r=check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip.
+     *
+     * "4 monsters" branch: end on hex_11_8 with four goblins on its non-Grimheim
+     * neighbors (hex_12_8, hex_11_9, hex_11_7, hex_12_7). countAdjMonsters==4
+     * → check passes → gainEquip moves the pick to tableau.
+     */
+    public function testEitrisPickLandsOnTableauWhenMoveEndsAdjacentTo4Monsters(): void {
+        $this->setupGame([4]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $eitrisPick = "card_equip_4_22";
+        $nextCard = "card_equip_4_19"; // Orebiter
+        $this->seedDeck("deck_equip_$color", [$eitrisPick, $nextCard]);
+
+        $startHex = "hex_10_9"; // Grimheim plains, adjacent to hex_11_8
+        $endHex = "hex_11_8";
+        $this->game->tokens->moveToken($heroId, $startHex);
+
+        $monsterHexes = ["hex_12_8", "hex_11_9", "hex_11_7", "hex_12_7"];
+        $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_goblin_3", "monster_goblin_4"];
+        foreach ($monsters as $i => $m) {
+            $this->game->getMonster($m)->moveTo($monsterHexes[$i], "");
+        }
+
+        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($eitrisPick),
+            "Eitri's Pick should land on tableau after move ends adjacent to 4 monsters"
+        );
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
+    }
+
+    /**
+     * Eitri's Pick "1 legend" branch: end on hex_11_8 with a single legend
+     * monster on hex_12_8. countAdjMonsters==1 (the legend itself) and
+     * countAdjLegends==1 → the OR predicate's legend disjunct passes.
+     */
+    public function testEitrisPickLandsOnTableauWhenMoveEndsAdjacentToLegend(): void {
+        $this->setupGame([4]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $eitrisPick = "card_equip_4_22";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$eitrisPick, $nextCard]);
+
+        $startHex = "hex_10_9";
+        $endHex = "hex_11_8";
+        $this->game->tokens->moveToken($heroId, $startHex);
+
+        $this->game->getMonster("monster_legend_1_1")->moveTo("hex_12_8", "");
+
+        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($eitrisPick),
+            "Eitri's Pick should land on tableau after move ends adjacent to a legend"
+        );
+    }
+
+    /**
+     * Negative path: end on a hex with no adjacent monsters or legends — both
+     * disjuncts fail, check evaluates to 0, gainEquip hidden, pick stays in deck.
+     */
+    public function testEitrisPickStaysInDeckWhenMoveEndsAwayFromMonstersAndLegends(): void {
+        $this->setupGame([4]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $eitrisPick = "card_equip_4_22";
+        $this->seedDeck("deck_equip_$color", [$eitrisPick, "card_equip_4_19"]);
+
+        $startHex = "hex_7_9";
+        $endHex = "hex_7_8";
+        $this->game->tokens->moveToken($heroId, $startHex);
+
+        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($eitrisPick),
+            "Eitri's Pick should stay in deck — no adjacent monsters or legends"
+        );
+    }
+
+    /**
+     * Negative path: ending a move on a hex with fewer than 3 adjacent mountains
+     * makes the check evaluate to 0, hiding gainEquip — pick stays in deck.
+     */
+    public function testDvalinsPickStaysInDeckWhenMoveEndsAwayFromMountains(): void {
+        $this->setupGame([4]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $dvalinsPick = "card_equip_4_20";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$dvalinsPick, $nextCard]);
+
+        $startHex = "hex_7_9"; // plains, no mountains anywhere near
+        $endHex = "hex_7_8";
+        $this->game->tokens->moveToken($heroId, $startHex);
+
+        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($dvalinsPick),
+            "Dvalin's Pick should stay in deck — gate countAdjMountains>=3 failed"
+        );
     }
 }

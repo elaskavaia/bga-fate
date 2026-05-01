@@ -44,6 +44,11 @@ class Character {
         return (int) $this->getRulesFor("armor", 0);
     }
 
+    /** Number of red crystals (damage) on this character. */
+    function getDamage(): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
+    }
+
     /**
      * Move crystals to/from this character.
      * @param string $type crystal type: "red", "green", "yellow"

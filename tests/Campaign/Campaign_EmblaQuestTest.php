@@ -46,11 +46,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         // Chained spendAction(actionFocus) is a single-confirm op — accept it.
         $this->confirmCardEffect();
 
-        $this->assertEquals(
-            "tableau_$color",
-            $this->tokenLocation($legGuards),
-            "Leg Guards should land on tableau after completeQuest"
-        );
+        $this->assertEquals("tableau_$color", $this->tokenLocation($legGuards), "Leg Guards should land on tableau after completeQuest");
 
         $hero = $this->game->getHero($color);
         $this->assertContains(
@@ -304,7 +300,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
 
     /**
      * Raven's Claw (card_equip_3_22): quest_on=TStep,
-     * quest_r=in(forest):gainTracker:check('countTracker>=10'):gainEquip.
+     * quest_r=in(forest):gainTracker,check('countTracker>=10'):gainEquip.
      *
      * Counter quest mirroring Belt of Youth (Alva's Q1 canary), only with target=10
      * instead of 8. After 10 TStep firings on forest hexes, the card leaves
@@ -372,11 +368,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
             $this->tokenLocation($ravensClaw),
             "Raven's Claw should land on tableau after 10 forest TSteps"
         );
-        $this->assertEquals(
-            0,
-            $this->countTokens("crystal_red", $ravensClaw),
-            "Op_gainEquip should sweep tracker crystals back to supply"
-        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $ravensClaw), "Op_gainEquip should sweep tracker crystals back to supply");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");

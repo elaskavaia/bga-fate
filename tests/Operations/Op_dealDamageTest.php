@@ -7,6 +7,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 final class Op_dealDamageTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine(); // drop leftover reinforcement/turnStart so dispatchAll() only runs the queued applyDamage
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -128,6 +129,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->createOp("2dealDamage");
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         // Red crystals should be cleaned up after kill
         $this->assertEquals(0, $this->getDamage("monster_goblin_1"));
@@ -139,6 +141,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
         $this->createOp("2dealDamage");
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $xpAfter = $this->countYellowCrystals($this->getPlayersTableau());
         $this->assertEquals($xpBefore + 1, $xpAfter);
     }
@@ -169,8 +172,10 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $op = $this->op;
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $op2 = $this->createOp("2dealDamage");
         $op2->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->dispatchAll();
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_brute_1"));
     }
 

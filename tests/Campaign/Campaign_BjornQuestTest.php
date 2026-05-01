@@ -169,23 +169,47 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Negative path for Home Sewn Cape — currently FAILS because Op_check only
-     * hides the immediately-next op (spendAction), so gainEquip still runs.
-     *
-     * Discovered while wiring this quest: with quest_r =
-     *   check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip
-     * an adjacent monster makes check evaluate to 0, hiding spendAction — but
-     * gainEquip is the *second* op past check and still fires, so the cape
-     * lands on the tableau anyway.
-     *
-     * Reported to user; choices include grouping the chain
-     * (`check(...):(spendAction(...):gainEquip)`) or reordering. Test is
-     * marked skipped until the chain shape is settled.
+     * Negative path for Home Sewn Cape — adjacent monster makes
+     * check('countAdjMonsters==0') evaluate to 0, which hides the grouped
+     * (spendAction(actionAttack):gainEquip) chain so neither op fires.
      */
     public function testHomeSewnCapeQuestBlockedWhenMonsterAdjacent(): void {
-        $this->markTestSkipped(
-            "Op_check only hides the immediately-next op, so check:spendAction:gainEquip " .
-                "leaves gainEquip running. Awaiting decision on grouping/reordering quest_r."
+        $this->setupGame([1]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $cape = "card_equip_1_24";
+        $nextCard = "card_equip_1_17";
+        $this->seedDeck("deck_equip_$color", [$cape, $nextCard]);
+
+        $heroHex = "hex_7_9";
+        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_7_8", "");
+
+        $this->game->machine->push("completeQuest", $color);
+        $this->game->machine->dispatchAll();
+
+        $this->assertOperation("completeQuest");
+        $this->respond($cape);
+
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($cape),
+            "Cape should stay in deck — gate countAdjMonsters==0 fails with monster adjacent"
+        );
+
+        $hero = $this->game->getHero($color);
+        $this->assertNotContains(
+            "actionAttack",
+            $hero->getActionsTaken(),
+            "Attack action should NOT be marked taken — gate hid the chain"
+        );
+
+        $this->assertEquals(
+            $cape,
+            $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"],
+            "Cape should still be on top of deck"
         );
     }
 

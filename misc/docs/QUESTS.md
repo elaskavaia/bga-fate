@@ -355,7 +355,7 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [x] Throwing Darts [Alva] (`in(forest):spendAction(actionPractice):gainEquip`)
 - [x] Throwing Knives [Embla] (`in(forest):spendAction(actionPractice):gainEquip`) — covered by Throwing Darts canonical test
 - [x] Precision Axes [Boldur] (`in(forest):spendAction(actionPractice):gainEquip`) — covered by Throwing Darts canonical test
-- [ ] Home Sewn Cape [Bjorn] (`check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip`)
+- [x] Home Sewn Cape [Bjorn] (`check('countAdjMonsters==0'):(spendAction(actionAttack):gainEquip)`)
 - [x] Home Sewn Tunic [Bjorn] (`spendAction(actionPractice):spendXp:gainEquip`)
 - [x] Bloodline Crystal [Alva] (`in(TempleRuins):2discardEvent:gainEquip`)
 - [x] Heels [Embla] (`in(WitchCabin):spendAction(actionMend):2discardEvent:gainEquip`)
@@ -377,19 +377,19 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip,2spawn(brute,adj)`) — bonus brute spawn
 
 **D — Counter / accumulating**
-- [x] Belt of Youth [Alva] (`in(forest):gainTracker:check('countTracker>=8'):gainEquip` on `TStep`) — Q1 canary
-- [x] Raven's Claw [Embla] (`in(forest):gainTracker:check('countTracker>=10'):gainEquip` on `TStep`)
-- [x] Dwarf Mail [Boldur] (`adj(mountain):gainTracker:check('countTracker>=7'):gainEquip` on `TStep`)
-- [x] Dwarf Pick [Boldur] (`gainTracker:check('countTracker>=3'):gainEquip` on `TMonsterKilled`)
-- [ ] Elven Blade [Alva] (`melee:gainTracker:check('countTracker>=3'):gainEquip` on `TMonsterKilled`) — needs `melee` predicate
-- [ ] Windbite [Alva] (`'hero_range>=2':gainTracker:check('countTracker>=4'):gainEquip` on `TMonsterKilled`) — needs `hero_range` Math term
+- [x] Belt of Youth [Alva] (`in(forest):gainTracker,check('countTracker>=8'):gainEquip` on `TStep`) — Q1 canary
+- [x] Raven's Claw [Embla] (`in(forest):gainTracker,check('countTracker>=10'):gainEquip` on `TStep`)
+- [x] Dwarf Mail [Boldur] (`adj(mountain):gainTracker,check('countTracker>=7'):gainEquip` on `TStep`)
+- [x] Dwarf Pick [Boldur] (`gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`)
+- [ ] Elven Blade [Alva] (`melee:gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`) — needs `melee` predicate
+- [ ] Windbite [Alva] (`'hero_range>=2':gainTracker,check('countTracker>=4'):gainEquip` on `TMonsterKilled`) — needs `hero_range` Math term
 - [ ] Trollbane [Bjorn] (`'killed(trollkin):gainTracker(monster_gold):check('countTracker>=5'):gainEquip` on `TMonsterKilled`) — needs `monster_gold` Math term
 - [ ] Singing Bow [Alva] (`in(forest):gainTracker(numDice):check('countTracker>=10'):gainEquip` on `TRoll(attackDice)`) — needs `numDice` Math term
 
 **E — End-of-movement positional (`TMove`)**
 - [x] Smiterbiter [Boldur] (`in(MarshOfSorrow):gainEquip`)
-- [ ] Dvalin's Pick [Boldur] (`check('countAdjMountains>=3'):gainEquip`) — needs `countAdjMountains` Math term (mirror existing `countAdjMonsters` at [Game.php:451](../../modules/php/Game.php#L451))
-- [ ] Eitri's Pick [Boldur] (`check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip`) — `countAdjMonsters` exists; needs new `countAdjLegends`
+- [x] Dvalin's Pick [Boldur] (`check('countAdjMountains>=3'):gainEquip`) 
+- [x] Eitri's Pick [Boldur] (`check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip`) 
 
 **F — Bespoke (custom Card class)**
 - [ ] Tiara [Alva] (extend existing `CardEquip_Tiara`) — quest_on=custom; "find in Dark Forest"
@@ -446,85 +446,3 @@ Items still unresolved, deferred to later phases or pending answers. Resolved it
 - **Section §6 numbering.** Items go 1, 2, 4, 5, 6, 7, 7, 9, 10, 11, 12, 13, 14 — duplicated 7 and missing 3 / 8 (artifacts from earlier removals). Cosmetic. Renumber once all §6 questions are answered.
 
 ---
-
-## 11. Questions queued for Victoria
-
-Append-only queue from background quest agents while Victoria is offline. Each entry: card / blocker / proposed options. Resolve top-down.
-
-### Q11.1 — `Op_check` only hides ONE next op (chain bug)
-
-**Surfaced by:** Home Sewn Cape [Bjorn] agent, attempting Option B `check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip`.
-
-**What happens:** [Op_check::resolve()](../../modules/php/Operations/Op_check.php#L19) does `array_shift($tops); hide($top["id"])` — i.e. hides exactly one op when the predicate fails. For the Cape's chain `check : spendAction : gainEquip`, only `spendAction` is hidden when a monster is adjacent — `gainEquip` runs anyway. Net effect: the cape lands on the tableau **without an action being spent**, strictly worse than the positive case.
-
-**Why Belt of Youth (the Q1 canary) doesn't trip this:** its chain `gainTracker:check('countTracker>=8'):gainEquip` has only ONE op past `check` (just `gainEquip`), so hiding-one-op is sufficient. The Cape pattern hides *one op out of two* and lets the rest leak through.
-
-**Fix options (need Victoria's call):**
-
-1. **Group the post-check ops in parens.** Change `check('...') : spendAction(actionAttack) : gainEquip` → `check('...') : (spendAction(actionAttack) : gainEquip)`. *Requires verifying the parser produces a single child node for `(a:b)` that `Op_check::resolve` can hide as one unit — the current `:` operator is left-fold n-ary, so parens may be flattened. Confirm in [OpExpression.php](../../modules/php/OpCommon/OpExpression.php) before relying on this.*
-2. **Reorder.** `spendAction(actionAttack) : check('...') : gainEquip`. Burns the action *before* checking — wrong semantics for a quest gate (player loses an action just to be told no).
-3. **Add a true `not_adj(monster)` (Op_in-style) predicate.** Mirror `Op_in`'s "void the chain by returning ERR_PREREQ from getPossibleMoves" pattern. The cape disappears from `completeQuest`'s target list entirely when adjacent to a monster — no resolve, no hidden ops, no leak. Symmetric: `adj(monster)` falls out for free (useful for future kill-adjacent quests).
-4. **Fix `Op_check` itself** to hide *all subsequent ops in the same `:` chain*, not just one. Possibly the Right Thing™ but a bigger blast radius — would change the semantics of Belt of Youth's pattern (currently fine because chain is short, but other call sites may rely on the one-op behavior).
-
-**Agent's vote:** Option 3 (true `not_adj` predicate) — most aligned with the §4 sketch as originally written, mirrors the existing `in(...)` gating pattern, and unblocks future `adj(monster)` quests with no further work.
-
-**Status:** Cape CSV row landed with the broken chain. Negative-path test marked `markTestSkipped` at [Campaign_BjornQuestTest.php:175](../../tests/Campaign/Campaign_BjornQuestTest.php#L175). QUESTS.md §7 box NOT ticked. Leftover [Debug_AdjMonstersTest.php](../../tests/Campaign/Debug_AdjMonstersTest.php) needs deletion.
-
-### Q11.2 — Dvalin's Pick / `countAdjMountains` Math term
-
-**Surfaced by:** Dvalin's Pick [Boldur] agent — quest_r needs `check('countAdjMountains>=3'):gainEquip` on `TMove`, but `countAdjMountains` is not a recognised Math DSL term yet. CSV NOT touched; nothing implemented.
-
-**What's needed:** a Math term that returns the number of mountain-terrain hexes adjacent to the active hero. Mirror of [`countAdjMonsters`](../../modules/php/Game.php#L451), except it filters on hex *terrain* (already exposed via [`HexMap::getHexTerrain`](../../modules/php/Common/HexMap.php#L57)) instead of hex *occupancy*. Once added, the same dispatch already wired in [Base.php:613](../../modules/php/Base.php#L613) (`str_starts_with($x, "count")` → reflection lookup of a method named `$x` on `Game`) makes `countAdjMountains` callable from `check('…')`.
-
-Confirmed: the reflection dispatch is name-based and zero-arg-from-DSL — `evaluateTerm` invokes `$method->invoke($this, $owner, $context, $options)`, so any new `count<Pascal>()` on `Game` is auto-discoverable. No parser, no registry, no new Trigger.
-
-**Options for shape:**
-
-1. **Option A — dedicated `countAdjMountains()` method.** Mirror of `countAdjMonsters` line-for-line, swapping the body for a terrain check. ~12 lines, no engine touch.
-
-   ```php
-   /** Count mountain-terrain hexes adjacent to the active hero. Used by evaluateExpression("countAdjMountains"). */
-   function countAdjMountains($owner = null, $context = null, $options = null): int {
-       $heroHex = $this->getHero($owner)->getHex();
-       if ($heroHex === null) {
-           return 0;
-       }
-       $count = 0;
-       foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
-           if ($this->hexMap->getHexTerrain($hex) === "mountain") {
-               $count++;
-           }
-       }
-       return $count;
-   }
-   ```
-
-2. **Option B — parameterised `countAdjTerrain('mountain')`.** Single general method, called from DSL as `countAdjTerrain('mountain')>=3`. Looks elegant, but the Math DSL parses function calls (see [`MathFunctionExpression`](../../modules/php/OpCommon/MathExpression.php#L202)) but only `evaluate()`s `min`/`max` — every other function name throws `"Unknown function: …"`. To make Option B work we'd need `MathFunctionExpression::evaluate()` to fall through to the mapper for unknown names AND we'd need string-literal arguments to evaluate cleanly (today `MathTerminalExpression::evaluate` only handles numbers and identifier-mapped lookups — feeding `'mountain'` through it would need a string-passthrough branch). That's an engine-shaping change for one card. Not worth it.
-
-3. **Option C — regex dispatch in [Base.php:613](../../modules/php/Base.php#L613) for `countAdjX` → `countAdjTerrain(X)`.** Keep the dedicated-method appearance at the call site, but auto-route any `countAdjFoo` to a single backing method via a regex in `evaluateTerm`. Cuts boilerplate if we expect 3+ terrains, but adds a magic mapping that masks typos (`countAdjMountians` would silently return 0 instead of throwing). Premature for one card.
-
-**Agent's vote:** **Option A.** Matches the existing `countAdjMonsters` shape exactly, no engine changes, no DSL changes, smallest possible blast radius. If a third terrain term shows up later (`countAdjForests`, `countAdjLakes`) we can revisit Option C as a refactor — at that point we'd have three call sites to validate the abstraction against, and the regex won't be speculative.
-
-**Side-question — Eitri's Pick / `countAdjLegends`:** same shape, different filter. Legend monsters have token IDs of the form `monster_legend_*` (confirmed by the existing `legend` predicate at [Game.php:349-351](../../modules/php/Game.php#L349) which checks `getPart($context, 1) == "legend"`). The mirror method:
-
-```php
-/** Count legend monsters on hexes adjacent to the active hero. Used by evaluateExpression("countAdjLegends"). */
-function countAdjLegends($owner = null, $context = null, $options = null): int {
-    $heroHex = $this->getHero($owner)->getHex();
-    if ($heroHex === null) {
-        return 0;
-    }
-    $count = 0;
-    foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
-        $occ = $this->hexMap->isOccupiedByCharacterType($hex, "monster");
-        if ($occ !== null && getPart($occ, 1) === "legend") {
-            $count++;
-        }
-    }
-    return $count;
-}
-```
-
-Eitri's quest then composes cleanly with the existing `countAdjMonsters`: `check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip` — the `or` is already supported by the Math parser ([MathExpression.php:335](../../modules/php/OpCommon/MathExpression.php#L335)). No DSL changes for that one either.
-
-**Status:** Nothing implemented. CSV not touched (no row added/edited for Dvalin's Pick or Eitri's Pick). [Game.php](../../modules/php/Game.php), [Base.php](../../modules/php/Base.php), [HexMap.php](../../modules/php/Common/HexMap.php) all unchanged. QUESTS.md §7 boxes for Dvalin's Pick and Eitri's Pick remain unticked. Awaiting Victoria's Option A/B/C call before any code lands; if Option A approved, both `countAdjMountains` and `countAdjLegends` can ship together (~25 lines total in `Game.php`) since they share the same shape.

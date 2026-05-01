@@ -458,7 +458,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
 
-        // 2drawEvent loops internally on a single confirm — both cards drawn in one resolve.
+        // 2drawEvent draws as many cards as fit in one resolve; only re-prompts if hand fills up.
         $this->respond("confirm");
 
         $this->assertEquals("hand_$color", $this->tokenLocation($first));

@@ -445,6 +445,11 @@ class Material {
         "name" => clienttranslate("Deal Damage"),
         "wicon" => "wicon_damage",
 ],
+    "Op_applyDamage" => [ 
+        "type" => "applyDamage",
+        "name" => clienttranslate("Apply Damage"),
+        "wicon" => "wicon_damage",
+],
     "Op_addDamage" => [ 
         "type" => "addDamage",
         "name" => clienttranslate("Add Damage"),
@@ -4531,7 +4536,7 @@ class Material {
         "effect_1" => clienttranslate("2[MANA]: Move 1 area"),
         "effect_2" => clienttranslate("3[MANA]: Prevent 2 damage"),
         "flavour" => '"Did Bjorn make this?""<br>""Sew it seams…"',
-        "quest_r" => "check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip",
+        "quest_r" => "check('countAdjMonsters==0'):(spendAction(actionAttack):gainEquip)",
 ],
     "card_equip_1_23" => [ 
         "ctype" => "equip",
@@ -4645,7 +4650,7 @@ class Material {
         "effect" => clienttranslate("Heal 1 damage from Alva."),
         "flavour" => "Ironically known as the Waist of Time, it actually carries rejuvenating powers.",
         "quest_on" => "TStep",
-        "quest_r" => "in(forest):gainTracker:check('countTracker>=8'):gainEquip",
+        "quest_r" => "in(forest):gainTracker,check('countTracker>=8'):gainEquip",
 ],
     "card_equip_2_25" => [ 
         "ctype" => "equip",
@@ -4862,7 +4867,7 @@ class Material {
         "flavour" => "The ancient sword Hrafnakló was forged from an alloy of celestial iron and silver.",
         "mw" => 1,
         "quest_on" => "TStep",
-        "quest_r" => "in(forest):gainTracker:check('countTracker>=10'):gainEquip",
+        "quest_r" => "in(forest):gainTracker,check('countTracker>=10'):gainEquip",
 ],
     "card_equip_3_18" => [ 
         "ctype" => "equip",
@@ -4958,6 +4963,8 @@ class Material {
         "quest" => "<i>End your movement adjacent to 3 mountain areas.</i> The tomb had better be there!",
         "effect" => clienttranslate("Spend an attack action to gain 1 gold [XP], 1 mana [MANA], and draw one card."),
         "flavour" => "Dvalin, who made the Brisingamen jewelry for Freyja, was buried between two mountain walls.",
+        "quest_on" => "TMove",
+        "quest_r" => "check('countAdjMountains>=3'):gainEquip",
 ],
     "card_equip_4_23" => [ 
         "ctype" => "equip",
@@ -4986,7 +4993,7 @@ class Material {
         "effect" => clienttranslate("Prevent the first damage dealt to Boldur each monster turn."),
         "flavour" => "Wearing this, Boldur is quite a hot male.",
         "quest_on" => "TStep",
-        "quest_r" => "adj(mountain):gainTracker:check('countTracker>=7'):gainEquip",
+        "quest_r" => "adj(mountain):gainTracker,check('countTracker>=7'):gainEquip",
 ],
     "card_equip_4_25" => [ 
         "ctype" => "equip",
@@ -4999,7 +5006,7 @@ class Material {
         "quest" => "<i>Kill 3 monsters</i>, then you get this from an anonymous admirer.",
         "flavour" => "Boldur, this is for you, so you know I would always pick you! X O X O",
         "quest_on" => "TMonsterKilled",
-        "quest_r" => "gainTracker:check('countTracker>=3'):gainEquip",
+        "quest_r" => "gainTracker,check('countTracker>=3'):gainEquip",
 ],
     "card_equip_4_22" => [ 
         "ctype" => "equip",
@@ -5014,6 +5021,8 @@ class Material {
         "effect" => clienttranslate("This is your Main Weapon. When you use Rapid Strike, add 2 [DIE_ATTACK] to that attack action."),
         "flavour" => "Used by Eitri, who forged Thor's hammer Mjölnir.",
         "mw" => 1,
+        "quest_on" => "TMove",
+        "quest_r" => "check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip",
 ],
     "card_equip_4_17" => [ 
         "ctype" => "equip",
