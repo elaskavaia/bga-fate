@@ -88,6 +88,7 @@ gainAtt_strength|Gain Strength|wicon_strength
 # damage / health
 dealDamage|Deal Damage|wicon_damage
 applyDamage|Apply Damage|wicon_damage
+finishKill|Finish Kill|wicon_damage
 addDamage|Add Damage|wicon_damage
 preventDamage|Prevent Damage|wicon_damage
 heal|Heal|wicon_health

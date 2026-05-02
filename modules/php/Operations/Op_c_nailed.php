@@ -76,18 +76,22 @@ class Op_c_nailed extends Operation {
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
         $this->game->systemAssert("ERR:c_nailed:noMonsterOnHex:$targetHex", $defenderId !== null);
 
-        // Deal overkill damage
-        $this->game->effect_moveCrystals($attackerId, "red", $overkill, $defenderId, [
-            "message" => "",
+        // Open-coded kill peek for the Level II chain decision — crystals aren't placed yet so
+        // evaluateDamage would under-report by $overkill. Op_applyDamage is the source of truth.
+        $defender = $this->game->getCharacter($defenderId);
+        $totalDamage = $defender->getDamage() + $overkill;
+        $health = $defender->getEffectiveHealth();
+        $willKill = $totalDamage >= $health;
+
+        $this->queue("applyDamage", null, [
+            "attacker" => $attackerId,
+            "target" => $defenderId,
+            "amount" => $overkill,
         ]);
 
-        $defender = $this->game->getCharacter($defenderId);
-        $remaining = $defender->applyDamageEffects($overkill, $attackerId);
-
-        // Level II: chain — update marker_attack to new killed hex and overkill
-        if ($this->isChain() && $remaining <= 0) {
-            $newOverkill = abs($remaining);
-            $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, $newOverkill, "");
+        // Level II: chain on kill — Op_applyDamage updates marker_attack with the new overkill,
+        // so the queued c_nailed(chain) reads the right values when it resolves.
+        if ($this->isChain() && $willKill) {
             $this->queue("c_nailed(chain)");
         }
     }

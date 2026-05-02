@@ -19,6 +19,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
 
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine();
         // Default hero from AbstractOpTestCase is hero_1; that's fine — Op_c_sweep
         // is hero-agnostic, it uses whoever owns the op.
         $this->game->tokens->moveToken("hero_1", $this->heroHex);
@@ -100,6 +101,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->createOp("c_sweep");
 
         $this->call_resolve("hex_5_8");
+        $this->dispatchAll();
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(1, $crystals, "Goblin should take 1 overkill damage");
@@ -113,6 +115,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->createOp("c_sweep");
 
         $this->call_resolve("hex_5_8");
+        $this->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
@@ -128,6 +131,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
 
         $this->createOp("c_sweep");
         $this->call_resolve("hex_5_8");
+        $this->dispatchAll();
 
         // #1 dead, #2 unharmed
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));

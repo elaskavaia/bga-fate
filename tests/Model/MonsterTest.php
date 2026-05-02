@@ -18,73 +18,70 @@ final class MonsterTest extends TestCase {
     }
 
     // -------------------------------------------------------------------------
-    // applyDamageEffects
+    // evaluateDamage
     // -------------------------------------------------------------------------
 
     public function testDamageKillsMonsterWhenEnough(): void {
         // Goblin: health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        // Pre-place damage crystals
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
 
         $monster = $this->game->getMonster("monster_goblin_1");
-        $remaining = $monster->applyDamageEffects(2, "hero_1");
-        $this->assertLessThanOrEqual(0, $remaining);
-        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        // Pure detection — evaluateDamage no longer mutates state.
+        $result = $monster->evaluateDamage(2, "hero_1");
+        $this->assertTrue($result["killed"]);
+        $this->assertLessThanOrEqual(0, $result["remaining"]);
 
-        // No red crystals should remain on monster
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
-        $this->assertCount(0, $crystals);
+        // Cleanup is the cleanup-step's job (Op_finishKill in production); call it here.
+        $monster->finalizeDamage(2, "hero_1");
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        $this->assertCount(0, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1"));
     }
 
     public function testDamageDoesNotKillWhenInsufficient(): void {
         // Goblin: health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        // Pre-place 1 damage crystal
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
 
-        $remaining = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(1, "hero_1");
-        $this->assertGreaterThan(0, $remaining);
-        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        $result = $this->game->getMonster("monster_goblin_1")->evaluateDamage(1, "hero_1");
+        $this->assertFalse($result["killed"]);
+        $this->assertGreaterThan(0, $result["remaining"]);
 
-        // 1 red crystal should be on monster
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
-        $this->assertCount(1, $crystals);
+        // No cleanup runs; monster stays on hex with its damage.
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1"));
     }
 
     public function testDamageAccumulates(): void {
         // Troll: health=7
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $monster = $this->game->getMonster("monster_troll_1");
 
-        // First attack: 3 damage
+        // First attack: 3 damage — survives
         $this->game->effect_moveCrystals("monster_troll_1", "red", 3, "monster_troll_1", ["message" => ""]);
-        $remaining = $this->game->getMonster("monster_troll_1")->applyDamageEffects(3, "hero_1");
-        $this->assertGreaterThan(0, $remaining);
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
-        $this->assertCount(3, $crystals);
+        $result = $monster->evaluateDamage(3, "hero_1");
+        $this->assertFalse($result["killed"]);
+        $this->assertCount(3, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1"));
 
         // Second attack: 4 more damage — total 7, enough to kill
         $this->game->effect_moveCrystals("monster_troll_1", "red", 4, "monster_troll_1", ["message" => ""]);
-        $remaining = $this->game->getMonster("monster_troll_1")->applyDamageEffects(4, "hero_1");
-        $this->assertLessThanOrEqual(0, $remaining);
-        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
+        $result = $monster->evaluateDamage(4, "hero_1");
+        $this->assertTrue($result["killed"]);
+        $this->assertLessThanOrEqual(0, $result["remaining"]);
 
-        // All red crystals returned to supply
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1");
-        $this->assertCount(0, $crystals);
+        $monster->finalizeDamage(4, "hero_1");
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));
+        $this->assertCount(0, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_troll_1"));
     }
 
     public function testZeroDamageDoesNothing(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
-        $remaining = $this->game->getMonster("monster_goblin_1")->applyDamageEffects(0, "hero_1");
-        $this->assertGreaterThan(0, $remaining);
+        $result = $this->game->getMonster("monster_goblin_1")->evaluateDamage(0, "hero_1");
+        $this->assertFalse($result["killed"]);
+        $this->assertGreaterThan(0, $result["remaining"]);
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
-        $this->assertCount(0, $crystals);
+        $this->assertCount(0, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1"));
     }
 
     // -------------------------------------------------------------------------

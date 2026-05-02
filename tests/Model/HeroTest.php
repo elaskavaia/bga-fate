@@ -39,15 +39,15 @@ final class HeroTest extends TestCase {
     public function testXpAwardedOnKill(): void {
         // Goblin: xp=1, health=2
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        // Pre-place enough damage crystals to kill
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
         $monster = $this->game->getMonster("monster_goblin_1");
-        $remaining = $monster->applyDamageEffects(2, "hero_1");
-        $this->assertLessThanOrEqual(0, $remaining);
+        $result = $monster->evaluateDamage(2, "hero_1");
+        $this->assertTrue($result["killed"]);
+        // XP is awarded by the cleanup step, not pure detection.
+        $monster->finalizeDamage(2, "hero_1");
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 1, $xpAfter);
@@ -55,16 +55,14 @@ final class HeroTest extends TestCase {
 
     public function testXpNotAwardedOnSurvive(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        // Pre-place 1 damage crystal (not enough to kill goblin with health=2)
         $this->game->effect_moveCrystals("monster_goblin_1", "red", 1, "monster_goblin_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
         $monster = $this->game->getMonster("monster_goblin_1");
-        $remaining = $monster->applyDamageEffects(1, "hero_1");
-        $this->assertGreaterThan(0, $remaining);
-        // No XP awarded since monster survived
+        $result = $monster->evaluateDamage(1, "hero_1");
+        $this->assertFalse($result["killed"]);
+        // No cleanup runs on survive.
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore, $xpAfter);
@@ -73,33 +71,32 @@ final class HeroTest extends TestCase {
     public function testBruteGivesMoreXp(): void {
         // Brute: health=3, xp=2
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
-
-        // Pre-place enough damage crystals to kill
         $this->game->effect_moveCrystals("monster_brute_1", "red", 3, "monster_brute_1", ["message" => ""]);
 
         $xpBefore = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
 
         $monster = $this->game->getMonster("monster_brute_1");
-        $remaining = $monster->applyDamageEffects(3, "hero_1");
-        $this->assertLessThanOrEqual(0, $remaining);
+        $result = $monster->evaluateDamage(3, "hero_1");
+        $this->assertTrue($result["killed"]);
+        $monster->finalizeDamage(3, "hero_1");
 
         $xpAfter = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
         $this->assertEquals($xpBefore + 2, $xpAfter);
     }
 
     // -------------------------------------------------------------------------
-    // applyDamageEffects / knockout
+    // evaluateDamage / knockout
     // -------------------------------------------------------------------------
 
     public function testHeroKnockedOutWhenDamageReachesHealth(): void {
-        // Move hero out of Grimheim so knockout moves him back
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        // Bjorn health=9. Pre-place 8 damage, then 1 more → total 9 = knocked out
+        // Bjorn health=9. Pre-place 9 damage = knocked out
         $this->game->effect_moveCrystals("hero_1", "red", 9, "hero_1", ["message" => ""]);
 
         $hero = $this->game->getHeroById("hero_1");
-        $remaining = $hero->applyDamageEffects(1, "monster_goblin_1");
-        $this->assertLessThanOrEqual(0, $remaining);
+        $result = $hero->evaluateDamage(1, "monster_goblin_1");
+        $this->assertTrue($result["killed"]);
+        $hero->finalizeDamage(1, "monster_goblin_1");
 
         $heroLoc = $this->game->tokens->getTokenLocation("hero_1");
         $this->assertTrue($this->game->hexMap->isInGrimheim($heroLoc), "Hero should be in Grimheim, got $heroLoc");
@@ -110,24 +107,19 @@ final class HeroTest extends TestCase {
 
         // 2 houses destroyed (1-player setup has 4 houses)
         $houses = $this->game->tokens->getTokensOfTypeInLocation("house", "hex%");
-        $this->assertCount(2, $houses); // 4 - 2
+        $this->assertCount(2, $houses);
     }
 
     public function testHeroNotKnockedOutBelowHealth(): void {
-        // Move hero out of Grimheim
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        // Bjorn health=9. Pre-place 7 damage, then 1 more → total 8 < 9
+        // Bjorn health=9. 8 damage < 9
         $this->game->effect_moveCrystals("hero_1", "red", 8, "hero_1", ["message" => ""]);
 
         $hero = $this->game->getHeroById("hero_1");
-        $remaining = $hero->applyDamageEffects(1, "monster_goblin_1");
-
-        $this->assertGreaterThan(0, $remaining);
+        $result = $hero->evaluateDamage(1, "monster_goblin_1");
+        $this->assertFalse($result["killed"]);
         $this->assertEquals("hex_11_8", $this->game->tokens->getTokenLocation("hero_1"));
-
-        // 8 damage total
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
-        $this->assertCount(8, $crystals);
+        $this->assertCount(8, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
     }
 
     public function testHeroKnockedOutExcessDamageCapsAt5(): void {
@@ -135,8 +127,9 @@ final class HeroTest extends TestCase {
         $this->game->effect_moveCrystals("hero_1", "red", 11, "hero_1", ["message" => ""]);
 
         $hero = $this->game->getHeroById("hero_1");
-        $remaining = $hero->applyDamageEffects(3, "monster_goblin_1");
-        $this->assertLessThanOrEqual(0, $remaining);
+        $result = $hero->evaluateDamage(3, "monster_goblin_1");
+        $this->assertTrue($result["killed"]);
+        $hero->finalizeDamage(3, "monster_goblin_1");
 
         $heroLoc = $this->game->tokens->getTokenLocation("hero_1");
         $this->assertTrue($this->game->hexMap->isInGrimheim($heroLoc), "Hero should be in Grimheim, got $heroLoc");

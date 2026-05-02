@@ -40,46 +40,35 @@ class Monster extends Character {
         return (int) $this->getRulesFor("health", "0");
     }
 
+    function getEffectiveHealth(): int {
+        return $this->getHealth();
+    }
+
     /**
-     * Apply damage to this monster.
-     * If total damage >= health, the monster is killed, removed from map, and the attacker gains XP.
-     * @param string $attackerId hero token id of whoever killed it (for log message and XP award)
-     * @return int health - totalDamage: positive if survived, <= 0 if killed (abs = overkill)
+     * Kill cleanup. Runs from Op_finishKill, after TMonsterKilled has
+     * dispatched, so trigger handlers see the monster still on its hex with
+     * its bonus crystals intact.
      */
-    function applyDamageEffects(int $amount, string $attackerId): int {
-        $this->game->systemAssert("cannot be negative amount", $amount >= 0);
-        $totalDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
-        $health = $this->getHealth();
+    function finalizeDamage(int $amount, string $attackerId): void {
+        $totalDamage = $this->getDamage();
+        // Remove red crystals from monster back to supply
+        $this->moveCrystals("red", -$totalDamage, $this->id, ["message" => ""]);
 
-        $remaining = $health - $totalDamage;
-        $this->game->notifyMessage(clienttranslate('${char_name2} deals ${amount} [DAMAGE] to ${char_name} (${remaining} health left)'), [
-            "char_name" => $this->id,
-            "char_name2" => $attackerId,
-            "amount" => $amount,
-            "remaining" => $remaining,
-        ]);
-
-        if ($totalDamage >= $health) {
-            // Remove red crystals from monster back to supply
-            $this->moveCrystals("red", -$totalDamage, $this->id, ["message" => ""]);
-
-            // Bonus XP from markers placed on the monster (e.g. Prey). Counted before moveTo
-            // so the source location is unambiguous.
-            $bonusXp = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $this->id));
-            if ($bonusXp > 0) {
-                $this->moveCrystals("yellow", -$bonusXp, $this->id, ["message" => ""]);
-            }
-
-            // Remove monster from map
-            $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
-
-            // Award base XP reward, then bonus XP separately so the log makes the source clear.
-            $hero = $this->game->getHeroById($attackerId);
-            $hero->gainXp($this->getXpReward());
-            if ($bonusXp > 0) {
-                $hero->gainXp($bonusXp);
-            }
+        // Bonus XP from markers placed on the monster (e.g. Prey). Counted before moveTo
+        // so the source location is unambiguous.
+        $bonusXp = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $this->id));
+        if ($bonusXp > 0) {
+            $this->moveCrystals("yellow", -$bonusXp, $this->id, ["message" => ""]);
         }
-        return $remaining;
+
+        // Remove monster from map
+        $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
+
+        // Award base XP reward, then bonus XP separately so the log makes the source clear.
+        $hero = $this->game->getHeroById($attackerId);
+        $hero->gainXp($this->getXpReward());
+        if ($bonusXp > 0) {
+            $hero->gainXp($bonusXp);
+        }
     }
 }

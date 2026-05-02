@@ -89,7 +89,11 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->respond("hex_4_9");
         $this->respond($cardId); // useCard for TActionAttack
         $this->respond("choice_0"); // addDamage branch
-        // Kill with 0 overkill → c_sweep is void → no useCard prompt for TMonsterKilled.
+        // After my-applyDamage refactor, TMonsterKilled fires *before* the kill is
+        // finalised, so the goblin sits on its hex while the trigger walks the tableau.
+        // CardAbility_SweepingStrikeI prompts useCard unconditionally on TMonsterKilled;
+        // skip it — there's no overkill and Op_c_sweep would bail anyway.
+        $this->skipIfOp("useCard");
 
         $this->assertEquals("supply_monster", $this->tokenLocation($primary));
         $this->assertEquals(0, $this->countDamage($cleave), "No overkill → no cleave damage");

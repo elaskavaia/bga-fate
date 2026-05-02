@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 final class Op_c_preyTest extends AbstractOpTestCase {
+    protected function setUp(): void {
+        parent::setUp();
+        $this->game->clearMachine(); // drop leftover reinforcement so dispatchAll() only runs the kill chain
+    }
+
     // ---- target selection ----
 
     public function testNoMonstersAutoSkips(): void {
@@ -68,15 +73,19 @@ final class Op_c_preyTest extends AbstractOpTestCase {
 
         $xpBefore = $this->countYellowCrystals($this->getPlayersTableau());
 
-        // Kill the troll directly via the model
+        // Kill the troll via Op_applyDamage directly so TMonsterKilled fires + Op_finishKill runs.
+        // (Skipping Op_dealDamage because its range defaults to "adj" and the troll is far from the hero.)
         $troll = $this->game->getMonster("monster_troll_1");
         $baseXp = $troll->getXpReward();
-        // Pre-load damage equal to health so applyDamageEffects(0) kills it
         $health = $troll->getHealth();
-        for ($i = 0; $i < $health; $i++) {
-            $this->game->tokens->moveToken("crystal_red_" . ($i + 1), "monster_troll_1");
-        }
-        $troll->applyDamageEffects(0, "hero_1");
+
+        $applyOp = $this->createOp("applyDamage", [
+            "target" => "monster_troll_1",
+            "attacker" => "hero_1",
+            "amount" => $health,
+        ]);
+        $applyOp->action_resolve([\Bga\Games\Fate\OpCommon\Operation::ARG_TARGET => "monster_troll_1"]);
+        $this->dispatchAll();
 
         // Troll removed
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_troll_1"));

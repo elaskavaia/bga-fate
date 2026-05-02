@@ -5,6 +5,7 @@ declare(strict_types=1);
 final class Op_c_nailedTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine();
         // Hero at hex_8_9 (Grimheim edge)
         $this->game->tokens->moveToken("hero_1", "hex_8_9");
     }
@@ -45,6 +46,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
         $this->setAttackMarker("hex_7_9", 1);
         $this->call_resolve("hex_6_9");
+        $this->dispatchAll();
 
         $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1");
         $this->assertCount(1, $crystals);
@@ -57,6 +59,7 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
         $this->setAttackMarker("hex_7_9", 3);
         $this->call_resolve("hex_6_9");
+        $this->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
@@ -70,14 +73,17 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
         $this->createOp("c_nailed(chain)");
         $this->call_resolve("hex_6_9");
 
-        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
-
-        // Should have queued another c_nailed(chain)
+        // Op_c_nailed queued applyDamage (the kill) and c_nailed(chain) (the next pierce).
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $opTypes = array_map(fn($o) => $o["type"], $ops);
+        $this->assertContains("applyDamage", $opTypes);
         $this->assertContains("c_nailed(chain)", $opTypes);
 
-        // marker_attack should be updated to hex_6_9 with new overkill
+        // Dispatch the kill chain — Op_applyDamage moves marker_attack to the new
+        // killed hex with the leftover overkill, which is what c_nailed(chain) reads.
+        $this->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $this->assertEquals("hex_6_9", $this->game->tokens->getTokenLocation("marker_attack"));
     }
 

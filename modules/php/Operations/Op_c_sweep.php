@@ -75,12 +75,11 @@ class Op_c_sweep extends Operation {
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
         $this->game->systemAssert("ERR:c_sweep:noMonsterOnHex:$targetHex", $defenderId !== null);
 
-        $this->game->effect_moveCrystals($attackerId, "red", $overkill, $defenderId, [
-            "message" => "",
+        $this->queue("applyDamage", null, [
+            "attacker" => $attackerId,
+            "target" => $defenderId,
+            "amount" => $overkill,
         ]);
-
-        $defender = $this->game->getCharacter($defenderId);
-        $defender->applyDamageEffects($overkill, $attackerId);
     }
 
     function getExtraArgs() {

@@ -370,6 +370,9 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [x] Orebiter [Boldur] (`2spendXp:gainEquip`)
 
 **C — Kill-monster, replaces XP (trigger-driven optional claim)**
+
+> **Note on `killed(...)` and `gainTracker(monster_gold)`**: these predicates need access to *which monster died* during `TMonsterKilled` handler dispatch. `Op_finishKill` runs *after* the trigger, so the dying monster is still on its hex when handlers fire. Implementation: read `marker_attack`'s location to get the killed hex, then `getCharacterOnHex(hex)` to get the monster id. From there `killed('rank>=3')` filters on `getRulesFor(id, "rank")`, `killed(trollkin)` checks `getRulesFor(id, "faction")`, etc. Same lookup `Op_c_sweep` already uses today.
+
 - [ ] Helmet [Bjorn] (`killed('brute or skeleton'):gainEquip:blockXp` on `TMonsterKilled`) — needs `Op_blockXp`
 - [ ] Helmet [Embla] (same shape as Bjorn's)
 - [ ] Quiver [Bjorn] (`killed('rank>=3'):gainEquip:blockXp`)
@@ -396,7 +399,7 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [ ] Elven Arrows [Alva] (`CardEquip_ElvenArrows` new) — needs `Trigger::MonsterSpawn` or polling hook
 - [ ] Shield [Boldur] (`CardEquip_ShieldBoldur` new) — OR of two predicates
 
-### Client polish
+### Client polishgainTracker,check
 
 Tracked in [PLAN.md](PLAN.md) under Quests → Client. Not required for the engine to function — defer until card coverage is broad enough that polish doesn't get redone.
 

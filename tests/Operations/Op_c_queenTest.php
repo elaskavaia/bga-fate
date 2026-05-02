@@ -26,6 +26,7 @@ final class Op_c_queenTest extends AbstractOpTestCase {
 
         $this->createOp("c_queen");
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
 
         $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_goblin_1"));
     }

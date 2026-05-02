@@ -16,7 +16,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  *   target list includes the card itself; picking it dispatches here. Target is an
  *   adjacent mountain hex, not a monster. Strategy: place a synthetic `monster_goldvein` token on the chosen hex
  *   and run the standard attack pipeline (Op_roll → Op_resolveHits → Op_dealDamage). The
- *   GoldVein subclass overrides applyDamageEffects to convert each damage point into 1 XP
+ *   GoldVein subclass overrides evaluateDamage to convert each damage point into 1 XP
  *   for the attacker, then despawns. Routing through the real pipeline is intentional so
  *   amplifying cards (Berserk, Magic Runes, Quiver, etc.) work correctly.
  *

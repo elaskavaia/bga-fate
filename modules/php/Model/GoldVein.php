@@ -10,17 +10,23 @@ namespace Bga\Games\Fate\Model;
  * 1:1 into XP for the attacker.
  */
 class GoldVein extends Monster {
-    function applyDamageEffects(int $amount, string $attackerId): int {
-        $this->game->systemAssert("cannot be negative amount", $amount >= 0);
+    /** GoldVein dies after one attack regardless of damage. */
+    function evaluateDamage(int $amount, string $attackerId): array {
+        $this->game->systemAssert("ERR:evaluateDamage:negative:$amount", $amount >= 0);
+        return [
+            "killed" => true,
+            "remaining" => 0,
+            "totalDamage" => $this->getDamage(),
+        ];
+    }
 
+    function finalizeDamage(int $amount, string $attackerId): void {
         $this->moveTo("supply_monster", "");
         if ($amount > 0) {
-            // Remove red crystals from monster back to supply
             $this->moveCrystals("red", -$amount, $this->id, ["message" => ""]);
             $this->game
                 ->getHeroById($attackerId)
                 ->gainXp($amount, clienttranslate('${char_name} gains ${count} [XP] (Gold extracted from Mountain)'));
         }
-        return 0;
     }
 }

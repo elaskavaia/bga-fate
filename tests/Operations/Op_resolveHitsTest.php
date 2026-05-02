@@ -50,7 +50,7 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
         $op->resolve();
 
         // 1 hit - 1 armor = 0 → dealDamage queued with count=0 (per-defender side effects still fire,
-        // amount=0 is benign: effect_moveCrystals no-ops on 0, applyDamageEffects(0) is harmless).
+        // amount=0 is benign: effect_moveCrystals no-ops on 0, evaluateDamage(0) is harmless).
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $dealDamageOps = array_values(array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage")));
         $this->assertCount(1, $dealDamageOps, "dealDamage queued even when armor absorbs all hits");

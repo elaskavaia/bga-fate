@@ -328,46 +328,34 @@ class Hero extends Character {
         ]);
     }
 
+    function getEffectiveHealth(): int {
+        return $this->getMaxHealth();
+    }
+
     /**
-     * Apply damage to this hero after monster attack.
-     * If total damage >= health, hero is knocked out:
-     * - Moved to Grimheim, damage set to 5, 2 town pieces destroyed.
-     * @return int health - totalDamage: positive if survived, <= 0 if knocked out
+     * Knockout cleanup. Runs from Op_finishKill, after THeroKnockedOut has
+     * dispatched, so trigger handlers see the hero on their pre-knockout hex.
      */
-    function applyDamageEffects(int $amount, string $attackerId): int {
-        $this->game->systemAssert("cannot be negative amount", $amount >= 0);
-        $totalDamage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $this->id));
-        $health = $this->getMaxHealth();
-        $remaining = $health - $totalDamage;
-
-        $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} [DAMAGE] (${totalDamage}/${health})'), [
-            "char_name" => $this->id,
-            "amount" => $amount,
-            "totalDamage" => $totalDamage,
-            "health" => $health,
-        ]);
-
-        if ($totalDamage >= $health) {
-            // Adjust damage to exactly 5: remove excess or add missing
-            $diff = $totalDamage - 5;
-            if ($diff !== 0) {
-                $this->moveCrystals("red", -$diff, $this->id, ["message" => ""]);
-            }
-
-            // Move hero to their starting hex in Grimheim
-            $startHex = $this->getRulesFor("location");
-            $this->moveTo(
-                $startHex,
-                clienttranslate('${char_name} is knocked out and carried back to Grimheim. By their mother. She is not happy.')
-            );
-
-            // "Some villagers panic and flee, leaving their houses undefended"
-            $this->game->effect_destroyHouses(2, $this->id, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
-
-            if ($this->game->isEndOfGame()) {
-                $this->game->handleEndOfGame();
-            }
+    function finalizeDamage(int $amount, string $attackerId): void {
+        $totalDamage = $this->getDamage();
+        // Adjust damage to exactly 5: remove excess or add missing
+        $diff = $totalDamage - 5;
+        if ($diff !== 0) {
+            $this->moveCrystals("red", -$diff, $this->id, ["message" => ""]);
         }
-        return $remaining;
+
+        // Move hero to their starting hex in Grimheim
+        $startHex = $this->getRulesFor("location");
+        $this->moveTo(
+            $startHex,
+            clienttranslate('${char_name} is knocked out and carried back to Grimheim. By their mother. She is not happy.')
+        );
+
+        // "Some villagers panic and flee, leaving their houses undefended"
+        $this->game->effect_destroyHouses(2, $this->id, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
+
+        if ($this->game->isEndOfGame()) {
+            $this->game->handleEndOfGame();
+        }
     }
 }

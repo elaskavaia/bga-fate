@@ -32,8 +32,10 @@ class Op_spendHealth extends CountableOperation {
         $heroId = $this->game->getHeroTokenId($owner);
         $amount = (int) $this->getCount();
 
-        $this->game->effect_moveCrystals($heroId, "red", $amount, $heroId, ["message" => ""]);
-
-        $this->game->getHero($owner)->applyDamageEffects($amount, $heroId);
+        $this->queue("applyDamage", null, [
+            "attacker" => $heroId,
+            "target" => $heroId,
+            "amount" => $amount,
+        ]);
     }
 }

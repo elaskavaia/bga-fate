@@ -283,6 +283,12 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Choose goblin_1 at hex_6_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
         $this->respond("hex_6_9");
 
+        // c_nailed kills now fire TMonsterKilled, which re-prompts useCard for any
+        // on=TMonsterKilled card on the tableau — including Nailed Together II itself.
+        // The chain semantics consume one Nailed Together activation across the whole
+        // pierce sequence, so skip the recursive re-prompt.
+        $this->skipIfOp("useCard");
+
         // Chain: c_nailed again — brute at hex_5_9 is behind hex_6_9
         // Auto-resolves since only one monster behind
         // Brute should have 1 damage (chain overkill from goblin_1)

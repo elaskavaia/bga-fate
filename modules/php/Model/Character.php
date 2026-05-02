@@ -116,9 +116,44 @@ class Character {
         return $this->game->material->getRulesFor($this->id, $field, $default);
     }
 
-    /** @return int health - totalDamage: positive if survived, <= 0 if killed (abs = overkill) */
-    function applyDamageEffects(int $amount, string $attackerId): int {
-        // Base character has no damage effects; overridden in Hero and Monster
-        return 1;
+    /**
+     * Health threshold used by evaluateDamage to decide whether totalDamage
+     * has killed/knocked-out this character. Override in Hero (max health) and
+     * Monster (card health). The base PHP_INT_MAX makes plain Character invincible.
+     */
+    function getEffectiveHealth(): int {
+        return PHP_INT_MAX;
+    }
+
+    /**
+     * Pure damage detection — no side effects.
+     *
+     * Reads the current red-crystal count on this character and decides whether
+     * the character is killed/knocked-out. Does NOT add the new damage; the
+     * caller (Op_applyDamage) is responsible for placing the red crystals on
+     * this character before calling.
+     *
+     * @return array{killed:bool, remaining:int, totalDamage:int}
+     */
+    function evaluateDamage(int $amount, string $attackerId): array {
+        $this->game->systemAssert("ERR:evaluateDamage:negative:$amount", $amount >= 0);
+        $totalDamage = $this->getDamage();
+        $health = $this->getEffectiveHealth();
+        $remaining = $health - $totalDamage;
+        return [
+            "killed" => $totalDamage >= $health,
+            "remaining" => $remaining,
+            "totalDamage" => $totalDamage,
+        ];
+    }
+
+    /**
+     * Finalisation step run from Op_finishKill, after TMonsterKilled /
+     * THeroKnockedOut have dispatched. Subclasses do their cleanup here:
+     * Monster moves to supply + awards XP; Hero is knocked back to Grimheim;
+     * GoldVein extracts gold for the attacker.
+     */
+    function finalizeDamage(int $amount, string $attackerId): void {
+        // base: no cleanup
     }
 }

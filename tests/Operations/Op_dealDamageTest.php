@@ -120,6 +120,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $op = $this->op;
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $this->assertEquals(1, $this->getDamage("monster_goblin_1"));
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
@@ -161,8 +162,10 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
         $op = $this->op;
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $op2 = $this->createOp();
         $op2->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->dispatchAll();
         $this->assertEquals(2, $this->getDamage("monster_brute_1"));
         $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_brute_1"));
     }
@@ -201,6 +204,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $supplyBefore = $this->countRedCrystals("supply_crystal_red");
         $this->createOp("2dealDamage");
         $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
         $supplyAfter = $this->countRedCrystals("supply_crystal_red");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
@@ -263,6 +267,7 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8");
         $this->createOp("dealDamage(adj_attack)");
         $this->call_resolve("hex_13_8");
+        $this->dispatchAll();
         $this->assertEquals(1, $this->getDamage("monster_goblin_1"));
     }
 }

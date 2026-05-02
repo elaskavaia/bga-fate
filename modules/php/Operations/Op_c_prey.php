@@ -17,7 +17,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * - Player selects any monster on the map (no range restriction) matching
  *   (rank==3 or legend) AND having zero red crystals (undamaged).
  * - Two yellow crystals are placed on the monster token as bonus XP.
- * - When the monster is later killed, Monster::applyDamageEffects awards
+ * - When the monster is later killed, Monster::evaluateDamage awards
  *   those crystals to the killer in addition to the base XP reward.
  * - Auto-skips if no valid target exists.
  *

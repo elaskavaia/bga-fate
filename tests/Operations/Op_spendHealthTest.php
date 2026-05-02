@@ -7,6 +7,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 final class Op_spendHealthTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
+        $this->game->clearMachine(); // drop leftover reinforcement/turnStart so dispatchAll() only runs the queued applyDamage
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 
@@ -18,12 +19,14 @@ final class Op_spendHealthTest extends AbstractOpTestCase {
         $this->assertEquals(0, $this->getHeroDamage());
         $this->createOp();
         $this->call_resolve();
+        $this->dispatchAll();
         $this->assertEquals(1, $this->getHeroDamage());
     }
 
     public function testResolveAddsNDamage(): void {
         $this->createOp("3spendHealth");
         $this->call_resolve();
+        $this->dispatchAll();
         $this->assertEquals(3, $this->getHeroDamage());
     }
 
@@ -31,6 +34,7 @@ final class Op_spendHealthTest extends AbstractOpTestCase {
         $supplyBefore = $this->countRedCrystals("supply_crystal_red");
         $this->createOp("2spendHealth");
         $this->call_resolve();
+        $this->dispatchAll();
         $supplyAfter = $this->countRedCrystals("supply_crystal_red");
         $this->assertEquals($supplyBefore - 2, $supplyAfter);
     }
@@ -39,6 +43,7 @@ final class Op_spendHealthTest extends AbstractOpTestCase {
         $this->game->effect_moveCrystals("hero_1", "red", 2, "hero_1");
         $this->createOp();
         $this->call_resolve();
+        $this->dispatchAll();
         $this->assertEquals(3, $this->getHeroDamage());
     }
 
@@ -49,6 +54,7 @@ final class Op_spendHealthTest extends AbstractOpTestCase {
 
         $this->createOp();
         $this->call_resolve();
+        $this->dispatchAll();
 
         // Knockout sets damage to exactly 5 and moves hero to starting hex in Grimheim
         $this->assertEquals(5, $this->getHeroDamage());

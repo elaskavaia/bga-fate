@@ -450,6 +450,11 @@ class Material {
         "name" => clienttranslate("Apply Damage"),
         "wicon" => "wicon_damage",
 ],
+    "Op_finishKill" => [ 
+        "type" => "finishKill",
+        "name" => clienttranslate("Finish Kill"),
+        "wicon" => "wicon_damage",
+],
     "Op_addDamage" => [ 
         "type" => "addDamage",
         "name" => clienttranslate("Add Damage"),

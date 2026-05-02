@@ -241,12 +241,14 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->respond($prey);
         $this->respond($trollHex);
 
-        // Now kill the troll directly — killer receives base reward + 2 bonus.
+        // Now kill the troll via the standard pipeline — killer receives base reward + 2 bonus.
         $health = $this->game->getMonster($troll)->getHealth();
-        for ($i = 0; $i < $health; $i++) {
-            $this->game->tokens->moveToken("crystal_red_" . ($i + 1), $troll);
-        }
-        $this->game->getMonster($troll)->applyDamageEffects(0, $this->heroId);
+        $this->game->machine->push("applyDamage", $color, [
+            "target" => $troll,
+            "attacker" => $this->heroId,
+            "amount" => $health,
+        ]);
+        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation($troll));
         $this->assertEquals($xpBefore + $baseXp + 2, $this->countXp());

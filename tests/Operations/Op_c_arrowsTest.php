@@ -54,6 +54,7 @@ final class Op_c_arrowsTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_2");
         $op = $this->op;
         $this->call_resolve("hex_13_2");
+        $this->dispatchAll();
         $this->assertEquals(1, $this->getDamage("monster_goblin_1"));
     }
 
@@ -72,6 +73,7 @@ final class Op_c_arrowsTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_brute_1", "hex_12_1");
         $op = $this->op;
         $this->call_resolve("hex_12_1");
+        $this->dispatchAll();
         $this->assertEquals(2, $this->getDamage("monster_brute_1"));
         $this->assertEquals("hex_12_1", $this->game->tokens->getTokenLocation("monster_brute_1"));
     }
@@ -81,6 +83,7 @@ final class Op_c_arrowsTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_2");
         $op = $this->op;
         $this->call_resolve("hex_13_2");
+        $this->dispatchAll();
         $this->assertEquals(1, $this->getDamage("monster_goblin_1"));
         $this->assertEquals("hex_13_2", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }

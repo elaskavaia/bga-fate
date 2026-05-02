@@ -38,6 +38,7 @@ enum Trigger: string {
     case TurnStart = "TTurnStart";
     case MonsterMove = "TMonsterMove";
     case MonsterKilled = "TMonsterKilled";
+    case HeroKnockedOut = "THeroKnockedOut";
     case CardEnter = "TCardEnter";
     /**
      * Synthetic "event" representing manual activation from the useCard free-action

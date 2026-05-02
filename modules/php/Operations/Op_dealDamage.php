@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -102,10 +101,6 @@ class Op_dealDamage extends CountableOperation {
         $this->game->systemAssert("ERR:dealDamage:noCharacterOnHex:$targetHex", $defenderId !== null);
 
         $amount = $this->getDamageAmount($defenderId);
-
-        $this->game->effect_moveCrystals($attackerId, "red", $amount, $defenderId, [
-            "message" => "",
-        ]);
 
         $this->queue("applyDamage", null, ["attacker" => $attackerId, "target" => $defenderId, "amount" => $amount]);
     }
