@@ -371,9 +371,9 @@ Grouped by §2 mechanism. Tick on per-card test green.
 
 **C — Kill-monster, replaces XP (trigger-driven optional claim)**
 
-> **Note on `killed(...)` and `gainTracker(monster_gold)`**: these predicates need access to *which monster died* during `TMonsterKilled` handler dispatch. `Op_finishKill` runs *after* the trigger, so the dying monster is still on its hex when handlers fire. Implementation: read `marker_attack`'s location to get the killed hex, then `getCharacterOnHex(hex)` to get the monster id. From there `killed('rank>=3')` filters on `getRulesFor(id, "rank")`, `killed(trollkin)` checks `getRulesFor(id, "faction")`, etc. Same lookup `Op_c_sweep` already uses today.
 
-- [ ] Helmet [Bjorn] (`killed('brute or skeleton'):gainEquip:blockXp` on `TMonsterKilled`) — needs `Op_blockXp`
+
+- [ ] Helmet [Bjorn] (`killed('brute or skeleton'):blockXp,gainEquip` on `TMonsterKilled`) — needs `Op_blockXp`
 - [ ] Helmet [Embla] (same shape as Bjorn's)
 - [ ] Quiver [Bjorn] (`killed('rank>=3'):gainEquip:blockXp`)
 - [ ] Quiver [Alva] (same shape as Bjorn's)
