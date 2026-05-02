@@ -20,7 +20,6 @@ use Bga\Games\Fate\Stubs\GameUT;
 final class Op_triggerTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 

@@ -14,7 +14,6 @@ final class Op_c_hailTest extends AbstractOpTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         // Put Alva's Hail I on her tableau, equip First Bow (range 2) so range tests
         // can use hexes beyond adjacency.
         $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());

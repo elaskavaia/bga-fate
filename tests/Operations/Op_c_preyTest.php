@@ -3,11 +3,6 @@
 declare(strict_types=1);
 
 final class Op_c_preyTest extends AbstractOpTestCase {
-    protected function setUp(): void {
-        parent::setUp();
-        $this->game->clearMachine(); // drop leftover reinforcement so dispatchAll() only runs the kill chain
-    }
-
     // ---- target selection ----
 
     public function testNoMonstersAutoSkips(): void {

@@ -9,7 +9,6 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau()); // Sure Shot II
         $this->game->tokens->moveToken("card_equip_1_15", $this->getPlayersTableau()); // First Bow (range=2)
         $this->game->tokens->moveToken("hero_1", "hex_11_8");

@@ -5,7 +5,6 @@ declare(strict_types=1);
 final class Op_performActionTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
     }
 

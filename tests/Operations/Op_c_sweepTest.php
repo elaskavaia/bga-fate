@@ -19,7 +19,6 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
 
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         // Default hero from AbstractOpTestCase is hero_1; that's fine — Op_c_sweep
         // is hero-agnostic, it uses whoever owns the op.
         $this->game->tokens->moveToken("hero_1", $this->heroHex);

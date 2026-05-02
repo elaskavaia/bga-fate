@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\Operations\Op_seq;
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
-use function Bga\Games\Fate\toJson;
 
 final class Op_seqTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
@@ -86,6 +81,7 @@ final class Op_seqTest extends AbstractOpTestCase {
     }
 
     public function testComplexInst(): void {
+        $this->game->machine->queue("turn");
         $op = $this->createOp("[0,2](gainAtt,3gainXp)", ["reason" => "kick"]);
         $copy = $op->copy();
         $copy->queueOp($copy);

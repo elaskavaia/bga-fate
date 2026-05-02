@@ -250,6 +250,10 @@ class Material {
         "type" => "check",
         "name" => clienttranslate("Check"),
 ],
+    "Op_killed" => [ 
+        "type" => "killed",
+        "name" => clienttranslate("Killed Filter"),
+],
     "Op_turn" => [ 
         "type" => "turn",
         "name" => clienttranslate("Turn"),

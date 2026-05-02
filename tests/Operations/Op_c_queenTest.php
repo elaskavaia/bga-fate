@@ -6,7 +6,6 @@ final class Op_c_queenTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        $this->game->clearMachine();
     }
 
     public function testNoAdjacentMonsterNoValidTargets(): void {

@@ -8,7 +8,6 @@ use Bga\Games\Fate\Operations\Op_turnMonster;
 final class Op_reinforcementTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         $this->game->machine->push("turnStart");
         $this->game->machine->dispatchAll();
     }

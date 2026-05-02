@@ -6,11 +6,6 @@ declare(strict_types=1);
  * Tests for Op_turnStart — fires trigger(turnStart) then queues the main turn op.
  */
 class Op_turnStartTest extends AbstractOpTestCase {
-    protected function setUp(): void {
-        parent::setUp();
-        $this->game->clearMachine();
-    }
-
     public function testResolveQueuesTriggerAndTurn(): void {
         $this->createOp("turnStart");
         $this->call_resolve();

@@ -5,7 +5,6 @@ declare(strict_types=1);
 final class Op_c_nailedTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
-        $this->game->clearMachine();
         // Hero at hex_8_9 (Grimheim edge)
         $this->game->tokens->moveToken("hero_1", "hex_8_9");
     }
