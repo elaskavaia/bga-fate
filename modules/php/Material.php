@@ -459,6 +459,10 @@ class Material {
         "name" => clienttranslate("Finish Kill"),
         "wicon" => "wicon_damage",
 ],
+    "Op_blockXp" => [ 
+        "type" => "blockXp",
+        "name" => clienttranslate("Forfeit XP Reward"),
+],
     "Op_addDamage" => [ 
         "type" => "addDamage",
         "name" => clienttranslate("Add Damage"),
@@ -4588,6 +4592,8 @@ class Material {
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed('rank>=3'):?(blockXp:gainEquip)",
 ],
     "card_equip_1_17" => [ 
         "ctype" => "equip",
@@ -4715,6 +4721,8 @@ class Material {
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed('rank>=3'):?(blockXp:gainEquip)",
 ],
     "card_equip_2_20" => [ 
         "ctype" => "equip",

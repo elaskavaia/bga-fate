@@ -152,8 +152,12 @@ class Character {
      * THeroKnockedOut have dispatched. Subclasses do their cleanup here:
      * Monster moves to supply + awards XP; Hero is knocked back to Grimheim;
      * GoldVein extracts gold for the attacker.
+     *
+     * $noXp suppresses any XP / gold reward this kill would normally produce —
+     * set by Op_blockXp inside trigger handler chains for "claim card INSTEAD
+     * of XP" quests (Helmet, Quiver, Orebiter via card text).
      */
-    function finalizeDamage(int $amount, string $attackerId): void {
+    function finalizeDamage(int $amount, string $attackerId, bool $noXp = false): void {
         // base: no cleanup
     }
 }

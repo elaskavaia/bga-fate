@@ -156,3 +156,4 @@ See misc/docs/CHECKLIST.md
 
 
 [ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
+[ ] Refactor updateData - create function in OpMachine to hide impl details

@@ -336,7 +336,7 @@ class Hero extends Character {
      * Knockout cleanup. Runs from Op_finishKill, after THeroKnockedOut has
      * dispatched, so trigger handlers see the hero on their pre-knockout hex.
      */
-    function finalizeDamage(int $amount, string $attackerId): void {
+    function finalizeDamage(int $amount, string $attackerId, bool $noXp = false): void {
         $totalDamage = $this->getDamage();
         // Adjust damage to exactly 5: remove excess or add missing
         $diff = $totalDamage - 5;

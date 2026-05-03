@@ -90,6 +90,7 @@ gainAtt_strength|Gain Strength|wicon_strength
 dealDamage|Deal Damage|wicon_damage
 applyDamage|Apply Damage|wicon_damage
 finishKill|Finish Kill|wicon_damage
+blockXp|Forfeit XP Reward|
 addDamage|Add Damage|wicon_damage
 preventDamage|Prevent Damage|wicon_damage
 heal|Heal|wicon_health

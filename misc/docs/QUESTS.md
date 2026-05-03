@@ -375,8 +375,8 @@ Grouped by §2 mechanism. Tick on per-card test green.
 
 - [ ] Helmet [Bjorn] (`killed('brute or skeleton'):blockXp,gainEquip` on `TMonsterKilled`) — needs `Op_blockXp`
 - [ ] Helmet [Embla] (same shape as Bjorn's)
-- [ ] Quiver [Bjorn] (`killed('rank>=3'):gainEquip:blockXp`)
-- [ ] Quiver [Alva] (same shape as Bjorn's)
+- [x] Quiver [Bjorn] (`killed('rank>=3'):blockXp:gainEquip`)
+- [x] Quiver [Alva] (same shape as Bjorn's)
 - [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip,2spawn(brute,adj)`) — bonus brute spawn
 
 **D — Counter / accumulating**

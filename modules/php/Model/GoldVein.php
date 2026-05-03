@@ -20,9 +20,9 @@ class GoldVein extends Monster {
         ];
     }
 
-    function finalizeDamage(int $amount, string $attackerId): void {
+    function finalizeDamage(int $amount, string $attackerId, bool $noXp = false): void {
         $this->moveTo("supply_monster", "");
-        if ($amount > 0) {
+        if ($amount) {
             $this->moveCrystals("red", -$amount, $this->id, ["message" => ""]);
             $this->game
                 ->getHeroById($attackerId)

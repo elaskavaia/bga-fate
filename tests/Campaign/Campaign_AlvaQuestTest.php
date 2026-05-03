@@ -240,4 +240,92 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
         $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
     }
+
+    /**
+     * Quiver (card_equip_2_18): quest_on=TMonsterKilled,
+     * quest_r=killed('rank>=3'):?(blockXp:gainEquip).
+     *
+     * Same shape as Bjorn's Quiver: rank-3 kill pops a yes/no prompt to claim.
+     */
+    public function testQuiverClaimsItselfOnRank3KillWhenAccepted(): void {
+        $this->setupGame([2]); // Solo Alva
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $quiver = "card_equip_2_18";
+        $nextCard = "card_equip_2_17"; // Throwing Darts
+        $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
+
+        $heroHex = "hex_11_8";
+        $trollHex = "hex_12_8";
+        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->getMonster("monster_troll_1")->moveTo($trollHex, "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => $trollHex, "count" => 7]);
+        $this->game->machine->dispatchAll();
+
+        $this->confirmCardEffect();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
+        $this->assertEquals("tableau_$color", $this->tokenLocation($quiver), "Quiver should land on tableau on rank-3 kill");
+        $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the troll's XP reward");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Throwing Darts should surface as the new deck-top");
+    }
+
+    public function testQuiverDeclinedKeepsXp(): void {
+        $this->setupGame([2]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $quiver = "card_equip_2_18";
+        $nextCard = "card_equip_2_17";
+        $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_troll_1")->moveTo("hex_12_8", "");
+
+        $baseXp = $this->game->getMonster("monster_troll_1")->getXpReward();
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 7]);
+        $this->game->machine->dispatchAll();
+
+        $this->skip();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver stays in deck on decline");
+        $this->assertEquals($xpBefore + $baseXp, $this->countXp(), "XP awarded when player declines the claim");
+    }
+
+    public function testQuiverStaysInDeckWhenKillIsRank1(): void {
+        $this->setupGame([2]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $quiver = "card_equip_2_18";
+        $nextCard = "card_equip_2_17";
+        $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver should stay in deck — goblin is rank 1");
+        $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
+    }
 }

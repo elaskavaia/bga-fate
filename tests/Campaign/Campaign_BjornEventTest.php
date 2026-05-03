@@ -225,6 +225,10 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
     }
 
     public function testPreyBonusXpAwardedOnKill(): void {
+        // Bjorn's equip deck is shuffled in setUp; if Quiver (TMonsterKilled quest) lands on top
+        // it claims the troll kill and suppresses XP. Move it out so kill cleanup runs default.
+        $this->game->tokens->moveToken("card_equip_1_18", "limbo");
+
         $prey = "card_event_1_25_1";
         $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);

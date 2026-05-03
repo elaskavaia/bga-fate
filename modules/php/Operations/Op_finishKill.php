@@ -36,9 +36,10 @@ class Op_finishKill extends Operation {
         $defenderId = $this->getDataField("target");
         $attackerId = $this->getDataField("attacker");
         $amount = (int) $this->getDataField("amount", 0);
+        $noXp = (bool) $this->getDataField("noXp", false);
 
         $defender = $this->game->getCharacter($defenderId);
-        $defender->finalizeDamage($amount, $attackerId);
+        $defender->finalizeDamage($amount, $attackerId, $noXp);
     }
 
     public function canSkip() {

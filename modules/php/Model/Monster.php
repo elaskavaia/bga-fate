@@ -49,7 +49,7 @@ class Monster extends Character {
      * dispatched, so trigger handlers see the monster still on its hex with
      * its bonus crystals intact.
      */
-    function finalizeDamage(int $amount, string $attackerId): void {
+    function finalizeDamage(int $amount, string $attackerId, bool $noXp = false): void {
         $totalDamage = $this->getDamage();
         // Remove red crystals from monster back to supply
         $this->moveCrystals("red", -$totalDamage, $this->id, ["message" => ""]);
@@ -64,11 +64,13 @@ class Monster extends Character {
         // Remove monster from map
         $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
 
-        // Award base XP reward, then bonus XP separately so the log makes the source clear.
-        $hero = $this->game->getHeroById($attackerId);
-        $hero->gainXp($this->getXpReward());
-        if ($bonusXp > 0) {
-            $hero->gainXp($bonusXp);
+        if (!$noXp) {
+            // Award base XP reward, then bonus XP separately so the log makes the source clear.
+            $hero = $this->game->getHeroById($attackerId);
+            $hero->gainXp($this->getXpReward());
+            if ($bonusXp > 0) {
+                $hero->gainXp($bonusXp);
+            }
         }
     }
 }
