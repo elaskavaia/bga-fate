@@ -37,8 +37,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $nailfareHex = "hex_16_5";
         $this->game->tokens->moveToken($heroId, $nailfareHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($bow);
@@ -89,8 +88,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $robberCampHex = "hex_5_11";
         $this->game->tokens->moveToken($heroId, $robberCampHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($blackArrows);
@@ -140,8 +138,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $heroHex = "hex_7_9";
         $this->game->tokens->moveToken($heroId, $heroHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($cape);
@@ -187,8 +184,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($heroId, $heroHex);
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_7_8", "");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->respond($cape);
@@ -241,8 +237,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(1, $xpBefore, "Need at least 1 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($tunic);
@@ -478,5 +473,123 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck — goblin doesn't match brute|skeleton");
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
+    }
+
+    /**
+     * Leather Purse (card_equip_1_19): quest_on=TMonsterKilled,
+     * quest_r=killed(trollkin):?(2spawn(brute):gainEquip).
+     *
+     * Trigger-driven optional claim — predicate matches any trollkin (goblin,
+     * brute, troll). On accept, 2 brutes spawn adjacent to the hero (the "cost"
+     * — bag's previous owners want it back) and Leather Purse lands on tableau.
+     * No blockXp in the chain — the kill XP is awarded either way.
+     */
+    public function testLeatherPurseClaimsItselfOnTrollkinKillSpawning2Brutes(): void {
+        $this->setupGame([1]); // Solo Bjorn
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $purse = "card_equip_1_19";
+        $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Purse is claimed
+        $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
+
+        $heroHex = "hex_11_8";
+        $goblinHex = "hex_12_8";
+        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->getMonster("monster_goblin_1")->moveTo($goblinHex, "");
+
+        $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
+        $this->assertGreaterThanOrEqual(2, $brutesBefore, "Need at least 2 brutes in supply for the spawn cost");
+
+        $this->game->machine->push("dealDamage", $color, ["target" => $goblinHex, "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        // Optional ?(2spawn(brute):gainEquip) pops a confirm prompt — accept it.
+        $this->confirmCardEffect();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"), "Goblin should be killed");
+        $this->assertEquals("tableau_$color", $this->tokenLocation($purse), "Leather Purse should land on tableau on trollkin kill");
+
+        $brutesAfter = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
+        $this->assertEquals($brutesBefore - 2, $brutesAfter, "2 brutes should leave supply (spawned next to hero)");
+
+        // Both spawned brutes should be on hexes adjacent to the hero.
+        $adjBrutes = 0;
+        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
+            $charId = $this->game->hexMap->getCharacterOnHex($hex);
+            if ($charId !== null && str_starts_with($charId, "monster_brute")) {
+                $adjBrutes++;
+            }
+        }
+        $this->assertEquals(2, $adjBrutes, "Both brutes should spawn on hexes adjacent to the hero");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Throwing Axes should surface as the new deck-top");
+    }
+
+    /** Player declines the optional claim — no spawns, card stays in deck. */
+    public function testLeatherPurseDeclinedKeepsCardInDeck(): void {
+        $this->setupGame([1]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $purse = "card_equip_1_19";
+        $nextCard = "card_equip_1_17";
+        $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
+
+        $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        // Decline the optional ?(2spawn(brute):gainEquip) prompt.
+        $this->skip();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($purse), "Leather Purse stays in deck on decline");
+        $this->assertEquals(
+            $brutesBefore,
+            count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster")),
+            "No brutes should spawn when player declines"
+        );
+    }
+
+    /**
+     * Negative path: killed(trollkin) fails on a firehorde monster (sprite),
+     * so the chain voids before the optional prompt — no choice, card stays.
+     */
+    public function testLeatherPurseStaysInDeckWhenKillIsNotTrollkin(): void {
+        $this->setupGame([1]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $purse = "card_equip_1_19";
+        $nextCard = "card_equip_1_17";
+        $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_sprite_1")->moveTo("hex_12_8", "");
+
+        $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 5]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_sprite_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($purse), "Leather Purse stays in deck — sprite isn't trollkin");
+        $this->assertEquals(
+            $brutesBefore,
+            count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster")),
+            "No brutes spawn when chain voids"
+        );
     }
 }

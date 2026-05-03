@@ -71,7 +71,9 @@ Verify the new fields land in [modules/php/Material.php](../../../modules/php/Ma
 
 The test should:
 
-- Push the trigger or `completeQuest` directly onto the machine (see existing tests for the `machine->push(...)` + `dispatchAll()` pattern).
+- Drive the entry point from the player's choice surface, not by pushing onto the machine:
+  - **Player-initiated quests** (`quest_on=` empty): `$this->respond("completeQuest")` — picks the free action from the turn op's choices. **Never** `$this->game->machine->push("completeQuest", ...)`; that bypasses the choice-listing pathway the real player uses.
+  - **Trigger-driven quests** (`TStep`, `TMonsterKilled`, …): push the underlying trigger source (`move`, `dealDamage`, …) — see existing tests for the `machine->push(...)` + `dispatchAll()` pattern.
 - Drive any sub-prompts (`spendAction`, choice, etc.).
 - Assert the equip card lands on `tableau_$color`, the new deck-top is revealed, and any quest-progress crystals are swept.
 

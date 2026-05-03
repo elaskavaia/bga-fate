@@ -17,6 +17,8 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->setupGame([1]); // Solo Bjorn
         $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
+        $this->clearEquipDecks();
+
         // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
             "card_monster_7", // Fiery Projectiles (Highlands, J,J,E)
@@ -225,10 +227,6 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
     }
 
     public function testPreyBonusXpAwardedOnKill(): void {
-        // Bjorn's equip deck is shuffled in setUp; if Quiver (TMonsterKilled quest) lands on top
-        // it claims the troll kill and suppresses XP. Move it out so kill cleanup runs default.
-        $this->game->tokens->moveToken("card_equip_1_18", "limbo");
-
         $prey = "card_event_1_25_1";
         $color = $this->getActivePlayerColor();
         $this->seedHand($prey, $color);

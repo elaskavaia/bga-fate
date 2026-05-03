@@ -41,8 +41,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(3, $xpBefore, "Need at least 3 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Mining Equipment.
         $this->assertOperation("completeQuest");
@@ -98,8 +97,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Dwarf Helm.
         $this->assertOperation("completeQuest");
@@ -146,8 +144,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->seedDeck("deck_equip_$color", [$battleBoots, $nextCard]);
         $this->assertEquals($battleBoots, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Battle Boots.
         $this->assertOperation("completeQuest");
@@ -406,8 +403,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Orebiter.
         $this->assertOperation("completeQuest");

@@ -35,8 +35,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->seedDeck("deck_equip_$color", [$legGuards, $nextCard]);
         $this->assertEquals($legGuards, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Leg Guards.
         $this->assertOperation("completeQuest");
@@ -85,8 +84,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $witchCabinHex = "hex_11_11";
         $this->game->tokens->moveToken($heroId, $witchCabinHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($potion);
@@ -135,8 +133,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->seedDeck("deck_equip_$color", [$warriorShield, $nextCard]);
         $this->assertEquals($warriorShield, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Warrior Shield.
         $this->assertOperation("completeQuest");
@@ -192,8 +189,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $spewingMountainHex = "hex_2_14";
         $this->game->tokens->moveToken($heroId, $spewingMountainHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($wildfireBlade);
@@ -255,8 +251,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $witchCabinHex = "hex_11_11";
         $this->game->tokens->moveToken($heroId, $witchCabinHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($heels);
@@ -405,8 +400,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Tailored Boots.
         $this->assertOperation("completeQuest");
@@ -461,8 +455,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(4, $xpBefore, "Need at least 4 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Custom Armor.
         $this->assertOperation("completeQuest");
@@ -517,8 +510,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Blade Decorations.
         $this->assertOperation("completeQuest");

@@ -89,8 +89,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $forestHex = "hex_2_8";
         $this->game->tokens->moveToken($heroId, $forestHex);
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($darts);
@@ -149,8 +148,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         // Place hero on Temple Ruins hex so the in(TempleRuins) gate passes.
         $this->game->tokens->moveToken($heroId, "hex_12_4");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
         $this->assertValidTarget($crystal);
@@ -213,8 +211,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(5, $xpBefore, "Need at least 5 XP on tableau to pay the quest cost");
 
-        $this->game->machine->push("completeQuest", $color);
-        $this->game->machine->dispatchAll();
+        $this->respond("completeQuest");
 
         // completeQuest prompts for the deck-top card; pick Alva's Bracers.
         $this->assertOperation("completeQuest");
@@ -235,6 +232,115 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->countTokens("crystal_yellow", "tableau_$color"),
             "5 yellow crystals should have been spent paying the quest cost"
         );
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
+    }
+
+    /**
+     * Tiara (card_equip_2_16): quest_on= (empty — player-initiated),
+     * quest_r=in(DarkForest):gainEquip.
+     *
+     * Player invokes the top-bar `completeQuest` free action while Tiara is on top
+     * of deck_equip_<color> AND the hero stands on a Dark Forest hex. No cost — the
+     * gate alone gates the claim. On success, Tiara's onCardEnter seeds 6 yellow
+     * crystals on the card.
+     */
+    public function testTiaraLandsOnTableauAfterCompleteQuestInDarkForest(): void {
+        $this->setupGame([2]); // Solo Alva — Tiara lives in Alva's deck
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $tiara = "card_equip_2_16";
+        $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Tiara is claimed
+        $this->seedDeck("deck_equip_$color", [$tiara, $nextCard]);
+        $this->assertEquals($tiara, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
+
+        // Place hero on a Dark Forest hex so the in(DarkForest) gate passes.
+        $this->game->tokens->moveToken($heroId, "hex_9_1");
+
+        $this->respond("completeQuest");
+
+        $this->assertOperation("completeQuest");
+        $this->assertValidTarget($tiara);
+        $this->respond($tiara);
+
+        // gainEquip may auto-resolve or surface a single-confirm; either way this is a no-op or a confirm.
+        $this->confirmCardEffect();
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($tiara),
+            "Tiara should land on tableau after completeQuest in Dark Forest"
+        );
+
+        // onCardEnter seeds 6 yellow crystals on the card.
+        $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara), "Tiara should seed 6 [XP] on enter");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
+    }
+
+    /**
+     * Elven Arrows (card_equip_2_24): quest_on= (empty — player-initiated),
+     * quest_r=in(TrollCaves):spawn(troll):gainEquip.
+     *
+     * Player invokes the top-bar `completeQuest` free action while Elven Arrows is on
+     * top of deck_equip_<color> AND the hero stands in the Troll Caves. The "cost" is
+     * a spawn — Op_spawn pulls a troll from supply_monster onto the first free
+     * adjacent hex (clockwise) — and then gainEquip moves the card to tableau.
+     */
+    public function testElvenArrowsLandsOnTableauAndSpawnsTrollOnCompleteQuestInTrollCaves(): void {
+        $this->setupGame([2]); // Solo Alva — Elven Arrows lives in Alva's deck
+        $this->clearMonstersFromMap(); // also returns trolls to supply_monster
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $arrows = "card_equip_2_24";
+        $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Arrows is claimed
+        $this->seedDeck("deck_equip_$color", [$arrows, $nextCard]);
+        $this->assertEquals($arrows, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
+
+        // hex_6_6 is mountain/TrollCaves — moveToken bypasses heroes-can't-enter-mountain.
+        $heroHex = "hex_6_6";
+        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->hexMap->invalidateOccupancy();
+
+        $trollsBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_troll", "supply_monster"));
+        $this->assertGreaterThan(0, $trollsBefore, "Need at least one troll in supply for spawn to work");
+
+        $this->respond("completeQuest");
+
+        $this->assertOperation("completeQuest");
+        $this->assertValidTarget($arrows);
+        $this->respond($arrows);
+
+        // spawn(troll) auto-resolves; gainEquip may surface a single-confirm or auto-resolve.
+        $this->confirmCardEffect();
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($arrows),
+            "Elven Arrows should land on tableau after completeQuest in Troll Caves"
+        );
+
+        $trollsAfter = count($this->game->tokens->getTokensOfTypeInLocation("monster_troll", "supply_monster"));
+        $this->assertEquals($trollsBefore - 1, $trollsAfter, "One troll should leave supply (spawned next to hero)");
+
+        // The spawned troll should be on a hex adjacent to the hero.
+        $adjHexes = $this->game->hexMap->getAdjacentHexes($heroHex);
+        $spawnedTroll = null;
+        foreach ($adjHexes as $hex) {
+            $charId = $this->game->hexMap->getCharacterOnHex($hex);
+            if ($charId !== null && str_starts_with($charId, "monster_troll")) {
+                $spawnedTroll = $charId;
+                break;
+            }
+        }
+        $this->assertNotNull($spawnedTroll, "A troll should have spawned on a hex adjacent to the hero");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
