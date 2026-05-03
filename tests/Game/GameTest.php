@@ -662,4 +662,23 @@ final class GameTest extends TestCase {
         $this->game->tokens->moveToken("rune_stone", "timetrack_1", 12);
         $this->assertEquals(100, $this->game->getGameProgression());
     }
+
+    // -------------------------------------------------------------------------
+    // evaluateExpression — bareword monster-tribe term (matches getPart($context, 1))
+    // -------------------------------------------------------------------------
+
+    public function testMonsterTribeBarewordMatchesBrute(): void {
+        $this->setupHeroAndTokens();
+        $this->assertEquals(1, $this->game->evaluateExpression("brute or skeleton", PCOLOR, "monster_brute_1"));
+    }
+
+    public function testMonsterTribeBarewordMatchesSkeleton(): void {
+        $this->setupHeroAndTokens();
+        $this->assertEquals(1, $this->game->evaluateExpression("brute or skeleton", PCOLOR, "monster_skeleton_1"));
+    }
+
+    public function testMonsterTribeBarewordRejectsGoblin(): void {
+        $this->setupHeroAndTokens();
+        $this->assertEquals(0, $this->game->evaluateExpression("brute or skeleton", PCOLOR, "monster_goblin_1"));
+    }
 }

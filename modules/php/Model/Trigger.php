@@ -27,6 +27,7 @@ namespace Bga\Games\Fate\Model;
  * and an actionAttack-flavored trigger).
  */
 enum Trigger: string {
+    case None = "TNone";
     case ActionAttack = "TActionAttack";
     case AfterActionAttack = "TAfterActionAttack";
     case ActionMove = "TActionMove"; // move with action move

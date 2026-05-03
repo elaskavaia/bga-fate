@@ -111,6 +111,18 @@ class GameUT extends Game {
         $this->machine->db->loadRows([]);
     }
 
+    /**
+     * Limbo every equipment card sitting in any equip deck so quests on
+     * deck-top cards don't leak into unrelated tests (e.g. a Helmet on top
+     * auto-claiming any brute kill). Tests that need specific equipment
+     * can move/seedDeck the cards they want back.
+     */
+    function clearEquipDecks(): void {
+        foreach (array_keys($this->tokens->getTokensOfTypeInLocation("card_equip", "deck_equip%")) as $tokenId) {
+            $this->tokens->moveToken($tokenId, "limbo");
+        }
+    }
+
     function getMultiMachine() {
         return $this->multimachine;
     }

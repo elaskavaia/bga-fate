@@ -60,11 +60,6 @@ final class Op_c_preyTest extends AbstractOpTestCase {
     // ---- bonus XP on kill ----
 
     public function testBonusXpAwardedOnKill(): void {
-        // Bjorn's deck is shuffled in setUp; if Quiver (TMonsterKilled quest) lands on top
-        // it claims the troll kill and suppresses XP. This test is about Prey's bonus XP, not
-        // quest interaction — clear the deck so kill cleanup runs the default path.
-        $this->game->tokens->moveToken("card_equip_1_18", "limbo");
-
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_5");
         // Mark via Prey
         $op = $this->op;

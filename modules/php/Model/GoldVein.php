@@ -12,7 +12,6 @@ namespace Bga\Games\Fate\Model;
 class GoldVein extends Monster {
     /** GoldVein dies after one attack regardless of damage. */
     function evaluateDamage(int $amount, string $attackerId): array {
-        $this->game->systemAssert("ERR:evaluateDamage:negative:$amount", $amount >= 0);
         return [
             "killed" => true,
             "remaining" => 0,

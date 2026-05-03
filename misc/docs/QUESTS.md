@@ -373,11 +373,11 @@ Grouped by §2 mechanism. Tick on per-card test green.
 
 
 
-- [ ] Helmet [Bjorn] (`killed('brute or skeleton'):blockXp,gainEquip` on `TMonsterKilled`) — needs `Op_blockXp`
-- [ ] Helmet [Embla] (same shape as Bjorn's)
+- [x] Helmet [Bjorn] (`killed('brute or skeleton'):?(blockXp:gainEquip)` on `TMonsterKilled`)
+- [x] Helmet [Embla] (same shape as Bjorn's)
 - [x] Quiver [Bjorn] (`killed('rank>=3'):blockXp:gainEquip`)
 - [x] Quiver [Alva] (same shape as Bjorn's)
-- [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip,2spawn(brute,adj)`) — bonus brute spawn
+
 
 **D — Counter / accumulating**
 - [x] Belt of Youth [Alva] (`in(forest):gainTracker,check('countTracker>=8'):gainEquip` on `TStep`) — Q1 canary
@@ -398,6 +398,7 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [ ] Tiara [Alva] (extend existing `CardEquip_Tiara`) — quest_on=custom; "find in Dark Forest"
 - [ ] Elven Arrows [Alva] (`CardEquip_ElvenArrows` new) — needs `Trigger::MonsterSpawn` or polling hook
 - [ ] Shield [Boldur] (`CardEquip_ShieldBoldur` new) — OR of two predicates
+- [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip`) — bonus brute spawn hook to onCardEnter
 
 ### Client polishgainTracker,check
 

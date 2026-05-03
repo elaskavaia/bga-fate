@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\GoldVein;
 use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
@@ -79,7 +80,9 @@ class Op_applyDamage extends Operation {
         // 5. Kill path: trigger first, finishKill second — so handlers see the dying char on its hex.
         if ($result["killed"]) {
             $trigger = $defender instanceof Hero ? Trigger::HeroKnockedOut : Trigger::MonsterKilled;
-            $this->queueTrigger($trigger);
+            if (!($defender instanceof GoldVein)) {
+                $this->queueTrigger($trigger);
+            }
             $this->queue("finishKill", null, [
                 "attacker" => $attackerId,
                 "target" => $defenderId,

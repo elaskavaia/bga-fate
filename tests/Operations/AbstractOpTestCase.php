@@ -33,6 +33,7 @@ abstract class AbstractOpTestCase extends TestCase {
         $this->game->initWithHero(1);
         $this->game->clearHand();
         $this->game->clearMachine();
+        $this->game->clearEquipDecks();
         $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
         $this->createOp();
     }

@@ -544,4 +544,100 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
         $this->assertEquals($nextCard, $newTop["key"], "Healing Potion should surface as the new deck-top");
     }
+
+    /**
+     * Helmet (card_equip_3_20): quest_on=TMonsterKilled,
+     * quest_r=killed('brute or skeleton'):?(blockXp:gainEquip).
+     *
+     * Same shape as Bjorn's Helmet — trigger-driven replacement-reward quest
+     * gated by the bareword tribe terms `brute` / `skeleton`.
+     */
+    public function testHelmetClaimsItselfOnBruteKillWhenAccepted(): void {
+        $this->setupGame([3]); // Solo Embla
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $helmet = "card_equip_3_20";
+        $nextCard = "card_equip_3_16"; // Healing Potion
+        $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
+
+        $bruteHex = "hex_12_8";
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_brute_1")->moveTo($bruteHex, "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => $bruteHex, "count" => 3]);
+        $this->game->machine->dispatchAll();
+
+        $this->confirmCardEffect();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
+        $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet should land on tableau on brute kill");
+        $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the brute's XP reward");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Healing Potion should surface as the new deck-top");
+    }
+
+    /**
+     * Player declines the optional claim — Helmet stays in deck, XP awarded normally.
+     */
+    public function testHelmetDeclinedKeepsXp(): void {
+        $this->setupGame([3]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $helmet = "card_equip_3_20";
+        $nextCard = "card_equip_3_16";
+        $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_skeleton_1")->moveTo("hex_12_8", "");
+
+        $baseXp = $this->game->getMonster("monster_skeleton_1")->getXpReward();
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 3]);
+        $this->game->machine->dispatchAll();
+
+        $this->skip();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_skeleton_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck on decline");
+        $this->assertEquals($xpBefore + $baseXp, $this->countXp(), "XP awarded when player declines the claim");
+    }
+
+    /**
+     * Negative path: killing a goblin (tribe=goblin doesn't match brute|skeleton)
+     * voids the chain before the optional prompt — no choice presented, Helmet
+     * stays in deck, XP awarded normally.
+     */
+    public function testHelmetStaysInDeckWhenKillIsGoblin(): void {
+        $this->setupGame([3]);
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $heroId = $this->game->getHeroTokenId($color);
+
+        $helmet = "card_equip_3_20";
+        $nextCard = "card_equip_3_16";
+        $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
+
+        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck — goblin doesn't match brute|skeleton");
+        $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
+    }
 }

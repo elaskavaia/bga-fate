@@ -4533,6 +4533,8 @@ class Material {
         "quest" => "<i>Kill a brute or a skeleton. Take this helmet instead of the gold</i> [XP].",
         "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "Radiating forcefulness.",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed('brute or skeleton'):?(blockXp:gainEquip)",
 ],
     "card_equip_1_24" => [ 
         "ctype" => "equip",
@@ -4856,6 +4858,8 @@ class Material {
         "quest" => "<i>Kill a brute or a skeleton. Take this instead of the gold [XP].</i>",
         "effect" => clienttranslate("[DAMAGE]: Prevent 1 damage."),
         "flavour" => "Heading for trouble.",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed('brute or skeleton'):?(blockXp:gainEquip)",
 ],
     "card_equip_3_23" => [ 
         "ctype" => "equip",

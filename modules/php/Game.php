@@ -353,6 +353,8 @@ class Game extends Base {
             return (int) (getPart($context, 1) != "legend");
         } elseif ($x !== "" && $this->getRulesFor($context, "faction", "") === $x) {
             return 1;
+        } elseif (str_starts_with($context, "monster_") && getPart($context, 1) === $x) {
+            return 1;
         } elseif ($x === "adj") {
             $heroId = $this->getHeroTokenId($owner);
             $heroHex = $this->hexMap->getCharacterHex($heroId);
