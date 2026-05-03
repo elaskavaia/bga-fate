@@ -312,8 +312,7 @@ class Card {
                 return;
             }
             $onarr[] = $event->value;
-            $op->withDataField("on", $onarr);
-            $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
+            $this->game->machine->setOpDataField($op, "on", $onarr);
         }
     }
 

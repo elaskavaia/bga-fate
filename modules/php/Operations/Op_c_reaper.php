@@ -66,9 +66,7 @@ class Op_c_reaper extends Operation {
 
         $this->game->systemAssert("ERR:c_reaper:noPendingResolveHits", $resolveHitsRow !== null);
 
-        $op = $this->game->machine->instantiateOperationFromDbRow($resolveHitsRow);
-        $op->withDataField("secondary", $secondaryHex);
-        $this->game->machine->db->updateData($op->getId(), $op->getDataForDb());
+        $this->game->machine->setOpDataField($resolveHitsRow, "secondary", $secondaryHex);
     }
 
     public function getUiArgs() {

@@ -235,6 +235,16 @@ class OpMachine {
         $this->db->updateData($op->getId(), $op->getDataForDb());
     }
 
+    /**
+     * Patch a single data field on a queued op and persist. Accepts either an
+     * Operation instance or a raw db row (whatever findOperation returned).
+     */
+    function setOpDataField($opOrRow, string $key, mixed $value): void {
+        $op = $opOrRow instanceof Operation ? $opOrRow : $this->instantiateOperationFromDbRow($opOrRow);
+        $op->withDataField($key, $value);
+        $this->db->updateData($op->getId(), $op->getDataForDb());
+    }
+
     //DISPATCH
 
     function dispatchAll(int $n = OpMachine::MA_GAME_DISPATCH_MAX) {
