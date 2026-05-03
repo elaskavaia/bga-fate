@@ -291,6 +291,11 @@ class Material {
         "type" => "reinforcement",
         "name" => clienttranslate("Reinforcement"),
 ],
+    "Op_spawn" => [ 
+        "type" => "spawn",
+        "name" => clienttranslate("Spawn"),
+        "wicon" => "wicon_damage",
+],
     "Op_monsterAttack" => [ 
         "type" => "monsterAttack",
         "name" => clienttranslate("Monster Attack"),
@@ -4579,6 +4584,8 @@ class Material {
         "quest" => "<i>After killing a trollkin, take this bag and spawn 2 brutes next to you.</i> They want the bag back.",
         "effect" => clienttranslate("[DAMAGE]: Heal 2 damage from yourself or any adjacent hero."),
         "flavour" => "Keeping your tools handy: thread, needles, bandages, herbs, and a pocket-sized mead sack.",
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed(trollkin):?(2spawn(brute):gainEquip)",
 ],
     "card_equip_1_18" => [ 
         "ctype" => "equip",
@@ -4696,6 +4703,7 @@ class Material {
         "strength" => 2,
         "quest" => "<i>Stand in the Troll Caves and spawn an adjacent troll.</i> Oops!",
         "flavour" => "Elven treasures long forgotten. Used as toothpicks for ages.",
+        "quest_r" => "in(TrollCaves):spawn(troll):gainEquip",
 ],
     "card_equip_2_21" => [ 
         "ctype" => "equip",
@@ -4765,6 +4773,7 @@ class Material {
         "name" => clienttranslate("Tiara"),
         "quest" => "<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!",
         "effect" => clienttranslate("Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn."),
+        "quest_r" => "in(DarkForest):gainEquip",
 ],
     "card_equip_2_19" => [ 
         "ctype" => "equip",

@@ -209,63 +209,7 @@ This is a small extension to `Op_trigger`: today it walks tableau+hand; we exten
 
 ## 4. Per-card mapping table
 
-For every quest, the new CSV fields. **Sketch quality** — predicates and tracker-amount details are refined per-card at implementation time. Authored by hand into `card_equip_material.csv`.
-
-| Card | quest_on | quest_r |
-|---|---|---|
-| Black Arrows | | `in(RobberCamp):spendAction(actionAttack):gainEquip` |
-| Bone Bane Bow | | `in(Nailfare):spendAction(actionMend):gainEquip` |
-| Throwing Axes / Darts / Knives / Precision Axes | | `in(forest):spendAction(actionPractice):gainEquip` |
-| Healing Potion | | `in(WitchCabin):spendAction(actionMend):gainEquip` |
-| Wildfire Blade | | `in(SpewingMountain):spendAction(actionMend):gainEquip` |
-| Home Sewn Cape | | `not_adj(monster):spendAction(actionAttack):gainEquip` |
-| Home Sewn Tunic | | `spendAction(actionPractice):spendXp:gainEquip` |
-| Leg Guards | | `spendAction(actionFocus):gainEquip` |
-| Battle Boots | | `spendAction(actionFocus):gainEquip` |
-| Warrior Shield | | `spendAction(actionAttack):gainEquip` |
-| Bloodline Crystal | | `in(TempleRuins):2discardEvent:gainEquip` |
-| Heels | | `in(WitchCabin):spendAction(actionMend):2discardEvent:gainEquip` |
-| Alva's Bracers | | `in(road):5spendXp:gainEquip` |
-| Blade Decorations | | `in(Grimheim):2spendXp:gainEquip` |
-| Custom Armor | | `4spendXp:gainEquip` |
-| Tailored Boots | | `in(Grimheim):2spendXp:gainEquip` |
-| Dwarf Helm | | `in(TempleRuins):2spendXp:gainEquip` |
-| Mining Equipment | | `3spendXp:gainEquip` |
-| Orebiter | | `2spendXp:gainEquip` |
-| Helmet (Bjorn/Embla) | TMonsterKilled | `?'brute or skeleton':gainEquip:blockXp` |
-| Quiver (×2) | TMonsterKilled | `?'rank>=3':gainEquip:blockXp` |
-| Leather Purse | TMonsterKilled | `?'trollkin':gainEquip,2spawn(brute,adj)` |
-| Trollbane | TMonsterKilled | `'killed=trollkin':gainTracker(monster_gold):counter('countTracker>=5'):gainEquip` |
-| Elven Blade | TMonsterKilled | `melee:gainTracker:counter('countTracker>=3'):gainEquip` |
-| Dwarf Pick | TMonsterKilled | `gainTracker:counter('countTracker>=3'):gainEquip` |
-| Windbite | TMonsterKilled | `'hero_range>=2':gainTracker:counter('countTracker>=4'):gainEquip` |
-| Singing Bow | TRoll(attackDice) | `in(forest):gainTracker(numDice):counter('countTracker>=10'):gainEquip` |
-| Belt of Youth | TStep | `in(forest):gainTracker:counter('countTracker>=8'):gainEquip` |
-| Raven's Claw | TStep | `in(forest):gainTracker:counter('countTracker>=10'):gainEquip` |
-| Dwarf Mail | TStep | `adj(mountain):gainTracker:counter('countTracker>=7'):gainEquip` |
-| Tiara | TStep | `in(DarkForest):gainEquip` |
-| Dvalin's Pick | TActionMove | `check('countAdjMountains>=3'):gainEquip` |
-| Eitri's Pick | TActionMove | `check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip` |
-| Smiterbiter | TActionMove | `in(MarshOfSorrow):gainEquip` |
-| Shield (Boldur) | custom | (`CardEquip_ShieldBoldur` — OR of two predicates) |
-| Elven Arrows | custom | (`CardEquip_ElvenArrows` — hero-in-TrollCaves + adjacent-troll-spawn) |
-
-Total: ~36 cards. Of those, ~17 player-initiated paid claims, ~17 trigger-driven (one-shot or counter), 2 bespoke.
-
-Existing ops/predicates reused:
-- `spendAction(actionXxx)` — burn an action slot. See [Op_spendAction.php](../../modules/php/Operations/Op_spendAction.php). Used today by Dvalin's Pick, Focus, Preparations, Bjorn's hero card, etc.
-- `discardEvent` (with multiplicity, e.g. `2discardEvent`) — discard from hand. See [Op_discardEvent.php](../../modules/php/Operations/Op_discardEvent.php).
-- `spendXp` / `NspendXp` — already used by Blade Decorations, etc.
-- `gainEquip` — already shipped.
-- `in(<loc>)` / `adj(<t>)` / `not_adj(<t>)` — existing location predicates. `in(...)` accepts both named locations (`in(Grimheim)`) and terrain types (`in(forest)`).
-
-New ops/predicates referenced above (to be added during implementation):
-- `gainTracker[(amount)]` — increment per-card quest progress. Implemented as `Op_gainTracker extends Op_spendDurab`: places red crystal(s) on the deck-top equipment card, no durability cap, optional `amount` arg (Math expression, default 1).
-- `counter('countTracker>=N')` — gate that passes when the per-card tracker reaches N. Math DSL on the tracker count (mirrors existing `counter(countRunes)` pattern).
-- `blockXp` — suppress the XP grant queued by `Op_killMonster` (reward-replacement quests).
-- `melee` / `hero_range>=N` — combat-context predicates evaluated against the kill event.
-- `in(road)` — extend `Op_in` to recognize `road` (in addition to named locations and terrain types) by checking the hex's road flag (already exists as a hex tag — see roads PR).
-
+redacted
 ---
 
 ## 5. Client display
@@ -386,8 +330,8 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [x] Dwarf Pick [Boldur] (`gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`)
 - [ ] Elven Blade [Alva] (`melee:gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`) — needs `melee` predicate
 - [ ] Windbite [Alva] (`'hero_range>=2':gainTracker,check('countTracker>=4'):gainEquip` on `TMonsterKilled`) — needs `hero_range` Math term
-- [ ] Trollbane [Bjorn] (`'killed(trollkin):gainTracker(monster_gold):check('countTracker>=5'):gainEquip` on `TMonsterKilled`) — needs `monster_gold` Math term
-- [ ] Singing Bow [Alva] (`in(forest):gainTracker(numDice):check('countTracker>=10'):gainEquip` on `TRoll(attackDice)`) — needs `numDice` Math term
+- [ ] Trollbane [Bjorn] (`'killed(trollkin):gainTracker(monster_gold),check('countTracker>=5'):gainEquip` on `TMonsterKilled`) — needs `monster_gold` Math term
+- [ ] Singing Bow [Alva] (`in(forest):gainTracker(numDice),check('countTracker>=10'):gainEquip` on `TRoll(attackDice)`) — needs `numDice` Math term
 
 **E — End-of-movement positional (`TMove`)**
 - [x] Smiterbiter [Boldur] (`in(MarshOfSorrow):gainEquip`)
@@ -395,10 +339,15 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [x] Eitri's Pick [Boldur] (`check('countAdjMonsters>=4 or countAdjLegends>=1'):gainEquip`) 
 
 **F — Bespoke (custom Card class)**
-- [ ] Tiara [Alva] (extend existing `CardEquip_Tiara`) — quest_on=custom; "find in Dark Forest"
-- [ ] Elven Arrows [Alva] (`CardEquip_ElvenArrows` new) — needs `Trigger::MonsterSpawn` or polling hook
+
+
 - [ ] Shield [Boldur] (`CardEquip_ShieldBoldur` new) — OR of two predicates
-- [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip`) — bonus brute spawn hook to onCardEnter
+
+
+Other
+- [ ] Tiara [Alva]
+- [ ] Elven Arrows [Alva] - needs new spawn operation
+- [ ] Leather Purse [Bjorn] (`killed(trollkin):gainEquip`) — needs new spawn operation
 
 ### Client polishgainTracker,check
 

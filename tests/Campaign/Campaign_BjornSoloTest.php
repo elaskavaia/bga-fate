@@ -16,6 +16,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->setupGame([1]); // Solo Bjorn
         $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
+        $this->clearEquipDecks();
+
         // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
             "card_monster_7", // Fiery Projectiles (Highlands, J,J,E)
@@ -28,12 +30,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
             "card_event_1_27_1", // Rest
             "card_event_1_27_2", // Rest
         ]);
-        // Clear random event cards from hand to avoid flaky triggers
-        $hand = $this->game->tokens->getTokensOfTypeInLocation("card_event", "hand_" . $this->getActivePlayerColor());
-        foreach ($hand as $card) {
-            $this->game->tokens->moveToken($card["key"], "limbo");
-        }
         $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $this->clearHand($color);
     }
 
     public function testMoveAttackMendKill(): void {

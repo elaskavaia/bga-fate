@@ -25,7 +25,7 @@ Search [modules/php/Material.php](../../../modules/php/Material.php) for the car
 - **name** — for the test method name and notifications.
 - **quest** — the italicised rules text (the human description of the quest).
 - **quest_on** / **quest_r** — current values. If both already set and tested, the card is done — flag and stop.
-- **r** / **on** — existing rule string for the card's *active* effect (after it's claimed). Don't conflate with quest fields.
+- **r** / **on** — existing rule string for the card's _active_ effect (after it's claimed). Don't conflate with quest fields.
 
 Edits in step 4 still go to the CSV (the source of truth); Material.php is regenerated from it.
 
@@ -41,7 +41,6 @@ Then in [misc/docs/QUESTS.md](../../../misc/docs/QUESTS.md):
 - **Player-initiated paid quest** (`quest_on=` empty): `[gate:]spendAction(actionXxx):gainEquip` or `[gate:]NspendXp:gainEquip` — surfaces via `Op_completeQuest` top-bar action.
 - **Trigger-driven counter**: `quest_on=TStep|TMonsterKilled|TRoll`, `quest_r=[gate:]gainTracker[(amount)]:check('countTracker>=N'):gainEquip`.
 - **Trigger-driven replacement reward** (Helmet/Quiver): `quest_on=TMonsterKilled`, `quest_r=?'<predicate>':gainEquip:blockXp` — `?` makes the chain optional → player gets a yes/no prompt.
-- **Bespoke** (Tiara, Elven Arrows, Shield-Boldur): `quest_on=custom`, `quest_r=` empty; ship a `CardEquip_<Name>.php` that overrides `triggerQuest` / `canResolveQuest`.
 
 ### 3. **Consult the user before adding any new op, extending an existing op, or adding a new Math DSL term**
 

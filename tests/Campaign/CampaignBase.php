@@ -180,6 +180,19 @@ abstract class CampaignBaseTest extends TestCase {
         $this->game->tokens->moveToken($cardId, "hand_$color");
     }
 
+    /**
+     * Limbo every card sitting in any equip deck. Useful in setUp when the
+     * test doesn't care about random deck contents — TMonsterKilled-quest
+     * cards (Helmet, Quiver) on top of a shuffled deck will auto-claim
+     * matching kills mid-test and stall the chain. Tests that need specific
+     * equipment use seedDeck.
+     */
+    protected function clearEquipDecks(): void {
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("card_equip", "deck_equip%")) as $tokenId) {
+            $this->game->tokens->moveToken($tokenId, "limbo");
+        }
+    }
+
     /** Move every card currently in the player's hand to limbo. */
     protected function clearHand(string $color = PCOLOR): void {
         foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation(null, "hand_$color")) as $key) {
