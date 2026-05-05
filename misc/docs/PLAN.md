@@ -28,7 +28,7 @@ See CLAUDE.md for project overview
 [x] Phase 3: Monster system with one monster type (spawning + movement done)
 [x] Phase 4: Combat and damage system
 [x] Phase 5a: Hero attribute trackers (strength, range, move, health)
-[~] Phase 5: Equipment, quests, and upgrades — equipment activation done, quests not tracked yet
+[x] Phase 5: Equipment, quests, and upgrades
 [x] Phase 6: Full monster turn (movement, attack, reinforcements)
 [x] Phase 7: Add remaining monster types and legends (all 3 factions done in Iter 2)
 [x] Phase 8: Add remaining heroes
@@ -47,9 +47,9 @@ See CLAUDE.md for project overview
 ## Quests
 ### Server
 
-[~] Quest definitions on equipment cards — quest column exists in card_equip_material.csv but no gameplay tracking
-[ ] Quest progress tracking
-[ ] Quest completion → new equipment active
+[x] Quest definitions on equipment cards (`quest_on` / `quest_r` fields in card_equip_material.csv)
+[x] Quest progress tracking (red crystals on deck-top equip via `gainTracker` + `countTracker`)
+[x] Quest completion → new equipment active (`Op_completeQuest` for player-initiated, `Op_trigger` walks deck-top for trigger-driven, bespoke `CardEquip_*` classes for custom)
 [x] `effect_gainEquipment($cardId, $owner)` — places an equipment card on the player's tableau and fires `trigger(enter)`. Should be called from quest completion, upgrade flow, and starting equipment setup ([Game.php:127](modules/php/Game.php#L127)). Black Arrows ("starts with 3 arrows here") and Tiara ("starts with 6 gold here") need this for their `onEnter` hook to fire.
 [x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
@@ -59,12 +59,12 @@ See CLAUDE.md for project overview
 
 
 [ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
-[ ] Quest UI polish — see [QUESTS.md Phase Q6](QUESTS.md): progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion). Defer until Q4/Q5 quests are landed.
+[ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
 [ ] Ability pile and equipment pile browsing
 
 ### Tests
 
-[ ] Test quest completion conditions
+[x] Test quest completion conditions (per-hero `Campaign_*QuestTest.php` covering all 4 categories)
 
 
 
@@ -105,7 +105,6 @@ See CLAUDE.md for project overview
 [ ] Dice roll animation
 [ ] Card play/draw animations
 [x] Responsive layout
-[ ] Card zoom on hover
 [ ] Visual indicators (current turn, threats, quest progress)
 
 ### BGA Requirements

@@ -31,8 +31,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * crystals from tableau) then runs gainEquip, which moves the card to
      * tableau and reveals the next deck-top.
      *
-     * Per QUESTS.md §6 question 6 the "1 gold + 2 gold" wording is a flavor
-     * joke — mechanically a single 3-XP payment.
+     * The "1 gold + 2 gold" wording is a flavor joke — mechanically a single 3-XP payment.
      */
     public function testMiningEquipmentLandsOnTableauAfterCompleteQuestPays3Xp(): void {
         $color = $this->getActivePlayerColor();
@@ -229,8 +228,8 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * goblins one at a time, each firing Trigger::MonsterKilled which the
      * deck-top Dwarf Pick listens for.
      *
-     * Op_check (§11.1 of QUESTS.md) only hides ONE next op — fine here because
-     * the chain past `check` is just `gainEquip` (single op).
+     * Op_check only hides ONE next op — fine here because the chain past `check`
+     * is just `gainEquip` (single op).
      */
     public function testDwarfPickLandsOnTableauAfter3MonsterKills(): void {
         $color = $this->getActivePlayerColor();
@@ -304,8 +303,8 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * directly. Hero oscillates between hex_6_11 and hex_6_12 — both plains,
      * both adjacent to the mountain at hex_5_12.
      *
-     * Op_check (§11.1 of QUESTS.md) only hides ONE next op — fine here because
-     * the chain past `check` is just `gainEquip` (single op).
+     * Op_check only hides ONE next op — fine here because the chain past `check`
+     * is just `gainEquip` (single op).
      */
     public function testDwarfMailLandsOnTableauAfter7MountainAdjacentSteps(): void {
         $color = $this->getActivePlayerColor();

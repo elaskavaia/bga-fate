@@ -217,8 +217,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * Heels (card_equip_3_17): quest_on= (empty — player-initiated),
      * quest_r=in(WitchCabin):spendAction(actionMend):2discardEvent:gainEquip.
      *
-     * Resolved as a single paid claim per QUESTS.md §6 Q7. Player invokes the
-     * top-bar `completeQuest` free action while Heels is on top of
+     * Player invokes the top-bar `completeQuest` free action while Heels is on top of
      * deck_equip_<color> AND the hero stands on the Witch Cabin hex AND the
      * hand has at least 2 event cards. The chain spends a Mend action,
      * discards 2 event cards (one prompt per discardEvent invocation; the
