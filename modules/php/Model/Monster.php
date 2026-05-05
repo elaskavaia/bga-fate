@@ -50,27 +50,15 @@ class Monster extends Character {
      * its bonus crystals intact.
      */
     function finalizeDamage(int $amount, string $attackerId, bool $noXp = false): void {
-        $totalDamage = $this->getDamage();
-        // Remove red crystals from monster back to supply
-        $this->moveCrystals("red", -$totalDamage, $this->id, ["message" => ""]);
-
-        // Bonus XP from markers placed on the monster (e.g. Prey). Counted before moveTo
-        // so the source location is unambiguous.
-        $bonusXp = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $this->id));
-        if ($bonusXp > 0) {
-            $this->moveCrystals("yellow", -$bonusXp, $this->id, ["message" => ""]);
-        }
+        $xp = $this->game->countMonsterXp(null, $this->id);
+        $this->game->effect_clearCrystals($this->id, $this->id);
 
         // Remove monster from map
         $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
 
         if (!$noXp) {
-            // Award base XP reward, then bonus XP separately so the log makes the source clear.
             $hero = $this->game->getHeroById($attackerId);
-            $hero->gainXp($this->getXpReward());
-            if ($bonusXp > 0) {
-                $hero->gainXp($bonusXp);
-            }
+            $hero->gainXp($xp);
         }
     }
 }

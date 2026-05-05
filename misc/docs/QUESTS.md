@@ -218,10 +218,10 @@ Grouped by §2 mechanism. Tick on per-card test green.
 - [x] Raven's Claw [Embla] (`in(forest):gainTracker,check('countTracker>=10'):gainEquip` on `TStep`)
 - [x] Dwarf Mail [Boldur] (`adj(mountain):gainTracker,check('countTracker>=7'):gainEquip` on `TStep`)
 - [x] Dwarf Pick [Boldur] (`gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`)
-- [ ] Elven Blade [Alva] (`killed(adj):gainTracker,check('countTracker>=3'):gainEquip` on `TMonsterKilled`) — needs `melee` predicate
-- [ ] Windbite [Alva] (`killed(inRange2):gainTracker,check('countTracker>=4'):gainEquip` on `TMonsterKilled`) — needs `hero_range` Math term
-- [ ] Trollbane [Bjorn] (`'killed(trollkin):counter(countMonsterXP):gainTracker,check('countTracker>=5'):gainEquip` on `TMonsterKilled`) — needs `countMonsterXP` Math term
-- [ ] Singing Bow [Alva] (`in(forest):counter(countDice):gainTracker,check('countTracker>=10'):gainEquip` on `TRoll`) — needs `countDice` Math term
+- [x] Elven Blade [Alva]
+- [x] Windbite [Alva]
+- [x] Trollbane [Bjorn]
+- [x] Singing Bow [Alva]
 
 **E — End-of-movement positional (`TMove`)**
 - [x] Smiterbiter [Boldur] (`in(MarshOfSorrow):gainEquip`)

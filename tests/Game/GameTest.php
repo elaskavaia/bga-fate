@@ -508,6 +508,75 @@ final class GameTest extends TestCase {
         $this->assertEquals(0, $result);
     }
 
+    public function testRangeTermAdjacent(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // hex_12_8 is 1 hex away from hero at hex_11_8
+        $this->assertEquals(1, $this->game->evaluateExpression("range", PCOLOR, "monster_goblin_1"));
+    }
+
+    public function testRangeTermDistance2(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8");
+        $this->assertEquals(2, $this->game->evaluateExpression("range", PCOLOR, "monster_goblin_1"));
+    }
+
+    public function testRangeTermPredicate(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8");
+        // range>=2 should be true at distance 2
+        $this->assertEquals(1, $this->game->evaluateExpression("range>=2", PCOLOR, "monster_goblin_1"));
+        // And false at distance 1
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->assertEquals(0, $this->game->evaluateExpression("range>=2", PCOLOR, "monster_goblin_1"));
+    }
+
+    public function testCountMonsterXpReadsBruteFromAttackHex(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        // Brute XP = 2
+        $this->assertEquals(2, $this->game->evaluateExpression("countMonsterXp", PCOLOR));
+    }
+
+    public function testCountMonsterXpReadsTroll(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        // Troll XP = 3
+        $this->assertEquals(3, $this->game->evaluateExpression("countMonsterXp", PCOLOR));
+    }
+
+    public function testCountMonsterXpZeroWhenAttackHexEmpty(): void {
+        $this->setupHeroAndTokens();
+        // No marker_attack placed → no attack hex
+        $this->assertEquals(0, $this->game->evaluateExpression("countMonsterXp", PCOLOR));
+    }
+
+    public function testCountMonsterXpAddsBonusYellowCrystals(): void {
+        $this->setupHeroAndTokens();
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        // Goblin base XP=1, plus 2 bonus yellow crystals (e.g. Prey markers) → 3
+        $this->game->tokens->moveToken("crystal_yellow_1", "monster_goblin_1");
+        $this->game->tokens->moveToken("crystal_yellow_2", "monster_goblin_1");
+        $this->assertEquals(3, $this->game->evaluateExpression("countMonsterXp", PCOLOR));
+    }
+
+    public function testCountDiceEmptyWhenDisplayClear(): void {
+        $this->setupHeroAndTokens();
+        $this->assertEquals(0, $this->game->evaluateExpression("countDice", PCOLOR));
+    }
+
+    public function testCountDiceCountsAllFaces(): void {
+        $this->setupHeroAndTokens();
+        // Three dice on display_battle, faces don't matter for countDice
+        $this->game->tokens->moveToken("die_attack_1", "display_battle", 1);
+        $this->game->tokens->moveToken("die_attack_2", "display_battle", 3);
+        $this->game->tokens->moveToken("die_attack_3", "display_battle", 5);
+        $this->assertEquals(3, $this->game->evaluateExpression("countDice", PCOLOR));
+    }
+
     public function testCloserToGrimheimTrue(): void {
         $this->setupHeroAndTokens();
         // Hero at hex_11_8, place goblin closer to Grimheim (hex_9_8 is nearer)

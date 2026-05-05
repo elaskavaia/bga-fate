@@ -13,6 +13,15 @@ require_once __DIR__ . "/CampaignBase.php";
  * accumulates / equip lands on tableau.
  */
 class Campaign_BoldurQuestTest extends CampaignBaseTest {
+    private string $heroId;
+
+    protected function setUp(): void {
+        parent::setUp();
+        $this->setupGame([4]); // Solo Boldur
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
+        $this->clearMonstersFromMap();
+    }
+
     /**
      * Mining Equipment (card_equip_4_17): quest_on= (empty — player-initiated),
      * quest_r=3spendXp:gainEquip.
@@ -26,10 +35,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * joke — mechanically a single 3-XP payment.
      */
     public function testMiningEquipmentLandsOnTableauAfterCompleteQuestPays3Xp(): void {
-        $this->setupGame([4]); // Solo Boldur — Mining Equipment lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $miningEquipment = "card_equip_4_17";
         $nextCard = "card_equip_4_19"; // Orebiter — surfaces after Mining Equipment is claimed
@@ -37,7 +43,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->assertEquals($miningEquipment, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Seed Boldur with 3 yellow crystals (XP) on tableau so the 3spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 3, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 3, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(3, $xpBefore, "Need at least 3 XP on tableau to pay the quest cost");
 
@@ -79,10 +85,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * deck-top.
      */
     public function testDwarfHelmLandsOnTableauAfterCompleteQuestPays2XpInTempleRuins(): void {
-        $this->setupGame([4]); // Solo Boldur — Dwarf Helm lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $dwarfHelm = "card_equip_4_23";
         $nextCard = "card_equip_4_24"; // Battle Boots — surfaces after Dwarf Helm is claimed
@@ -90,10 +93,10 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->assertEquals($dwarfHelm, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Place hero on Temple Ruins hex so the in(TempleRuins) gate passes.
-        $this->game->tokens->moveToken($heroId, "hex_12_4");
+        $this->game->tokens->moveToken($this->heroId, "hex_12_4");
 
         // Seed Boldur with 2 yellow crystals (XP) on tableau so the 2spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
@@ -135,8 +138,6 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * Mirrors Embla's Leg Guards flow (same shape, different hero deck).
      */
     public function testBattleBootsLandsOnTableauAfterCompleteQuest(): void {
-        $this->setupGame([4]); // Solo Boldur — Battle Boots lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
 
         $battleBoots = "card_equip_4_24";
@@ -185,10 +186,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * directly onto the machine), but only one move is needed.
      */
     public function testSmiterbiterLandsOnTableauAfterMoveEndsInMarshOfSorrow(): void {
-        $this->setupGame([4]); // Solo Boldur — Smiterbiter lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $smiterbiter = "card_equip_4_21";
         $nextCard = "card_equip_4_19"; // Orebiter — surfaces after Smiterbiter is claimed
@@ -199,7 +197,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // CSV is y|x so map_material row "7|16|plains|MarshOfSorrow" -> hex_16_7.
         $startHex = "hex_15_8"; // plains, no named loc
         $marshHex = "hex_16_8"; // plains, MarshOfSorrow
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         // Single move into the Marsh. Op_step emits Trigger::ActionMove on the
         // final step (because reason="Op_actionMove"), which chains through
@@ -236,10 +234,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * the chain past `check` is just `gainEquip` (single op).
      */
     public function testDwarfPickLandsOnTableauAfter3MonsterKills(): void {
-        $this->setupGame([4]); // Solo Boldur — Dwarf Pick lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $dwarfPick = "card_equip_4_25";
         $nextCard = "card_equip_4_19"; // Orebiter — surfaces after Dwarf Pick is claimed
@@ -249,7 +244,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Place Boldur and three goblins on adjacent hexes. Goblins have health=2,
         // so dealDamage(count=2) kills outright and queues Trigger::MonsterKilled.
         $heroHex = "hex_11_8";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $goblinHexes = ["hex_12_8", "hex_10_8", "hex_11_7"];
         $goblins = ["monster_goblin_1", "monster_goblin_2", "monster_goblin_3"];
         foreach ($goblins as $i => $goblin) {
@@ -314,10 +309,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * the chain past `check` is just `gainEquip` (single op).
      */
     public function testDwarfMailLandsOnTableauAfter7MountainAdjacentSteps(): void {
-        $this->setupGame([4]); // Solo Boldur — Dwarf Mail lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $dwarfMail = "card_equip_4_18";
         $nextCard = "card_equip_4_19"; // Orebiter — surfaces after Dwarf Mail is claimed
@@ -330,7 +322,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Two adjacent plains hexes with NO mountain neighbors (negative case).
         $hexNonAdj1 = "hex_7_11"; // plains, no mountain neighbors
         $hexNonAdj2 = "hex_7_12"; // plains, no mountain neighbors
-        $this->game->tokens->moveToken($heroId, $hexNonAdj1);
+        $this->game->tokens->moveToken($this->heroId, $hexNonAdj1);
 
         // Bonus: one non-mountain-adjacent step first. From hex_7_11 to hex_7_12.
         // TStep fires at the destination — adj(mountain) gate fails — no crystal added.
@@ -348,7 +340,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         );
 
         // Move hero onto a mountain-adjacent hex so the first scripted move starts cleanly.
-        $this->game->tokens->moveToken($heroId, $hexA);
+        $this->game->tokens->moveToken($this->heroId, $hexA);
 
         // 7 single-step moves, oscillating A → B → A → B …
         // Each move emits TStep at the destination (mountain-adjacent), so quest_r runs:
@@ -388,10 +380,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * location gate — pay anywhere).
      */
     public function testOrebiterLandsOnTableauAfterCompleteQuestPays2Xp(): void {
-        $this->setupGame([4]); // Solo Boldur — Orebiter lives in Boldur's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $orebiter = "card_equip_4_19";
         $nextCard = "card_equip_4_20"; // Dvalin's Pick — surfaces after Orebiter is claimed
@@ -399,7 +388,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $this->assertEquals($orebiter, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Seed Boldur with 2 yellow crystals (XP) on tableau so the 2spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
@@ -440,10 +429,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * gainEquip moves the card to tableau.
      */
     public function testDvalinsPickLandsOnTableauWhenMoveEndsAdjacentTo3Mountains(): void {
-        $this->setupGame([4]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $dvalinsPick = "card_equip_4_20";
         $nextCard = "card_equip_4_19"; // Orebiter
@@ -451,7 +437,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $startHex = "hex_4_14"; // plains, only 1 adjacent mountain (hex_3_15)
         $endHex = "hex_4_15"; // plains, 3 adjacent mountains (hex_3_15, hex_5_15, hex_3_16)
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
         $this->game->machine->dispatchAll();
@@ -476,10 +462,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * → check passes → gainEquip moves the pick to tableau.
      */
     public function testEitrisPickLandsOnTableauWhenMoveEndsAdjacentTo4Monsters(): void {
-        $this->setupGame([4]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $eitrisPick = "card_equip_4_22";
         $nextCard = "card_equip_4_19"; // Orebiter
@@ -487,7 +470,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $startHex = "hex_10_9"; // Grimheim plains, adjacent to hex_11_8
         $endHex = "hex_11_8";
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         $monsterHexes = ["hex_12_8", "hex_11_9", "hex_11_7", "hex_12_7"];
         $monsters = ["monster_goblin_1", "monster_goblin_2", "monster_goblin_3", "monster_goblin_4"];
@@ -514,10 +497,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * countAdjLegends==1 → the OR predicate's legend disjunct passes.
      */
     public function testEitrisPickLandsOnTableauWhenMoveEndsAdjacentToLegend(): void {
-        $this->setupGame([4]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $eitrisPick = "card_equip_4_22";
         $nextCard = "card_equip_4_19";
@@ -525,7 +505,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $startHex = "hex_10_9";
         $endHex = "hex_11_8";
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         $this->game->getMonster("monster_legend_1_1")->moveTo("hex_12_8", "");
 
@@ -544,17 +524,14 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * disjuncts fail, check evaluates to 0, gainEquip hidden, pick stays in deck.
      */
     public function testEitrisPickStaysInDeckWhenMoveEndsAwayFromMonstersAndLegends(): void {
-        $this->setupGame([4]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $eitrisPick = "card_equip_4_22";
         $this->seedDeck("deck_equip_$color", [$eitrisPick, "card_equip_4_19"]);
 
         $startHex = "hex_7_9";
         $endHex = "hex_7_8";
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
         $this->game->machine->dispatchAll();
@@ -571,10 +548,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
      * makes the check evaluate to 0, hiding gainEquip — pick stays in deck.
      */
     public function testDvalinsPickStaysInDeckWhenMoveEndsAwayFromMountains(): void {
-        $this->setupGame([4]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $dvalinsPick = "card_equip_4_20";
         $nextCard = "card_equip_4_19";
@@ -582,7 +556,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $startHex = "hex_7_9"; // plains, no mountains anywhere near
         $endHex = "hex_7_8";
-        $this->game->tokens->moveToken($heroId, $startHex);
+        $this->game->tokens->moveToken($this->heroId, $startHex);
 
         $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
         $this->game->machine->dispatchAll();

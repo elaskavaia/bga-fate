@@ -12,6 +12,15 @@ require_once __DIR__ . "/CampaignBase.php";
  * trigger fires → quest_r runs → progress accumulates / equip lands on tableau.
  */
 class Campaign_BjornQuestTest extends CampaignBaseTest {
+    private string $heroId;
+
+    protected function setUp(): void {
+        parent::setUp();
+        $this->setupGame([1]); // Solo Bjorn
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
+        $this->clearMonstersFromMap();
+    }
+
     /**
      * Bone Bane Bow (card_equip_1_16): quest_on= (empty — player-initiated),
      * quest_r=in(Nailfare):spendAction(actionMend):gainEquip.
@@ -23,10 +32,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * to tableau and reveals the next deck-top.
      */
     public function testBoneBaneBowLandsOnTableauAfterCompleteQuestOnNailfare(): void {
-        $this->setupGame([1]); // Solo Bjorn — Bone Bane Bow lives in Bjorn's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $bow = "card_equip_1_16";
         $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Bone Bane Bow is claimed
@@ -35,7 +41,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Place Bjorn on a Nailfare hex so the in(Nailfare) gate passes.
         $nailfareHex = "hex_16_5";
-        $this->game->tokens->moveToken($heroId, $nailfareHex);
+        $this->game->tokens->moveToken($this->heroId, $nailfareHex);
 
         $this->respond("completeQuest");
 
@@ -74,10 +80,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * on the tableau and revealing the next deck-top.
      */
     public function testBlackArrowsLandsOnTableauAfterCompleteQuestOnRobberCamp(): void {
-        $this->setupGame([1]); // Solo Bjorn — Black Arrows lives in Bjorn's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $blackArrows = "card_equip_1_20";
         $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Black Arrows
@@ -86,7 +89,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Place Bjorn on the Robber Camp hex so the in(RobberCamp) gate passes.
         $robberCampHex = "hex_5_11";
-        $this->game->tokens->moveToken($heroId, $robberCampHex);
+        $this->game->tokens->moveToken($this->heroId, $robberCampHex);
 
         $this->respond("completeQuest");
 
@@ -124,10 +127,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * lands the cape on tableau and reveals the next deck-top.
      */
     public function testHomeSewnCapeLandsOnTableauAfterCompleteQuestWithNoAdjacentMonsters(): void {
-        $this->setupGame([1]); // Solo Bjorn — Home Sewn Cape lives in Bjorn's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $cape = "card_equip_1_24";
         $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Cape
@@ -136,7 +136,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Plains hex outside Grimheim, no adjacent monsters (clearMonstersFromMap above).
         $heroHex = "hex_7_9";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
 
         $this->respond("completeQuest");
 
@@ -171,17 +171,14 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * (spendAction(actionAttack):gainEquip) chain so neither op fires.
      */
     public function testHomeSewnCapeQuestBlockedWhenMonsterAdjacent(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $cape = "card_equip_1_24";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$cape, $nextCard]);
 
         $heroHex = "hex_7_9";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_7_8", "");
 
         $this->respond("completeQuest");
@@ -222,10 +219,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * has no place restriction).
      */
     public function testHomeSewnTunicLandsOnTableauAfterCompleteQuestPaysPracticeAndXp(): void {
-        $this->setupGame([1]); // Solo Bjorn — Home Sewn Tunic lives in Bjorn's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $tunic = "card_equip_1_23";
         $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Tunic
@@ -233,7 +227,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals($tunic, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Seed Bjorn with 1 yellow crystal (XP) on tableau so the spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 1, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 1, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(1, $xpBefore, "Need at least 1 XP on tableau to pay the quest cost");
 
@@ -282,10 +276,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * to take the XP normally.
      */
     public function testQuiverClaimsItselfOnRank3KillWhenAccepted(): void {
-        $this->setupGame([1]); // Solo Bjorn
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_1_18";
         $nextCard = "card_equip_1_17"; // Throwing Axes
@@ -293,7 +284,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         $heroHex = "hex_11_8";
         $trollHex = "hex_12_8";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->getMonster("monster_troll_1")->moveTo($trollHex, "");
 
         $xpBefore = $this->countXp();
@@ -319,16 +310,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * Player declines the optional claim — Quiver stays in deck, XP awarded normally.
      */
     public function testQuiverDeclinedKeepsXp(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_1_18";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_troll_1")->moveTo("hex_12_8", "");
 
         $baseXp = $this->game->getMonster("monster_troll_1")->getXpReward();
@@ -352,16 +340,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * presented, Quiver stays in deck, XP awarded normally.
      */
     public function testQuiverStaysInDeckWhenKillIsRank1(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_1_18";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
 
         $xpBefore = $this->countXp();
@@ -383,17 +368,14 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * (any monster_brute_* or monster_skeleton_*) instead of rank>=3.
      */
     public function testHelmetClaimsItselfOnBruteKillWhenAccepted(): void {
-        $this->setupGame([1]); // Solo Bjorn
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_1_21";
         $nextCard = "card_equip_1_17"; // Throwing Axes
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
         $bruteHex = "hex_12_8";
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_brute_1")->moveTo($bruteHex, "");
 
         $xpBefore = $this->countXp();
@@ -419,16 +401,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * Player declines the optional claim — Helmet stays in deck, XP awarded normally.
      */
     public function testHelmetDeclinedKeepsXp(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_1_21";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_skeleton_1")->moveTo("hex_12_8", "");
 
         $baseXp = $this->game->getMonster("monster_skeleton_1")->getXpReward();
@@ -453,16 +432,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * stays in deck, XP awarded normally.
      */
     public function testHelmetStaysInDeckWhenKillIsGoblin(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_1_21";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
 
         $xpBefore = $this->countXp();
@@ -485,10 +461,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * No blockXp in the chain — the kill XP is awarded either way.
      */
     public function testLeatherPurseClaimsItselfOnTrollkinKillSpawning2Brutes(): void {
-        $this->setupGame([1]); // Solo Bjorn
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $purse = "card_equip_1_19";
         $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Purse is claimed
@@ -496,7 +469,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         $heroHex = "hex_11_8";
         $goblinHex = "hex_12_8";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->getMonster("monster_goblin_1")->moveTo($goblinHex, "");
 
         $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
@@ -532,16 +505,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
     /** Player declines the optional claim — no spawns, card stays in deck. */
     public function testLeatherPurseDeclinedKeepsCardInDeck(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $purse = "card_equip_1_19";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
 
         $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
@@ -567,16 +537,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * so the chain voids before the optional prompt — no choice, card stays.
      */
     public function testLeatherPurseStaysInDeckWhenKillIsNotTrollkin(): void {
-        $this->setupGame([1]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $purse = "card_equip_1_19";
         $nextCard = "card_equip_1_17";
         $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_sprite_1")->moveTo("hex_12_8", "");
 
         $brutesBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
@@ -591,5 +558,76 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
             count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster")),
             "No brutes spawn when chain voids"
         );
+    }
+
+    /**
+     * Trollbane (card_equip_1_22): quest_on=TMonsterKilled,
+     * quest_r=killed(trollkin):counter(countMonsterXp):gainTracker,check('countTracker>=5'):gainEquip.
+     *
+     * Counter quest where each kill bumps the tracker by the killed monster's XP
+     * (goblin=1, brute=2, troll=3). Reaches the threshold after 1+2+3 = 6 ≥ 5.
+     * Uses the new `countMonsterXp` Math term (Game::evaluateTerm).
+     */
+    public function testTrollbaneLandsOnTableauAfterCollecting5XpFromTrollkin(): void {
+        $color = $this->getActivePlayerColor();
+
+        $trollbane = "card_equip_1_22";
+        $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Trollbane is claimed
+        $this->seedDeck("deck_equip_$color", [$trollbane, $nextCard]);
+
+        $heroHex = "hex_11_8";
+        $killHex = "hex_12_8";
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
+
+        // Three trollkin kills with increasing XP: 1 + 2 + 3 = 6 ≥ 5.
+        $kills = [
+            ["monster_goblin_1", 2, 1], // dealDamage to kill HP=2; XP=1 → tracker after = 1
+            ["monster_brute_1", 3, 3],  //                  HP=3; XP=2 → tracker after = 3
+            ["monster_troll_1", 7, 6],  //                  HP=7; XP=3 → tracker after = 6 (claim fires)
+        ];
+
+        foreach ($kills as $idx => [$monsterId, $hp, $expectedTracker]) {
+            $this->game->getMonster($monsterId)->moveTo($killHex, "");
+            $this->game->machine->push("dealDamage", $color, ["target" => $killHex, "count" => $hp]);
+            $this->game->machine->dispatchAll();
+            $this->assertEquals("supply_monster", $this->tokenLocation($monsterId), "$monsterId should be killed");
+        }
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($trollbane),
+            "Trollbane should land on tableau after collecting 6 XP from trollkin kills"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $trollbane), "gainEquip should sweep tracker crystals back to supply");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Throwing Axes should surface as the new deck-top");
+    }
+
+    /**
+     * Negative path: killing a non-trollkin monster (firehorde sprite) should
+     * NOT bump the tracker — killed(trollkin) voids the chain.
+     */
+    public function testTrollbaneIgnoresNonTrollkinKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $trollbane = "card_equip_1_22";
+        $nextCard = "card_equip_1_17";
+        $this->seedDeck("deck_equip_$color", [$trollbane, $nextCard]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $this->game->getMonster("monster_sprite_1")->moveTo("hex_12_8", "");
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 5]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_sprite_1"));
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($trollbane),
+            "Trollbane stays in deck — sprite isn't trollkin"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $trollbane), "No tracker crystal added on non-trollkin kill");
     }
 }

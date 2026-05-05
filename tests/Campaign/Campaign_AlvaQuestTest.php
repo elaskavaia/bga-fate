@@ -12,6 +12,15 @@ require_once __DIR__ . "/CampaignBase.php";
  * trigger fires → quest_r runs → progress accumulates / equip lands on tableau.
  */
 class Campaign_AlvaQuestTest extends CampaignBaseTest {
+    private string $heroId;
+
+    protected function setUp(): void {
+        parent::setUp();
+        $this->setupGame([2]); // Solo Alva
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
+        $this->clearMonstersFromMap();
+    }
+
     /**
      * Belt of Youth (card_equip_2_22): quest_on=TStep,
      * quest_r=in(forest):gainTracker,check('countTracker>=8'):gainEquip.
@@ -24,10 +33,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * multi-hex forest path, and equally valid for the quest engine.
      */
     public function testBeltOfYouthLandsOnTableauAfter8ForestSteps(): void {
-        $this->setupGame([2]); // Solo Alva — Belt of Youth lives in Alva's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $belt = "card_equip_2_22";
         $nextCard = "card_equip_2_25"; // Bloodline Crystal — surfaces after Belt is claimed
@@ -37,7 +43,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         // Two adjacent forest hexes (both in the DarkForest cluster).
         $hexA = "hex_10_2";
         $hexB = "hex_11_2";
-        $this->game->tokens->moveToken($heroId, $hexA);
+        $this->game->tokens->moveToken($this->heroId, $hexA);
 
         // 8 single-step moves, oscillating A → B → A → B …
         // Each move emits TStep at the destination (forest), so quest_r runs:
@@ -75,10 +81,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * is sufficient — the cards differ only in hero owner and active-effect text.
      */
     public function testThrowingDartsLandsOnTableauAfterCompleteQuestInForest(): void {
-        $this->setupGame([2]); // Solo Alva — Throwing Darts lives in Alva's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $darts = "card_equip_2_17";
         $nextCard = "card_equip_2_25"; // Bloodline Crystal — surfaces after Darts is claimed
@@ -87,7 +90,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
 
         // Place hero on a forest hex so the in(forest) gate passes.
         $forestHex = "hex_2_8";
-        $this->game->tokens->moveToken($heroId, $forestHex);
+        $this->game->tokens->moveToken($this->heroId, $forestHex);
 
         $this->respond("completeQuest");
 
@@ -127,10 +130,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * gainEquip, which moves the card to tableau and reveals the next deck-top.
      */
     public function testBloodlineCrystalLandsOnTableauAfterDiscarding2InTempleRuins(): void {
-        $this->setupGame([2]); // Solo Alva — Bloodline Crystal lives in Alva's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $crystal = "card_equip_2_25";
         $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Crystal is claimed
@@ -146,7 +146,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->seedHand($cardB, $color);
 
         // Place hero on Temple Ruins hex so the in(TempleRuins) gate passes.
-        $this->game->tokens->moveToken($heroId, "hex_12_4");
+        $this->game->tokens->moveToken($this->heroId, "hex_12_4");
 
         $this->respond("completeQuest");
 
@@ -192,10 +192,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * (see Op_in.php — checks $game->getRulesFor($hex, "road", 0) == 1).
      */
     public function testAlvaBracersLandsOnTableauAfterCompleteQuestPays5XpOnRoad(): void {
-        $this->setupGame([2]); // Solo Alva — Alva's Bracers lives in Alva's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $bracers = "card_equip_2_23";
         $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Bracers is claimed
@@ -204,10 +201,10 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
 
         // Place hero on a road hex so the in(road) gate passes.
         // hex_7_8 is plains with road=1 in map_material.csv.
-        $this->game->tokens->moveToken($heroId, "hex_7_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_8");
 
         // Seed Alva with 5 yellow crystals (XP) on tableau so the 5spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 5, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 5, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(5, $xpBefore, "Need at least 5 XP on tableau to pay the quest cost");
 
@@ -248,10 +245,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * crystals on the card.
      */
     public function testTiaraLandsOnTableauAfterCompleteQuestInDarkForest(): void {
-        $this->setupGame([2]); // Solo Alva — Tiara lives in Alva's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $tiara = "card_equip_2_16";
         $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Tiara is claimed
@@ -259,7 +253,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->assertEquals($tiara, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Place hero on a Dark Forest hex so the in(DarkForest) gate passes.
-        $this->game->tokens->moveToken($heroId, "hex_9_1");
+        $this->game->tokens->moveToken($this->heroId, "hex_9_1");
 
         $this->respond("completeQuest");
 
@@ -294,10 +288,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * adjacent hex (clockwise) — and then gainEquip moves the card to tableau.
      */
     public function testElvenArrowsLandsOnTableauAndSpawnsTrollOnCompleteQuestInTrollCaves(): void {
-        $this->setupGame([2]); // Solo Alva — Elven Arrows lives in Alva's deck
-        $this->clearMonstersFromMap(); // also returns trolls to supply_monster
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $arrows = "card_equip_2_24";
         $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Arrows is claimed
@@ -306,7 +297,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
 
         // hex_6_6 is mountain/TrollCaves — moveToken bypasses heroes-can't-enter-mountain.
         $heroHex = "hex_6_6";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->hexMap->invalidateOccupancy();
 
         $trollsBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_troll", "supply_monster"));
@@ -354,10 +345,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      * Same shape as Bjorn's Quiver: rank-3 kill pops a yes/no prompt to claim.
      */
     public function testQuiverClaimsItselfOnRank3KillWhenAccepted(): void {
-        $this->setupGame([2]); // Solo Alva
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_2_18";
         $nextCard = "card_equip_2_17"; // Throwing Darts
@@ -365,7 +353,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
 
         $heroHex = "hex_11_8";
         $trollHex = "hex_12_8";
-        $this->game->tokens->moveToken($heroId, $heroHex);
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->getMonster("monster_troll_1")->moveTo($trollHex, "");
 
         $xpBefore = $this->countXp();
@@ -386,16 +374,13 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
     }
 
     public function testQuiverDeclinedKeepsXp(): void {
-        $this->setupGame([2]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_2_18";
         $nextCard = "card_equip_2_17";
         $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_troll_1")->moveTo("hex_12_8", "");
 
         $baseXp = $this->game->getMonster("monster_troll_1")->getXpReward();
@@ -413,16 +398,13 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
     }
 
     public function testQuiverStaysInDeckWhenKillIsRank1(): void {
-        $this->setupGame([2]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $quiver = "card_equip_2_18";
         $nextCard = "card_equip_2_17";
         $this->seedDeck("deck_equip_$color", [$quiver, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
 
         $xpBefore = $this->countXp();
@@ -433,5 +415,226 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver should stay in deck — goblin is rank 1");
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
+    }
+
+    /**
+     * Elven Blade (card_equip_2_21): quest_on=TMonsterKilled,
+     * quest_r=killed(adj):gainTracker,check('countTracker>=3'):gainEquip.
+     *
+     * Trigger-driven counter quest. Each kill of a monster adjacent to Alva
+     * bumps the tracker; the third kill flips check() and runs gainEquip.
+     * Uses the existing `adj` Math term (Game::evaluateTerm), no new code.
+     */
+    public function testElvenBladeLandsOnTableauAfter3AdjacentKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $blade = "card_equip_2_21";
+        $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Blade is claimed
+        $this->seedDeck("deck_equip_$color", [$blade, $nextCard]);
+
+        $heroHex = "hex_11_8";
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
+
+        // Place 3 goblins on the first 3 free adjacent hexes.
+        $goblins = ["monster_goblin_1", "monster_goblin_2", "monster_goblin_3"];
+        $placedHexes = [];
+        $i = 0;
+        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
+            if ($this->game->hexMap->getCharacterOnHex($hex) !== null) {
+                continue;
+            }
+            $this->game->getMonster($goblins[$i])->moveTo($hex, "");
+            $placedHexes[] = $hex;
+            if (++$i >= 3) {
+                break;
+            }
+        }
+        $this->assertCount(3, $placedHexes, "Need 3 free adjacent hexes for the test");
+
+        // Kill each goblin in sequence — each TMonsterKilled fires the chain:
+        // killed(adj) passes (monster on adjacent hex) → gainTracker → check.
+        foreach ($placedHexes as $hex) {
+            $this->game->machine->push("dealDamage", $color, ["target" => $hex, "count" => 2]);
+            $this->game->machine->dispatchAll();
+        }
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($blade),
+            "Elven Blade should land on tableau after 3 adjacent kills"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $blade), "gainEquip should sweep tracker crystals back to supply");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
+    }
+
+    /**
+     * Negative path: a non-adjacent kill (range-2 attack) should NOT bump the
+     * tracker — killed(adj) fails when the monster wasn't next to the hero.
+     */
+    public function testElvenBladeIgnoresNonAdjacentKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $blade = "card_equip_2_21";
+        $nextCard = "card_equip_2_22";
+        $this->seedDeck("deck_equip_$color", [$blade, $nextCard]);
+
+        // Hero at hex_11_8; goblin two hexes away (non-adjacent).
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $farHex = "hex_13_8"; // distance 2 from hex_11_8
+        $this->assertEquals(2, $this->game->hexMap->getMoveDistance("hex_11_8", $farHex), "Sanity: hex_13_8 is 2 away from hex_11_8");
+        $this->game->getMonster("monster_goblin_1")->moveTo($farHex, "");
+
+        $this->game->machine->push("dealDamage", $color, ["target" => $farHex, "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($blade),
+            "Elven Blade stays in deck — goblin wasn't adjacent"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $blade), "No tracker crystal added on non-adjacent kill");
+    }
+
+    /**
+     * Windbite (card_equip_2_19): quest_on=TMonsterKilled,
+     * quest_r=killed('range>=2'):gainTracker,check('countTracker>=4'):gainEquip.
+     *
+     * Trigger-driven counter quest. Each kill of a monster at distance 2+ from
+     * Alva bumps the tracker; the fourth such kill flips check() and runs
+     * gainEquip. Uses the new `range` Math term (Game::evaluateTerm).
+     */
+    public function testWindbiteLandsOnTableauAfter4RangedKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $windbite = "card_equip_2_19";
+        $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Windbite is claimed
+        $this->seedDeck("deck_equip_$color", [$windbite, $nextCard]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $farHex = "hex_13_8";
+        $this->assertEquals(2, $this->game->hexMap->getMoveDistance("hex_11_8", $farHex), "Sanity: hex_13_8 is range 2");
+
+        // Kill 4 goblins in sequence, each one placed on the same range-2 hex.
+        $goblins = ["monster_goblin_1", "monster_goblin_2", "monster_goblin_3", "monster_goblin_4"];
+        foreach ($goblins as $g) {
+            $this->game->getMonster($g)->moveTo($farHex, "");
+            $this->game->machine->push("dealDamage", $color, ["target" => $farHex, "count" => 2]);
+            $this->game->machine->dispatchAll();
+        }
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($windbite),
+            "Windbite should land on tableau after 4 range-2+ kills"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $windbite), "gainEquip should sweep tracker crystals back to supply");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
+    }
+
+    /**
+     * Negative path: an adjacent kill (range 1) should NOT bump the tracker —
+     * killed('range>=2') fails when the monster was next to the hero.
+     */
+    public function testWindbiteIgnoresAdjacentKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $windbite = "card_equip_2_19";
+        $nextCard = "card_equip_2_22";
+        $this->seedDeck("deck_equip_$color", [$windbite, $nextCard]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 2]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($windbite),
+            "Windbite stays in deck — kill was at range 1"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $windbite), "No tracker crystal added on adjacent kill");
+    }
+
+    /**
+     * Singing Bow (card_equip_2_20): quest_on=TRoll,
+     * quest_r=in(forest):counter(countDice):gainTracker,check('countTracker>=10'):gainEquip.
+     *
+     * Counter quest. Each TRoll while standing in a forest hex bumps the
+     * tracker by the number of dice rolled (read from display_battle via the
+     * new `countDice` Math term). Hits 10 cumulative dice → claim.
+     */
+    public function testSingingBowLandsOnTableauAfterRolling10DiceInForest(): void {
+        $color = $this->getActivePlayerColor();
+
+        $bow = "card_equip_2_20";
+        $nextCard = "card_equip_2_22"; // Belt of Youth — surfaces after Bow is claimed
+        $this->seedDeck("deck_equip_$color", [$bow, $nextCard]);
+
+        // Hero on a forest hex so in(forest) gate passes.
+        $this->game->tokens->moveToken($this->heroId, "hex_2_8");
+
+        // Three simulated rolls: 4 + 4 + 2 = 10 dice cumulative → claim fires.
+        $rolls = [4, 4, 2];
+        foreach ($rolls as $diceCount) {
+            $this->seedDiceOnDisplay($diceCount);
+            $this->game->machine->push("trigger(TRoll)", $color);
+            $this->game->machine->dispatchAll();
+        }
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($bow),
+            "Singing Bow should land on tableau after rolling 10 dice in forest"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $bow), "gainEquip should sweep tracker crystals back to supply");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Belt of Youth should surface as the new deck-top");
+    }
+
+    /**
+     * Negative path: rolls outside a forest hex don't bump the tracker —
+     * in(forest) voids the chain.
+     */
+    public function testSingingBowIgnoresRollsOutsideForest(): void {
+        $color = $this->getActivePlayerColor();
+
+        $bow = "card_equip_2_20";
+        $nextCard = "card_equip_2_22";
+        $this->seedDeck("deck_equip_$color", [$bow, $nextCard]);
+
+        // hex_11_8 is plains — not forest.
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+
+        $this->seedDiceOnDisplay(10);
+        $this->game->machine->push("trigger(TRoll)", $color);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($bow),
+            "Singing Bow stays in deck — hero wasn't in forest"
+        );
+        $this->assertEquals(0, $this->countTokens("crystal_red", $bow), "No tracker crystal added when in(forest) voids");
+    }
+
+    /** Sweep display_battle and seed N fresh dice (face=1; doesn't matter for countDice). */
+    private function seedDiceOnDisplay(int $count): void {
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle")) as $id) {
+            $this->game->tokens->moveToken($id, "limbo");
+        }
+        for ($i = 1; $i <= $count; $i++) {
+            $this->game->tokens->moveToken("die_attack_$i", "display_battle", 1);
+        }
     }
 }

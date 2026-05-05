@@ -360,6 +360,14 @@ class Game extends Base {
             $heroHex = $this->hexMap->getCharacterHex($heroId);
             $contextHex = $this->tokens->getTokenLocation($context);
             return (int) ($heroHex !== null && $contextHex !== null && $this->hexMap->getMoveDistance($heroHex, $contextHex) === 1);
+        } elseif ($x === "range") {
+            $heroId = $this->getHeroTokenId($owner);
+            $heroHex = $this->hexMap->getCharacterHex($heroId);
+            $contextHex = $this->tokens->getTokenLocation($context);
+            if ($heroHex === null || $contextHex === null) {
+                return 0;
+            }
+            return $this->hexMap->getHexDistance($heroHex, $contextHex);
         } elseif ($x === "healthRem") {
             $health = (int) $this->getRulesFor($context, "health", 0);
             $damage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $context));
@@ -495,6 +503,11 @@ class Game extends Base {
         return $count;
     }
 
+    /** Total dice on display_battle (regardless of face). Used by evaluateExpression("countDice"). */
+    function countDice($owner = null, $context = null, $options = null): int {
+        return count($this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle"));
+    }
+
     /** Count dice on display_battle showing a rune (side 3). Used by evaluateExpression("countRunes"). */
     function countRunes($owner = null, $context = null, $options = null): int {
         $count = 0;
@@ -507,6 +520,25 @@ class Game extends Base {
             }
         }
         return $count;
+    }
+
+    /**
+     * Total XP yielded by the monster on the current attack hex (just-killed monster during TMonsterKilled):
+     * base reward + bonus yellow crystals parked on the monster (Prey etc.).
+     */
+    function countMonsterXp($owner = null, $context = null, $options = null): int {
+        $hex = $this->getAttackHex();
+        if ($hex === null) {
+            $monsterId = $context;
+        } else {
+            $monsterId = $this->hexMap->getCharacterOnHex($hex);
+        }
+        if ($monsterId === null || !str_starts_with($monsterId, "monster_")) {
+            return 0;
+        }
+        $base = (int) $this->getRulesFor($monsterId, "xp", 0);
+        $bonus = count($this->tokens->getTokensOfTypeInLocation("crystal_yellow", $monsterId));
+        return $base + $bonus;
     }
 
     /** Count red crystals on the deck-top equip card (quest progress). Used by evaluateExpression("countTracker"). */

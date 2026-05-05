@@ -13,6 +13,15 @@ require_once __DIR__ . "/CampaignBase.php";
  * accumulates / equip lands on tableau.
  */
 class Campaign_EmblaQuestTest extends CampaignBaseTest {
+    private string $heroId;
+
+    protected function setUp(): void {
+        parent::setUp();
+        $this->setupGame([3]); // Solo Embla
+        $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
+        $this->clearMonstersFromMap();
+    }
+
     /**
      * Leg Guards (card_equip_3_23): quest_on= (empty — player-initiated),
      * quest_r=spendAction(actionFocus):gainEquip.
@@ -25,10 +34,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * machine — matches the Belt of Youth pattern in Campaign_AlvaQuestTest.
      */
     public function testLegGuardsLandsOnTableauAfterCompleteQuest(): void {
-        $this->setupGame([3]); // Solo Embla — Leg Guards lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $legGuards = "card_equip_3_23";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Leg Guards is claimed
@@ -70,10 +76,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * deck-top.
      */
     public function testHealingPotionLandsOnTableauAfterCompleteQuestOnWitchCabin(): void {
-        $this->setupGame([3]); // Solo Embla — Healing Potion lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $potion = "card_equip_3_16";
         $nextCard = "card_equip_3_17"; // Heels — surfaces after Healing Potion is claimed
@@ -82,7 +85,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
 
         // Place Embla on the Witch Cabin hex so the in(WitchCabin) gate passes.
         $witchCabinHex = "hex_11_11";
-        $this->game->tokens->moveToken($heroId, $witchCabinHex);
+        $this->game->tokens->moveToken($this->heroId, $witchCabinHex);
 
         $this->respond("completeQuest");
 
@@ -120,13 +123,10 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * which would make spendAction(actionAttack) ungated-fail mid-quest.
      */
     public function testWarriorShieldLandsOnTableauAfterCompleteQuest(): void {
-        $this->setupGame([3]); // Solo Embla — Warrior Shield lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         // Park Embla on a plains hex outside Grimheim so attack actions are legal.
-        $this->game->tokens->moveToken($heroId, "hex_7_9");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
 
         $warriorShield = "card_equip_3_24";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Warrior Shield is claimed
@@ -173,10 +173,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * the card on the tableau and revealing the next deck-top.
      */
     public function testWildfireBladeLandsOnTableauAfterCompleteQuestOnSpewingMountain(): void {
-        $this->setupGame([3]); // Solo Embla — Wildfire Blade lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $wildfireBlade = "card_equip_3_21";
         $nextCard = "card_equip_3_22"; // Raven's Claw — surfaces after Wildfire Blade is claimed
@@ -187,7 +184,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         // (hex id is hex_{x}_{y}; the named area Spewing Mountain has plains tiles
         // hex_2_14, hex_1_15, hex_4_16 — picking the first.)
         $spewingMountainHex = "hex_2_14";
-        $this->game->tokens->moveToken($heroId, $spewingMountainHex);
+        $this->game->tokens->moveToken($this->heroId, $spewingMountainHex);
 
         $this->respond("completeQuest");
 
@@ -228,10 +225,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * second auto-resolves when only one card remains), then runs gainEquip.
      */
     public function testHeelsLandsOnTableauAfterMendAndDiscarding2InWitchCabin(): void {
-        $this->setupGame([3]); // Solo Embla — Heels lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $heels = "card_equip_3_17";
         $nextCard = "card_equip_3_20"; // Helmet — surfaces after Heels is claimed
@@ -249,7 +243,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
 
         // Place Embla on the Witch Cabin hex so the in(WitchCabin) gate passes.
         $witchCabinHex = "hex_11_11";
-        $this->game->tokens->moveToken($heroId, $witchCabinHex);
+        $this->game->tokens->moveToken($this->heroId, $witchCabinHex);
 
         $this->respond("completeQuest");
 
@@ -311,10 +305,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * multi-hex forest path, and equally valid for the quest engine.
      */
     public function testRavensClawLandsOnTableauAfter10ForestSteps(): void {
-        $this->setupGame([3]); // Solo Embla — Raven's Claw lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $ravensClaw = "card_equip_3_22";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Raven's Claw is claimed
@@ -325,7 +316,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $hexA = "hex_10_2"; // forest
         $hexB = "hex_11_2"; // forest
         $hexPlains = "hex_12_2"; // plains, adjacent to hex_11_2 — the negative-case hex
-        $this->game->tokens->moveToken($heroId, $hexB);
+        $this->game->tokens->moveToken($this->heroId, $hexB);
 
         // Bonus: one non-forest step first. From hex_11_2 (forest) to hex_12_2 (plains).
         // TStep fires at the destination — in(forest) gate fails — no crystal added.
@@ -343,7 +334,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         );
 
         // Move hero back onto a forest hex so the first scripted forest move starts cleanly.
-        $this->game->tokens->moveToken($heroId, $hexA);
+        $this->game->tokens->moveToken($this->heroId, $hexA);
 
         // 10 single-step moves, oscillating A → B → A → B …
         // Each move emits TStep at the destination (forest), so quest_r runs:
@@ -382,10 +373,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * Identical shape to Boldur's Dwarf Helm (in(TempleRuins):2spendXp:gainEquip).
      */
     public function testTailoredBootsLandsOnTableauAfterCompleteQuestPays2XpInGrimheim(): void {
-        $this->setupGame([3]); // Solo Embla — Tailored Boots lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $tailoredBoots = "card_equip_3_18";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Tailored Boots is claimed
@@ -393,10 +381,10 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertEquals($tailoredBoots, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Place Embla on a Grimheim hex so the in(Grimheim) gate passes.
-        $this->game->tokens->moveToken($heroId, "hex_9_9");
+        $this->game->tokens->moveToken($this->heroId, "hex_9_9");
 
         // Seed Embla with 2 yellow crystals (XP) on tableau so the 2spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
@@ -440,10 +428,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * cost is 4 instead of 3 and Embla owns the deck. No location gate — pay-anywhere.
      */
     public function testCustomArmorLandsOnTableauAfterCompleteQuestPays4Xp(): void {
-        $this->setupGame([3]); // Solo Embla — Custom Armor lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $customArmor = "card_equip_3_25";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Custom Armor is claimed
@@ -451,7 +436,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertEquals($customArmor, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Seed Embla with 4 yellow crystals (XP) on tableau so the 4spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 4, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 4, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(4, $xpBefore, "Need at least 4 XP on tableau to pay the quest cost");
 
@@ -492,10 +477,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * is different.
      */
     public function testBladeDecorationsLandsOnTableauAfterCompleteQuestPays2XpInGrimheim(): void {
-        $this->setupGame([3]); // Solo Embla — Blade Decorations lives in Embla's deck
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $bladeDecorations = "card_equip_3_19";
         $nextCard = "card_equip_3_16"; // Healing Potion — surfaces after Blade Decorations is claimed
@@ -503,10 +485,10 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertEquals($bladeDecorations, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
         // Place Embla on a Grimheim hex so the in(Grimheim) gate passes.
-        $this->game->tokens->moveToken($heroId, "hex_9_9");
+        $this->game->tokens->moveToken($this->heroId, "hex_9_9");
 
         // Seed Embla with 2 yellow crystals (XP) on tableau so the 2spendXp cost can be paid.
-        $this->game->effect_moveCrystals($heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 2, "tableau_$color", ["message" => ""]);
         $xpBefore = $this->countTokens("crystal_yellow", "tableau_$color");
         $this->assertGreaterThanOrEqual(2, $xpBefore, "Need at least 2 XP on tableau to pay the quest cost");
 
@@ -545,17 +527,14 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * gated by the bareword tribe terms `brute` / `skeleton`.
      */
     public function testHelmetClaimsItselfOnBruteKillWhenAccepted(): void {
-        $this->setupGame([3]); // Solo Embla
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_3_20";
         $nextCard = "card_equip_3_16"; // Healing Potion
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
         $bruteHex = "hex_12_8";
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_brute_1")->moveTo($bruteHex, "");
 
         $xpBefore = $this->countXp();
@@ -579,16 +558,13 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * Player declines the optional claim — Helmet stays in deck, XP awarded normally.
      */
     public function testHelmetDeclinedKeepsXp(): void {
-        $this->setupGame([3]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_3_20";
         $nextCard = "card_equip_3_16";
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_skeleton_1")->moveTo("hex_12_8", "");
 
         $baseXp = $this->game->getMonster("monster_skeleton_1")->getXpReward();
@@ -611,16 +587,13 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
      * stays in deck, XP awarded normally.
      */
     public function testHelmetStaysInDeckWhenKillIsGoblin(): void {
-        $this->setupGame([3]);
-        $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
-        $heroId = $this->game->getHeroTokenId($color);
 
         $helmet = "card_equip_3_20";
         $nextCard = "card_equip_3_16";
         $this->seedDeck("deck_equip_$color", [$helmet, $nextCard]);
 
-        $this->game->tokens->moveToken($heroId, "hex_11_8");
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_12_8", "");
 
         $xpBefore = $this->countXp();

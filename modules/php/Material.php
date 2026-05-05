@@ -4633,6 +4633,8 @@ class Material {
         "flavour" => "Once used to strangle the Trollfather. Not the conventional use of a bow, but hey, it worked.",
         "attack_range" => 2,
         "mw" => 1,
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed(trollkin):counter(countMonsterXp):gainTracker,check('countTracker>=5'):gainEquip",
 ],
 // # Equipment - Alva (hno=2)
     "card_equip_2_23" => [ 
@@ -4716,6 +4718,8 @@ class Material {
         "on" => "TAfterActionAttack",
         "quest" => "<i>Kill 3 adjacent monsters</i> to practice switching weapons.",
         "effect" => clienttranslate("After each attack action, deal 1 damage to a monster adjacent to Alva."),
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed(adj):gainTracker,check('countTracker>=3'):gainEquip",
 ],
     "card_equip_2_18" => [ 
         "ctype" => "equip",
@@ -4749,6 +4753,8 @@ class Material {
         "flavour" => "Sings your swan song.",
         "attack_range" => 2,
         "mw" => 1,
+        "quest_on" => "TRoll",
+        "quest_r" => "in(forest):counter(countDice):gainTracker,check('countTracker>=10'):gainEquip",
 ],
     "card_equip_2_17" => [ 
         "ctype" => "equip",
@@ -4790,6 +4796,8 @@ class Material {
         "flavour" => "It anticipates your wishes.",
         "attack_range" => 2,
         "mw" => 1,
+        "quest_on" => "TMonsterKilled",
+        "quest_r" => "killed('range>=2'):gainTracker,check('countTracker>=4'):gainEquip",
 ],
 // # Equipment - Embla (hno=3)
     "card_equip_3_19" => [ 
