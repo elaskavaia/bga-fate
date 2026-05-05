@@ -543,7 +543,6 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->confirmCardEffect();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet should land on tableau on brute kill");
@@ -574,7 +573,6 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->skip();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_skeleton_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck on decline");
@@ -602,7 +600,11 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
-        $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck — goblin doesn't match brute|skeleton");
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($helmet),
+            "Helmet stays in deck — goblin doesn't match brute|skeleton"
+        );
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
     }
 }

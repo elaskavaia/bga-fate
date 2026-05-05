@@ -193,17 +193,9 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         );
 
         $hero = $this->game->getHero($color);
-        $this->assertNotContains(
-            "actionAttack",
-            $hero->getActionsTaken(),
-            "Attack action should NOT be marked taken — gate hid the chain"
-        );
+        $this->assertNotContains("actionAttack", $hero->getActionsTaken(), "Attack action should NOT be marked taken — gate hid the chain");
 
-        $this->assertEquals(
-            $cape,
-            $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"],
-            "Cape should still be on top of deck"
-        );
+        $this->assertEquals($cape, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"], "Cape should still be on top of deck");
     }
 
     /**
@@ -295,7 +287,6 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt — accept it.
         $this->confirmCardEffect();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"), "Troll should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($quiver), "Quiver should land on tableau on rank-3 kill");
@@ -327,7 +318,6 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Decline the optional ?(blockXp:gainEquip) prompt.
         $this->skip();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver stays in deck on decline");
@@ -386,7 +376,6 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt — accept it.
         $this->confirmCardEffect();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet should land on tableau on brute kill");
@@ -419,7 +408,6 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Decline the optional ?(blockXp:gainEquip) prompt.
         $this->skip();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_skeleton_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck on decline");
@@ -447,7 +435,11 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
-        $this->assertEquals("deck_equip_$color", $this->tokenLocation($helmet), "Helmet stays in deck — goblin doesn't match brute|skeleton");
+        $this->assertEquals(
+            "deck_equip_$color",
+            $this->tokenLocation($helmet),
+            "Helmet stays in deck — goblin doesn't match brute|skeleton"
+        );
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
     }
 
@@ -521,7 +513,6 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         // Decline the optional ?(2spawn(brute):gainEquip) prompt.
         $this->skip();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($purse), "Leather Purse stays in deck on decline");
@@ -582,8 +573,8 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         // Three trollkin kills with increasing XP: 1 + 2 + 3 = 6 ≥ 5.
         $kills = [
             ["monster_goblin_1", 2, 1], // dealDamage to kill HP=2; XP=1 → tracker after = 1
-            ["monster_brute_1", 3, 3],  //                  HP=3; XP=2 → tracker after = 3
-            ["monster_troll_1", 7, 6],  //                  HP=7; XP=3 → tracker after = 6 (claim fires)
+            ["monster_brute_1", 3, 3], //                  HP=3; XP=2 → tracker after = 3
+            ["monster_troll_1", 7, 6], //                  HP=7; XP=3 → tracker after = 6 (claim fires)
         ];
 
         foreach ($kills as $idx => [$monsterId, $hp, $expectedTracker]) {
@@ -623,11 +614,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_sprite_1"));
-        $this->assertEquals(
-            "deck_equip_$color",
-            $this->tokenLocation($trollbane),
-            "Trollbane stays in deck — sprite isn't trollkin"
-        );
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($trollbane), "Trollbane stays in deck — sprite isn't trollkin");
         $this->assertEquals(0, $this->countTokens("crystal_red", $trollbane), "No tracker crystal added on non-trollkin kill");
     }
 }

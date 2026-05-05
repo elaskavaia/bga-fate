@@ -281,6 +281,25 @@ actionAttack → player picks target → roll dice
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
 
+### Quest System
+
+Quests are the only path to gain equipment past the starter card. Each row in [card_equip_material.csv](../card_equip_material.csv) carries two extra fields:
+
+- **`quest_on`** — trigger that fires the quest. Empty = player-initiated; a `Trigger` value = trigger-driven; `custom` = bespoke class.
+- **`quest_r`** — Op DSL chain (same parser as the active `r` field) that runs on match. Always ends in `gainEquip`.
+
+**Three flavors:**
+
+- *Player-initiated* (`quest_on=` empty). Surfaces as a top-bar **`completeQuest`** free action via `Op_completeQuest`, which lists the deck-top equip card if `quest_r`'s leading gates pass. The chain typically pays a cost (`spendAction`, `NspendXp`, `discardEvent`) before `gainEquip`. Examples: Throwing Darts (`in(forest):spendAction(actionPractice):gainEquip`), Mining Equipment (`3spendXp:gainEquip`).
+- *Trigger-driven* (`quest_on=TStep|TMonsterKilled|TRoll|…`). `Op_trigger` walks `deck_equip_{owner}`'s top card and calls `triggerQuest($event)`. Default `Card::triggerQuest` queues `quest_r` when `quest_on` matches the trigger chain. Counter quests use **`gainTracker`** (red crystals on the deck-top card) plus `check('countTracker>=N')` to gate the claim. Examples: Belt of Youth (8 forest steps), Trollbane (5 trollkin XP via `counter(countMonsterXp):gainTracker`).
+- *Replacement-reward* (sub-pattern of trigger-driven, `?` makes the chain optional). Player gets a yes/no prompt at trigger time; on accept, the chain runs (typically `blockXp:gainEquip` to forfeit the kill reward in exchange for the card). Examples: Quiver, Helmet, Leather Purse.
+
+**Custom (`quest_on=custom`).** Bespoke `CardEquip_<Name>` class overrides `triggerQuest($event)` and dispatches by hand — used when a single card needs multiple triggers or non-DSL logic (e.g. Shield: enter Ogre Valley OR skip a troll's XP, two different triggers).
+
+**Sweep + reveal.** `Op_gainEquip` moves the card from `deck_equip_{owner}` to `tableau_{owner}`, fires `Trigger::CardEnter`, sweeps any `gainTracker` red crystals back to supply, and reveals the new deck-top.
+
+Math terms used by quest predicates (in `Game::evaluateTerm`): `adj`, `range` (hex distance to context monster), `countTracker`, `countMonsterXp` (base XP + bonus yellow crystals), `countDice`, `countRunes`, `countAdjMonsters`, `countAdjMountains`, `countAdjLegends`, `closerToGrimheim`, `healthRem`. Predicates for `killed(<expr>)` evaluate against the just-killed monster (read via `marker_attack`'s hex), so `killed(trollkin)`, `killed('rank>=3')`, `killed(adj)`, `killed('range>=2')` all compose freely.
+
 ### Hero Attribute Trackers
 
 Hero attributes (strength, range, move, health) are stored as tracker tokens in the DB: `tracker_{attr}_{color}`.

@@ -18,6 +18,7 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
 
         $this->clearMonstersFromMap();
         $this->clearHand($this->getActivePlayerColor());
+        $this->clearEquipDecks();
     }
 
     // --- Queen of the Hill I (card_ability_3_11) ---

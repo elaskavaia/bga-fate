@@ -390,7 +390,6 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->skip();
-        $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver stays in deck on decline");
@@ -458,11 +457,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->game->machine->dispatchAll();
         }
 
-        $this->assertEquals(
-            "tableau_$color",
-            $this->tokenLocation($blade),
-            "Elven Blade should land on tableau after 3 adjacent kills"
-        );
+        $this->assertEquals("tableau_$color", $this->tokenLocation($blade), "Elven Blade should land on tableau after 3 adjacent kills");
         $this->assertEquals(0, $this->countTokens("crystal_red", $blade), "gainEquip should sweep tracker crystals back to supply");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
@@ -491,11 +486,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
-        $this->assertEquals(
-            "deck_equip_$color",
-            $this->tokenLocation($blade),
-            "Elven Blade stays in deck — goblin wasn't adjacent"
-        );
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($blade), "Elven Blade stays in deck — goblin wasn't adjacent");
         $this->assertEquals(0, $this->countTokens("crystal_red", $blade), "No tracker crystal added on non-adjacent kill");
     }
 
@@ -526,11 +517,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->game->machine->dispatchAll();
         }
 
-        $this->assertEquals(
-            "tableau_$color",
-            $this->tokenLocation($windbite),
-            "Windbite should land on tableau after 4 range-2+ kills"
-        );
+        $this->assertEquals("tableau_$color", $this->tokenLocation($windbite), "Windbite should land on tableau after 4 range-2+ kills");
         $this->assertEquals(0, $this->countTokens("crystal_red", $windbite), "gainEquip should sweep tracker crystals back to supply");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
@@ -556,11 +543,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
-        $this->assertEquals(
-            "deck_equip_$color",
-            $this->tokenLocation($windbite),
-            "Windbite stays in deck — kill was at range 1"
-        );
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($windbite), "Windbite stays in deck — kill was at range 1");
         $this->assertEquals(0, $this->countTokens("crystal_red", $windbite), "No tracker crystal added on adjacent kill");
     }
 
@@ -620,11 +603,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->game->machine->push("trigger(TRoll)", $color);
         $this->game->machine->dispatchAll();
 
-        $this->assertEquals(
-            "deck_equip_$color",
-            $this->tokenLocation($bow),
-            "Singing Bow stays in deck — hero wasn't in forest"
-        );
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($bow), "Singing Bow stays in deck — hero wasn't in forest");
         $this->assertEquals(0, $this->countTokens("crystal_red", $bow), "No tracker crystal added when in(forest) voids");
     }
 

@@ -5114,6 +5114,7 @@ class Material {
         "quest" => "<i>Enter the Ogre Valley or skip the gold [XP] from killing a troll.</i>",
         "effect" => clienttranslate("[DAMAGE]: Prevent 2 damage."),
         "flavour" => "Breaking off one side of a troll breastplate should do the trick",
+        "quest_on" => "custom",
 ],
     "card_equip_4_21" => [ 
         "ctype" => "equip",

@@ -202,8 +202,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Single move into the Marsh. Op_step emits Trigger::ActionMove on the
         // final step (because reason="Op_actionMove"), which chains through
         // Trigger::Move. Smiterbiter listens on TMove, so it matches.
-        $this->game->machine->push("move", $color, ["target" => $marshHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($marshHex);
 
         $this->assertEquals(
             "tableau_$color",
@@ -439,8 +438,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $endHex = "hex_4_15"; // plains, 3 adjacent mountains (hex_3_15, hex_5_15, hex_3_16)
         $this->game->tokens->moveToken($this->heroId, $startHex);
 
-        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($endHex);
 
         $this->assertEquals(
             "tableau_$color",
@@ -478,8 +476,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
             $this->game->getMonster($m)->moveTo($monsterHexes[$i], "");
         }
 
-        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($endHex);
 
         $this->assertEquals(
             "tableau_$color",
@@ -509,8 +506,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->game->getMonster("monster_legend_1_1")->moveTo("hex_12_8", "");
 
-        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($endHex);
 
         $this->assertEquals(
             "tableau_$color",
@@ -533,8 +529,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $endHex = "hex_7_8";
         $this->game->tokens->moveToken($this->heroId, $startHex);
 
-        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($endHex);
 
         $this->assertEquals(
             "deck_equip_$color",
@@ -558,13 +553,136 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         $endHex = "hex_7_8";
         $this->game->tokens->moveToken($this->heroId, $startHex);
 
-        $this->game->machine->push("move", $color, ["target" => $endHex, "reason" => "Op_actionMove"]);
-        $this->game->machine->dispatchAll();
+        $this->respond($endHex);
 
         $this->assertEquals(
             "deck_equip_$color",
             $this->tokenLocation($dvalinsPick),
             "Dvalin's Pick should stay in deck — gate countAdjMountains>=3 failed"
         );
+    }
+
+    /**
+     * Shield (card_equip_4_16): bespoke (CardEquip_Shield), quest_on=custom.
+     * Two OR-branches:
+     *   A. Enter Ogre Valley → auto-claim
+     *   B. Skip XP from troll kill → optional ?(blockXp:gainEquip) prompt
+     *
+     * Both branches stay live until the card is claimed.
+     */
+
+    public function testShieldClaimsItselfOnEnteringOgreValley(): void {
+        $color = $this->getActivePlayerColor();
+
+        $shield = "card_equip_4_16";
+        $nextCard = "card_equip_4_19"; // Orebiter — surfaces after Shield is claimed
+        $this->seedDeck("deck_equip_$color", [$shield, $nextCard]);
+
+        // Boldur on a hex adjacent to the OgreValley cluster; step into hex_2_8 (forest, OgreValley).
+        $this->game->tokens->moveToken($this->heroId, "hex_3_7");
+        $ogreValleyHex = "hex_2_8";
+
+        $this->respond($ogreValleyHex);
+
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($shield),
+            "Shield should land on tableau after stepping into Ogre Valley"
+        );
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
+    }
+
+    public function testShieldStaysInDeckWhenSteppingOutsideOgreValley(): void {
+        $color = $this->getActivePlayerColor();
+
+        $shield = "card_equip_4_16";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$shield, $nextCard]);
+
+        // Boldur on a plains hex; step into another plains hex (not Ogre Valley).
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->respond("hex_7_8");
+
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($shield), "Shield stays in deck — destination wasn't Ogre Valley");
+    }
+
+    public function testShieldClaimsOnTrollKillWhenAccepted(): void {
+        $color = $this->getActivePlayerColor();
+
+        $shield = "card_equip_4_16";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$shield, $nextCard]);
+
+        $heroHex = "hex_11_8";
+        $trollHex = "hex_12_8";
+        $this->game->tokens->moveToken($this->heroId, $heroHex);
+        $this->game->getMonster("monster_troll_1")->moveTo($trollHex, "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => $trollHex, "count" => 7]);
+        $this->game->machine->dispatchAll();
+
+        // Optional ?(blockXp:gainEquip) prompt — accept it.
+        $this->confirmCardEffect();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"), "Troll should be killed");
+        $this->assertEquals(
+            "tableau_$color",
+            $this->tokenLocation($shield),
+            "Shield should land on tableau on troll kill when player accepts"
+        );
+        $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the troll's XP reward");
+
+        $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
+        $this->assertNotNull($newTop, "deck_equip should have a new top card");
+        $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
+    }
+
+    public function testShieldDeclinedOnTrollKillKeepsXp(): void {
+        $color = $this->getActivePlayerColor();
+
+        $shield = "card_equip_4_16";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$shield, $nextCard]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $this->game->getMonster("monster_troll_1")->moveTo("hex_12_8", "");
+
+        $baseXp = $this->game->getMonster("monster_troll_1")->getXpReward();
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 7]);
+        $this->game->machine->dispatchAll();
+
+        // Decline the optional ?(blockXp:gainEquip) prompt.
+        $this->skip();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($shield), "Shield stays in deck on decline");
+        $this->assertEquals($xpBefore + $baseXp, $this->countXp(), "Troll XP awarded normally when player declines");
+    }
+
+    public function testShieldIgnoresNonTrollKills(): void {
+        $color = $this->getActivePlayerColor();
+
+        $shield = "card_equip_4_16";
+        $nextCard = "card_equip_4_19";
+        $this->seedDeck("deck_equip_$color", [$shield, $nextCard]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_12_8", "");
+
+        $xpBefore = $this->countXp();
+
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 3]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($shield), "Shield stays in deck — brute isn't a troll");
+        $this->assertEquals($xpBefore + 2, $this->countXp(), "Brute XP awarded normally when chain doesn't fire");
     }
 }

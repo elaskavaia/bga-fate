@@ -231,7 +231,7 @@ Grouped by §2 mechanism. Tick on per-card test green.
 **F — Bespoke (custom Card class)**
 
 
-- [ ] Shield [Boldur] (`CardEquip_ShieldBoldur` new) — OR of two predicates
+- [x] Shield [Boldur]
 
 
 Other
@@ -264,13 +264,7 @@ Tracked in [PLAN.md](PLAN.md) under Quests → Client. Not required for the engi
 
 ---
 
-## 10. Open concerns
-
-Items still unresolved, deferred to later phases or pending answers. Resolved items are removed.
-
-### Real risks
 
 
 
-5. **Singing Bow's `gainTracker(numDice)` — where does `numDice` come from?** `TRoll` carries the roll context, but the Math expression in `gainTracker(numDice)` evaluates via the [Base mapper](../../modules/php/Base.php). The mapper needs a `numDice` resolver scoped to the current trigger event. Same concern for `monster_gold` (Trollbane), `killed=trollkin` (predicate). These are all event-context lookups — the design assumes the trigger event is reachable from the Math evaluator, which I haven't verified.
 
