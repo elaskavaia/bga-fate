@@ -1797,6 +1797,27 @@ button.bgabutton > * {
   content: " x " attr(data-count);
 }
 
+.fateaction.err_4::after {
+  content: "✓";
+  position: absolute;
+  bottom: 10px;
+  right: -14px;
+  height: 50%;
+  aspect-ratio: 1;
+  font-size: 32px;
+  color: green;
+}
+.fateaction.err_2::after, .fateaction.err_6::after {
+  content: "⊘";
+  position: absolute;
+  bottom: 3px;
+  right: -9px;
+  height: 50%;
+  aspect-ratio: 1;
+  font-size: 20px;
+  color: red;
+}
+
 .action-button {
   min-width: 4em;
   line-height: 24px;

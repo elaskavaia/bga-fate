@@ -141,6 +141,36 @@ button.bgabutton > * {
     content: " x " attr(data-count);
   }
 }
+// err_4 = ERR_MAX: action already taken this turn
+.fateaction {
+  &.err_4 {
+    &::after {
+      content: "✓";
+      position: absolute;
+      bottom: 10px;
+      right: -14px;
+      height: 50%;
+      aspect-ratio: 1;
+      font-size: 32px;
+      color: green;
+    }
+  }
+
+  // err_2 = ERR_PREREQ: no valid targets right now
+  &.err_2,
+  &.err_6 {
+    &::after {
+      content: "⊘";
+      position: absolute;
+      bottom: 3px;
+      right: -9px;
+      height: 50%;
+      aspect-ratio: 1;
+      font-size: 20px;
+      color: red;
+    }
+  }
+}
 //#page-title
 .action-button {
   min-width: 4em;

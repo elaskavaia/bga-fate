@@ -2129,8 +2129,9 @@ class PlayerTurn extends GameMachine {
             const opKey = `Op_${target}`;
             const icon = this.game.getRulesFor(opKey, "wicon", "");
             const name = this.game.getRulesFor(opKey, "name");
+            const q = paramInfo.q;
             const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
-            return `<div id='${target}' class="fateaction">${iconHtml}<span>${name}</span></div>`;
+            return `<div id='${target}' class="fateaction err_${q}">${iconHtml}<span>${name}</span></div>`;
         }
         return super.createCustomButtonImageHtml(target, paramInfo);
     }
