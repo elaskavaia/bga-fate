@@ -17,7 +17,7 @@ See CLAUDE.md for project overview
 [x] Main Board (jpg) — img/EN_Game_Board.jpg
 [x] Cards (jpg) — monster cards sprite exists (img/EN_Monster_Cards.jpg), hero cards
 [x] Miniatures (png) — hero sprites (img/mini_heroes.png), house sprites (img/mini_houses.png), monster sprites
-[~] Other 3d pieces and iconography (png) — dice sprite done (img/dice.png), crystals TODO
+[x] Other 3d pieces and iconography (png) — dice sprite done (img/dice.png), crystals
 
 ## High level plan
 
@@ -41,7 +41,7 @@ See CLAUDE.md for project overview
 
 [x] Encounters - there are crystals placed on map, we need to implement hero running into them
 [x] Main weapon
-[ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control
+
 
 
 ## Quests
@@ -56,11 +56,6 @@ See CLAUDE.md for project overview
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
 
 ### Client
-
-
-[ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
-[ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
-[ ] Ability pile and equipment pile browsing
 
 ### Tests
 
@@ -81,7 +76,7 @@ See CLAUDE.md for project overview
 
 ### Server
 
-[ ] Monster die with effects
+
 [x] Game option: time track (short/long)
 [ ] Game option: monster die (on/off)
 [ ] Game option: difficulty
@@ -101,11 +96,9 @@ See CLAUDE.md for project overview
 
 ### UI/UX
 
-[ ] Smooth movement animations (hero and monster)
-[ ] Dice roll animation
-[ ] Card play/draw animations
+
 [x] Responsive layout
-[ ] Visual indicators (current turn, threats, quest progress)
+
 
 ### BGA Requirements
 
@@ -135,24 +128,3 @@ See misc/docs/CHECKLIST.md
 
 ---
 
-## TODO
-
-- Fix stacked tooltips
-- [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
-- Check if damage dice (8 in rules) are meant to be limited or just a physical constraint — verify on BGG forum or designer notes
-  [ ] Fix spawn locations in monster cards — current data is not correct
-  [ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
-  [ ] Show win/loss end screen — BGA default end screen works, custom UI
-  [ ] Range indicator for ranged monster attacks
-  [ ] Legend monster special display
-  [ ] Suppressive Fire multiplayer bug: `findStunCrystal()` in Op_c_supfire finds the first green crystal on any monster globally — in multiplayer (Bjorn + Alva both have Suppressive Fire), one player's resolve/skip could move or remove the other player's stun crystal
-  [ ] Visual display for stunmarker — currently the stun token sits on the monster but has no distinct UI (looks like any other token on the monster). Need a clear indicator (e.g. a halo, icon overlay, or position offset) so the player can see at a glance which monsters are stunned this turn.
-  [ ] Flip animation for upgrades
-  [x] Main weapon - restriction only one main weapon allowed
-  [ ] **Manually test: double-confirm on comma-chained event card rules.** Multi-Shot (`r=2roll(inRange),2roll(inRange)`) creates a `seq` op for the comma-chain. Test via `Campaign_AlvaEventTest::testMultiShotRollsAgainstTwoDifferentMonsters` shows an extra `confirm` step is required after the card pick, before the first sub-op prompts. The root paygain already has `confirm=true` from `Card::useCard`; seq's expandOperation correctly strips confirm from children. Expected UX: click card → prompt for first monster hex (no intermediate confirm). Actual: click card → confirm button → prompt for first monster hex. Verify in the harness whether this is a UX bug (double-click) or intentional. If UX bug, likely fix is in `Op_seq::expandOperation` or how useCard wraps the op.
-  [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
-  [ ] **Monsters must follow a predetermined path to Grimheim.** Per rules, monster movement toward Grimheim should follow the canonical path defined for each spawn area, not just shortest-distance pathfinding. Verify current movement logic and add per-area path data if missing.
-
-
-[ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
-[x] Refactor updateData - create function in OpMachine to hide impl details
