@@ -162,7 +162,7 @@ describe("Game.updateTokenDisplayInfo", () => {
     const info = game.getTokenDisplayInfo("monster_legend_1_1");
     expect(info.tooltip).to.include("Strength");
     expect(info.tooltip).to.include("Health");
-    expect(info.tooltip).to.not.include("Rank");
+    expect(info.tooltip).to.include("Legend");
   });
 });
 

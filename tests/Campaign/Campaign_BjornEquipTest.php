@@ -44,14 +44,9 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($cape, "tableau_$color");
 
+        $this->moveHeroOutOfGrimheim();
         // Place a goblin adjacent so the attack has a target.
-        $goblin = "monster_goblin_20";
-        $goblinHex = "hex_7_9";
-        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
-
-        // Use both action markers so only attack is available.
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+        $this->spawnMonsterAdjacent("goblin");
 
         // Roll: 2 runes (3) + 1 hit (5)
         $this->seedRand([3, 3, 5]);
@@ -149,12 +144,10 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
-        // Place a goblin (trollkin) adjacent
-        $goblin = "monster_goblin_20";
-        $goblinHex = "hex_7_9";
-        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$goblin] = $this->spawnMonsterAdjacent("goblin");
+        $goblinHex = $this->tokenLocation($goblin);
 
-        // Hero at hex_8_9 (default), adjacent to goblin
         $this->seedRand([5, 5, 5]);
         $this->respond($goblinHex);
 
@@ -304,10 +297,9 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
-        // Place a sprite (firehorde, not trollkin) adjacent
-        $sprite = "monster_sprite_1";
-        $spriteHex = "hex_7_9";
-        $this->game->getMonster($sprite)->moveTo($spriteHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$sprite] = $this->spawnMonsterAdjacent("sprite");
+        $spriteHex = $this->tokenLocation($sprite);
 
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");

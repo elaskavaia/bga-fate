@@ -9,10 +9,7 @@ declare(strict_types=1);
  */
 final class Op_c_orebiterTest extends AbstractOpTestCase {
     protected function setUp(): void {
-        $this->game = new \Bga\Games\Fate\Stubs\GameUT();
-        $this->game->initWithHero(4); // Boldur
-        $this->game->clearHand();
-        $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
+        $this->init(4);
 
         // Park Boldur on hex_5_8 (forest) which is adjacent to hex_5_7 (mountain).
         $this->game->tokens->moveToken("hero_4", "hex_5_8");
@@ -50,7 +47,7 @@ final class Op_c_orebiterTest extends AbstractOpTestCase {
         $opTypes = array_map(fn($o) => $o["type"], $ops);
         foreach ($ops as $o) {
             if (str_contains($o["type"], "roll")) {
-                $data = is_string($o["data"]) ? json_decode($o["data"], true) : ($o["data"] ?? []);
+                $data = is_string($o["data"]) ? json_decode($o["data"], true) : $o["data"] ?? [];
                 $this->assertEquals("hex_5_7", $data["target"]);
                 $this->assertEquals("Op_actionAttack", $data["reason"]);
                 return;

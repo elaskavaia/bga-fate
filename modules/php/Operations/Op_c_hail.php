@@ -33,7 +33,7 @@ class Op_c_hail extends CountableOperation {
     }
 
     function getPrompt() {
-        return clienttranslate('Select up to ${count} monsters to deal 1 damage each (cost: 3 mana)');
+        return clienttranslate('Select ${count} monsters to deal 1 damage each (cost: 3 mana)');
     }
 
     function getCount() {
@@ -41,8 +41,7 @@ class Op_c_hail extends CountableOperation {
     }
 
     function getMinCount() {
-        $hexes = $this->getPossibleHexes();
-        return min(3, count($hexes));
+        return max(1, min(3, count($this->getPossibleHexes())));
     }
 
     function getArgType() {
@@ -51,8 +50,7 @@ class Op_c_hail extends CountableOperation {
 
     function getPossibleHexes() {
         $hero = $this->game->getHero($this->getOwner());
-        $hexes = $hero->getMonsterHexesInRange($hero->getAttackRange());
-        return $hexes;
+        return $hero->getMonsterHexesInRange($hero->getAttackRange());
     }
 
     function getPossibleMoves() {
@@ -63,7 +61,7 @@ class Op_c_hail extends CountableOperation {
 
         $manaOp = $this->getPayOp();
         if ($manaOp->isVoid()) {
-            return $manaOp->getPossibleMoves();
+            return $manaOp->getErrorInfo();
         }
 
         $hexes = $this->getPossibleHexes();
@@ -80,9 +78,7 @@ class Op_c_hail extends CountableOperation {
      */
     function getPayOp(int $actualCost = 0) {
         $cost = $actualCost ?: $this->getManaCost(1);
-        $op = $this->instantiateOperation("spendMana");
-        $op->withData($this->getData(), merge: true); // strips our count/mcount/confirm
-        $op->withDataField("count", $cost);
+        $op = $this->instantiateOperation("spendMana", null, ["card" => $this->getCard(), "count" => $cost]);
         return $op;
     }
 

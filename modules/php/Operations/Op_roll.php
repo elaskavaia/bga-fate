@@ -82,9 +82,6 @@ class Op_roll extends CountableOperation {
 
         // Hero attacking: find monster hexes in range
         $hero = $this->game->getHeroById($attackerId);
-        if ($this->game->hexMap->isInGrimheim($hero->getHex())) {
-            return [];
-        }
         return $hero->getMonsterHexesInRange($this->getRange());
     }
 

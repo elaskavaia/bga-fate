@@ -309,10 +309,8 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->seedHand($masterShot, $color);
 
-        // Place a troll adjacent (health=7)
-        $troll = "monster_troll_1";
-        $trollHex = "hex_7_9";
-        $this->game->getMonster($troll)->moveTo($trollHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
 
         // Bjorn strength=3, all hits
         $this->seedRand([5, 5, 5]);
@@ -383,10 +381,8 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->seedHand($piercingArrows, $color);
 
-        // Place a troll adjacent (health=7, survives the attack so we can check damage)
-        $troll = "monster_troll_1";
-        $trollHex = "hex_7_9";
-        $this->game->getMonster($troll)->moveTo($trollHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
 
         // Roll: 2 runes (3) + 1 hit (5) → 1 base damage + 2 from Piercing Arrows = 3 total
         $this->seedRand([3, 3, 5]);
@@ -414,10 +410,8 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->seedHand($piercingArrows, $color);
 
-        // Place a troll adjacent
-        $troll = "monster_troll_1";
-        $trollHex = "hex_7_9";
-        $this->game->getMonster($troll)->moveTo($trollHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
 
         // Roll: all hits (5), 0 runes → counter(countRunes) evaluates to 0, card should not be offered
         $this->seedRand([5, 5, 5]);

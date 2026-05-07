@@ -3,12 +3,6 @@
 declare(strict_types=1);
 
 final class Op_c_reaperTest extends AbstractOpTestCase {
-    protected function setUp(): void {
-        parent::setUp();
-        // Hero starts at hex_8_9 (Grimheim edge). Most tests reposition or just need
-        // marker_attack on a hex; hero placement only matters for damage-routing tests.
-    }
-
     /** Place marker_attack on a hex to simulate "attack in progress". */
     private function setAttackMarker(string $hex): void {
         $this->game->tokens->moveToken("marker_attack", $hex, 0);

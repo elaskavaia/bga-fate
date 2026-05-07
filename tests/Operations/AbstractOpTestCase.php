@@ -28,14 +28,18 @@ abstract class AbstractOpTestCase extends TestCase {
         return $this->op;
     }
 
-    protected function setUp(): void {
+    protected function init(int $heroNum = 1): void {
         $this->game = new GameUT();
-        $this->game->initWithHero(1);
+        $this->game->initWithHero($heroNum);
         $this->game->clearHand();
         $this->game->clearMachine();
         $this->game->clearEquipDecks();
         $this->owner = $this->game->getPlayerColorById((int) $this->game->getActivePlayerId());
         $this->createOp();
+    }
+
+    protected function setUp(): void {
+        $this->init(1);
     }
 
     // -------------------------------------------------------------------------

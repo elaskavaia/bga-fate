@@ -40,9 +40,9 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertEquals(2, $hero->getAttackRange());
 
         // Place a goblin 2 hexes from Alva (range 2 reach)
-        $this->game->tokens->moveToken($this->heroId, "hex_9_9");
-        $this->game->getMonster("monster_goblin_20")->moveTo("hex_9_7", "");
-        $this->assertValidTarget("hex_9_7");
+        $this->moveHeroOutOfGrimheim();
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_7_7", "");
+        $this->assertValidTarget("hex_7_7");
 
         // Passive — not offered as a useCard target
         $this->assertNotValidTarget("card_equip_2_15");

@@ -108,10 +108,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
     }
 
     public function testBjornIHeroCardSpendsFocusAndDealsDamage(): void {
-        $troll = "monster_troll_1";
-        $trollHex = "hex_7_9"; // adjacent to hero start (hex_8_9), not in Grimheim
-
-        $this->game->getMonster($troll)->moveTo($trollHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
+        $trollHex = $this->tokenLocation($troll);
 
         // First action: attack adjacent troll (health=5)
         // actionAttack auto-resolves (single monster in range)
@@ -155,10 +154,8 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Place both Long Shot cards on tableau — II ensures trigger isn't void
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
         $this->game->tokens->moveToken("card_ability_1_12", "tableau_$color");
-        // Place goblin adjacent (range 1)
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
-        $goblinHex = "hex_7_9"; // adjacent to hero start hex_8_9
+        $this->moveHeroOutOfGrimheim();
+        $goblinHex = "hex_6_9"; // adjacent to hex_7_9, range 1
         $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
 
         $this->seedRand([5, 5, 5]);
@@ -174,10 +171,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_ability_1_11", "tableau_$color");
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
+        $this->moveHeroOutOfGrimheim();
 
-        $this->game->getMonster("monster_goblin_20")->moveTo("hex_6_9", ""); // range 2
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_5_9", ""); // range 2 from hex_7_9
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
 
@@ -191,21 +187,18 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         // Place Nailed Together I on tableau
         $this->game->tokens->moveToken("card_ability_1_13", "tableau_$color");
-        // Use both action markers so only attack is available
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
 
-        // Hero at hex_8_9 (default). Goblin at hex_7_9 (adjacent, range 1).
-        // Brute at hex_6_9 (behind goblin, range 2 from hero).
+        $this->moveHeroOutOfGrimheim();
+        // Hero at hex_7_9. Goblin at hex_6_9 (adjacent). Brute at hex_5_9 (behind goblin).
         $goblin = "monster_goblin_20";
         $brute = "monster_brute_1";
-        $this->game->getMonster($goblin)->moveTo("hex_7_9", "");
-        $this->game->getMonster($brute)->moveTo("hex_6_9", "");
+        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
 
         // Bjorn strength=3, goblin health=2 → 3 hits = kill + 1 overkill
         $this->seedRand([5, 5, 5]); // 3 hits
         $this->respond("actionAttack");
-        $this->respond("hex_7_9"); // pick the goblin as attack target
+        $this->respond("hex_6_9"); // pick the goblin as attack target
 
         // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered as a useCard prompt; skip it.
         // Then Nailed Together I (on=monsterKilled) should be the next prompt.
@@ -233,23 +226,22 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         // Place Nailed Together II on tableau
         $this->game->tokens->moveToken("card_ability_1_14", "tableau_$color");
-        $this->game->tokens->moveToken("marker_" . $color . "_1", "aslot_" . $color . "_empty_1");
-        $this->game->tokens->moveToken("marker_" . $color . "_2", "aslot_" . $color . "_empty_2");
 
-        // Hero at hex_8_9. Layout in a line:
-        //   hex_7_9: goblin_20 (target, pre-damaged 1 → dies with overkill 2)
-        //   hex_6_9: goblin_1 (behind, pre-damaged 1 → 2 pierce kills with overkill 1, chains)
-        //   hex_7_8: goblin_2 (also behind hex_7_9 — player must choose)
-        //   hex_5_9: brute_1 (behind hex_6_9 — gets chain damage)
+        $this->moveHeroOutOfGrimheim();
+        // Hero at hex_7_9. Layout:
+        //   hex_6_9: goblin_20 (target, pre-damaged 1 → dies with overkill 2)
+        //   hex_5_9: goblin_1 (behind, pre-damaged 1 → 2 pierce kills with overkill 1, chains)
+        //   hex_6_8: goblin_2 (also behind hex_6_9 — player must choose)
+        //   hex_4_9: brute_1 (behind hex_5_9 — gets chain damage)
         $goblin20 = "monster_goblin_20";
         $goblin1 = "monster_goblin_1";
         $goblin2 = "monster_goblin_2";
         $brute = "monster_brute_1";
 
-        $this->game->getMonster($goblin20)->moveTo("hex_7_9", "");
-        $this->game->getMonster($goblin1)->moveTo("hex_6_9", "");
-        $this->game->getMonster($goblin2)->moveTo("hex_7_8", "");
-        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+        $this->game->getMonster($goblin20)->moveTo("hex_6_9", "");
+        $this->game->getMonster($goblin1)->moveTo("hex_5_9", "");
+        $this->game->getMonster($goblin2)->moveTo("hex_6_8", "");
+        $this->game->getMonster($brute)->moveTo("hex_4_9", "");
 
         // Pre-damage goblin_20 (1 existing + 3 hits = 4 total, health=2, overkill=2)
         $this->game->effect_moveCrystals("hero_1", "red", 1, $goblin20, ["message" => ""]);
@@ -259,7 +251,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Bjorn strength=3, all hits
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
-        $this->respond("hex_7_9"); // pick goblin_20
+        $this->respond("hex_6_9"); // pick goblin_20
 
         // New flow: triggers auto-resolve. Bjorn hero card (on=roll) is offered first; skip it.
         $args = $this->getOpArgs();
@@ -273,14 +265,14 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertValidTarget("card_ability_1_14");
         $this->respond("card_ability_1_14");
 
-        // c_nailed — two monsters behind hex_7_9: hex_6_9 and hex_7_8
+        // c_nailed — two monsters behind hex_6_9: hex_5_9 and hex_6_8
         $args = $this->getOpArgs();
         $this->assertEquals("c_nailed", $args["type"] ?? "");
-        $this->assertValidTarget("hex_6_9");
-        $this->assertValidTarget("hex_7_8");
+        $this->assertValidTarget("hex_5_9");
+        $this->assertValidTarget("hex_6_8");
 
-        // Choose goblin_1 at hex_6_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
-        $this->respond("hex_6_9");
+        // Choose goblin_1 at hex_5_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
+        $this->respond("hex_5_9");
 
         // c_nailed kills now fire TMonsterKilled, which re-prompts useCard for any
         // on=TMonsterKilled card on the tableau — including Nailed Together II itself.
@@ -288,7 +280,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // pierce sequence, so skip the recursive re-prompt.
         $this->skipIfOp("useCard");
 
-        // Chain: c_nailed again — brute at hex_5_9 is behind hex_6_9
+        // Chain: c_nailed again — brute at hex_4_9 is behind hex_5_9
         // Auto-resolves since only one monster behind
         // Brute should have 1 damage (chain overkill from goblin_1)
         $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 chain damage");
@@ -301,15 +293,15 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
     public function testBjornIIHeroCardDeals3Damage(): void {
         $this->clearMonstersFromMap();
-        $troll = "monster_troll_1";
-        $trollHex = "hex_7_9";
 
         // Upgrade hero card: swap level I for level II
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_hero_1_1", "limbo");
         $this->game->tokens->moveToken("card_hero_1_2", "tableau_$color");
 
-        $this->game->getMonster($troll)->moveTo($trollHex, "");
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
+        $trollHex = $this->tokenLocation($troll);
 
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
@@ -357,9 +349,10 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Place Suppressive Fire I on tableau
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
-        // Place a goblin (rank 1) within range 3 of hero start (hex_8_9)
+        $this->moveHeroOutOfGrimheim();
+        // Place a goblin (rank 1) within range 3 of hero (hex_7_9)
         $goblin = "monster_goblin_20";
-        $goblinHex = "hex_7_8"; // range 2 from hex_8_9
+        $goblinHex = "hex_6_8"; // within range 3 of hex_7_9
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
         // Place a brute far away — it should still move toward Grimheim
@@ -407,10 +400,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
+        $this->moveHeroOutOfGrimheim();
         $goblin = "monster_goblin_20";
         $brute = "monster_brute_1";
-        $goblinHex = "hex_7_8";
-        $bruteHex = "hex_6_9";
+        $goblinHex = "hex_6_8";
+        $bruteHex = "hex_5_9";
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
         $this->game->getMonster($brute)->moveTo($bruteHex, "");
 
@@ -476,10 +470,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->dbSetTokenLocation("card_ability_1_5", "tableau_$color", 0);
 
+        $this->moveHeroOutOfGrimheim();
         $goblin = "monster_goblin_20";
         $brute = "monster_brute_1";
-        $goblinHex = "hex_7_8";
-        $bruteHex = "hex_6_9";
+        $goblinHex = "hex_6_8";
+        $bruteHex = "hex_5_9";
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
         $this->game->getMonster($brute)->moveTo($bruteHex, "");
 
@@ -597,9 +592,10 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals($this->heroId, "green", 2, $sureShotId, ["message" => ""]);
         $this->assertEquals(3, $this->countTokens("crystal_green", $sureShotId));
 
+        $this->moveHeroOutOfGrimheim();
         // Place a goblin within attack range (Bjorn range=2 with First Bow)
         $goblin = "monster_goblin_20";
-        $goblinHex = "hex_6_9"; // range 2 from hero start hex_8_9
+        $goblinHex = "hex_5_9"; // range 2 from hero hex_7_9
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
         // Sure Shot I should be offered as a free action
@@ -628,10 +624,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Add 4 mana to Sure Shot II
         $this->game->effect_moveCrystals($this->heroId, "green", 4, $sureShotId, ["message" => ""]);
 
+        $this->moveHeroOutOfGrimheim();
         // Place a brute within attack range (Bjorn range=2 with First Bow)
         // Brute health=3
         $brute = "monster_brute_1";
-        $bruteHex = "hex_6_9"; // range 2 from hero start hex_8_9
+        $bruteHex = "hex_5_9"; // range 2 from hero hex_7_9
         $this->game->getMonster($brute)->moveTo($bruteHex, "");
 
         // Sure Shot II should be offered as a free action

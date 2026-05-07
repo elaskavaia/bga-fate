@@ -244,6 +244,10 @@ class Hero extends Character {
     function getMonsterHexesInRange(int $range, ?callable $filter = null): array {
         $heroHex = $this->game->hexMap->getCharacterHex($this->id);
         $this->game->systemAssert("ERR:heroNotOnMap:{$this->id}", $heroHex !== null);
+        // Heroes inside Grimheim cannot interact with monsters — they must move out first.
+        if ($this->game->hexMap->isInGrimheim($heroHex)) {
+            return [];
+        }
         $hexesInRange = $this->game->hexMap->getHexesInRange($heroHex, $range);
         $targets = [];
         foreach ($hexesInRange as $hexId) {

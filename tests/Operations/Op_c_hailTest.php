@@ -11,15 +11,13 @@ use Bga\Games\Fate\Material;
  */
 final class Op_c_hailTest extends AbstractOpTestCase {
     private string $cardId = "card_ability_2_3";
+    private string $hero = "hero_2";
 
     protected function setUp(): void {
-        parent::setUp();
-        // Put Alva's Hail I on her tableau, equip First Bow (range 2) so range tests
-        // can use hexes beyond adjacency.
-        $this->game->tokens->moveToken($this->cardId, $this->getPlayersTableau());
-        $this->game->tokens->moveToken("card_equip_1_15", $this->getPlayersTableau());
-        $this->game->tokens->moveToken("hero_1", "hex_11_8");
-        $this->game->effect_moveCrystals("hero_1", "green", 3, $this->cardId);
+        $this->init(2);
+        // Reposition Alva to hex_11_8 so the range-2 bow can reach the test hexes around her.
+        $this->game->tokens->moveToken($this->hero, "hex_11_8");
+        $this->game->effect_moveCrystals($this->hero, "green", 2, $this->cardId);
     }
 
     private function getMana(): int {
@@ -46,12 +44,30 @@ final class Op_c_hailTest extends AbstractOpTestCase {
     }
 
     public function testNoValidTargetsWhenInsufficientMana(): void {
-        $this->game->effect_moveCrystals("hero_1", "green", -1, $this->cardId);
+        $this->game->effect_moveCrystals($this->hero, "green", -1, $this->cardId);
         $this->assertEquals(2, $this->getMana());
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
         $this->createOp(null, ["card" => $this->cardId]);
         $this->assertNoValidTargetsAndError(Material::ERR_COST);
+    }
+
+    public function testVoidWhenOnlyOneMana(): void {
+        $this->game->effect_moveCrystals($this->hero, "green", -2, $this->cardId);
+        $this->assertEquals(1, $this->getMana());
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+
+        $op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->assertTrue($op->isVoid(), "Hail I needs 3 mana — with only 1 on the card the op is void");
+    }
+
+    public function testVoidWhenHeroInGrimheim(): void {
+        // Heroes in Grimheim can't attack — even with monsters in range, op should be void.
+        $this->game->tokens->moveToken($this->hero, "hex_9_9");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8");
+
+        $op = $this->createOp(null, ["card" => $this->cardId]);
+        $this->assertTrue($op->isVoid(), "Hail I from inside Grimheim is void");
     }
 
     public function testTargetsAreSingleSelectPerHex(): void {

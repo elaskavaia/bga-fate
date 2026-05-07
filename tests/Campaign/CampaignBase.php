@@ -151,6 +151,34 @@ abstract class CampaignBaseTest extends TestCase {
         return $this->game->tokens->getTokenLocation($tokenId);
     }
 
+    /**
+     * Move the active hero out of Grimheim to a known non-Grimheim hex.
+     * Heroes inside Grimheim cannot interact with characters or terrain outside it
+     * (RULES.md), so combat tests must call this before placing monsters and attacking.
+     * Returns the hex the hero now occupies.
+     */
+    protected function moveHeroOutOfGrimheim(?string $hex = null): string {
+        $heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
+        $target = $hex ?? "hex_7_9";
+        $this->game->tokens->moveToken($heroId, $target);
+        return $target;
+    }
+
+    /**
+     * Spawn $count monsters of the given type adjacent to the active hero
+     * (uses the in-game spawn op so placement matches real gameplay).
+     * Returns the spawned monster ids in placement order.
+     */
+    protected function spawnMonsterAdjacent(string $type, int $count = 1): array {
+        $color = $this->getActivePlayerColor();
+        $supplyBefore = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
+        $expr = $count > 1 ? "{$count}spawn($type)" : "spawn($type)";
+        $op = $this->game->machine->instantiateOperation($expr, $color);
+        $op->resolve();
+        $supplyAfter = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
+        return array_keys(array_diff_key($supplyBefore, $supplyAfter));
+    }
+
     /** Count tokens of type at location */
     protected function countTokens(string $type, string $location): int {
         return count($this->game->tokens->getTokensOfTypeInLocation($type, $location));

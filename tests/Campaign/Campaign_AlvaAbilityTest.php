@@ -305,9 +305,10 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $cardId = "card_ability_2_9";
         $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
 
-        // Goblin (rank 1) within range 3 of Alva's starting hex.
+        $this->moveHeroOutOfGrimheim();
+        // Goblin (rank 1) within range 3 of Alva's hex (hex_7_9).
         $goblin = "monster_goblin_20";
-        $goblinHex = "hex_7_8";
+        $goblinHex = "hex_6_8";
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
         // Burn the player turn → monster turn.
@@ -338,9 +339,10 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $cardId = "card_ability_2_10";
         $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
 
+        $this->moveHeroOutOfGrimheim();
         // Troll (rank 3) within range 3 — Suppressive Fire I would reject this, II accepts it.
         $troll = "monster_troll_1";
-        $trollHex = "hex_7_8";
+        $trollHex = "hex_6_8";
         $this->game->getMonster($troll)->moveTo($trollHex, "");
 
         $this->respond("actionPractice");
