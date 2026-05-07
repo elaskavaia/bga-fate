@@ -2614,9 +2614,6 @@ class Game extends Game1Tokens {
             firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
             dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
         };
-        if (factionFlavor[tokenInfo.faction]) {
-            tokenInfo.tooltip += this.iiSection(factionFlavor[tokenInfo.faction]);
-        }
         if (tokenInfo.rank)
             tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
         if (tokenInfo.strength)
@@ -2632,7 +2629,10 @@ class Game extends Game1Tokens {
         if (tokenInfo.armor)
             tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
         if (tokenInfo.xp)
-            tokenInfo.tooltip += this.ttSection(_("XP"), tokenInfo.xp);
+            tokenInfo.tooltip += this.ttSection(_("Gold"), tokenInfo.xp);
+        if (factionFlavor[tokenInfo.faction]) {
+            tokenInfo.tooltip += this.iiSection(factionFlavor[tokenInfo.faction]);
+        }
     }
     buildLegendTooltip(tokenInfo) {
         const tokenId = tokenInfo.tokenId;
@@ -2647,36 +2647,35 @@ class Game extends Game1Tokens {
             "1": _("A chilling sight to behold, Hel brings the dead to the underworld at death. At least those who died of old age and sickness. Let's hope that's not you..."),
             "2": _("This unsettling figure may be blind, but still sees things of the past and future, acting as an advisor to the Asgaard gods. In this case Loki and his hordes."),
             "3": _("The strength of this colossal beast is matched only by his lack of intellect. He has heard the singing from the mead hall and can't bear it any longer. He is hungry..."),
-            "4": _("The fire giant with his flaming sword is supposed to bring about Ragnarok, the apocalypse of the cosmos – if he makes it that long."),
+            "4": _("The fire giant with his flaming sword is supposed to bring about Ragnarok, the apocalypse of the cosmos - if he makes it that long."),
             "5": _("This brute leader is fearless and collects battle scars as trophies of his invincibility. Naturally, his presence infuses the entire trollkin clan with confidence."),
             "6": _("While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches.")
         };
-        if (legendFlavor[legendNum])
-            tokenInfo.tooltip += this.iiSection(legendFlavor[legendNum]);
-        // Show current level indicator
-        tokenInfo.tooltip += this.ttSection(_("Current Level"), level === "1" ? "I" : "II");
+        tokenInfo.tooltip += this.ttSection(_("Rank"), _("Legend") + " " + (level === "1" ? "I" : "II"));
         // Stats as Level I / Level II
         if (side1 && side2) {
-            const fmt = (v) => (v == 0 ? "*" : `${v ?? "–"}`);
+            const fmt = (v) => (v == 0 ? "*" : `${v ?? "-"}`);
             const dual = (label, field) => {
-                const v1 = side1[field];
+                const v1 = level === "1" ? side1[field] : side2[field];
                 const v2 = side2[field];
-                if (v1 != null || v2 != null) {
-                    tokenInfo.tooltip += this.ttSection(label, v1 == v2 ? fmt(v1) : `${fmt(v1)} / ${fmt(v2)}`);
+                if (v1 || v2) {
+                    tokenInfo.tooltip += this.ttSection(label, v1 == v2 ? fmt(v1) : `${fmt(v1)} (${fmt(v2)} - level II)`);
                 }
             };
             dual(_("Strength"), "strength");
             dual(_("Health"), "health");
-            dual(_("XP"), "xp");
+            dual(_("Gold"), "xp");
             dual(_("Armor"), "armor");
-            // Special ability notes for legends with * strength
-            const specialAbility = {
-                "2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
-                "6": _("Wyrm: Nidhuggr's strength is the same as its remaining health.")
-            };
-            if (specialAbility[legendNum])
-                tokenInfo.tooltip += this.iiSection(specialAbility[legendNum]);
         }
+        // Special ability notes for legends with * strength
+        const specialAbility = {
+            "2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
+            "6": _("Wyrm: Nidhuggr's strength is the same as its remaining health.")
+        };
+        if (specialAbility[legendNum])
+            tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[legendNum]);
+        if (legendFlavor[legendNum])
+            tokenInfo.tooltip += this.iiSection(legendFlavor[legendNum]);
     }
     /** Get crystal damage/gold/mana info for a character from its bucket children. */
     getCrystalInfo(tokenId) {
