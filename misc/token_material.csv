@@ -52,8 +52,8 @@ RUNE|Rune|0|wicon wicon_rune|0||
 
 DIE_ATT_1|Miss|0|wicon wicon_die_attack_miss|0||
 DIE_ATT_2|Miss|0|wicon wicon_die_attack_miss|0||
-DIE_ATT_3|Cover|0|wicon wicon_die_attack_cover|0||
-DIE_ATT_4|Rune|0|wicon wicon_die_attack_rune|0||
+DIE_ATT_3|Rune|0|wicon wicon_die_attack_rune|0||
+DIE_ATT_4|Cover|0|wicon wicon_die_attack_cover|0||
 DIE_ATT_5|Hit|0|wicon wicon_die_attack_hit|0||
 DIE_ATT_6|Hit|0|wicon wicon_die_attack_hit|0||
 DIE_ATTACK|Attack Die|0|wicon wicon_die_attack_hit|0||

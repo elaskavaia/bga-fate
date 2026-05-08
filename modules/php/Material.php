@@ -842,16 +842,16 @@ class Material {
 ],
     "DIE_ATT_3" => [ 
         "state" => 0,
-        "name" => clienttranslate("Cover"),
+        "name" => clienttranslate("Rune"),
         "count" => 0,
-        "type" => "wicon wicon_die_attack_cover",
+        "type" => "wicon wicon_die_attack_rune",
         "create" => 0,
 ],
     "DIE_ATT_4" => [ 
         "state" => 0,
-        "name" => clienttranslate("Rune"),
+        "name" => clienttranslate("Cover"),
         "count" => 0,
-        "type" => "wicon wicon_die_attack_rune",
+        "type" => "wicon wicon_die_attack_cover",
         "create" => 0,
 ],
     "DIE_ATT_5" => [ 
