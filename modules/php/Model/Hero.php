@@ -116,6 +116,7 @@ class Hero extends Character {
         $cardId = $topCard["key"];
         $this->game->tokens->dbSetTokenLocation($cardId, $hand, 0, clienttranslate('${char_name} draws an event card'), [
             "char_name" => $this->id,
+            "place_from" => $deck,
         ]);
         $this->game->customUndoSavepoint($this->getPlayerId(), 1, "draw");
         return true;

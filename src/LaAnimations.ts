@@ -115,7 +115,11 @@ export class LaAnimations {
     let over: Element;
     if (ontoWhat) over = $(ontoWhat);
     else over = $("oversurface"); // this div has to exists with pointer-events: none and cover all area with high zIndex
-    var elemRect = elem.getBoundingClientRect();
+    // Fall back to parent's rect when source is display:none (e.g. cards stacked in a deck) — otherwise animation flies from (0,0)
+    let elemRect = elem.getBoundingClientRect();
+    if (elemRect.width === 0 && elemRect.height === 0 && elem.parentElement) {
+      elemRect = elem.parentElement.getBoundingClientRect();
+    }
 
     //console.log("elemRect", elemRect);
 

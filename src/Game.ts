@@ -110,9 +110,11 @@ export class Game extends Game1Tokens {
         );
       });
       const panel = this.bga.playerPanels.getElement(Number(player.id));
+      const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
       placeHtml(
-        `<div id="miniboard_${color}" class="miniboard">
-                  <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
+        `<div id="miniboard_${color}" class="miniboard" style="--player-color: #${color}">
+          <div class="miniboard_banner">${heroName}</div>
+          <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`,
         panel
       );
@@ -243,6 +245,8 @@ export class Game extends Game1Tokens {
     const loc = tokenInfo.location;
     const tokenKey = tokenInfo.key;
 
+    if (args.place_from) result.place_from = args.place_from;
+
     // Redirect tracker tokens to miniboard in player panel
     if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
       const color = getPart(loc, 1);
@@ -276,10 +280,7 @@ export class Game extends Game1Tokens {
           await this.animationLa.shrinkAndFade(node);
         };
       }
-    } else if (loc.startsWith("hand_") && tokenKey.startsWith("card_")) {
-      // Cards in hand need click handlers for discard selection
-      result.onClick = (e) => this.onToken(e);
-    } else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+    } else if (tokenKey.startsWith("card_")) {
       result.onClick = (e) => this.onToken(e);
     } else if (tokenKey.startsWith("crystal_")) {
       // Bucket redirect: tokens placed on another token get a sub-container bucket

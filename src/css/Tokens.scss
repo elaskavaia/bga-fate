@@ -1,32 +1,29 @@
 @use "variables" as v;
 @use "sass:math";
 
-.card,
-.gsupply,
-.miniboard {
-  // Mana bucket: green badge, bottom-right corner of card
-  .bucket_crystal_green,
-  .bucket_crystal_red,
-  .bucket_crystal_yellow {
-    background-image: url("img/tokens.webp");
-    background-color: unset;
-    border-radius: unset;
-    background-size: 600% auto;
-    aspect-ratio: 1;
-    height: 32px;
-    filter: v.$dropShadow2;
-  }
-
-  .bucket_crystal_green {
-    background-position: 40% 0%;
-  }
-  .bucket_crystal_red {
-    background-position: 0% 0%;
-  }
-  .bucket_crystal_yellow {
-    background-position: 20% 0%;
-  }
+// Mana bucket: green badge, bottom-right corner of card
+.bucket_crystal_green,
+.bucket_crystal_red,
+.bucket_crystal_yellow {
+  background-image: url("img/tokens.webp");
+  background-color: unset;
+  border-radius: unset;
+  background-size: 600% auto;
+  aspect-ratio: 1;
+  height: 32px;
+  filter: v.$dropShadow2;
 }
+
+.bucket_crystal_green {
+  background-position: 40% 0%;
+}
+.bucket_crystal_red {
+  background-position: 0% 0%;
+}
+.bucket_crystal_yellow {
+  background-position: 20% 0%;
+}
+
 .monster.monster_goldvein {
   // looks like gold
   background-image: url("img/tokens.webp");
@@ -166,6 +163,19 @@
   position: relative;
   gap: 16px;
 
+  .miniboard_banner {
+    flex-basis: 100%;
+    height: auto !important;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--player-color, #333);
+    background: color-mix(in srgb, var(--player-color, #555) 15%, transparent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    order: -1;
+  }
+
   & > * {
     position: relative !important;
     height: 32px;
@@ -255,13 +265,25 @@
   background-position: 97% 5%;
   background-size: 800% auto;
 }
-.wicon_die_attack {
+.wicon_die_attack,
+.wicon_die_attack_miss {
   background-image: url("img/dice.png");
   background-size: 600% 200%;
   background-position: 0% 0%;
 }
-.wicon_rune {
+.wicon_rune,
+.wicon_die_attack_rune {
   background-image: url("img/dice.png");
   background-size: 600% 200%;
   background-position: 40% 0%;
+}
+.wicon_die_attack_cover {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 60% 0%;
+}
+.wicon_die_attack_hit {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 100% 0%;
 }

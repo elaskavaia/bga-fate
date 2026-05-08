@@ -747,6 +747,9 @@ export class Game1Tokens extends Game0Basics {
           res = this.getTokenPresentaton(key, arg_value, args);
           if (res) args[key] = res;
         }
+        if (args.sides) {
+          args.sides = this.replaceSimpleIconsInLog(args.sides);
+        }
       }
       if (log && typeof log == "string") log = this.replaceSimpleIconsInLog(log, args);
     } catch (e) {

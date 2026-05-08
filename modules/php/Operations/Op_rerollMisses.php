@@ -20,12 +20,14 @@ class Op_rerollMisses extends Operation {
     function resolve(): void {
         $dice = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         $attackerId = $this->game->getHeroTokenId($this->getOwner());
+        $dicesel = [];
         foreach ($dice as $die) {
             $roll = (int) $die["state"];
             $rule = $this->game->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
             if ($rule === "miss" || $rule === "rune") {
-                $this->game->effect_rollAttackDie($attackerId, $die["key"]);
+                $dicesel[] = $die;
             }
         }
+        $this->game->effect_doRollAttackDice($attackerId, $dicesel);
     }
 }

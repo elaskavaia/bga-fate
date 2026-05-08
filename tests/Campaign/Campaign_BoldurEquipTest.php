@@ -183,6 +183,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
     // queue 2addRoll for 2 extra attack dice.
 
     public function testEitrisPickAddsTwoDiceWhenAttackingViaRapidStrike(): void {
+        $this->clearEquipDecks();
         $color = $this->getActivePlayerColor();
         $eitri = "card_equip_4_22";
         $rapid = "card_ability_4_3";

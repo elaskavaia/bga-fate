@@ -115,15 +115,9 @@
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
-.card .bucket_crystal_green,
-.card .bucket_crystal_red,
-.card .bucket_crystal_yellow,
-.gsupply .bucket_crystal_green,
-.gsupply .bucket_crystal_red,
-.gsupply .bucket_crystal_yellow,
-.miniboard .bucket_crystal_green,
-.miniboard .bucket_crystal_red,
-.miniboard .bucket_crystal_yellow {
+.bucket_crystal_green,
+.bucket_crystal_red,
+.bucket_crystal_yellow {
   background-image: url("img/tokens.webp");
   background-color: unset;
   border-radius: unset;
@@ -132,19 +126,16 @@
   height: 32px;
   filter: drop-shadow(2px 2px 3px black);
 }
-.card .bucket_crystal_green,
-.gsupply .bucket_crystal_green,
-.miniboard .bucket_crystal_green {
+
+.bucket_crystal_green {
   background-position: 40% 0%;
 }
-.card .bucket_crystal_red,
-.gsupply .bucket_crystal_red,
-.miniboard .bucket_crystal_red {
+
+.bucket_crystal_red {
   background-position: 0% 0%;
 }
-.card .bucket_crystal_yellow,
-.gsupply .bucket_crystal_yellow,
-.miniboard .bucket_crystal_yellow {
+
+.bucket_crystal_yellow {
   background-position: 20% 0%;
 }
 
@@ -303,6 +294,18 @@
   position: relative;
   gap: 16px;
 }
+.miniboard .miniboard_banner {
+  flex-basis: 100%;
+  height: auto !important;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: var(--player-color, #333);
+  background: color-mix(in srgb, var(--player-color, #555) 15%, transparent);
+  padding: 2px 6px;
+  border-radius: 3px;
+  order: -1;
+}
 .miniboard > * {
   position: relative !important;
   height: 32px;
@@ -396,16 +399,30 @@
   background-size: 800% auto;
 }
 
-.wicon_die_attack {
+.wicon_die_attack,
+.wicon_die_attack_miss {
   background-image: url("img/dice.png");
   background-size: 600% 200%;
   background-position: 0% 0%;
 }
 
-.wicon_rune {
+.wicon_rune,
+.wicon_die_attack_rune {
   background-image: url("img/dice.png");
   background-size: 600% 200%;
   background-position: 40% 0%;
+}
+
+.wicon_die_attack_cover {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 60% 0%;
+}
+
+.wicon_die_attack_hit {
+  background-image: url("img/dice.png");
+  background-size: 600% 200%;
+  background-position: 100% 0%;
 }
 
 /**
@@ -1900,19 +1917,19 @@ html:before {
   background-position-y: 8%;
 }
 #logs .roundedbox {
-  background-color: #b5e6e3;
+  background-color: rgba(198, 235, 226, 0.7294117647);
 }
 
 #right-side-first-part {
   background-position-y: 8%;
 }
 #right-side-first-part .player-board {
-  background-color: #b5e6e3;
+  background-color: rgba(198, 235, 226, 0.7294117647);
 }
 
 #page-title {
   line-height: 24px;
-  background-color: #b5e6e3 !important;
+  background-color: rgba(198, 235, 226, 0.7294117647) !important;
 }
 
 .game_top_bar {

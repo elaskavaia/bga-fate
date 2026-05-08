@@ -427,7 +427,11 @@ class LaAnimations {
             over = $(ontoWhat);
         else
             over = $("oversurface"); // this div has to exists with pointer-events: none and cover all area with high zIndex
-        var elemRect = elem.getBoundingClientRect();
+        // Fall back to parent's rect when source is display:none (e.g. cards stacked in a deck) — otherwise animation flies from (0,0)
+        let elemRect = elem.getBoundingClientRect();
+        if (elemRect.width === 0 && elemRect.height === 0 && elem.parentElement) {
+            elemRect = elem.parentElement.getBoundingClientRect();
+        }
         //console.log("elemRect", elemRect);
         var newId = elem.id + postfix;
         var old = $(newId);
@@ -1317,6 +1321,9 @@ class Game1Tokens extends Game0Basics {
                     res = this.getTokenPresentaton(key, arg_value, args);
                     if (res)
                         args[key] = res;
+                }
+                if (args.sides) {
+                    args.sides = this.replaceSimpleIconsInLog(args.sides);
                 }
             }
             if (log && typeof log == "string")
@@ -2245,8 +2252,10 @@ class Game extends Game1Tokens {
                 placeHtml(`<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`, `tableau_${color}`);
             });
             const panel = this.bga.playerPanels.getElement(Number(player.id));
-            placeHtml(`<div id="miniboard_${color}" class="miniboard">
-                  <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
+            const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
+            placeHtml(`<div id="miniboard_${color}" class="miniboard" style="--player-color: #${color}">
+          <div class="miniboard_banner">${heroName}</div>
+          <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`, panel);
             placeHtml(`
         <div id="pboard_${color}" class="pboard">
@@ -2348,6 +2357,8 @@ class Game extends Game1Tokens {
         const result = { ...tokenInfo };
         const loc = tokenInfo.location;
         const tokenKey = tokenInfo.key;
+        if (args.place_from)
+            result.place_from = args.place_from;
         // Redirect tracker tokens to miniboard in player panel
         if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
             const color = getPart(loc, 1);
@@ -2386,11 +2397,7 @@ class Game extends Game1Tokens {
                 };
             }
         }
-        else if (loc.startsWith("hand_") && tokenKey.startsWith("card_")) {
-            // Cards in hand need click handlers for discard selection
-            result.onClick = (e) => this.onToken(e);
-        }
-        else if (loc.startsWith("tableau_") && tokenKey.startsWith("card_")) {
+        else if (tokenKey.startsWith("card_")) {
             result.onClick = (e) => this.onToken(e);
         }
         else if (tokenKey.startsWith("crystal_")) {

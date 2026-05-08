@@ -49,7 +49,14 @@ XP|Gold/XP|0|wicon wicon_xp|0||
 MANA|Mana|0|wicon wicon_mana|0||
 DAMAGE|Damage|0|wicon wicon_damage|0||
 RUNE|Rune|0|wicon wicon_rune|0||
-DIE_ATTACK|Attack Die|0|wicon wicon_die_attack|0||
+
+DIE_ATT_1|Miss|0|wicon wicon_die_attack_miss|0||
+DIE_ATT_2|Miss|0|wicon wicon_die_attack_miss|0||
+DIE_ATT_3|Cover|0|wicon wicon_die_attack_cover|0||
+DIE_ATT_4|Rune|0|wicon wicon_die_attack_rune|0||
+DIE_ATT_5|Hit|0|wicon wicon_die_attack_hit|0||
+DIE_ATT_6|Hit|0|wicon wicon_die_attack_hit|0||
+DIE_ATTACK|Attack Die|0|wicon wicon_die_attack_hit|0||
 
 # hero attribute trackers (created per hero in setupGameTables, not auto-created)
 tracker_strength|Strength|0|tracker wicon wicon_strength|4|tableau_{COLOR}

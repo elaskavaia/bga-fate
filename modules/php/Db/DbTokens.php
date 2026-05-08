@@ -1149,7 +1149,7 @@ class DbTokens {
      * @param string $notif
      * @param array $args
      */
-    function dbSetTokensLocation($token_arr, $place_id, $state = null, $notif = "*", $args = [], $player_id = 0) {
+    function dbSetTokensLocation(array $token_arr, string $place_id, $state = null, $notif = "*", $args = [], $player_id = 0) {
         $type = $this->checkListOrTokenArray($token_arr);
         if ($type == 0) {
             return;

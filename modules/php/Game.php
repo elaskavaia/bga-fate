@@ -392,9 +392,9 @@ class Game extends Base {
      * Cleans up leftover dice, announces the attack, picks dice from supply and rolls them.
      */
     function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength, bool $add = false): void {
-        $this->notifyMessage(clienttranslate('${token_name} attacks ${token_name2} with strength ${strength}'), [
-            "token_name" => $attackerId,
-            "token_name2" => $defenderId,
+        $this->notifyMessage(clienttranslate('${char_name} attacks ${token_name} with strength ${strength}'), [
+            "char_name" => $attackerId,
+            "token_name" => $defenderId,
             "strength" => $strength,
         ]);
 
@@ -409,22 +409,29 @@ class Game extends Base {
 
         // Roll attack dice — pick from supply, then notify each with its roll result
         $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
-        foreach ($diceTokens as $die) {
-            $dieId = $die["key"];
-            $this->effect_rollAttackDie($attackerId, $dieId);
-        }
-
-        // global undo reset, information revealed
-        $this->customUndoSavepoint(0, 1, "roll");
+        $this->effect_doRollAttackDice($attackerId, $diceTokens);
     }
 
-    function effect_rollAttackDie(string $attackerId, string $dieId): void {
-        $roll = $this->bgaRand(1, 6);
-        $sideName = $this->material->getRulesFor("side_die_attack_$roll", "name", "?");
-        $this->tokens->dbSetTokenLocation($dieId, "display_battle", $roll, clienttranslate('${char_name} rolls ${side_name}'), [
+    function effect_doRollAttackDice(string $attackerId, array $diceTokens): void {
+        if (empty($diceTokens)) {
+            $this->notifyMessage(clienttranslate('${char_name} has no dice to roll'), [
+                "char_name" => $attackerId,
+            ]);
+            return;
+        }
+        $sides = [];
+        foreach ($diceTokens as $die) {
+            $dieId = $die["key"];
+            $roll = $this->bgaRand(1, 6);
+            $this->tokens->dbSetTokenLocation($dieId, "display_battle", $roll, "");
+            $sides[] = "[DIE_ATT_$roll]";
+        }
+        $this->notifyMessage(clienttranslate('${char_name} rolls ${sides}'), [
             "char_name" => $attackerId,
-            "side_name" => $sideName,
+            "sides" => implode(" ", $sides),
         ]);
+        // global undo reset, information revealed
+        $this->customUndoSavepoint(0, 1, "roll");
     }
 
     function effect_addAttackDiceDamage(string $attackerId, int $strength): void {
