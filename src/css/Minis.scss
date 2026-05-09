@@ -83,6 +83,25 @@
   }
 }
 
+// Stunned monster: hide the raw marker token and show a star overlay + desaturated/glowing sprite.
+// Marker tokenId is `stunmarker_<card>`, so its first class is `stunmarker`.
+.monster > .stunmarker {
+  // content: "✶";
+  position: absolute;
+  top: 23px;
+  right: 11px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #e4ecec 0%, #465e81 55%, #222096 100%);
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  z-index: 11;
+  pointer-events: none;
+}
+
 // Sprite positions: columns = rank3 (0%), rank2 (50%), rank1 (100%); rows = faction
 // Row 0 = dead, Row 1 = trollkin, Row 2 = firehorde
 .monster.monster_draugr {

@@ -46,8 +46,7 @@
     "name": "Monster Die",
     "values": {
       "0": {
-        "name": "Off",
-        "description": "Recommended for first game."
+        "name": "Off"
       },
       "1": {
         "name": "On",

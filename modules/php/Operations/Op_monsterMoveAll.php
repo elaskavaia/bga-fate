@@ -58,7 +58,7 @@ class Op_monsterMoveAll extends Operation {
             $this->moveMonster($monsterId, $currentHex, $isChargeForMonster);
 
             // Stop immediately if the last house was destroyed
-            if ($this->game->isEndOfGame()) {
+            if ($this->game->isWellDestroyed()) {
                 return;
             }
         }

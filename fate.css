@@ -211,6 +211,10 @@
   background-position: 100% 0%;
 }
 
+.die_monster {
+  height: 64px;
+}
+
 .die_monster[data-state="1"] {
   background-position: 0% 100%;
 }
@@ -542,6 +546,22 @@
 .monster .bucket_crystal_red::after,
 .hero .bucket_crystal_red::after {
   background-color: #e53935;
+}
+
+.monster > .stunmarker {
+  position: absolute;
+  top: 23px;
+  right: 11px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #e4ecec 0%, #465e81 55%, #222096 100%);
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+  z-index: 11;
+  pointer-events: none;
 }
 
 .monster.monster_draugr {

@@ -5,13 +5,14 @@ declare(strict_types=1);
 /**
  * Op_addRoll: rolls dice without sweeping existing dice off display_battle.
  * Used by "add N attack dice to this attack" effects (e.g. Mastery).
- * Gated on dice already being present — void outside an active attack.
+ * Gated on marker_attack being set — void outside an active attack.
  */
 final class Op_addRollTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
         $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $this->game->tokens->dbSetTokenLocation("marker_attack", "hex_12_8", 0, "");
     }
 
     private function diceOnBattle(): array {
@@ -22,9 +23,10 @@ final class Op_addRollTest extends AbstractOpTestCase {
     // Gating: addRoll is only valid when dice are already on display_battle
     // -------------------------------------------------------------------------
 
-    public function testVoidWhenNoExistingDice(): void {
+    public function testVoidOutsideActiveAttack(): void {
+        $this->game->tokens->moveToken("marker_attack", "limbo");
         $op = $this->createOp("4addRoll");
-        $this->assertTrue($op->isVoid(), "addRoll should be void with no dice on display_battle");
+        $this->assertTrue($op->isVoid(), "addRoll should be void when no marker_attack is set");
     }
 
     public function testValidWhenDicePresent(): void {

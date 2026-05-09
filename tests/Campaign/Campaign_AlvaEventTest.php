@@ -196,6 +196,50 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
         $this->assertEquals(2, $this->countDamage($brute));
     }
 
+    /**
+     * Bug repro: Piercing Arrows in hand, attack roll yields no runes → counter(countRunes)
+     * evaluates to 0, so the card is not playable. The TRoll trigger should NOT queue a
+     * useCard prompt at all (Piercing Arrows is the only candidate). Currently the prompt
+     * fires with only "skip" as a valid target and a "Cannot be used now" banner — forcing
+     * the player to click "Not now" after every rune-less roll.
+     *
+     * Hand also has a non-TRoll event card (Agility) to mirror a realistic hand and prove
+     * that unrelated event cards in hand don't keep the prompt alive.
+     */
+    public function testPiercingArrowsDoesNotPromptUseCardWhenNoRunesRolled(): void {
+        $color = $this->getActivePlayerColor();
+        $piercing = "card_event_2_34_1";
+        $agility = "card_event_2_28_1"; // r=2move, no `on` — manual-only, not TRoll-triggered
+        $this->seedHand($piercing, $color);
+        $this->seedHand($agility, $color);
+
+        // Use a troll (health=7) so the attack does NOT kill — keeps the post-attack state
+        // simple (no MonsterKilled trigger chain to confuse the assertion).
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_5_9", "");
+
+        // Seed 3 mana on Hail of Arrows I (card_ability_2_3) — mirrors the screenshot scenario
+        // where Alva had a tableau card with mana stacked. Should not affect Piercing Arrows
+        // gating but exercises the path where useCard enumerates more candidates.
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, "card_ability_2_3", ["message" => ""]);
+
+        // Roll: 3 misses (side 1), 0 runes — Piercing Arrows' counter(countRunes) returns 0.
+        $this->seedRand([1, 1, 1]);
+        $this->respond("actionAttack");
+
+        $this->assertOperation("turn");
+        // useCard should not be the next op — Piercing Arrows is the only TRoll candidate
+        // and it's unplayable; Agility/tableau cards don't listen to TRoll.
+        $this->assertNotEquals(
+            "useCard",
+            $this->getOpArgs()["type"] ?? "",
+            "useCard should not prompt when no card listening to the trigger is playable"
+        );
+        // Troll took 0 damage (all dice missed).
+        $this->assertEquals(0, $this->countDamage($troll));
+    }
+
     // --- Mastery (card_event_2_27) ---
     // r=4addRoll, on=TActionAttack — add 4 dice to the current attack roll.
 

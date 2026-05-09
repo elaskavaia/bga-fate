@@ -53,13 +53,6 @@ class Op_roll extends CountableOperation {
             return [$presetTarget];
         }
 
-        if ($this->isAddition()) {
-            $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
-            if (count($diceOnDisplay) == 0) {
-                return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
-            }
-        }
-
         $attackerId = $this->getAttackerId();
 
         // Monster attacking: find hero hexes in range (excluding Grimheim)

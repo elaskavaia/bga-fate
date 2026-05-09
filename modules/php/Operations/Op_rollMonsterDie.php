@@ -26,8 +26,8 @@ class Op_rollMonsterDie extends Operation {
             "die_monster",
             "display_monsterturn",
             $roll,
-            clienttranslate('Monster die rolls ${side_name} ${side_icon}'),
-            ["side_name" => $sideName, "side_icon" => "[DIE_MON_$roll]"],
+            clienttranslate('Monster die rolls ${side_name} ${sides}'),
+            ["side_name" => $sideName, "sides" => "[DIE_MON_$roll]"]
         );
 
         // Roll result is hidden info that becomes public — non-rewindable.

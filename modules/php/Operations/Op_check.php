@@ -26,7 +26,7 @@ class Op_check extends Op_counter {
         $top = array_shift($tops);
         $this->game->systemAssert("ERR:counter:noNextOp", $top);
         if ($count == 0 && $mincount == 0) {
-            $this->game->machine->hide($top["id"]);
+            $this->game->machine->hide((int) $top["id"]);
         } else {
             $this->game->machine->setCounts($top, $count, $mincount);
         }

@@ -567,13 +567,16 @@ export class Game extends Game1Tokens {
     if (legendFlavor[legendNum]) tokenInfo.tooltip += this.iiSection(legendFlavor[legendNum]);
   }
 
-  /** Get crystal damage/gold/mana info for a character from its bucket children. */
+  /** Get crystal damage/gold/mana + status (stun) info for a character from its child tokens. */
   getCrystalInfo(tokenId: string): string {
     let info = "";
     for (const type of ["red", "green", "yellow"]) {
       const bucket = $(`bucket_crystal_${type}_${tokenId}`);
       const count = parseInt(bucket?.dataset.state ?? "0");
       if (count > 0) info += this.ttSection(this.getTokenName(`crystal_${type}`), String(count));
+    }
+    if ($(tokenId)?.querySelector(":scope > .stunmarker")) {
+      info += this.ttSection(_("Stunned"), _("Cannot move during this monster turn"));
     }
     return info;
   }

@@ -262,16 +262,20 @@ class Game extends Base {
             return true;
         }
         // Loss condition: Freyja's Well destroyed
-        if (!$this->isHeroesWin()) {
+        if ($this->isWellDestroyed()) {
             return true;
         }
         return false;
     }
 
     function isHeroesWin() {
+        return !$this->isWellDestroyed();
+    }
+
+    function isWellDestroyed() {
         // Heroes win if at least Freyja's Well remains in Grimheim
         $wellLoc = $this->tokens->getTokenLocation("house_0");
-        return $wellLoc === "hex_9_9";
+        return $wellLoc !== "hex_9_9";
     }
 
     function handleEndOfGame(): void {

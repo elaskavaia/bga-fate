@@ -14,16 +14,21 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
+
 /**
  * addRoll: Like roll, but ADDS dice to an existing attack in progress instead of
  * starting a fresh roll. Op_roll's `effect_rollAttackDice` normally sweeps leftover
  * dice off display_battle before rolling; addRoll skips that sweep via isAddition().
  *
  * Used by cards that say "Add N [DIE_ATTACK] to this attack action" (e.g. Mastery).
- * Only valid after another roll — getPossibleMoves() gates on dice already being on
- * display_battle so the op is void outside an attack.
+ * Only valid after another roll — getPossibleMoves() gates on marker_attack being set
+ * so the op is void outside an active attack.
  */
 class Op_addRoll extends Op_roll {
+    function getPrompt() {
+        return clienttranslate('Roll ${count} dice');
+    }
     function isAddition() {
         return true;
     }
@@ -31,5 +36,18 @@ class Op_addRoll extends Op_roll {
         // Added dice must not re-fire TRoll/TActionAttack, otherwise cards that respond to
         // those triggers by calling addRoll (e.g. Windbite) would loop on their own dice.
         return false;
+    }
+    function getPossibleMoves(): array {
+        $presetTarget = $this->getDataField("target");
+        if ($presetTarget) {
+            return [$presetTarget];
+        }
+
+        $attackHex = $this->game->getAttackHex();
+        if (!$attackHex) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
+        }
+
+        return [$attackHex => ["q" => 0, "name" => clienttranslate("Confirm")]];
     }
 }

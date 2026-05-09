@@ -359,7 +359,7 @@ class Hero extends Character {
         // "Some villagers panic and flee, leaving their houses undefended"
         $this->game->effect_destroyHouses(2, $this->id, clienttranslate('Villagers panic and flee, ${token_name} is left undefended!'));
 
-        if ($this->game->isEndOfGame()) {
+        if ($this->game->isWellDestroyed()) {
             $this->game->handleEndOfGame();
         }
     }

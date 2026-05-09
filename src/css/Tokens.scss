@@ -86,6 +86,9 @@
   }
 }
 
+.die_monster {
+  height: 64px;
+}
 // Monster die — styled via data-state attribute (set by token system)
 @for $i from 1 through 6 {
   .die_monster[data-state="#{$i}"] {
