@@ -58,6 +58,14 @@ DIE_ATT_5|Hit|0|wicon wicon_die_attack_hit|0||
 DIE_ATT_6|Hit|0|wicon wicon_die_attack_hit|0||
 DIE_ATTACK|Attack Die|0|wicon wicon_die_attack_hit|0||
 
+DIE_MON_1|Maneuver CW|0|wicon wicon_die_monster_maneuver_1|0||
+DIE_MON_2|Maneuver CCW|0|wicon wicon_die_monster_maneuver_2|0||
+DIE_MON_3|Attack|0|wicon wicon_die_monster_attack|0||
+DIE_MON_4|Push|0|wicon wicon_die_monster_push|0||
+DIE_MON_5|Charge|0|wicon wicon_die_monster_charge|0||
+DIE_MON_6|Ambush|0|wicon wicon_die_monster_ambush|0||
+DIE_MONSTER|Monster Die|0|wicon wicon_die_monster_attack|0||
+
 # hero attribute trackers (created per hero in setupGameTables, not auto-created)
 tracker_strength|Strength|0|tracker wicon wicon_strength|4|tableau_{COLOR}
 tracker_range|Attack Range|0|tracker wicon wicon_range|4|tableau_{COLOR}

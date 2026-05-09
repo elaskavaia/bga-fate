@@ -47,8 +47,15 @@ class Op_monsterMoveAll extends Operation {
                 continue;
             }
 
-            // TODO: Charge rule A — Monster Dice may cause rank 1 monsters to charge
-            $this->moveMonster($monsterId, $currentHex, $isChargeTurn);
+            // Monster Die `charge` side gives rank-1 monsters +1 step (RULES.md §2).
+            $isChargeForMonster = $isChargeTurn;
+            if (!$isChargeForMonster && $this->game->getMonsterDieSide() === "charge") {
+                $rank = (int) $this->game->getRulesFor($monsterId, "rank", 0);
+                if ($rank === 1) {
+                    $isChargeForMonster = true;
+                }
+            }
+            $this->moveMonster($monsterId, $currentHex, $isChargeForMonster);
 
             // Stop immediately if the last house was destroyed
             if ($this->game->isEndOfGame()) {

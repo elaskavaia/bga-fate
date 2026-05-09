@@ -94,6 +94,11 @@ class Op_monsterAttack extends Operation {
             }
         }
 
+        // Monster Die `attack` side: +1 strength to every monster attack this turn (RULES.md §2).
+        if ($this->game->getMonsterDieSide() === "attack") {
+            $strength++;
+        }
+
         return $strength;
     }
 }

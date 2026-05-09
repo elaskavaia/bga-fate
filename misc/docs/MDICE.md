@@ -27,12 +27,12 @@ Per [RULES.md:250–259](RULES.md). Effects are **per-turn**, applied to **all m
 
 | Side | Name | Effect |
 |---|---|---|
-| 1 | `maneuver_1` | All monsters rotate **clockwise** one hex around their nearest adjacent hero (no rotation if not adjacent to any hero). |
+| 1 | `maneuver_1` | **In player order**, all monsters adjacent to that hero simultaneously rotate **clockwise** one hex around that hero, if possible. May rotate into Grimheim (destroys town pieces). |
 | 2 | `maneuver_2` | Same as side 1, but **counter-clockwise**. |
 | 3 | `attack` | Every monster gets **+1 strength** for this turn's attack step. |
-| 4 | `push` | Every hero adjacent to a monster is pushed **1 hex toward Grimheim**. |
+| 4 | `push` | Every hero adjacent to a monster is pushed **1 hex toward Grimheim** along the monster path (per-hex `dir` tag). |
 | 5 | `charge` | All **rank 1** monsters get **+1 move** for this turn (compounds with normal move). |
-| 6 | `ambush` | Each hero must place **1 new goblin** on an adjacent hex. |
+| 6 | `ambush` | Each hero must place **1 new goblin** on an adjacent hex. **Heroes in Grimheim are skipped** — the effect is ignored for that player. |
 
 ---
 

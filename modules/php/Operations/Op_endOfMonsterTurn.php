@@ -12,6 +12,12 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_endOfMonsterTurn extends Operation {
     function resolve(): void {
+        // Sweep the monster die back to supply so its rolled side doesn't leak
+        // into hero-turn code paths that read getMonsterDieSide().
+        if ($this->game->tokens->getTokenLocation("die_monster") === "display_monsterturn") {
+            $this->game->tokens->dbSetTokenLocation("die_monster", "supply_die_monster", 6, "");
+        }
+
         if ($this->game->isEndOfGame()) {
             $this->game->handleEndOfGame();
             return;

@@ -31,8 +31,9 @@ class Op_turnMonster extends Operation {
         $this->advanceTimeTrack();
         $spotType = $this->getCurrentSpotType();
         $isChargeTurn = $spotType === "tm_red_skull";
-        // TODO: Step 2 — Roll Monster Dice (variant rule for higher difficulty)
-        // Effects: maneuver CW/CCW, attack +1, charge rank 1, push, ambush
+        if ($this->game->isMonsterDieOn()) {
+            $this->queue("rollMonsterDie");
+        }
         // Pre-movement trigger: Suppressive Fire and similar abilities
         foreach ($this->game->getPlayerColors() as $color) {
             $this->queueTrigger(Trigger::MonsterMove, $color);

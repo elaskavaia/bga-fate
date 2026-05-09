@@ -46,6 +46,7 @@ class Game extends Base {
         self::initGameStateLabels([
             "var_solo_hero" => 100,
             "var_long_track" => 101,
+            "var_monster_die" => 102,
         ]);
 
         $this->material = new Material();
@@ -601,6 +602,24 @@ class Game extends Base {
         return (int) $this->getGameStateValue("var_long_track") === 1;
     }
 
+    function isMonsterDieOn(): bool {
+        return (int) $this->getGameStateValue("var_monster_die") === 1;
+    }
+
+    /**
+     * Returns the rolled side rule of the monster die for the current monster turn,
+     * or null if no die is currently parked on display_monsterturn.
+     * One of: maneuver_1, maneuver_2, attack, push, charge, ambush.
+     */
+    function getMonsterDieSide(): ?string {
+        $info = $this->tokens->getTokenInfo("die_monster");
+        if (($info["location"] ?? null) !== "display_monsterturn") {
+            return null;
+        }
+        $side = $info["state"];
+        return $this->material->getRulesFor("side_die_monster_$side", "rule", null);
+    }
+
     function getTimeTrackId(): string {
         return $this->isLongTimeTrack() ? "timetrack_2" : "timetrack_1";
     }
@@ -1021,8 +1040,8 @@ class Game extends Base {
         for ($i = 11; $i <= 16; $i++) {
             $this->tokens->dbSetTokenLocation("die_attack_$i", "display_monsterturn", $i - 10);
         }
-        // Place monster die with side 1
-        $this->tokens->dbSetTokenLocation("die_monster_3", "display_monsterturn", 4);
+        // Place monster die with side 4 (push)
+        $this->tokens->dbSetTokenLocation("die_monster", "display_monsterturn", 4);
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 

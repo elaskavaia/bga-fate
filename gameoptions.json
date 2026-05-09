@@ -41,5 +41,19 @@
       }
     },
     "default": 0
+  },
+  "102": {
+    "name": "Monster Die",
+    "values": {
+      "0": {
+        "name": "Off",
+        "description": "Recommended for first game."
+      },
+      "1": {
+        "name": "On",
+        "description": "Variant rule: each Monster Turn rolls a die for an extra effect (maneuver, attack +1, push, charge, ambush)."
+      }
+    },
+    "default": 0
   }
 }

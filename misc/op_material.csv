@@ -25,6 +25,7 @@ turnEnd|End of Turn
 
 
 turnMonster|Monster Turn
+rollMonsterDie|Roll Monster Die
 monsterMoveAll|Monster Movement
 monsterAttackAll|Monster Attacks
 endOfMonsterTurn|End Monster Turn
