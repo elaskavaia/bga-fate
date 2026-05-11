@@ -548,7 +548,11 @@
   background-color: #e53935;
 }
 
-.monster > .stunmarker {
+.monster > .stunmarker[data-state="1"] {
+  display: none;
+}
+
+.monster > .stunmarker[data-state="0"] {
   position: absolute;
   top: 23px;
   right: 11px;

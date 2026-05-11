@@ -26,7 +26,7 @@ class Op_rollMonsterDie extends Operation {
             "die_monster",
             "display_monsterturn",
             $roll,
-            clienttranslate('Monster die rolls ${side_name} ${sides}'),
+            clienttranslate('Monsters roll ${side_name} ${sides}'),
             ["side_name" => $sideName, "sides" => "[DIE_MON_$roll]"]
         );
 

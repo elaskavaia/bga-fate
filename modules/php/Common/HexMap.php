@@ -186,11 +186,11 @@ class HexMap {
      * 1=NE, 3=E, 5=SE, 7=SW, 9=W, 11=NW. Same convention as map_material.csv `dir` column.
      */
     private const CLOCK_OFFSETS = [
-        1  => [1, -1],
-        3  => [1, 0],
-        5  => [0, 1],
-        7  => [-1, 1],
-        9  => [-1, 0],
+        1 => [1, -1],
+        3 => [1, 0],
+        5 => [0, 1],
+        7 => [-1, 1],
+        9 => [-1, 0],
         11 => [0, -1],
     ];
 
@@ -487,7 +487,7 @@ class HexMap {
                 if (!$startInGrimheim && $this->isInGrimheim($neighbor)) {
                     foreach ($this->getHexesInGrimheim() as $gHex) {
                         if (!isset($visited[$gHex])) {
-                            $visited[$gHex] = $steps + 1;
+                            $visited[$gHex] = $maxSteps;
                         }
                     }
                 } else {

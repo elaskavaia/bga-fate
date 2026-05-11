@@ -17,6 +17,7 @@ export interface CustomGamedatas extends Gamedatas<CustomPlayer> {
   tokens: { [key: string]: Token };
   token_types: { [key: string]: any };
   counters: { [key: string]: { value: number } };
+  endBanner?: { message: string; isWellDestroyed: boolean };
 }
 
 export interface NotificationMessage {

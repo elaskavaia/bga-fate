@@ -229,11 +229,10 @@ class Game extends Base {
 
         // Hero attribute trackers (tracker_strength_{color}, etc.) are sent automatically via tokens->getAllDatas()
 
-        $gameStage = $this->tokens->getTokenState(Game::GAME_STAGE);
-        $isGameEnded = $gameStage >= 5;
-        $result["gameEnded"] = $isGameEnded;
-        $result["lastTurn"] = $gameStage >= 1 && $gameStage <= 4;
-        $result["endScores"] = $isGameEnded ? $this->getEndScores() : null;
+        $result["gameEnded"] = $isGameEnded = $this->isEndOfGame();
+        if ($isGameEnded) {
+            $result["endBanner"] = ["message" => $this->getEndBannerMessage(), "isWellDestroyed" => $this->isWellDestroyed()];
+        }
 
         return $result;
     }
@@ -279,15 +278,23 @@ class Game extends Base {
     }
 
     function handleEndOfGame(): void {
+        $msg = $this->getEndBannerMessage();
         if ($this->isHeroesWin()) {
-            $this->notify->all("message", clienttranslate("The time track has reached the end. Freyja returns! Heroes win!"), []);
+            $this->notify->all("message", $msg, []);
             // Award each player 1 point so the win is recorded by the BGA framework
             foreach ($this->loadPlayersBasicInfos() as $playerId => $player) {
                 $this->playerScore->set((int) $playerId, 1);
             }
         } else {
-            $this->notify->all("message", clienttranslate("The Heroes have failed. The Monsters win!"), []);
+            $this->notify->all("message", $msg, []);
         }
+        $this->notify->all("endBanner", "", ["message" => $msg, "isWellDestroyed" => $this->isWellDestroyed()]);
+    }
+
+    function getEndBannerMessage(): string {
+        return $this->isHeroesWin()
+            ? clienttranslate("The time track has reached the end. Freyja returns! Heroes win!")
+            : clienttranslate("The Heroes have failed. The Monsters win!");
     }
 
     function getUserPreference(int $player_id, int $code): int {

@@ -39,11 +39,16 @@ class Op_monsterMoveAll extends Operation {
             $monsterId = $m["key"];
             $currentHex = $m["hex"];
 
-            $stunMarkers = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $monsterId);
+            // state=0 markers block movement this turn; bump to state=1 (spent) afterwards so
+            // they no longer block movement but still block re-targeting by the same supfire card.
+            $stunMarkers = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $monsterId, 0);
             if (count($stunMarkers) > 0) {
                 $this->game->notifyMessage(clienttranslate('${token_name} is suppressed and cannot move this turn'), [
                     "token_name" => $monsterId,
                 ]);
+                foreach ($stunMarkers as $marker) {
+                    $this->dbSetTokenState($marker["key"], 1, "");
+                }
                 continue;
             }
 

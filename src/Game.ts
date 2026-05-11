@@ -151,13 +151,18 @@ export class Game extends Game1Tokens {
 
     this.setupNotifications();
 
+    if (gamedatas.endBanner) {
+      if (gamedatas.endBanner.isWellDestroyed) this.bga.gameArea.addLastTurnBanner(gamedatas.endBanner.message);
+      else this.bga.gameArea.addWinConditionBanner(gamedatas.endBanner.message);
+    }
+
     // last minute tweaks for miniboard
     Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
       const color = player.color;
       // attach hand counter to miniboard
       const mini = $(`miniboard_${color}`);
       const handCounter = $(`counter_hand_${color}`);
-      if (handCounter) {
+      if (handCounter && mini) {
         mini.appendChild(handCounter);
         handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
 
@@ -575,7 +580,7 @@ export class Game extends Game1Tokens {
       const count = parseInt(bucket?.dataset.state ?? "0");
       if (count > 0) info += this.ttSection(this.getTokenName(`crystal_${type}`), String(count));
     }
-    if ($(tokenId)?.querySelector(":scope > .stunmarker")) {
+    if ($(tokenId)?.querySelector(':scope > .stunmarker[data-state="0"]')) {
       info += this.ttSection(_("Stunned"), _("Cannot move during this monster turn"));
     }
     return info;
@@ -661,5 +666,11 @@ export class Game extends Game1Tokens {
   async notif_lastTurn(args: any) {
     //this.gamedatas.lastTurn = true;
     //this.updateBanner();
+  }
+
+  async notif_endBanner(args: any) {
+    if (args.isWellDestroyed) this.bga.gameArea.addLastTurnBanner(args.message);
+    else this.bga.gameArea.addWinConditionBanner(args.message);
+    return gameui.wait(1);
   }
 }

@@ -195,13 +195,30 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals("hex_12_8", $loc, "Stunned monster should not move");
     }
 
-    public function testStunMarkerStaysAfterSkippingMovement(): void {
+    public function testStunMarkerStaysButBecomesSpentAfterMonsterTurn(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->placeStunMarker("monster_goblin_1");
 
         $this->call_resolve();
-        $markersAfter = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", "monster_goblin_1");
-        $this->assertCount(1, $markersAfter, "Stun marker should stay on monster (removed by next c_supfire trigger)");
+
+        // Marker stays on the monster (so the same supfire card can't re-target it next play),
+        // but its state advances from 0 (active) to 1 (spent — no longer blocks movement).
+        $active = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", "monster_goblin_1", 0);
+        $spent = $this->game->tokens->getTokensOfTypeInLocation("stunmarker", "monster_goblin_1", 1);
+        $this->assertCount(0, $active, "Active stun marker should have been consumed");
+        $this->assertCount(1, $spent, "Marker should remain on monster as spent (state=1) for re-target cooldown");
+    }
+
+    public function testSpentStunMarkerDoesNotBlockMovement(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // Place a spent (state=1) stun marker — should not block movement
+        $this->game->tokens->createTokenIfNot("stunmarker_c", "monster_goblin_1");
+        $this->game->tokens->dbSetTokenLocation("stunmarker_c", "monster_goblin_1", 1, "");
+
+        $this->call_resolve();
+
+        $loc = $this->game->tokens->getTokenLocation("monster_goblin_1");
+        $this->assertNotEquals("hex_12_8", $loc, "Monster with only spent stun markers should still move");
     }
 
     public function testStunnedMonsterDoesNotMoveOnChargeTurn(): void {

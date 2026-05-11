@@ -149,7 +149,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         $sideRules = ["maneuver_1", "maneuver_2", "attack", "push", "charge", "ambush"];
         $rollLogs = array_filter(
             $this->game->notify->_getNotifications(),
-            fn($n) => str_contains($n["log"] ?? "", "Monster die rolls"),
+            fn($n) => str_contains($n["log"] ?? "", "Monsters roll"),
         );
         $this->assertCount(1, $rollLogs, "exactly one Monster die roll per monster turn");
     }

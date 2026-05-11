@@ -1912,7 +1912,7 @@ class GameMachine {
             .performAction("action_resolve", {
             data: JSON.stringify(args)
         })
-            .then((x) => {
+            ?.then((x) => {
             console.log("action complete", x);
         })
             .catch((e) => {
@@ -2279,13 +2279,19 @@ class Game extends Game1Tokens {
         this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
         this.zoomControls.setup();
         this.setupNotifications();
+        if (gamedatas.endBanner) {
+            if (gamedatas.endBanner.isWellDestroyed)
+                this.bga.gameArea.addLastTurnBanner(gamedatas.endBanner.message);
+            else
+                this.bga.gameArea.addWinConditionBanner(gamedatas.endBanner.message);
+        }
         // last minute tweaks for miniboard
         Object.values(gamedatas.players).forEach((player) => {
             const color = player.color;
             // attach hand counter to miniboard
             const mini = $(`miniboard_${color}`);
             const handCounter = $(`counter_hand_${color}`);
-            if (handCounter) {
+            if (handCounter && mini) {
                 mini.appendChild(handCounter);
                 handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
                 const handMaxCounter = $(`tracker_hand_${color}`);
@@ -2694,7 +2700,7 @@ class Game extends Game1Tokens {
             if (count > 0)
                 info += this.ttSection(this.getTokenName(`crystal_${type}`), String(count));
         }
-        if ($(tokenId)?.querySelector(":scope > .stunmarker")) {
+        if ($(tokenId)?.querySelector(':scope > .stunmarker[data-state="0"]')) {
             info += this.ttSection(_("Stunned"), _("Cannot move during this monster turn"));
         }
         return info;
@@ -2768,6 +2774,13 @@ class Game extends Game1Tokens {
     async notif_lastTurn(args) {
         //this.gamedatas.lastTurn = true;
         //this.updateBanner();
+    }
+    async notif_endBanner(args) {
+        if (args.isWellDestroyed)
+            this.bga.gameArea.addLastTurnBanner(args.message);
+        else
+            this.bga.gameArea.addWinConditionBanner(args.message);
+        return gameui.wait(1);
     }
 }
 
