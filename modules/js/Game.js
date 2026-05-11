@@ -2713,25 +2713,48 @@ class Game extends Game1Tokens {
             }
             return;
         }
-        // Case 2: A token (hero/monster/house) on a hex — combine hex + token tooltips on the token
         const parentId = attachNode.parentElement?.id;
-        if (!parentId?.startsWith("hex"))
-            return;
-        // Remove hex tooltip — the token on top will carry everything
-        this.removeTooltip(parentId);
-        // Rebuild token tooltip with crystal info injected into its tooltip text
         const tokenToken = attachNode.dataset.tt ?? attachNode.id;
-        const tokenInfo = this.getTokenDisplayInfo(tokenToken, true);
-        const crystalInfo = this.getCrystalInfo(attachNode.id);
-        if (crystalInfo)
-            tokenInfo.tooltip = (tokenInfo.tooltip ?? "") + crystalInfo;
-        let combined = this.getTooltipHtmlForTokenInfo(tokenInfo);
-        if (!combined)
+        // Case 2: A token (hero/monster/house) on a hex — combine hex + token tooltips on the token
+        if (parentId?.startsWith("hex")) {
+            // Rebuild token tooltip with crystal info injected into its tooltip text
+            const tokenInfo = this.getTokenDisplayInfo(tokenToken, true);
+            const crystalInfo = this.getCrystalInfo(attachNode.id);
+            if (crystalInfo) {
+                tokenInfo.tooltip = (tokenInfo.tooltip ?? "") + crystalInfo;
+            }
+            let combined = this.getTooltipHtmlForTokenInfo(tokenInfo);
+            if (!combined)
+                return;
+            // Remove hex tooltip — the token on top  (child) will carry everything
+            this.removeTooltip(parentId);
+            const hexHtml = this.getTooltipHtmlForToken(parentId);
+            if (hexHtml)
+                combined += hexHtml;
+            this.game.addTooltipHtml(attachNode.id, combined, this.game.defaultTooltipDelay);
             return;
-        const hexHtml = this.getTooltipHtmlForToken(parentId);
-        if (hexHtml)
-            combined += hexHtml;
-        this.game.addTooltipHtml(attachNode.id, combined, this.game.defaultTooltipDelay);
+        }
+        // Case 3: Level I hero/ability card on tableau — append Level II preview as a second container
+        const siblingId = this.getLevel2Sibling(tokenToken);
+        if (siblingId) {
+            const baseHtml = this.getTooltipHtmlForToken(tokenToken);
+            const reverseHtml = this.getTooltipHtmlForToken(siblingId);
+            if (baseHtml && reverseHtml) {
+                this.game.addTooltipHtml(attachNode.id, baseHtml + reverseHtml, this.game.defaultTooltipDelay);
+            }
+        }
+    }
+    /** Return the Level II sibling tokenId iff `tokenId` is a Level I hero/ability card */
+    getLevel2Sibling(tokenId) {
+        if (getPart(tokenId, 0) !== "card")
+            return null;
+        const sub = getPart(tokenId, 1);
+        if (sub !== "hero" && sub !== "ability")
+            return null;
+        const last = getIntPart(tokenId, -1);
+        if (last % 2 !== 1)
+            return null;
+        return getParentParts(tokenId) + "_" + (last + 1);
     }
     setupNotifications() {
         console.log("notifications subscriptions setup");

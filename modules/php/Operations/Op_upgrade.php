@@ -158,7 +158,7 @@ class Op_upgrade extends Operation {
     }
 
     function getUiArgs() {
-        return ["buttons" => false, "replicate" => true];
+        return ["buttons" => false];
     }
 
     function getExtraArgs() {
