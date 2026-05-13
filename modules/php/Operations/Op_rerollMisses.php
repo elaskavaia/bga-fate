@@ -28,6 +28,7 @@ class Op_rerollMisses extends Operation {
                 $dicesel[] = $die;
             }
         }
-        $this->game->effect_doRollAttackDice($attackerId, $dicesel);
+        $defenderHex = $this->game->tokens->getTokenLocation("marker_attack");
+        $this->game->effect_doRollAttackDice($attackerId, $dicesel, $defenderHex);
     }
 }

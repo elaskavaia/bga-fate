@@ -53,9 +53,8 @@ class Op_resolveHits extends Operation {
         if ($primaryHex === "") {
             return 0;
         }
-        $defenderId = $this->game->hexMap->getCharacterOnHex($primaryHex);
-        $this->game->systemAssert("ERR:resolveHits:noCharOnHex:$primaryHex", $defenderId !== null);
-        return $this->game->countHits($this->getAttackerId(), $defenderId);
+        $this->game->systemAssert("ERR:resolveHits:noCharOnHex:$primaryHex", $this->game->hexMap->getCharacterOnHex($primaryHex) !== null);
+        return $this->game->countHits($this->getAttackerId(), $primaryHex);
     }
 
     function getPrompt() {

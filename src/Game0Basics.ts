@@ -18,6 +18,7 @@ export class Game0Basics {
   player_color: string;
   defaultTooltipDelay: number = 800;
   public gamedatas!: CustomGamedatas;
+  protected inSetup: boolean = true;
 
   constructor(public bga: Bga) {
     //console.log("game constructor");
@@ -51,12 +52,18 @@ export class Game0Basics {
     return gameui.bgaAnimationsActive();
   }
 
+  gameAnimationsActive() {
+    return this.bgaAnimationsActive() && !this.inSetup;
+  }
+
   setup(gamedatas: any) {
+    this.inSetup = true;
     this.gamedatas = gamedatas;
     console.log("Starting game setup", gamedatas);
     const first_player_id = Object.keys(gamedatas.players)[0];
     if (!this.bga.players.isCurrentPlayerSpectator()) this.player_color = gamedatas.players[this.player_id].color;
     else this.player_color = gamedatas.players[first_player_id].color;
+    // caller must set inSetup to false
   }
 
   // utils
@@ -202,7 +209,7 @@ export class Game0Basics {
     return div;
   }
 
-  getTr(name: string | NotificationMessage, args: any = {}) {
+  getTr(name: string | NotificationMessage | undefined, args: any = {}) {
     if (!name) return "";
 
     if ((name as any).log !== undefined) {
@@ -212,13 +219,21 @@ export class Game0Basics {
     }
     if (typeof name !== "string") return name.toString();
 
-    //if (name.includes("$"))
-    {
-      const log = this.format_string_recursive((gameui as any).clienttranslate_string(name) as string, args);
+    const log = this.format_string_recursive((gameui as any).clienttranslate_string(name) as string, args);
+    return log;
+  }
+
+  getFormatted(name: string | NotificationMessage | undefined) {
+    if (!name) return "";
+
+    if ((name as any).log !== undefined) {
+      const notif = name as NotificationMessage;
+      const log = this.format_string_recursive(notif.log, notif.args);
       return log;
     }
 
-    //return this.clienttranslate_string(name);
+    const log = this.format_string_recursive(name as string, {});
+    return log;
   }
   setActionStatus(text: string, args: any = {}) {
     if (!text) text = "";
@@ -296,14 +311,14 @@ export class Game0Basics {
   }
 
   notif_message_warning(notif: Notif) {
-    if (gameui.bgaAnimationsActive()) {
+    if (this.gameAnimationsActive()) {
       var message = this.format_string_recursive(notif.log, notif.args);
       this.bga.dialogs.showMessage(_("Warning:") + " " + message, "info");
     }
   }
 
   notif_message_info(notif: Notif) {
-    if (gameui.bgaAnimationsActive()) {
+    if (this.gameAnimationsActive()) {
       var message = this.format_string_recursive(notif.log, notif.args);
       this.bga.dialogs.showMessage(_("Announcement:") + " " + message, "info");
     }

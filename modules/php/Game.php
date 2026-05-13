@@ -20,8 +20,6 @@ use Bga\Games\Fate\Common\HexMap;
 use Bga\Games\Fate\Db\DbMultiUndo;
 use Bga\Games\Fate\Db\DbTokens;
 use Bga\Games\Fate\Model\Card;
-use Bga\Games\Fate\OpCommon\AiOperation;
-use Bga\Games\Fate\OpCommon\ComplexOperation;
 use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\Model\Character;
 use Bga\Games\Fate\Model\GoldVein;
@@ -403,10 +401,10 @@ class Game extends Base {
      * Roll attack dice onto display_battle. Does NOT count hits — that's done later by countHits.
      * Cleans up leftover dice, announces the attack, picks dice from supply and rolls them.
      */
-    function effect_rollAttackDice(string $attackerId, string $defenderId, int $strength, bool $add = false): void {
+    function effect_rollAttackDice(string $attackerId, string $defenderHex, int $strength, bool $add = false): void {
         $this->notifyMessage(clienttranslate('${char_name} attacks ${token_name} with strength ${strength}'), [
             "char_name" => $attackerId,
-            "token_name" => $defenderId,
+            "token_name" => $this->game->hexMap->getCharacterOnHex($defenderHex),
             "strength" => $strength,
         ]);
 
@@ -421,10 +419,10 @@ class Game extends Base {
 
         // Roll attack dice — pick from supply, then notify each with its roll result
         $diceTokens = $this->tokens->pickTokensForLocation($strength, "supply_die_attack", "display_battle");
-        $this->effect_doRollAttackDice($attackerId, $diceTokens);
+        $this->effect_doRollAttackDice($attackerId, $diceTokens, $defenderHex);
     }
 
-    function effect_doRollAttackDice(string $attackerId, array $diceTokens): void {
+    function effect_doRollAttackDice(string $attackerId, array $diceTokens, ?string $defenderHex = null): void {
         if (empty($diceTokens)) {
             $this->notifyMessage(clienttranslate('${char_name} has no dice to roll'), [
                 "char_name" => $attackerId,
@@ -438,9 +436,13 @@ class Game extends Base {
             $this->tokens->dbSetTokenLocation($dieId, "display_battle", $roll, "");
             $sides[] = "[DIE_ATT_$roll]";
         }
-        $this->notifyMessage(clienttranslate('${char_name} rolls ${sides}'), [
+
+        $dmg = $this->game->countHits($attackerId, $defenderHex);
+
+        $this->notifyMessage(clienttranslate('${char_name} rolls ${sides}, estimated ${dmg} [DAMAGE]'), [
             "char_name" => $attackerId,
             "sides" => implode(" ", $sides),
+            "dmg" => $dmg,
         ]);
         // global undo reset, information revealed
         $this->customUndoSavepoint(0, 1, "roll");
@@ -464,14 +466,14 @@ class Game extends Base {
      * Dice remain on display_battle so the player can see them.
      * @return int number of hits
      */
-    function countHits(string $attackerId, string $defenderId): int {
-        $defender = $this->getCharacter($defenderId);
+    function countHits(string $attackerId, ?string $defenderHex = null): int {
+        $attacker = $this->getCharacter($attackerId);
         $hits = 0;
         $diceOnDisplay = $this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         foreach ($diceOnDisplay as $die) {
             $roll = (int) $die["state"];
             $rule = $this->material->getRulesFor("side_die_attack_$roll", "rule", "miss");
-            $hits += $defender->countHit($rule, $attackerId);
+            $hits += $attacker->countHit($rule, $defenderHex);
         }
         return $hits;
     }

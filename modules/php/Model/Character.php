@@ -56,7 +56,7 @@ class Character {
      * @param string $location target location for the crystals
      */
     function moveCrystals(string $type, int $inc, string $location, array $options = []): void {
-        $this->game->effect_moveCrystals($this->id, $type, $inc, $location, $options);
+        $this->game->effect_moveCrystals($this->id, $type, $inc, $location, $options + ["char_name" => $this->id]);
     }
 
     /**
@@ -72,34 +72,14 @@ class Character {
 
     /**
      * Check if defender has cover (forest hex blocks "hitcov" results).
-     */
-    function hasCover(): bool {
-        return $this->isInForest();
-    }
-
-    /**
-     * Check if a single die result is a hit. Handles cover for "hitcov"
-     * and Dead faction rune-as-hit.
+     *
      * @param string $rule die result rule: "hit", "hitcov", "miss", "rune"
-     * @param string $attackerId token id of the attacker
+     * @param string|null $defenderHex hex of the defender — null means "no cover"
      * @return int 1 if hit, 0 if miss
      */
-    function countHit(string $rule, string $attackerId): int {
-        $isHit = $rule === "hit" || ($rule === "hitcov" && !$this->hasCover());
-        // Dead faction: rune counts as hit
-        if ($rule === "rune") {
-            $attackerFaction = $this->game->material->getRulesFor($attackerId, "faction", "");
-            if ($attackerFaction === "dead") {
-                $isHit = true;
-            }
-            // Beefy Berserker I/II (Boldur ability): runes count as hits for owning hero
-            if (str_starts_with($attackerId, "hero_")) {
-                $hero = $this->game->getHero($this->game->getHeroOwner($attackerId));
-                if ($hero->heroHasCardsOnTableau("card_ability_4_9", "card_ability_4_10")) {
-                    $isHit = true;
-                }
-            }
-        }
+    function countHit(string $rule, ?string $defenderHex = null): int {
+        $defenderHasCover = $defenderHex !== null && $this->game->hexMap->getHexTerrain($defenderHex) === "forest";
+        $isHit = $rule === "hit" || ($rule === "hitcov" && !$defenderHasCover);
         return $isHit ? 1 : 0;
     }
 

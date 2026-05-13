@@ -363,4 +363,15 @@ class Hero extends Character {
             $this->game->handleEndOfGame();
         }
     }
+
+    function countHit(string $rule, ?string $defenderHex = null): int {
+        $isHit = parent::countHit($rule, $defenderHex);
+        if (!$isHit && $rule === "rune") {
+            // Beefy Berserker I/II (Boldur ability): runes count as hits for owning hero
+            if ($this->heroHasCardsOnTableau("card_ability_4_9", "card_ability_4_10")) {
+                $isHit = 1;
+            }
+        }
+        return $isHit ? 1 : 0;
+    }
 }

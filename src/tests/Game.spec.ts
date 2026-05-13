@@ -317,3 +317,131 @@ describe("Game.onClickSanity", () => {
     expect(result.active).to.be.false;
   });
 });
+
+describe("Game.handleStackedTooltips", () => {
+  let game: Game;
+  let addTooltipHtml: sinon.SinonStub;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="ebd-body"></div>';
+    game = new Game(createMockBga());
+
+    addTooltipHtml = sinon.stub();
+    (gameui as any).addTooltipHtml = addTooltipHtml;
+
+    // Stub the per-token tooltip builder so assertions can compare on a recognizable shape
+    (game as any).getTooltipHtmlForToken = (id: string) => `<tt-${id}>`;
+
+    // Level I card sibling lookup needs minimal token_types
+    (game as any).gamedatas = {
+      tokens: {},
+      token_types: {
+        card_hero_1_1: { name: "Bjorn I" },
+        card_hero_1_2: { name: "Bjorn II" }
+      }
+    };
+  });
+
+  function makeHex(id: string): HTMLElement {
+    const hex = document.createElement("div");
+    hex.id = id;
+    hex.classList.add("hex");
+    document.body.appendChild(hex);
+    return hex;
+  }
+
+  function addChild(parent: HTMLElement, id: string, dataTt?: string): HTMLElement {
+    const child = document.createElement("div");
+    child.id = id;
+    if (dataTt) child.dataset.tt = dataTt;
+    parent.appendChild(child);
+    return child;
+  }
+
+  it("hex with no children: registers no tooltips", () => {
+    const hex = makeHex("hex_5_5");
+    game.handleStackedTooltips(hex);
+    expect(addTooltipHtml.called).to.be.false;
+  });
+
+  it("hex with a token child: writes combined tooltip on both child and hex", () => {
+    const hex = makeHex("hex_5_5");
+    addChild(hex, "hero_1");
+
+    game.handleStackedTooltips(hex);
+
+    expect(addTooltipHtml.callCount).to.equal(2);
+    const combined = "<tt-hero_1><tt-hex_5_5>";
+    expect(addTooltipHtml.calledWith("hero_1", combined)).to.be.true;
+    expect(addTooltipHtml.calledWith("hex_5_5", combined)).to.be.true;
+  });
+
+  it("hex with a bucket child: bucket is excluded from stacking", () => {
+    const hex = makeHex("hex_5_5");
+    addChild(hex, "bucket_crystal_red_hex_5_5");
+
+    game.handleStackedTooltips(hex);
+
+    expect(addTooltipHtml.called).to.be.false;
+  });
+
+  it("hex with multiple children: parent ends up with the last child's combined tooltip", () => {
+    const hex = makeHex("hex_5_5");
+    addChild(hex, "hero_1");
+    addChild(hex, "monster_goblin_1");
+
+    game.handleStackedTooltips(hex);
+
+    const lastCombined = "<tt-monster_goblin_1><tt-hex_5_5>";
+    const onHex = addTooltipHtml.getCalls().filter((c) => c.args[0] === "hex_5_5");
+    expect(onHex).to.have.length(2);
+    expect(onHex[onHex.length - 1].args[1]).to.equal(lastCombined);
+  });
+
+  it("token whose parent is a hex: writes combined tooltip on both token and hex", () => {
+    const hex = makeHex("hex_5_5");
+    const child = addChild(hex, "monster_goblin_1");
+
+    game.handleStackedTooltips(child);
+
+    expect(addTooltipHtml.callCount).to.equal(2);
+    const combined = "<tt-monster_goblin_1><tt-hex_5_5>";
+    expect(addTooltipHtml.calledWith("monster_goblin_1", combined)).to.be.true;
+    expect(addTooltipHtml.calledWith("hex_5_5", combined)).to.be.true;
+  });
+
+  it("token not on a hex with no Level II sibling: no tooltip registered", () => {
+    const parent = document.createElement("div");
+    parent.id = "supply_monster";
+    document.body.appendChild(parent);
+    const child = addChild(parent, "monster_goblin_1");
+
+    game.handleStackedTooltips(child);
+
+    expect(addTooltipHtml.called).to.be.false;
+  });
+
+  it("Level I hero card: registers combined base + sibling Level II tooltip", () => {
+    const card = document.createElement("div");
+    card.id = "card_hero_1_1";
+    document.body.appendChild(card);
+
+    game.handleStackedTooltips(card);
+
+    expect(addTooltipHtml.callCount).to.equal(1);
+    expect(addTooltipHtml.firstCall.args[0]).to.equal("card_hero_1_1");
+    expect(addTooltipHtml.firstCall.args[1]).to.equal("<tt-card_hero_1_1><tt-card_hero_1_2>");
+  });
+
+  it("uses data-tt over id when resolving the child token id", () => {
+    const hex = makeHex("hex_5_5");
+    // DOM id is a CSS-safe alias; dataset.tt carries the real token id
+    addChild(hex, "tt_card_1", "card_hero_1_1");
+
+    game.handleStackedTooltips(hex);
+
+    const combined = "<tt-card_hero_1_1><tt-hex_5_5>";
+    expect(addTooltipHtml.calledWith("tt_card_1", combined)).to.be.true;
+    expect(addTooltipHtml.calledWith("hex_5_5", combined)).to.be.true;
+  });
+});

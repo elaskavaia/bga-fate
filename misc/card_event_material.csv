@@ -44,7 +44,7 @@ num|hno|name|count|r|on|effect|flavour
 # Events - Boldur (hno=4)
 32|4|Berserk|3|spendHealth:3addDamage|TActionAttack|Take 1 unpreventable damage to add 3 damage to this attack.|Grr… Wraaaaaaah!
 36|4|Boldur's Gate|1|in(Grimheim):2spendXp:addTownPiece||Spend 2 gold [XP] in Grimheim to gain 1 town piece.|Narrow is the gate that leads to the inn.
-35|4|Dodge|1|2preventDamage||Prevent up to 2 damage.|Did you miss me?
+35|4|Dodge|1|2preventDamage|TResolveHits|Prevent up to 2 damage.|Did you miss me?
 34|4|Durability|1|repairCard(max)||Remove all damage from an equipment card.|Can't even handle the mead?
 33|4|Focus|2|spendAction(actionFocus):gainXp:gainMana:drawEvent||Spend a focus action to gain 1 experience [XP], add 1 mana [MANA] to any card, and draw 1 card.|Think, think… think.
 31|4|Kick|3|dealDamage(adj),moveMonster(marked)||Deal 1 damage to an adjacent monster and move it 1 area.|I get a kick out of you.
@@ -75,4 +75,4 @@ num|hno|name|count|r|on|effect|flavour
 #27|6|Lava Spike|3|custom||Count all mana [MANA] on 1 of your cards and roll that many [DIE_ATTACK] against an adjacent monster (max 10[DIE_ATTACK]).|Solid spikes made of liquid lava? Sounds impossible, but Sindra nailed it.
 #30|6|Petrify|3|custom||Spend 2 mana [MANA] to kill a rank 2 monster within range 2.|Your fate is set in stone.
 #31|6|Power Surge|3|2gainMana||Add 2 mana [MANA] to 1 of your cards.|
-#28|6|Stoneskin|3|2preventDamage||Prevent up to 2 damage.|Sticks and stones can't break my bones…
+#28|6|Stoneskin|3|2preventDamage|TResolveHits|Prevent up to 2 damage.|Sticks and stones can't break my bones…

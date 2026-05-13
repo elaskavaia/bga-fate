@@ -32,6 +32,7 @@ export interface TokenDisplayInfo {
   imageData?: Record<string, string>; // data-* attributes for tooltip image
   name?: string | NotificationMessage;
   tooltip?: string | NotificationMessage;
+  dynamicTooltip?: string | NotificationMessage;
   showtooltip?: boolean;
   [key: string]: any;
 }
@@ -54,7 +55,6 @@ export interface AnimArgs {
 }
 
 export class Game1Tokens extends Game0Basics {
-  CON: { [key: string]: string }; // constants from php
   original_click_id: any;
   globlog: number = 1;
   tokenInfoCache: { [key: string]: TokenDisplayInfo } = {};
@@ -463,7 +463,7 @@ export class Game1Tokens extends Game0Basics {
       return;
     }
 
-    var main = this.getTooltipHtmlForTokenInfo(tokenInfo);
+    var main = this.getTooltipHtmlForTokenInfo(tokenInfo, attachNode);
 
     if (main) {
       attachNode.classList.add("withtooltip");
@@ -481,27 +481,31 @@ export class Game1Tokens extends Game0Basics {
 
   handleStackedTooltips(attachNode: HTMLElement) {}
 
-  getTooltipHtmlForToken(token: string) {
-    if (typeof token != "string") {
-      console.error("cannot calc tooltip" + token);
-      return null;
-    }
-    var tokenInfo = this.getTokenDisplayInfo(token, true);
-    // console.log(tokenInfo);
-    if (!tokenInfo) return;
-    return this.getTooltipHtmlForTokenInfo(tokenInfo);
+  getTooltipHtmlForToken(token: string): string {
+    const tokenInfo = this.getTokenDisplayInfo(token, true);
+    return this.getTooltipHtmlForTokenInfo(tokenInfo, $(token));
   }
 
-  getTooltipHtmlForTokenInfo(tokenInfo: TokenDisplayInfo) {
-    return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, tokenInfo.imageTypes, tokenInfo.reverseImageTypes, tokenInfo.imageData);
+  getTooltipHtmlForTokenInfo(tokenInfo: TokenDisplayInfo | undefined, attachNode?: HTMLElement) {
+    if (!tokenInfo) return "";
+    this.updateDynamicTooltip(tokenInfo, attachNode);
+    return this.getTooltipHtml(
+      this.getFormatted(tokenInfo.name),
+      this.getFormatted(tokenInfo.tooltip) + this.getFormatted(tokenInfo.dynamicTooltip),
+      tokenInfo.imageTypes,
+      tokenInfo.reverseImageTypes,
+      tokenInfo.imageData
+    );
   }
+
+  updateDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement) {}
 
   getTokenName(tokenId: string, force: boolean = true): string {
     var tokenInfo = this.getTokenDisplayInfo(tokenId);
     if (tokenInfo) {
       return this.game.getTr(tokenInfo.name);
     } else {
-      if (!force) return undefined;
+      if (!force) return "";
       return "? " + tokenId;
     }
   }
@@ -783,7 +787,7 @@ export class Game1Tokens extends Game0Basics {
   ) {
     if (!$(token)) console.error(`token not found for ${token}`);
     if ($(token)?.parentNode == $(finalPlace)) return;
-    if (gameui.bgaAnimationsActive() == false) {
+    if (this.gameAnimationsActive() == false) {
       duration = 0;
       delay = 0;
     }
@@ -804,7 +808,7 @@ export class Game1Tokens extends Game0Basics {
     <div id="card_pile_help" class="card_pile_help">${_("Click on element below to see details")}</div>
     <div id="pile_content" class="pile_content">${cards_htm}</div>`;
     dialog.setContent(html);
-    const parent = $("pile_content");
+    const parent = $("pile_content")!;
 
     let children = Array.from(parent.children);
     if (sort) {
@@ -816,7 +820,7 @@ export class Game1Tokens extends Game0Basics {
       const origId = node.id.replace("_tt", "");
       node.addEventListener("click", (e) => {
         const selected_html = this.getTooltipHtmlForToken(origId);
-        $("card_pile_selector").innerHTML = selected_html;
+        $("card_pile_selector")!.innerHTML = selected_html;
       });
       if (index === selectedId) selectedId = origId;
     });

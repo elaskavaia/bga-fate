@@ -61,4 +61,15 @@ class Monster extends Character {
             $hero->gainXp($xp);
         }
     }
+
+    function countHit(string $rule, ?string $defenderHex = null): int {
+        $isHit = parent::countHit($rule, $defenderHex);
+        if (!$isHit && $rule === "rune") {
+            $attackerFaction = $this->game->material->getRulesFor($this->id, "faction", "");
+            if ($attackerFaction === "dead") {
+                $isHit = true;
+            }
+        }
+        return $isHit ? 1 : 0;
+    }
 }

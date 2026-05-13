@@ -103,4 +103,36 @@ class Campaign_BoldurEventTest extends CampaignBaseTest {
         // Equip card moved to tableau.
         $this->assertEquals("tableau_$color", $this->tokenLocation($equip));
     }
+
+    // --- Dodge (card_event_4_35) ---
+    // r=2preventDamage, on=TResolveHits — reactively prevent up to 2 incoming damage.
+
+    public function testDodgePreventsIncomingMonsterDamage(): void {
+        $color = $this->getActivePlayerColor();
+        $dodge = "card_event_4_35_1";
+        $this->seedHand($dodge, $color);
+
+        // Move Boldur out of Grimheim, place a goblin adjacent so it attacks on the monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5]); // goblin str=1 — one guaranteed hit
+
+        // Burn both player actions → end of player turn → monster turn → goblin attacks Boldur.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        // TResolveHits fires before dealDamage resolves — Dodge offered as a useCard target.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($dodge);
+        $this->respond($dodge);
+
+        // 1 hit prevented (Dodge prevents up to 2, only 1 incoming) → Boldur takes 0 damage.
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        // Card moved out of hand (discarded after use).
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($dodge));
+    }
 }

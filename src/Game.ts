@@ -56,10 +56,12 @@ export class Game extends Game1Tokens {
   }
 
   setup(gamedatas: CustomGamedatas) {
-    console.log("Starting game setup");
-    super.setup(gamedatas);
-    placeHtml(
-      `
+    this.inSetup = true;
+    try {
+      console.log("Starting game setup");
+      super.setup(gamedatas);
+      placeHtml(
+        `
       <div id='game_top_bar' class='game_top_bar'>
         <div id='selection_area' class='selection_area'>
         </div>
@@ -68,15 +70,15 @@ export class Game extends Game1Tokens {
       <div id="thething_wrap">
         <div id="thething"></div>
       </div>`,
-      this.bga.gameArea.getElement()
-    );
-    placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
-    // Players panels (left side in wide layout, top in narrow)
-    placeHtml(`<div id="players_panels"></div>`, "thething");
-    // Board area: map + monster turn display + supply (right side in wide layout)
-    const mapWrapper = "map_wrapper";
-    placeHtml(
-      `<div id="board_area">
+        this.bga.gameArea.getElement()
+      );
+      placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
+      // Players panels (left side in wide layout, top in narrow)
+      placeHtml(`<div id="players_panels"></div>`, "thething");
+      // Board area: map + monster turn display + supply (right side in wide layout)
+      const mapWrapper = "map_wrapper";
+      placeHtml(
+        `<div id="board_area">
       <div id="display_battle"> </div>
       <div id="${mapWrapper}" class="map_wrapper"></div>
       <div id="display_monsterturn">
@@ -93,33 +95,33 @@ export class Game extends Game1Tokens {
       </div>
       <div id="timetrack_area"></div>
       </div>`,
-      "thething"
-    );
+        "thething"
+      );
 
-    this.createMap($(mapWrapper));
+      this.createMap($(mapWrapper));
 
-    Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
-      const color = player.color;
-      const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
-      placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
-      ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
-        const name = this.getRulesFor(d, "name");
+      Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
+        const color = player.color;
+        const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
+        placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
+        ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
+          const name = this.getRulesFor(d, "name");
+          placeHtml(
+            `<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`,
+            `tableau_${color}`
+          );
+        });
+        const panel = this.bga.playerPanels.getElement(Number(player.id));
+        const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
         placeHtml(
-          `<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`,
-          `tableau_${color}`
-        );
-      });
-      const panel = this.bga.playerPanels.getElement(Number(player.id));
-      const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
-      placeHtml(
-        `<div id="miniboard_${color}" class="miniboard" style="--player-color: #${color}">
+          `<div id="miniboard_${color}" class="miniboard" style="--player-color: #${color}">
           <div class="miniboard_banner">${heroName}</div>
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`,
-        panel
-      );
-      placeHtml(
-        `
+          panel
+        );
+        placeHtml(
+          `
         <div id="pboard_${color}" class="pboard">
           <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
           <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
@@ -130,63 +132,68 @@ export class Game extends Game1Tokens {
           <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
         </div>`,
-        `limbo`
-      );
-    });
+          `limbo`
+        );
+      });
 
-    // Create hand container for current player only (not spectators)
-    if (!this.bga.players.isCurrentPlayerSpectator()) {
-      const myColor = this.player_color;
-      const name = _("Hand (Events)");
-      placeHtml(
-        `<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`,
-        `tableau_${myColor}`,
-        "afterbegin"
-      );
-    }
-
-    this.setupTokens(gamedatas);
-    this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
-    this.zoomControls.setup();
-
-    this.setupNotifications();
-
-    if (gamedatas.endBanner) {
-      if (gamedatas.endBanner.isWellDestroyed) this.bga.gameArea.addLastTurnBanner(gamedatas.endBanner.message);
-      else this.bga.gameArea.addWinConditionBanner(gamedatas.endBanner.message);
-    }
-
-    // last minute tweaks for miniboard
-    Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
-      const color = player.color;
-      // attach hand counter to miniboard
-      const mini = $(`miniboard_${color}`);
-      const handCounter = $(`counter_hand_${color}`);
-      if (handCounter && mini) {
-        mini.appendChild(handCounter);
-        handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
-
-        const handMaxCounter = $(`tracker_hand_${color}`);
-        if (handMaxCounter) handCounter.dataset.limit = handMaxCounter.dataset.state;
+      // Create hand container for current player only (not spectators)
+      if (!this.bga.players.isCurrentPlayerSpectator()) {
+        const myColor = this.player_color;
+        const name = _("Hand (Events)");
+        placeHtml(
+          `<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`,
+          `tableau_${myColor}`,
+          "afterbegin"
+        );
       }
 
-      // hero damage mirror on miniboard
-      const heroNo = player.heroNo;
+      this.setupTokens(gamedatas);
+      this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
+      this.zoomControls.setup();
 
-      const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);
-      const initialState = srcBucket?.dataset.state ?? "0";
-      placeHtml(
-        `<div id="miniboard_damage_${color}" class="bucket bucket_crystal_red miniboard_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`,
-        `miniboard_${color}`
-      );
+      this.setupNotifications();
 
-      // marker tracking cost of upgrade
-      const marker = $(`marker_${color}_3`);
-      $(`miniboard_${color}`).appendChild(marker);
-      marker.classList.add("bucket", "upgrade_cost");
-      this.updateTooltip("upgrade_cost", marker);
-    });
+      if (gamedatas.endBanner) {
+        if (gamedatas.endBanner.isWellDestroyed) this.bga.gameArea.addLastTurnBanner(gamedatas.endBanner.message);
+        else this.bga.gameArea.addWinConditionBanner(gamedatas.endBanner.message);
+      }
 
+      // last minute tweaks for miniboard
+      Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
+        const color = player.color;
+        // attach hand counter to miniboard
+        const mini = $(`miniboard_${color}`);
+        const handCounter = $(`counter_hand_${color}`);
+        if (handCounter && mini) {
+          mini.appendChild(handCounter);
+          handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
+
+          const handMaxCounter = $(`tracker_hand_${color}`);
+          if (handMaxCounter) handCounter.dataset.limit = handMaxCounter.dataset.state;
+        }
+
+        // hero damage mirror on miniboard
+        const heroNo = player.heroNo;
+
+        const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);
+        const initialState = srcBucket?.dataset.state ?? "0";
+        placeHtml(
+          `<div id="miniboard_damage_${color}" class="bucket bucket_crystal_red miniboard_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`,
+          `miniboard_${color}`
+        );
+
+        // marker tracking cost of upgrade
+        const marker = $(`marker_${color}_3`);
+        $(`miniboard_${color}`).appendChild(marker);
+        marker.classList.add("bucket", "upgrade_cost");
+        this.updateTooltip("upgrade_cost", marker);
+      });
+    } catch (e) {
+      console.error(e);
+      throw e;
+    } finally {
+      this.inSetup = false;
+    }
     console.log("Ending game setup");
   }
 
@@ -586,48 +593,54 @@ export class Game extends Game1Tokens {
     return info;
   }
 
+  updateDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement) {
+    if (attachNode) {
+      const crystalInfo = this.getCrystalInfo(attachNode?.id);
+      tokenInfo.dynamicTooltip = crystalInfo;
+    } else {
+      tokenInfo.dynamicTooltip = "";
+    }
+  }
+
   handleStackedTooltips(attachNode: HTMLElement) {
     // Case 1: A hex that has children — remove hex tooltip, children own it
     if (attachNode.classList.contains("hex")) {
-      if (attachNode.childElementCount > 0) {
-        this.removeTooltip(attachNode.id);
+      for (const child of attachNode.children) {
+        this.handleStackedTooltipsParentChild(attachNode, child as HTMLElement);
       }
       return;
     }
 
-    const parentId = attachNode.parentElement?.id;
-    const tokenToken = attachNode.dataset.tt ?? attachNode.id;
-
     // Case 2: A token (hero/monster/house) on a hex — combine hex + token tooltips on the token
-    if (parentId?.startsWith("hex")) {
-      // Rebuild token tooltip with crystal info injected into its tooltip text
-      const tokenInfo = this.getTokenDisplayInfo(tokenToken, true);
-      const crystalInfo = this.getCrystalInfo(attachNode.id);
-      if (crystalInfo) {
-        tokenInfo.tooltip = (tokenInfo.tooltip ?? "") + crystalInfo;
-      }
-      let combined = this.getTooltipHtmlForTokenInfo(tokenInfo);
-      if (!combined) return;
-
-      // Remove hex tooltip — the token on top  (child) will carry everything
-      this.removeTooltip(parentId);
-
-      const hexHtml = this.getTooltipHtmlForToken(parentId);
-      if (hexHtml) combined += hexHtml;
-
-      this.game.addTooltipHtml(attachNode.id, combined, this.game.defaultTooltipDelay);
+    if (this.handleStackedTooltipsParentChild(attachNode.parentElement as HTMLElement, attachNode)) {
       return;
     }
 
     // Case 3: Level I hero/ability card on tableau — append Level II preview as a second container
-    const siblingId = this.getLevel2Sibling(tokenToken);
+    const tokenId = attachNode.dataset.tt ?? attachNode.id;
+    const siblingId = this.getLevel2Sibling(tokenId);
     if (siblingId) {
-      const baseHtml = this.getTooltipHtmlForToken(tokenToken);
+      const baseHtml = this.getTooltipHtmlForToken(tokenId);
       const reverseHtml = this.getTooltipHtmlForToken(siblingId);
-      if (baseHtml && reverseHtml) {
-        this.game.addTooltipHtml(attachNode.id, baseHtml + reverseHtml, this.game.defaultTooltipDelay);
-      }
+      this.game.addTooltipHtml(attachNode.id, baseHtml + reverseHtml, this.game.defaultTooltipDelay);
     }
+  }
+
+  handleStackedTooltipsParentChild(parentElement: HTMLElement, attachNode: HTMLElement) {
+    const parentId = parentElement?.id;
+    const tokenId = attachNode.dataset.tt ?? attachNode.id;
+    if (!tokenId) return false;
+    const mainChildType = getPart(tokenId, 0);
+    // buckets on hexes carry crystal-count tooltips already; don't stack hex info on top
+    if (parentId?.startsWith("hex") && mainChildType != "bucket" && mainChildType != "marker") {
+      const childHtml = this.getTooltipHtmlForToken(tokenId);
+      const hexHtml = this.getTooltipHtmlForToken(parentId);
+
+      this.game.addTooltipHtml(attachNode.id, childHtml + hexHtml, this.game.defaultTooltipDelay);
+      this.game.addTooltipHtml(parentId, childHtml + hexHtml, this.game.defaultTooltipDelay);
+      return true;
+    }
+    return false;
   }
 
   /** Return the Level II sibling tokenId iff `tokenId` is a Level I hero/ability card */

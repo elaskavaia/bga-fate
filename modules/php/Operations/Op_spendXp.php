@@ -14,12 +14,24 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
+use Override;
 
 /**
  *  Spend X gold/XP (move yellow crystals from supply to player tableau).
  */
 class Op_spendXp extends CountableOperation {
+    #[Override]
+    public function getPossibleMoves() {
+        $owner = $this->getOwner();
+        $cost = (int) $this->getCount();
+        $xp = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_$owner"));
+        if ($xp < $cost) {
+            return ["q" => Material::ERR_COST];
+        }
+        return parent::getPossibleMoves();
+    }
     function resolve(): void {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);

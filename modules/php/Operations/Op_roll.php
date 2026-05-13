@@ -80,15 +80,14 @@ class Op_roll extends CountableOperation {
 
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
-        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
-        $this->game->systemAssert("ERR:roll:noCharOnHex:$targetHex", $defenderId !== null);
+        $this->game->systemAssert("ERR:roll:noCharOnHex:$targetHex", $this->game->hexMap->getCharacterOnHex($targetHex) !== null);
 
         $attackerId = $this->getAttackerId();
         $diceCount = (int) $this->getCount();
 
         // Roll dice onto display_battle
         $add = $this->isAddition();
-        $this->game->effect_rollAttackDice($attackerId, $defenderId, $diceCount, $add);
+        $this->game->effect_rollAttackDice($attackerId, $targetHex, $diceCount, $add);
 
         // Only trigger on player rolls (hero is attacker), not monster rolls.
         // Emit the most specific trigger; ActionAttack chains through Roll so cards

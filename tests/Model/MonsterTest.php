@@ -125,27 +125,25 @@ final class MonsterTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testCountHitHit(): void {
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-
-        $monster = $this->game->getMonster("monster_goblin_1");
-        $this->assertEquals(1, $monster->countHit("hit", "hero_1"));
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(1, $hero->countHit("hit", "hex_12_8"));
     }
 
     public function testCountHitMiss(): void {
-        $monster = $this->game->getMonster("monster_goblin_1");
-        $this->assertEquals(0, $monster->countHit("miss", "hero_1"));
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(0, $hero->countHit("miss"));
     }
 
     public function testCountHitRuneNotHitForNonDead(): void {
-        // Goblin is trollkin — rune should miss
-        $monster = $this->game->getMonster("monster_goblin_1");
-        $this->assertEquals(0, $monster->countHit("rune", "hero_1"));
+        // Hero is not dead-faction — rune does not count as a hit
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(0, $hero->countHit("rune"));
     }
 
     public function testCountHitRuneCountsAsHitForDeadAttacker(): void {
-        // Imp is dead faction — rune should count as hit
-        $hero = $this->game->getHeroById("hero_1");
-        $this->assertEquals(1, $hero->countHit("rune", "monster_imp_1"));
+        // Imp is dead faction — its rune counts as a hit
+        $imp = $this->game->getMonster("monster_imp_1");
+        $this->assertEquals(1, $imp->countHit("rune"));
     }
 
     // -------------------------------------------------------------------------
@@ -163,12 +161,9 @@ final class MonsterTest extends TestCase {
     }
 
     public function testCountHitReturnsHits(): void {
-        $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
-
-        $monster = $this->game->getMonster("monster_draugr_1");
-
-        $this->assertEquals(1, $monster->countHit("hit", "hero_1"));
-        $this->assertEquals(0, $monster->countHit("miss", "hero_1"));
+        $hero = $this->game->getHeroById("hero_1");
+        $this->assertEquals(1, $hero->countHit("hit", "hex_12_8"));
+        $this->assertEquals(0, $hero->countHit("miss", "hex_12_8"));
     }
 
     public function testApplyArmorReducesHits(): void {
