@@ -43,13 +43,6 @@ Search `modules/php/Material.php` for the card to get details (+20 lines of cont
 - **effect**: human-readable card text describing what the card does
 - **Other stats**: strength, health, durability, mana, attack_range (vary by card type)
 
-### 2. Check PLAN.md status
-
-Read `misc/docs/PLAN.md` and find the card's entry in the "Bjorn Card Validation" section (or other hero sections if they exist). Note:
-
-- Whether it's checked `[x]` or unchecked `[ ]`
-- Any notes after the card description (e.g., "has tests", "verify", "custom")
-
 ### 3. Find existing tests
 
 Search `tests/Campaign/` for references to this card ID and for the card name in test method names (e.g., `testNailedTogetherIPiercesDamage` for `card_ability_1_13`).

@@ -113,4 +113,36 @@ class Campaign_EmblaEquipTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countDamage($primary), "Primary takes no damage (all misses)");
         $this->assertEquals(1, $this->countDamage($secondary), "Wildfire Blade deals 1 damage to secondary");
     }
+
+    // --- Helmet (card_equip_3_20) ---
+    // r=spendDurab:preventDamage, on=TResolveHits, durability=3.
+    // Reactively prevent 1 incoming damage by adding a red crystal to the card.
+
+    public function testHelmetPreventsOneIncomingDamageAtDurabilityCost(): void {
+        $helmet = "card_equip_3_20";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($helmet, "tableau_$color");
+
+        // Embla outside Grimheim; goblin adjacent attacks on monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5]); // goblin str=1 — one guaranteed hit
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        // TResolveHits fires before dealDamage resolves — Helmet offered via useCard.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($helmet);
+        $this->respond($helmet);
+
+        // 1 hit prevented → Embla takes 0 damage; 1 durability spent on Helmet.
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertEquals(1, $this->countDamage($helmet), "1 red crystal placed on Helmet (durability cost)");
+        $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet stays on tableau after use");
+    }
 }

@@ -82,4 +82,42 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
         $ops = $this->game->machine->db->getOperations(PCOLOR, "roll");
         $this->assertNotEmpty($ops);
     }
+
+    // -------------------------------------------------------------------------
+    // Prompt path — getPrompt / getExtraArgs / getCurrentDamage
+    // -------------------------------------------------------------------------
+
+    public function testGetCurrentDamageReadsLiveDealDamageCount(): void {
+        $this->queueDealDamage(4);
+        $op = $this->createOp("1preventDamage");
+        $this->assertEquals(4, $op->getCurrentDamage());
+    }
+
+    public function testGetCurrentDamageZeroWhenNoDealDamageOnStack(): void {
+        $op = $this->createOp("1preventDamage");
+        $this->assertEquals(0, $op->getCurrentDamage());
+    }
+
+    public function testGetExtraArgsExposesMaxToClient(): void {
+        $this->queueDealDamage(5);
+        $op = $this->createOp("2preventDamage");
+        $this->assertEquals(["max" => 5], $op->getExtraArgs());
+    }
+
+    public function testGetPromptIncludesCountAndMaxPlaceholders(): void {
+        $this->queueDealDamage(3);
+        $op = $this->createOp("1preventDamage");
+        $prompt = $op->getPrompt();
+        $this->assertStringContainsString('${count}', $prompt);
+        $this->assertStringContainsString('${max}', $prompt);
+    }
+
+    public function testGetCurrentDamageReflectsPostPreventCount(): void {
+        $this->queueDealDamage(5);
+        $op = $this->createOp("2preventDamage");
+        $op->resolve();
+        // After preventing 2 of 5, a fresh preventDamage op should see 3 remaining.
+        $next = $this->createOp("1preventDamage");
+        $this->assertEquals(3, $next->getCurrentDamage());
+    }
 }

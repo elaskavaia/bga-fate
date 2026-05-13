@@ -16,6 +16,7 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
+use Override;
 
 /**
  * preventDamage: Prevent up to X incoming damage.
@@ -30,12 +31,18 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Used by: Dodge, Stoneskin, Riposte, Dreadnought (1spendMana:1preventDamage).
  */
 class Op_preventDamage extends CountableOperation {
-    private function findDealDamage(): ?array {
-        return $this->game->machine->findOperation(
+    private function findDealDamage(): ?Op_dealDamage {
+        $dealDamageRow = $this->game->machine->findOperation(
             null,
             null,
             fn($row) => $this->game->machine->instantiateOperationFromDbRow($row)->getType() === "dealDamage"
         );
+        if (!$dealDamageRow) {
+            return null;
+        }
+        /** @var Op_dealDamage */
+        $dealDamageOp = $this->game->machine->instantiateOperationFromDbRow($dealDamageRow);
+        return $dealDamageOp;
     }
 
     function getPossibleMoves() {
@@ -44,13 +51,26 @@ class Op_preventDamage extends CountableOperation {
         }
         return parent::getPossibleMoves();
     }
+    #[Override]
+    function getPrompt() {
+        return clienttranslate('Prevent ${count} of ${max} damage?');
+    }
+
+    #[Override]
+    public function getExtraArgs() {
+        return ["max" => $this->getCurrentDamage()];
+    }
+
+    function getCurrentDamage() {
+        $dealDamageOp = $this->findDealDamage();
+        $currentCount = $dealDamageOp ? (int) $dealDamageOp->getCount() : 0;
+        return $currentCount;
+    }
+    #[Override]
     function resolve(): void {
         $amount = (int) $this->getCount();
-
-        $dealDamageRow = $this->findDealDamage();
-        $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageRow);
-        /** @var Op_dealDamage */
-        $dealDamageOp = $this->game->machine->instantiateOperationFromDbRow($dealDamageRow);
+        $dealDamageOp = $this->findDealDamage();
+        $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageOp);
 
         $currentCount = (int) $dealDamageOp->getCount();
         $prevented = min($amount, $currentCount);
@@ -60,7 +80,7 @@ class Op_preventDamage extends CountableOperation {
         $this->game->machine->setCounts($dealDamageOp, $newCount);
 
         if ($newCount <= 0) {
-            $this->game->machine->db->hide($dealDamageRow);
+            $dealDamageOp->destroy();
             $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} [DAMAGE] (all [DAMAGE] is prevented)'), [
                 "count" => $prevented,
             ]);

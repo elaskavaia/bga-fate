@@ -513,6 +513,14 @@ export class Game extends Game1Tokens {
     if (range > 1) tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
     if (tokenInfo.armor) tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
     if (tokenInfo.xp) tokenInfo.tooltip += this.ttSection(_("Gold"), tokenInfo.xp);
+    const factionEffect: Record<string, string> = {
+      trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
+      firehorde: _("All Fire Horde monsters have attack range 2."),
+      dead: _("Runes count as hits when the Dead attack.")
+    };
+    if (factionEffect[tokenInfo.faction]) {
+      tokenInfo.tooltip += this.ttSection(_("Faction Effect"), factionEffect[tokenInfo.faction]);
+    }
     if (factionFlavor[tokenInfo.faction]) {
       tokenInfo.tooltip += this.iiSection(factionFlavor[tokenInfo.faction]);
     }

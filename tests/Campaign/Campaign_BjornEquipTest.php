@@ -137,6 +137,40 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertNotValidTarget($blackArrows, "Black Arrows should not be usable with 0 arrows");
     }
 
+    // --- Helmet (card_equip_1_21) ---
+    // r=spendDurab:preventDamage, on=TResolveHits, durability=3.
+    // Reactively prevent 1 incoming damage at the cost of 1 durability (red crystal on the card).
+
+    public function testHelmetPreventsOneIncomingDamageAtDurabilityCost(): void {
+        $helmet = "card_equip_1_21";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($helmet, "tableau_$color");
+
+        // Place Bjorn adjacent to a goblin so it will attack him on the monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5]); // goblin str=1 — one guaranteed hit
+
+        // Burn both player actions → end of player turn → monster turn → goblin attacks Bjorn.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        // TResolveHits fires before dealDamage resolves — Helmet offered as a useCard target.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($helmet);
+        $this->respond($helmet);
+
+        // 1 hit prevented → Bjorn takes 0 damage; Helmet absorbs 1 durability.
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertEquals(1, $this->countDamage($helmet));
+        // Helmet stays on tableau (durability 3, still has 2 uses left).
+        $this->assertEquals("tableau_$color", $this->tokenLocation($helmet));
+    }
+
     // --- Trollbane (card_equip_1_22) ---
 
     public function testTrollbaneOfferedWhenAttackingTrollkin(): void {
