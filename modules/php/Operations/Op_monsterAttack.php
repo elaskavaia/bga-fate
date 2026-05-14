@@ -34,6 +34,12 @@ class Op_monsterAttack extends Operation {
             return; // Monster was killed or removed
         }
 
+        // Seer of Odin (II) — special attack that bypasses dice + cover + range.
+        if ($monsterId === "monster_legend_2_2") {
+            $this->resolveSeerAttack($monsterId);
+            return;
+        }
+
         // Calculate monster strength with faction bonus and queue roll pipeline
         $strength = $this->getMonsterStrength($monsterHex);
 
@@ -61,6 +67,26 @@ class Op_monsterAttack extends Operation {
             "count" => $strength,
         ]);
         $this->queue("endOfAttack");
+    }
+
+    /**
+     * Seer of Odin (II) special attack: 1 unpreventable damage to every hero still on the map.
+     */
+    private function resolveSeerAttack(string $attackerId): void {
+        $this->game->notifyMessage(clienttranslate('${token_name} foresees doom - every hero takes 1 unpreventable [DAMAGE]'), [
+            "token_name" => $attackerId,
+        ]);
+        foreach ($this->game->getPlayerColors() as $owner) {
+            // Knocked-out heroes sit in Grimheim and are out of Seer's reach.
+            if ($this->game->hexMap->isInGrimheim($this->game->getHero($owner)->getHex())) {
+                continue;
+            }
+            $this->queue("applyDamage", null, [
+                "attacker" => $attackerId,
+                "target" => $this->game->getHeroTokenId($owner),
+                "amount" => 1,
+            ]);
+        }
     }
 
     /**

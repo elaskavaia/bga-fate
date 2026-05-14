@@ -332,7 +332,7 @@ Hexes use pointy-top axial coordinates, center at (9,9), radius 8. Tokens placed
 - `player_areas` — Wrapper for all player zones
 - `tableau_{playerColor}` — Individual player zone (tableau)
 - `hand_{color}` — Player's private hand of event cards
-- `discard_{color}` — Player's discard pile? TODO check?
+- `discard_{color}` — Player's discard pile
 - `deck_event_{color}` — Player's event draw pile on tableau
 - `deck_ability_{color}` — Player's ability pile on tableau
 - `deck_equip_{color}` — Player's equipment pile on tableau

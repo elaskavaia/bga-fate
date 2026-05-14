@@ -89,6 +89,27 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
+    // Seer of Odin (II) special attack
+    // -------------------------------------------------------------------------
+
+    public function testSeerIISpecialAttackHitsHeroOutsideRange(): void {
+        // Seer parked far from any hero — range gate would normally veto this attack.
+        $this->game->getMonster("monster_legend_2_2")->moveTo("hex_2_8", "");
+        $this->game->hexMap->invalidateOccupancy(); // sync occupancy with the hero moves from setUp
+        $this->resolveMonsterAttack("monster_legend_2_2");
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
+    }
+
+    public function testSeerIIAttackSkipsHeroInGrimheim(): void {
+        // Knocked-out heroes sit in Grimheim and are out of Seer's reach.
+        $this->game->tokens->moveToken("hero_1", "hex_9_9"); // Grimheim well hex
+        $this->game->hexMap->invalidateOccupancy();
+        $this->game->getMonster("monster_legend_2_2")->moveTo("hex_2_8", "");
+        $this->resolveMonsterAttack("monster_legend_2_2");
+        $this->assertCount(0, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
+    }
+
+    // -------------------------------------------------------------------------
     // Trollkin faction bonus
     // -------------------------------------------------------------------------
 

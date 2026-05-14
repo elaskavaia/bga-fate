@@ -17,23 +17,20 @@ class Op_monsterAttackAll extends Operation {
         if ($this->game->isWellDestroyed()) {
             return;
         }
-        $monsters = $this->game->hexMap->getMonstersOnMap();
-        $queued = 0;
-        foreach ($monsters as $m) {
-            $hex = $this->game->hexMap->getCharacterHex($m["key"]);
-            if ($hex === null) {
-                continue;
-            }
-            $monster = $this->game->getMonster($m["key"]);
-            if ($this->game->hexMap->isCharacterTypeInRange($hex, $monster->getAttackRange(), "hero")) {
-                $this->queue("monsterAttack", null, ["char" => $m["key"]]);
-                $queued++;
-            }
-        }
 
-        // Announce a wasted attack-side roll so players see why nothing happened.
-        if ($queued === 0 && $this->game->getMonsterDieSide() === "attack") {
-            $this->game->notify->all("message", clienttranslate("Monsters get +1 strength but have no targets this turn"), []);
+        $monsters = $this->game->hexMap->getMonstersOnMap();
+
+        foreach ($monsters as $m) {
+            $monsterId = $m["key"];
+            $hex = $this->game->hexMap->getCharacterHex($monsterId);
+
+            // Seer of Odin (II) attacks every hero regardless of range — bypass the range gate.
+            if (
+                $monsterId === "monster_legend_2_2" ||
+                $this->game->hexMap->isCharacterTypeInRange($hex, $this->game->getMonster($monsterId)->getAttackRange(), "hero")
+            ) {
+                $this->queue("monsterAttack", null, ["char" => $monsterId]);
+            }
         }
     }
 }

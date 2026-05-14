@@ -109,6 +109,66 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals("limbo", $wellLoc, "Freyja's Well should be destroyed when it's the last house");
     }
 
+    public function testLegendSwapsWithBlockingRegularMonster(): void {
+        // Hero next to the blocker prevents it from moving on its own — so the legend behind
+        // it must trigger the swap to advance.
+        $this->game->tokens->moveToken("hero_1", "hex_11_7"); // adj to hex_11_8 only
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // stuck blocker
+        $this->game->tokens->moveToken("monster_legend_3_1", "hex_12_8"); // legend behind
+
+        $this->call_resolve();
+
+        $this->assertEquals(
+            "hex_11_8",
+            $this->game->tokens->getTokenLocation("monster_legend_3_1"),
+            "Legend should advance into the blocker's hex"
+        );
+        $this->assertEquals(
+            "hex_12_8",
+            $this->game->tokens->getTokenLocation("monster_goblin_1"),
+            "Blocking monster should be pushed back into the legend's vacated hex"
+        );
+    }
+
+    public function testLegendDoesNotSwapWithAnotherLegend(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_11_7"); // adj to hex_11_8 only
+        $this->game->tokens->moveToken("monster_legend_2_1", "hex_11_8"); // blocker legend
+        $this->game->tokens->moveToken("monster_legend_3_1", "hex_12_8"); // legend trying to advance
+
+        $this->call_resolve();
+
+        $this->assertEquals(
+            "hex_12_8",
+            $this->game->tokens->getTokenLocation("monster_legend_3_1"),
+            "Legend must not swap with another Legend — should stay put"
+        );
+        $this->assertEquals(
+            "hex_11_8",
+            $this->game->tokens->getTokenLocation("monster_legend_2_1"),
+            "Front Legend should not be pushed by another Legend"
+        );
+    }
+
+    public function testLegendDoesNotSwapWithBlockingHero(): void {
+        // Park hero directly in the legend's path. Legends only swap with non-Legend
+        // MONSTERS — a hero blocker stops them like any monster would.
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+        $this->game->tokens->moveToken("monster_legend_3_1", "hex_12_8");
+
+        $this->call_resolve();
+
+        $this->assertEquals(
+            "hex_12_8",
+            $this->game->tokens->getTokenLocation("monster_legend_3_1"),
+            "Legend must not swap with a hero — should stay put"
+        );
+        $this->assertEquals(
+            "hex_11_8",
+            $this->game->tokens->getTokenLocation("hero_1"),
+            "Hero should not be pushed by a Legend"
+        );
+    }
+
     public function testLegendEnteringGrimheimDestroys3Houses(): void {
         $this->game->tokens->moveToken("monster_legend_3_1", "hex_11_8");
 

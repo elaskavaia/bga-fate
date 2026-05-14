@@ -97,7 +97,7 @@ These are settled and feed §4. Listed here so reviewers don't have to dig throu
 - **A5 — Charge mirrors the existing skull-turn charge.** When `monster_die_side === "charge"`, rank-1 monsters get `$moveSteps += 1` in [Op_monsterMoveAll::moveMonster()](../../modules/php/Operations/Op_monsterMoveAll.php#L64). The extra step still respects the normal "stop if hero-adjacent" rule (`moveMonsterOneStep` line 99). No special "lunge past the stop rule" behavior — same shape as the skull-turn charge already shipped.
 - **A6 — Ambush + empty supply: log and skip per-hero.** If the goblin supply is empty when an `ambush` side fires, log a translatable message (`No goblins left in the supply`) and skip the spawn for that hero. Continue processing the remaining heroes. No substitution with other monster types. Verbose-but-honest, consistent with player expectation.
 - **A7 — Ambush hex picker: active player resolves all heroes.** A single ambush op is queued (not one per hero); the active player whose Monster Turn is firing picks an adjacent hex for each hero in turn order. Faster than per-player prompting, no cross-player handoff. If a hero has zero valid adjacent hexes (all blocked), auto-skip that hero with a log line (composes with A6).
-- **A8 — Attack-side wasted: log it.** When `attack` is rolled but no monster attacks this turn (no monster adjacent to any hero), no special mechanic fires. Add a translatable log line acknowledging the no-op (e.g. `Monsters get +1 strength but have no targets this turn`). No re-roll, no consolation effect.
+- **A8 — Attack-side wasted: silent no-op.** When `attack` is rolled but no monster attacks this turn (no monster adjacent to any hero), nothing fires — no log, no re-roll, no consolation. Players see the rolled side on the die and infer the rest from the empty attack step. (Earlier draft proposed a wasted-attack log line; deemed noise.)
 - **A9 — Legends affected uniformly.** Monster Die effects apply to legends and regular monsters the same way — no per-card opt-out. If a future legend needs to ignore a specific die side, add a flag at that point. Default is "all monsters means all monsters."
 
 ---
@@ -120,7 +120,7 @@ Iterate heroes; for each hero adjacent to ≥1 monster, find the neighbor hex wi
 
 ### Charge (+1 move for rank-1 monsters)
 
-In `Op_monsterMoveAll`, when computing per-monster step budget: `$steps = $monster->move + (isCharge() && rank===1 ? 1 : 0)`. The existing TODO comment at [Op_monsterMoveAll.php:50](../../modules/php/Operations/Op_monsterMoveAll.php#L50) is the exact hook.
+In `Op_monsterMoveAll`, when computing per-monster step budget: `$steps = $monster->move + (isCharge() && rank===1 ? 1 : 0)`. Implemented at [Op_monsterMoveAll.php:58](../../modules/php/Operations/Op_monsterMoveAll.php#L58).
 
 ### Ambush (spawn goblin adjacent to each hero)
 
@@ -186,7 +186,7 @@ D1 + D2 are the smallest shippable feature (visible roll, two passive effects). 
 - [gameoptions.json](../../gameoptions.json) — option 102
 - [modules/php/Game.php](../../modules/php/Game.php) — `var_monster_die` label, `isMonsterDieOn()`, `getMonsterStrength` +1 hook
 - [modules/php/Operations/Op_turnMonster.php](../../modules/php/Operations/Op_turnMonster.php) — queue `rollMonsterDie` first when option is on
-- [modules/php/Operations/Op_monsterMoveAll.php](../../modules/php/Operations/Op_monsterMoveAll.php) — charge +1 hook (TODO at line 50 already exists)
+- [modules/php/Operations/Op_monsterMoveAll.php](../../modules/php/Operations/Op_monsterMoveAll.php) — charge +1 hook (implemented at [line 58](../../modules/php/Operations/Op_monsterMoveAll.php#L58))
 - [modules/php/Operations/Op_rollMonsterDie.php](../../modules/php/Operations/) — **new**, rolls die + dispatches per-side handler
 - [modules/php/Operations/Op_monsterDieManeuver.php](../../modules/php/Operations/) — **new**, cw/ccw rotation
 - [modules/php/Operations/Op_monsterDiePush.php](../../modules/php/Operations/) — **new**, push heroes toward Grimheim

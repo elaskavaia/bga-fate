@@ -23,7 +23,8 @@ class Op_monsterMoveAll extends Operation {
      * Each monster moves a number of steps equal to its move value (default 1).
      * Charge: on skull turns, all monsters get +1 additional step.
      * Charge rule C: any monster that can reach a hero with 1 extra step charges.
-     * Rules: skip if adjacent to a hero; skip if target hex is occupied.
+     * Rules: skip if adjacent to a hero; skip if target hex is occupied
+     * (Legends swap places with a blocking non-Legend monster instead of skipping).
      * If a monster enters Grimheim, it is removed and town pieces are destroyed.
      */
     private function moveAllMonsters(bool $isChargeTurn): void {
@@ -118,8 +119,21 @@ class Op_monsterMoveAll extends Operation {
         }
 
         // Can't enter an occupied hex (by another monster or hero)
-        // TODO: Legends swap places with blocking monsters instead of being stopped
+        // Exception: Legends swap places with a blocking non-Legend monster (RULES.md §3).
         if ($this->game->hexMap->isOccupied($nextHex)) {
+            if (
+                str_contains($monsterId, "legend") &&
+                ($blockerId = $this->game->hexMap->isOccupiedByCharacterType($nextHex, "monster")) !== null &&
+                !str_contains($blockerId, "legend")
+            ) {
+                $this->game
+                    ->getMonster($blockerId)
+                    ->moveTo($currentHex, clienttranslate('${token_name} is pushed aside by ${token_name2}'), [
+                        "token_name2" => $monsterId,
+                    ]);
+                $this->game->getMonster($monsterId)->moveTo($nextHex, $message);
+                return $nextHex;
+            }
             return null;
         }
 

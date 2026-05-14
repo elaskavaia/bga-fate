@@ -147,10 +147,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         // But during the turn the side must have been one of the 6 valid rules — confirm via
         // the roll log line we always emit.
         $sideRules = ["maneuver_1", "maneuver_2", "attack", "push", "charge", "ambush"];
-        $rollLogs = array_filter(
-            $this->game->notify->_getNotifications(),
-            fn($n) => str_contains($n["log"] ?? "", "Monsters roll"),
-        );
+        $rollLogs = array_filter($this->game->notify->_getNotifications(), fn($n) => str_contains($n["log"] ?? "", "Monsters roll"));
         $this->assertCount(1, $rollLogs, "exactly one Monster die roll per monster turn");
     }
 
@@ -175,10 +172,12 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         $this->driveOneMonsterTurn();
 
         // Filter the notify stream for the per-attack "attacks ... with strength X" lines.
-        $strengthLogs = array_values(array_filter(
-            $this->game->notify->_getNotifications(),
-            fn($n) => str_contains($n["log"] ?? "", "attacks") && str_contains($n["log"] ?? "", "strength"),
-        ));
+        $strengthLogs = array_values(
+            array_filter(
+                $this->game->notify->_getNotifications(),
+                fn($n) => str_contains($n["log"] ?? "", "attacks") && str_contains($n["log"] ?? "", "strength")
+            )
+        );
         $this->assertCount(2, $strengthLogs, "both goblins should emit one attack log");
         foreach ($strengthLogs as $i => $log) {
             $this->assertEquals(2, $log["args"]["strength"] ?? null, "goblin #$i should attack at strength 2 (1 base + 1 attack-side)");
@@ -200,18 +199,5 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         // Skull alone: goblin (move=2) + 1 = 3 steps → hex_12_2 → hex_12_3 → hex_12_4 → hex_12_5.
         // If charge stacked, would be 4 steps → hex_12_6 (or further).
         $this->assertEquals("hex_12_5", $this->tokenLocation($monster), "skull-turn charge already provides +1; charge die must not stack");
-    }
-
-    public function testAttackSideWithNoTargetsLogsTheWaste(): void {
-        $this->seedDieSide(3); // attack
-
-        // No monster placed — attack-side fires but no monster has a target.
-        $this->driveOneMonsterTurn();
-
-        $wasteLogs = array_filter(
-            $this->game->notify->_getNotifications(),
-            fn($n) => str_contains($n["log"] ?? "", "no targets this turn"),
-        );
-        $this->assertCount(1, $wasteLogs, "A8: empty-target attack-side must log a no-op message");
     }
 }

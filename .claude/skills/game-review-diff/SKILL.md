@@ -18,31 +18,23 @@ Each bullet is a **preferred pattern** — flag any code that doesn't follow it.
 - Use `systemAssert($msg, $cond)` with message `"ERR:<op>:<what>:$ctx"` for conditions that should never occur at runtime, not silent `return ["q" => ERR_PREREQ]`.
 - Use `getPart($tokenId, $n)` instead of `explode("_", $tokenId)[$n]` — `getPart` has bounds checking.
 
-### Player / hero mapping
-
-- Use `$this->game->getHeroTokenId($owner)` to get a hero token, not `custom_getPlayerNoById()` (latter returns player_id like 10, 11… in tests).
-- Guard `getHeroTokenId` calls when setup may be incomplete — it `systemAssert`s if no `card_hero_*` is on `tableau_$owner`.
-
 ### Tests
 
 - Call `createTokens()` in `setUp` when a test depends on token locations.
 - Add `tests/Operations/Op_xxxTest.php` alongside any new `Op_xxx.php`.
-- Use `PCOLOR` / `BCOLOR` constants (`6cd0f6`, `982fff`) instead of hardcoded player colors.
+- Use `PCOLOR` / `BCOLOR` constants (`6cd0f6`, `982fff`) instead of hardcoded player colors (only in unit tests, Campain tests should not hardcoded colors at all).
 - Match the assertion style of neighboring `tests/Operations/Op_*Test.php` files.
+- Do not run all tests, only if necessary and very specific tests
 
 ### Comments
 
 - Keep only WHY-comments; remove WHAT-comments on BGA boilerplate (`// send notification`, `// move token`).
 - Update or remove comments that reference renamed/removed operations, cards, or hex IDs.
 
-### Client-side (`src/`)
-
-- Run `npm run build` after editing `.ts` / `.scss` (refreshes generated `.js` and `fate.css`).
-- Add a handler in `src/Game.ts` for every new notification sent from PHP.
-
 ### Docs
 
 - Mark completed features with `[x]` in [PLAN.md](../../../misc/docs/PLAN.md).
+- Check if `docs/DESIGN.md` needs updating
 
 ## Not a bug — do NOT flag
 
