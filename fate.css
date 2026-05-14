@@ -1749,6 +1749,9 @@
   line-height: 24px;
   height: 24px;
 }
+.tooltipcontainer .dynamic_tooltip {
+  padding-left: 4em;
+}
 
 .tooltip-left {
   padding: 0.5em;

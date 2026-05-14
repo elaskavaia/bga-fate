@@ -32,7 +32,6 @@ export interface TokenDisplayInfo {
   imageData?: Record<string, string>; // data-* attributes for tooltip image
   name?: string | NotificationMessage;
   tooltip?: string | NotificationMessage;
-  dynamicTooltip?: string | NotificationMessage;
   showtooltip?: boolean;
   [key: string]: any;
 }
@@ -488,17 +487,13 @@ export class Game1Tokens extends Game0Basics {
 
   getTooltipHtmlForTokenInfo(tokenInfo: TokenDisplayInfo | undefined, attachNode?: HTMLElement) {
     if (!tokenInfo) return "";
-    this.updateDynamicTooltip(tokenInfo, attachNode);
-    return this.getTooltipHtml(
-      this.getFormatted(tokenInfo.name),
-      this.getFormatted(tokenInfo.tooltip) + this.getFormatted(tokenInfo.dynamicTooltip),
-      tokenInfo.imageTypes,
-      tokenInfo.reverseImageTypes,
-      tokenInfo.imageData
-    );
+    const dt = this.getDynamicTooltip(tokenInfo, attachNode);
+    return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, dt, tokenInfo.imageTypes, tokenInfo.imageData);
   }
 
-  updateDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement) {}
+  getDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement): string | NotificationMessage | undefined {
+    return undefined;
+  }
 
   getTokenName(tokenId: string, force: boolean = true): string {
     var tokenInfo = this.getTokenDisplayInfo(tokenId);
@@ -511,10 +506,10 @@ export class Game1Tokens extends Game0Basics {
   }
 
   getTooltipHtml(
-    name: string | NotificationMessage,
-    message: string | NotificationMessage,
+    name: string | NotificationMessage | undefined,
+    message: string | NotificationMessage | undefined,
+    dynamic: string | NotificationMessage | undefined,
     imgTypes: string = "",
-    reverseImgTypes: string = "",
     imageData?: Record<string, string>
   ) {
     if (name == null || message == "-") return "";
@@ -522,21 +517,13 @@ export class Game1Tokens extends Game0Basics {
     var divImg = "";
     var containerType = "tooltipcontainer ";
     if (imgTypes && !imgTypes.includes("_nottimage")) {
-      // Check if this is a dual-image tooltip (upgrade tiles with front and reverse)
-      if (imgTypes.includes("_dual_image") && reverseImgTypes) {
-        const frontImgTypes = imgTypes.replace("_dual_image", "").trim();
-        divImg = `
-          <div class='tooltipimage ${frontImgTypes}'></div>
-          <div class='tooltipimage ${reverseImgTypes}'></div>
-        `;
-      } else {
-        const dataAttrs = imageData
-          ? Object.entries(imageData)
-              .map(([k, v]) => `data-${k}="${v}"`)
-              .join(" ")
-          : "";
-        divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
-      }
+      const dataAttrs = imageData
+        ? Object.entries(imageData)
+            .map(([k, v]) => `data-${k}="${v}"`)
+            .join(" ")
+        : "";
+      divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
+
       var itypes = imgTypes.split(" ");
       for (var i = 0; i < itypes.length; i++) {
         containerType += itypes[i] + "_tooltipcontainer ";
@@ -549,11 +536,13 @@ export class Game1Tokens extends Game0Basics {
       body = message;
     } else {
       const message_tr = this.game.getTr(message);
+      const dt_tr = this.game.getTr(dynamic);
       body = `
            <div class='tooltip-left'>${divImg}</div>
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
+             <div class='tooltiptext dynamic_tooltip'>${dt_tr}</div>
            </div>
     `;
     }

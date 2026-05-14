@@ -1080,10 +1080,12 @@ class Game1Tokens extends Game0Basics {
     getTooltipHtmlForTokenInfo(tokenInfo, attachNode) {
         if (!tokenInfo)
             return "";
-        this.updateDynamicTooltip(tokenInfo, attachNode);
-        return this.getTooltipHtml(this.getFormatted(tokenInfo.name), this.getFormatted(tokenInfo.tooltip) + this.getFormatted(tokenInfo.dynamicTooltip), tokenInfo.imageTypes, tokenInfo.reverseImageTypes, tokenInfo.imageData);
+        const dt = this.getDynamicTooltip(tokenInfo, attachNode);
+        return this.getTooltipHtml(tokenInfo.name, tokenInfo.tooltip, dt, tokenInfo.imageTypes, tokenInfo.imageData);
     }
-    updateDynamicTooltip(tokenInfo, attachNode) { }
+    getDynamicTooltip(tokenInfo, attachNode) {
+        return undefined;
+    }
     getTokenName(tokenId, force = true) {
         var tokenInfo = this.getTokenDisplayInfo(tokenId);
         if (tokenInfo) {
@@ -1095,7 +1097,7 @@ class Game1Tokens extends Game0Basics {
             return "? " + tokenId;
         }
     }
-    getTooltipHtml(name, message, imgTypes = "", reverseImgTypes = "", imageData) {
+    getTooltipHtml(name, message, dynamic, imgTypes = "", imageData) {
         if (name == null || message == "-")
             return "";
         if (!message)
@@ -1103,22 +1105,12 @@ class Game1Tokens extends Game0Basics {
         var divImg = "";
         var containerType = "tooltipcontainer ";
         if (imgTypes && !imgTypes.includes("_nottimage")) {
-            // Check if this is a dual-image tooltip (upgrade tiles with front and reverse)
-            if (imgTypes.includes("_dual_image") && reverseImgTypes) {
-                const frontImgTypes = imgTypes.replace("_dual_image", "").trim();
-                divImg = `
-          <div class='tooltipimage ${frontImgTypes}'></div>
-          <div class='tooltipimage ${reverseImgTypes}'></div>
-        `;
-            }
-            else {
-                const dataAttrs = imageData
-                    ? Object.entries(imageData)
-                        .map(([k, v]) => `data-${k}="${v}"`)
-                        .join(" ")
-                    : "";
-                divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
-            }
+            const dataAttrs = imageData
+                ? Object.entries(imageData)
+                    .map(([k, v]) => `data-${k}="${v}"`)
+                    .join(" ")
+                : "";
+            divImg = `<div class='tooltipimage ${imgTypes}' ${dataAttrs}></div>`;
             var itypes = imgTypes.split(" ");
             for (var i = 0; i < itypes.length; i++) {
                 containerType += itypes[i] + "_tooltipcontainer ";
@@ -1131,11 +1123,13 @@ class Game1Tokens extends Game0Basics {
         }
         else {
             const message_tr = this.game.getTr(message);
+            const dt_tr = this.game.getTr(dynamic);
             body = `
            <div class='tooltip-left'>${divImg}</div>
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
+             <div class='tooltiptext dynamic_tooltip'>${dt_tr}</div>
            </div>
     `;
         }
@@ -2733,13 +2727,13 @@ class Game extends Game1Tokens {
         }
         return info;
     }
-    updateDynamicTooltip(tokenInfo, attachNode) {
+    getDynamicTooltip(tokenInfo, attachNode) {
         if (attachNode) {
             const crystalInfo = this.getCrystalInfo(attachNode?.id);
-            tokenInfo.dynamicTooltip = crystalInfo;
+            return crystalInfo;
         }
         else {
-            tokenInfo.dynamicTooltip = "";
+            return undefined;
         }
     }
     handleStackedTooltips(attachNode) {

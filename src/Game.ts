@@ -601,12 +601,12 @@ export class Game extends Game1Tokens {
     return info;
   }
 
-  updateDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement) {
+  getDynamicTooltip(tokenInfo: TokenDisplayInfo, attachNode?: HTMLElement) {
     if (attachNode) {
       const crystalInfo = this.getCrystalInfo(attachNode?.id);
-      tokenInfo.dynamicTooltip = crystalInfo;
+      return crystalInfo;
     } else {
-      tokenInfo.dynamicTooltip = "";
+      return undefined;
     }
   }
 
