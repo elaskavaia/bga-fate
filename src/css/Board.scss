@@ -348,7 +348,12 @@
   box-sizing: border-box;
 }
 
-.hand_wrapper {
+.players_panels {
+  padding: 5px;
+}
+
+.hand_wrapper,
+.tableau {
   background-color: #f5deb37d;
   position: relative;
   display: flex;
@@ -356,6 +361,8 @@
   justify-content: center;
   width: 100%;
   @include v.vertical-title;
+  margin-top: 10px;
+  margin-left: 20px;
 }
 
 // Battle display (dice rolled during attack) — overlays map top center

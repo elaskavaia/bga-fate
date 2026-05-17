@@ -2249,6 +2249,12 @@ class Game extends Game1Tokens {
       <div id="timetrack_area"></div>
       </div>`, "thething");
             this.createMap($(mapWrapper));
+            // Create hand container for current player only (not spectators)
+            if (!this.bga.players.isCurrentPlayerSpectator()) {
+                const myColor = this.player_color;
+                const name = _("Hand");
+                placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, "players_panels");
+            }
             Object.values(gamedatas.players).forEach((player) => {
                 const color = player.color;
                 const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
@@ -2275,12 +2281,6 @@ class Game extends Game1Tokens {
           <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
         </div>`, `limbo`);
             });
-            // Create hand container for current player only (not spectators)
-            if (!this.bga.players.isCurrentPlayerSpectator()) {
-                const myColor = this.player_color;
-                const name = _("Hand (Events)");
-                placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, `tableau_${myColor}`, "afterbegin");
-            }
             this.setupTokens(gamedatas);
             this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
             this.zoomControls.setup();
@@ -2314,6 +2314,14 @@ class Game extends Game1Tokens {
                 $(`miniboard_${color}`).appendChild(marker);
                 marker.classList.add("bucket", "upgrade_cost");
                 this.updateTooltip("upgrade_cost", marker);
+                Object.values(gamedatas.players).forEach((player) => {
+                    const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
+                    const color = player.color;
+                    $(`tableau_${color}`).dataset.name = this.getTr(tname);
+                    const hand = document.querySelector(`.hand_wrapper > #hand_${color}`);
+                    if (hand)
+                        hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
+                });
             });
         }
         catch (e) {
@@ -2500,11 +2508,20 @@ class Game extends Game1Tokens {
             }
             bucket.dataset.state = String(count);
             // sync miniboard damage mirror if this is a hero's red crystal bucket
-            const match = bucketId.match(/^bucket_crystal_red_(hero_\d+)$/);
-            if (match) {
-                const mirror = document.querySelector(`[data-hero="${match[1]}"].bucket_crystal_red`);
+            const heroMatch = bucketId.match(/^bucket_crystal_red_(hero_\d+)$/);
+            if (heroMatch) {
+                const mirror = document.querySelector(`[data-hero="${heroMatch[1]}"].bucket_crystal_red`);
                 if (mirror)
                     mirror.dataset.state = String(count);
+            }
+            // Monster damage bucket: show "remaining/max" instead of raw damage count.
+            const monsterMatch = bucketId.match(/^bucket_crystal_red_(monster_.+)$/);
+            if (monsterMatch) {
+                const max = parseInt(this.getRulesFor(monsterMatch[1], "health", "0"));
+                if (max > 0) {
+                    bucket.dataset.max = String(max);
+                    bucket.dataset.remaining = String(Math.max(0, max - count));
+                }
             }
         }
     }

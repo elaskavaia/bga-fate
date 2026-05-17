@@ -83,6 +83,19 @@
   }
 }
 
+// Monster damage badge: pill showing "remaining/max" HP, only when damaged.
+// data-remaining and data-max are set in JS (updateBucketCount).
+.monster > .bucket_crystal_red[data-max]::after {
+  content: attr(data-remaining) "/" attr(data-max);
+  width: auto;
+  aspect-ratio: unset;
+  padding: 0 5px;
+  font-size: 11px;
+  line-height: 18px;
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
 // Stunned monster: hide the raw marker token and show a star overlay + desaturated/glowing sprite.
 // Marker tokenId is `stunmarker_<card>`, so its first class is `stunmarker`.
 // state=0 = active stun (visible); state=1 = spent (invisible — only kept for re-target cooldown).

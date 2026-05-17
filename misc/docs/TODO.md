@@ -25,7 +25,7 @@
 - [ ] [Operation.php:790](../../modules/php/OpCommon/Operation.php#L790) — AI/auto-resolve picks one target at random when op expects multi-select. **Valid** — only matters once multi-select ops are auto-resolved (e.g. NPC turns), low impact today.
 - [ ] [Game.php:331](../../modules/php/Game.php#L331) — Crystal supply assumes infinite; `pickTokensForLocation` will return fewer than requested if the supply runs out. **Probably valid** — confirm rules cap (do we ever exhaust the supply?) and either log or auto-create.
 - [ ] [Game.php:807](../../modules/php/Game.php#L807) — `restorePlayerTables` is a stub returning false (BGA undo hook). **Valid** — needed if/when full table-state undo is supported.
-- [ ] [Game0Basics.ts:166](../../src/Game0Basics.ts#L166) — Manual `delete gameui.tooltips[nodeId]` workaround because `removeTooltip` leaks. **Valid HACK** — keep until BGA framework fixes it; tracked-by-comment is fine.
+
 - [ ] [GameMachine.ts:124](../../src/GameMachine.ts#L124) — "skip, whatever TODO: anytime" inside secondary-button rendering for `paramInfo.sec`. **Unclear** — comment is cryptic, recheck whether the anytime/secondary button path needs work.
 - [ ] [GameMachine.ts:484](../../src/GameMachine.ts#L484) — `const skippable = false; // XXX` hardcoded in `onMultiSelectionUpdate`. **Valid** — multi-select ops can't currently expose a skip button; revisit if any op needs it.
 - [ ] [Cards.scss:106](../../src/css/Cards.scss#L106) — `.deck.deck_monster { background-image: none; // TODO }` then per-color decks set their own image. **Likely stale** — the `none` is intentional as a base reset; comment can probably just be deleted.
