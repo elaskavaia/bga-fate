@@ -7,8 +7,8 @@ require_once __DIR__ . "/CampaignBase.php";
 /**
  * Integration test: Map encounters — hero stepping onto a bonus hex prompts
  * for pickup count, then queues the matching gain op (gainXp/gainMana/heal).
- * Setup places 3 yellow on hex_6_16 (Wyrm Lair), 3 green on hex_16_5 (Nailfare),
- * 3 red on hex_6_7 (Troll Caves).
+ * Setup places 3 yellow on hex_5_17 (Wyrm Lair), 3 green on hex_17_5 (Nailfare),
+ * 3 red on hex_5_7 (Troll Caves).
  */
 class Campaign_EncounterTest extends CampaignBaseTest {
     private string $heroId;
@@ -28,15 +28,14 @@ class Campaign_EncounterTest extends CampaignBaseTest {
 
     public function testYellowEncounterQueuesGainXp(): void {
         // Park hero adjacent to Wyrm Lair so a single Move step lands on the bonus hex.
-        // hex_6_16 (Wyrm Lair, plains) is the bonus hex; place hero on hex_5_16 (adjacent unnamed mountain).
-        // Use a passable adjacent hex instead — hex_6_15 or hex_7_16.
-        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_6_15");
+        // hex_5_17 (Wyrm Lair, plains) is the bonus hex; hex_5_16 is a passable adjacent WyrmLair hex.
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_16");
 
         // Confirm the bonus crystals are present (placed by setup)
-        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_6_16"));
+        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_5_17"));
 
         // First action: Move — pick the Wyrm Lair hex
-        $this->respond("hex_6_16");
+        $this->respond("hex_5_17");
 
         // Hero arrives, encounter prompt fires
         $args = $this->getOpArgs();
@@ -46,15 +45,15 @@ class Campaign_EncounterTest extends CampaignBaseTest {
         $this->respond(3);
 
         // Hex should be empty; XP should land on the player's tableau
-        $this->assertEquals(0, $this->countTokens("crystal_yellow", "hex_6_16"));
+        $this->assertEquals(0, $this->countTokens("crystal_yellow", "hex_5_17"));
         $this->assertGreaterThanOrEqual(5, $this->countXp(), "should have setup 2 + encounter 3 = 5 XP");
     }
 
     public function testYellowEncounterSkip(): void {
-        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_6_15");
-        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_6_16"));
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_5_16");
+        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_5_17"));
 
-        $this->respond("hex_6_16");
+        $this->respond("hex_5_17");
 
         $args = $this->getOpArgs();
         $this->assertEquals("encounter", $args["type"] ?? "");
@@ -62,7 +61,7 @@ class Campaign_EncounterTest extends CampaignBaseTest {
         // Skip — crystals stay on the hex for a teammate
         $this->skip();
 
-        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_6_16"), "skipped crystals stay on hex");
+        $this->assertEquals(3, $this->countTokens("crystal_yellow", "hex_5_17"), "skipped crystals stay on hex");
         // No gainXp queued
         $args = $this->getOpArgs();
         $this->assertNotEquals("gainXp", $args["type"] ?? "");

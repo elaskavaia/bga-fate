@@ -1129,7 +1129,7 @@ class Game1Tokens extends Game0Basics {
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
-             <div class='tooltiptext dynamic_tooltip'>${dt_tr}</div>
+             <div class='tooltiptext dynamic_tooltip' data-label='${this.game.getTr(_("Dynamic Assets"))}'>${dt_tr}</div>
            </div>
     `;
         }
@@ -1139,7 +1139,7 @@ class Game1Tokens extends Game0Basics {
     }
     getTokenState(tokenId) {
         var tokenInfo = this.gamedatas.tokens[tokenId];
-        return Number(tokenInfo?.state);
+        return Number(tokenInfo?.state) || 0;
     }
     getTokenLocation(tokenId) {
         var tokenInfo = this.gamedatas.tokens[tokenId];
@@ -1260,6 +1260,17 @@ class Game1Tokens extends Game0Basics {
     }
     iiSection(text) {
         return `<p><i>${text}</i></p>`;
+    }
+    /** One row in a stats tooltip table: icon | label | value. Omit `iconKey` to leave the icon cell blank. */
+    ttRow(label, value, iconKey = "") {
+        const icon = iconKey ? `<span class="wicon wicon_${iconKey}"></span>` : "";
+        return `<tr><td>${icon}</td><td>${label}</td><td>${value}</td></tr>`;
+    }
+    /** Wrap `ttRow()` outputs in a stats table. Returns empty string if no rows. */
+    ttStats(rows) {
+        if (!rows)
+            return "";
+        return `<table class="tt_stats">${rows}</table>`;
     }
     createTokenImage(tokenId, state = 0, extraClass = "") {
         const span = document.createElement("span");
@@ -2413,7 +2424,15 @@ class Game extends Game1Tokens {
             else {
                 const subId = "supply_" + monsterType;
                 if (!$(subId)) {
-                    placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}"></div>`, "map_wrapper");
+                    const atk = this.getRulesFor(monsterType, "strength", 0);
+                    const gold = this.getRulesFor(monsterType, "xp", 0);
+                    const hp = this.getRulesFor(monsterType, "health", 0);
+                    const stats = `<div class="pile_stats">` +
+                        `<span class="tracker wicon wicon_strength" data-state="${atk}"></span>` +
+                        `<span class="tracker wicon wicon_gold" data-state="${gold}"></span>` +
+                        `<span class="tracker wicon wicon_health" data-state="${hp}"></span>` +
+                        `</div>`;
+                    placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}">${stats}</div>`, "map_wrapper");
                 }
                 result.location = subId;
             }
@@ -2565,7 +2584,6 @@ class Game extends Game1Tokens {
                     tokenInfo.tooltip = this.ttSection(_("Effect"), _("Mountain gold deposit. Damage dealt converts to [XP]."));
                     break;
                 }
-                tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
                 if (subType === "legend") {
                     this.buildLegendTooltip(tokenInfo);
                 }
@@ -2581,16 +2599,13 @@ class Game extends Game1Tokens {
                 if (!player)
                     break;
                 const color = player.color;
-                const strength = this.getTokenState(`tracker_strength_${color}`) || 0;
-                const health = this.getTokenState(`tracker_health_${color}`) || 0;
-                const range = this.getTokenState(`tracker_range_${color}`) || 0;
-                const move = this.getTokenState(`tracker_move_${color}`) || 0;
-                const hand = this.getTokenState(`tracker_hand_${color}`) || 0;
-                tokenInfo.tooltip += this.ttSection(_("Strength"), String(strength));
-                tokenInfo.tooltip += this.ttSection(_("Health"), String(health));
-                tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
-                tokenInfo.tooltip += this.ttSection(_("Move"), String(move));
-                tokenInfo.tooltip += this.ttSection(_("Hand Limit"), String(hand));
+                let rows = "";
+                rows += this.ttRow(_("Strength"), this.getTokenState(`tracker_strength_${color}`), "strength");
+                rows += this.ttRow(_("Health"), this.getTokenState(`tracker_health_${color}`), "health");
+                rows += this.ttRow(_("Range"), this.getTokenState(`tracker_range_${color}`), "range");
+                rows += this.ttRow(_("Move"), this.getTokenState(`tracker_move_${color}`), "move");
+                rows += this.ttRow(_("Hand Limit"), this.getTokenState(`tracker_hand_${color}`), "hand");
+                tokenInfo.tooltip += this.ttStats(rows);
                 break;
             }
             case "house": {
@@ -2659,22 +2674,24 @@ class Game extends Game1Tokens {
             firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
             dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
         };
-        if (tokenInfo.rank)
-            tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
+        let rows = "";
+        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
+        tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
         if (tokenInfo.strength)
-            tokenInfo.tooltip += this.ttSection(_("Strength"), tokenInfo.strength);
+            rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
         if (tokenInfo.health)
-            tokenInfo.tooltip += this.ttSection(_("Health"), tokenInfo.health);
+            rows += this.ttRow(_("Health"), tokenInfo.health, "health");
         if (tokenInfo.move)
-            tokenInfo.tooltip += this.ttSection(_("Move"), tokenInfo.move);
+            rows += this.ttRow(_("Move"), tokenInfo.move, "move");
         // Range is not shipped in material; firehorde faction has range 2 per rules. Show only when > 1.
         const range = tokenInfo.faction === "firehorde" ? 2 : 1;
         if (range > 1)
-            tokenInfo.tooltip += this.ttSection(_("Range"), String(range));
+            rows += this.ttRow(_("Range"), String(range), "range");
         if (tokenInfo.armor)
-            tokenInfo.tooltip += this.ttSection(_("Armor"), tokenInfo.armor);
+            rows += this.ttRow(_("Armor"), tokenInfo.armor);
         if (tokenInfo.xp)
-            tokenInfo.tooltip += this.ttSection(_("Gold"), tokenInfo.xp);
+            rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
+        tokenInfo.tooltip += this.ttStats(rows);
         const factionEffect = {
             trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
             firehorde: _("All Fire Horde monsters have attack range 2."),
@@ -2704,22 +2721,25 @@ class Game extends Game1Tokens {
             "5": _("This brute leader is fearless and collects battle scars as trophies of his invincibility. Naturally, his presence infuses the entire trollkin clan with confidence."),
             "6": _("While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches.")
         };
+        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
         tokenInfo.tooltip += this.ttSection(_("Rank"), _("Legend") + " " + (level === "1" ? "I" : "II"));
+        let rows = "";
         // Stats as Level I / Level II
         if (side1 && side2) {
             const fmt = (v) => (v == 0 ? "*" : `${v ?? "-"}`);
-            const dual = (label, field) => {
+            const dual = (label, field, icon = "") => {
                 const v1 = level === "1" ? side1[field] : side2[field];
                 const v2 = side2[field];
                 if (v1 || v2) {
-                    tokenInfo.tooltip += this.ttSection(label, v1 == v2 ? fmt(v1) : `${fmt(v1)} (${fmt(v2)} - level II)`);
+                    rows += this.ttRow(label, v1 == v2 ? fmt(v1) : `${fmt(v1)} (${fmt(v2)} - level II)`, icon);
                 }
             };
-            dual(_("Strength"), "strength");
-            dual(_("Health"), "health");
-            dual(_("Gold"), "xp");
+            dual(_("Strength"), "strength", "strength");
+            dual(_("Health"), "health", "health");
+            dual(_("Gold"), "xp", "gold");
             dual(_("Armor"), "armor");
         }
+        tokenInfo.tooltip += this.ttStats(rows);
         // Special ability notes for legends with * strength
         const specialAbility = {
             "2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
@@ -2732,13 +2752,15 @@ class Game extends Game1Tokens {
     }
     /** Get crystal damage/gold/mana + status (stun) info for a character from its child tokens. */
     getCrystalInfo(tokenId) {
-        let info = "";
+        const iconForCrystal = { red: "damage", green: "mana", yellow: "gold" };
+        let rows = "";
         for (const type of ["red", "green", "yellow"]) {
             const bucket = $(`bucket_crystal_${type}_${tokenId}`);
             const count = parseInt(bucket?.dataset.state ?? "0");
             if (count > 0)
-                info += this.ttSection(this.getTokenName(`crystal_${type}`), String(count));
+                rows += this.ttRow(this.getTokenName(`crystal_${type}`), count, iconForCrystal[type]);
         }
+        let info = this.ttStats(rows);
         if ($(tokenId)?.querySelector(':scope > .stunmarker[data-state="0"]')) {
             info += this.ttSection(_("Stunned"), _("Cannot move during this monster turn"));
         }

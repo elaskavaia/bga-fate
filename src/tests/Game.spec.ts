@@ -38,6 +38,9 @@ describe("Game.getPlaceRedirect", () => {
       pulse: sinon.stub(),
       evaporate: sinon.stub()
     };
+    // Pile-stats overlay reads strength/xp/health via getRulesFor on the monster
+    // type — seed the minimum so getPlaceRedirect doesn't crash on undefined token_types.
+    (game as any).gamedatas = { token_types: { monster_goblin: { strength: 1, xp: 1, health: 2 } } };
   });
 
   it("should redirect monsters to a supply sub-container by type", () => {

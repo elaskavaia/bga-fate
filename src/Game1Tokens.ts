@@ -542,7 +542,7 @@ export class Game1Tokens extends Game0Basics {
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
-             <div class='tooltiptext dynamic_tooltip'>${dt_tr}</div>
+             <div class='tooltiptext dynamic_tooltip' data-label='${this.game.getTr(_("Dynamic Assets"))}'>${dt_tr}</div>
            </div>
     `;
     }
@@ -554,7 +554,7 @@ export class Game1Tokens extends Game0Basics {
 
   getTokenState(tokenId: string) {
     var tokenInfo = this.gamedatas.tokens[tokenId];
-    return Number(tokenInfo?.state);
+    return Number(tokenInfo?.state) || 0;
   }
   getTokenLocation(tokenId: string) {
     var tokenInfo = this.gamedatas.tokens[tokenId];
@@ -679,6 +679,18 @@ export class Game1Tokens extends Game0Basics {
   }
   iiSection(text: string) {
     return `<p><i>${text}</i></p>`;
+  }
+
+  /** One row in a stats tooltip table: icon | label | value. Omit `iconKey` to leave the icon cell blank. */
+  ttRow(label: string, value: string | number, iconKey: string = ""): string {
+    const icon = iconKey ? `<span class="wicon wicon_${iconKey}"></span>` : "";
+    return `<tr><td>${icon}</td><td>${label}</td><td>${value}</td></tr>`;
+  }
+
+  /** Wrap `ttRow()` outputs in a stats table. Returns empty string if no rows. */
+  ttStats(rows: string): string {
+    if (!rows) return "";
+    return `<table class="tt_stats">${rows}</table>`;
   }
   createTokenImage(tokenId: string, state: number = 0, extraClass: string = "") {
     const span = document.createElement("span");

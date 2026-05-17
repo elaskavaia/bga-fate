@@ -51,6 +51,45 @@
 
   .dynamic_tooltip {
     padding-left: 4em;
+    margin-top: 20px;
+    &::before {
+      content: attr(data-label);
+      font-size: x-small;
+      background-color: burlywood;
+    }
+    border: 1px solid rgba(105, 59, 59, 0.212);
+    border-radius: 5%;
+    &:empty {
+      display: none;
+    }
+  }
+
+  // Stats table: icon | label | value rows. Built by ttRow()/ttStats() in Game.ts.
+  .tt_stats {
+    border-collapse: collapse;
+    margin: 0.3em 0;
+
+    td {
+      padding: 1px 8px 1px 0;
+      vertical-align: middle;
+      line-height: 22px;
+    }
+    td:first-child {
+      width: 26px;
+      text-align: center;
+    }
+    td:nth-child(2) {
+      font-weight: bold;
+    }
+    td:last-child {
+      text-align: right;
+      padding-right: 0;
+    }
+    .wicon {
+      height: 20px;
+      width: 20px;
+      vertical-align: middle;
+    }
   }
 }
 

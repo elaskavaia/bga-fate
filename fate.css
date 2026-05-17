@@ -1204,20 +1204,47 @@
 .pile_monster::after {
   content: counter(pile);
   position: absolute;
-  bottom: 2px;
+  top: 4px;
   right: 2px;
-  /* min-width: 1.2em; */
-  /* height: 1.2em; */
-  /* background-color: #333; */
+  min-width: 1.5em;
+  font-size: small;
+  background-color: rgba(51, 51, 51, 0.4941176471);
   color: white;
   text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
-  /* font-size: 0.7em; */
   font-weight: bold;
-  /* line-height: 1.2em; */
   text-align: center;
-  /* border-radius: 50%; */
+  border-radius: 50%;
   /* padding: 0 0.2em; */
   z-index: 10;
+}
+.pile_monster .pile_stats {
+  position: absolute;
+  width: 100%;
+  left: 2px;
+  bottom: 0px;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  pointer-events: none;
+  color: white;
+  font-weight: bold;
+  background-color: rgba(17, 17, 17, 0.3019607843);
+  border-radius: 20%;
+  text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
+}
+.pile_monster .pile_stats > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 24px;
+  font-size: 16px;
+  height: 24px;
+}
+.pile_monster .pile_stats > span::after {
+  position: relative;
+  left: 12px;
+  bottom: -3px;
 }
 
 .supply_crystal_green,
@@ -1242,18 +1269,16 @@
 .supply_crystal_yellow::after {
   content: counter(pile);
   position: absolute;
-  bottom: 2px;
+  top: 4px;
   right: 2px;
-  /* min-width: 1.2em; */
-  /* height: 1.2em; */
-  /* background-color: #333; */
+  min-width: 1.5em;
+  font-size: small;
+  background-color: rgba(51, 51, 51, 0.4941176471);
   color: white;
   text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
-  /* font-size: 0.7em; */
   font-weight: bold;
-  /* line-height: 1.2em; */
   text-align: center;
-  /* border-radius: 50%; */
+  border-radius: 50%;
   /* padding: 0 0.2em; */
   z-index: 10;
 }
@@ -1276,18 +1301,16 @@
 #supply_die_monster::after {
   content: counter(pile);
   position: absolute;
-  bottom: 2px;
+  top: 4px;
   right: 2px;
-  /* min-width: 1.2em; */
-  /* height: 1.2em; */
-  /* background-color: #333; */
+  min-width: 1.5em;
+  font-size: small;
+  background-color: rgba(51, 51, 51, 0.4941176471);
   color: white;
   text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
-  /* font-size: 0.7em; */
   font-weight: bold;
-  /* line-height: 1.2em; */
   text-align: center;
-  /* border-radius: 50%; */
+  border-radius: 50%;
   /* padding: 0 0.2em; */
   z-index: 10;
 }
@@ -1314,17 +1337,17 @@
 
 .pile_monster.monster_jotunn {
   bottom: 26%;
-  left: 0%;
+  left: 1%;
 }
 
 .pile_monster.monster_elemental {
-  bottom: 16%;
-  left: 4%;
+  bottom: 13%;
+  left: 6%;
 }
 
 .pile_monster.monster_sprite {
-  bottom: 6%;
-  left: 8%;
+  bottom: 2%;
+  left: 12%;
 }
 
 .pile_monster.monster_imp {
@@ -1773,6 +1796,44 @@
 }
 .tooltipcontainer .dynamic_tooltip {
   padding-left: 4em;
+  margin-top: 20px;
+}
+.tooltipcontainer .dynamic_tooltip::before {
+  content: attr(data-label);
+  font-size: x-small;
+  background-color: burlywood;
+}
+.tooltipcontainer .dynamic_tooltip {
+  border: 1px solid rgba(105, 59, 59, 0.212);
+  border-radius: 5%;
+}
+.tooltipcontainer .dynamic_tooltip:empty {
+  display: none;
+}
+.tooltipcontainer .tt_stats {
+  border-collapse: collapse;
+  margin: 0.3em 0;
+}
+.tooltipcontainer .tt_stats td {
+  padding: 1px 8px 1px 0;
+  vertical-align: middle;
+  line-height: 22px;
+}
+.tooltipcontainer .tt_stats td:first-child {
+  width: 26px;
+  text-align: center;
+}
+.tooltipcontainer .tt_stats td:nth-child(2) {
+  font-weight: bold;
+}
+.tooltipcontainer .tt_stats td:last-child {
+  text-align: right;
+  padding-right: 0;
+}
+.tooltipcontainer .tt_stats .wicon {
+  height: 20px;
+  width: 20px;
+  vertical-align: middle;
 }
 
 .tooltip-left {

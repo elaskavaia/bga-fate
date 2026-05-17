@@ -24,6 +24,39 @@
 // Each pile_monster shows one token shape + a count badge
 .pile_monster {
   @include v.pile-counter(".monster");
+
+  // Static stats overlay (attack / gold / health) — horizontal row along the bottom.
+  // Built in Game.ts when the pile container is first created.
+  .pile_stats {
+    position: absolute;
+    width: 100%;
+    left: 2px;
+    bottom: 0px;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    pointer-events: none;
+    color: white;
+    font-weight: bold;
+    background-color: #1111114d;
+    border-radius: 20%;
+    text-shadow: v.$textShadowBlackStrong;
+
+    > span {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      line-height: 24px;
+      font-size: 16px;
+      height: 24px;
+      &::after {
+        position: relative;
+        left: 12px;
+        bottom: -3px;
+      }
+    }
+  }
 }
 
 // Crystal supply piles: stack with counter (same trick as monster piles)
@@ -63,15 +96,15 @@
 // Fire Horde: bottom-left, vertical stack (rank3 top, rank1 bottom)
 .pile_monster.monster_jotunn {
   bottom: 26%;
-  left: 0%;
+  left: 1%;
 }
 .pile_monster.monster_elemental {
-  bottom: 16%;
-  left: 4%;
+  bottom: 13%;
+  left: 6%;
 }
 .pile_monster.monster_sprite {
-  bottom: 6%;
-  left: 8%;
+  bottom: 2%;
+  left: 12%;
 }
 // Dead: right, vertical stack (rank1 top, rank3 bottom)
 .pile_monster.monster_imp {
