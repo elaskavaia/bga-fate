@@ -23,6 +23,7 @@ class Material {
     const ERR_NONE_LEFT = 5;
     const ERR_NOT_APPLICABLE = 6;
     const ERR_NO_PLACE = 7;
+    const ERR_NOT_ENOUGH = 8;
     const ERR_SILENT = 100;
 
     const MA_PREF_CONFIRM_TURN = 101;
@@ -101,6 +102,13 @@ class Material {
             ],
 
             "err_8" => [
+                //
+                "code" => Material::ERR_NOT_ENOUGH,
+                "type" => "err",
+                "name" => clienttranslate("Not enough resources/cards"),
+            ],
+
+            "err_100" => [
                 //
                 "code" => Material::ERR_SILENT,
                 "type" => "err",
@@ -987,7 +995,7 @@ class Material {
         "type" => "hero",
         "create" => 1,
         "location" => "hex_8_10",
-        "tc" => "#1565c0",
+        "tc" => "#0000ff",
 ],
     "hero_3" => [ 
         "name" => clienttranslate("Embla"),
@@ -995,7 +1003,7 @@ class Material {
         "type" => "hero",
         "create" => 1,
         "location" => "hex_10_8",
-        "tc" => "#bf360c",
+        "tc" => "#ffa500",
 ],
     "hero_4" => [ 
         "name" => clienttranslate("Boldur"),
@@ -1003,7 +1011,7 @@ class Material {
         "type" => "hero",
         "create" => 1,
         "location" => "hex_10_9",
-        "tc" => "#c62828",
+        "tc" => "#ff0000",
 ],
 // # Expansion heroes - not implemented
 // #hero_5|Finkel|1|hero|1|limbo||||||||

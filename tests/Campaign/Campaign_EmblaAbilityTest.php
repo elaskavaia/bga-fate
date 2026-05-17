@@ -226,4 +226,80 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_7_8", $this->tokenLocation($primary));
         $this->assertEquals("hex_6_8", $this->tokenLocation($secondary));
     }
+
+    // --- Riposte I (card_ability_3_3) ---
+    // r=2spendMana:(2preventDamage:2dealDamage), on=TResolveHits, mana=1.
+    // Embla's *starting* ability. 2[MANA]: Prevent up to 2 damage dealt by an
+    // adjacent monster, and deal 2 damage to it.
+
+    public function testRiposteIPreventsDamageAndDealsCounterDamageToAttacker(): void {
+        $color = $this->getActivePlayerColor();
+        $riposte = "card_ability_3_3";
+
+        // Riposte I is Embla's starting ability — already in tableau with 1 mana.
+        // Op_turnEnd will top it up further; we just need ≥2 by the time Riposte fires.
+        $this->assertEquals("tableau_$color", $this->tokenLocation($riposte));
+
+        // Park a goblin (strength 1) adjacent so it attacks Embla on the monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5]); // 1 hit guaranteed
+
+        // Burn both actions → monster turn → goblin attacks Embla.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        // TResolveHits fires before the hit lands → useCard prompt offers Riposte.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($riposte);
+        $manaBefore = $this->countTokens("crystal_green", $riposte);
+        $this->respond($riposte);
+
+        // Embla took 0 damage (1 incoming, up to 2 prevented).
+        $this->assertEquals(0, $this->countDamage($this->heroId), "Embla should take no damage");
+        // Goblin (health=2) took 2 counter-damage → dies.
+        $this->assertEquals(
+            "supply_monster",
+            $this->tokenLocation($goblin),
+            "Goblin should be killed by Riposte counter-damage (2 dmg, health=2)"
+        );
+        // Riposte spent 2 mana from its own crystals.
+        $this->assertEquals($manaBefore - 2, $this->countTokens("crystal_green", $riposte), "2 mana spent off Riposte I");
+    }
+
+    // --- Riposte II (card_ability_3_4) ---
+    // r=3spendMana:(3preventDamage:3dealDamage), on=TResolveHits, mana=2.
+    // 3[MANA]: Prevent up to 3 damage, deal 3 damage to attacker.
+
+    public function testRiposteIIPreventsAndDealsCounterDamage(): void {
+        $color = $this->getActivePlayerColor();
+        $riposte = "card_ability_3_4";
+        // Flip from L1 to L2 — swap Riposte I out, put Riposte II in.
+        $this->game->tokens->moveToken("card_ability_3_3", "limbo");
+        $this->game->tokens->moveToken($riposte, "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, $riposte, ["message" => ""]);
+
+        // Use a brute (str=3) so 3 hits land — Riposte II prevents all 3.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+        $this->seedRand([5, 5, 5]); // 3 hits guaranteed
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        $this->assertOperation("useCard");
+        $manaBefore = $this->countTokens("crystal_green", $riposte);
+        $this->respond($riposte);
+
+        $this->assertEquals(0, $this->countDamage($this->heroId), "Embla should take no damage");
+        // Brute (health=3) takes 3 counter-damage → dies.
+        $this->assertEquals("supply_monster", $this->tokenLocation($brute), "Brute killed by Riposte II");
+        $this->assertEquals($manaBefore - 3, $this->countTokens("crystal_green", $riposte), "3 mana spent");
+    }
 }

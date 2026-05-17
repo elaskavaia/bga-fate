@@ -266,6 +266,15 @@ class OpMachine {
         if (!$op) {
             return StateConstants::STATE_MACHINE_HALTED;
         }
+        // Sync active player to the op's owner before dispatch. Without this, a
+        // foreign-owned interactive op (e.g. useCard queued for player B during
+        // player A's monster turn) leaves PlayerTurn unable to resolve it →
+        // infinite GameDispatch ⇄ PlayerTurn loop.
+        $playerId = $op->getPlayerId();
+        if ($playerId !== Game::PLAYER_AUTOMA && $playerId > 0 && $playerId != $this->game->getActivePlayerId()) {
+            $this->game->switchActivePlayer($playerId, true);
+            $this->game->customUndoSavepoint($playerId, 1);
+        }
         // $this->game->debugLog("starting op " . $op->getType());
         return $op->onEnteringGameState();
     }
@@ -450,17 +459,35 @@ class OpMachine {
     }
 
     function findOperation($owner = null, $type = null, ?callable $filter = null): ?array {
-        $ops = $this->findOperations($owner, $type, $filter);
+        $ops = $this->findOperationRows($owner, $type, $filter);
         $op = reset($ops);
         return $op ?: null;
     }
 
-    function findOperations($owner = null, $type = null, ?callable $filter = null): array {
+    function findOperationRows($owner = null, $type = null, ?callable $filter = null): array {
         $ops = $this->db->getOperations($owner, $type);
         if ($filter !== null) {
             $ops = array_filter($ops, $filter);
         }
         return $ops;
+    }
+
+    function findOperationOp($owner = null, $type = null, ?callable $filter = null): ?Operation {
+        $ops = $this->findOperationOps($owner, $type, $filter);
+        $op = reset($ops);
+        return $op ?: null;
+    }
+
+    function findOperationOps($owner = null, $type = null, ?callable $filter = null): array {
+        $oprows = $this->db->getOperations($owner, $type);
+        $res = [];
+        foreach ($oprows as $row) {
+            $op = $this->instantiateOperationFromDbRow($row);
+            if (!$filter || $filter($op)) {
+                $res[] = $op;
+            }
+        }
+        return $res;
     }
 
     function isMultiplayerOperationMode() {

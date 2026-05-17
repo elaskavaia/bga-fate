@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-use Bga\Games\Fate\Operations\Op_preventDamage;
-use Bga\Games\Fate\OpCommon\Operation;
-use Bga\Games\Fate\Stubs\GameUT;
-use PHPUnit\Framework\TestCase;
-
 final class Op_preventDamageTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();

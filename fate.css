@@ -108,6 +108,12 @@
 .hex.active_slot.gg_selected, .hex.active_slot.gg_selected_alt {
   outline: none;
 }
+.hex > .bucket {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
 
 /**
  * fate.scss

@@ -69,7 +69,7 @@ final class CardGenericTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
+        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "attacker" => "monster_goblin_1", "count" => 3]);
 
         $card = $this->createCard("card_ability_3_3", Trigger::ResolveHits);
         $this->assertTrue($card->canBePlayed(Trigger::ResolveHits));
@@ -122,7 +122,7 @@ final class CardGenericTest extends AbstractCardTestCase {
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
+        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "attacker" => "monster_goblin_1", "count" => 3]);
 
         $card = $this->createCard("card_ability_3_3", Trigger::ResolveHits);
         $card->onTrigger(Trigger::ResolveHits);

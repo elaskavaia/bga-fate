@@ -16,10 +16,10 @@ if (!defined("PCOLOR")) {
     define("PCOLOR", "2e7d32");
 }
 if (!defined("BCOLOR")) {
-    define("BCOLOR", "1565c0");
+    define("BCOLOR", "0000ff");
 }
 if (!defined("CCOLOR")) {
-    define("CCOLOR", "bf360c");
+    define("CCOLOR", "ffa500");
 }
 if (!defined("ACOLOR")) {
     define("ACOLOR", "ffffff");

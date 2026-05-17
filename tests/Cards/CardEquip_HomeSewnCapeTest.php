@@ -49,6 +49,7 @@ class CardEquip_HomeSewnCapeTest extends AbstractCardTestCase {
         // Pending dealDamage so preventDamage has something to reduce.
         $this->game->machine->push("dealDamage", $this->owner, [
             "target" => "hero_1",
+            "attacker" => "monster_goblin_1",
             "count" => 2,
         ]);
 

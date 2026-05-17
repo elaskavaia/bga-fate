@@ -38,7 +38,7 @@ final class Op_triggerTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("crystal_green_1", "card_ability_3_3");
         $this->game->tokens->moveToken("crystal_green_2", "card_ability_3_3");
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
-        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "count" => 3]);
+        $this->game->machine->push("dealDamage", $this->owner, ["target" => "hex_11_8", "attacker" => "monster_goblin_1", "count" => 3]);
         $this->createOp("trigger(TResolveHits)");
         $this->call_resolve();
         $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations($this->owner));

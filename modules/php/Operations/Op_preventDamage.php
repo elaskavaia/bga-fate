@@ -31,22 +31,29 @@ use Override;
  * Used by: Dodge, Stoneskin, Riposte, Dreadnought (1spendMana:1preventDamage).
  */
 class Op_preventDamage extends CountableOperation {
-    private function findDealDamage(): ?Op_dealDamage {
-        $dealDamageRow = $this->game->machine->findOperation(
-            null,
-            null,
-            fn($row) => $this->game->machine->instantiateOperationFromDbRow($row)->getType() === "dealDamage"
-        );
-        if (!$dealDamageRow) {
-            return null;
+    private function findDealDamageOp(bool $incoming): ?Op_dealDamage {
+        if ($incoming) {
+            $owner = null;
+        } else {
+            $owner = $this->getOwner();
         }
-        /** @var Op_dealDamage */
-        $dealDamageOp = $this->game->machine->instantiateOperationFromDbRow($dealDamageRow);
-        return $dealDamageOp;
+
+        return $this->game->machine->findOperationOp($owner, null, function ($op) use ($incoming) {
+            if ($op->getType() !== "dealDamage") {
+                return false;
+            }
+            if (!$incoming) {
+                return true;
+            }
+
+            $attacker = $op->getDataField("attacker");
+            // Counter-damage (e.g. Riposte's `:2dealDamage`) leaves `attacker` unset until resolve.
+            return $attacker !== null;
+        });
     }
 
     function getPossibleMoves() {
-        if (!$this->findDealDamage()) {
+        if (!$this->findDealDamageOp(true)) {
             return ["q" => Material::ERR_NOT_APPLICABLE];
         }
         return parent::getPossibleMoves();
@@ -61,33 +68,52 @@ class Op_preventDamage extends CountableOperation {
         return ["max" => $this->getCurrentDamage()];
     }
 
-    function getCurrentDamage() {
-        $dealDamageOp = $this->findDealDamage();
-        $currentCount = $dealDamageOp ? (int) $dealDamageOp->getCount() : 0;
-        return $currentCount;
+    function getCurrentDamage(): int {
+        $dealDamageOp = $this->findDealDamageOp(true);
+        return $dealDamageOp ? (int) $dealDamageOp->getCount() : 0;
     }
+
     #[Override]
     function resolve(): void {
-        $amount = (int) $this->getCount();
-        $dealDamageOp = $this->findDealDamage();
+        $dealDamageOp = $this->findDealDamageOp(true);
         $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageOp);
 
         $currentCount = (int) $dealDamageOp->getCount();
-        $prevented = min($amount, $currentCount);
+        $prevented = min((int) $this->getCount(), $currentCount);
         $newCount = $currentCount - $prevented;
 
-        // Update the dealDamage operation's count
         $this->game->machine->setCounts($dealDamageOp, $newCount);
+        $this->retargetCounterAttackDamage($dealDamageOp);
 
         if ($newCount <= 0) {
             $dealDamageOp->destroy();
-            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} [DAMAGE] (all [DAMAGE] is prevented)'), [
-                "count" => $prevented,
-            ]);
-        } else {
-            $this->game->notifyMessage(clienttranslate('${player_name} prevents ${count} [DAMAGE]'), [
-                "count" => $prevented,
-            ]);
         }
+        $this->notifyPrevented($prevented, $newCount <= 0);
+    }
+
+    /**
+     * A counter-damage dealDamage queued by the same r-expression (e.g. Riposte's
+     * `2spendMana:(2preventDamage:2dealDamage)`) should auto-target the attacker.
+     * The incoming dealDamage carries `attacker` = monster id; resolve to its current hex.
+     */
+    private function retargetCounterAttackDamage(Op_dealDamage $incoming): void {
+        $follow = $this->findDealDamageOp(false);
+        if (!$follow) {
+            return;
+        }
+        $attackerId = $incoming->getDataField("attacker");
+        $this->game->systemAssert("ERR:preventDamage:noAttackeeId", $attackerId);
+        $attackerHex = $this->game->hexMap->getCharacterHex($attackerId);
+        $this->game->machine->setOpDataField($follow, "target", $attackerHex);
+    }
+
+    private function notifyPrevented(int $prevented, bool $allPrevented): void {
+        $msg = $allPrevented
+            ? clienttranslate('${char_name} prevents ${count} [DAMAGE] (all [DAMAGE] is prevented)')
+            : clienttranslate('${char_name} prevents ${count} [DAMAGE]');
+        $this->notifyMessage($msg, [
+            "count" => $prevented,
+            "char_name" => $this->game->getHeroTokenId($this->getOwner()),
+        ]);
     }
 }

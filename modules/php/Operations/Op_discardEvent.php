@@ -40,6 +40,9 @@ class Op_discardEvent extends CountableOperation {
     function getPossibleMoves() {
         $hero = $this->game->getHero($this->getOwner());
         $cards = $hero->getHandCards();
+        if (count($cards) < $this->getCount()) {
+            return ["q" => Material::ERR_NOT_ENOUGH, "err" => clienttranslate("Not enough event cards")];
+        }
         $targets = [];
         foreach ($cards as $card) {
             $targets[$card["key"]] = ["q" => Material::RET_OK];

@@ -74,9 +74,9 @@ $gameinfos = [
     // Colors attributed to players
     "player_colors" => [
         "2e7d32", // green (Bjorn)
-        "1565c0", // blue (Alva)
-        "bf360c", // orange (Embla)
-        "c62828", // red (Boldur)
+        "0000ff", // blue (Alva)
+        "ffa500", // orange (Embla)
+        "ff0000", // red (Boldur)
     ],
 
     // Favorite colors support : if set to "true", support attribution of favorite colors based on player's preferences (see reattributeColorsBasedOnPreferences PHP method)
