@@ -154,9 +154,9 @@ class Game extends Base {
         }
 
         // Encounter bonuses: 3 crystals per location for heroes to pick up on entry
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_red", "hex_6_7"); // Troll Caves
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_green", "hex_16_5"); // Nailfare
-        $this->tokens->pickTokensForLocation(3, "supply_crystal_yellow", "hex_6_16"); // Wyrm Lair
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_red", "hex_5_7"); // Troll Caves
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_green", "hex_17_5"); // Nailfare
+        $this->tokens->pickTokensForLocation(3, "supply_crystal_yellow", "hex_5_17"); // Wyrm Lair
 
         $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
@@ -820,6 +820,27 @@ class Game extends Base {
     function debug_draw(string $card) {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->tokens->dbSetTokenLocation($card, "hand_{$color}");
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
+    /** Place a row of monsters with varied HP / damage so the HP ring renders for visual check. */
+    function debug_showHpRing() {
+        $samples = [
+            ["hex_6_5", "monster_imp_1", 0],
+            ["hex_7_5", "monster_goblin_1", 1],
+            ["hex_8_5", "monster_skeleton_1", 1],
+            ["hex_9_5", "monster_brute_1", 2],
+            ["hex_10_5", "monster_jotunn_1", 3],
+            ["hex_11_5", "monster_draugr_1", 4],
+            ["hex_12_5", "monster_troll_1", 0],
+            ["hex_13_5", "monster_legend_1_1", 5],
+        ];
+        foreach ($samples as [$hex, $monster, $dmg]) {
+            $this->tokens->dbSetTokenLocation($monster, $hex, 0, "");
+            if ($dmg > 0) {
+                $this->effect_moveCrystals($monster, "red", $dmg, $monster, ["message" => ""]);
+            }
+        }
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
