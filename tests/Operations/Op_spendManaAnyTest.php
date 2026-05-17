@@ -55,7 +55,7 @@ final class Op_spendManaAnyTest extends AbstractOpTestCase {
     public function testResolveCount1DoesNotRequeue(): void {
         $this->createOp();
         $this->call_resolve("card_ability_1_3");
-        $this->assertFalse((bool) $this->game->machine->findOperation($this->owner, "spendManaAny"));
+        $this->assertNull($this->game->machine->findOperation($this->owner, "spendManaAny"));
     }
 
     // -------------------------------------------------------------------------
@@ -70,9 +70,8 @@ final class Op_spendManaAnyTest extends AbstractOpTestCase {
         $this->assertEquals(1, $this->getMana("card_ability_1_3"));
 
         // A spendManaAny op should be queued with count=1
-        $row = $this->game->machine->findOperation($this->owner, "spendManaAny");
-        $this->assertNotNull($row, "spendManaAny should be re-queued for remaining mana");
-        $requeued = $this->game->machine->instantiateOperationFromDbRow($row);
+        $requeued = $this->game->machine->findOperation($this->owner, "spendManaAny");
+        $this->assertNotNull($requeued, "spendManaAny should be re-queued for remaining mana");
         $this->assertEquals(1, (int) $requeued->getCount());
     }
 
@@ -89,9 +88,9 @@ final class Op_spendManaAnyTest extends AbstractOpTestCase {
         $this->assertEquals(1, $this->getMana("card_ability_1_11"));
 
         // Instantiate + resolve the re-queued op, this time picking the other card
-        $row = $this->game->machine->findOperation($this->owner, "spendManaAny");
-        $this->assertNotNull($row);
-        $this->op = $this->game->machine->instantiateOperationFromDbRow($row);
+        $op = $this->game->machine->findOperation($this->owner, "spendManaAny");
+        $this->assertNotNull($op);
+        $this->op = $op;
         $this->call_resolve("card_ability_1_11");
 
         $this->assertEquals(1, $this->getMana("card_ability_1_3"));

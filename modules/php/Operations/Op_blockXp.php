@@ -49,14 +49,11 @@ class Op_blockXp extends Operation {
             return;
         }
 
-        $finishKillRow = $this->game->machine->findOperation(null, "finishKill", function ($row) use ($killedId) {
-            $op = $this->game->machine->instantiateOperationFromDbRow($row);
-            return $op->getDataField("target") === $killedId;
-        });
-        if ($finishKillRow === null) {
+        $finishKillOp = $this->game->machine->findOperation(null, "finishKill", fn($op) => $op->getDataField("target") === $killedId);
+        if ($finishKillOp === null) {
             return;
         }
 
-        $this->game->machine->setOpDataField($finishKillRow, "noXp", true);
+        $this->game->machine->setOpDataField($finishKillOp, "noXp", true);
     }
 }

@@ -75,10 +75,8 @@ final class Op_c_reaperTest extends AbstractOpTestCase {
         $this->call_resolve("hex_6_9");
 
         // Pending resolveHits should now carry secondary=hex_6_9
-        $row = $this->game->machine->findOperation($this->owner, "resolveHits");
-        $this->assertNotNull($row, "resolveHits should still be pending after c_reaper resolve");
-
-        $op = $this->game->machine->instantiateOperationFromDbRow($row);
+        $op = $this->game->machine->findOperation($this->owner, "resolveHits");
+        $this->assertNotNull($op, "resolveHits should still be pending after c_reaper resolve");
         $this->assertEquals("hex_6_9", $op->getDataField("secondary"));
         $this->assertEquals("hex_7_9", $op->getDataField("target"), "primary target preserved");
     }

@@ -93,9 +93,4 @@ class CardGeneric extends Card {
         $errorRes = array_merge($errorRes, ["q" => 0, "err" => ""]);
         return true;
     }
-
-    function isAttackAction() {
-        // if end of attack is on stack we are in the middle of attack
-        return $this->game->machine->findOperation($this->owner, "endOfAttack");
-    }
 }

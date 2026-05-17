@@ -111,18 +111,10 @@ class Op_resolveHits extends Operation {
         $this->game->systemAssert("ERR:resolveHits:noCharOnHex:$targetHex", $defenderId !== null);
 
         if ($hits <= 0) {
-            $this->game->notifyMessage(clienttranslate('${char_name}\'s attack missed!'), [
-                "char_name" => $attackerId,
-            ]);
             $hits = 0;
         } else {
             $defender = $this->game->getCharacter($defenderId);
             $hits = $defender->applyArmor($hits);
-            if ($hits <= 0) {
-                $this->game->notifyMessage(clienttranslate('${char_name}\'s attack was fully absorbed by armor'), [
-                    "char_name" => $attackerId,
-                ]);
-            }
         }
 
         $defenderOwner = str_starts_with($defenderId, "hero_") ? $this->game->getHeroOwner($defenderId) : null;

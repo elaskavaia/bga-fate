@@ -237,7 +237,7 @@ class OpMachine {
 
     /**
      * Patch a single data field on a queued op and persist. Accepts either an
-     * Operation instance or a raw db row (whatever findOperation returned).
+     * Operation instance (the common case via findOperation) or a raw db row.
      */
     function setOpDataField($opOrRow, string $key, mixed $value): void {
         $op = $opOrRow instanceof Operation ? $opOrRow : $this->instantiateOperationFromDbRow($opOrRow);
@@ -458,21 +458,7 @@ class OpMachine {
         return $result;
     }
 
-    function findOperation($owner = null, $type = null, ?callable $filter = null): ?array {
-        $ops = $this->findOperationRows($owner, $type, $filter);
-        $op = reset($ops);
-        return $op ?: null;
-    }
-
-    function findOperationRows($owner = null, $type = null, ?callable $filter = null): array {
-        $ops = $this->db->getOperations($owner, $type);
-        if ($filter !== null) {
-            $ops = array_filter($ops, $filter);
-        }
-        return $ops;
-    }
-
-    function findOperationOp($owner = null, $type = null, ?callable $filter = null): ?Operation {
+    function findOperation($owner = null, $type = null, ?callable $filter = null): ?Operation {
         $ops = $this->findOperationOps($owner, $type, $filter);
         $op = reset($ops);
         return $op ?: null;

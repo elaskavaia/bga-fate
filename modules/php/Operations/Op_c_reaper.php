@@ -62,11 +62,11 @@ class Op_c_reaper extends Operation {
         // Reach into the pending Op_resolveHits and add `secondary`. resolveHits is the
         // next op queued by Op_roll (FIFO within roll's frame: trigger fires first, then
         // resolveHits — so at this point resolveHits is still pending in the same frame).
-        $resolveHitsRow = $this->game->machine->findOperation($this->getOwner(), "resolveHits");
+        $resolveHitsOp = $this->game->machine->findOperation($this->getOwner(), "resolveHits");
 
-        $this->game->systemAssert("ERR:c_reaper:noPendingResolveHits", $resolveHitsRow !== null);
+        $this->game->systemAssert("ERR:c_reaper:noPendingResolveHits", $resolveHitsOp !== null);
 
-        $this->game->machine->setOpDataField($resolveHitsRow, "secondary", $secondaryHex);
+        $this->game->machine->setOpDataField($resolveHitsOp, "secondary", $secondaryHex);
     }
 
     public function getUiArgs() {

@@ -38,7 +38,7 @@ class Op_preventDamage extends CountableOperation {
             $owner = $this->getOwner();
         }
 
-        return $this->game->machine->findOperationOp($owner, null, function ($op) use ($incoming) {
+        return $this->game->machine->findOperation($owner, null, function ($op) use ($incoming) {
             if ($op->getType() !== "dealDamage") {
                 return false;
             }

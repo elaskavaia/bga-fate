@@ -44,8 +44,7 @@ final class Op_blockXpTest extends AbstractOpTestCase {
         $this->call_resolve("confirm");
 
         // Re-read the patched op
-        $row = $this->game->machine->findOperation(null, "finishKill");
-        $patched = $this->game->machine->instantiateOperationFromDbRow($row);
+        $patched = $this->game->machine->findOperation(null, "finishKill");
         $this->assertTrue((bool) $patched->getDataField("noXp"), "noXp flag should be set on Op_finishKill");
         $this->assertEquals($monster, $patched->getDataField("target"), "Patch should preserve other data fields");
     }
@@ -68,9 +67,8 @@ final class Op_blockXpTest extends AbstractOpTestCase {
         $this->createOp("blockXp");
         $this->call_resolve("confirm");
 
-        $row = $this->game->machine->findOperation(null, "finishKill");
-        $data = is_string($row["data"]) ? json_decode($row["data"], true) : $row["data"];
-        $this->assertFalse((bool) ($data["noXp"] ?? false), "Without marker_attack, no patch");
+        $op = $this->game->machine->findOperation(null, "finishKill");
+        $this->assertFalse((bool) $op->getDataField("noXp"), "Without marker_attack, no patch");
     }
 
     // -------------------------------------------------------------------------

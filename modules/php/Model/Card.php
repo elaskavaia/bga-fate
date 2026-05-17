@@ -302,11 +302,10 @@ class Card {
         $owner = $this->getOwner();
         $action = "useCard";
 
-        $alreadyOp = $this->game->machine->findOperation($owner, $action);
-        if (!$alreadyOp) {
+        $op = $this->game->machine->findOperation($owner, $action);
+        if (!$op) {
             $this->queue($action, null, ["l_confirm" => true, "on" => [$event->value]]);
         } else {
-            $op = $this->game->machine->instantiateOperationFromDbRow($alreadyOp);
             $onarr = $op->getDataField("on", []);
             if (in_array($event->value, $onarr)) {
                 return;
