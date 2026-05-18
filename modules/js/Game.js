@@ -357,6 +357,9 @@ class LaAnimations {
     setup() {
         placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
     }
+    gameAnimationsActive() {
+        return this.bga.gameui.bgaAnimationsActive();
+    }
     phantomMove(mobileId, newparentId, duration, mobileStyle, onEnd) {
         var mobileNode = $(mobileId);
         if (!mobileNode)
@@ -370,7 +373,7 @@ class LaAnimations {
             duration = 0;
         const noanimation = duration <= 0 || !mobileNode.parentNode;
         const oldParent = mobileNode.parentElement;
-        var clone = null;
+        let clone;
         if (!noanimation) {
             // do animation
             clone = this.projectOnto(mobileNode, "_temp");
@@ -503,6 +506,8 @@ class LaAnimations {
      * If called again while already pulsing, queues the next pulse after the current one.
      */
     pulse(targetId, scale = 2, duration = 400) {
+        if (!this.gameAnimationsActive())
+            return;
         const node = $(targetId);
         if (!node)
             return;
@@ -717,6 +722,7 @@ class Game1Tokens extends Game0Basics {
         });
         this.animationLa = new LaAnimations(this.bga);
         this.animationLa.setup();
+        this.animationLa.gameAnimationsActive = () => this.gameAnimationsActive();
         if (!this.gamedatas.tokens) {
             console.error("Missing gamadatas.tokens!");
             this.gamedatas.tokens = {};

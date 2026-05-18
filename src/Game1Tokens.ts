@@ -79,6 +79,7 @@ export class Game1Tokens extends Game0Basics {
 
     this.animationLa = new LaAnimations(this.bga);
     this.animationLa.setup();
+    this.animationLa.gameAnimationsActive = () => this.gameAnimationsActive();
 
     if (!this.gamedatas.tokens) {
       console.error("Missing gamadatas.tokens!");

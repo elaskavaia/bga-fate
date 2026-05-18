@@ -6,9 +6,11 @@
 [ ] Ability pile and equipment pile browsing
 [ ] Dice roll animation
 [ ] Card draw animations
+[ ] Show number of houses left in Grimheim
+[ ] Reshuffle event deck when exhausted (designer-confirmed, DESIGN.md assumption #2)
+[ ] Allow moveMonster to push into Grimheim (designer-confirmed, DESIGN.md assumption #4)
 
 - [ ] Fix stacked tooltips
-- [x] Add hero stats to tooltip (health, attack strength from hero card on tableau)
   [ ] Fix spawn locations in monster cards — current data is not correct
   [ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
   [ ] Show win/loss end screen — BGA default end screen works, custom UI

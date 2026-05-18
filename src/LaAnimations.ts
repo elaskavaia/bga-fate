@@ -17,6 +17,11 @@ export class LaAnimations {
   setup() {
     placeHtml(`<div id="oversurface"></div>`, this.bga.gameArea.getElement());
   }
+
+  gameAnimationsActive() {
+    return this.bga.gameui.bgaAnimationsActive();
+  }
+
   phantomMove(
     mobileId: ElementOrId,
     newparentId: ElementOrId,
@@ -33,7 +38,7 @@ export class LaAnimations {
     if (!duration || duration < 0) duration = 0;
     const noanimation = duration <= 0 || !mobileNode.parentNode;
     const oldParent = mobileNode.parentElement;
-    var clone = null;
+    let clone: HTMLElement;
     if (!noanimation) {
       // do animation
       clone = this.projectOnto(mobileNode, "_temp");
@@ -178,6 +183,7 @@ export class LaAnimations {
    * If called again while already pulsing, queues the next pulse after the current one.
    */
   pulse(targetId: ElementOrId, scale: number = 2, duration: number = 400) {
+    if (!this.gameAnimationsActive()) return;
     const node = $(targetId) as HTMLElement;
     if (!node) return;
     const pending = Number(node.dataset.pulseQueue || 0);
