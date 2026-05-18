@@ -992,7 +992,7 @@ class DbTokens {
 
     protected function isConsideredLocation(string $id) {
         $type = $this->getRulesFor($id, "type", "");
-        return $type == "location"; // XXX contains?
+        return $type == "location";
     }
 
     protected function isContentAllowedForLocation($player_id, $location, $attr = "content") {

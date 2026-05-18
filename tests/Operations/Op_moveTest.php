@@ -86,7 +86,7 @@ final class Op_moveTest extends AbstractOpTestCase {
 
         // Recompute the raw reachable set and assert none of them have a loc — if this assertion
         // fails, the test fixture (hero start hex) needs to change, not the production code.
-        $reachable = $this->game->hexMap->getReachableHexes("hex_13_6", 2);
+        $reachable = $this->game->hexMap->getReachableHexes("hex_13_6", 2, $this->game->getHero(PCOLOR));
         foreach (array_keys($reachable) as $hexId) {
             $this->assertEquals(
                 "",

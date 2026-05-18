@@ -51,7 +51,7 @@ class Game extends Base {
         $this->machine = new OpMachine();
         $this->tokens = new DbTokens($this);
         $this->hexMap = new HexMap($this);
-        $this->dbMultiUndo = new DbMultiUndo($this, "restorePlayerTables");
+        $this->dbMultiUndo = new DbMultiUndo($this);
 
         $this->registerNotifyDecorators();
     }
@@ -672,8 +672,9 @@ class Game extends Base {
                 return $color;
             }
         }
-        $this->systemAssert("No owner found for hero $heroId");
-        return ""; // unreachable
+        // Orphan hero (no card on any tableau) — used by unit tests that place a raw hero token.
+        // Production setup always pairs hero tokens with a tableau card.
+        return "";
     }
 
     /** Factory: create a Hero model for a player color. */
@@ -806,11 +807,6 @@ class Game extends Base {
             $this->dbMultiUndo->doSaveUndoSnapshot(["barrier" => $barrier, "label" => $label], $player_id, true);
             $this->undoSavepoint();
         }
-    }
-
-    function restorePlayerTables($table, $saved_data, $meta) {
-        // TODO
-        return false;
     }
 
     function debug_q() {

@@ -103,7 +103,7 @@ $hero-sprites: (
   border: 2px solid;
   border-radius: 6px;
   display: inline-block;
-  background-image: none; // TODO
+  background-image: none;
 
   & > * {
     display: none;

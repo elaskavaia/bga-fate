@@ -78,10 +78,10 @@ class Op_c_wrecking extends Operation {
         $displaced = $this->getDisplaced();
         if ($displaced) {
             // push phase — must always pick a destination (no early-stop here)
-            $charType = getPart($displaced, 0);
+            $displacedChar = $this->game->getCharacter($displaced);
             $targets = [];
             foreach ($this->game->hexMap->getAdjacentHexes($boldurHex) as $hex) {
-                if ($this->game->hexMap->canEnterHex($hex, $charType)) {
+                if ($this->game->hexMap->canStopOn($hex, $displacedChar)) {
                     $targets[] = $hex;
                 }
             }
@@ -93,7 +93,7 @@ class Op_c_wrecking extends Operation {
         $targets = ["endOfMove" => ["q" => 0, clienttranslate("End Move")]];
         if ($this->getBudget() > 0) {
             foreach ($this->game->hexMap->getAdjacentHexes($boldurHex) as $hex) {
-                if ($this->game->hexMap->isImpassable($hex, "hero")) {
+                if ($this->game->hexMap->isImpassable($hex, $hero)) {
                     continue;
                 }
                 $targets[] = $hex;

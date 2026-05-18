@@ -73,6 +73,18 @@ class Hero extends Character {
         return $this->game->custom_getPlayerIdByColor($this->owner);
     }
 
+    function isHero(): bool {
+        return true;
+    }
+
+    function canIgnoreMountains(): bool {
+        return $this->heroHasCardsOnTableau("card_ability_3_8"); // Fleetfoot II
+    }
+
+    function canIgnoreOccupied(): bool {
+        return $this->heroHasCardsOnTableau("card_ability_3_8"); // Fleetfoot II
+    }
+
     /** Returns all cards on this hero's tableau. */
     function getTableauCards(): array {
         return $this->game->tokens->getTokensOfTypeInLocation("card", "tableau_{$this->owner}");

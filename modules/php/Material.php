@@ -4494,7 +4494,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Dreadnought II"),
         "mana" => 1,
-        "r" => "spendMana:(preventDamage,custom)",
+        "r" => "spendMana:preventDamage",
         "on" => "TResolveHits",
         "effect" => clienttranslate("1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack."),
 ],

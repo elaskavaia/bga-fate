@@ -97,7 +97,9 @@ class Op_moveMonster extends CountableOperation {
     private function getDestinationMoves(string $monsterHex): array {
         $maxSteps = (int) $this->getCount();
         $minSteps = (int) $this->getMinCount();
-        $reachable = $this->game->hexMap->getReachableHexes($monsterHex, $maxSteps, "monster");
+        $monsterId = $this->game->hexMap->getCharacterOnHex($monsterHex, "monster");
+        $monster = $this->game->getMonster($monsterId);
+        $reachable = $this->game->hexMap->getReachableHexes($monsterHex, $maxSteps, $monster);
 
         // Filter out Grimheim hexes (assumption: player cannot push monster into Grimheim)
         foreach (array_keys($reachable) as $hex) {

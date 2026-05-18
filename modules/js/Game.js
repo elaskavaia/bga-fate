@@ -1715,7 +1715,7 @@ class GameMachine {
         for (const target of sortedTargets) {
             const paramInfo = opInfo.info[target];
             if (paramInfo.sec) {
-                // skip, whatever TODO: anytime
+                // skip, whatever
                 const color = paramInfo.color ?? "secondary";
                 const call = paramInfo.call ?? target;
                 const button = this.bga.statusBar.addActionButton(this.getTargetButtonName(target, paramInfo), () => this.bga.actions.performAction(`action_${call}`, {

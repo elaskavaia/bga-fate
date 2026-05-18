@@ -2,12 +2,22 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Model\Hero;
+use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\Stubs\GameUT;
 use Bga\Games\Fate\States\GameDispatch;
 use PHPUnit\Framework\TestCase;
 
 final class GameTest extends TestCase {
     private GameUT $game;
+
+    private function hero(): Hero {
+        return new Hero($this->game, "hero_1", PCOLOR);
+    }
+
+    private function monster(): Monster {
+        return $this->game->getMonster("monster_goblin_1");
+    }
     function dispatchOneStep($done = null) {
         $game = $this->game;
         $state = $game->machine->dispatchOne();
@@ -99,7 +109,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // From a Grimheim hex, all Grimheim hexes are at distance 0
-        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3, $this->hero());
         $this->assertArrayHasKey("hex_9_8", $reachable); // Grimheim
         $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
         $this->assertEquals(0, $reachable["hex_9_8"]);
@@ -122,11 +132,11 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // hex_13_4 is mountain — not reachable by hero
-        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, "hero");
+        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, $this->hero());
         $this->assertArrayNotHasKey("hex_13_4", $reachable);
 
         // But reachable by monster
-        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, "monster");
+        $reachable = $game->hexMap->getReachableHexes("hex_12_4", 1, $this->monster());
         $this->assertArrayHasKey("hex_13_4", $reachable);
     }
 
@@ -138,7 +148,7 @@ final class GameTest extends TestCase {
         $game->tokens->moveToken("hero_1", "hex_11_8");
 
         // hex_11_8 should not be reachable (occupied)
-        $reachable = $game->hexMap->getReachableHexes("hex_10_8", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_10_8", 3, $this->hero());
         $this->assertArrayNotHasKey("hex_11_8", $reachable);
 
         // Hexes behind the occupied one should still be reachable via other paths
@@ -149,7 +159,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // From hex_11_8 (adjacent to Grimheim hex_10_8), entering Grimheim ends movement
-        $reachable = $game->hexMap->getReachableHexes("hex_11_8", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_11_8", 3, $this->hero());
 
         // All Grimheim hexes should be reachable
         $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
@@ -166,7 +176,7 @@ final class GameTest extends TestCase {
         $game = $this->game;
 
         // From Grimheim, adjacent non-mountain hexes should be at distance 1
-        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3);
+        $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3, $this->hero());
 
         // hex_11_8 is adjacent to Grimheim border hex hex_10_8
         $this->assertArrayHasKey("hex_11_8", $reachable);

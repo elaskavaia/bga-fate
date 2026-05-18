@@ -52,11 +52,11 @@ class Op_move extends CountableOperation {
             return [$target];
         }
         $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $currentHex = $this->game->tokens->getTokenLocation($heroId);
+        $hero = $this->game->getHero($owner);
+        $currentHex = $this->game->tokens->getTokenLocation($hero->getId());
         $maxSteps = (int) $this->getCount();
         $minSteps = (int) $this->getMinCount();
-        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $maxSteps);
+        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $maxSteps, $hero);
 
         // For mandatory movement (minSteps == maxSteps), only offer hexes at the
         // required distance. If none exist, fall back to farthest reachable.
@@ -113,7 +113,7 @@ class Op_move extends CountableOperation {
         if ($this->game->hexMap->isInGrimheim($target)) {
             $target = $hero->getRulesFor("location", $target);
         }
-        $path = $this->game->hexMap->getPath($hero->getHex(), $target, "hero");
+        $path = $this->game->hexMap->getPath($hero->getHex(), $target, $hero);
 
         foreach ($path as $hex) {
             $isFinal = $hex === $target;

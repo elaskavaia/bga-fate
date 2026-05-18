@@ -38,9 +38,10 @@ use Bga\Games\Fate\Material;
 class Op_c_queen extends Op_dealDamage {
     function getPossibleMoves(): array {
         $hexes = parent::getPossibleMoves();
+        $hero = $this->game->getHero($this->getOwner());
         $targets = [];
         foreach ($hexes as $hex) {
-            if ($this->game->hexMap->isImpassable($hex, "hero")) {
+            if ($this->game->hexMap->isImpassable($hex, $hero)) {
                 $targets[$hex] = [
                     "q" => Material::ERR_PREREQ,
                     "err" => clienttranslate("You cannot enter that terrain (cannot swap)"),

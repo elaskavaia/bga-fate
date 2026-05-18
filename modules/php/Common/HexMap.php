@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Common;
 
 use Bga\Games\Fate\Game;
+use Bga\Games\Fate\Model\Character;
 
 use function Bga\Games\Fate\getPart;
 
@@ -236,7 +237,8 @@ class HexMap {
                     continue;
                 }
 
-                if ($this->isImpassable($neighbor)) {
+                // Distance-to-Grimheim is a monster pathing aid — only lakes block monsters.
+                if ($this->getHexTerrain($neighbor) === "lake") {
                     continue;
                 }
                 $dist[$neighbor] = $steps + 1;
@@ -252,15 +254,15 @@ class HexMap {
         return (int) $this->game->material->getRulesFor($hexId, "dir", 0);
     }
 
-    function isImpassable(string $hexId, string $characterType = "monster") {
-        if ($characterType === "hero" && $this->getHexNamedLocation($hexId) !== "") {
+    function isImpassable(string $hexId, Character $character): bool {
+        if ($character->isHero() && $this->getHexNamedLocation($hexId) !== "") {
             return false;
         }
         $terrain = $this->getHexTerrain($hexId);
         if ($terrain === "lake") {
             return true;
         }
-        if ($terrain === "mountain" && $characterType === "hero") {
+        if ($terrain === "mountain" && $character->isHero() && !$character->canIgnoreMountains()) {
             return true;
         }
         return false;
@@ -440,8 +442,21 @@ class HexMap {
         return $this->firstCharacter($occ[$hexId] ?? [], $characterType);
     }
 
-    function canEnterHex(string $hexId, string $characterType): bool {
-        if ($this->isImpassable($hexId, $characterType)) {
+    /** True if $character can traverse this hex as an intermediate step of a multi-hex move.
+     *  Allows occupied hexes for characters that can ignore occupancy (Fleetfoot II). */
+    function canPassThrough(string $hexId, Character $character): bool {
+        if ($this->isImpassable($hexId, $character)) {
+            return false;
+        }
+        if ($this->isOccupied($hexId) && !$character->canIgnoreOccupied()) {
+            return false;
+        }
+        return true;
+    }
+
+    /** True if $character can end its move on this hex. Destination is always blocked by occupancy. */
+    function canStopOn(string $hexId, Character $character): bool {
+        if ($this->isImpassable($hexId, $character)) {
             return false;
         }
         if ($this->isOccupied($hexId)) {
@@ -454,10 +469,9 @@ class HexMap {
      * BFS reachability: returns all hexes reachable from $startHex within $maxSteps.
      * Grimheim counts as one area (0 cost between its hexes).
      * Entering Grimheim ends movement. Exiting Grimheim costs 1 step.
-     * @param string $characterType "hero" or "monster" — heroes cannot enter mountains, monsters can
-     * @return array<string, int> hex => distance
+     * @return array<string, int> hex => distance (only hexes the character can stop on)
      */
-    function getReachableHexes(string $startHex, int $maxSteps = 3, string $characterType = "hero"): array {
+    function getReachableHexes(string $startHex, int $maxSteps, Character $character): array {
         $startInGrimheim = $this->isInGrimheim($startHex);
         // BFS queue: [hexId, stepsUsed]
         $visited = [$startHex => 0];
@@ -480,7 +494,7 @@ class HexMap {
                 if (isset($visited[$neighbor])) {
                     continue;
                 }
-                if (!$this->canEnterHex($neighbor, $characterType)) {
+                if (!$this->canPassThrough($neighbor, $character)) {
                     continue;
                 }
                 // Entering Grimheim ends movement — mark reachable but don't expand
@@ -498,7 +512,8 @@ class HexMap {
         }
         // Remove start hex
         unset($visited[$startHex]);
-        return $visited;
+        // Destinations must be stoppable — drop occupied hexes the character only passed through.
+        return array_filter($visited, fn($_d, $hex) => $this->canStopOn($hex, $character), ARRAY_FILTER_USE_BOTH);
     }
 
     /**
@@ -510,7 +525,7 @@ class HexMap {
      * @return string[] ordered steps starting with the first hex after $from, ending
      * with $to. Empty array if $to == $from or if $to is unreachable.
      */
-    function getPath(string $from, string $to, string $characterType = "hero"): array {
+    function getPath(string $from, string $to, Character $character): array {
         if ($from === $to) {
             return [];
         }
@@ -539,7 +554,7 @@ class HexMap {
                 if (isset($parent[$neighbor])) {
                     continue;
                 }
-                if (!$this->canEnterHex($neighbor, $characterType)) {
+                if (!$this->canPassThrough($neighbor, $character)) {
                     continue;
                 }
                 if (!$startInGrimheim && $this->isInGrimheim($neighbor)) {

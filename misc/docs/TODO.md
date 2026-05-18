@@ -26,15 +26,9 @@
 - [ ] [Op_monsterAttack.php:60](../../modules/php/Operations/Op_monsterAttack.php#L60) — Hero selection picks first hex; rules may want closest / random / player choice. **Valid, gameplay-affecting.**
 - [ ] [Operation.php:790](../../modules/php/OpCommon/Operation.php#L790) — AI/auto-resolve picks one target at random when op expects multi-select. **Valid** — only matters once multi-select ops are auto-resolved (e.g. NPC turns), low impact today.
 - [ ] [Game.php:331](../../modules/php/Game.php#L331) — Crystal supply assumes infinite; `pickTokensForLocation` will return fewer than requested if the supply runs out. **Probably valid** — confirm rules cap (do we ever exhaust the supply?) and either log or auto-create.
-- [ ] [Game.php:807](../../modules/php/Game.php#L807) — `restorePlayerTables` is a stub returning false (BGA undo hook). **Valid** — needed if/when full table-state undo is supported.
-
-- [ ] [GameMachine.ts:124](../../src/GameMachine.ts#L124) — "skip, whatever TODO: anytime" inside secondary-button rendering for `paramInfo.sec`. **Unclear** — comment is cryptic, recheck whether the anytime/secondary button path needs work.
 - [ ] [GameMachine.ts:484](../../src/GameMachine.ts#L484) — `const skippable = false; // XXX` hardcoded in `onMultiSelectionUpdate`. **Valid** — multi-select ops can't currently expose a skip button; revisit if any op needs it.
-- [ ] [Cards.scss:106](../../src/css/Cards.scss#L106) — `.deck.deck_monster { background-image: none; // TODO }` then per-color decks set their own image. **Likely stale** — the `none` is intentional as a base reset; comment can probably just be deleted.
-- [ ] [CampaignBase.php:146](../../tests/Campaign/CampaignBase.php#L146) — `getActivePlayerColor` uses current player. **Test-only, probably fine** — works for single-active tests; revisit if multi-active campaign tests need it.
-- [ ] [types.d.ts:76](../../src/types.d.ts#L76) — Trailing `XXX` on `err?` field comment with no explanation. **Cosmetic** — drop the marker or explain the concern.
-- [ ] [Game.ts:54](../../src/Game.ts#L54) — `onToken` always routes to `playerTurn.onToken`; should dispatch by current state. **Valid** — works today because only playerTurn handles token clicks, but fragile.
-- [ ] [DbTokens.php:995](../../modules/php/Db/DbTokens.php#L995) — `isConsideredLocation` matches only exact `type=="location"`; XXX asks about `contains?`. **Valid question** — check whether composite types (e.g. `location,deck`) exist and need to match.
+
+
 
 ### Missing Campaign tests (swept on 2026-05-17)
 
@@ -42,6 +36,6 @@
 
 
 Ability cards:
-- [ ] card_ability_3_8 — Fleetfoot II — **r mismatch**: missing mountain/occupied-hex passthrough (effect text "may always move into mountains and through occupied areas" not implemented; `r=spendUse:move` identical to Fleetfoot I)
-- [ ] card_ability_4_12 — Dreadnought II — **r partial**: `spendMana:(preventDamage,custom)` — reflect-damage half undesigned ("Each adjacent monster that attacks you is dealt 1 damage")
+- [x] card_ability_3_8 — Fleetfoot II — has tests (mountain/occupied passthrough hardcoded via Hero::canIgnoreMountains/canIgnoreOccupied; HexMap now takes Character)
+- [ ] card_ability_4_12 — Dreadnought II — **r partial**: `spendMana:preventDamage` covers the first half; reflect-damage half undesigned ("Each adjacent monster that attacks you is dealt 1 damage")
 

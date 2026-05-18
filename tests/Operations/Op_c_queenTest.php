@@ -83,8 +83,9 @@ final class Op_c_queenTest extends AbstractOpTestCase {
     }
 
     private function findAdjacentMountainHex(string $fromHex): ?string {
+        $hero = $this->game->getHero(PCOLOR);
         foreach ($this->game->hexMap->getAdjacentHexes($fromHex) as $h) {
-            if ($this->game->hexMap->isImpassable($h, "hero")) {
+            if ($this->game->hexMap->isImpassable($h, $hero)) {
                 return $h;
             }
         }

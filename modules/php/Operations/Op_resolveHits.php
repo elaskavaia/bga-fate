@@ -118,7 +118,7 @@ class Op_resolveHits extends Operation {
         }
 
         $defenderOwner = str_starts_with($defenderId, "hero_") ? $this->game->getHeroOwner($defenderId) : null;
-        if ($defenderOwner !== null) {
+        if ($defenderOwner) {
             $this->queueTrigger(Trigger::ResolveHits, $defenderOwner, ["target" => $defenderId]);
         }
         $this->queue("dealDamage", null, [

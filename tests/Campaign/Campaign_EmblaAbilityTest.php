@@ -337,6 +337,58 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
     }
 
+    // --- Fleetfoot II (card_ability_3_8) ---
+    // r=spendUse:move, no trigger — same active effect as Fleetfoot I plus passive
+    // "You may always move into mountains and through occupied areas."
+
+    public function testFleetfootIIMovesIntoMountain(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_8";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // hex_14_4 plains, adjacent to hex_13_4 (unnamed mountain — normally hero-impassable).
+        $this->game->tokens->moveToken($this->heroId, "hex_14_4");
+
+        $this->respond($cardId);
+        // 1move auto-resolves only when there's one valid destination; here there are several,
+        // so we explicitly target the mountain to prove Fleetfoot II allows it.
+        $this->respond("hex_13_4");
+        $this->assertEquals("hex_13_4", $this->tokenLocation($this->heroId), "Fleetfoot II should allow stopping on a mountain");
+    }
+
+    public function testFleetfootIIWithoutCardMountainBlocked(): void {
+        // Regression sanity: same setup but no Fleetfoot II on tableau — mountain must still block.
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_7"; // Fleetfoot I instead — no passive
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        $this->game->tokens->moveToken($this->heroId, "hex_14_4");
+
+        $this->respond($cardId);
+        // The move sub-op should not list hex_13_4 as a target.
+        $this->assertNotContains("hex_13_4", $this->getOpArgs()["target"] ?? [], "Without Fleetfoot II, hero cannot enter mountain");
+    }
+
+    public function testFleetfootIIPassesThroughOccupiedHex(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_8";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        // Move card_ability_3_7 onto tableau too with count=2 wiring so the spendUse:move on 3_8 uses count=2.
+        // Actually Fleetfoot II is `spendUse:move` (1 step). For pass-through we need 2+ steps, so place a fresh card-driven move.
+        // Simpler: use Maneuver-style with a 2move via Agility. Here we'll just verify the destination set
+        // through getReachableHexes — drives the same code path used by Op_move.
+
+        $hero = $this->game->getHero($color);
+        $this->game->tokens->moveToken($this->heroId, "hex_14_4");
+        // Place a blocking monster on hex_15_4 (plains, adjacent east).
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_15_4", "");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $reachable = $this->game->hexMap->getReachableHexes("hex_14_4", 2, $hero);
+        $this->assertArrayHasKey("hex_16_4", $reachable, "Fleetfoot II lets Embla pass through occupied hex_15_4 to hex_16_4");
+        $this->assertArrayNotHasKey("hex_15_4", $reachable, "Occupied destination still blocked even with Fleetfoot II");
+    }
+
     // --- Embla Hero II (card_hero_3_2) ---
     // r=empty, on=empty → passive stat-bearing card. strength=5, health=10.
     // Effect text "Move 4." is delivered by Hero::calcBaseMove (hno==3 → 4), shared with Hero I.

@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Model\Hero;
+use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 final class HexMapTest extends TestCase {
     private GameUT $game;
+    private Hero $hero;
+    private Monster $monster;
 
     protected function setUp(): void {
         $this->game = new GameUT();
@@ -14,6 +18,8 @@ final class HexMapTest extends TestCase {
         $this->game->tokens->createAllTokens();
         $this->game->setPlayersNumber(1);
         $this->game->tokens->moveToken("card_hero_1", "tableau_" . PCOLOR);
+        $this->hero = $this->game->getHero(PCOLOR);
+        $this->monster = $this->game->getMonster("monster_goblin_1");
     }
 
     // -------------------------------------------------------------------------
@@ -105,42 +111,42 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testIsImpassableLake(): void {
-        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", "monster"));
-        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", "hero"));
+        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", $this->monster));
+        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", $this->hero));
     }
 
     public function testIsImpassableMountainForHero(): void {
-        $this->assertTrue($this->game->hexMap->isImpassable("hex_13_1", "hero"));
+        $this->assertTrue($this->game->hexMap->isImpassable("hex_13_1", $this->hero));
     }
 
     public function testIsImpassableMountainForMonster(): void {
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_13_1", "monster"));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_13_1", $this->monster));
     }
 
     public function testIsImpassablePlains(): void {
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_9_9", "hero"));
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_9_9", "monster"));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_9_9", $this->hero));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_9_9", $this->monster));
     }
 
-    public function testIsImpassableDefaultIsMonster(): void {
-        // Default characterType is "monster" — mountains passable
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_13_1"));
+    public function testIsImpassableMountainForMonsterPassable(): void {
+        // Monsters can enter mountain terrain.
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_13_1", $this->monster));
     }
 
     public function testNailfareLakePassableToHero(): void {
         // Nailfare lakes are explicitly passable per RULES.md:55 — named locations override terrain
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_16_5", "hero"));
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_17_5", "hero"));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_16_5", $this->hero));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_17_5", $this->hero));
     }
 
     public function testTrollCavesMountainPassableToHero(): void {
         // Troll Caves is a named mountain location heroes can enter (Elven Arrows quest)
-        $this->assertFalse($this->game->hexMap->isImpassable("hex_6_6", "hero"));
+        $this->assertFalse($this->game->hexMap->isImpassable("hex_6_6", $this->hero));
     }
 
     public function testUnnamedLakeStillImpassable(): void {
         // hex_5_5 is plain lake (no named location) — still blocked
-        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", "hero"));
+        $this->assertTrue($this->game->hexMap->isImpassable("hex_5_5", $this->hero));
     }
 
     // -------------------------------------------------------------------------
@@ -265,27 +271,27 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testCanEnterHexPlains(): void {
-        $this->assertTrue($this->game->hexMap->canEnterHex("hex_13_7", "hero"));
-        $this->assertTrue($this->game->hexMap->canEnterHex("hex_13_7", "monster"));
+        $this->assertTrue($this->game->hexMap->canStopOn("hex_13_7", $this->hero));
+        $this->assertTrue($this->game->hexMap->canStopOn("hex_13_7", $this->monster));
     }
 
     public function testCanEnterHexLakeBlocked(): void {
-        $this->assertFalse($this->game->hexMap->canEnterHex("hex_5_5", "hero"));
-        $this->assertFalse($this->game->hexMap->canEnterHex("hex_5_5", "monster"));
+        $this->assertFalse($this->game->hexMap->canStopOn("hex_5_5", $this->hero));
+        $this->assertFalse($this->game->hexMap->canStopOn("hex_5_5", $this->monster));
     }
 
     public function testCanEnterHexMountainBlocksHero(): void {
-        $this->assertFalse($this->game->hexMap->canEnterHex("hex_13_1", "hero"));
+        $this->assertFalse($this->game->hexMap->canStopOn("hex_13_1", $this->hero));
     }
 
     public function testCanEnterHexMountainAllowsMonster(): void {
-        $this->assertTrue($this->game->hexMap->canEnterHex("hex_13_1", "monster"));
+        $this->assertTrue($this->game->hexMap->canStopOn("hex_13_1", $this->monster));
     }
 
     public function testCanEnterHexOccupiedBlocked(): void {
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
 
-        $this->assertFalse($this->game->hexMap->canEnterHex("hex_11_8", "monster"));
+        $this->assertFalse($this->game->hexMap->canStopOn("hex_11_8", $this->monster));
     }
 
     // -------------------------------------------------------------------------
@@ -465,17 +471,17 @@ final class HexMapTest extends TestCase {
     // -------------------------------------------------------------------------
 
     public function testGetPathSameHexIsEmpty(): void {
-        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_11_8"));
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_11_8", $this->hero));
     }
 
     public function testGetPathAdjacent(): void {
         // hex_11_8 -> hex_12_8 is one step (both plains, adjacent)
-        $this->assertSame(["hex_12_8"], $this->game->hexMap->getPath("hex_11_8", "hex_12_8"));
+        $this->assertSame(["hex_12_8"], $this->game->hexMap->getPath("hex_11_8", "hex_12_8", $this->hero));
     }
 
     public function testGetPathTwoStepsStraight(): void {
         // hex_11_8 -> hex_13_8 passes through hex_12_8
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8", $this->hero);
         $this->assertCount(2, $path);
         $this->assertSame("hex_13_8", end($path));
         // Middle hex must be adjacent to both endpoints
@@ -485,7 +491,7 @@ final class HexMapTest extends TestCase {
 
     public function testGetPathStepsAreAdjacent(): void {
         // Every consecutive pair in the returned path must be adjacent
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_14_9");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_14_9", $this->hero);
         $this->assertNotEmpty($path);
         $prev = "hex_11_8";
         foreach ($path as $hex) {
@@ -496,17 +502,17 @@ final class HexMapTest extends TestCase {
 
     public function testGetPathUnreachableReturnsEmpty(): void {
         // hex_5_5 is a lake — no character can enter it
-        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_5_5"));
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_5_5", $this->hero));
     }
 
     public function testGetPathHeroCannotCrossMountain(): void {
         // hex_13_1 is a mountain — impassable to heroes
-        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_13_1", "hero"));
+        $this->assertSame([], $this->game->hexMap->getPath("hex_11_8", "hex_13_1", $this->hero));
     }
 
     public function testGetPathMonsterCanCrossMountain(): void {
         // Same target is reachable by monster (mountains ok)
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_1", "monster");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_1", $this->monster);
         $this->assertNotEmpty($path);
         $this->assertSame("hex_13_1", end($path));
     }
@@ -516,7 +522,7 @@ final class HexMapTest extends TestCase {
         $this->game->tokens->moveToken("hero_2", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
 
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_13_8", $this->hero);
         $this->assertNotEmpty($path);
         $this->assertNotContains("hex_12_8", $path);
         $this->assertSame("hex_13_8", end($path));
@@ -528,27 +534,27 @@ final class HexMapTest extends TestCase {
         $this->game->tokens->moveToken("hero_3", "limbo");
         $this->game->hexMap->invalidateOccupancy();
 
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_10_8");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_10_8", $this->hero);
         $this->assertSame(["hex_10_8"], $path);
     }
 
     public function testGetPathToDeepGrimheimHex(): void {
         // hex_9_9 is deep Grimheim; getReachableHexes marks it reachable from hex_11_8
         // Path must terminate at hex_9_9 (the requested destination)
-        $path = $this->game->hexMap->getPath("hex_11_8", "hex_9_9");
+        $path = $this->game->hexMap->getPath("hex_11_8", "hex_9_9", $this->hero);
         $this->assertNotEmpty($path);
         $this->assertSame("hex_9_9", end($path));
     }
 
     public function testGetPathOutOfGrimheim(): void {
         // Start inside Grimheim, exit to a non-Grimheim hex
-        $path = $this->game->hexMap->getPath("hex_9_9", "hex_11_8");
+        $path = $this->game->hexMap->getPath("hex_9_9", "hex_11_8", $this->hero);
         $this->assertNotEmpty($path);
         $this->assertSame("hex_11_8", end($path));
     }
 
     public function testGetPathWithinGrimheimIsEmpty(): void {
         // Grimheim is a single area — moving between its hexes is a no-op.
-        $this->assertSame([], $this->game->hexMap->getPath("hex_9_9", "hex_8_9"));
+        $this->assertSame([], $this->game->hexMap->getPath("hex_9_9", "hex_8_9", $this->hero));
     }
 }

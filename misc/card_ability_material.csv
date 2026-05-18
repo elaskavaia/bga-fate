@@ -50,7 +50,7 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 9|4|Beefy Berserker I|1|||||Runes [RUNE] always count as hits for you. Because that's the way you roll.|
 10|4|Beefy Berserker II|3|||||Runes [RUNE] always count as hits for you. It runes in the family.|
 11|4|Dreadnought I|||1|spendMana:preventDamage|TResolveHits|1[MANA]: Prevent 1 damage.|Armor so heavy that even gravity's jealous.
-12|4|Dreadnought II|||1|spendMana:(preventDamage,custom)|TResolveHits|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
+12|4|Dreadnought II|||1|spendMana:preventDamage|TResolveHits|1[MANA]: Prevent 1 damage. Each adjacent monster that attacks you is dealt 1 damage after its attack.|
 13|4|Fortified I||||spendUse:1heal(self)||Heal 1 damage from Boldur.|It's not hiding, it's strategic positioning.
 14|4|Fortified II|1|2||spendUse:1heal(self)||Heal 1 damage from Boldur.|
 3|4|Rapid Strike I|||1|spendUse:3spendMana:actionAttack||3[MANA]: Perform an attack action.|

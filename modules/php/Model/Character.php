@@ -31,6 +31,21 @@ class Character {
         return $this->game->hexMap->getCharacterHex($this->id);
     }
 
+    /** True for heroes — replaces the "hero"/"monster" string used by passability checks. */
+    function isHero(): bool {
+        return false;
+    }
+
+    /** Mountain terrain still blocks this character. Overridden by Hero for Fleetfoot II. */
+    function canIgnoreMountains(): bool {
+        return false;
+    }
+
+    /** Occupied intermediate hexes still block this character's path. Overridden by Hero for Fleetfoot II. */
+    function canIgnoreOccupied(): bool {
+        return false;
+    }
+
     function isInForest(): bool {
         $hex = $this->getHex();
         return $hex !== null && $this->game->hexMap->getHexTerrain($hex) === "forest";
