@@ -362,6 +362,43 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("stunmarker", $troll));
     }
 
+    // --- Treetreader I (card_ability_2_5) ---
+    // r=(in(forest):move)/move(forest), no `on` — manual free-action.
+    // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
+
+    public function testTreetreaderIMovesIntoAdjacentForest(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_5";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Alva on plains (hex_5_9) with adjacent forest hex_5_8.
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // Branch 0=in(forest):move (Alva not in forest → unavailable); 1=move(forest).
+        $this->respond("choice_1");
+        $this->respond("hex_5_8");
+
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+    }
+
+    public function testTreetreaderIMovesOutOfForest(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_2_5";
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+
+        // Alva in forest (hex_5_8) → branch 0=in(forest):move offers any adjacent hex.
+        $this->game->tokens->moveToken($this->heroId, "hex_5_8");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->respond("choice_0");
+        $this->respond("hex_5_9");
+
+        $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
+    }
+
     // --- Treetreader II (card_ability_2_6) ---
     // r=(in(forest):move)/move(forest), on=custom — manual free-action.
     // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.

@@ -64,7 +64,7 @@ class Op_applyDamage extends Operation {
             ]);
         } else {
             $this->game->notifyMessage(
-                clienttranslate('${char_name2} deals ${amount} [DAMAGE] to ${char_name} (${remaining} health left)'),
+                clienttranslate('${char_name2} deals ${amount} [DAMAGE] to ${char_name} (remaining ${remaining} health)'),
                 [
                     "char_name" => $defenderId,
                     "char_name2" => $attackerId,

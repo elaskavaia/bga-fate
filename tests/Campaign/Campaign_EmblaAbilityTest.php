@@ -227,6 +227,18 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_6_8", $this->tokenLocation($secondary));
     }
 
+    // --- Embla Hero I (card_hero_3_1) ---
+    // No r/on — passive "Move 4." stat baked into Hero::calcBaseMove (heroNum === 3 → 4).
+
+    public function testEmblaHeroIGrantsBaseMoveFour(): void {
+        $color = $this->getActivePlayerColor();
+        $hero = $this->game->getHero($color);
+
+        // Embla Hero I is the starting hero card — already in tableau.
+        $this->assertEquals("tableau_$color", $this->tokenLocation("card_hero_3_1"));
+        $this->assertEquals(4, $hero->getNumberOfMoves(), "Embla Hero I grants base move = 4");
+    }
+
     // --- Riposte I (card_ability_3_3) ---
     // r=2spendMana:(2preventDamage:2dealDamage), on=TResolveHits, mana=1.
     // Embla's *starting* ability. 2[MANA]: Prevent up to 2 damage dealt by an
@@ -301,5 +313,105 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         // Brute (health=3) takes 3 counter-damage → dies.
         $this->assertEquals("supply_monster", $this->tokenLocation($brute), "Brute killed by Riposte II");
         $this->assertEquals($manaBefore - 3, $this->countTokens("crystal_green", $riposte), "3 mana spent");
+    }
+
+    // --- Fleetfoot I (card_ability_3_7) ---
+    // r=spendUse:move, no trigger — manual free-action, once per turn.
+    // "Move 1 area."
+
+    public function testFleetfootIMovesOneArea(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_7";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Park Embla on plains outside Grimheim so move has neighbors.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // move sub-op prompts for destination hex (1 step away).
+        $this->respond("hex_6_9");
+
+        $this->assertEquals("hex_6_9", $this->tokenLocation($this->heroId));
+        // spendUse flipped card state to 1 (used this turn).
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId));
+    }
+
+    // --- Embla Hero II (card_hero_3_2) ---
+    // r=empty, on=empty → passive stat-bearing card. strength=5, health=10.
+    // Effect text "Move 4." is delivered by Hero::calcBaseMove (hno==3 → 4), shared with Hero I.
+
+    public function testEmblaHeroIIRaisesStrengthAndHealthKeepsMove4(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Hero I out for Hero II (setup places card_hero_3_1).
+        $this->game->tokens->moveToken("card_hero_3_1", "limbo");
+        $this->game->tokens->moveToken("card_hero_3_2", "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        $hero = $this->game->getHero($color);
+        // Strength = 5 (Hero II) + 1 (Flimsy Blade in starter tableau).
+        $this->assertEquals(6, $hero->getAttackStrength(), "Hero II + Flimsy Blade strength");
+        $this->assertEquals(10, $hero->getMaxHealth(), "Hero II health");
+        $this->assertEquals(4, $hero->getNumberOfMoves(), "Embla retains Move 4");
+    }
+
+    // --- Swift Kick I (card_ability_3_13) ---
+    // r=spendUse:(dealDamage(adj,not_legend),moveMonster(marked))
+    // Deal 1 damage to an adjacent non-legend monster and move it 1 area.
+    public function testSwiftKickIDamagesAdjacentMonsterAndMovesIt(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_13";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1"; // hp=6, survives 1 damage
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // dealDamage(adj,not_legend) auto-resolves (single adjacent non-legend); marker_attack set on hex_7_8.
+        // moveMonster(marked) Phase 1 auto-resolves to that hex; Phase 2 prompts for destination.
+        $this->assertOperation("moveMonster");
+        $destinations = $this->getOpArgs()["target"] ?? [];
+        $this->assertNotEmpty($destinations, "Swift Kick should offer hexes to push the troll to");
+        $newHex = $destinations[0];
+        $this->respond($newHex);
+
+        $this->assertEquals(1, $this->countDamage($troll), "Troll takes 1 damage from Swift Kick");
+        $this->assertEquals($newHex, $this->tokenLocation($troll), "Troll was moved by Swift Kick");
+        $this->assertNotEquals("hex_7_8", $newHex, "Troll moved off its original hex");
+        // spendUse flipped card state to 1 (used this turn).
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "Swift Kick I marked used");
+    }
+
+    // --- Swift Kick II (card_ability_3_14) ---
+    // r=spendUse:(2dealDamage(adj,not_legend),2moveMonster(marked))
+    // Deal 2 damage to an adjacent non-legend monster and move it 2 areas.
+    public function testSwiftKickIIDamagesAdjacentMonsterAndMovesItTwoAreas(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_14";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1"; // hp=6, survives 2 damage
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // 2dealDamage(adj,not_legend) auto-resolves (single adjacent non-legend); marker_attack set on hex_7_8.
+        // 2moveMonster(marked) Phase 1 auto-resolves to that hex; Phase 2 prompts for destination (max 2 steps).
+        $this->assertOperation("moveMonster");
+        $destinations = $this->getOpArgs()["target"] ?? [];
+        $this->assertNotEmpty($destinations, "Swift Kick II should offer hexes to push the troll to");
+        // Pick a hex that's 2 steps away from hex_7_8 to verify multi-step movement.
+        $twoStepHexes = array_filter($destinations, fn($h) => $this->game->hexMap->getMoveDistance("hex_7_8", $h) === 2);
+        $this->assertNotEmpty($twoStepHexes, "Swift Kick II should reach a hex 2 steps away");
+        $newHex = array_values($twoStepHexes)[0];
+        $this->respond($newHex);
+
+        $this->assertEquals(2, $this->countDamage($troll), "Troll takes 2 damage from Swift Kick II");
+        $this->assertEquals($newHex, $this->tokenLocation($troll), "Troll was moved by Swift Kick II");
+        $this->assertEquals(2, $this->game->hexMap->getMoveDistance("hex_7_8", $newHex), "Troll moved exactly 2 areas");
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "Swift Kick II marked used");
     }
 }

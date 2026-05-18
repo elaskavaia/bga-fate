@@ -1,6 +1,6 @@
 ---
 name: game-verify-card
-description: Verify a game card works correctly by checking its CSV definition, operation implementation, test coverage, and PLAN.md status. Use this skill when the user wants to verify, validate, or check a card (e.g., "/game-verify-card card_event_1_33"), or when they ask about a card's implementation status, test coverage, or readiness.
+description: Verify a game card works correctly by checking its CSV definition, operation implementation, test coverage, and TODO.md status. Use this skill when the user wants to verify, validate, or check a card (e.g., "/game-verify-card card_event_1_33"), or when they ask about a card's implementation status, test coverage, or readiness.
 argument-hint: card ID or multiple card IDs
 ---
 
@@ -25,7 +25,7 @@ Agent({
 })
 ```
 
-Fire all `Agent(...)` calls in a single message so they run concurrently. The agent (defined in `.claude/agents/game-card-verifier.md`) wraps this skill with parallel-safety rules: it runs only its own targeted test (no full suite), and it does NOT touch `PLAN.md`. After all agents finish, you (the dispatcher) flip the relevant `PLAN.md` lines based on their reports and surface a combined summary to the user.
+Fire all `Agent(...)` calls in a single message so they run concurrently. The agent (defined in `.claude/agents/game-card-verifier.md`) wraps this skill with parallel-safety rules: it runs only its own targeted test (no full suite), and it does NOT touch `TODO.md`. After all agents finish, you (the dispatcher) flip the relevant `TODO.md` lines based on their reports and surface a combined summary to the user.
 
 Caveat — same-hero serialization: two agents verifying cards for the same hero may both edit the same `Campaign_<Hero><Category>Test.php` file and clobber each other. When dispatching a batch that includes multiple cards for the same hero, run those serially (one agent at a time) while parallelizing across different heroes.
 

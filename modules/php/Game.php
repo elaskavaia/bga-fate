@@ -439,7 +439,7 @@ class Game extends Base {
 
         $dmg = $this->game->countHits($attackerId, $defenderHex);
 
-        $this->notifyMessage(clienttranslate('${char_name} rolls ${sides}, estimated ${dmg} [DAMAGE]'), [
+        $this->notifyMessage(clienttranslate('${char_name} rolls ${sides} (${dmg} [DAMAGE])'), [
             "char_name" => $attackerId,
             "sides" => implode(" ", $sides),
             "dmg" => $dmg,

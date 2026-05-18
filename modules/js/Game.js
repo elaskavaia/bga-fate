@@ -2527,20 +2527,26 @@ class Game extends Game1Tokens {
             }
             bucket.dataset.state = String(count);
             // sync miniboard damage mirror if this is a hero's red crystal bucket
-            const heroMatch = bucketId.match(/^bucket_crystal_red_(hero_\d+)$/);
+            const heroMatch = bucketId.match(/^bucket_crystal_red_(hero_(\d+))$/);
             if (heroMatch) {
+                const heroNo = parseInt(heroMatch[2]);
+                const player = Object.values(this.gamedatas.players).find((p) => p.heroNo === heroNo);
+                const max = player ? this.getTokenState(`tracker_health_${player.color}`) : 0;
                 const mirror = document.querySelector(`[data-hero="${heroMatch[1]}"].bucket_crystal_red`);
                 if (mirror)
                     mirror.dataset.state = String(count);
+                if (max > 0) {
+                    bucket.dataset.max = String(max);
+                    if (mirror)
+                        mirror.dataset.max = String(max);
+                }
             }
-            // Monster damage bucket: show "remaining/max" instead of raw damage count.
+            // Monster damage bucket: stash max HP so the badge can render "damage/max".
             const monsterMatch = bucketId.match(/^bucket_crystal_red_(monster_.+)$/);
             if (monsterMatch) {
                 const max = parseInt(this.getRulesFor(monsterMatch[1], "health", "0"));
-                if (max > 0) {
+                if (max > 0)
                     bucket.dataset.max = String(max);
-                    bucket.dataset.remaining = String(Math.max(0, max - count));
-                }
             }
         }
     }

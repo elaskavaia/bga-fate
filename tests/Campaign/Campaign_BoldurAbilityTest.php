@@ -52,6 +52,32 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 5 dice");
     }
 
+    // --- Beefy Berserker II (card_ability_4_10) ---
+    // Same passive rune-as-hit hook, but grants +3 strength instead of +1.
+
+    public function testBeefyBerserkerIICountsRunesAsHits(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_4_10";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        // Boldur I (3) + Boldur's First Pick (1) + Beefy Berserker II (3) = 7 dice.
+        $this->assertEquals(7, $this->game->getHero($color)->getAttackStrength());
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // 3 runes + 4 misses. Without the card runes wouldn't count → 0 damage.
+        // With Beefy Berserker II all 3 runes count as hits → 3 damage (troll h=6 survives).
+        $this->seedRand([3, 3, 3, 1, 1, 1, 1]);
+        $this->respond("hex_7_8");
+
+        $this->assertEquals(3, $this->countDamage($troll));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
+        $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 7 dice");
+    }
+
     // --- Wrecking Ball I (card_ability_4_7) ---
     // r=nop, on=custom — bespoke Op_c_wrecking pendulum loop dispatched from Op_move
     // when the card is on the tableau and an adjacent hex is occupied. Designer rule
@@ -213,5 +239,165 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_7_8", $this->tokenLocation($this->heroId));
         $this->assertEquals("hex_6_8", $this->tokenLocation($goblin));
         $this->assertEquals(1, $this->countDamage($goblin));
+    }
+
+    // --- Rapid Strike II (card_ability_4_4) ---
+    // r=2spendMana:actionAttack — pay 2 mana to perform an attack action.
+    // Unlike Rapid Strike I (which has spendUse), II has no spendUse and may be
+    // activated multiple times per turn — that's the distinguishing feature.
+
+    public function testRapidStrikeIIPerformsAttackTwiceInOneTurn(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_4_4";
+        // Heroes start at Level I — move Rapid Strike II onto the tableau manually.
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        // Seed 4 mana on the card so we can pay 2+2 (two activations in one turn).
+        $this->game->effect_moveCrystals($this->heroId, "green", 4, $cardId, ["message" => ""]);
+
+        // Park Boldur outside Grimheim with a beefy troll (h=6) adjacent so it survives both attacks.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // Boldur I (3) + Boldur's First Pick (1) = 4 dice per attack. Two activations = 8 dice.
+        // Seed 1 hit + 3 misses per activation → 1 damage each, 2 total (troll h=6 survives).
+        $this->seedRand([5, 1, 1, 1, 5, 1, 1, 1]);
+
+        // First activation: respond(cardId) pays 2 mana and auto-runs actionAttack
+        // (single adjacent monster → target inlined into the turn op, no second prompt).
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->assertEquals(1, $this->countDamage($troll), "First Rapid Strike II attack deals 1 damage");
+        $this->assertEquals(2, $this->countTokens("crystal_green", $cardId), "2 of 4 mana spent");
+
+        // Second activation in the same turn — proves "may be used several times per turn"
+        // (no spendUse in r → no per-turn lockout, unlike Rapid Strike I).
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->assertEquals(2, $this->countDamage($troll), "Second Rapid Strike II attack deals another 1 damage");
+        $this->assertEquals(0, $this->countTokens("crystal_green", $cardId), "All 4 mana spent");
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll), "Troll still alive after 2 damage");
+        $this->assertEmpty($this->game->randQueue, "Exactly 8 dice rolled (4 per attack x 2 attacks)");
+    }
+
+    // --- Boldur Hero I (card_hero_4_1) ---
+    // No r/on — passive: "Armor. (Always prevents 1 damage)".
+    // Implemented in Hero::getArmor() returning 1 for heroNum===4. Op_resolveHits
+    // calls Character::applyArmor before queueing dealDamage so total incoming
+    // hits are reduced by 1 (floor 0). Driven via direct monsterAttack op to
+    // isolate the armor pipeline from monsterAttackAll's defender grouping.
+
+    private function runMonsterAttack(string $monsterId, string $heroHex): void {
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->game->machine->instantiateOperation("monsterAttack", null, [
+            "char" => $monsterId,
+            "target" => $heroHex,
+        ]);
+        $op->resolve();
+        $this->game->machine->dispatchAll();
+    }
+
+    public function testBoldurHeroIArmorAbsorbsOneDamagePerAttack(): void {
+        $this->assertEquals(1, $this->game->getHero($this->getActivePlayerColor())->getArmor(), "Boldur has armor=1");
+        // Brute (str=3) adjacent. Seed 2 hits + 1 miss → 2 hits, armor → 1 damage.
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+
+        $damageBefore = $this->countDamage($this->heroId);
+        $this->seedRand([5, 5, 1]);
+
+        $this->runMonsterAttack($brute, $boldurHex);
+
+        $this->assertEquals(
+            $damageBefore + 1,
+            $this->countDamage($this->heroId),
+            "Boldur takes 2 hits - 1 armor = 1 damage"
+        );
+    }
+
+    public function testBoldurHeroIArmorAbsorbsSingleHitToZero(): void {
+        // Goblin (str=1) adjacent → 1 die. Seed 1 hit → armor absorbs fully → 0 damage.
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $goblin = "monster_goblin_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+
+        $damageBefore = $this->countDamage($this->heroId);
+        $this->seedRand([5]);
+
+        $this->runMonsterAttack($goblin, $boldurHex);
+
+        $this->assertEquals(
+            $damageBefore,
+            $this->countDamage($this->heroId),
+            "Single hit fully absorbed by armor"
+        );
+    }
+
+    // --- Fortified I (card_ability_4_13) ---
+    // r=spendUse:1heal(self) — flip card as used, then heal 1 damage from Boldur.
+
+    public function testFortifiedIResolveHealsBoldurAndMarksUsed(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_4_13";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->confirmCardEffect();
+
+        $this->assertEquals(1, $this->countDamage($this->heroId), "Fortified I should heal 1 damage from Boldur");
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "card should be marked used (state=1)");
+    }
+
+    // --- Fortified II (card_ability_4_14) ---
+    // Same active effect as Fortified I (r=spendUse:1heal(self)) but with passive
+    // stat bonuses: strength=+1, health=+2.
+
+    public function testFortifiedIIHealsAndGrantsPassiveStatBonuses(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_4_14";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+        $hero = $this->game->getHero($color);
+        $hero->recalcTrackers();
+
+        // Passive stats: Boldur Hero I (3) + First Pick (1) + Fortified II (1) = 5 dice.
+        $this->assertEquals(5, $hero->getAttackStrength(), "Fortified II grants +1 strength");
+        // Health: Boldur Hero I (6) + Fortified II (2) = 8 max.
+        $this->assertEquals(8, $hero->getMaxHealth(), "Fortified II grants +2 health");
+
+        // Active effect: spendUse:1heal(self) — heal 1 damage and mark card used.
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        $this->confirmCardEffect();
+
+        $this->assertEquals(1, $this->countDamage($this->heroId), "Fortified II should heal 1 damage from Boldur");
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "card should be marked used (state=1)");
+    }
+
+    // --- Boldur Hero II (card_hero_4_2) ---
+    // r=empty, on=empty → passive stat-bearing card. strength=5, health=7.
+    // Effect text "Armor. (Always prevents 1 damage)" is delivered by Hero::getArmor (hno==4 → 1),
+    // shared with Hero I.
+
+    public function testBoldurHeroIIRaisesStrengthAndHealthKeepsArmor(): void {
+        $color = $this->getActivePlayerColor();
+        // Swap Hero I out for Hero II (setup places card_hero_4_1).
+        $this->game->tokens->moveToken("card_hero_4_1", "limbo");
+        $this->game->tokens->moveToken("card_hero_4_2", "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        $hero = $this->game->getHero($color);
+        // Strength = 5 (Hero II) + 1 (Boldur's First Pick in starter tableau).
+        $this->assertEquals(6, $hero->getAttackStrength(), "Hero II + First Pick strength");
+        $this->assertEquals(7, $hero->getMaxHealth(), "Hero II health");
+        $this->assertEquals(1, $hero->getArmor(), "Boldur retains armor=1 with Hero II");
     }
 }

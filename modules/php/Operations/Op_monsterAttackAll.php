@@ -18,18 +18,28 @@ class Op_monsterAttackAll extends Operation {
             return;
         }
 
-        $monsters = $this->game->hexMap->getMonstersOnMap();
-
-        foreach ($monsters as $m) {
+        // Bucket each monster by the hero it would attack so consecutive
+        // monsterAttack ops resolve against the same defender. Seer of Odin (II)
+        // has no single target and goes into its own auto-indexed slot.
+        $byHero = [];
+        foreach ($this->game->hexMap->getMonstersOnMap() as $m) {
             $monsterId = $m["key"];
-            $hex = $this->game->hexMap->getCharacterHex($monsterId);
+            if ($monsterId === "monster_legend_2_2") {
+                $byHero[][] = $monsterId;
+                continue;
+            }
+            /** @var Op_monsterAttack $attackOp */
+            $attackOp = $this->instantiateOperation("monsterAttack", null, ["char" => $monsterId]);
+            $heroId = $attackOp->findHeroTarget();
+            if ($heroId === null) {
+                continue;
+            }
+            $byHero[$heroId][] = $monsterId;
+        }
 
-            // Seer of Odin (II) attacks every hero regardless of range — bypass the range gate.
-            if (
-                $monsterId === "monster_legend_2_2" ||
-                $this->game->hexMap->isCharacterTypeInRange($hex, $this->game->getMonster($monsterId)->getAttackRange(), "hero")
-            ) {
-                $this->queue("monsterAttack", null, ["char" => $monsterId]);
+        foreach ($byHero as $heroId => $monsterIds) {
+            foreach ($monsterIds as $monsterId) {
+                $this->queue("monsterAttack", null, ["char" => $monsterId, "target" => $this->game->hexMap->getCharacterHex($heroId)]);
             }
         }
     }

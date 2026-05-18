@@ -442,4 +442,87 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         // Piercing Arrows has on=roll, so it should NOT be playable as a free action
         $this->assertNotValidTarget($piercingArrows, "Piercing Arrows should not be playable outside a roll");
     }
+
+    // --- Burning Arrows (card_event_1_28) ---
+
+    public function testBurningArrowsDeals1DamageOnPlains(): void {
+        $burningArrows = "card_event_1_28_1";
+        $color = $this->getActivePlayerColor();
+        $this->seedHand($burningArrows, $color);
+
+        // Hero at hex_7_9 (plains), goblin at hex_5_9 (plains) — in range 2.
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_7_9");
+        $goblin = "monster_goblin_20";
+        $goblinHex = "hex_5_9";
+        $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        $this->assertValidTarget($burningArrows);
+        $this->respond($burningArrows);
+        $this->assertValidTarget($goblinHex);
+        $this->respond($goblinHex);
+
+        $this->assertEquals(1, $this->countDamage($goblin), "Goblin on plains should take 1 damage");
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($burningArrows));
+    }
+
+    public function testBurningArrowsDeals2DamageInForest(): void {
+        $burningArrows = "card_event_1_28_2";
+        $color = $this->getActivePlayerColor();
+        $this->seedHand($burningArrows, $color);
+
+        // Hero at hex_7_9 (plains), troll at hex_5_11 (forest) — within attack range 2.
+        // Troll has health 6 so the 2 damage tokens stick (no removal).
+        $this->game->tokens->dbSetTokenLocation($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $trollHex = "hex_5_11";
+        $this->game->getMonster($troll)->moveTo($trollHex, "");
+
+        $this->assertValidTarget($burningArrows);
+        $this->respond($burningArrows);
+        $this->assertValidTarget($trollHex);
+        $this->respond($trollHex);
+
+        $this->assertEquals(2, $this->countDamage($troll), "Troll on forest should take 2 damage");
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($burningArrows));
+    }
+
+    // --- Perfect Aim (card_event_1_31) ---
+
+    public function testPerfectAimRerollsMissesIntoHits(): void {
+        $perfectAim = "card_event_1_31_1";
+        $color = $this->getActivePlayerColor();
+        $this->seedHand($perfectAim, $color);
+
+        $this->moveHeroOutOfGrimheim();
+        [$troll] = $this->spawnMonsterAdjacent("troll");
+
+        // Bjorn strength=3. Initial roll: miss, miss, hit. Reroll the 2 misses into hits.
+        $this->seedRand([1, 1, 5, 5, 5]);
+        $this->respond("actionAttack");
+
+        // trigger(roll) → useCard offers Bjorn Hero I and Perfect Aim together.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($perfectAim);
+        $this->respond($perfectAim);
+        // rerollMisses prompts for confirm before applying the reroll.
+        $this->confirmCardEffect();
+
+        // After reroll, useCard re-queues offering Bjorn Hero I — dismiss it.
+        $this->skipUseCard("card_hero_1_1");
+
+        // After reroll: 3 hits total → 3 damage on troll.
+        $this->assertEquals(3, $this->countDamage($troll), "Troll should take 3 damage after Perfect Aim rerolls 2 misses into hits");
+
+        // Perfect Aim is discarded from hand.
+        $this->assertNotEquals("hand_$color", $this->tokenLocation($perfectAim));
+    }
+
+    public function testPerfectAimNotOfferedOutsideRoll(): void {
+        $perfectAim = "card_event_1_31_1";
+        $color = $this->getActivePlayerColor();
+        $this->seedHand($perfectAim, $color);
+
+        // on=TRoll — should not be playable as a free action outside a roll.
+        $this->assertNotValidTarget($perfectAim, "Perfect Aim should not be playable outside a roll");
+    }
 }

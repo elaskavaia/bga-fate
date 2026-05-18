@@ -40,25 +40,18 @@ class Op_monsterAttack extends Operation {
             return;
         }
 
-        // Calculate monster strength with faction bonus and queue roll pipeline
-        $strength = $this->getMonsterStrength($monsterHex);
-
-        $heroHex = $this->getDataField("target", ""); // defender  hex
-
-        if (!$heroHex) {
-            // Find heroes in attack range
-            // Check via roll op whether this hero can be attacked on this hex
-            $rollOp = $this->instantiateOperation("roll", null, ["attacker" => $monsterId]);
-            $hexes = $rollOp->getArgs()["target"];
-
-            if (empty($hexes)) {
-                return; // No heroes to attack
-            }
-
-            // TODO: Hero selection — currently picks first
-            // Rules may require different targeting logic (e.g. closest, random, player choice).
-            $heroHex = $this->pickTarget($hexes);
+        // Target may be pinned by Op_monsterAttackAll's grouping pass. Re-evaluate
+        // if the pinned hex is no longer occupied by a hero (earlier attack in the
+        // batch may have KO'd or relocated the defender).
+        $heroHex = $this->getDataField("target", "");
+        if (!$heroHex || $this->game->hexMap->isOccupiedByCharacterType($heroHex, "hero") === null) {
+            $heroHex = $this->findHeroHex();
         }
+        if (!$heroHex) {
+            return; // No heroes to attack
+        }
+
+        $strength = $this->getMonsterStrength($monsterHex);
 
         $this->game->tokens->dbSetTokenLocation("marker_attack", $heroHex, 0, "");
         $this->queue("roll", null, [
@@ -67,6 +60,40 @@ class Op_monsterAttack extends Operation {
             "count" => $strength,
         ]);
         $this->queue("endOfAttack");
+    }
+
+    /**
+     * Hero token id this monster would attack, or null if none in range.
+     * Used by Op_monsterAttackAll to group attacks by defender.
+     */
+    public function findHeroTarget(): ?string {
+        $monsterId = $this->getDataField("char", "");
+        if (!$monsterId) {
+            return null;
+        }
+        if ($this->game->getMonster($monsterId)->getHex() === null) {
+            return null;
+        }
+        $heroHex = $this->findHeroHex();
+        if (!$heroHex) {
+            return null;
+        }
+        return $this->game->hexMap->isOccupiedByCharacterType($heroHex, "hero");
+    }
+
+    /**
+     * Pick a hero hex in attack range (delegates target enumeration to Op_roll).
+     */
+    private function findHeroHex(): ?string {
+        $monsterId = $this->getDataField("char", "");
+        $rollOp = $this->instantiateOperation("roll", null, ["attacker" => $monsterId]);
+        $hexes = $rollOp->getArgs()["target"];
+        if (empty($hexes)) {
+            return null;
+        }
+        // TODO: Hero selection — currently picks first.
+        // Rules may require different targeting logic (e.g. closest, random, player choice).
+        return $this->pickTarget($hexes);
     }
 
     /**

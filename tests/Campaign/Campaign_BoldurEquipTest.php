@@ -20,6 +20,33 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->clearHand($this->getActivePlayerColor());
     }
 
+    // --- Boldur's First Pick (card_equip_4_15) ---
+    // Passive starting Main Weapon: +1 strength, mw=1. No r, no on. Auto-placed on the
+    // tableau during setup. Test (a) it contributes to base strength out of the gate,
+    // and (b) gaining another Main Weapon displaces it to limbo.
+
+    public function testFirstPickIsOnTableauAndContributesOneStrengthAtSetup(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_equip_4_15";
+
+        $this->assertEquals("tableau_$color", $this->tokenLocation($cardId), "First Pick auto-placed on tableau at setup");
+        // Boldur I (3) + First Pick (1) = 4 base strength.
+        $this->assertEquals(4, $this->game->getHero($color)->getAttackStrength());
+    }
+
+    public function testFirstPickIsDisplacedWhenGainingAnotherMainWeapon(): void {
+        $color = $this->getActivePlayerColor();
+        $firstPick = "card_equip_4_15";
+        $eitri = "card_equip_4_22"; // Also mw=1.
+
+        $this->assertEquals("tableau_$color", $this->tokenLocation($firstPick));
+        $this->game->machine->push("gainEquip", $color, ["target" => $eitri]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("tableau_$color", $this->tokenLocation($eitri), "Eitri's Pick lands on tableau");
+        $this->assertEquals("limbo", $this->tokenLocation($firstPick), "First Pick displaced to limbo");
+    }
+
     // --- Dvalin's Pick (card_equip_4_20) ---
     // r=spendAction(actionAttack):gainXp,gainMana,drawEvent — spend attack action for 1 XP, 1 mana, 1 card.
 
@@ -215,5 +242,32 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation($troll));
         // Confirm exactly 8 dice rolled — the 2 from Eitri's hook on top of 6 base.
         $this->assertEmpty($this->game->randQueue, "Should have rolled exactly 8 dice");
+    }
+
+    // --- Precision Axes (card_equip_4_26) ---
+    // r=spendUse:spendDurab:dealDamage(adj) — manual activation: spend 1 use +
+    // 1 durability to deal 1 unpreventable damage to an adjacent monster (no dice).
+
+    public function testPrecisionAxesDealsOneUnpreventableDamageToAdjacentMonster(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_equip_4_26";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+        // dealDamage(adj) prompts for the adjacent monster hex — only one valid target here.
+        $this->confirmCardEffect();
+
+        // 1 unpreventable damage on troll (no dice rolled).
+        $this->assertEquals(1, $this->countDamage($troll));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
+        // Durability cost: one red crystal on the card.
+        $this->assertEquals(1, $this->countTokens("crystal_red", $cardId), "spendDurab adds 1 red to the card");
+        // Use marker spent — card state flips to 1 (used-this-turn).
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "spendUse sets card state to 1");
     }
 }

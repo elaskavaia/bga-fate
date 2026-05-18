@@ -554,8 +554,10 @@
   background-color: #e53935;
 }
 
-.monster > .bucket_crystal_red[data-max]::after {
-  content: attr(data-remaining) "/" attr(data-max);
+.monster > .bucket_crystal_red[data-max]:not([data-state="0"])::after,
+.hero > .bucket_crystal_red[data-max]:not([data-state="0"])::after,
+.miniboard_damage[data-max]:not([data-state="0"])::after {
+  content: attr(data-state) "/" attr(data-max);
   width: auto;
   aspect-ratio: unset;
   padding: 0 5px;

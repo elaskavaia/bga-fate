@@ -33,3 +33,50 @@
 - [ ] [types.d.ts:76](../../src/types.d.ts#L76) — Trailing `XXX` on `err?` field comment with no explanation. **Cosmetic** — drop the marker or explain the concern.
 - [ ] [Game.ts:54](../../src/Game.ts#L54) — `onToken` always routes to `playerTurn.onToken`; should dispatch by current state. **Valid** — works today because only playerTurn handles token clicks, but fragile.
 - [ ] [DbTokens.php:995](../../modules/php/Db/DbTokens.php#L995) — `isConsideredLocation` matches only exact `type=="location"`; XXX asks about `contains?`. **Valid question** — check whether composite types (e.g. `location,deck`) exist and need to match.
+
+### Missing Campaign tests (swept on 2026-05-17)
+
+34 of 145 cards had no reference in [tests/Campaign/](../../tests/Campaign/). Verifier sweep on 2026-05-17 added integration tests for 29; 5 are blocked on implementation work (see annotations).
+
+Hero cards:
+- [x] card_hero_3_1 — Embla Hero I — has tests
+- [x] card_hero_3_2 — Embla Hero II — has tests
+- [x] card_hero_4_1 — Boldur Hero I — has tests
+- [x] card_hero_4_2 — Boldur Hero II — has tests
+
+Ability cards:
+- [x] card_ability_2_5 — Treetreader I — has tests
+- [x] card_ability_3_7 — Fleetfoot I — has tests
+- [ ] card_ability_3_8 — Fleetfoot II — **r mismatch**: missing mountain/occupied-hex passthrough (effect text "may always move into mountains and through occupied areas" not implemented; `r=spendUse:move` identical to Fleetfoot I)
+- [x] card_ability_3_13 — Swift Kick I — has tests
+- [x] card_ability_3_14 — Swift Kick II — has tests
+- [x] card_ability_4_4 — Rapid Strike II — has tests
+- [x] card_ability_4_10 — Beefy Berserker II — has tests
+- [ ] card_ability_4_12 — Dreadnought II — **r partial**: `spendMana:(preventDamage,custom)` — reflect-damage half undesigned ("Each adjacent monster that attacks you is dealt 1 damage")
+- [x] card_ability_4_13 — Fortified I — has tests
+- [x] card_ability_4_14 — Fortified II — has tests (calcBaseHealth fixed to aggregate)
+
+Equip cards:
+- [x] card_equip_3_15 — Flimsy Blade — has tests
+- [x] card_equip_3_26 — Throwing Knives — has tests
+- [x] card_equip_4_15 — Boldur's First Pick — has tests
+- [x] card_equip_4_26 — Precision Axes — has tests
+
+Event cards:
+- [x] card_event_1_28 — Burning Arrows — has tests
+- [x] card_event_1_31 — Perfect Aim — has tests
+- [x] card_event_3_28 — Kick (Embla) — has tests
+- [x] card_event_3_30 — Courage — has tests
+- [x] card_event_3_31 — Retaliation — has tests
+- [x] card_event_3_32 — Vigilance — has tests
+- [x] card_event_3_36 — Durability (Embla) — has tests
+- [x] card_event_3_37 — Preparations — has tests
+- [x] card_event_4_27 — Miner — has tests
+- [x] card_event_4_28 — Short Temper — has tests
+- [x] card_event_4_29 — Maneuver — has tests
+- [x] card_event_4_30 — Rest — has tests
+- [x] card_event_4_31 — Kick (Boldur) — has tests
+- [x] card_event_4_33 — Focus — has tests
+- [x] card_event_4_34 — Durability (Boldur) — has tests
+- [x] card_event_4_37 — Seek Shelter — has tests
+

@@ -208,10 +208,13 @@ class Hero extends Character {
         return max($total, 0);
     }
 
-    /** Compute base max health from the hero card on tableau. */
+    /** Compute base max health by summing 'health' across all tableau cards (hero + abilities/equips). */
     function calcBaseHealth(): int {
-        $heroCardKey = $this->game->tokens->getTokensOfTypeInLocationSingleKey("card_hero", "tableau_{$this->owner}");
-        return (int) $this->game->material->getRulesFor($heroCardKey, "health", 9);
+        $total = 0;
+        foreach ($this->getTableauCards() as $card) {
+            $total += (int) $this->game->material->getRulesFor($card["key"], "health", 0);
+        }
+        return max($total, 1);
     }
 
     /** Compute base attack range from equipment cards. Default is 1. */

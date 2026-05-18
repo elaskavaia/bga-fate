@@ -114,6 +114,58 @@ class Campaign_EmblaEquipTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($secondary), "Wildfire Blade deals 1 damage to secondary");
     }
 
+    // --- Flimsy Blade (card_equip_3_15) ---
+    // Embla's starting equipment. Passive +1 strength, no r, no on, no effect.
+
+    public function testFlimsyBladeStartsOnTableauAndAddsOneStrengthDie(): void {
+        $cardId = "card_equip_3_15";
+        $color = $this->getActivePlayerColor();
+        $tableau = "tableau_$color";
+
+        // Starting equipment — already on tableau after setupGame, no manual move needed.
+        $this->assertEquals($tableau, $this->tokenLocation($cardId), "Flimsy Blade on Embla tableau at setup");
+
+        // Embla I = 3 strength + Flimsy Blade = 4 dice.
+        $this->assertEquals(4, $this->game->getHero($color)->getAttackStrength());
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // 4 dice, all hits — troll (health=6) survives.
+        $this->seedRand([5, 5, 5, 5]);
+        $this->respond("hex_7_8");
+
+        $this->assertEquals(4, $this->countDamage($troll));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
+        $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 4 dice");
+    }
+
+    // --- Throwing Knives (card_equip_3_26) ---
+    // r=spendUse:spendDurab:3roll(adj), durability 2: spend use + 1 durability → roll 3 dice vs adjacent monster.
+
+    public function testThrowingKnivesRollsThreeDiceAtAdjacentMonster(): void {
+        $cardId = "card_equip_3_26";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Embla outside Grimheim, single adjacent troll (health=6) so roll(adj) has no target choice.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $troll = "monster_troll_1";
+        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
+
+        // 3 dice, all hits (count comes from the rule literal, not hero strength).
+        $this->seedRand([5, 5, 5]);
+        $this->assertValidTarget($cardId);
+        $this->respond($cardId);
+
+        // 3 damage on troll, 1 durability spent on the card, troll survives (health=6).
+        $this->assertEquals(3, $this->countDamage($troll));
+        $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
+        $this->assertEquals(1, $this->countDamage($cardId), "1 red crystal placed on Throwing Knives (durability cost)");
+        $this->assertEmpty($this->game->randQueue, "Throwing Knives should consume exactly 3 dice");
+    }
+
     // --- Helmet (card_equip_3_20) ---
     // r=spendDurab:preventDamage, on=TResolveHits, durability=3.
     // Reactively prevent 1 incoming damage by adding a red crystal to the card.
