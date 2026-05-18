@@ -758,6 +758,15 @@ class Material {
         "create" => 1,
         "location" => "limbo",
 ],
+// # attack instigator marker (location = the attacking monster's token id during one monsterAttack pipeline)
+    "marker_instigator" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Attack Instigator"),
+        "count" => 1,
+        "type" => "marker_instigator",
+        "create" => 1,
+        "location" => "limbo",
+],
 // #resources
     "crystal_green" => [ 
         "state" => 0,
@@ -5597,7 +5606,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Retaliation"),
         "count" => 3,
-        "r" => "2dealDamage(adj)",
+        "r" => "2dealDamage(adj,'is_instigator')",
         "on" => "TResolveHits",
         "effect" => clienttranslate("Play after an adjacent monster attacked you to deal 2 damage to it."),
 ],

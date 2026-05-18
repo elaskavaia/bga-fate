@@ -15,5 +15,6 @@ class Op_endOfAttack extends Operation {
         $trigger = Trigger::AfterActionAttack;
         $this->queueTrigger($trigger);
         $this->game->tokens->dbSetTokenLocation("marker_attack", "limbo", 0, "");
+        $this->game->tokens->dbSetTokenLocation("marker_instigator", "limbo", 0, "");
     }
 }

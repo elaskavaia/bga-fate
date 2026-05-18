@@ -54,6 +54,7 @@ class Op_monsterAttack extends Operation {
         $strength = $this->getMonsterStrength($monsterHex);
 
         $this->game->tokens->dbSetTokenLocation("marker_attack", $heroHex, 0, "");
+        $this->game->tokens->dbSetTokenLocation("marker_instigator", $monsterId, 0, "");
         $this->queue("roll", null, [
             "attacker" => $monsterId,
             "target" => $heroHex,

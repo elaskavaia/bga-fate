@@ -30,6 +30,9 @@ marker|Player Marker|3|marker|3|limbo
 # attack target marker (placed on hex during attack pipeline)
 marker_attack|Attack Target|1|marker_attack|1|limbo
 
+# attack instigator marker (location = the attacking monster's token id during one monsterAttack pipeline)
+marker_instigator|Attack Instigator|1|marker_instigator|1|limbo
+
 #resources
 crystal_green|Green Crystal|50||2|supply_crystal_green
 crystal_red|Red Crystal|50||2|supply_crystal_red

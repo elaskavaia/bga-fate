@@ -390,6 +390,11 @@ class Game extends Base {
             $heroDist = $distMap[$heroHex] ?? PHP_INT_MAX;
             $monsterDist = $distMap[$contextHex] ?? PHP_INT_MAX;
             return (int) ($monsterDist < $heroDist);
+        } elseif ($x === "is_instigator") {
+            // Used by Retaliation to narrow dealDamage targets to the monster that just attacked.
+            // Op_monsterAttack stores the attacker's token id as marker_instigator's location.
+            $instigatorId = $this->tokens->getTokenLocation("marker_instigator");
+            return (int) ($instigatorId !== "" && $context === $instigatorId);
         }
 
         //id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor

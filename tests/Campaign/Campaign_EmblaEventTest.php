@@ -150,13 +150,17 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $retaliation = "card_event_3_31_1";
         $this->seedHand($retaliation, $color);
 
-        // Park Embla on plains with a troll (hp=6) adjacent — survives 2 damage so we can read it.
+        // Two adjacent attackers. Goblin attacks first (per Op_monsterAttackAll's iteration order)
+        // and becomes the instigator when TResolveHits fires — Retaliation should hit goblin only,
+        // not the also-adjacent troll.
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
-        $troll = "monster_troll_1";
+        $troll = "monster_troll_1"; // hp=6, str=3 — adjacent bystander, untouched by Retaliation
+        $goblin = "monster_goblin_1"; // hp=2, str=2 — the actual attacker killed by Retaliation
         $this->game->getMonster($troll)->moveTo("hex_7_8", "");
-        $this->seedRand([5, 5, 5]); // troll str=3 → all hits land
+        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
+        // 3 troll dice + 2 goblin dice → seed 5 values, all hits
+        $this->seedRand([5, 5, 5, 5, 5]);
 
-        // Burn both actions → monster turn → troll attacks Embla → TResolveHits fires.
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         $this->skipOp("turn");
@@ -165,9 +169,12 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($retaliation);
         $this->respond($retaliation);
-        // dealDamage(adj) auto-resolves on the single adjacent troll.
+        // is_instigator filter narrows dealDamage(adj) to the goblin (the first attacker, by
+        // Op_monsterAttackAll's iteration order). dealDamage auto-resolves on it; the 2 damage
+        // kills the goblin (hp=2). Troll, the adjacent bystander, is untouched by Retaliation.
 
-        $this->assertEquals(2, $this->countDamage($troll), "Troll takes 2 damage from Retaliation");
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin), "Goblin (the attacker) killed by Retaliation");
+        $this->assertEquals(0, $this->countDamage($troll), "Troll (adjacent bystander) is not hit by Retaliation");
         $this->assertNotEquals("hand_$color", $this->tokenLocation($retaliation), "Retaliation discarded after use");
     }
 
