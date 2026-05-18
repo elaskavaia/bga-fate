@@ -261,6 +261,14 @@ export class Game0Basics {
   isSolo() {
     return this.gamedatas.playerorder.length == 1;
   }
+  // Player ids in turn order, rotated so current player is first (unless spectator)
+  getOrderedPlayerIds(gamedatas: any): number[] {
+    const ids: number[] = gamedatas.playerorder.map(Number);
+    if (this.bga.players.isCurrentPlayerSpectator()) return ids;
+    const idx = ids.indexOf(this.player_id);
+    if (idx <= 0) return ids;
+    return ids.slice(idx).concat(ids.slice(0, idx));
+  }
 
   protected lastMoveId = 0;
   private prevLogId = 0;

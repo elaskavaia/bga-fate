@@ -243,6 +243,16 @@ class Game0Basics {
     isSolo() {
         return this.gamedatas.playerorder.length == 1;
     }
+    // Player ids in turn order, rotated so current player is first (unless spectator)
+    getOrderedPlayerIds(gamedatas) {
+        const ids = gamedatas.playerorder.map(Number);
+        if (this.bga.players.isCurrentPlayerSpectator())
+            return ids;
+        const idx = ids.indexOf(this.player_id);
+        if (idx <= 0)
+            return ids;
+        return ids.slice(idx).concat(ids.slice(0, idx));
+    }
     addTooltipToLogItems(log_id) {
         // override
     }
@@ -2235,8 +2245,6 @@ class Game extends Game1Tokens {
       </div>`, title);
             placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
             placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
-            // Players panels (left side in wide layout, top in narrow)
-            placeHtml(`<div id="players_panels"></div>`, "thething");
             // Board area: map + monster turn display + supply (right side in wide layout)
             const mapWrapper = "map_wrapper";
             placeHtml(`<div id="board_area">
@@ -2257,13 +2265,17 @@ class Game extends Game1Tokens {
       <div id="timetrack_area"></div>
       </div>`, "thething");
             this.createMap($(mapWrapper));
+            // Players panels
+            placeHtml(`<div id="players_panels"></div>`, "thething");
             // Create hand container for current player only (not spectators)
             if (!this.bga.players.isCurrentPlayerSpectator()) {
                 const myColor = this.player_color;
                 const name = _("Hand");
                 placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, "players_panels");
             }
-            Object.values(gamedatas.players).forEach((player) => {
+            const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
+            orderedPlayerIds.forEach((pid) => {
+                const player = gamedatas.players[pid];
                 const color = player.color;
                 const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
                 placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
@@ -2509,6 +2521,9 @@ class Game extends Game1Tokens {
             };
         }
         else if (tokenKey.startsWith("display_battle")) {
+            result.nop = true;
+        }
+        else if (tokenKey.startsWith("tableau")) {
             result.nop = true;
         }
         return result;

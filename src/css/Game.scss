@@ -275,13 +275,24 @@ $logsBgColor: #c6ebe2ba; // #b5e6e3;
   }
 }
 
+// Force border-box on player_boards children to prevent horizontal scrollbar overflow on mobile.
+#player_boards > div {
+  box-sizing: border-box !important;
+}
+
+.mobile_version #player_boards {
+  box-sizing: border-box !important;
+  width: 100%;
+}
+
 #page-title {
   line-height: 24px;
   background-color: $logsBgColor !important;
+  box-sizing: border-box !important;
 }
 
 .game_top_bar {
-  width: 100%;
+  width: calc(100% - 10px);
   position: absolute;
   top: 100%;
   margin-top: 5px;

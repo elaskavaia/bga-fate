@@ -1704,7 +1704,8 @@
 .hand_wrapper,
 .tableau {
   margin-top: 10px;
-  margin-left: 20px;
+  padding-left: 20px;
+  box-sizing: border-box;
 }
 
 #display_battle {
@@ -2086,13 +2087,23 @@ html:before {
   background-color: rgba(198, 235, 226, 0.7294117647);
 }
 
+#player_boards > div {
+  box-sizing: border-box !important;
+}
+
+.mobile_version #player_boards {
+  box-sizing: border-box !important;
+  width: 100%;
+}
+
 #page-title {
   line-height: 24px;
   background-color: rgba(198, 235, 226, 0.7294117647) !important;
+  box-sizing: border-box !important;
 }
 
 .game_top_bar {
-  width: 100%;
+  width: calc(100% - 10px);
   position: absolute;
   top: 100%;
   margin-top: 5px;

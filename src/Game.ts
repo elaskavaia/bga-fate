@@ -74,8 +74,7 @@ export class Game extends Game1Tokens {
       );
       placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
       placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
-      // Players panels (left side in wide layout, top in narrow)
-      placeHtml(`<div id="players_panels"></div>`, "thething");
+
       // Board area: map + monster turn display + supply (right side in wide layout)
       const mapWrapper = "map_wrapper";
       placeHtml(
@@ -99,7 +98,9 @@ export class Game extends Game1Tokens {
         "thething"
       );
 
-      this.createMap($(mapWrapper));
+      this.createMap($(mapWrapper)!);
+      // Players panels
+      placeHtml(`<div id="players_panels"></div>`, "thething");
       // Create hand container for current player only (not spectators)
       if (!this.bga.players.isCurrentPlayerSpectator()) {
         const myColor = this.player_color;
@@ -107,7 +108,9 @@ export class Game extends Game1Tokens {
         placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, "players_panels");
       }
 
-      Object.values(gamedatas.players).forEach((player: CustomPlayer) => {
+      const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
+      orderedPlayerIds.forEach((pid: number) => {
+        const player: CustomPlayer = gamedatas.players[pid];
         const color = player.color;
         const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
 
@@ -366,6 +369,8 @@ export class Game extends Game1Tokens {
         this.animationLa.evaporate(node, target);
       };
     } else if (tokenKey.startsWith("display_battle")) {
+      result.nop = true;
+    } else if (tokenKey.startsWith("tableau")) {
       result.nop = true;
     }
 

@@ -395,7 +395,8 @@
   width: 100%;
   @include v.vertical-title;
   margin-top: 10px;
-  margin-left: 20px;
+  padding-left: 20px;
+  box-sizing: border-box;
 }
 
 // Battle display (dice rolled during attack) — overlays map top center
