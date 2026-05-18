@@ -120,4 +120,9 @@ class Op_or extends ComplexOperation {
         }
         return count($nonVoid) <= 1 && (!$nonVoid || $nonVoid[0]->isTrivial());
     }
+
+    /** If operation require confirmation it will be sent to user and not auto-resolved */
+    function requireConfirmation() {
+        return (bool) $this->getDataField("l_confirm", false);
+    }
 }

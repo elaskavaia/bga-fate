@@ -84,13 +84,8 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testPlayRestCardHealsHero(): void {
-        // setUp adds 3 damage; Rest r=2heal(self) heals 2 → 1 remaining
+        // setUp adds 3 damage; Rest r=2heal(self) auto-resolves on the single self target → 1 remaining
         $this->call_resolve(EVENT_CARD);
-        $this->dispatchAll();
-        $queued = $this->game->machine->getTopOperations(PCOLOR);
-        $this->assertNotEmpty($queued);
-        $healOp = $this->game->machine->instantiateOperationFromDbRow(reset($queued));
-        $healOp->action_resolve([Operation::ARG_TARGET => "hero_1"]);
         $this->dispatchAll();
 
         $damage = $this->countRedCrystals("hero_1");

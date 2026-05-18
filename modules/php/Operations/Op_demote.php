@@ -37,6 +37,10 @@ class Op_demote extends Operation {
         return true;
     }
 
+    public function getSkipName() {
+        return clienttranslate("Do not Demote");
+    }
+
     public function getPrompt() {
         return clienttranslate("You may demote the top equipment or ability to the bottom of its pile");
     }

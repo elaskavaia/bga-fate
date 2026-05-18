@@ -1514,10 +1514,6 @@ class LaZoom {
     setup() {
         this.destroyDivOtherCopies("board_layout_controls");
         const host = document.getElementById("page-title");
-        if (!host) {
-            console.error("LaZoom: host element #page-title not found, zoom controls disabled");
-            return;
-        }
         host.insertAdjacentHTML("beforeend", `<div id="board_layout_controls" class="board_layout_controls">
         <button id="layout_home" class="layout_button active" title="${_("Fit to screen")}"><i class="fa6 fa6-arrows-to-dot"></i></button>
         <button id="layout_zoom_in" class="layout_button" title="${_("Zoom in")}"><i class="fa fa-search-plus"></i></button>
@@ -2228,15 +2224,16 @@ class Game extends Game1Tokens {
         try {
             console.log("Starting game setup");
             super.setup(gamedatas);
+            const title = $("page-title");
+            const topbar = $("game_top_bar");
+            if (topbar)
+                topbar.remove();
             placeHtml(`
       <div id='game_top_bar' class='game_top_bar'>
         <div id='selection_area' class='selection_area'>
         </div>
-
-      </div>
-      <div id="thething_wrap">
-        <div id="thething"></div>
-      </div>`, this.bga.gameArea.getElement());
+      </div>`, title);
+            placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
             placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
             // Players panels (left side in wide layout, top in narrow)
             placeHtml(`<div id="players_panels"></div>`, "thething");

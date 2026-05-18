@@ -36,7 +36,7 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($brute)->moveTo("hex_7_8", "");
 
         $this->respond($cardId);
-        $this->respond("hex_7_8"); // Op_c_queen prompts for adjacent monster hex
+        // c_queen auto-resolves on the single adjacent brute.
 
         // Brute took 2 damage, survived, swapped onto hero's old hex
         $this->assertEquals(2, $this->countDamage($brute));
@@ -56,7 +56,7 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
 
         $this->respond($cardId);
-        $this->respond("hex_7_8");
+        // c_queen auto-resolves on the single adjacent goblin.
 
         // Goblin killed → off the map
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
@@ -79,7 +79,7 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($troll)->moveTo("hex_7_8", "");
 
         $this->respond($cardId);
-        $this->respond("hex_7_8");
+        // c_queen auto-resolves on the single adjacent troll.
 
         $this->assertEquals(4, $this->countDamage($troll));
         $this->assertEquals("hex_7_9", $this->tokenLocation($troll));

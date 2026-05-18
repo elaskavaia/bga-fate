@@ -49,11 +49,7 @@ export class LaZoom {
 
   setup() {
     this.destroyDivOtherCopies("board_layout_controls");
-    const host = document.getElementById("page-title");
-    if (!host) {
-      console.error("LaZoom: host element #page-title not found, zoom controls disabled");
-      return;
-    }
+    const host = document.getElementById("page-title")!;
 
     host.insertAdjacentHTML(
       "beforeend",
@@ -69,9 +65,9 @@ export class LaZoom {
     this.mode = savedMode === "manual" ? "manual" : "fit";
     this.scale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
 
-    $("layout_home").addEventListener("click", () => this.setMode("fit"));
-    $("layout_zoom_in").addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
-    $("layout_zoom_out").addEventListener("click", () => this.zoomByFactor(1 / this.opts.stepFactor));
+    $("layout_home")!.addEventListener("click", () => this.setMode("fit"));
+    $("layout_zoom_in")!.addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
+    $("layout_zoom_out")!.addEventListener("click", () => this.zoomByFactor(1 / this.opts.stepFactor));
 
     window.addEventListener("resize", this.boundOnResize);
 

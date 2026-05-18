@@ -34,11 +34,15 @@ class Op_turnMonster extends Operation {
         if ($this->game->isMonsterDieOn()) {
             $this->queue("rollMonsterDie");
         }
-        // Pre-movement trigger: Suppressive Fire and similar abilities
+        // Pre-movement trigger: Suppressive Fire and similar abilities that prevent movement
         foreach ($this->game->getPlayerColors() as $color) {
             $this->queueTrigger(Trigger::MonsterMove, $color);
         }
         $this->queue("monsterMoveAll", null, ["charge" => $isChargeTurn]);
+        // Post-movement trigger: Vigilance and similar abilities that react to new positions
+        foreach ($this->game->getPlayerColors() as $color) {
+            $this->queueTrigger(Trigger::AfterMonsterMove, $color);
+        }
         $this->queue("monsterAttackAll");
         if ($spotType === "tm_yellow_axes") {
             $this->queue("reinforcement", null, ["deck" => "deck_monster_yellow"]);

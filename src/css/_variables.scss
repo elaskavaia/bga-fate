@@ -125,7 +125,7 @@ $pboardHeight: calc($cardHeight * 2.4);
   &::after {
     content: counter(pile);
     position: absolute;
-    top: 4px;
+    top: 16px;
     right: 2px;
     min-width: 1.5em;
     font-size: small;

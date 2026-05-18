@@ -5633,7 +5633,7 @@ class Material {
         "name" => clienttranslate("Vigilance"),
         "count" => 2,
         "r" => "dealDamage(adj)",
-        "on" => "TMonsterMove",
+        "on" => "TAfterMonsterMove",
         "effect" => clienttranslate("Play after the Monsters Move step. Deal 1 damage to an adjacent monster."),
         "flavour" => "Under cover, over confident.",
 ],

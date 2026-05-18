@@ -1212,7 +1212,7 @@
 .pile_monster::after {
   content: counter(pile);
   position: absolute;
-  top: 4px;
+  top: 16px;
   right: 2px;
   min-width: 1.5em;
   font-size: small;
@@ -1277,7 +1277,7 @@
 .supply_crystal_yellow::after {
   content: counter(pile);
   position: absolute;
-  top: 4px;
+  top: 16px;
   right: 2px;
   min-width: 1.5em;
   font-size: small;
@@ -1309,7 +1309,7 @@
 #supply_die_monster::after {
   content: counter(pile);
   position: absolute;
-  top: 4px;
+  top: 16px;
   right: 2px;
   min-width: 1.5em;
   font-size: small;
@@ -2093,8 +2093,9 @@ html:before {
 
 .game_top_bar {
   width: 100%;
-  position: sticky;
-  top: 86px;
+  position: absolute;
+  top: 100%;
+  margin-top: 5px;
   align-self: flex-start;
   min-height: 46px;
   z-index: 20;
@@ -2102,6 +2103,7 @@ html:before {
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  font-weight: normal;
 }
 .game_top_bar > * {
   position: relative;

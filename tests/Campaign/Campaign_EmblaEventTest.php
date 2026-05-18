@@ -136,9 +136,7 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
 
         $this->assertValidTarget($courage);
         $this->respond($courage);
-        // dealDamage prompts for the target hex (target-picking op).
-        $this->assertOperation("dealDamage");
-        $this->respond("hex_7_8");
+        // dealDamage(adj) auto-resolves on the single adjacent troll.
 
         $this->assertEquals(2, $this->countDamage($troll), "Troll takes 2 damage from Courage");
         $this->assertNotEquals("hand_$color", $this->tokenLocation($courage), "Courage discarded after use");
@@ -167,17 +165,15 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($retaliation);
         $this->respond($retaliation);
-        // dealDamage prompts for the adjacent monster hex (target-picking op).
-        $this->assertOperation("dealDamage");
-        $this->respond("hex_7_8");
+        // dealDamage(adj) auto-resolves on the single adjacent troll.
 
         $this->assertEquals(2, $this->countDamage($troll), "Troll takes 2 damage from Retaliation");
         $this->assertNotEquals("hand_$color", $this->tokenLocation($retaliation), "Retaliation discarded after use");
     }
 
     // --- Vigilance (card_event_3_32) ---
-    // r=dealDamage(adj), on=TMonsterMove
-    // Play around the Monsters Move step. Deal 1 damage to an adjacent monster.
+    // r=dealDamage(adj), on=TAfterMonsterMove
+    // Play after the Monsters Move step. Deal 1 damage to an adjacent monster.
     public function testVigilanceDeals1DamageToAdjacentMonster(): void {
         $color = $this->getActivePlayerColor();
         $vigilance = "card_event_3_32_1";
@@ -188,7 +184,7 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $troll = "monster_troll_1";
         $this->game->getMonster($troll)->moveTo("hex_7_8", "");
 
-        // Burn the player turn → monster turn → TMonsterMove trigger fires (pre-movement).
+        // Burn the player turn → monster turn → TAfterMonsterMove trigger fires (post-movement).
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         // Seed troll attack dice as misses so the troll survives and its 1 Vigilance damage
@@ -200,9 +196,7 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($vigilance);
         $this->respond($vigilance);
-        // dealDamage prompts for the adjacent monster hex (target-picking op).
-        $this->assertOperation("dealDamage");
-        $this->respond("hex_7_8");
+        // dealDamage(adj) auto-resolves on the single adjacent troll.
 
         $this->assertEquals(1, $this->countDamage($troll), "Troll takes 1 damage from Vigilance");
         $this->assertNotEquals("hand_$color", $this->tokenLocation($vigilance), "Vigilance discarded after use");

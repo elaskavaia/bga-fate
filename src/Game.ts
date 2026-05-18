@@ -60,18 +60,19 @@ export class Game extends Game1Tokens {
     try {
       console.log("Starting game setup");
       super.setup(gamedatas);
+
+      const title = $("page-title")!;
+      const topbar = $("game_top_bar");
+      if (topbar) topbar.remove();
       placeHtml(
         `
       <div id='game_top_bar' class='game_top_bar'>
         <div id='selection_area' class='selection_area'>
         </div>
-
-      </div>
-      <div id="thething_wrap">
-        <div id="thething"></div>
       </div>`,
-        this.bga.gameArea.getElement()
+        title
       );
+      placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
       placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
       // Players panels (left side in wide layout, top in narrow)
       placeHtml(`<div id="players_panels"></div>`, "thething");

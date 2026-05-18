@@ -322,8 +322,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->assertValidTarget($masterShot);
 
         $this->respond($masterShot);
-        $this->confirmCardEffect();
-
+        // Master Shot's 2addDamage auto-resolves; chained useCard offers Bjorn Hero I (on=Roll) — decline it.
         $this->skipIfOp("useCard");
 
         // Master Shot adds 2 damage dice → troll takes 3 hits + 2 bonus = 5 total damage
@@ -504,10 +503,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget($perfectAim);
         $this->respond($perfectAim);
-        // rerollMisses prompts for confirm before applying the reroll.
-        $this->confirmCardEffect();
-
-        // After reroll, useCard re-queues offering Bjorn Hero I — dismiss it.
+        // rerollMisses auto-resolves; chained useCard offers Bjorn Hero I (on=Roll) — dismiss it.
         $this->skipUseCard("card_hero_1_1");
 
         // After reroll: 3 hits total → 3 damage on troll.

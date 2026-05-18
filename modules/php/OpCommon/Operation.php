@@ -614,9 +614,8 @@ abstract class Operation {
         return Operation::TTYPE_TOKEN;
     }
 
-    /** If operation require confirmation it will be sent to user and not auto-resolved */
     function requireConfirmation() {
-        return (bool) $this->getDataField("l_confirm", false);
+        return false;
     }
 
     function getUiArgs() {

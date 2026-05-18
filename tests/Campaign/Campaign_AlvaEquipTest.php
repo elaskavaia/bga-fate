@@ -195,7 +195,7 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
         $this->assertValidTarget("card_equip_2_21");
         $this->respond("card_equip_2_21");
-        $this->respond("hex_7_8");
+        // dealDamage(adj) auto-resolves on the single adjacent bystander at hex_7_8.
 
         // Attack target at hex_5_9 is NOT adjacent to Alva, so it's excluded from Elven Blade's reach.
         $this->assertEquals(0, $this->countDamage($target), "Attack target was out of Elven Blade's adj range");

@@ -282,16 +282,17 @@ $logsBgColor: #c6ebe2ba; // #b5e6e3;
 
 .game_top_bar {
   width: 100%;
-  position: sticky;
-  top: 86px;
+  position: absolute;
+  top: 100%;
+  margin-top: 5px;
   align-self: flex-start;
   min-height: 46px;
   z-index: 20;
-
   display: flex;
   justify-content: center;
   gap: 10px;
   flex-wrap: wrap;
+  font-weight: normal;
 
   & > * {
     position: relative;

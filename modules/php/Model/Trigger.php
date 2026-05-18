@@ -37,7 +37,8 @@ enum Trigger: string {
     case ResolveHits = "TResolveHits";
     case TurnEnd = "TTurnEnd";
     case TurnStart = "TTurnStart";
-    case MonsterMove = "TMonsterMove";
+    case MonsterMove = "TMonsterMove"; // before monsters move (Suppressive Fire prevents movement)
+    case AfterMonsterMove = "TAfterMonsterMove"; // after monsters have moved (Vigilance reacts to new positions)
     case MonsterKilled = "TMonsterKilled";
     case HeroKnockedOut = "THeroKnockedOut";
     case CardEnter = "TCardEnter";
