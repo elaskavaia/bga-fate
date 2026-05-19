@@ -121,3 +121,40 @@
 .tooltipcontainer + .tooltipcontainer .tooltipimage.hcard {
   height: 200px;
 }
+
+#pile_content {
+  position: relative;
+  justify-content: space-around;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 2em;
+
+  .counter {
+    position: absolute;
+    display: none;
+  }
+
+  & > * {
+    opacity: 1;
+    position: relative;
+    color: black;
+    margin-right: 1em;
+    margin-bottom: 1em;
+  }
+
+  & > *:only-child {
+    display: none;
+  }
+}
+
+.card_pile_selector {
+  .tooltip-right {
+    min-width: 20em;
+  }
+}
+
+.card_pile_help {
+  font-size: x-small;
+  font-style: italic;
+}
