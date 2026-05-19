@@ -158,6 +158,23 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countDamage($bystander), "Bystander never engaged");
     }
 
+    /**
+     * Regression: with a monster 2 hexes away (not directly adjacent), Boldur's
+     * move action must still offer Wrecking Ball — Op_c_wrecking lets him walk
+     * one hex first and then ram. Previously the card was only surfaced when an
+     * adjacent hex was occupied, hiding the option in this scenario.
+     */
+    public function testWreckingBallIOfferedWhenMonsterIsTwoHexesAway(): void {
+        $this->placeWreckingBallI();
+        $goblin = "monster_goblin_3";
+        // Boldur at hex_7_9 (set by placeWreckingBallI); goblin at hex_7_7 — distance 2.
+        $this->game->getMonster($goblin)->moveTo("hex_7_7", "");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Turn-level offer surfaces the card via the inlined actionMove targets.
+        $this->assertValidTarget("card_ability_4_7", "Wrecking Ball must be offered when monster is reachable via walk-then-ram");
+    }
+
     public function testWreckingBallIEndOfMoveSentinelEndsAction(): void {
         $this->placeWreckingBallI();
         $goblin = "monster_goblin_5";

@@ -5606,7 +5606,7 @@ class Material {
         "hno" => 3,
         "name" => clienttranslate("Retaliation"),
         "count" => 3,
-        "r" => "2dealDamage(adj,'is_instigator')",
+        "r" => "2dealDamage(adj,is_instigator)",
         "on" => "TResolveHits",
         "effect" => clienttranslate("Play after an adjacent monster attacked you to deal 2 damage to it."),
 ],

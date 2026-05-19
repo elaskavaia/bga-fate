@@ -557,4 +557,43 @@ final class HexMapTest extends TestCase {
         // Grimheim is a single area — moving between its hexes is a no-op.
         $this->assertSame([], $this->game->hexMap->getPath("hex_9_9", "hex_8_9", $this->hero));
     }
+
+    // -------------------------------------------------------------------------
+    // getReachableHexes — movement BFS used by Op_move's target picker.
+    // -------------------------------------------------------------------------
+
+    public function testGetReachableHexesEntersGrimheimButStopsThere(): void {
+        // Other heroes spawn on Grimheim border hexes by default; sideline them so
+        // their occupancy doesn't accidentally block the BFS we're testing.
+        $this->clearHeroesExcept("hero_1");
+        $this->game->tokens->moveToken("hero_1", "hex_7_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Hero (move=3) at hex_7_9 (west of Grimheim) cannot pass through Grimheim
+        // in 3 steps — hex_11_9 (east side) is unreachable; the detour is 6+ hexes.
+        $reachable = $this->game->hexMap->getReachableHexes("hex_7_9", 3, $this->hero);
+
+        // Border Grimheim hex is reachable (entering ends movement).
+        $this->assertArrayHasKey("hex_8_9", $reachable, "adjacent Grimheim border is reachable");
+        // East side of Grimheim is NOT reachable — going through Grimheim is blocked.
+        $this->assertArrayNotHasKey("hex_11_9", $reachable, "cannot pass through Grimheim in 3 moves");
+    }
+
+    public function testGetReachableHexesGoesAroundGrimheimWithEnoughMoves(): void {
+        $this->clearHeroesExcept("hero_1");
+        $this->game->tokens->moveToken("hero_1", "hex_7_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // With move=7 the BFS can detour north or south of Grimheim and reach the east side.
+        $reachable = $this->game->hexMap->getReachableHexes("hex_7_9", 7, $this->hero);
+        $this->assertArrayHasKey("hex_11_9", $reachable, "hex_11_9 is reachable when detouring around Grimheim");
+    }
+
+    private function clearHeroesExcept(string $keepId): void {
+        foreach (["hero_1", "hero_2", "hero_3", "hero_4"] as $hId) {
+            if ($hId !== $keepId) {
+                $this->game->tokens->moveToken($hId, "limbo");
+            }
+        }
+    }
 }

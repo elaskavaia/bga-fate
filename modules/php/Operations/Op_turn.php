@@ -99,6 +99,12 @@ class Op_turn extends Operation {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgsInfo();
                     foreach ($info as $key => $value) {
+                        // Don't overwrite a valid target (q=0) from a previous action
+                        $existingQ = $res[$key]["q"] ?? null;
+                        $newQ = $value["q"] ?? 0;
+                        if ($existingQ === 0 && $newQ !== 0) {
+                            continue;
+                        }
                         $res[$key] = $value;
                         $res[$key]["action"] = $action;
                     }
@@ -167,13 +173,13 @@ class Op_turn extends Operation {
     public function getPrompt() {
         $remaining = $this->getActionsRemaining();
         if ($remaining == self::ACTIONS_PER_TURN) {
-            return clienttranslate("Select your first action or free action");
+            return clienttranslate('${char_name} select your first action or free action');
         } elseif ($remaining == 1) {
-            return clienttranslate("Select your second action or free action");
+            return clienttranslate('${char_name} select your second action or free action');
         } elseif ($this->noValidTargets()) {
             return clienttranslate("Confirm end of turn");
         }
-        return clienttranslate("Select a free action or end your turn");
+        return clienttranslate('${char_name} select a free action or end your turn');
     }
 
     public function getSubTitle() {
@@ -191,6 +197,7 @@ class Op_turn extends Operation {
         return [
             "actions_taken" => $this->getActionsTaken(),
             "actions_remaining" => $this->getActionsRemaining(),
+            "char_name" => $this->game->getHero($this->getOwner())->getId(),
         ];
     }
 }

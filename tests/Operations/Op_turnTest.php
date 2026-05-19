@@ -82,13 +82,13 @@ final class Op_turnTest extends AbstractOpTestCase {
 
     public function testPromptFirstAction(): void {
         $op = $this->op;
-        $this->assertEquals("Select your first action or free action", $op->getPrompt());
+        $this->assertEquals('${char_name} select your first action or free action', $op->getPrompt());
     }
 
     public function testPromptSecondAction(): void {
         $this->simulateActionTaken("actionPractice");
         $op = $this->op;
-        $this->assertEquals("Select your second action or free action", $op->getPrompt());
+        $this->assertEquals('${char_name} select your second action or free action', $op->getPrompt());
     }
 
     public function testPromptNoValidActionsRemain(): void {

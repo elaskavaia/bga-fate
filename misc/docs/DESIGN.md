@@ -514,34 +514,10 @@ Card effects are categorized by card type (Ability, Equipment, Event) and how th
 
 These are questions we'd like to put to the designer on BGG. Each lists our current working assumption, why we're asking, and any partial information found in the forum.
 
-1. **Is the event discard pile face up (visible to all players)?**
-   - *Current assumption:* face up, as is standard for card game discard piles.
-   - *Why it matters:* affects UI — do we render discarded events as a public stack or hide them?
-   - *Forum:* not discussed.
-
-2. **Can equipment-repair effects target other players' equipment, or only the acting player's own?** Applies to both **Stitching** (Bjorn ability — *"Remove damage from any hero or equipment within range 1"*) and the **Durability event card** (*"Remove all damage from an equipment card"*).
-   - *Current assumption:* heals any hero within range 1 (including self), but repairs only the acting player's own equipment. Durability is restricted to own tableau in code today.
-   - *Why it matters:* the card texts are ambiguous — Stitching's "any equipment within range 1" could include a teammate's tableau, and Durability's "an equipment card" has no scope qualifier at all.
-   - *Forum:* Jonathan Fryxelius confirmed Stitching works on both heroes and equipment ([BGG 3539878](https://boardgamegeek.com/thread/3539878)) and confirmed range-1 includes self ([BGG 3528335](https://boardgamegeek.com/thread/3528335)) — but the cross-tableau question was not asked for either card. The Durability event card is not mentioned in the forum.
-
-3. **Does Windbite's effect chain — i.e. can the added dice themselves roll runes that trigger more added dice?**
-   - *Current assumption:* one-shot — count runes on the initial roll, add that many dice, done. No chaining.
-   - *Why it matters:* card text *"Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]"* read literally could chain indefinitely.
-   - *Forum:* Jonathan confirmed the effect applies "all the time", not just on attack actions ([BGG 3425406](https://boardgamegeek.com/thread/3425406)) — but the chaining question was not raised.
-
-4. **When a new Main Weapon replaces an existing one, what happens to mana/damage/other tokens parked on the displaced weapon?**
-   - *Current assumption:* tokens return to their supply (the displaced card is permanently inaccessible under the new one).
-   - *Why it matters:* the rules say *"place it on top of the other one for the rest of the game"* but don't address parked tokens — could be a meaningful state loss.
-   - *Forum:* not discussed.
-
-5. **For "Move X" wording on hero cards: confirm the rule of thumb is exact-X if possible, max-reachable if partially blocked — and what makes Alva's Agility different?**
-   - *Current rule (designer-confirmed):* *"you should do as much of a card's effect as possible, unless it states 'may' etc."* ([BGG 3579463](https://boardgamegeek.com/thread/3579463)).
-   - *Open caveat:* Jonathan said for Alva's Agility ("Move 2 areas. Just because you can.") that *"you may move just 1 area"* ([BGG 3539878](https://boardgamegeek.com/thread/3539878)). Is "Just because you can" the explicit optional marker, or is Alva's Agility a special case? Affects how we generalize the rule in code.
-
-6. **If Embla is knocked out by the remaining unprevented damage from an attack she Riposted, is the 2 damage still dealt to the attacking monster?**
+1. **If Embla is knocked out by the remaining unprevented damage from an attack she Riposted, is the 2 damage still dealt to the attacking monster?**
    - *Current assumption:* yes — Riposte's "prevent + deal damage" resolves as a single effect at the moment the attack hits, so the monster takes 2 damage even if the unprevented remainder knocks Embla out.
    - *Why it matters:* affects ordering in `Op_monsterAttack` — do we apply Riposte's outbound damage before/after the hero's knock-out check?
-   - *Forum:* Riposte is discussed in [BGG 3650916](https://boardgamegeek.com/thread/3650916) (once per attack; prevents + deals damage) and [BGG 3649944](https://boardgamegeek.com/thread/3649944) (self only). A related ruling at [BGG 3425406](https://boardgamegeek.com/thread/3425406) notes *"if Embla can kill a trollkin in a defense situation, that may alter the trollkin support in a subsequent attack against her"* — confirming defensive damage is dealt during attack resolution — but the specific "Embla dies mid-Riposte" case is not addressed.
+   - *Forum:* Riposte is discussed in [BGG 3650916](https://boardgamegeek.com/thread/3650916) (once per attack; prevents + deals damage) and [BGG 3649944](https://boardgamegeek.com/thread/3649944) (self only). A related ruling at [BGG 3425406](https://boardgamegeek.com/thread/3425406) notes *"if Embla can kill a trollkin in a defense situation, that may alter the trollkin support in a subsequent attack against her"* — confirming defensive damage is dealt during attack resolution — but the specific "Embla knocked out mid-Riposte" case is not addressed.
 
 ## Rule clarifications (resolved with designer)
 
@@ -573,3 +549,25 @@ Boldur is the center of the "clock", so he sweeps around himself, going clockwis
 - Jacob Fryxelius on Embla's Sidekick/Kick: *"You can kick it 1 step in any direction that has an available area (no characters)"* ([BGG 3487338](https://boardgamegeek.com/thread/3487338)) — the only constraint is "available area, no characters". Grimheim is not excluded.
 - Jonathan Fryxelius on Wrecking Ball: the card was *deliberately worded "character" rather than "monster"* so that it can push characters (including heroes) into Grimheim ([BGG 3431404](https://boardgamegeek.com/thread/3431404)).
 - Implication: `Op_moveMonster` (and similar push effects) should allow Grimheim as a destination, subject to standard occupancy rules. Remove any blanket "no Grimheim" filter on monster push targets.
+
+7. **Event discard pile is face up (visible to all players)**:
+- Designer confirmed: *"Face up is correct."*
+- Implication: render the event discard as a public stack — all players can see the top card / browse the pile.
+
+8. **Stitching may repair heroes OR equipment of other players, as long as that player is adjacent**:
+- Designer confirmed: *"Stitching may repair heroes or equipment of other players, as long as that player is adjacent."*
+- The "within range 1" qualifier applies to the *owning player*, not the equipment token — so a teammate's equipment is in range if the teammate's hero is in range. Self counts (range 0 ⊂ range 1, [BGG 3528335](https://boardgamegeek.com/thread/3528335)).
+- Implication: `Op_repairCard` for Stitching must allow targets in any tableau owned by an adjacent hero, not just the acting player's tableau. **Note**: the **Durability event card** ("Remove all damage from an equipment card") is a separate, no-range effect and still has no explicit cross-tableau ruling — but by analogy it most likely permits any equipment too.
+
+9. **Windbite chains — every rune rolled (including on added dice) adds another die**:
+- Designer confirmed: *"It chains and may add more and more dice. Theoretically, you could be asked to roll any amount of dice in the end. This is phrased as rolling extra dice rather than re-rolling the runes, because other cards may use these runes to add damage. So it is important that the rolled runes are not discarded."*
+- Implication: implementation must loop — after each batch of added dice is rolled, count new runes and add that many more dice. Critically, **rune results stay on the table** (not discarded/replaced) because other cards consume them for damage.
+- **Update our assumption**: replace the "one-shot" model in [Op_windbite](modules/php/Operations/) (or wherever the effect lives) with a recursive add-and-roll loop that preserves rune dice.
+
+10. **Displaced Main Weapons lose all parked tokens — strip them on replacement**:
+- Designer confirmed: *"There is no way to get 'old' main weapons back, so their mana / damage / tokens are not relevant if they are replaced. Remove any information-bearing marks or tokens from a displaced weapon."*
+- Implication: when a new Main Weapon is placed on top of an old one, the operation must clear any crystals (mana, damage, etc.) and reset any quest-progress/state markers on the displaced weapon — return them to supply.
+
+11. **"Move X" is always "up to X" unless the card says "move exactly"**:
+- Designer confirmed: *"The 'do as much as possible' is meant to convey that you don't have to perform all effects in order to play a card, just do what can be done and skip the rest. As for movement, it is always 'up to' that amount of steps unless specifically stated 'move exactly' (which - for now - doesn't occur anywhere in the game). So heroes may move 'up to 3 areas' in their movement action (or 4 areas if they are playing Embla). And if a card lets them move 2 steps, that may be up to 2 steps."*
+- Implication: **all** hero-movement card effects ("Move 2 areas", "Move 3 areas", etc.) are optional in magnitude — the player chooses 0..X steps. There is currently no "move exactly N" wording in the game, so we don't need to support a strict variant. This supersedes the earlier assumption that bare "Move X" was mandatory and only "Move up to X" was optional.

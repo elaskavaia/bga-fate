@@ -88,7 +88,7 @@ class Op_move extends CountableOperation {
         // choice when the card is on the tableau and at least one adjacent hex
         // is occupied by a character.
         $wreckingCard = $this->getWreckingCard();
-        if ($wreckingCard !== null && $this->hasAdjacentOccupiedHex($currentHex)) {
+        if ($wreckingCard !== null && $this->hasReachableOccupiedHex($currentHex, $maxSteps)) {
             $targets[] = $wreckingCard;
         }
 
@@ -136,9 +136,22 @@ class Op_move extends CountableOperation {
         return null;
     }
 
-    private function hasAdjacentOccupiedHex(string $heroHex): bool {
-        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
-            if ($this->game->hexMap->getCharacterOnHex($hex) !== null) {
+    /**
+     * Wrecking Ball is worth offering if any occupied hex sits within the move budget —
+     * the pendulum loop in Op_c_wrecking lets Boldur walk in first and then ram. Using a
+     * straight-line hex distance is fine because c_wrecking can pass through any non-
+     * impassable hex (including occupied ones), so terrain isn't a meaningful filter here.
+     */
+    private function hasReachableOccupiedHex(string $heroHex, int $budget): bool {
+        foreach ($this->game->hexMap->getOccupancyMap() as $hexId => $_chars) {
+            if ($hexId === $heroHex) {
+                continue;
+            }
+            // Only character-occupied hexes can be rammed; ignore stuff like crystals.
+            if ($this->game->hexMap->getCharacterOnHex($hexId) === null) {
+                continue;
+            }
+            if ($this->game->hexMap->getHexDistance($heroHex, $hexId) <= $budget) {
                 return true;
             }
         }
