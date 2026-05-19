@@ -191,7 +191,20 @@ class TokensInMem extends DbTokens {
     }
 
     function moveAllTokensInLocation($from_location, $to_location, $from_state = null, $to_state = 0) {
-        throw new \Exception("TokensInMem::moveAllTokensInLocation() called — add in-memory stub if needed");
+        if ($from_location !== null) {
+            self::checkLocation($from_location);
+        }
+        self::checkLocation($to_location);
+        foreach ($this->keyindex as $key => $rec) {
+            if ($from_location !== null && $rec["location"] !== $from_location) {
+                continue;
+            }
+            if ($from_state !== null && $rec["state"] != $from_state) {
+                continue;
+            }
+            $this->keyindex[$key]["location"] = $to_location;
+            $this->keyindex[$key]["state"] = $to_state;
+        }
     }
 
     function moveAllTokensInLocationKeepOrder($from_location, $to_location) {

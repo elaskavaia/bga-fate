@@ -306,7 +306,6 @@ class DbTokens {
     function getTokensOnTop($nbr, $location) {
         self::checkLocation($location);
         self::checkPosInt($nbr);
-        $result = [];
         $sql = $this->getSelectQuery();
         $sql .= " WHERE token_location='$location'";
         $sql .= " ORDER BY token_state DESC";
@@ -314,17 +313,17 @@ class DbTokens {
         return $this->game->getObjectListFromDB($sql);
     }
 
-    function reformDeckFromDiscard($from_location) {
-        self::checkLocation($from_location);
+    function reformDeckFromDiscard(string $from_location, ?string $discard_location = null) {
+        $this->checkLocation($from_location);
         $this->clear_cache();
         if (isset($this->autoreshuffle_custom[$from_location])) {
             $discard_location = $this->autoreshuffle_custom[$from_location];
-        } else {
+        } elseif (!$discard_location) {
             throw new SystemException("reformDeckFromDiscard: Unknown discard location for $from_location !");
         }
-        self::checkLocation($discard_location);
-        self::moveAllTokensInLocation($discard_location, $from_location);
-        self::shuffle($from_location);
+        $this->checkLocation($discard_location);
+        $this->moveAllTokensInLocation($discard_location, $from_location);
+        $this->shuffle($from_location);
         if ($this->autoreshuffle_trigger) {
             $obj = $this->autoreshuffle_trigger["obj"];
             $method = $this->autoreshuffle_trigger["method"];

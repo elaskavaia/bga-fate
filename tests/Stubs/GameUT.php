@@ -47,8 +47,11 @@ class GameUT extends Game {
         parent::__construct();
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
-        $this->tokens = new TokensInMem($this);
         $this->setPlayersNumber(2);
+    }
+
+    protected function createDbTokens(): \Bga\Games\Fate\Db\DbTokens {
+        return $this->configureTokenAutoreshuffle(new TokensInMem($this));
     }
 
     function _getAvailColors() {

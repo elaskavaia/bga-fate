@@ -49,11 +49,25 @@ class Game extends Base {
 
         $this->material = new Material();
         $this->machine = new OpMachine();
-        $this->tokens = new DbTokens($this);
+        $this->tokens = $this->createDbTokens();
         $this->hexMap = new HexMap($this);
         $this->dbMultiUndo = new DbMultiUndo($this);
 
         $this->registerNotifyDecorators();
+    }
+
+    /** Factory for the tokens store. Overridden by GameUT to swap in an in-memory implementation. */
+    protected function createDbTokens(): DbTokens {
+        return $this->configureTokenAutoreshuffle(new DbTokens($this));
+    }
+
+    /** Wire up DbTokens auto-reshuffle for event decks. */
+    protected function configureTokenAutoreshuffle(DbTokens $tokens): DbTokens {
+        $tokens->autoreshuffle = true;
+        foreach ($this->getAvailColors() as $color) {
+            $tokens->autoreshuffle_custom["deck_event_{$color}"] = "discard_{$color}";
+        }
+        return $tokens;
     }
 
     public function registerNotifyDecorators(): void {

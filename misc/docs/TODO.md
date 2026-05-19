@@ -1,19 +1,17 @@
 ## TODO
 
-[ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control
+
 [ ] Fix missing animation when damage crystals are removed from cards (e.g. repairCard/Durability)
 [ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
 [ ] Ability pile and equipment pile browsing
 [ ] Dice roll animation
 [ ] Card draw animations
 [ ] Show number of houses left in Grimheim
-[ ] Reshuffle event deck when exhausted (designer-confirmed, DESIGN.md assumption #2)
-[ ] Allow moveMonster to push into Grimheim (designer-confirmed, DESIGN.md assumption #4)
+[x] Reshuffle event deck when exhausted
+
 
 - [ ] Fix stacked tooltips
   [ ] Fix spawn locations in monster cards — current data is not correct
-  [ ] Add crystal sprite graphics and update CSS (currently using colored circle placeholders)
-  [ ] Show win/loss end screen — BGA default end screen works, custom UI
   [ ] Range indicator for ranged monster attacks
   [ ] Legend monster special display
   [ ] Flip animation for upgrades
@@ -39,3 +37,8 @@ Ability cards:
 - [x] card_ability_3_8 — Fleetfoot II — has tests (mountain/occupied passthrough hardcoded via Hero::canIgnoreMountains/canIgnoreOccupied; HexMap now takes Character)
 - [ ] card_ability_4_12 — Dreadnought II — **r partial**: `spendMana:preventDamage` covers the first half; reflect-damage half undesigned ("Each adjacent monster that attacks you is dealt 1 damage")
 
+
+### Low priority
+
+[ ] Allow moveMonster to push into Grimheim (designer-confirmed)
+[ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control

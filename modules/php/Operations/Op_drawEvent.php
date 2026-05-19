@@ -42,13 +42,8 @@ class Op_drawEvent extends CountableOperation {
     }
 
     function getPossibleMoves() {
+        // it's not possible to run out of event cards (auto-reshuffle + hand limit), so not checking that
         $hero = $this->game->getHero($this->getOwner());
-        if ($hero->getCountOfCardsInEventDeck() == 0) {
-            return [
-                "q" => Material::ERR_NOT_APPLICABLE,
-                "err" => clienttranslate("No cards left to draw"),
-            ];
-        }
         if (!$this->isMax() && $hero->getHandSize() >= $hero->getHandLimit()) {
             return $this->instantiateOperation("discardEvent")->getPossibleMoves();
         }

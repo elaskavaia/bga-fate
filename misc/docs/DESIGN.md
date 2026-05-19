@@ -508,17 +508,35 @@ Card effects are categorized by card type (Ability, Equipment, Event) and how th
 
 
 
-## Assumptions (to verify with game designer)
+## Open questions for the designer
 
 > **Note on forum sources:** authoritative answers in `misc/docs/FORUM.md` come from the **Fryxelius brothers** — **Jonathan Fryxelius** = BGG `Lord_Aethan` (user `430700`), the game designer; and **Jacob Fryxelius** (user `430994`), also part of the publishing company, whose posts are tagged 🎲 *DESIGNER — confirmed*. Treat answers from either as official rulings.
 
-1. **Event discard pile is face up (public)**: The rules don't specify whether the event discard pile is face up or face down. We assume face up, as is standard for card game discard piles. All players can see discarded event cards. *(Not discussed in forum.)*
-2. **Event deck is not reshuffled when exhausted**: ❌ **Contradicted by designer.** Jonathan Fryxelius confirmed twice that the deck IS reshuffled: *"Reshuffle and form a new deck, events never run out"* ([BGG 3479474](https://boardgamegeek.com/thread/3479474)) and *"if they were to run out, you would simply reshuffle all used cards into a new pile to draw from"* ([BGG 3432147](https://boardgamegeek.com/thread/3432147)). **Action: implement reshuffle.**
-3. **"Move X" is mandatory; "Move up to X" is optional**: ✅ **Designer-confirmed.** Jonathan Fryxelius: *"you should do as much of a card's effect as possible, unless it states 'may' etc."* (Jacob Fryxelius further endorsed this post under the 🎲 DESIGNER — confirmed banner, [BGG 3579463](https://boardgamegeek.com/thread/3579463)). ⚠️ Caveat: for Alva's Agility ("Move 2 areas. Just because you can.") Jonathan said *"you may move just 1 area"* ([BGG 3539878](https://boardgamegeek.com/thread/3539878)) — so the "Just because you can" wording on that specific card is the optional marker.
-4. **moveMonster cannot push into Grimheim**: ❌ **Contradicted by designer.** Jacob Fryxelius (on Embla's Sidekick/Kick): *"You can kick it 1 step in any direction that has an available area (no characters)"* ([BGG 3487338](https://boardgamegeek.com/thread/3487338)) — the only constraint is "available area, no characters", which does not exclude Grimheim. Jonathan Fryxelius separately confirmed Wrecking Ball CAN push a character (hero) into Grimheim, with the card deliberately worded "character" to allow this ([BGG 3431404](https://boardgamegeek.com/thread/3431404)). There is no forum quote prohibiting a hero card from pushing a *monster* into Grimheim. **Action: remove the restriction.**
-5. **Stitching can heal adjacent heroes but only repair own equipment**: ⚠️ **Partially confirmed; equipment scope still open.** Jonathan Fryxelius: *"this card works for both [heroes and equipment]"* ([BGG 3539878](https://boardgamegeek.com/thread/3539878)). The "own tableau only" restriction for equipment repair is NOT addressed — still an open assumption.
-6. **Windbite does not trigger on its own added dice**: ⚠️ **Scope clarified by designer; chaining still open.** Jonathan Fryxelius: *"The Windbite effect applies all the time. We have tried to be specific when something only applies in attack actions"* ([BGG 3425406](https://boardgamegeek.com/thread/3425406)) — confirms broad scope (e.g. Alva's Snipe), but does NOT address whether added dice can themselves trigger more added dice. One-shot assumption remains untested.
-7. **Main Weapon replacement returns crystals to supply**: The rules say "place it on top of the other one for the rest of the game" — silent on what happens to mana/damage/other tokens parked on the displaced card. We assume those tokens are gone (returned to their supply) since the card is permanently inaccessible. *(Not discussed in forum.)*
+These are questions we'd like to put to the designer on BGG. Each lists our current working assumption, why we're asking, and any partial information found in the forum.
+
+1. **Is the event discard pile face up (visible to all players)?**
+   - *Current assumption:* face up, as is standard for card game discard piles.
+   - *Why it matters:* affects UI — do we render discarded events as a public stack or hide them?
+   - *Forum:* not discussed.
+
+2. **Does "Stitching" repair equipment on other players' tableaus, or only the acting player's own equipment?**
+   - *Current assumption:* heals any hero within range 1 (including self), but repairs only the acting player's own equipment.
+   - *Why it matters:* the card text says *"Remove damage from any hero or equipment within range 1"* — "any equipment" could include teammates' tableau items.
+   - *Forum:* Jonathan Fryxelius confirmed the card works on both heroes and equipment ([BGG 3539878](https://boardgamegeek.com/thread/3539878)), but the cross-tableau question was not asked.
+
+3. **Does Windbite's effect chain — i.e. can the added dice themselves roll runes that trigger more added dice?**
+   - *Current assumption:* one-shot — count runes on the initial roll, add that many dice, done. No chaining.
+   - *Why it matters:* card text *"Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]"* read literally could chain indefinitely.
+   - *Forum:* Jonathan confirmed the effect applies "all the time", not just on attack actions ([BGG 3425406](https://boardgamegeek.com/thread/3425406)) — but the chaining question was not raised.
+
+4. **When a new Main Weapon replaces an existing one, what happens to mana/damage/other tokens parked on the displaced weapon?**
+   - *Current assumption:* tokens return to their supply (the displaced card is permanently inaccessible under the new one).
+   - *Why it matters:* the rules say *"place it on top of the other one for the rest of the game"* but don't address parked tokens — could be a meaningful state loss.
+   - *Forum:* not discussed.
+
+5. **For "Move X" wording on hero cards: confirm the rule of thumb is exact-X if possible, max-reachable if partially blocked — and what makes Alva's Agility different?**
+   - *Current rule (designer-confirmed):* *"you should do as much of a card's effect as possible, unless it states 'may' etc."* ([BGG 3579463](https://boardgamegeek.com/thread/3579463)).
+   - *Open caveat:* Jonathan said for Alva's Agility ("Move 2 areas. Just because you can.") that *"you may move just 1 area"* ([BGG 3539878](https://boardgamegeek.com/thread/3539878)). Is "Just because you can" the explicit optional marker, or is Alva's Agility a special case? Affects how we generalize the rule in code.
 
 ## Rule clarifications (resolved with designer)
 
@@ -539,3 +557,14 @@ Boldur is the center of the "clock", so he sweeps around himself, going clockwis
 -  the strangest thing with this card is that Boldur may push the other character to the area he came from, essentially swapping places with it. With that in mind, he can really get the wrecking ball pendulum going, moving back and forth and really demolish his opponents 
 - +1 Move the effect is passive, always active.
 - Yes, you may push another hero into Grimheim, giving them 1 damage. We worded this card with "character" rather than "monster" for this purpose. However, you cannot push someone out of there, as Grimheim is not an "occupied area" in that sense. Thematically, think of every character inside Grimheim to be inside one of the houses. Moving into Grimheim will not push anyone inside a building out of the building and also out into the surroundings. Not even Boldur has that force 😛 This way of reasoning will solve a lot of questions regarding Grimheim. If they are in Grimheim, they are inside one of the houses. That's why they are protected against attacks, that's why they cannot attack monsters outside, that's why they mend more effectively, etc.
+
+5. **Event deck IS reshuffled when exhausted** (per Jonathan Fryxelius):
+- *"Reshuffle and form a new deck, events never run out"* ([BGG 3479474](https://boardgamegeek.com/thread/3479474)).
+- *"if they were to run out, you would simply reshuffle all used cards into a new pile to draw from"* ([BGG 3432147](https://boardgamegeek.com/thread/3432147)).
+- Implication: implement reshuffle of the discard pile into a fresh deck when the draw deck is exhausted. Same applies to character/hero decks ("just reshuffle the discarded cards into a new deck" — same thread).
+- ✅ Implemented for event decks via `DbTokens::autoreshuffle_custom`, wired in `Game::configureTokenAutoreshuffle`. `Hero::drawEventCard()` calls `getTokenOnTop($deck, /*no_deck_reform*/ false)` so the discard auto-reshuffles when the deck is empty.
+
+6. **Hero card effects CAN push monsters into Grimheim**:
+- Jacob Fryxelius on Embla's Sidekick/Kick: *"You can kick it 1 step in any direction that has an available area (no characters)"* ([BGG 3487338](https://boardgamegeek.com/thread/3487338)) — the only constraint is "available area, no characters". Grimheim is not excluded.
+- Jonathan Fryxelius on Wrecking Ball: the card was *deliberately worded "character" rather than "monster"* so that it can push characters (including heroes) into Grimheim ([BGG 3431404](https://boardgamegeek.com/thread/3431404)).
+- Implication: `Op_moveMonster` (and similar push effects) should allow Grimheim as a destination, subject to standard occupancy rules. Remove any blanket "no Grimheim" filter on monster push targets.

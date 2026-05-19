@@ -23,20 +23,48 @@ final class Op_drawEventTest extends AbstractOpTestCase {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Testing possible moves — hand < limit: confirm target
-    // -------------------------------------------------------------------------
-
     public function testConfirmOfferedWhenHandNotFull(): void {
         $this->assertValidTarget("confirm");
     }
 
-    public function testDeckEmptyReturnsError(): void {
+    // -------------------------------------------------------------------------
+    // Reshuffle: when deck is empty but discard has cards, drawing reshuffles
+    // -------------------------------------------------------------------------
+
+    /** Move every card in `deck_event_{owner}` to the given location. */
+    private function drainDeckTo(string $location): array {
         $deck = $this->game->tokens->getTokensOfTypeInLocation("card", "deck_event_" . $this->owner);
-        foreach ($deck as $cardId => $info) {
-            $this->game->tokens->moveToken($cardId, "limbo");
+        $ids = array_keys($deck);
+        foreach ($ids as $cardId) {
+            $this->game->tokens->moveToken($cardId, $location);
         }
-        $this->assertNoValidTargets();
+        return $ids;
+    }
+
+    public function testDrawReshufflesDiscardWhenDeckEmpty(): void {
+        $discarded = $this->drainDeckTo("discard_" . $this->owner);
+        $this->assertGreaterThan(0, count($discarded));
+        $this->assertEquals(0, $this->game->tokens->countTokensInLocation("deck_event_" . $this->owner));
+
+        $hero = $this->game->getHero($this->owner);
+        $this->assertTrue($hero->drawEventCard(), "draw should succeed after reshuffle");
+
+        // One discarded card landed in hand, the rest were reshuffled back into the deck
+        $deckAfter = $this->game->tokens->countTokensInLocation("deck_event_" . $this->owner);
+        $discardAfter = $this->game->tokens->countTokensInLocation("discard_" . $this->owner);
+        $this->assertEquals(count($discarded) - 1, $deckAfter);
+        $this->assertEquals(0, $discardAfter);
+    }
+
+    public function testGetPossibleMovesAllowsDrawWhenOnlyDiscardHasCards(): void {
+        $this->drainDeckTo("discard_" . $this->owner);
+        $this->createOp(); // refresh op after state change
+        $this->assertValidTarget("confirm");
+    }
+
+    public function testDrawReturnsFalseWhenDeckAndDiscardEmpty(): void {
+        $this->drainDeckTo("limbo");
+        $this->assertFalse($this->game->getHero($this->owner)->drawEventCard());
     }
 
     // -------------------------------------------------------------------------

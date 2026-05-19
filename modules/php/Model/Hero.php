@@ -116,12 +116,13 @@ class Hero extends Character {
 
     /**
      * Draw 1 event card from deck to hand.
-     * @return bool true if a card was drawn, false if deck is empty
+     *
+     * @return bool true if a card was drawn, false if deck and discard are both empty
      */
     function drawEventCard(): bool {
         $deck = "deck_event_{$this->owner}";
         $hand = "hand_{$this->owner}";
-        $topCard = $this->game->tokens->getTokenOnTop($deck);
+        $topCard = $this->game->tokens->getTokenOnTop($deck, /* no_deck_reform */ false);
         if ($topCard === null) {
             return false;
         }
@@ -132,11 +133,6 @@ class Hero extends Character {
         ]);
         $this->game->customUndoSavepoint($this->getPlayerId(), 1, "draw");
         return true;
-    }
-
-    function getCountOfCardsInEventDeck() {
-        $deck = "deck_event_{$this->owner}";
-        return count($this->game->tokens->getTokensOfTypeInLocation("card", $deck));
     }
 
     /**
