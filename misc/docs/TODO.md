@@ -42,7 +42,7 @@ Ability cards:
 
 - [ ] **Stitching cross-tableau repair (DESIGN.md #8)** — relax `Op_repairCard` so Stitching can target heroes and equipment of *other* players, as long as the owning hero is within range 1. Today it's scoped to acting player's own tableau.
 - [ ] **Windbite recursive chain (DESIGN.md #9)** — replace the one-shot model with a recursive add-and-roll loop: every rune rolled (including on added dice) adds another attack die. **Important:** rune dice must stay on the table (not discarded) because other cards consume them for damage.
-- [ ] **"Move X" is always "up to X" (DESIGN.md #11)** — audit hero-card movement effects and remove any strict-magnitude enforcement; player chooses 0..X steps. No card currently says "move exactly N".
+- [x] **"Move X" is always "up to X" (DESIGN.md #11)** — Op_move no longer filters reachable hexes to exactly maxSteps; all distances 1..count are offered, so Agility II "Move 2" correctly allows stopping at 1. No other cards needed CSV changes.
 
 
 ### Low priority

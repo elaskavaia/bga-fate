@@ -26,13 +26,13 @@ final class Op_moveTest extends AbstractOpTestCase {
         $this->assertNotValidTarget("hex_13_7");
     }
 
-    public function testMoveHero2MandatoryOnlyDistance2(): void {
-        // 2move is mandatory: must move exactly 2 steps
+    public function testMoveHeroNStepsIsUpToN(): void {
+        // "Nmove" is "up to N" per DESIGN.md #11 (designer-confirmed). Any distance 1..N
+        // is a valid pick; the player may not skip the action entirely (mcount=N>0), but
+        // can choose to stop short of N hexes.
         $this->createOp("2move");
-        // hex_12_8 is adjacent (distance 1) — should NOT be offered for mandatory 2-step move
-        $this->assertNotValidTarget("hex_12_8");
-        // hex_13_7 is distance 2 — should be offered
-        $this->assertValidTarget("hex_13_7");
+        $this->assertValidTarget("hex_12_8", "distance 1 is offered under up-to-N semantics");
+        $this->assertValidTarget("hex_13_7", "distance 2 is offered");
     }
 
     public function testMoveHeroOptionalShowsAllDistances(): void {
