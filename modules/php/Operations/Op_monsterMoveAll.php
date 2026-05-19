@@ -157,7 +157,7 @@ class Op_monsterMoveAll extends Operation {
         $isLegend = str_contains($monsterId, "legend");
         $destroyCount = $isLegend ? 3 : 1;
 
-        $this->game->effect_destroyHouses($destroyCount, $monsterId, clienttranslate('${token_name} tears down a house!'));
+        $this->game->effect_destroyHouses($destroyCount, $monsterId);
 
         // Remove monster from the map
         $this->game->getMonster($monsterId)->moveTo("supply_monster", clienttranslate('${token_name} goes home happy'));

@@ -98,7 +98,10 @@ class Op_dealDamage extends CountableOperation {
         }
 
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null);
-        $this->game->systemAssert("ERR:dealDamage:noCharacterOnHex:$targetHex", $defenderId !== null);
+        if (!$defenderId) {
+            $this->notifyMessage(clienttranslate("hmm, attack target no longer there, let's move on"));
+            return;
+        }
 
         $amount = $this->getDamageAmount($defenderId);
 

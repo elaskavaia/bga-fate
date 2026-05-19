@@ -99,6 +99,30 @@ final class Op_repairCardTest extends AbstractOpTestCase {
         $this->assertValidTarget("card_equip_1_21");
     }
 
+    /**
+     * Regression: with a preset target AND multiple damaged candidates, the op
+     * must apply only 1 damage to the picked target and re-queue with the
+     * remaining count and cleared target so the player can pick again
+     * (e.g. for actionMend's "remove X damage from heroes/cards" flow).
+     */
+    public function testPresetTargetWithMultipleDamagedCandidatesSplits(): void {
+        $this->addDamageToCard("card_equip_1_21", 3);
+        $this->addDamageToCard("card_equip_1_23", 2);
+        $this->createOp("5repairCard", ["target" => "card_equip_1_21"]);
+        $this->call_resolve("card_equip_1_21");
+
+        // Only 1 damage removed from the picked card; the other card untouched
+        $this->assertEquals(2, $this->getCardDamage("card_equip_1_21"));
+        $this->assertEquals(2, $this->getCardDamage("card_equip_1_23"));
+
+        // A new repairCard is queued with count-1 and no preset target
+        $queued = $this->getQueuedOp();
+        $this->assertNotNull($queued);
+        $this->assertEquals("repairCard", $queued["type"]);
+        $data = is_string($queued["data"] ?? null) ? (json_decode($queued["data"], true) ?? []) : ($queued["data"] ?? []);
+        $this->assertArrayNotHasKey("target", $data, "preset target should be cleared on re-queue");
+    }
+
     public function testAllModeReturnsConfirmTarget(): void {
         $this->addDamageToCard("card_equip_1_21", 2);
         $this->createOp("repairCard(all)");

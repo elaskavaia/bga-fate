@@ -60,7 +60,36 @@ class Op_monsterAttack extends Operation {
             "target" => $heroHex,
             "count" => $strength,
         ]);
+        $this->queueDreadnoughtIIReflect($heroHex, $monsterHex);
         $this->queue("endOfAttack");
+    }
+
+    /**
+     * Dreadnought II: "Each adjacent monster that attacks you is dealt 1 damage after its attack."
+     * Hardcoded here because there's no player interaction; the reflect just fires automatically.
+     */
+    private function queueDreadnoughtIIReflect(string $heroHex, string $monsterHex): void {
+        $defenderId = $this->game->hexMap->isOccupiedByCharacterType($heroHex, "hero");
+        if ($defenderId === null) {
+            return;
+        }
+        $defenderOwner = $this->game->getHeroOwner($defenderId);
+        if (!$defenderOwner) {
+            return;
+        }
+        $defender = $this->game->getHero($defenderOwner);
+        if (!$defender->heroHasCardsOnTableau("card_ability_4_12")) {
+            return;
+        }
+        if (!in_array($monsterHex, $this->game->hexMap->getAdjacentHexes($heroHex), true)) {
+            return;
+        }
+        $this->queue("dealDamage", $defenderOwner, [
+            "attacker" => $defenderId,
+            "target" => $monsterHex,
+            "count" => 1,
+            "reason" => "card_ability_4_12",
+        ]);
     }
 
     /**

@@ -519,10 +519,10 @@ These are questions we'd like to put to the designer on BGG. Each lists our curr
    - *Why it matters:* affects UI — do we render discarded events as a public stack or hide them?
    - *Forum:* not discussed.
 
-2. **Does "Stitching" repair equipment on other players' tableaus, or only the acting player's own equipment?**
-   - *Current assumption:* heals any hero within range 1 (including self), but repairs only the acting player's own equipment.
-   - *Why it matters:* the card text says *"Remove damage from any hero or equipment within range 1"* — "any equipment" could include teammates' tableau items.
-   - *Forum:* Jonathan Fryxelius confirmed the card works on both heroes and equipment ([BGG 3539878](https://boardgamegeek.com/thread/3539878)), but the cross-tableau question was not asked.
+2. **Can equipment-repair effects target other players' equipment, or only the acting player's own?** Applies to both **Stitching** (Bjorn ability — *"Remove damage from any hero or equipment within range 1"*) and the **Durability event card** (*"Remove all damage from an equipment card"*).
+   - *Current assumption:* heals any hero within range 1 (including self), but repairs only the acting player's own equipment. Durability is restricted to own tableau in code today.
+   - *Why it matters:* the card texts are ambiguous — Stitching's "any equipment within range 1" could include a teammate's tableau, and Durability's "an equipment card" has no scope qualifier at all.
+   - *Forum:* Jonathan Fryxelius confirmed Stitching works on both heroes and equipment ([BGG 3539878](https://boardgamegeek.com/thread/3539878)) and confirmed range-1 includes self ([BGG 3528335](https://boardgamegeek.com/thread/3528335)) — but the cross-tableau question was not asked for either card. The Durability event card is not mentioned in the forum.
 
 3. **Does Windbite's effect chain — i.e. can the added dice themselves roll runes that trigger more added dice?**
    - *Current assumption:* one-shot — count runes on the initial roll, add that many dice, done. No chaining.
@@ -537,6 +537,11 @@ These are questions we'd like to put to the designer on BGG. Each lists our curr
 5. **For "Move X" wording on hero cards: confirm the rule of thumb is exact-X if possible, max-reachable if partially blocked — and what makes Alva's Agility different?**
    - *Current rule (designer-confirmed):* *"you should do as much of a card's effect as possible, unless it states 'may' etc."* ([BGG 3579463](https://boardgamegeek.com/thread/3579463)).
    - *Open caveat:* Jonathan said for Alva's Agility ("Move 2 areas. Just because you can.") that *"you may move just 1 area"* ([BGG 3539878](https://boardgamegeek.com/thread/3539878)). Is "Just because you can" the explicit optional marker, or is Alva's Agility a special case? Affects how we generalize the rule in code.
+
+6. **If Embla is knocked out by the remaining unprevented damage from an attack she Riposted, is the 2 damage still dealt to the attacking monster?**
+   - *Current assumption:* yes — Riposte's "prevent + deal damage" resolves as a single effect at the moment the attack hits, so the monster takes 2 damage even if the unprevented remainder knocks Embla out.
+   - *Why it matters:* affects ordering in `Op_monsterAttack` — do we apply Riposte's outbound damage before/after the hero's knock-out check?
+   - *Forum:* Riposte is discussed in [BGG 3650916](https://boardgamegeek.com/thread/3650916) (once per attack; prevents + deals damage) and [BGG 3649944](https://boardgamegeek.com/thread/3649944) (self only). A related ruling at [BGG 3425406](https://boardgamegeek.com/thread/3425406) notes *"if Embla can kill a trollkin in a defense situation, that may alter the trollkin support in a subsequent attack against her"* — confirming defensive damage is dealt during attack resolution — but the specific "Embla dies mid-Riposte" case is not addressed.
 
 ## Rule clarifications (resolved with designer)
 

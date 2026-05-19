@@ -40,7 +40,7 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_removeDamage extends CountableOperation {
     function getPrompt() {
-        return clienttranslate("Choose a hero or card to remove damage from");
+        return clienttranslate('Choose a hero or card to remove damage from (${count} [DAMAGE] left)');
     }
 
     protected function getMode(): string {
@@ -133,9 +133,11 @@ class Op_removeDamage extends CountableOperation {
         $tokenId = $candidates[$targetKey] ?? null;
         $this->game->systemAssert("ERR:removeDamage:noToken:$targetKey", $tokenId !== null);
 
-        // Singleton damaged candidate → apply full count in one shot (no re-queue, no split prompt).
-        $singleChoice = $this->isOneChoice();
         $count = (int) $this->getCount();
+        // Single-choice means "only one damaged candidate exists" — compute from getCandidates()
+        // instead of isOneChoice() so a preset `target` (e.g. from actionMend) doesn't
+        // masquerade as the sole choice and apply the whole count to one target.
+        $singleChoice = $this->countDamagedCandidates() <= 1;
         $perUnit = $this->getMode() === "max" ? $this->damageOn($tokenId) : ($singleChoice ? $count : 1);
         $this->removeFrom($heroId, $tokenId, $perUnit);
 
@@ -143,11 +145,23 @@ class Op_removeDamage extends CountableOperation {
         // Preserve the op type (heal/repairCard/removeDamage) so subclass restrictions stay.
         $remainingCount = $count - $perUnit;
         if ($remainingCount > 0 && !$singleChoice) {
-            // re-queue itself with lower count
+            // Clear the preset target so the next iteration prompts fresh (the preset was a
+            // one-time hint from the entry op, not a lock).
+            $this->withDataField("target", null);
             $this->withDataField("count", $remainingCount);
             $this->withDataField("mcount", $remainingCount);
             $this->queueOp($this);
         }
+    }
+
+    private function countDamagedCandidates(): int {
+        $n = 0;
+        foreach ($this->getCandidates() as $tokenId) {
+            if ($this->damageOn($tokenId) > 0) {
+                $n++;
+            }
+        }
+        return $n;
     }
 
     private function hasAnyDamageLeft(): bool {

@@ -35,7 +35,7 @@
 
 Ability cards:
 - [x] card_ability_3_8 — Fleetfoot II — has tests (mountain/occupied passthrough hardcoded via Hero::canIgnoreMountains/canIgnoreOccupied; HexMap now takes Character)
-- [ ] card_ability_4_12 — Dreadnought II — **r partial**: `spendMana:preventDamage` covers the first half; reflect-damage half undesigned ("Each adjacent monster that attacks you is dealt 1 damage")
+- [x] card_ability_4_12 — Dreadnought II — `spendMana:preventDamage` (active) + reflect-damage half hardcoded in `Op_monsterAttack::queueDreadnoughtIIReflect` (passive 1 dmg to adjacent attacker)
 
 
 ### Low priority

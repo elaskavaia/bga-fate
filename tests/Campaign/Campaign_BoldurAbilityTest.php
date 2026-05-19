@@ -336,6 +336,84 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         );
     }
 
+    // --- Dreadnought II (card_ability_4_12) ---
+    // Passive: "Each adjacent monster that attacks you is dealt 1 damage after its attack."
+    // Hardcoded in Op_monsterAttack: queues a 1dealDamage targeting the attacker's hex
+    // after the roll, gated on (defender has card_ability_4_12) AND (attacker adjacent).
+
+    public function testDreadnoughtIIDeals1DamageToAdjacentAttacker(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_ability_4_12", "tableau_$color");
+
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $brute = "monster_brute_1";
+        $bruteHex = "hex_7_8";
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+
+        // Brute str=3 → 3 dice. Seed all hits (Boldur takes 3 - 1 armor = 2 dmg).
+        $this->seedRand([5, 5, 5]);
+        $this->runMonsterAttack($brute, $boldurHex);
+
+        $this->assertEquals(1, $this->countDamage($brute), "Dreadnought II reflects 1 damage to the brute");
+    }
+
+    public function testDreadnoughtIIDoesNotReflectFromNonAdjacentAttacker(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_ability_4_12", "tableau_$color");
+
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        // Wisp = ranged (range 2). Place 2 hexes away so it can attack but isn't adjacent.
+        $wisp = "monster_wisp_1";
+        $wispHex = "hex_7_7";
+        $this->game->getMonster($wisp)->moveTo($wispHex, "");
+
+        $this->seedRand([5, 5, 5]);
+        $this->runMonsterAttack($wisp, $boldurHex);
+
+        $this->assertEquals(0, $this->countDamage($wisp), "Ranged (non-adjacent) attacker is not reflected");
+    }
+
+    public function testNoReflectWithoutDreadnoughtIIOnTableau(): void {
+        // Sanity check: same setup as the positive test, minus the card → no reflect.
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+
+        $this->seedRand([5, 5, 5]);
+        $this->runMonsterAttack($brute, $boldurHex);
+
+        $this->assertEquals(0, $this->countDamage($brute), "Without the card, attacker takes no reflect damage");
+    }
+
+    /**
+     * Pins down DESIGN.md open question #6 for Dreadnought II: the reflect resolves
+     * as part of the same attack, so it still fires even when the attack itself
+     * knocks Boldur out. Same assumption we apply to Embla's Riposte.
+     */
+    public function testDreadnoughtIIReflectsEvenWhenBoldurKnockedOut(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_ability_4_12", "tableau_$color");
+        $boldur = $this->game->getHero($color);
+        $boldur->recalcTrackers();
+
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+
+        // Pre-damage so the incoming 2 damage (3 hits - 1 armor) takes Boldur to 0.
+        $preDmg = $boldur->getEffectiveHealth() - 2;
+        $this->game->effect_moveCrystals($this->heroId, "red", $preDmg, $this->heroId, ["message" => ""]);
+
+        $this->seedRand([5, 5, 5]);
+        $this->runMonsterAttack($brute, $boldurHex);
+
+        $this->assertEquals(1, $this->countDamage($brute), "Reflect still fires even when the attack KOs Boldur");
+    }
+
     // --- Fortified I (card_ability_4_13) ---
     // r=spendUse:1heal(self) — flip card as used, then heal 1 damage from Boldur.
 
