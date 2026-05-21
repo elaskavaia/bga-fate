@@ -16,5 +16,7 @@ class Op_endOfAttack extends Operation {
         $this->queueTrigger($trigger);
         $this->game->tokens->dbSetTokenLocation("marker_attack", "limbo", 0, "");
         $this->game->tokens->dbSetTokenLocation("marker_instigator", "limbo", 0, "");
+        // Reset the rune HWM used by countNewRunes (Windbite et al.).
+        $this->game->tokens->setTokenState("marker_runes", 0);
     }
 }

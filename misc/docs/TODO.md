@@ -28,20 +28,11 @@
 
 
 
-### Missing Campaign tests (swept on 2026-05-17)
-
-34 of 145 cards had no reference in [tests/Campaign/](../../tests/Campaign/). Verifier sweep on 2026-05-17 added integration tests for 29; 5 are blocked on implementation work (see annotations).
-
-
-Ability cards:
-- [x] card_ability_3_8 — Fleetfoot II — has tests (mountain/occupied passthrough hardcoded via Hero::canIgnoreMountains/canIgnoreOccupied; HexMap now takes Character)
-- [x] card_ability_4_12 — Dreadnought II — `spendMana:preventDamage` (active) + reflect-damage half hardcoded in `Op_monsterAttack::queueDreadnoughtIIReflect` (passive 1 dmg to adjacent attacker)
-
 
 ### Designer rulings to implement (from DESIGN.md Rule clarifications #7–#11)
 
 - [ ] **Stitching cross-tableau repair (DESIGN.md #8)** — relax `Op_repairCard` so Stitching can target heroes and equipment of *other* players, as long as the owning hero is within range 1. Today it's scoped to acting player's own tableau.
-- [ ] **Windbite recursive chain (DESIGN.md #9)** — replace the one-shot model with a recursive add-and-roll loop: every rune rolled (including on added dice) adds another attack die. **Important:** rune dice must stay on the table (not discarded) because other cards consume them for damage.
+- [x] **Windbite recursive chain (DESIGN.md #9)** — `Op_addRoll::resolve` now counts new runes on the just-rolled dice and re-queues itself with that delta when Windbite is on tableau. Dice stay on display_battle (no consumption), so other rune-readers (Wildfire, Bone Bane Bow) still see them.
 - [x] **"Move X" is always "up to X" (DESIGN.md #11)** — Op_move no longer filters reachable hexes to exactly maxSteps; all distances 1..count are offered, so Agility II "Move 2" correctly allows stopping at 1. No other cards needed CSV changes.
 
 

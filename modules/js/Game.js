@@ -1140,12 +1140,13 @@ class Game1Tokens extends Game0Basics {
         else {
             const message_tr = this.game.getTr(message);
             const dt_tr = this.game.getTr(dynamic);
+            const label = _("Dynamic Assets");
             body = `
            <div class='tooltip-left'>${divImg}</div>
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
-             <div class='tooltiptext dynamic_tooltip' data-label='${this.game.getTr(_("Dynamic Assets"))}'>${dt_tr}</div>
+             <div class='tooltiptext dynamic_tooltip' data-label='${label}'>${dt_tr}</div>
            </div>
     `;
         }
@@ -1357,8 +1358,10 @@ class Game1Tokens extends Game0Basics {
                     args.sides = this.replaceSimpleIconsInLog(args.sides);
                 }
             }
-            if (log && typeof log == "string")
+            if (log && typeof log == "string") {
+                log = gameui.clienttranslate_string(log);
                 log = this.replaceSimpleIconsInLog(log, args);
+            }
         }
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
@@ -1408,7 +1411,7 @@ class Game1Tokens extends Game0Basics {
     <div id="pile_content" class="pile_content">${cards_htm}</div>`;
         dialog.setContent(html);
         const parent = $("pile_content");
-        let children = Array.from(parent.children);
+        let children = Array.from(parent.children).filter((node) => node.id && !node.id.startsWith("counter"));
         if (sort) {
             children.sort(sort);
             parent.replaceChildren(...children);
@@ -2162,7 +2165,7 @@ class PlayerTurn extends GameMachine {
         if (target.startsWith("action")) {
             const opKey = `Op_${target}`;
             const icon = this.game.getRulesFor(opKey, "wicon", "");
-            const name = this.game.getRulesFor(opKey, "name");
+            const name = this.game.getTokenName(opKey);
             const q = paramInfo.q;
             const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
             return `<div id='${target}' class="fateaction err_${q}">${iconHtml}<span>${name}</span></div>`;
@@ -2172,10 +2175,11 @@ class PlayerTurn extends GameMachine {
     onToken_nonActive(target, node) {
         if (!target)
             return false;
+        if (!$(target))
+            return false;
         const mainType = getPart(target, 0);
         switch (mainType) {
             case "card": {
-                const cardType = getPart(target, 1);
                 const container = $(target).parentElement?.id;
                 if (container?.startsWith("discard") || container?.startsWith("deck")) {
                     this.game.showHiddenContent(container, _("Pile contents"), 0, function (a, b) {

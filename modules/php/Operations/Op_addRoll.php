@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Trigger;
 
 /**
  * addRoll: Like roll, but ADDS dice to an existing attack in progress instead of
@@ -24,6 +25,11 @@ use Bga\Games\Fate\Material;
  * Used by cards that say "Add N [DIE_ATTACK] to this attack action" (e.g. Mastery).
  * Only valid after another roll — getPossibleMoves() gates on marker_attack being set
  * so the op is void outside an active attack.
+ *
+ * Trigger semantics: emits Trigger::Roll (not ActionAttack — added dice are not a new
+ * attack action). Other on=TRoll cards can react to the new dice; cards that need to
+ * avoid double-counting their own re-firing must guard themselves (e.g. Windbite uses
+ * `counter(countNewRunes)` which tracks a high-water mark on the card itself).
  */
 class Op_addRoll extends Op_roll {
     function getPrompt() {
@@ -32,10 +38,9 @@ class Op_addRoll extends Op_roll {
     function isAddition() {
         return true;
     }
-    function shouldEmitTrigger() {
-        // Added dice must not re-fire TRoll/TActionAttack, otherwise cards that respond to
-        // those triggers by calling addRoll (e.g. Windbite) would loop on their own dice.
-        return false;
+    function getEmittedTrigger(): Trigger {
+        // Added dice never start a new attack action — always Roll, never ActionAttack.
+        return Trigger::Roll;
     }
     function getPossibleMoves(): array {
         $presetTarget = $this->getDataField("target");
@@ -49,5 +54,11 @@ class Op_addRoll extends Op_roll {
         }
 
         return [$attackHex => ["q" => 0, "name" => clienttranslate("Confirm")]];
+    }
+
+    function resolve(): void {
+        // High-water-mark bump for any countNewRunes consumer (e.g. Windbite)
+        $this->game->tokens->setTokenState("marker_runes", $this->game->countRunes());
+        parent::resolve();
     }
 }

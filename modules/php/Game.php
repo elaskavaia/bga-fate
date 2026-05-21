@@ -548,6 +548,17 @@ class Game extends Base {
         return count($this->tokens->getTokensOfTypeInLocation("die_attack", "display_battle"));
     }
 
+    /**
+     * Rune count minus the high-water mark already serviced this attack. Lets ongoing
+     * rune-triggered effects (Windbite) re-fire on Trigger::Roll without counter()
+     * double-counting old runes. HWM is stored as the state of marker_roll (parked in
+     * limbo so it has no visual presence) and reset at end of attack.
+     */
+    function countNewRunes($owner = null, $context = null, $options = null): int {
+        $serviced = (int) $this->tokens->getTokenState("marker_runes");
+        return max(0, $this->countRunes($owner) - $serviced);
+    }
+
     /** Count dice on display_battle showing a rune (side 3). Used by evaluateExpression("countRunes"). */
     function countRunes($owner = null, $context = null, $options = null): int {
         $count = 0;

@@ -538,12 +538,13 @@ export class Game1Tokens extends Game0Basics {
     } else {
       const message_tr = this.game.getTr(message);
       const dt_tr = this.game.getTr(dynamic);
+      const label = _("Dynamic Assets");
       body = `
            <div class='tooltip-left'>${divImg}</div>
            <div class='tooltip-right'>
              <div class='tooltiptitle'>${name_tr}</div>
              <div class='tooltiptext'>${message_tr}</div>
-             <div class='tooltiptext dynamic_tooltip' data-label='${this.game.getTr(_("Dynamic Assets"))}'>${dt_tr}</div>
+             <div class='tooltiptext dynamic_tooltip' data-label='${label}'>${dt_tr}</div>
            </div>
     `;
     }
@@ -757,8 +758,12 @@ export class Game1Tokens extends Game0Basics {
           args.sides = this.replaceSimpleIconsInLog(args.sides);
         }
       }
-      if (log && typeof log == "string") log = this.replaceSimpleIconsInLog(log, args);
-    } catch (e) {
+
+      if (log && typeof log == "string") {
+        log = (gameui as any).clienttranslate_string(log);
+        log = this.replaceSimpleIconsInLog(log, args);
+      }
+    } catch (e: any) {
       console.error(log, args, "Exception thrown", e.stack);
     }
 
@@ -812,7 +817,7 @@ export class Game1Tokens extends Game0Basics {
     dialog.setContent(html);
     const parent = $("pile_content")!;
 
-    let children = Array.from(parent.children);
+    let children = Array.from(parent.children).filter((node) => node.id && !node.id.startsWith("counter"));
     if (sort) {
       children.sort(sort);
       parent.replaceChildren(...children);
@@ -827,11 +832,11 @@ export class Game1Tokens extends Game0Basics {
       if (index === selectedId) selectedId = origId;
     });
     if (children.length == 0) {
-      $("card_pile_help").remove();
+      $("card_pile_help")!.remove();
     }
     if (selectedId && typeof selectedId === "string") {
       const selected_html = this.getTooltipHtmlForToken(selectedId);
-      $("card_pile_selector").innerHTML = selected_html;
+      $("card_pile_selector")!.innerHTML = selected_html;
     }
     dialog.show();
     return dialog;

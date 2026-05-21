@@ -40,7 +40,7 @@ export class PlayerTurn extends GameMachine {
     if (target.startsWith("action")) {
       const opKey = `Op_${target}`;
       const icon = this.game.getRulesFor(opKey, "wicon", "");
-      const name = this.game.getRulesFor(opKey, "name");
+      const name = this.game.getTokenName(opKey);
       const q = paramInfo.q;
       const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
       return `<div id='${target}' class="fateaction err_${q}">${iconHtml}<span>${name}</span></div>`;
@@ -51,11 +51,11 @@ export class PlayerTurn extends GameMachine {
 
   onToken_nonActive(target: string, node: HTMLElement) {
     if (!target) return false;
+    if (!$(target)) return false;
     const mainType = getPart(target, 0);
     switch (mainType) {
       case "card": {
-        const cardType = getPart(target, 1);
-        const container = $(target).parentElement?.id;
+        const container = $(target)!.parentElement?.id;
         if (container?.startsWith("discard") || container?.startsWith("deck")) {
           this.game.showHiddenContent(container, _("Pile contents"), 0, function (a: HTMLElement, b: HTMLElement) {
             const orderA = parseInt(a.dataset.state);

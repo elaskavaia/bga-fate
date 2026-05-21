@@ -767,6 +767,16 @@ class Material {
         "create" => 1,
         "location" => "limbo",
 ],
+// # rune high-water-mark (state = rune count already serviced by a countNewRunes effect like Windbite;
+// # reset to 0 at endOfAttack so it doesn't bleed across attacks)
+    "marker_roll" => [ 
+        "state" => 0,
+        "name" => clienttranslate("Roll Tracker"),
+        "count" => 1,
+        "type" => "marker_roll",
+        "create" => 1,
+        "location" => "limbo",
+],
 // #resources
     "crystal_green" => [ 
         "state" => 0,
@@ -4903,7 +4913,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Windbite"),
         "strength" => 3,
-        "r" => "counter(countRunes):addRoll",
+        "r" => "counter(countNewRunes):addRoll",
         "on" => "TRoll",
         "quest" => "<i>Kill 4 monsters at range 2 or more</i> to get the sponsors lining up.",
         "effect" => clienttranslate("This is your Main Weapon. Attack range 2.<br>Whenever you roll [RUNE], add another [DIE_ATTACK] to your roll for each [RUNE]."),

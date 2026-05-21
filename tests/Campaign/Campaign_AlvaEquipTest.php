@@ -271,6 +271,35 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($brute));
     }
 
+    /**
+     * DESIGN.md #9: a rune on a Windbite-added die spawns another Windbite die.
+     * Initial roll: 1 rune → addRoll(1). That add rolls another rune → addRoll(1).
+     * That add rolls a hit → no further recursion. Final dice landed: 3 runes + 1 hit.
+     */
+    public function testWindbiteRecursesOnRunesFromAddedDice(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_2_15", "limbo");
+        $this->game->tokens->moveToken("card_equip_2_19", "tableau_$color");
+        $this->game->getHeroById($this->heroId)->recalcTrackers();
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_2";
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        // 5 dice initial roll: 1 rune (side 3) + 4 misses (side 1).
+        // 1st Windbite addRoll: 1 die → rune (3) — spawns recursion.
+        // 2nd Windbite addRoll: 1 die → hit (5) — terminates recursion.
+        $this->seedRand([3, 1, 1, 1, 1, /* 1st add */ 3, /* 2nd add */ 5]);
+        $this->respond("actionAttack");
+
+        $this->assertOperation("useCard");
+        $this->respond("card_equip_2_19");
+        $this->confirmCardEffect();
+
+        $this->assertEquals(1, $this->countDamage($brute), "1 hit lands from the recursive chain (the final added die)");
+        $this->assertEmpty($this->game->randQueue, "Expected dice consumed: 5 initial + 2 added");
+    }
+
     // --- Singing Bow (card_equip_2_20) ---
     // r=gainMana, on=TAfterActionAttack, strength=3, range=2.
     // Passive main weapon; after each attack action, add 1 mana to any card.
