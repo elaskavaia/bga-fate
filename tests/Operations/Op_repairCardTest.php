@@ -166,4 +166,48 @@ final class Op_repairCardTest extends AbstractOpTestCase {
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_21"));
         $this->assertEquals(0, $this->getCardDamage("card_equip_1_23"));
     }
+
+    // -------------------------------------------------------------------------
+    // "adj" mode — cross-tableau repair (DESIGN.md #8, Stitching).
+    // Cards on the tableau of any hero within range 1 of the acting hero are
+    // also eligible.
+    // -------------------------------------------------------------------------
+
+    public function testAdjModeIncludesOwnCards(): void {
+        $this->addDamageToCard("card_equip_1_21", 1);
+        $this->createOp("repairCard(adj)");
+        $this->assertValidTarget("card_equip_1_21", "Own damaged card is still a target under adj mode");
+    }
+
+    /** Register Alva as a second player so getHeroOwner can resolve hero_2 → BCOLOR. */
+    private function registerAlvaAsSecondPlayer(): void {
+        $this->game->setPlayersNumber(2);
+        $this->game->tokens->moveToken("card_hero_2_1", "tableau_" . BCOLOR);
+    }
+
+    public function testAdjModePicksUpAdjacentHeroEquipment(): void {
+        $this->registerAlvaAsSecondPlayer();
+        // Park Alva on a hex adjacent to Bjorn at hex_11_8.
+        $this->game->tokens->moveToken("hero_2", "hex_12_8");
+        $alvaEquip = "card_equip_2_15";
+        $this->game->tokens->moveToken($alvaEquip, "tableau_" . BCOLOR);
+        $this->addDamageToCard($alvaEquip, 1);
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->createOp("repairCard(adj)");
+        $this->assertValidTarget($alvaEquip, "Adjacent Alva's equipment must be reachable via repairCard(adj)");
+    }
+
+    public function testAdjModeExcludesNonAdjacentHeroEquipment(): void {
+        $this->registerAlvaAsSecondPlayer();
+        // Park Alva far away — distance > 1 from Bjorn at hex_11_8.
+        $this->game->tokens->moveToken("hero_2", "hex_5_5");
+        $alvaEquip = "card_equip_2_15";
+        $this->game->tokens->moveToken($alvaEquip, "tableau_" . BCOLOR);
+        $this->addDamageToCard($alvaEquip, 1);
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->createOp("repairCard(adj)");
+        $this->assertNotValidTarget($alvaEquip, "Out-of-range hero's equipment is not eligible");
+    }
 }

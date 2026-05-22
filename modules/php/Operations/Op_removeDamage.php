@@ -27,7 +27,9 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Params (param 0):
  *  - ""       — acting hero OR any card on tableau (default for actionMend in Grimheim, encounters)
  *  - "self"   — acting hero only
- *  - "adj"    — heroes within range 1 (including self) — does NOT include cards
+ *  - "adj"    — heroes within range 1 (including self). For card-allowing variants
+ *               (Op_repairCard), also picks up cards from the tableaus of those adjacent
+ *               heroes — used by Stitching for cross-tableau equipment repair (DESIGN.md #8).
  *  - "max"    — pick a single target, remove ALL damage from it (count multiplies the picks:
  *               2removeDamage(max) prompts twice, all damage stripped from each pick)
  *  - "all"    — single confirm; remove damage from EVERY eligible target at once.
@@ -52,7 +54,7 @@ class Op_removeDamage extends CountableOperation {
     }
 
     protected function allowsCards(): bool {
-        return in_array($this->getMode(), ["", "max", "all"], true);
+        return in_array($this->getMode(), ["", "max", "all", "adj"], true);
     }
 
     protected function isAllMode(): bool {
@@ -69,27 +71,64 @@ class Op_removeDamage extends CountableOperation {
 
         if ($this->allowsHeroes()) {
             $heroId = $this->game->getHeroTokenId($owner);
+            $selfHex = $this->game->hexMap->getCharacterHex($heroId);
             if ($this->getMode() === "adj") {
-                $heroHex = $this->game->hexMap->getCharacterHex($heroId);
-                $hexes = array_merge([$heroHex], $this->game->hexMap->getHexesInRange($heroHex, 1));
-                foreach ($hexes as $hex) {
-                    $other = $this->game->hexMap->getCharacterOnHex($hex, "hero");
-                    if ($other) {
-                        $candidates[$hex] = $other;
-                    }
+                $candidates[$selfHex] = $heroId;
+                foreach ($this->getAdjacentHeroes() as $hex => $other) {
+                    $candidates[$hex] = $other;
                 }
             } else {
-                $candidates[$this->game->hexMap->getCharacterHex($heroId)] = $heroId;
+                $candidates[$selfHex] = $heroId;
             }
         }
 
         if ($this->allowsCards()) {
-            foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$owner")) as $cardId) {
-                $candidates[$cardId] = $cardId;
+            foreach ($this->getCardOwners() as $tableauOwner) {
+                foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("card", "tableau_$tableauOwner")) as $cardId) {
+                    $candidates[$cardId] = $cardId;
+                }
             }
         }
 
         return $candidates;
+    }
+
+    /**
+     * Other heroes within range 1 of the acting hero, keyed by hex. Excludes the
+     * acting hero itself. Used by adj-mode hero/card target gathering.
+     */
+    private function getAdjacentHeroes(): array {
+        $heroId = $this->game->getHeroTokenId($this->getOwner());
+        $heroHex = $this->game->hexMap->getCharacterHex($heroId);
+        $result = [];
+        foreach ($this->game->hexMap->getHexesInRange($heroHex, 1) as $hex) {
+            $other = $this->game->hexMap->getCharacterOnHex($hex, "hero");
+            if ($other && $other !== $heroId) {
+                $result[$hex] = $other;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Player colors whose tableaus are eligible card sources under the current mode.
+     * Default: acting player only. "adj" (e.g. Stitching's repairCard(adj)): acting player
+     * plus any other hero within range 1, so cross-tableau repair is allowed when the
+     * owner sits adjacent to the acting hero.
+     */
+    private function getCardOwners(): array {
+        $owner = $this->getOwner();
+        if ($this->getMode() !== "adj") {
+            return [$owner];
+        }
+        $owners = [$owner];
+        foreach ($this->getAdjacentHeroes() as $other) {
+            $otherOwner = $this->game->getHeroOwner($other);
+            if ($otherOwner && !in_array($otherOwner, $owners, true)) {
+                $owners[] = $otherOwner;
+            }
+        }
+        return $owners;
     }
 
     private function damageOn(string $tokenId): int {

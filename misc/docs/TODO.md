@@ -28,7 +28,7 @@
 
 ### Designer rulings to implement (from DESIGN.md Rule clarifications #7–#11)
 
-- [ ] **Stitching cross-tableau repair (DESIGN.md #8)** — relax `Op_repairCard` so Stitching can target heroes and equipment of *other* players, as long as the owning hero is within range 1. Today it's scoped to acting player's own tableau.
+- [x] **Stitching cross-tableau repair (DESIGN.md #8)** — `Op_removeDamage::getCardOwners()` now extends to the acting hero + heroes within range 1 when mode is `adj`. Stitching I/II CSVs switched to `repairCard(adj)` so equipment on adjacent allies' tableaus is eligible.
 - [x] **Windbite recursive chain (DESIGN.md #9)** — `Op_addRoll::resolve` now counts new runes on the just-rolled dice and re-queues itself with that delta when Windbite is on tableau. Dice stay on display_battle (no consumption), so other rune-readers (Wildfire, Bone Bane Bow) still see them.
 - [x] **"Move X" is always "up to X" (DESIGN.md #11)** — Op_move no longer filters reachable hexes to exactly maxSteps; all distances 1..count are offered, so Agility II "Move 2" correctly allows stopping at 1. No other cards needed CSV changes.
 

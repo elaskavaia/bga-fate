@@ -4120,7 +4120,7 @@ class Material {
         "num" => 7,
         "hno" => 1,
         "name" => clienttranslate("Stitching I"),
-        "r" => "spendUse:(heal(adj)/repairCard)",
+        "r" => "spendUse:(heal(adj)/repairCard(adj))",
         "effect" => clienttranslate("Remove 1 damage from any hero or equipment within range 1."),
         "flavour" => "If you're in a pinch, Bjorn can patch.",
 ],
@@ -4131,7 +4131,7 @@ class Material {
         "num" => 8,
         "hno" => 1,
         "name" => clienttranslate("Stitching II"),
-        "r" => "spendUse:(2heal(adj)/2repairCard/(heal(adj),repairCard))",
+        "r" => "spendUse:(2heal(adj)/2repairCard(adj)/(heal(adj),repairCard(adj)))",
         "effect" => clienttranslate("Remove a total of 2 damage from heroes and equipment within range 1."),
 ],
     "card_ability_1_5" => [ 
