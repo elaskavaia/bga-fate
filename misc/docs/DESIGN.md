@@ -175,6 +175,19 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `shareGold` (free) — Give gold to another hero — *notimpl*
 
 
+### Monster Die Variant
+
+Optional difficulty toggle (game option `102` → `var_monster_die`). When on, `Op_turnMonster` queues `rollMonsterDie` ahead of the existing move/attack ops. The roll outcome lives on the `die_monster` token while it sits on `display_monsterturn`; readers consult `Game::getMonsterDieSide()`, which maps the die's state to one of `maneuver_1`, `maneuver_2`, `attack`, `push`, `charge`, `ambush`. `Op_endOfMonsterTurn` sweeps the die back to `supply_die_monster` so the side never leaks into hero-turn code.
+
+Effect dispatch splits two ways:
+
+- **Passive** (`attack`, `charge`) — handled inline by existing ops that already check `getMonsterDieSide()`. `Op_monsterAttack::getMonsterStrength` adds +1 strength when the side is `attack`; `Op_monsterMoveAll` grants rank-1 monsters one extra step when the side is `charge` (it does **not** stack with the skull-turn charge).
+- **Active** (`maneuver_*`, `push`, `ambush`) — `Op_rollMonsterDie` queues a one-shot handler that runs before `monsterMoveAll`:
+  - `Op_monsterDiePush` — every hero adjacent to a monster moves one hex along the per-hex `dir` tag via `HexMap::getMonsterNextHex`. Stay-put if the destination is occupied, off-map, or impassable for the hero (mountain/lake without a named location). Pushes are silent moves — they do **not** fire end-of-movement triggers.
+  - `Op_monsterDieAmbush` — queues one `spawn(goblin)` per hero not currently in Grimheim. Spawn placement re-uses `Op_spawn`'s auto-pick (clockwise from N), so empty supply or fully-blocked rings are silent skips.
+  - `Op_monsterDieManeuver(cw|ccw)` — iterates heroes in player order; for each hero, all currently-adjacent monsters rotate one ring position simultaneously using `HexMap::rotateAroundCenter`. Within a hero's group, monsters do not block each other (lift-then-place via `HexMap::moveCharacterOnMap`); only another hero, off-map, or Grimheim affects the result. Rotating into Grimheim triggers the standard monster-enters-Grimheim destruction path. A monster adjacent to multiple heroes gets a rotation pass per anchor.
+
+
 ### Card Effect Operations 
 
 These are **generic parameterized operations** used as building blocks to implement card effects.

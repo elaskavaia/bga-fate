@@ -1,7 +1,7 @@
 # Monster Dice Plan
 
 Plan document for adding the **Monster Dice** optional variant to Fate.
-Status: **draft, not implemented**.
+Status: **D1–D5 shipped**; D6 (client polish) re-uses existing animation glue.
 
 > Scope: a single d6 rolled at the start of every Monster Turn, gated behind a game option. Visual/material layer is already shipped; this plan covers the gameplay wiring.
 
@@ -91,9 +91,9 @@ After all monster ops complete, sweep `monster_die_side` back to empty in the sa
 These are settled and feed §4. Listed here so reviewers don't have to dig through §6 history.
 
 - **A1 — Game option is table-creation only.** `var_monster_die` is set from option `102` at game setup and is immutable for the remainder of the game. Mirrors the time-track option pattern. No runtime toggle.
-- **A2 — Maneuver tie-break: closest-to-Grimheim hero.** When a monster is adjacent to multiple heroes during a `maneuver_*` resolve, it rotates around the hero closest to Grimheim (lowest `getDistanceMapToGrimheim` value). Deterministic; matches the `closerToGrimheim` Math term already used elsewhere. Tiebreaker if two heroes are equidistant: lowest hex-id.
-- **A3 — Push uses the same step logic as monster movement.** Reuse `HexMap::getMonsterNextHex($heroHex)` — the per-hex `dir` tag drives the choice, exactly as in [Op_monsterMoveAll](../../modules/php/Operations/Op_monsterMoveAll.php). The dir tag is deterministic, so there is no tie-breaking question. If `getMonsterNextHex` returns `null`, hero stays. If the next hex is `isOccupied($nextHex)`, hero stays (mirror Op_monsterMoveAll line 110). Heroes entering Grimheim is a normal move — no house destruction (that rule is monster-specific).
-- **A4 — Maneuver mechanics (per designer clarification).** Hero in center; clockwise = next adjacent hex "to the right" (analog-clock dials). Movement is **simultaneous** — if 6 monsters surround a hero, all 6 move at once. A monster's rotation can be **blocked by another hero** occupying the destination hex (in which case that monster doesn't move). A monster **can rotate into Grimheim** during maneuver — this triggers the standard "monster enters Grimheim" path (destroy houses), same as a normal move-in. Note: A4 does not resolve A2 (adjacent-to-multiple-heroes tie-break) — A2 still applies for picking the rotation anchor.
+- **A2 — Maneuver iterates per-hero, in player order.** Per FORUM #2 (HORST324 thread): the effect fires once for every hero. A monster adjacent to multiple heroes rotates once per hero (chain effects). Within one hero's group, all adjacent monsters move simultaneously (see A4). Heroes inside Grimheim are skipped as anchors.
+- **A3 — Push uses the same step logic as monster movement.** Reuse `HexMap::getMonsterNextHex($heroHex)` — the per-hex `dir` tag drives the choice, exactly as in [Op_monsterMoveAll](../../modules/php/Operations/Op_monsterMoveAll.php). Per FORUM #2 / #4: hero stays if the next hex is **(a)** missing (`null`), **(b)** occupied (monster or another hero), or **(c)** impassable for the hero (mountain/lake without a named location). Heroes entering Grimheim is a normal move — no house destruction (that rule is monster-specific). Per FORUM #6: being pushed is **not** "active movement" — it does not trigger end-of-movement abilities (e.g. Alva's forest mana).
+- **A4 — Maneuver mechanics (per designer clarification + FORUM #3).** Hero in center; clockwise = next adjacent hex "to the right" (analog-clock dials). Movement is **simultaneous within one hero's group** — monsters in the same group don't block each other. A monster's rotation is **blocked only by another hero** on the destination hex, or by the edge of the board. A monster **can rotate into Grimheim** — this triggers the standard "monster enters Grimheim" path (destroy houses), same as a normal move-in. The rotation may diverge from the monster's normal path and may move a monster further from Grimheim (designer-confirmed).
 - **A5 — Charge mirrors the existing skull-turn charge.** When `monster_die_side === "charge"`, rank-1 monsters get `$moveSteps += 1` in [Op_monsterMoveAll::moveMonster()](../../modules/php/Operations/Op_monsterMoveAll.php#L64). The extra step still respects the normal "stop if hero-adjacent" rule (`moveMonsterOneStep` line 99). No special "lunge past the stop rule" behavior — same shape as the skull-turn charge already shipped.
 - **A6 — Ambush + empty supply: log and skip per-hero.** If the goblin supply is empty when an `ambush` side fires, log a translatable message (`No goblins left in the supply`) and skip the spawn for that hero. Continue processing the remaining heroes. No substitution with other monster types. Verbose-but-honest, consistent with player expectation.
 - **A7 — Ambush hex picker: active player resolves all heroes.** A single ambush op is queued (not one per hero); the active player whose Monster Turn is firing picks an adjacent hex for each hero in turn order. Faster than per-player prompting, no cross-player handoff. If a hero has zero valid adjacent hexes (all blocked), auto-skip that hero with a log line (composes with A6).
@@ -138,46 +138,18 @@ For each hero, queue `Op_spawn` with `param=goblin, target=adj(hero)`. Open ques
 
 ---
 
-## 6. Edge cases and open questions
-
-> Per Victoria's convention: questions stay in this doc, get answered inline, item is removed when resolved.
-
-1. ~~Game option timing.~~ → see §3.5 A1.
-
-2. ~~Maneuver tie-break.~~ → see §3.5 A2.
-
-3. ~~Push tie-breaking.~~ → see §3.5 A3.
-
-4. ~~Push into a blocked hex.~~ → see §3.5 A3.
-
-5. ~~Push into Grimheim.~~ → see §3.5 A3.
-
-6. ~~Charge ordering.~~ → see §3.5 A5.
-
-7. ~~Ambush goblin supply exhaustion.~~ → see §3.5 A6.
-
-8. ~~Ambush — who picks the hex?~~ → see §3.5 A7.
-
-9. ~~Maneuver into hero's hex.~~ Strike — geometrically impossible (rotation around a neighbor never lands you on the neighbor).
-
-10. ~~Attack-side die rolled but monster turn has no attacks.~~ → see §3.5 A8.
-
-11. ~~Interaction with bespoke monster cards (legends).~~ → see §3.5 A9.
-
 ---
 
 ## 7. Implementation phases
 
 Smallest viable shippable units first:
 
-1. **Phase D1 — Game option + roll op.** Add option 102 to `gameoptions.json`, wire `var_monster_die` label, add `isMonsterDieOn()` helper. Implement `Op_rollMonsterDie` that just rolls + parks the die + logs (no effects yet). Hook into `Op_turnMonster`. Test: turn off, no roll. Turn on, die rolls and shows on `display_monsterturn`.
-2. **Phase D2 — Attack & Charge (passive effects).** Add `monster_die_side` state value, set/clear in roll op. Modify `getMonsterStrength` and `Op_monsterMoveAll` to read it. Tests: roll attack → +1 strength on all monster attacks that turn. Roll charge → rank-1 monsters move +1.
-3. **Phase D3 — Push.** Implement `Op_monsterDiePush`. Reuse `getDistanceMapToGrimheim`. Test: hero adjacent to a monster, roll push → hero moves toward Grimheim.
-4. **Phase D4 — Ambush.** Implement `Op_monsterDieAmbush` per hero, reusing `Op_spawn`. Test: roll ambush → each hero prompted to place a goblin adjacent.
-5. **Phase D5 — Maneuver (cw / ccw).** Implement the hex-rotation primitive in `HexMap` (or as a helper in `Op_monsterDieManeuver`). Test: monster adjacent to a hero, roll maneuver_1 → monster rotates one hex clockwise around hero.
-6. **Phase D6 — Client polish.** Translatable log lines per side, completion log line on monster die sweep.
-
-D1 + D2 are the smallest shippable feature (visible roll, two passive effects). D3–D5 each ship independently.
+1. **Phase D1 — Game option + roll op.** ✅ Shipped.
+2. **Phase D2 — Attack & Charge (passive effects).** ✅ Shipped.
+3. **Phase D3 — Push.** ✅ Shipped. `Op_monsterDiePush` queued from `Op_rollMonsterDie` when side 4 rolls; blocks on monster/hero/mountain per FORUM #4.
+4. **Phase D4 — Ambush.** ✅ Shipped. `Op_monsterDieAmbush` queues one `spawn(goblin)` per non-Grimheim hero; auto-pick of adjacent hex matches existing Op_spawn. Interactive picker (A7) is a future refinement.
+5. **Phase D5 — Maneuver (cw / ccw).** ✅ Shipped. `Op_monsterDieManeuver` iterates heroes in player order and rotates each hero's adjacent-monster group simultaneously. `HexMap::rotateAroundCenter` is the new primitive.
+6. **Phase D6 — Client polish.** Re-uses existing animation paths: `Hero::moveTo` / `Monster::moveTo` for push/maneuver, `Op_spawn` notification for ambush. The roll log line is emitted by `Op_rollMonsterDie`; end-of-turn die sweep is silent.
 
 ---
 

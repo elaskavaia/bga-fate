@@ -209,6 +209,34 @@ class HexMap {
         return $this->isValidHex($next) ? $next : null;
     }
 
+    /**
+     * Rotate $fromHex one position around $centerHex, in screen-clockwise (or counter-CW)
+     * order. Returns null if $fromHex isn't adjacent to $centerHex or the rotated position
+     * is off-map. Used by Op_monsterDieManeuver — strict ring rotation (off-map neighbours
+     * still count as a position, the rotation just fails on that step).
+     */
+    function rotateAroundCenter(string $centerHex, string $fromHex, bool $clockwise): ?string {
+        // Same screen-CW direction order as getAdjacentHexesClockwise.
+        $cwDirs = [[-1, 0], [0, -1], [1, -1], [1, 0], [0, 1], [-1, 1]];
+        [$cq, $cr] = $this->getHexCoords($centerHex);
+        [$fq, $fr] = $this->getHexCoords($fromHex);
+        $offset = [$fq - $cq, $fr - $cr];
+        $idx = -1;
+        foreach ($cwDirs as $i => $dir) {
+            if ($dir === $offset) {
+                $idx = $i;
+                break;
+            }
+        }
+        if ($idx === -1) {
+            return null;
+        }
+        $newIdx = ($idx + ($clockwise ? 1 : -1) + 6) % 6;
+        [$dq, $dr] = $cwDirs[$newIdx];
+        $next = "hex_" . ($cq + $dq) . "_" . ($cr + $dr);
+        return $this->isValidHex($next) ? $next : null;
+    }
+
     /** @var array<string, int>|null cached distance map to Grimheim */
     private ?array $distMapToGrimheim = null;
 

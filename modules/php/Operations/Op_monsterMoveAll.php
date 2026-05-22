@@ -147,19 +147,7 @@ class Op_monsterMoveAll extends Operation {
         return $nextHex;
     }
 
-    /**
-     * Monster reaches Grimheim: remove the monster and destroy town pieces.
-     * Legends destroy 3 town pieces, regular monsters destroy 1.
-     * Freyja's Well (house_0) is always destroyed last.
-     */
     private function monsterEntersGrimheim(string $monsterId, string $fromHex): void {
-        // Legends destroy 3 town pieces, regular monsters destroy 1
-        $isLegend = str_contains($monsterId, "legend");
-        $destroyCount = $isLegend ? 3 : 1;
-
-        $this->game->effect_destroyHouses($destroyCount, $monsterId);
-
-        // Remove monster from the map
-        $this->game->getMonster($monsterId)->moveTo("supply_monster", clienttranslate('${token_name} goes home happy'));
+        $this->game->effect_monsterEntersGrimheim($monsterId);
     }
 }

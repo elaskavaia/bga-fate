@@ -609,6 +609,18 @@ class Game extends Base {
      * @param string $charId token causing the destruction (for log messages and animation)
      * @param string $message log message per house destroyed (use ${token_name} for causeTokenId)
      */
+    /**
+     * Monster reaches Grimheim: destroy town pieces (3 for legends, 1 otherwise) and
+     * return the monster to the supply. Centralised here so monster-move, monster-die
+     * maneuver, and any future Grimheim-entry path share one rule.
+     */
+    function effect_monsterEntersGrimheim(string $monsterId): void {
+        $isLegend = str_contains($monsterId, "legend");
+        $destroyCount = $isLegend ? 3 : 1;
+        $this->effect_destroyHouses($destroyCount, $monsterId);
+        $this->getMonster($monsterId)->moveTo("supply_monster", clienttranslate('${token_name} goes home happy'));
+    }
+
     function effect_destroyHouses(int $count, string $charId, string $message = ""): void {
         if ($message === "") {
             $message = clienttranslate('${char_name} destroys ${token_name}');

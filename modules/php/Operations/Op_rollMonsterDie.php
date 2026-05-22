@@ -30,6 +30,17 @@ class Op_rollMonsterDie extends Operation {
             ["side_name" => $sideName, "sides" => "[DIE_MON_$roll]"]
         );
 
+        // Active sides queue a one-shot handler that runs before monsterMoveAll.
+        // attack & charge are passive — readers inspect die state directly.
+        $rule = $this->game->material->getRulesFor("side_die_monster_$roll", "rule", "");
+        match ($rule) {
+            "maneuver_1" => $this->queue("monsterDieManeuver(cw)"),
+            "maneuver_2" => $this->queue("monsterDieManeuver(ccw)"),
+            "push" => $this->queue("monsterDiePush"),
+            "ambush" => $this->queue("monsterDieAmbush"),
+            default => null,
+        };
+
         // Roll result is hidden info that becomes public — non-rewindable.
         $this->game->customUndoSavepoint(0, 1, "roll");
     }

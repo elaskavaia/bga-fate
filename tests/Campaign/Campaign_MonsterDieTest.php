@@ -46,6 +46,16 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         $this->game->tokens->dbSetTokenLocation("die_monster", "display_monsterturn", $state, "");
     }
 
+    /**
+     * Drive a real monster die roll by stuffing the next bgaRand result. Use this
+     * for active sides (maneuver/push/ambush) where we need the roll op itself to
+     * dispatch the per-side handler. Passive sides (attack/charge) can keep using
+     * seedDieSide.
+     */
+    private function forceRollSide(int $side): void {
+        $this->game->randQueue[] = $side;
+    }
+
     private function driveOneMonsterTurn(): void {
         $this->respond("actionPractice");
         $this->respond("actionFocus");
@@ -199,5 +209,83 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
         // Skull alone: goblin (move=2) + 1 = 3 steps → hex_12_2 → hex_12_3 → hex_12_4 → hex_12_5.
         // If charge stacked, would be 4 steps → hex_12_6 (or further).
         $this->assertEquals("hex_12_5", $this->tokenLocation($monster), "skull-turn charge already provides +1; charge die must not stack");
+    }
+
+    // -------------------------------------------------------------------------
+    // Phase D3 / D4 / D5: active sides — full roll-dispatch path
+    // -------------------------------------------------------------------------
+
+    public function testPushSideMovesAdjacentHeroTowardGrimheim(): void {
+        // Hero at hex_12_7 (dir=7, getMonsterNextHex → hex_11_8). Adjacent monster at hex_13_7.
+        $this->game->tokens->moveToken($this->heroId, "hex_12_7");
+        $this->game->getMonster("monster_goblin_19")->moveTo("hex_13_7", "");
+        $this->forceRollSide(4); // push
+
+        $this->driveOneMonsterTurn();
+
+        $this->assertEquals("hex_11_8", $this->tokenLocation($this->heroId), "hero should be pushed one hex toward Grimheim");
+    }
+
+    public function testPushSideLeavesUnadjacentHeroPut(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_12_7");
+        // No monster adjacent — clearMonstersFromMap in setUp already cleared the map.
+        $this->forceRollSide(4); // push
+
+        $this->driveOneMonsterTurn();
+
+        $this->assertEquals("hex_12_7", $this->tokenLocation($this->heroId), "no adjacent monster → no push");
+    }
+
+    public function testAmbushSidePlacesGoblinAdjacent(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->forceRollSide(6); // ambush
+
+        $goblinsBefore = $this->countTokens("monster_goblin", "hex%");
+        $this->driveOneMonsterTurn();
+        $goblinsAfter = $this->countTokens("monster_goblin", "hex%");
+
+        $this->assertEquals($goblinsBefore + 1, $goblinsAfter, "ambush should spawn exactly one goblin on the map");
+
+        // Spawned goblin must sit on a hex adjacent to the hero.
+        $heroHex = $this->tokenLocation($this->heroId);
+        $adjacent = $this->game->hexMap->getAdjacentHexes($heroHex);
+        $goblinsAdjacent = 0;
+        foreach ($adjacent as $hex) {
+            $goblinsAdjacent += count($this->game->tokens->getTokensOfTypeInLocation("monster_goblin", $hex));
+        }
+        $this->assertEquals(1, $goblinsAdjacent, "the new goblin landed on an adjacent hex");
+    }
+
+    public function testAmbushSideSkipsHeroInGrimheim(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_9_9"); // Grimheim
+        $this->forceRollSide(6); // ambush
+
+        $goblinsBefore = $this->countTokens("monster_goblin", "hex%");
+        $this->driveOneMonsterTurn();
+        $goblinsAfter = $this->countTokens("monster_goblin", "hex%");
+
+        $this->assertEquals($goblinsBefore, $goblinsAfter, "no goblin spawned when the only hero is in Grimheim");
+    }
+
+    public function testManeuverCwRotatesMonsterAroundHero(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_12_7");
+        // Goblin at W of hero (hex_11_7). CW rotation → NW = hex_12_6.
+        $this->game->getMonster("monster_goblin_19")->moveTo("hex_11_7", "");
+        $this->forceRollSide(1); // maneuver_1 = cw
+
+        $this->driveOneMonsterTurn();
+
+        $this->assertEquals("hex_12_6", $this->tokenLocation("monster_goblin_19"));
+    }
+
+    public function testManeuverCcwRotatesMonsterAroundHero(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_12_7");
+        // Goblin at W of hero. CCW → SW = hex_11_8.
+        $this->game->getMonster("monster_goblin_19")->moveTo("hex_11_7", "");
+        $this->forceRollSide(2); // maneuver_2 = ccw
+
+        $this->driveOneMonsterTurn();
+
+        $this->assertEquals("hex_11_8", $this->tokenLocation("monster_goblin_19"));
     }
 }

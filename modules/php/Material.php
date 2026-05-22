@@ -287,6 +287,18 @@ class Material {
         "type" => "rollMonsterDie",
         "name" => clienttranslate("Roll Monster Die"),
 ],
+    "Op_monsterDiePush" => [ 
+        "type" => "monsterDiePush",
+        "name" => clienttranslate("Monster Die Push"),
+],
+    "Op_monsterDieAmbush" => [ 
+        "type" => "monsterDieAmbush",
+        "name" => clienttranslate("Monster Die Ambush"),
+],
+    "Op_monsterDieManeuver" => [ 
+        "type" => "monsterDieManeuver",
+        "name" => clienttranslate("Monster Die Maneuver"),
+],
     "Op_monsterMoveAll" => [ 
         "type" => "monsterMoveAll",
         "name" => clienttranslate("Monster Movement"),
