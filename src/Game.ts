@@ -113,19 +113,22 @@ export class Game extends Game1Tokens {
         const player: CustomPlayer = gamedatas.players[pid];
         const color = player.color;
         const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
-
+        const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
         placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
         ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
-          const name = this.getRulesFor(d, "name");
+          const name = this.getTr(_("${hero}'s ${deck}"), {
+            hero: heroName,
+            deck: this.getRulesFor(d, "name")
+          });
           placeHtml(
             `<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`,
             `tableau_${color}`
           );
         });
         const panel = this.bga.playerPanels.getElement(Number(player.id));
-        const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
+
         placeHtml(
-          `<div id="miniboard_${color}" class="miniboard" style="--player-color: #${color}">
+          `<div id="miniboard_${color}" class="miniboard ${hnoClass}" style="--player-color: #${color}">
           <div class="miniboard_banner">${heroName}</div>
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`,

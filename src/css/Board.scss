@@ -385,8 +385,8 @@
   padding: 5px;
 }
 
-.hand_wrapper,
-.tableau {
+.hand_wrapper {
+  // .tableau
   background-color: #f5deb37d;
   position: relative;
   display: flex;
@@ -410,4 +410,19 @@
   //padding: 8px;
   min-height: 32px;
   //min-width: 160px;
+}
+
+// Miniboard art — keyed off the hno class set in Game.ts (decoupled from player color).
+$miniboard-sprites: (
+  1: ("cards/bjorn_cards_hq.webp", 95%),
+  2: ("cards/alva_cards_hq.webp", 95%),
+  3: ("cards/embla_cards_hq.webp", 92%),
+  4: ("cards/boldur_cards_hq.webp", 95%),
+);
+@each $hno, $entry in $miniboard-sprites {
+  .miniboard.hno_#{$hno} {
+    background-image: url("img/#{nth($entry, 1)}");
+    background-size: 600% auto;
+    background-position: 100% nth($entry, 2);
+  }
 }

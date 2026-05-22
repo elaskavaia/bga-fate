@@ -1692,8 +1692,7 @@
   padding: 5px;
 }
 
-.hand_wrapper,
-.tableau {
+.hand_wrapper {
   background-color: rgba(245, 222, 179, 0.4901960784);
   position: relative;
   display: flex;
@@ -1702,8 +1701,7 @@
   width: 100%;
   padding-left: 20px;
 }
-.hand_wrapper::after,
-.tableau::after {
+.hand_wrapper::after {
   position: absolute;
   top: 0;
   left: 0;
@@ -1720,8 +1718,7 @@
   justify-content: center;
   padding: 10px 0;
 }
-.hand_wrapper,
-.tableau {
+.hand_wrapper {
   margin-top: 10px;
   padding-left: 20px;
   box-sizing: border-box;
@@ -1735,6 +1732,30 @@
   flex-wrap: wrap;
   gap: 8px;
   min-height: 32px;
+}
+
+.miniboard.hno_1 {
+  background-image: url("img/cards/bjorn_cards_hq.webp");
+  background-size: 600% auto;
+  background-position: 100% 95%;
+}
+
+.miniboard.hno_2 {
+  background-image: url("img/cards/alva_cards_hq.webp");
+  background-size: 600% auto;
+  background-position: 100% 95%;
+}
+
+.miniboard.hno_3 {
+  background-image: url("img/cards/embla_cards_hq.webp");
+  background-size: 600% auto;
+  background-position: 100% 92%;
+}
+
+.miniboard.hno_4 {
+  background-image: url("img/cards/boldur_cards_hq.webp");
+  background-size: 600% auto;
+  background-position: 100% 95%;
 }
 
 .board_layout_controls {
@@ -2127,14 +2148,14 @@ html:before {
   background-position-y: 8%;
 }
 #logs .roundedbox {
-  background-color: rgba(198, 235, 226, 0.7294117647);
+  background-color: #fff;
 }
 
 #right-side-first-part {
   background-position-y: 8%;
 }
 #right-side-first-part .player-board {
-  background-color: rgba(198, 235, 226, 0.7294117647);
+  background-color: #fff;
 }
 
 #player_boards > div {
@@ -2148,7 +2169,7 @@ html:before {
 
 #page-title {
   line-height: 24px;
-  background-color: rgba(198, 235, 226, 0.7294117647) !important;
+  background-color: #fff !important;
   box-sizing: border-box !important;
 }
 
