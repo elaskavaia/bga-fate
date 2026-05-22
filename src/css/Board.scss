@@ -1,3 +1,4 @@
+@use "sass:list";
 @use "variables" as v;
 
 // Supply areas
@@ -421,8 +422,8 @@ $miniboard-sprites: (
 );
 @each $hno, $entry in $miniboard-sprites {
   .miniboard.hno_#{$hno} {
-    background-image: url("img/#{nth($entry, 1)}");
+    background-image: url("img/#{list.nth($entry, 1)}");
     background-size: 600% auto;
-    background-position: 100% nth($entry, 2);
+    background-position: 100% list.nth($entry, 2);
   }
 }

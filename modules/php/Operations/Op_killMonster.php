@@ -36,6 +36,6 @@ class Op_killMonster extends Op_dealDamage {
 
     protected function getDamageAmount(string $defenderId): int {
         $monster = $this->game->getMonster($defenderId);
-        return $monster->getHealth();
+        return $monster->getRemainingHealth();
     }
 }

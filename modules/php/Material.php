@@ -781,11 +781,11 @@ class Material {
 ],
 // # rune high-water-mark (state = rune count already serviced by a countNewRunes effect like Windbite;
 // # reset to 0 at endOfAttack so it doesn't bleed across attacks)
-    "marker_roll" => [ 
+    "marker_runes" => [ 
         "state" => 0,
-        "name" => clienttranslate("Roll Tracker"),
+        "name" => clienttranslate("Runes Tracker"),
         "count" => 1,
-        "type" => "marker_roll",
+        "type" => "marker_runes",
         "create" => 1,
         "location" => "limbo",
 ],

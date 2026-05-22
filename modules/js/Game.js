@@ -604,7 +604,7 @@ class LaAnimations {
             }, duration);
         });
     }
-    cardFlip(mobileId, newState, duration, onEnd) {
+    cardFlip(mobileId, newState, duration, onEnd, frontNode) {
         var mobileNode = $(mobileId);
         if (!mobileNode)
             throw new Error(`Does not exists ${mobileId}`);
@@ -621,42 +621,65 @@ class LaAnimations {
             }, 0);
             return;
         }
-        const clone = this.projectOnto(mobileNode, "_temp");
-        clone.innerHTML = "";
-        mobileNode.dataset.state = newState;
-        mobileNode.offsetHeight; // recalc
+        // Front face. Single-node: project mobileNode at its pre-state appearance.
+        // Two-node: anchor to mobileNode's rect (frontNode may be in limbo with no rect), swap sprite classes to frontNode's.
+        let clone;
+        if (frontNode) {
+            clone = this.projectOnto(mobileNode, "_temp");
+            clone.innerHTML = "";
+            const frontEl = $(frontNode);
+            const phantomClasses = Array.from(clone.classList).filter((c) => c.startsWith("phantom"));
+            clone.className = "";
+            clone.classList.add(...Array.from(frontEl.classList));
+            clone.classList.add(...phantomClasses);
+        }
+        else {
+            clone = this.projectOnto(mobileNode, "_temp");
+            clone.innerHTML = "";
+            mobileNode.dataset.state = newState;
+            mobileNode.offsetHeight; // recalc
+        }
         const desti = this.projectOnto(mobileNode, "_temp2"); // invisible destination on top of new parent
         desti.innerHTML = "";
         mobileNode.style.opacity = "0"; // hide original
-        placeHtml(`<div id="card_temp"></div>`, "oversurface");
+        mobileNode.style.pointerEvents = "none"; // opacity:0 still hit-tests — block tooltips/clicks during the flip
+        // Two-layer wrapper: outer keeps the position-correcting matrix transform; inner gets the flip animation.
+        // (If we put both on one element, the @keyframes transform would wipe the position matrix during the animation.)
+        placeHtml(`<div id="card_temp"><div id="card_temp_inner"></div></div>`, "oversurface");
         const group = $("card_temp");
-        group.style.left = clone.style.left;
-        group.style.top = clone.style.top;
-        group.style.transform = clone.style.transform;
-        group.style.width = clone.style.width;
-        group.style.height = clone.style.height;
+        const inner = $("card_temp_inner");
+        group.style.left = desti.style.left;
+        group.style.top = desti.style.top;
+        group.style.transform = desti.style.transform;
+        group.style.width = desti.style.width;
+        group.style.height = desti.style.height;
         group.style.position = "absolute";
-        group.style.transformStyle = "preserve-3d";
-        group.style.transitionProperty = "all";
-        group.appendChild(clone);
-        group.appendChild(desti);
-        delete clone.style.left;
-        delete clone.style.top;
-        delete desti.style.left;
-        delete desti.style.top;
+        group.style.perspective = "40em";
+        inner.style.position = "absolute";
+        inner.style.width = "100%";
+        inner.style.height = "100%";
+        inner.style.transformStyle = "preserve-3d";
+        inner.appendChild(clone);
+        inner.appendChild(desti);
+        clone.style.removeProperty("left");
+        clone.style.removeProperty("top");
+        desti.style.removeProperty("left");
+        desti.style.removeProperty("top");
+        clone.style.width = "100%";
+        clone.style.height = "100%";
+        desti.style.width = "100%";
+        desti.style.height = "100%";
         desti.style.transform = "rotateY(180deg)";
         desti.style.backfaceVisibility = "hidden";
         clone.style.backfaceVisibility = "hidden";
+        // .phantom may carry its own animation/transform — suppress on these clones so only the wrapper's flip runs
+        clone.style.animation = "none";
+        desti.style.animation = "none";
         try {
-            //setStyleAttributes(desti, mobileStyle);
-            group.style.transitionDuration = duration + "ms";
-            //group.style.visibility = "visible";
-            //group.style.opacity = "1";
-            // that will cause animation
-            //group.style.scale = "2.0";
-            group.style.animation = `flip ${duration}ms`;
+            inner.style.animation = `flip ${duration}ms`;
             setTimeout(() => {
                 mobileNode.style.removeProperty("opacity"); // restore visibility of original
+                mobileNode.style.removeProperty("pointer-events");
                 group.remove();
                 if (onEnd)
                     onEnd(mobileNode);
@@ -665,6 +688,7 @@ class LaAnimations {
         catch (e) {
             // if bad thing happen we have to clean up clones
             console.error("ERR:C01:animation error", e);
+            mobileNode.style.removeProperty("pointer-events");
             group.remove();
             if (onEnd)
                 onEnd(mobileNode);
@@ -2468,6 +2492,13 @@ class Game extends Game1Tokens {
         }
         else if (tokenKey.startsWith("card_")) {
             result.onClick = (e) => this.onToken(e);
+            // Upgrade flip: L2 just landed in tableau; flip from L1's sprite to L2's at the slot.
+            if (args.flip_from) {
+                const fromId = args.flip_from;
+                result.onEnd = () => {
+                    this.animationLa.cardFlip(tokenKey, String(tokenInfo.state), 1000, undefined, fromId);
+                };
+            }
         }
         else if (tokenKey.startsWith("crystal_")) {
             // Bucket redirect: tokens placed on another token get a sub-container bucket

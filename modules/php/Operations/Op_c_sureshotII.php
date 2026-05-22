@@ -45,9 +45,7 @@ class Op_c_sureshotII extends Operation {
         $hex = $this->getMonsterHex();
         $defenderId = $this->game->hexMap->getCharacterOnHex($hex, null);
         $this->game->systemAssert("ERR:c_sureshotII:noCharOnHex:$hex", $defenderId !== null);
-        $health = (int) $this->game->material->getRulesFor($defenderId, "health", "0");
-        $damage = count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $defenderId));
-        return $health - $damage;
+        return $this->game->getCharacter($defenderId)->getRemainingHealth();
     }
 
     private function getMaxMana(): int {

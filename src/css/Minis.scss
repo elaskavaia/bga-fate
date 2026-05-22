@@ -239,6 +239,16 @@
 // Freyja's Well — stone well sprite
 .well {
   background-position: 0% 0%;
+
+  > .counter {
+    @include v.counter-badge(auto, -4px);
+    top: -6px;
+    font-size: 14px;
+    min-width: 22px;
+    height: 22px;
+    line-height: 22px;
+    border-radius: 11px;
+  }
 }
 
 .rune_stone {

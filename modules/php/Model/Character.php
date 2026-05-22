@@ -120,6 +120,11 @@ class Character {
         return PHP_INT_MAX;
     }
 
+    /** Health left */
+    function getRemainingHealth(): int {
+        return $this->getEffectiveHealth() - $this->getDamage();
+    }
+
     /**
      * Pure damage detection — no side effects.
      *

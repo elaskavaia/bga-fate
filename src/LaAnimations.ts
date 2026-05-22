@@ -285,7 +285,13 @@ export class LaAnimations {
     });
   }
 
-  cardFlip(mobileId: ElementOrId, newState: string, duration?: number, onEnd?: (node?: HTMLElement) => void) {
+  cardFlip(
+    mobileId: ElementOrId,
+    newState: string,
+    duration?: number,
+    onEnd?: (node?: HTMLElement) => void,
+    frontNode?: ElementOrId
+  ) {
     var mobileNode = $(mobileId) as HTMLElement;
 
     if (!mobileNode) throw new Error(`Does not exists ${mobileId}`);
@@ -301,54 +307,78 @@ export class LaAnimations {
       return;
     }
 
-    const clone = this.projectOnto(mobileNode, "_temp");
-    clone.innerHTML = "";
+    // Front face. Single-node: project mobileNode at its pre-state appearance.
+    // Two-node: anchor to mobileNode's rect (frontNode may be in limbo with no rect), swap sprite classes to frontNode's.
+    let clone: HTMLElement;
+    if (frontNode) {
+      clone = this.projectOnto(mobileNode, "_temp");
+      clone.innerHTML = "";
+      const frontEl = $(frontNode) as HTMLElement;
+      const phantomClasses = Array.from(clone.classList).filter((c) => c.startsWith("phantom"));
+      clone.className = "";
+      clone.classList.add(...Array.from(frontEl.classList));
+      clone.classList.add(...phantomClasses);
+    } else {
+      clone = this.projectOnto(mobileNode, "_temp");
+      clone.innerHTML = "";
+      mobileNode.dataset.state = newState;
+      mobileNode.offsetHeight; // recalc
+    }
 
-    mobileNode.dataset.state = newState;
-    mobileNode.offsetHeight; // recalc
     const desti = this.projectOnto(mobileNode, "_temp2"); // invisible destination on top of new parent
     desti.innerHTML = "";
     mobileNode.style.opacity = "0"; // hide original
-    placeHtml(`<div id="card_temp"></div>`, "oversurface");
-    const group = $("card_temp");
+    mobileNode.style.pointerEvents = "none"; // opacity:0 still hit-tests — block tooltips/clicks during the flip
 
-    group.style.left = clone.style.left;
-    group.style.top = clone.style.top;
-    group.style.transform = clone.style.transform;
-    group.style.width = clone.style.width;
-    group.style.height = clone.style.height;
+    // Two-layer wrapper: outer keeps the position-correcting matrix transform; inner gets the flip animation.
+    // (If we put both on one element, the @keyframes transform would wipe the position matrix during the animation.)
+    placeHtml(`<div id="card_temp"><div id="card_temp_inner"></div></div>`, "oversurface");
+    const group = $("card_temp") as HTMLElement;
+    const inner = $("card_temp_inner") as HTMLElement;
+
+    group.style.left = desti.style.left;
+    group.style.top = desti.style.top;
+    group.style.transform = desti.style.transform;
+    group.style.width = desti.style.width;
+    group.style.height = desti.style.height;
     group.style.position = "absolute";
-    group.style.transformStyle = "preserve-3d";
-    group.style.transitionProperty = "all";
+    group.style.perspective = "40em";
 
-    group.appendChild(clone);
-    group.appendChild(desti);
-    delete clone.style.left;
-    delete clone.style.top;
-    delete desti.style.left;
-    delete desti.style.top;
+    inner.style.position = "absolute";
+    inner.style.width = "100%";
+    inner.style.height = "100%";
+    inner.style.transformStyle = "preserve-3d";
+
+    inner.appendChild(clone);
+    inner.appendChild(desti);
+    clone.style.removeProperty("left");
+    clone.style.removeProperty("top");
+    desti.style.removeProperty("left");
+    desti.style.removeProperty("top");
+    clone.style.width = "100%";
+    clone.style.height = "100%";
+    desti.style.width = "100%";
+    desti.style.height = "100%";
     desti.style.transform = "rotateY(180deg)";
     desti.style.backfaceVisibility = "hidden";
     clone.style.backfaceVisibility = "hidden";
+    // .phantom may carry its own animation/transform — suppress on these clones so only the wrapper's flip runs
+    clone.style.animation = "none";
+    desti.style.animation = "none";
 
     try {
-      //setStyleAttributes(desti, mobileStyle);
-      group.style.transitionDuration = duration + "ms";
-
-      //group.style.visibility = "visible";
-      //group.style.opacity = "1";
-      // that will cause animation
-      //group.style.scale = "2.0";
-      group.style.animation = `flip ${duration}ms`;
+      inner.style.animation = `flip ${duration}ms`;
 
       setTimeout(() => {
         mobileNode.style.removeProperty("opacity"); // restore visibility of original
+        mobileNode.style.removeProperty("pointer-events");
         group.remove();
         if (onEnd) onEnd(mobileNode);
       }, duration);
     } catch (e) {
       // if bad thing happen we have to clean up clones
       console.error("ERR:C01:animation error", e);
+      mobileNode.style.removeProperty("pointer-events");
       group.remove();
       if (onEnd) onEnd(mobileNode);
     }

@@ -132,10 +132,10 @@ class Op_upgrade extends Operation {
         $heroId = $this->game->getHeroTokenId($owner);
 
         $suppress = ["noa" => true];
-        // Move L1 to limbo (suppress animation)
+        // Move L1 to limbo (suppress slide — flip animation runs on L2 below)
         $this->dbSetTokenLocation($cardId, "limbo", 0, "", $suppress);
 
-        // Move L2 to tableau (suppress animation)
+        // Move L2 to tableau; client plays a 3D flip from L1's sprite to L2's at this slot
         $this->dbSetTokenLocation(
             $level2Id,
             "tableau_$owner",
@@ -143,6 +143,7 @@ class Op_upgrade extends Operation {
             clienttranslate('${char_name} upgrades to ${token_name}'),
             [
                 "char_name" => $heroId,
+                "flip_from" => $cardId,
             ] + $suppress
         );
 

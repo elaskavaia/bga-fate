@@ -26,18 +26,22 @@ See [misc/docs/DESIGN.md](misc/docs/DESIGN.md) for architecture overview, token/
 - `npm run build:scss` - Compile SCSS to fate.css
 - `npm run genmat` - Generate Material.php from CSV files in misc/
 - `npm run lint:php`- Check for php syntax errors
-- `npm run predeploy` - Generate and test everything (build + PHP lint + PHP tests + JS tests)
+
+- `npm run predeploy` - Generate and test everything (build + PHP lint + PHP tests + JS tests). Slow (several minutes). **Only run it when explicitly asked or right before `git commit`.** Do NOT run as mid-task verification — use targeted commands instead (`npm run build:ts`, `npm run jstests`, single PHP test file). Always redirect output to `/tmp/predeploy_output.txt` so you can re-read it instead of re-running.
 
 
 ### Testing
 
-- `npm run tests` - Run all PHPUnit tests
+- `npm run tests` - Run all PHPUnit tests (full suite)
+- **Important**: When running full test suite, redirect output to a temp file (`npm run tests > /tmp/test_output.txt 2>&1`) and read from it instead of re-running multiple times — tests are slow!
+
 - `npm run test -- tests/<TestFile>.php` - Run a single test file
 - `npm run test -- --filter testMethodName tests/<TestFile>.php` - Run a single test method
 - Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
 - `npm run tests:cov` - Run PHPUnit tests with code coverage report (requires Xdebug)
 - `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
-- **Important**: When running full test suite, redirect output to a temp file (`npm run tests > /tmp/test_output.txt 2>&1`) and read from it instead of re-running multiple times — tests are slow!
+- `npm run play` - Run simulated game to generate web page (html), see [misc/docs/HARNESS.md](misc/docs/HARNESS.md) for usage details.
+
 
 ### Debugging PHP tests (phpdbg)
 

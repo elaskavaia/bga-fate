@@ -241,6 +241,8 @@ class Game extends Base {
 
         // Hero attribute trackers (tracker_strength_{color}, etc.) are sent automatically via tokens->getAllDatas()
 
+        $result["counters"]["counter_house_0"] = ["value" => $this->getHousesRemainingCount()];
+
         $result["gameEnded"] = $isGameEnded = $this->isEndOfGame();
         if ($isGameEnded) {
             $result["endBanner"] = ["message" => $this->getEndBannerMessage(), "isWellDestroyed" => $this->isWellDestroyed()];
@@ -281,6 +283,10 @@ class Game extends Base {
 
     function isHeroesWin() {
         return !$this->isWellDestroyed();
+    }
+
+    function getHousesRemainingCount(): int {
+        return count($this->tokens->getTokensOfTypeInLocation("house", "hex%"));
     }
 
     function isWellDestroyed() {
@@ -393,9 +399,7 @@ class Game extends Base {
             }
             return $this->hexMap->getHexDistance($heroHex, $contextHex);
         } elseif ($x === "healthRem") {
-            $health = (int) $this->getRulesFor($context, "health", 0);
-            $damage = count($this->tokens->getTokensOfTypeInLocation("crystal_red", $context));
-            return $health - $damage;
+            return $this->getCharacter($context)->getRemainingHealth();
         } elseif ($x === "closerToGrimheim") {
             $heroId = $this->getHeroTokenId($owner);
             $heroHex = $this->hexMap->getCharacterHex($heroId);
@@ -551,7 +555,7 @@ class Game extends Base {
     /**
      * Rune count minus the high-water mark already serviced this attack. Lets ongoing
      * rune-triggered effects (Windbite) re-fire on Trigger::Roll without counter()
-     * double-counting old runes. HWM is stored as the state of marker_roll (parked in
+     * double-counting old runes. HWM is stored as the state of marker_runes (parked in
      * limbo so it has no visual presence) and reset at end of attack.
      */
     function countNewRunes($owner = null, $context = null, $options = null): int {
@@ -647,6 +651,7 @@ class Game extends Base {
                 "char_name" => $charId,
             ]);
         }
+        $this->tokens->notifyCounterDirect("counter_house_0", $this->getHousesRemainingCount(), "");
     }
 
     function getVariantSoloBoard() {

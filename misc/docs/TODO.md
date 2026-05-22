@@ -3,6 +3,7 @@
 
 
 [ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
+[ ] Turn signal in title bar — currently says "laskava1 performs an action" using player name; should say "Bjorn / laskava1" or just hero name so the active *hero* is identifiable.
 [ ] Ability pile and equipment pile browsing
 [ ] Dice roll animation
 [ ] Card draw animations
@@ -13,7 +14,7 @@
 - [ ] Fix stacked tooltips
   [x] Fix spawn locations in monster cards — current data is not correct
   [ ] Range indicator for ranged monster attacks
-  [ ] Flip animation for upgrades
+  [x] Flip animation for upgrades
 
 
 ### Code TODOs / XXX (swept from source on 2026-05-13)

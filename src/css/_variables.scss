@@ -189,3 +189,15 @@ $pboardHeight: calc($cardHeight * 2.4);
     box-shadow: 0 0 0 0 $activeColor;
   }
 }
+
+@keyframes flip {
+  0% {
+    transform: perspective(40em) rotateY(0deg);
+  }
+  50% {
+    scale: 2;
+  }
+  100% {
+    transform: perspective(40em) rotateY(-180deg);
+  }
+}

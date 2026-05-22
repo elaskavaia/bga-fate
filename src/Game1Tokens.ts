@@ -51,6 +51,7 @@ export interface AnimArgs {
   place_from?: string;
   inc?: number;
   anim_target?: string;
+  flip_from?: string;
 }
 
 export class Game1Tokens extends Game0Basics {

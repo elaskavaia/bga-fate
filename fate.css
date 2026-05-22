@@ -52,6 +52,17 @@
     box-shadow: 0 0 0 0 #19bedb;
   }
 }
+@keyframes flip {
+  0% {
+    transform: perspective(40em) rotateY(0deg);
+  }
+  50% {
+    scale: 2;
+  }
+  100% {
+    transform: perspective(40em) rotateY(-180deg);
+  }
+}
 #map_area {
   position: absolute;
   top: 0%;
@@ -704,6 +715,36 @@
 
 .well {
   background-position: 0% 0%;
+}
+.well > .counter {
+  position: absolute;
+  bottom: auto;
+  right: -4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  padding: 0 4px;
+  z-index: 1;
+}
+.well > .counter::after {
+  content: attr(data-state);
+}
+.well > .counter[data-state="0"] {
+  display: none;
+}
+.well > .counter {
+  top: -6px;
+  font-size: 14px;
+  min-width: 22px;
+  height: 22px;
+  line-height: 22px;
+  border-radius: 11px;
 }
 
 .rune_stone {
@@ -1959,10 +2000,6 @@
   transition-timing-function: ease-in-out;
   /* background-color: blue; */
   transform-origin: center center;
-}
-
-.phantom {
-  animation: pulse 500ms ease-in-out;
 }
 
 .limbo {

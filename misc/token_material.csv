@@ -35,7 +35,7 @@ marker_instigator|Attack Instigator|1|marker_instigator|1|limbo
 
 # rune high-water-mark (state = rune count already serviced by a countNewRunes effect like Windbite;
 # reset to 0 at endOfAttack so it doesn't bleed across attacks)
-marker_roll|Roll Tracker|1|marker_roll|1|limbo
+marker_runes|Runes Tracker|1|marker_runes|1|limbo
 
 #resources
 crystal_green|Green Crystal|50||2|supply_crystal_green

@@ -314,6 +314,13 @@ export class Game extends Game1Tokens {
       }
     } else if (tokenKey.startsWith("card_")) {
       result.onClick = (e) => this.onToken(e);
+      // Upgrade flip: L2 just landed in tableau; flip from L1's sprite to L2's at the slot.
+      if (args.flip_from) {
+        const fromId = args.flip_from;
+        result.onEnd = () => {
+          this.animationLa.cardFlip(tokenKey, String(tokenInfo.state), 1000, undefined, fromId);
+        };
+      }
     } else if (tokenKey.startsWith("crystal_")) {
       // Bucket redirect: tokens placed on another token get a sub-container bucket
       // e.g. crystal_red on monster_goblin_1 → bucket_crystal_red_monster_goblin_1
