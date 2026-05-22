@@ -1322,7 +1322,7 @@ class Material {
 
             /* --- gen php begin monstercard_material --- */
 // # spawnloc - locate where they spawn
-// # spawn format: comma separed list of monster type abbreviation as they appear on location, i.e for Flanking it will be "G,G,,,B,,,T,,B"
+// # spawn format: one character per hex slot — single-letter monster abbreviation (faction-specific) or "L" for legend; "-" marks an empty slot. Example: Flanking is "GG--B--T-B".
 // # Monster cards - yellow deck (early game) - 36
 // # Yellow legends (1-6)
     "card_monster_1" => [ 
@@ -1333,7 +1333,7 @@ class Material {
         "num" => 1,
         "name" => clienttranslate("Queen of the Dead"),
         "spawnloc" => "Nailfare",
-        "spawn" => ",L",
+        "spawn" => "-L",
         "ftext" => "Scary as Hel.",
 ],
     "card_monster_2" => [ 
@@ -1355,7 +1355,7 @@ class Material {
         "num" => 3,
         "name" => clienttranslate("Grendel"),
         "spawnloc" => "TrollCaves",
-        "spawn" => ",,L",
+        "spawn" => "--L",
         "ftext" => "Grendel has a face only a mother could love...and she's not too sure.",
 ],
     "card_monster_4" => [ 
@@ -1366,7 +1366,7 @@ class Material {
         "num" => 4,
         "name" => clienttranslate("Surt"),
         "spawnloc" => "Highlands",
-        "spawn" => ",,,,L,J,E,,,,E",
+        "spawn" => "----LJE---E",
         "ftext" => "He really lights up the day.",
 ],
     "card_monster_5" => [ 
@@ -1377,7 +1377,7 @@ class Material {
         "num" => 5,
         "name" => clienttranslate("Hrungbald"),
         "spawnloc" => "OgreValley",
-        "spawn" => "B,,,L,B,,B",
+        "spawn" => "B--LB-B",
         "ftext" => "Hrungbald Hammerfist has a fearsome reputation, a word he can't really pronounce.",
 ],
     "card_monster_6" => [ 
@@ -1388,7 +1388,7 @@ class Material {
         "num" => 6,
         "name" => clienttranslate("Nidhuggr"),
         "spawnloc" => "WyrmLair",
-        "spawn" => ",,,L",
+        "spawn" => "---L",
         "ftext" => "Rumor has it that whoever dies will be his personal flosser in the afterlife.",
 ],
 // # Yellow regular (7-36)
@@ -1400,7 +1400,7 @@ class Material {
         "num" => 7,
         "name" => clienttranslate("Fiery Projectiles"),
         "spawnloc" => "Highlands",
-        "spawn" => "J,J,E",
+        "spawn" => "--E----J--J",
         "ftext" => "I never expected this hero business to include so much running!",
 ],
     "card_monster_8" => [ 
@@ -1411,7 +1411,7 @@ class Material {
         "num" => 8,
         "name" => clienttranslate("Whirlwinds"),
         "spawnloc" => "Highlands",
-        "spawn" => "E,E,E,E,E",
+        "spawn" => "E-E----E--EE",
         "ftext" => "They always wind up attacking.",
 ],
     "card_monster_9" => [ 
@@ -1422,7 +1422,7 @@ class Material {
         "num" => 9,
         "name" => clienttranslate("Trending Monsters"),
         "spawnloc" => "Highlands",
-        "spawn" => "J,E,E,S,S",
+        "spawn" => "-E--ESS-J---",
         "ftext" => "They are so hot right now.",
 ],
     "card_monster_10" => [ 
@@ -1433,7 +1433,7 @@ class Material {
         "num" => 10,
         "name" => clienttranslate("Burnt Offerings"),
         "spawnloc" => "Highlands",
-        "spawn" => "E,E,E,E,S",
+        "spawn" => "---ESE--E-E",
         "ftext" => "They just have to fire you first.",
 ],
     "card_monster_11" => [ 
@@ -1444,7 +1444,7 @@ class Material {
         "num" => 11,
         "name" => clienttranslate("Jotunn Clan"),
         "spawnloc" => "Highlands",
-        "spawn" => "J,E,E,S,S",
+        "spawn" => "S-S---EJ--E-",
         "ftext" => "We just follow the big guy's orders.",
 ],
     "card_monster_12" => [ 
@@ -1455,7 +1455,7 @@ class Material {
         "num" => 12,
         "name" => clienttranslate("Mischievous Sprites"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "S,S,S,S,S,S,S,S",
+        "spawn" => "S-S-SS--SSSS",
         "ftext" => "Like a bunch of hot-tempered kids, only on fire.",
 ],
     "card_monster_13" => [ 
@@ -1466,7 +1466,7 @@ class Material {
         "num" => 13,
         "name" => clienttranslate("Fire-Breathing Stones"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "J,E,E,E",
+        "spawn" => "-E-E--JE----",
         "ftext" => 'As if just "breathing stones" wasn\'t bad enough...',
 ],
     "card_monster_14" => [ 
@@ -1477,7 +1477,7 @@ class Material {
         "num" => 14,
         "name" => clienttranslate("Jotunn Youth Camp"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "E,E,E,S,S,S",
+        "spawn" => "-SESEES-",
         "ftext" => "The small ones need experience - let's warm them up...",
 ],
     "card_monster_15" => [ 
@@ -1488,7 +1488,7 @@ class Material {
         "num" => 15,
         "name" => clienttranslate("Air Strike"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "J,E,S,S,S,S",
+        "spawn" => "E------SSJSS",
         "ftext" => "Strategic bombing.",
 ],
     "card_monster_16" => [ 
@@ -1499,7 +1499,7 @@ class Material {
         "num" => 16,
         "name" => clienttranslate("Reunion"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "J,E,E,S,S",
+        "spawn" => "-JSEE-S",
         "ftext" => 'And they thought: "Why not at the human city? We can have a barbecue!"',
 ],
     "card_monster_17" => [ 
@@ -1510,7 +1510,7 @@ class Material {
         "num" => 17,
         "name" => clienttranslate("Boneyard"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "S,S,S,S,I",
+        "spawn" => "---S-SI-S-S",
         "ftext" => "Ivar the Boneless had bones after all!",
 ],
     "card_monster_18" => [ 
@@ -1521,7 +1521,7 @@ class Material {
         "num" => 18,
         "name" => clienttranslate("Bad to the Bone"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "D,S,S,S",
+        "spawn" => "S----D--S-S-",
         "ftext" => "Yes, literally, their bones are rotten.",
 ],
     "card_monster_19" => [ 
@@ -1532,7 +1532,7 @@ class Material {
         "num" => 19,
         "name" => clienttranslate("Eyes in the Dark"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "S,S,I,I,I,I,I,I",
+        "spawn" => "-IISI-II-I-S",
         "ftext" => "Can you see them? They see you!",
 ],
     "card_monster_20" => [ 
@@ -1543,7 +1543,7 @@ class Material {
         "num" => 20,
         "name" => clienttranslate("Skeletons on a Leash"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "D,D,S,S",
+        "spawn" => "--SD--S--D--",
         "ftext" => "Draugrs' favorite pets.",
 ],
     "card_monster_21" => [ 
@@ -1554,7 +1554,7 @@ class Material {
         "num" => 21,
         "name" => clienttranslate("Marshing"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "D,S,I,I,I,I",
+        "spawn" => "DS--II-I--I",
         "ftext" => "Out for a walk...",
 ],
     "card_monster_22" => [ 
@@ -1565,7 +1565,7 @@ class Material {
         "num" => 22,
         "name" => clienttranslate("Imp-ressive Swarm"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,I,I,I,I,I,I,S,S",
+        "spawn" => "SIIIIIIIS",
         "ftext" => "The sound of large flapping wings and toxic drool is just the appetizer.",
 ],
     "card_monster_23" => [ 
@@ -1576,7 +1576,7 @@ class Material {
         "num" => 23,
         "name" => clienttranslate("Bone Structures"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "S,S,S,S,S",
+        "spawn" => "SSSS-S---",
         "ftext" => "No, it doesn't make them look fat...",
 ],
     "card_monster_24" => [ 
@@ -1587,7 +1587,7 @@ class Material {
         "num" => 24,
         "name" => clienttranslate("Brain Dead"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,S,S,D",
+        "spawn" => "----D-ISS",
         "ftext" => "Pure instincts.",
 ],
     "card_monster_25" => [ 
@@ -1598,7 +1598,7 @@ class Material {
         "num" => 25,
         "name" => clienttranslate("Dead Trio"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "D,D,D",
+        "spawn" => "-D--D--D-",
         "ftext" => "All for one!",
 ],
     "card_monster_26" => [ 
@@ -1609,7 +1609,7 @@ class Material {
         "num" => 26,
         "name" => clienttranslate("Sudden Death"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,I,S,S,D",
+        "spawn" => "S-ID-SI--",
         "ftext" => "They are upping their game, it could be over at any moment.",
 ],
     "card_monster_27" => [ 
@@ -1620,7 +1620,7 @@ class Material {
         "num" => 27,
         "name" => clienttranslate("Brutish Offense"),
         "spawnloc" => "OgreValley",
-        "spawn" => "B,B,B,B,B",
+        "spawn" => "BB--B--B-B",
         "ftext" => "Relentless, ruthless, senseless, clueless.",
 ],
     "card_monster_28" => [ 
@@ -1631,7 +1631,7 @@ class Material {
         "num" => 28,
         "name" => clienttranslate("Flanking"),
         "spawnloc" => "OgreValley",
-        "spawn" => "G,G,,,B,,,T,,B",
+        "spawn" => "GG--B--T-B",
         "ftext" => "They are, quite flankly, devastating to our defenses.",
 ],
     "card_monster_29" => [ 
@@ -1642,7 +1642,7 @@ class Material {
         "num" => 29,
         "name" => clienttranslate("Foraging"),
         "spawnloc" => "OgreValley",
-        "spawn" => "T,B,B,G,G",
+        "spawn" => "--GB-GB-T-",
         "ftext" => "Only looking for food.",
 ],
     "card_monster_30" => [ 
@@ -1653,7 +1653,7 @@ class Material {
         "num" => 30,
         "name" => clienttranslate("Brutus the Babysitter"),
         "spawnloc" => "OgreValley",
-        "spawn" => "B,G,G,G,G,G,G,G",
+        "spawn" => "GG-GBGGG-G",
         "ftext" => "Stay with the group!",
 ],
     "card_monster_31" => [ 
@@ -1664,7 +1664,7 @@ class Material {
         "num" => 31,
         "name" => clienttranslate("Strolling"),
         "spawnloc" => "OgreValley",
-        "spawn" => "T,T,B",
+        "spawn" => "--T--B--T",
         "ftext" => "Out for a walk, very aimlessly.",
 ],
     "card_monster_32" => [ 
@@ -1675,7 +1675,7 @@ class Material {
         "num" => 32,
         "name" => clienttranslate("Younglings"),
         "spawnloc" => "DarkForest",
-        "spawn" => "B,G,G,G,G,G,G,G",
+        "spawn" => "GB----GGGGG-G",
         "ftext" => "There are so many of them; what are we going to do?",
 ],
     "card_monster_33" => [ 
@@ -1686,7 +1686,7 @@ class Material {
         "num" => 33,
         "name" => clienttranslate("Brutal Band"),
         "spawnloc" => "DarkForest",
-        "spawn" => ",,B,B,B,B,,,,,,B",
+        "spawn" => "--BBBB-----B",
         "ftext" => "Specializing in war drums.",
 ],
     "card_monster_34" => [ 
@@ -1697,7 +1697,7 @@ class Material {
         "num" => 34,
         "name" => clienttranslate("Family Trip"),
         "spawnloc" => "DarkForest",
-        "spawn" => "T,B,G,G,G,G",
+        "spawn" => "-G----GGG-T--B",
         "ftext" => "The kids are so eager, let them run ahead...",
 ],
     "card_monster_35" => [ 
@@ -1708,7 +1708,7 @@ class Material {
         "num" => 35,
         "name" => clienttranslate("Forest Patrol"),
         "spawnloc" => "DarkForest",
-        "spawn" => "B,B,B,B,G,G",
+        "spawn" => "B--BBG----BG",
         "ftext" => "Attacking at their first convenience.",
 ],
     "card_monster_36" => [ 
@@ -1719,7 +1719,7 @@ class Material {
         "num" => 36,
         "name" => clienttranslate("Viral Trolls"),
         "spawnloc" => "DarkForest",
-        "spawn" => "T,T,T",
+        "spawn" => "---T-T------T",
         "ftext" => "The sheer amount of bacteria in their boogers and toxic breath makes them viral.",
 ],
 // # Monster cards - red deck (late game) - 18
@@ -1732,7 +1732,7 @@ class Material {
         "num" => 37,
         "name" => clienttranslate("Queen of the Dead"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,S,I,D,L,I,S,I,S",
+        "spawn" => "ISIDLISIS",
         "ftext" => "Scary as Hel.",
 ],
     "card_monster_38" => [ 
@@ -1743,7 +1743,7 @@ class Material {
         "num" => 38,
         "name" => clienttranslate("Seer of Odin"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "S,,S,I,I,L,S,I,,S",
+        "spawn" => "S-SIILSI-S",
         "ftext" => "I didn't see it coming, but she did...",
 ],
     "card_monster_39" => [ 
@@ -1754,7 +1754,7 @@ class Material {
         "num" => 39,
         "name" => clienttranslate("Grendel"),
         "spawnloc" => "OgreValley",
-        "spawn" => "L,,,G,,G,,,G",
+        "spawn" => "L--G-G--G",
         "ftext" => "Trolls will be trolls.",
 ],
     "card_monster_40" => [ 
@@ -1765,7 +1765,7 @@ class Material {
         "num" => 40,
         "name" => clienttranslate("Surt"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => ",,,E,,L,E,,E",
+        "spawn" => "---E-LE-E",
         "ftext" => "Hotter than a summer day in Muspelheim, and twice as destructive.",
 ],
     "card_monster_41" => [ 
@@ -1776,7 +1776,7 @@ class Material {
         "num" => 41,
         "name" => clienttranslate("Hrungbald"),
         "spawnloc" => "DarkForest",
-        "spawn" => "G,L,,B,,G,B,,B,,,B,,B",
+        "spawn" => "GL-B-GB-B--B-B",
         "ftext" => "Now with added fury and an even smaller vocabulary.",
 ],
     "card_monster_42" => [ 
@@ -1787,7 +1787,7 @@ class Material {
         "num" => 42,
         "name" => clienttranslate("Nidhuggr"),
         "spawnloc" => "Highlands",
-        "spawn" => ",E,E,,,,,,E,E,,L",
+        "spawn" => "-EE-----EE-L",
         "ftext" => "Nidhuggr, the eater of worlds, has ordered Viking for dinner.",
 ],
 // # Red regular (43-54)
@@ -1799,7 +1799,7 @@ class Material {
         "num" => 43,
         "name" => clienttranslate("Feed the Flames"),
         "spawnloc" => "Highlands",
-        "spawn" => "J,E,E,E,E,S,S,S,S,S,S,S",
+        "spawn" => "SSSESSSESEEJ",
         "ftext" => "You've never seen flames spread this fast!",
 ],
     "card_monster_44" => [ 
@@ -1810,7 +1810,7 @@ class Material {
         "num" => 44,
         "name" => clienttranslate("Brimstone"),
         "spawnloc" => "Highlands",
-        "spawn" => "J,J,J,J,S,S",
+        "spawn" => "-JJ---SJJ--S",
         "ftext" => "A trial by fire.",
 ],
     "card_monster_45" => [ 
@@ -1821,7 +1821,7 @@ class Material {
         "num" => 45,
         "name" => clienttranslate("Erupting"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "J,J,J,J,E",
+        "spawn" => "-J-J-JE-J--",
         "ftext" => "The ancient Jotunn arrive through the fire portal.",
 ],
     "card_monster_46" => [ 
@@ -1832,7 +1832,7 @@ class Material {
         "num" => 46,
         "name" => clienttranslate("The Red Tide"),
         "spawnloc" => "SpewingMountain",
-        "spawn" => "J,J,E,E,S,S,S,S,S,S",
+        "spawn" => "JSSSS-EESJS",
         "ftext" => "If they could do this every month, they would. But we won't let them. Period.",
 ],
     "card_monster_47" => [ 
@@ -1843,7 +1843,7 @@ class Material {
         "num" => 47,
         "name" => clienttranslate("Walking Armors"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "D,D,D,D",
+        "spawn" => "---DD-D-D-",
         "ftext" => "It's the march of sorrow.",
 ],
     "card_monster_48" => [ 
@@ -1854,7 +1854,7 @@ class Material {
         "num" => 48,
         "name" => clienttranslate("Gloom Fate"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "D,S,S,S,S,S,S,S",
+        "spawn" => "DSS--S-S-SSS",
         "ftext" => "They're raised from the dead just to be killed again. Gotta pity those guys...",
 ],
     "card_monster_49" => [ 
@@ -1865,7 +1865,7 @@ class Material {
         "num" => 49,
         "name" => clienttranslate("Dread Summoning"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,I,I,I,S,D,D,D",
+        "spawn" => "IDDI-ISDI",
         "ftext" => "Death was just a brief pause. Now they're back for the finale, and they're dead serious about it...",
 ],
     "card_monster_50" => [ 
@@ -1876,7 +1876,7 @@ class Material {
         "num" => 50,
         "name" => clienttranslate("Intense Darkness"),
         "spawnloc" => "DeadPlains",
-        "spawn" => "I,I,S,S,S,S,D,D",
+        "spawn" => "DSSDI-ISS",
         "ftext" => "I don't understand it, but it hurts, so it has to be real.",
 ],
     "card_monster_51" => [ 
@@ -1887,7 +1887,7 @@ class Material {
         "num" => 51,
         "name" => clienttranslate("Trololololol"),
         "spawnloc" => "OgreValley",
-        "spawn" => "T,T,T,T,G,G",
+        "spawn" => "-GT-GTT--T",
         "ftext" => "Four grown trolls singing; it might be the death of me.",
 ],
     "card_monster_52" => [ 
@@ -1898,7 +1898,7 @@ class Material {
         "num" => 52,
         "name" => clienttranslate("Immoral Brutes"),
         "spawnloc" => "OgreValley",
-        "spawn" => "T,B,B,B,B,B,B,G",
+        "spawn" => "-BB-BTBBGB",
         "ftext" => "They do what they want, moralless.",
 ],
     "card_monster_53" => [ 
@@ -1909,7 +1909,7 @@ class Material {
         "num" => 53,
         "name" => clienttranslate("Trollkin United"),
         "spawnloc" => "DarkForest",
-        "spawn" => "T,T,B,B,B,G,G,G,G",
+        "spawn" => "T-BB-T-BG--GGG",
         "ftext" => "A seldom-sighted formation of trolls.",
 ],
     "card_monster_54" => [ 
@@ -1920,7 +1920,7 @@ class Material {
         "num" => 54,
         "name" => clienttranslate("Brawling Brutes"),
         "spawnloc" => "DarkForest",
-        "spawn" => "T,B,B,B,B,G,G,G,G,G,G",
+        "spawn" => "GGG-TBBGGG-BB-",
         "ftext" => "Cheap to hire, fierce fighters. Not that bright, though.",
 ],
             /* --- gen php end monstercard_material --- */

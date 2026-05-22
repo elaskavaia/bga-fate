@@ -175,23 +175,23 @@ class Op_reinforcement extends Operation {
         "dead" => ["I" => "monster_imp", "S" => "monster_skeleton", "D" => "monster_draugr"],
     ];
     /**
-     * Parse spawn string like "G,G,,,B,,,T,,B" into positional array.
-     * Returns array indexed by hex position: null for empty slots, "LEGEND" for L, or monster type ID.
+     * Parse spawn string like "GG--B--T-B" into positional array.
+     * One character per hex slot: "-" = empty, "L" = legend, otherwise faction-specific monster abbreviation.
      */
     private function parseSpawnString(string $spawnStr, string $spawnLoc): array {
         $faction = Material::SPAWN_FACTION[$spawnLoc] ?? "trollkin";
         $abbrevMap = self::MONSTER_ABBREV[$faction] ?? [];
 
-        $parts = explode(",", $spawnStr);
         $result = [];
-        foreach ($parts as $index => $abbrev) {
-            $abbrev = trim($abbrev);
-            if ($abbrev === "") {
-                $result[$index] = null;
+        $len = strlen($spawnStr);
+        for ($i = 0; $i < $len; $i++) {
+            $abbrev = $spawnStr[$i];
+            if ($abbrev === "-") {
+                $result[$i] = null;
             } elseif ($abbrev === "L") {
-                $result[$index] = "LEGEND";
+                $result[$i] = "LEGEND";
             } else {
-                $result[$index] = $abbrevMap[$abbrev] ?? null;
+                $result[$i] = $abbrevMap[$abbrev] ?? null;
             }
         }
         return $result;

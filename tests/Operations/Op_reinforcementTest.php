@@ -80,16 +80,16 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
     }
 
     public function testSkipsCardWhenHexOccupied(): void {
-        // Card 36 "Viral Trolls" in DarkForest: T,T,T (monsters at hex indices 0,1,2)
-        // Card 31 "Strolling" in OgreValley: T,T,B (no occupied hexes there)
+        // Card 36 "Viral Trolls" in DarkForest: ---T-T------T (monsters at hex indices 3, 5, 12)
+        // Card 31 "Strolling" in OgreValley: --T--B--T (no occupied hexes there)
         $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");
         $this->game->tokens->setTokenState("card_monster_36", 999); // top
         $this->game->tokens->moveToken("card_monster_31", "deck_monster_yellow");
         $this->game->tokens->setTokenState("card_monster_31", 998); // second
 
-        // Occupy the first hex in DarkForest — card 36 can't place at index 0
+        // Occupy hex[3] in DarkForest — card 36 can't place its first monster there
         $darkForestHexes = $this->game->hexMap->getHexesInLocation("DarkForest");
-        $this->game->tokens->moveToken("hero_1", $darkForestHexes[0]);
+        $this->game->tokens->moveToken("hero_1", $darkForestHexes[3]);
 
         $this->game->setPlayersNumber(1);
         $op = $this->createReinforcementOp(["deck" => "deck_monster_yellow"]);
