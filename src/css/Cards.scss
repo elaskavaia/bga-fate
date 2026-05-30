@@ -15,8 +15,8 @@
 // Monster cards — landscape, 6 columns x 9 rows sprite sheet
 // Native card size: 392 x 288, aspect ratio ~1.36:1
 .card_monster {
-  width: 196px;
   height: 144px;
+  aspect-ratio: 196 / 144;
   background-image: url(img/EN_Monster_Cards.jpg);
   background-size: 600% 900%;
   border-radius: 6px;

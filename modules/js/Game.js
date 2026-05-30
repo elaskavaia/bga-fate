@@ -2379,6 +2379,7 @@ class Game extends Game1Tokens {
                         hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
                 });
             });
+            this.setupCardCatalog();
         }
         catch (e) {
             console.error(e);
@@ -2388,6 +2389,105 @@ class Game extends Game1Tokens {
             this.inSetup = false;
         }
         console.log("Ending game setup");
+    }
+    setupCardCatalog() {
+        const root = this.bga.gameArea.getElement();
+        placeHtml(`<div id="catalog" class="catalog"></div>`, root);
+        const folders = [];
+        for (let hno = 1; hno <= 4; hno++) {
+            const heroName = this.getRulesFor(`hero_${hno}`, "name", `Hero ${hno}`);
+            folders.push({ id: `catalog_hero_${hno}`, titleKey: _("Cards:") + " " + heroName, hno });
+        }
+        folders.push({ id: "catalog_monster", titleKey: _("Cards: Monsters") });
+        folders.forEach((f) => {
+            placeHtml(`<details class="catalog_folder" id="${f.id}">
+          <summary><span class="catalog_title">${this.getTr(f.titleKey)}</span></summary>
+          <div class="catalog_filter_wrap">
+            <input type="text" class="catalog_filter" placeholder="${_("Search...")}">
+            <button type="button" class="catalog_filter_clear" title="${_("Clear")}">✕</button>
+          </div>
+          <span>${_("Click or hover over card to get details")}</span>
+          <div class="catalog_cards" id="${f.id}_cards"></div>
+        </details>`, "catalog");
+        });
+        const ctypeOrder = { hero: 0, ability: 1, equip: 2, event: 3, monster: 4 };
+        const entries = [];
+        for (const key in this.gamedatas.token_types) {
+            if (!key.startsWith("card_"))
+                continue;
+            const ctype = getPart(key, 1);
+            if (ctype === "monster") {
+                const num = parseInt(getPart(key, 2)) || 0;
+                entries.push({ cardId: key, folderId: "catalog_monster", ctype, num });
+            }
+            else {
+                const hno = parseInt(getPart(key, 2));
+                const num = parseInt(getPart(key, 3)) || 0;
+                if (!(hno >= 1 && hno <= 4))
+                    continue;
+                entries.push({ cardId: key, folderId: `catalog_hero_${hno}`, ctype, num });
+            }
+        }
+        entries.sort((a, b) => (ctypeOrder[a.ctype] ?? 99) - (ctypeOrder[b.ctype] ?? 99) || a.num - b.num);
+        const counts = {};
+        entries.forEach((e) => {
+            const container = $(`${e.folderId}_cards`);
+            if (!container)
+                return;
+            const info = this.getTokenDisplayInfo(e.cardId);
+            const div = document.createElement("div");
+            div.id = `catalog_${e.cardId}`;
+            div.classList.add(...info.imageTypes.split(/  */).filter(Boolean));
+            div.classList.add("catalog_card");
+            div.dataset.targetId = e.cardId;
+            container.appendChild(div);
+            this.updateTooltip(e.cardId, div);
+            counts[e.folderId] = (counts[e.folderId] ?? 0) + 1;
+        });
+        folders.forEach((f) => {
+            const folderEl = $(f.id);
+            if (!folderEl)
+                return;
+            const titleSpan = folderEl.querySelector(".catalog_title");
+            const count = counts[f.id] ?? 0;
+            titleSpan.textContent = `${titleSpan.textContent} (${count})`;
+            const cardsEl = folderEl.querySelector(".catalog_cards");
+            cardsEl.addEventListener("click", (e) => {
+                const node = e.target.closest(".catalog_card");
+                if (!node || !node.dataset.targetId)
+                    return;
+                this.showCatalogCardDialog(node.dataset.targetId);
+            });
+            const filter = folderEl.querySelector(".catalog_filter");
+            const applyFilter = () => {
+                const q = filter.value.trim().toLowerCase();
+                cardsEl.querySelectorAll(".catalog_card").forEach((card) => {
+                    if (!q) {
+                        card.style.removeProperty("display");
+                        return;
+                    }
+                    const id = card.dataset.targetId;
+                    if (!id)
+                        return;
+                    const text = (this.getTooltipHtmlForToken(id) || "").toLowerCase() + " " + (card.dataset.name || "").toLowerCase();
+                    card.style.display = text.includes(q) ? "" : "none";
+                });
+            };
+            filter.addEventListener("input", applyFilter);
+            const clearBtn = folderEl.querySelector(".catalog_filter_clear");
+            clearBtn.addEventListener("click", () => {
+                filter.value = "";
+                applyFilter();
+                filter.focus();
+            });
+        });
+    }
+    showCatalogCardDialog(cardId) {
+        const dialog = new ebg.popindialog();
+        dialog.create("catalog_card_dlg");
+        dialog.setTitle(this.getTokenName(cardId));
+        dialog.setContent(`<div class="catalog_dlg_content">${this.getTooltipHtmlForToken(cardId)}</div>`);
+        dialog.show();
     }
     /** Populate timetrack slots inside the timetrack container (created by token system). */
     createTimetrack(trackId) {

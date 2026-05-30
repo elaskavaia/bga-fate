@@ -27,6 +27,15 @@
 - [x] **"Move X" is always "up to X" (DESIGN.md #11)** — Op_move no longer filters reachable hexes to exactly maxSteps; all distances 1..count are offered, so Agility II "Move 2" correctly allows stopping at 1. No other cards needed CSV changes.
 
 
+### Legend factions (designer-confirmed via [BGG 3426870](https://boardgamegeek.com/thread/3426870))
+
+Designer ruling: *"Legends have a faction written on the legend card. Since Nidhuggr specifically is a Wyrm and not a Fire Horde, it doesn't have attack range +1."* Each legend belongs to its printed faction and shares that faction's abilities; effects scoped to a faction (e.g. Tough Guy: "+2 dice for each adjacent trollkin") should include legends of the same faction.
+
+- [ ] **Fix Nidhuggr faction: `dead` → `wyrm`** in [monster_material.csv:50-51](../../misc/monster_material.csv#L50). Currently Nidhuggr incorrectly inherits Draugr armor / Dead rune-die-as-hit effects.
+- [ ] **Add Wyrm as a new faction** — no shared abilities (Nidhuggr is the only Wyrm in base game). Make sure faction-effect lookups handle "wyrm" gracefully (no rune-die promotion, no armor, etc.). Regenerate Material.php after the CSV change.
+- [ ] **Audit faction-scoped iteration** to ensure legends are included where they share the faction. Examples to verify: Grendel/Hrungbald (trollkin) counted by Tough Guy's "+2 dice for each adjacent trollkin"; Seer of Odin/Surt (firehorde) benefit from firehorde +1 attack range; Queen of the Dead (dead) benefits from Dead faction rune-die-as-hit rule. Check `Monster::getFaction()` callers and `Character::damageResolution`.
+
+
 ### Low priority
 
 [ ] Allow moveMonster to push into Grimheim (designer-confirmed)

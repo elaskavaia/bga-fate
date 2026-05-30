@@ -117,6 +117,10 @@
   height: 400px;
 }
 
+.tooltipimage.card_monster {
+  height: 260px;
+}
+
 // Stacked card tooltip (Level I + Level II preview): shrink the reverse-side card to half size.
 .tooltipcontainer + .tooltipcontainer .tooltipimage.hcard {
   height: 200px;
