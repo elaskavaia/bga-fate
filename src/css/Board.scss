@@ -30,34 +30,28 @@
   // Built in Game.ts when the pile container is first created.
   .pile_stats {
     position: absolute;
-    width: 100%;
-    left: 2px;
+    width: 54%;
+    left: 23%;
     bottom: 0px;
     z-index: 10;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     pointer-events: none;
-    color: white;
-    font-weight: bold;
-    background-color: #1111114d;
-    border-radius: 20%;
-    text-shadow: v.$textShadowBlackStrong;
 
     > span {
       display: inline-flex;
       align-items: center;
-      gap: 2px;
-      line-height: 24px;
-      font-size: 16px;
-      height: 24px;
       &::after {
         position: relative;
         left: 12px;
-        bottom: -3px;
+        bottom: 0px;
       }
     }
   }
+}
+.pile_monster .pile_stats > span.wicon_gold {
+  display: none;
 }
 
 // Crystal supply piles: stack with counter (same trick as monster piles)
@@ -415,10 +409,22 @@
 
 // Miniboard art — keyed off the hno class set in Game.ts (decoupled from player color).
 $miniboard-sprites: (
-  1: ("cards/bjorn_cards_hq.webp", 95%),
-  2: ("cards/alva_cards_hq.webp", 95%),
-  3: ("cards/embla_cards_hq.webp", 92%),
-  4: ("cards/boldur_cards_hq.webp", 95%),
+  1: (
+    "cards/bjorn_cards_hq.webp",
+    95%
+  ),
+  2: (
+    "cards/alva_cards_hq.webp",
+    95%
+  ),
+  3: (
+    "cards/embla_cards_hq.webp",
+    92%
+  ),
+  4: (
+    "cards/boldur_cards_hq.webp",
+    95%
+  )
 );
 @each $hno, $entry in $miniboard-sprites {
   .miniboard.hno_#{$hno} {

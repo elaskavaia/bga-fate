@@ -160,7 +160,7 @@ export class GameMachine {
   createTargetButton(target: string, paramInfo: ParamInfo): HTMLElement | undefined {
     const q = paramInfo.q;
     const active = q == 0;
-    const color: any = paramInfo.color ?? this.opInfo?.ui.color;
+    const color: any = paramInfo.color ?? this.opInfo?.ui.color ?? "primary";
     const button = this.bga.statusBar.addActionButton(this.getTargetButtonName(target, paramInfo), (event: Event) => this.onToken(event), {
       color: color,
       disabled: !active,
@@ -171,8 +171,7 @@ export class GameMachine {
   replicateTargetOnToolbar(target: string, paramInfo: ParamInfo): HTMLElement | undefined {
     const q = paramInfo.q;
     const active = q == 0;
-    const color: any = paramInfo.color ?? "secondary";
-    const div = $(target);
+    const color: any = paramInfo.color ?? this.opInfo?.ui.color ?? "secondary";
     let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
     if (!cloneHtml) {
       return undefined;

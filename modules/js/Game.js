@@ -1772,7 +1772,7 @@ class GameMachine {
     createTargetButton(target, paramInfo) {
         const q = paramInfo.q;
         const active = q == 0;
-        const color = paramInfo.color ?? this.opInfo?.ui.color;
+        const color = paramInfo.color ?? this.opInfo?.ui.color ?? "primary";
         const button = this.bga.statusBar.addActionButton(this.getTargetButtonName(target, paramInfo), (event) => this.onToken(event), {
             color: color,
             disabled: !active,
@@ -1783,8 +1783,7 @@ class GameMachine {
     replicateTargetOnToolbar(target, paramInfo) {
         const q = paramInfo.q;
         const active = q == 0;
-        const color = paramInfo.color ?? "secondary";
-        const div = $(target);
+        const color = paramInfo.color ?? this.opInfo?.ui.color ?? "secondary";
         let cloneHtml = this.createCustomTargetImageHtml(target, paramInfo);
         if (!cloneHtml) {
             return undefined;
@@ -2737,12 +2736,10 @@ class Game extends Game1Tokens {
             dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
         };
         let rows = "";
-        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-        tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
-        if (tokenInfo.strength)
-            rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
-        if (tokenInfo.health)
-            rows += this.ttRow(_("Health"), tokenInfo.health, "health");
+        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " - " + tokenInfo.rank);
+        rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
+        rows += this.ttRow(_("Health"), tokenInfo.health, "health");
+        rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
         if (tokenInfo.move)
             rows += this.ttRow(_("Move"), tokenInfo.move, "move");
         // Range is not shipped in material; firehorde faction has range 2 per rules. Show only when > 1.
@@ -2751,8 +2748,6 @@ class Game extends Game1Tokens {
             rows += this.ttRow(_("Range"), String(range), "range");
         if (tokenInfo.armor)
             rows += this.ttRow(_("Armor"), tokenInfo.armor);
-        if (tokenInfo.xp)
-            rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
         tokenInfo.tooltip += this.ttStats(rows);
         const factionEffect = {
             trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
@@ -2783,8 +2778,7 @@ class Game extends Game1Tokens {
             "5": _("This brute leader is fearless and collects battle scars as trophies of his invincibility. Naturally, his presence infuses the entire trollkin clan with confidence."),
             "6": _("While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches.")
         };
-        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-        tokenInfo.tooltip += this.ttSection(_("Rank"), _("Legend") + " " + (level === "1" ? "I" : "II"));
+        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " " + _("Legend") + " " + (level === "1" ? "I" : "II"));
         let rows = "";
         // Stats as Level I / Level II
         if (side1 && side2) {

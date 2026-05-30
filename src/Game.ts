@@ -543,16 +543,16 @@ export class Game extends Game1Tokens {
     };
 
     let rows = "";
-    tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-    tokenInfo.tooltip += this.ttSection(_("Rank"), tokenInfo.rank);
-    if (tokenInfo.strength) rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
-    if (tokenInfo.health) rows += this.ttRow(_("Health"), tokenInfo.health, "health");
+    tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " - " + tokenInfo.rank);
+    rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
+    rows += this.ttRow(_("Health"), tokenInfo.health, "health");
+    rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
     if (tokenInfo.move) rows += this.ttRow(_("Move"), tokenInfo.move, "move");
     // Range is not shipped in material; firehorde faction has range 2 per rules. Show only when > 1.
     const range = tokenInfo.faction === "firehorde" ? 2 : 1;
     if (range > 1) rows += this.ttRow(_("Range"), String(range), "range");
     if (tokenInfo.armor) rows += this.ttRow(_("Armor"), tokenInfo.armor);
-    if (tokenInfo.xp) rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
+
     tokenInfo.tooltip += this.ttStats(rows);
     const factionEffect: Record<string, string> = {
       trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
@@ -599,8 +599,10 @@ export class Game extends Game1Tokens {
         "While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches."
       )
     };
-    tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction));
-    tokenInfo.tooltip += this.ttSection(_("Rank"), _("Legend") + " " + (level === "1" ? "I" : "II"));
+    tokenInfo.tooltip = this.ttSection(
+      _("Faction"),
+      this.getTokenName(tokenInfo.faction) + " " + _("Legend") + " " + (level === "1" ? "I" : "II")
+    );
 
     let rows = "";
     // Stats as Level I / Level II

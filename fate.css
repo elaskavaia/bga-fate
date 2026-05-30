@@ -380,7 +380,7 @@
 }
 
 .wicon_strength {
-  background-position: 0% 50%;
+  background-position: 0% 48%;
 }
 
 .wicon_health {
@@ -720,7 +720,7 @@
   position: absolute;
   bottom: auto;
   right: -4px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(47, 95, 55, 0.7);
   color: #fff;
   font-size: 12px;
   font-weight: bold;
@@ -1287,32 +1287,27 @@
 }
 .pile_monster .pile_stats {
   position: absolute;
-  width: 100%;
-  left: 2px;
+  width: 54%;
+  left: 23%;
   bottom: 0px;
   z-index: 10;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   pointer-events: none;
-  color: white;
-  font-weight: bold;
-  background-color: rgba(17, 17, 17, 0.3019607843);
-  border-radius: 20%;
-  text-shadow: #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px, #000 0px 0px 2px;
 }
 .pile_monster .pile_stats > span {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  line-height: 24px;
-  font-size: 16px;
-  height: 24px;
 }
 .pile_monster .pile_stats > span::after {
   position: relative;
   left: 12px;
-  bottom: -3px;
+  bottom: 0px;
+}
+
+.pile_monster .pile_stats > span.wicon_gold {
+  display: none;
 }
 
 .supply_crystal_green,
@@ -1604,7 +1599,7 @@
   position: absolute;
   bottom: 2px;
   right: 2px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(47, 95, 55, 0.7);
   color: #fff;
   font-size: 12px;
   font-weight: bold;

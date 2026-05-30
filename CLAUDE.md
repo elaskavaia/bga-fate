@@ -103,3 +103,4 @@ Detailed step-by-step checklists are in separate files — read them when perfor
 - `../bga-wayfares/`
 - `../bga-skarabrae/`
 - `../bga-mars/`
+- `~/git/bga-sharedcode/misc/` - test stubs
