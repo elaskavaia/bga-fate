@@ -3,8 +3,6 @@
 
 
 [ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
-[ ] Turn signal in title bar — currently says "laskava1 performs an action" using player name; should say "Bjorn / laskava1" or just hero name so the active *hero* is identifiable.
-
 [ ] Dice roll animation
 
 
@@ -31,9 +29,9 @@
 
 Designer ruling: *"Legends have a faction written on the legend card. Since Nidhuggr specifically is a Wyrm and not a Fire Horde, it doesn't have attack range +1."* Each legend belongs to its printed faction and shares that faction's abilities; effects scoped to a faction (e.g. Tough Guy: "+2 dice for each adjacent trollkin") should include legends of the same faction.
 
-- [ ] **Fix Nidhuggr faction: `dead` → `wyrm`** in [monster_material.csv:50-51](../../misc/monster_material.csv#L50). Currently Nidhuggr incorrectly inherits Draugr armor / Dead rune-die-as-hit effects.
-- [ ] **Add Wyrm as a new faction** — no shared abilities (Nidhuggr is the only Wyrm in base game). Make sure faction-effect lookups handle "wyrm" gracefully (no rune-die promotion, no armor, etc.). Regenerate Material.php after the CSV change.
-- [ ] **Audit faction-scoped iteration** to ensure legends are included where they share the faction. Examples to verify: Grendel/Hrungbald (trollkin) counted by Tough Guy's "+2 dice for each adjacent trollkin"; Seer of Odin/Surt (firehorde) benefit from firehorde +1 attack range; Queen of the Dead (dead) benefits from Dead faction rune-die-as-hit rule. Check `Monster::getFaction()` callers and `Character::damageResolution`.
+- [x] **Fix Nidhuggr faction: `dead` → `wyrm`** in [monster_material.csv:50-51](../../misc/monster_material.csv#L50). (Note: armor was never inherited from faction — only rune-as-hit was wrongly granted.)
+- [x] **Add Wyrm as a new faction** — string label added in `strings_material.csv`. No shared abilities; existing faction-lookup paths (`Monster::getAttackRange`, `Monster::countHit`, `Op_monsterAttack::getMonsterStrength`) treat unknown factions as a no-op, so "wyrm" is handled gracefully.
+- [x] **Audit faction-scoped iteration** — existing iterators already use `getRulesFor(monsterId, "faction")` and filter on `getPart(char, 0) === "monster"`, which includes legends. Confirmed: Trollkin adjacency bonus ([Op_monsterAttack.php:165](../../modules/php/Operations/Op_monsterAttack.php#L165)) counts legend trollkin (Grendel/Hrungbald); Fire Horde range 2 ([Monster.php:28](../../modules/php/Model/Monster.php#L28)) applies to Seer/Surt; Dead rune-as-hit ([Monster.php:65](../../modules/php/Model/Monster.php#L65)) applies to Queen. Tests in [tests/Model/MonsterTest.php](../../tests/Model/MonsterTest.php) pin the Nidhuggr and Queen behavior.
 
 
 ### Low priority
@@ -42,3 +40,4 @@ Designer ruling: *"Legends have a faction written on the legend card. Since Nidh
 [ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control
   [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
 [ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
+[ ] Turn signal in title bar — currently says "laskava1 performs an action" using player name; should say "Bjorn / laskava1" or just hero name so the active *hero* is identifiable.

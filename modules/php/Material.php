@@ -1313,7 +1313,7 @@ class Material {
         "create" => 1,
         "location" => "supply_monster",
         "tc" => "#9b59b6",
-        "faction" => "dead",
+        "faction" => "wyrm",
         "strength" => 0,
         "health" => 13,
         "xp" => 6,
@@ -1325,7 +1325,7 @@ class Material {
         "create" => 1,
         "location" => "limbo",
         "tc" => "#9b59b6",
-        "faction" => "dead",
+        "faction" => "wyrm",
         "strength" => 0,
         "health" => 18,
         "xp" => 8,
@@ -3722,6 +3722,9 @@ class Material {
 ],
     "dead" => [ 
         "name" => clienttranslate("Dead"),
+],
+    "wyrm" => [ 
+        "name" => clienttranslate("Wyrm"),
 ],
 // # Area colors (used on map hex flags)
     "red" => [ 

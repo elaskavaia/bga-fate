@@ -146,6 +146,30 @@ final class MonsterTest extends TestCase {
         $this->assertEquals(1, $imp->countHit("rune"));
     }
 
+    // Designer ruling (BGG 3426870): Nidhuggr is faction "wyrm", not "dead" —
+    // so the Dead faction's rune-die-as-hit rule does NOT apply.
+    public function testNidhuggrFactionIsWyrm(): void {
+        $this->assertEquals("wyrm", $this->game->getMonster("monster_legend_6_1")->getFaction());
+        $this->assertEquals("wyrm", $this->game->getMonster("monster_legend_6_2")->getFaction());
+    }
+
+    public function testNidhuggrRuneIsNotHit(): void {
+        $nidhuggr = $this->game->getMonster("monster_legend_6_1");
+        $this->assertEquals(0, $nidhuggr->countHit("rune"));
+    }
+
+    public function testNidhuggrRangeIsOne(): void {
+        // Wyrm has no faction-wide range bonus; default range = 1.
+        $this->assertEquals(1, $this->game->getMonster("monster_legend_6_1")->getAttackRange());
+    }
+
+    public function testQueenOfDeadStillGetsRuneAsHit(): void {
+        // Regression: Queen (legend 1) remains in the Dead faction.
+        $queen = $this->game->getMonster("monster_legend_1_1");
+        $this->assertEquals("dead", $queen->getFaction());
+        $this->assertEquals(1, $queen->countHit("rune"));
+    }
+
     // -------------------------------------------------------------------------
     // Armor (Draugr absorbs 1 hit per attack)
     // -------------------------------------------------------------------------

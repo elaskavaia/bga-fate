@@ -642,36 +642,45 @@ export class Game extends Game1Tokens {
     }
   }
 
-  buildMonsterTooltip(tokenInfo: TokenDisplayInfo) {
-    const factionFlavor: Record<string, string> = {
+  private factionAttackRange(faction: string): number {
+    return faction === "firehorde" ? 2 : 1;
+  }
+
+  private factionEffectText(faction: string): string | undefined {
+    const map: Record<string, string> = {
+      trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
+      firehorde: _("All Fire Horde monsters have attack range 2."),
+      dead: _("Runes count as hits when the Dead attack.")
+    };
+    return map[faction];
+  }
+
+  private factionFlavorText(faction: string): string | undefined {
+    const map: Record<string, string> = {
       trollkin: _("The Trollkin are a savage clan of goblins, brutes, and trolls that roam the forests and valleys."),
       firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
       dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
     };
+    return map[faction];
+  }
 
+  buildMonsterTooltip(tokenInfo: TokenDisplayInfo) {
     let rows = "";
     tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " - " + tokenInfo.rank);
     rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
     rows += this.ttRow(_("Health"), tokenInfo.health, "health");
     rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
     if (tokenInfo.move) rows += this.ttRow(_("Move"), tokenInfo.move, "move");
-    // Range is not shipped in material; firehorde faction has range 2 per rules. Show only when > 1.
-    const range = tokenInfo.faction === "firehorde" ? 2 : 1;
+    // Range is not shipped in material; derive from faction. Only show when > 1.
+    const range = this.factionAttackRange(tokenInfo.faction);
     if (range > 1) rows += this.ttRow(_("Range"), String(range), "range");
     if (tokenInfo.armor) rows += this.ttRow(_("Armor"), tokenInfo.armor);
 
     tokenInfo.tooltip += this.ttStats(rows);
-    const factionEffect: Record<string, string> = {
-      trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
-      firehorde: _("All Fire Horde monsters have attack range 2."),
-      dead: _("Runes count as hits when the Dead attack.")
-    };
-    if (factionEffect[tokenInfo.faction]) {
-      tokenInfo.tooltip += this.ttSection(_("Faction Effect"), factionEffect[tokenInfo.faction]);
-    }
-    if (factionFlavor[tokenInfo.faction]) {
-      tokenInfo.tooltip += this.iiSection(factionFlavor[tokenInfo.faction]);
-    }
+    const eff = this.factionEffectText(tokenInfo.faction);
+    if (eff) tokenInfo.tooltip += this.ttSection(_("Faction Effect"), eff);
+    const flv = this.factionFlavorText(tokenInfo.faction);
+    if (flv) tokenInfo.tooltip += this.iiSection(flv);
   }
 
   buildLegendTooltip(tokenInfo: TokenDisplayInfo) {
@@ -725,6 +734,9 @@ export class Game extends Game1Tokens {
       dual(_("Strength"), "strength", "strength");
       dual(_("Health"), "health", "health");
       dual(_("Gold"), "xp", "gold");
+      // Range follows the legend's faction (firehorde legends get +1).
+      const range = this.factionAttackRange(tokenInfo.faction);
+      if (range > 1) rows += this.ttRow(_("Range"), String(range), "range");
       dual(_("Armor"), "armor");
     }
     tokenInfo.tooltip += this.ttStats(rows);
@@ -735,6 +747,10 @@ export class Game extends Game1Tokens {
       "6": _("Wyrm: Nidhuggr's strength is the same as its remaining health.")
     };
     if (specialAbility[legendNum]) tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[legendNum]);
+
+    // Faction effect — same map as regular monsters; lets the player see Seer/Surt are firehorde, Queen is dead, etc.
+    const eff = this.factionEffectText(tokenInfo.faction);
+    if (eff) tokenInfo.tooltip += this.ttSection(_("Faction Effect"), eff);
 
     if (legendFlavor[legendNum]) tokenInfo.tooltip += this.iiSection(legendFlavor[legendNum]);
   }
