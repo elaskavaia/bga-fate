@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -16,7 +17,6 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
-use function Bga\Games\Fate\getPart;
 
 /**
  * Reinforcement: draw monster cards and place monsters on the board.
@@ -25,7 +25,7 @@ use function Bga\Games\Fate\getPart;
  * Data: ["deck" => "deck_monster_yellow"|"deck_monster_red", "card" => optional specific card id to use instead of drawing]
  */
 class Op_reinforcement extends Operation {
-    function resolve(): void {
+    public function resolve(): void {
         $cardId = $this->getDataField("card", null);
         if ($cardId !== null) {
             $this->placeMonsterCard($cardId);
@@ -59,22 +59,6 @@ class Op_reinforcement extends Operation {
         $this->game->notifyMessage(clienttranslate("No placeable monster card found — skipping reinforcement"));
     }
 
-    /** Map card number to legend number. Yellow 1-6, Red 37-42. */
-    const CARD_LEGEND_MAP = [
-        1 => [1, 1],
-        2 => [2, 1],
-        3 => [3, 1],
-        4 => [4, 1],
-        5 => [5, 1],
-        6 => [6, 1],
-        37 => [1, 2],
-        38 => [2, 2],
-        39 => [3, 2],
-        40 => [4, 2],
-        41 => [5, 2],
-        42 => [6, 2],
-    ];
-
     /** Place monsters from a specific card. Returns true on success, false if skipped. */
     private function placeMonsterCard(string $cardId): bool {
         $spawnLoc = $this->game->tokens->getRulesFor($cardId, "spawnloc");
@@ -91,10 +75,7 @@ class Op_reinforcement extends Operation {
         $isLegendCard = in_array("LEGEND", $monsterTypes, true);
         if ($isLegendCard) {
             $legendTokenId = $this->getLegendTokenId($cardId);
-            if ($legendTokenId === null) {
-                $this->dbSetTokenLocation($cardId, "display_monsterturn", 1, clienttranslate('${token_name}: unknown legend — skipping'));
-                return false;
-            }
+            $this->game->systemAssert("ERR:reinforcement:missingLegend:$cardId", $legendTokenId);
         }
 
         // Move card to display
@@ -161,15 +142,10 @@ class Op_reinforcement extends Operation {
 
     /** Get the legend token ID for a monster card, or null if not a legend card. */
     private function getLegendTokenId(string $cardId): ?string {
-        $cardNum = (int) getPart($cardId, 2);
-        $legendInfo = self::CARD_LEGEND_MAP[$cardNum] ?? null;
-        if ($legendInfo === null) {
-            return null;
-        }
-        [$legendNum, $level] = $legendInfo;
-        return "monster_legend_{$legendNum}_{$level}";
+        $legend = (string) $this->game->material->getRulesFor($cardId, "legend", "");
+        return $legend !== "" ? $legend : null;
     }
-    const MONSTER_ABBREV = [
+    public const MONSTER_ABBREV = [
         "trollkin" => ["G" => "monster_goblin", "B" => "monster_brute", "T" => "monster_troll"],
         "firehorde" => ["S" => "monster_sprite", "E" => "monster_elemental", "J" => "monster_jotunn"],
         "dead" => ["I" => "monster_imp", "S" => "monster_skeleton", "D" => "monster_draugr"],

@@ -1346,6 +1346,7 @@ class Material {
         "name" => clienttranslate("Queen of the Dead"),
         "spawnloc" => "Nailfare",
         "spawn" => "-L",
+        "legend" => "monster_legend_1_1",
         "ftext" => "Scary as Hel.",
 ],
     "card_monster_2" => [ 
@@ -1357,6 +1358,7 @@ class Material {
         "name" => clienttranslate("Seer of Odin"),
         "spawnloc" => "TempleRuins",
         "spawn" => "L",
+        "legend" => "monster_legend_2_1",
         "ftext" => "They say she sees everything, except what's before her eyes.",
 ],
     "card_monster_3" => [ 
@@ -1368,6 +1370,7 @@ class Material {
         "name" => clienttranslate("Grendel"),
         "spawnloc" => "TrollCaves",
         "spawn" => "--L",
+        "legend" => "monster_legend_3_1",
         "ftext" => "Grendel has a face only a mother could love...and she's not too sure.",
 ],
     "card_monster_4" => [ 
@@ -1379,6 +1382,7 @@ class Material {
         "name" => clienttranslate("Surt"),
         "spawnloc" => "Highlands",
         "spawn" => "----LJE---E",
+        "legend" => "monster_legend_4_1",
         "ftext" => "He really lights up the day.",
 ],
     "card_monster_5" => [ 
@@ -1390,6 +1394,7 @@ class Material {
         "name" => clienttranslate("Hrungbald"),
         "spawnloc" => "OgreValley",
         "spawn" => "B--LB-B",
+        "legend" => "monster_legend_5_1",
         "ftext" => "Hrungbald Hammerfist has a fearsome reputation, a word he can't really pronounce.",
 ],
     "card_monster_6" => [ 
@@ -1401,6 +1406,7 @@ class Material {
         "name" => clienttranslate("Nidhuggr"),
         "spawnloc" => "WyrmLair",
         "spawn" => "---L",
+        "legend" => "monster_legend_6_1",
         "ftext" => "Rumor has it that whoever dies will be his personal flosser in the afterlife.",
 ],
 // # Yellow regular (7-36)
@@ -1745,6 +1751,7 @@ class Material {
         "name" => clienttranslate("Queen of the Dead"),
         "spawnloc" => "DeadPlains",
         "spawn" => "ISIDLISIS",
+        "legend" => "monster_legend_1_2",
         "ftext" => "Scary as Hel.",
 ],
     "card_monster_38" => [ 
@@ -1756,6 +1763,7 @@ class Material {
         "name" => clienttranslate("Seer of Odin"),
         "spawnloc" => "MarshOfSorrow",
         "spawn" => "S-SIILSI-S",
+        "legend" => "monster_legend_2_2",
         "ftext" => "I didn't see it coming, but she did...",
 ],
     "card_monster_39" => [ 
@@ -1767,6 +1775,7 @@ class Material {
         "name" => clienttranslate("Grendel"),
         "spawnloc" => "OgreValley",
         "spawn" => "L--G-G--G",
+        "legend" => "monster_legend_3_2",
         "ftext" => "Trolls will be trolls.",
 ],
     "card_monster_40" => [ 
@@ -1778,6 +1787,7 @@ class Material {
         "name" => clienttranslate("Surt"),
         "spawnloc" => "SpewingMountain",
         "spawn" => "---E-LE-E",
+        "legend" => "monster_legend_4_2",
         "ftext" => "Hotter than a summer day in Muspelheim, and twice as destructive.",
 ],
     "card_monster_41" => [ 
@@ -1789,6 +1799,7 @@ class Material {
         "name" => clienttranslate("Hrungbald"),
         "spawnloc" => "DarkForest",
         "spawn" => "GL-B-GB-B--B-B",
+        "legend" => "monster_legend_5_2",
         "ftext" => "Now with added fury and an even smaller vocabulary.",
 ],
     "card_monster_42" => [ 
@@ -1800,6 +1811,7 @@ class Material {
         "name" => clienttranslate("Nidhuggr"),
         "spawnloc" => "Highlands",
         "spawn" => "-EE-----EE-L",
+        "legend" => "monster_legend_6_2",
         "ftext" => "Nidhuggr, the eater of worlds, has ordered Viking for dinner.",
 ],
 // # Red regular (43-54)

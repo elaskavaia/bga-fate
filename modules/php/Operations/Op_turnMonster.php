@@ -1,4 +1,5 @@
 <?php
+
 /**
  *------
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
@@ -26,8 +27,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * 4. Monsters attack, 5. Reinforcements (if on axes/skull spot).
  */
 class Op_turnMonster extends Operation {
-    function resolve(): void {
-        $this->cleanupMonsterDisplay();
+    public function resolve(): void {
         $this->advanceTimeTrack();
         $spotType = $this->getCurrentSpotType();
         $isChargeTurn = $spotType === "tm_red_skull";
@@ -44,11 +44,16 @@ class Op_turnMonster extends Operation {
             $this->queueTrigger(Trigger::AfterMonsterMove, $color);
         }
         $this->queue("monsterAttackAll");
+
+        // Reinforcements: only clean the monster card display during a reinforcement turn
         if ($spotType === "tm_yellow_axes") {
+            $this->cleanupMonsterDisplay();
             $this->queue("reinforcement", null, ["deck" => "deck_monster_yellow"]);
         } elseif ($spotType === "tm_red_axes") {
+            $this->cleanupMonsterDisplay();
             $this->queue("reinforcement", null, ["deck" => "deck_monster_red"]);
         }
+
         $this->queue("endOfMonsterTurn");
     }
 
