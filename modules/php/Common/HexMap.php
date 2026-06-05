@@ -611,7 +611,9 @@ class HexMap {
 
     /**
      * Returns all monster token IDs currently on the map (on hex_* locations),
-     * sorted by distance to Grimheim (closest first).
+     * sorted by distance to Grimheim (closest first). Ties: monsters already on
+     * a road move first (R.13.7 / RULES.md:269 "the monster already on the road
+     * moves first"), then by hex id for a stable order.
      */
     function getMonstersOnMap(): array {
         $distMap = $this->getDistanceMapToGrimheim();
@@ -622,13 +624,20 @@ class HexMap {
                 if (getPart($id, 0) !== "monster") {
                     continue;
                 }
-                $result[] = ["key" => $id, "hex" => $hex, "dist" => $distMap[$hex] ?? PHP_INT_MAX];
+                $result[] = [
+                    "key" => $id,
+                    "hex" => $hex,
+                    "dist" => $distMap[$hex] ?? PHP_INT_MAX,
+                    "road" => (int) $this->game->getRulesFor($hex, "road", 0),
+                ];
             }
         }
-        // Sort closest to Grimheim first, ties broken by hex id
         usort($result, function ($a, $b) {
             if ($a["dist"] !== $b["dist"]) {
                 return $a["dist"] - $b["dist"];
+            }
+            if ($a["road"] !== $b["road"]) {
+                return $b["road"] - $a["road"]; // road=1 wins over road=0
             }
             return strcmp($a["hex"], $b["hex"]);
         });

@@ -150,15 +150,15 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $retaliation = "card_event_3_31_1";
         $this->seedHand($retaliation, $color);
 
-        // Two adjacent attackers. Goblin attacks first (per Op_monsterAttackAll's iteration order)
-        // and becomes the instigator when TResolveHits fires — Retaliation should hit goblin only,
-        // not the also-adjacent troll.
+        // Two adjacent attackers. Goblin sits on the road-tile (hex_7_8) so the road-priority
+        // tiebreak in getMonstersOnMap (R.13.7) makes it attack first and become the instigator
+        // when TResolveHits fires. Retaliation should hit the goblin only.
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
-        $troll = "monster_troll_1"; // hp=6, str=3 — adjacent bystander, untouched by Retaliation
-        $goblin = "monster_goblin_1"; // hp=2, str=2 — the actual attacker killed by Retaliation
-        $this->game->getMonster($troll)->moveTo("hex_7_8", "");
-        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
-        // 3 troll dice + 2 goblin dice → seed 5 values, all hits
+        $troll = "monster_troll_1"; // hp=6, str=3 — non-road bystander, untouched by Retaliation
+        $goblin = "monster_goblin_1"; // hp=2, str=2 — first attacker (on road), killed by Retaliation
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->game->getMonster($troll)->moveTo("hex_6_9", "");
+        // 2 goblin dice + 3 troll dice → seed 5 values, all hits
         $this->seedRand([5, 5, 5, 5, 5]);
 
         $this->respond("actionPractice");

@@ -439,6 +439,27 @@ final class HexMapTest extends TestCase {
         $this->assertEquals("monster_goblin_1", $monsters[0]["key"]);
     }
 
+    /**
+     * RULES.md:269 — at equal distance to Grimheim, a monster already
+     * on a road moves before one that isn't.
+     */
+    public function testGetMonstersOnMapTiebreaksByRoadFirst(): void {
+        // hex_8_8 (road) and hex_9_7 (non-road) are both distance 1 from Grimheim.
+        // Place the non-road monster on a hex that sorts EARLIER by strcmp so the
+        // old strcmp tiebreak would have put it first, then verify road wins anyway.
+        $roadHex = "hex_8_8";
+        $nonRoadHex = "hex_9_7";
+        $this->assertEquals(1, $this->game->material->getRulesFor($roadHex, "road", 0));
+        $this->assertEquals(0, $this->game->material->getRulesFor($nonRoadHex, "road", 0));
+
+        $this->game->tokens->moveToken("monster_goblin_1", $nonRoadHex);
+        $this->game->tokens->moveToken("monster_goblin_2", $roadHex);
+
+        $monsters = $this->game->hexMap->getMonstersOnMap();
+        $this->assertEquals("monster_goblin_2", $monsters[0]["key"], "monster already on a road moves first");
+        $this->assertEquals("monster_goblin_1", $monsters[1]["key"]);
+    }
+
     // -------------------------------------------------------------------------
     // getHexesBehind
     // -------------------------------------------------------------------------

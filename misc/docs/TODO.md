@@ -26,7 +26,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 #### Behaviour drift — needs a design decision
 
 - [x] **R.12.2 / R.12.3 — Maneuver uses player order.** Added `Base::getPlayerColorsInOrder()` and switched `Op_monsterDieManeuver::resolve` to use it; the chain now starts at the first player and follows the turn rotation, matching RULES.md:254.
-- [ ] **R.13.7 — Road-merge tiebreak uses `strcmp(hex)`, not "monster already on road moves first".** [HexMap.php:633](../../modules/php/Common/HexMap.php#L633). Two monsters at equal distance, one already on a road and one stepping onto it, may resolve in wrong order.
+- [x] **R.13.7 — Road-merge tiebreak.** `HexMap::getMonstersOnMap()` now sorts by (distance asc, road desc, hex strcmp). Equal-distance monsters already on a road move before those that aren't, matching RULES.md:269.
 
 
 #### Missing test coverage (implemented but no test pins it)
