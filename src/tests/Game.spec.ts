@@ -33,10 +33,12 @@ describe("Game.getPlaceRedirect", () => {
     // Clean body, add root containers
     document.body.innerHTML = '<div id="ebd-body"><div id="map_wrapper"><div id="supply_monster"></div></div></div>';
     game = new Game(createMockBga());
-    // Stub animationLa so onEnd callbacks don't blow up
+    // Stub animationLa so onStart/onEnd callbacks don't blow up
     (game as any).animationLa = {
       pulse: sinon.stub(),
-      evaporate: sinon.stub()
+      evaporate: sinon.stub(),
+      shrinkAndFade: sinon.stub().resolves(),
+      cardFlip: sinon.stub()
     };
     // Pile-stats overlay reads strength/xp/health via getRulesFor on the monster
     // type — seed the minimum so getPlaceRedirect doesn't crash on undefined token_types.
@@ -88,6 +90,127 @@ describe("Game.getPlaceRedirect", () => {
     const result = game.getPlaceRedirect({ key: "hero_1", location: "hex_5_5", state: 0 });
     expect(result.location).to.equal("hex_5_5");
     expect(result.onEnd).to.be.undefined;
+  });
+
+  it("should redirect tracker tokens from tableau to miniboard and set hand limit", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="counter_hand_red"></div>');
+    const result = game.getPlaceRedirect({ key: "tracker_hand_red", location: "tableau_red", state: 5 });
+    expect(result.location).to.equal("miniboard_red");
+    expect(result.noa).to.be.true;
+    expect($("counter_hand_red")!.dataset.limit).to.equal("5");
+  });
+
+  it("should redirect non-hand tracker without touching any counter", () => {
+    const result = game.getPlaceRedirect({ key: "tracker_strength_red", location: "tableau_red", state: 3 });
+    expect(result.location).to.equal("miniboard_red");
+    expect(result.noa).to.be.true;
+  });
+
+  it("should ignore tracker tokens that are not on a tableau", () => {
+    const result = game.getPlaceRedirect({ key: "tracker_strength_red", location: "limbo", state: 0 });
+    expect(result.location).to.equal("limbo");
+    expect(result.noa).to.be.undefined;
+  });
+
+  it("should redirect marker tokens from tableau to miniboard", () => {
+    const result = game.getPlaceRedirect({ key: "marker_runes_red", location: "tableau_red", state: 0 });
+    expect(result.location).to.equal("miniboard_red");
+    expect(result.noa).to.be.true;
+  });
+
+  it("should place legend monsters directly on map_wrapper (no supply piling)", () => {
+    const result = game.getPlaceRedirect({ key: "monster_legend_1", location: "supply_monster", state: 0 });
+    expect(result.location).to.equal("map_wrapper");
+    expect($("supply_monster_legend")).to.be.null;
+  });
+
+  it("should shrink-and-fade monsters that retreat from a hex back to supply", async () => {
+    // Place monster on a hex so the onStart branch fires
+    const hex = document.createElement("div");
+    hex.id = "hex_5_5";
+    document.body.appendChild(hex);
+    const mob = document.createElement("div");
+    mob.id = "monster_goblin_1";
+    hex.appendChild(mob);
+
+    const result = game.getPlaceRedirect({ key: "monster_goblin_1", location: "supply_monster", state: 0 });
+    expect(result.noa).to.be.true;
+    expect(result.onStart).to.be.a("function");
+    await result.onStart!(mob);
+    expect((game as any).animationLa.shrinkAndFade.calledWith(mob)).to.be.true;
+  });
+
+  it("should set onClick on cards and trigger cardFlip when flip_from is passed", () => {
+    const result = game.getPlaceRedirect(
+      { key: "card_hero_1_2", location: "tableau_red", state: 0 },
+      { flip_from: "card_hero_1_1" }
+    );
+    expect(result.onClick).to.be.a("function");
+    expect(result.onEnd).to.be.a("function");
+    result.onEnd!(document.createElement("div"));
+    expect(
+      (game as any).animationLa.cardFlip.calledWith("card_hero_1_2", "0", 1000, undefined, "card_hero_1_1")
+    ).to.be.true;
+  });
+
+  it("should set onClick on cards but skip flip when flip_from is absent", () => {
+    const result = game.getPlaceRedirect({ key: "card_equip_2_21", location: "tableau_red", state: 0 });
+    expect(result.onClick).to.be.a("function");
+    expect(result.onEnd).to.be.undefined;
+  });
+
+  it("should suppress slide and pulse the bucket when a crystal lands on a monster", () => {
+    const target = document.createElement("div");
+    target.id = "monster_goblin_1";
+    document.body.appendChild(target);
+    (game as any).updateBucketCount = sinon.stub();
+    (game as any).updateTooltip = sinon.stub();
+
+    const result = game.getPlaceRedirect({ key: "crystal_red_1", location: "monster_goblin_1", state: 0 });
+    expect(result.noa).to.be.true;
+    expect(result.location).to.equal("bucket_crystal_red_monster_goblin_1");
+    result.onEnd!(document.createElement("div"));
+    expect((game as any).animationLa.pulse.calledWith("bucket_crystal_red_monster_goblin_1")).to.be.true;
+    expect((game as any).updateTooltip.calledWith("monster_goblin_1")).to.be.true;
+  });
+
+  it("should pulse the old bucket when a crystal returns from a character to supply", () => {
+    // Existing bucket on a monster with crystal_red_1 inside it
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<div id="monster_goblin_1"><div id="bucket_crystal_red_monster_goblin_1" class="bucket"><div id="crystal_red_1"></div></div></div>'
+    );
+    (game as any).updateBucketCount = sinon.stub();
+    (game as any).updateTooltip = sinon.stub();
+
+    const result = game.getPlaceRedirect({ key: "crystal_red_1", location: "supply_crystal_red", state: 0 });
+    expect(result.noa).to.be.true;
+    result.onEnd!(document.createElement("div"));
+    expect((game as any).animationLa.pulse.calledWith("bucket_crystal_red_monster_goblin_1")).to.be.true;
+    expect((game as any).updateBucketCount.calledWith("bucket_crystal_red_monster_goblin_1")).to.be.true;
+    // updateTooltip targets the old character via oldCharId stripped from the bucket id
+    expect((game as any).updateTooltip.calledWith("monster_goblin_1")).to.be.true;
+  });
+
+  it("should redirect timetrack container to timetrack_area and rebuild slots", () => {
+    document.body.insertAdjacentHTML("beforeend", '<div id="timetrack_area"></div>');
+    (game as any).createTimetrack = sinon.stub();
+    const result = game.getPlaceRedirect({ key: "timetrack_1", location: "limbo", state: 0 });
+    expect(result.location).to.equal("timetrack_area");
+    result.onEnd!(document.createElement("div"));
+    expect((game as any).createTimetrack.calledWith("timetrack_1")).to.be.true;
+  });
+
+  it("should redirect rune_stone to the timetrack slot matching its state", () => {
+    const result = game.getPlaceRedirect({ key: "rune_stone", location: "timetrack_1", state: 4 });
+    expect(result.location).to.equal("slot_timetrack_1_4");
+  });
+
+  it("should mark display_battle and tableau containers as nop", () => {
+    const battle = game.getPlaceRedirect({ key: "display_battle", location: "ebd-body", state: 0 });
+    expect(battle.nop).to.be.true;
+    const tab = game.getPlaceRedirect({ key: "tableau_red", location: "ebd-body", state: 0 });
+    expect(tab.nop).to.be.true;
   });
 });
 

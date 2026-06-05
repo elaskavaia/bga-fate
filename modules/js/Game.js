@@ -2541,133 +2541,149 @@ class Game extends Game1Tokens {
         const result = { ...tokenInfo };
         const loc = tokenInfo.location;
         const tokenKey = tokenInfo.key;
+        const mainType = getPart(tokenKey, 0);
         if (args.place_from)
             result.place_from = args.place_from;
-        // Redirect tracker tokens to miniboard in player panel
-        if (tokenKey.startsWith("tracker_") && loc.startsWith("tableau_")) {
-            const color = getPart(loc, 1);
-            result.location = `miniboard_${color}`;
-            result.noa = true;
-            if (tokenKey.startsWith("tracker_hand")) {
-                const handCounter = $(`counter_hand_${color}`);
-                if (handCounter)
-                    handCounter.dataset.limit = String(tokenInfo.state);
-            }
-        }
-        else if (tokenKey.startsWith("marker_") && loc.startsWith("tableau_")) {
-            const color = getPart(loc, 1);
-            result.location = `miniboard_${color}`;
-            result.noa = true;
-        }
-        else if (loc === "supply_monster") {
-            // Stack monsters by type in supply: create sub-container per monster type
-            const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "monster_goblin"
-            if (monsterType === "monster_legend") {
-                // Legends: place directly on map_wrapper, no piling
-                result.location = "map_wrapper";
-            }
-            else {
-                const subId = "supply_" + monsterType;
-                if (!$(subId)) {
-                    const atk = this.getRulesFor(monsterType, "strength", 0);
-                    const gold = this.getRulesFor(monsterType, "xp", 0);
-                    const hp = this.getRulesFor(monsterType, "health", 0);
-                    const stats = `<div class="pile_stats">` +
-                        `<span class="tracker wicon wicon_strength" data-state="${atk}"></span>` +
-                        `<span class="tracker wicon wicon_gold" data-state="${gold}"></span>` +
-                        `<span class="tracker wicon wicon_health" data-state="${hp}"></span>` +
-                        `</div>`;
-                    placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}">${stats}</div>`, "map_wrapper");
+        switch (mainType) {
+            case "tracker":
+                // Redirect tracker tokens to miniboard in player panel
+                if (loc.startsWith("tableau_")) {
+                    const color = getPart(loc, 1);
+                    result.location = `miniboard_${color}`;
+                    result.noa = true;
+                    if (tokenKey.startsWith("tracker_hand")) {
+                        const handCounter = $(`counter_hand_${color}`);
+                        if (handCounter)
+                            handCounter.dataset.limit = String(tokenInfo.state);
+                    }
                 }
-                result.location = subId;
-            }
-            // Shrink & fade at current position, then snap to supply
-            if ($(tokenKey)?.parentElement?.id?.startsWith("hex_")) {
-                result.noa = true;
-                result.onStart = async (node) => {
-                    await this.animationLa.shrinkAndFade(node);
-                };
-            }
-        }
-        else if (tokenKey.startsWith("card_")) {
-            result.onClick = (e) => this.onToken(e);
-            // Upgrade flip: L2 just landed in tableau; flip from L1's sprite to L2's at the slot.
-            if (args.flip_from) {
-                const fromId = args.flip_from;
-                result.onEnd = () => {
-                    this.animationLa.cardFlip(tokenKey, String(tokenInfo.state), 1000, undefined, fromId);
-                };
-            }
-        }
-        else if (tokenKey.startsWith("crystal_")) {
-            // Bucket redirect: tokens placed on another token get a sub-container bucket
-            // e.g. crystal_red on monster_goblin_1 → bucket_crystal_red_monster_goblin_1
-            const bucketType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1); // e.g. "crystal_red"
-            const tokenNode = $(tokenKey);
-            const oldBucket = tokenNode?.parentElement;
-            const oldBucketId = oldBucket?.classList.contains("bucket") ? oldBucket.id : null;
-            if (!loc.startsWith("supply")) {
-                const bucketId = `bucket_${bucketType}_${loc}`;
-                if (!$(bucketId)) {
-                    placeHtml(`<div id="${bucketId}" class="bucket bucket_${bucketType}"></div>`, loc);
+                break;
+            case "marker":
+                if (loc.startsWith("tableau_")) {
+                    const color = getPart(loc, 1);
+                    result.location = `miniboard_${color}`;
+                    result.noa = true;
                 }
-                result.location = bucketId;
-                // Crystal landing on a monster, hero, or card: suppress slide, pulse the crystal bucket instead
-                if (loc.startsWith("monster") || loc.startsWith("hero") || loc.startsWith("card")) {
+                break;
+            case "monster":
+                if (loc === "supply_monster") {
+                    // Stack monsters by type in supply: create sub-container per monster type
+                    const monsterType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1);
+                    if (monsterType === "monster_legend") {
+                        // Legends: place directly on map_wrapper, no piling
+                        result.location = "map_wrapper";
+                    }
+                    else {
+                        const subId = "supply_" + monsterType;
+                        if (!$(subId)) {
+                            const atk = this.getRulesFor(monsterType, "strength", 0);
+                            const gold = this.getRulesFor(monsterType, "xp", 0);
+                            const hp = this.getRulesFor(monsterType, "health", 0);
+                            const stats = `<div class="pile_stats">` +
+                                `<span class="tracker wicon wicon_strength" data-state="${atk}"></span>` +
+                                `<span class="tracker wicon wicon_gold" data-state="${gold}"></span>` +
+                                `<span class="tracker wicon wicon_health" data-state="${hp}"></span>` +
+                                `</div>`;
+                            placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}">${stats}</div>`, "map_wrapper");
+                        }
+                        result.location = subId;
+                    }
+                    // Shrink & fade at current position, then snap to supply
+                    if ($(tokenKey)?.parentElement?.id?.startsWith("hex_")) {
+                        result.noa = true;
+                        result.onStart = async (node) => {
+                            await this.animationLa.shrinkAndFade(node);
+                        };
+                    }
+                }
+                break;
+            case "card":
+                result.onClick = (e) => this.onToken(e);
+                // Upgrade flip: L2 just landed in tableau; flip from L1's sprite to L2's at the slot.
+                if (args.flip_from) {
+                    const fromId = args.flip_from;
+                    result.onEnd = () => {
+                        this.animationLa.cardFlip(tokenKey, String(tokenInfo.state), 1000, undefined, fromId);
+                    };
+                }
+                break;
+            case "crystal": {
+                // Bucket redirect: tokens placed on another token get a sub-container bucket
+                // e.g. crystal_red on monster_goblin_1 → bucket_crystal_red_monster_goblin_1
+                const bucketType = getPart(tokenKey, 0) + "_" + getPart(tokenKey, 1);
+                const tokenNode = $(tokenKey);
+                const oldBucket = tokenNode?.parentElement;
+                const oldBucketId = oldBucket?.classList.contains("bucket") ? oldBucket.id : null;
+                if (!loc.startsWith("supply")) {
+                    const bucketId = `bucket_${bucketType}_${loc}`;
+                    if (!$(bucketId)) {
+                        placeHtml(`<div id="${bucketId}" class="bucket bucket_${bucketType}"></div>`, loc);
+                    }
+                    result.location = bucketId;
+                    // Crystal landing on a monster, hero, or card: suppress slide, pulse the crystal bucket instead
+                    if (loc.startsWith("monster") || loc.startsWith("hero") || loc.startsWith("card")) {
+                        result.noa = true;
+                        result.onEnd = () => {
+                            if (oldBucketId)
+                                this.updateBucketCount(oldBucketId);
+                            this.updateBucketCount(bucketId);
+                            this.animationLa.pulse(bucketId);
+                            this.updateTooltip(loc, undefined, { force: true });
+                        };
+                    }
+                    else {
+                        result.onEnd = () => {
+                            if (oldBucketId) {
+                                this.updateBucketCount(oldBucketId);
+                                const oldCharId = oldBucketId.replace(/^bucket_crystal_[a-z]+_/, "");
+                                if ($(oldCharId))
+                                    this.updateTooltip(oldCharId, undefined, { force: true });
+                            }
+                            this.updateBucketCount(bucketId);
+                        };
+                    }
+                }
+                else if (oldBucketId) {
+                    // Crystal returning to supply — suppress slide, just pulse the old bucket
+                    const oldCharId = oldBucketId.replace(/^bucket_crystal_[a-z]+_/, "");
                     result.noa = true;
                     result.onEnd = () => {
-                        if (oldBucketId)
-                            this.updateBucketCount(oldBucketId);
-                        this.updateBucketCount(bucketId);
-                        this.animationLa.pulse(bucketId);
-                        this.updateTooltip(loc, undefined, { force: true });
+                        this.updateBucketCount(oldBucketId);
+                        this.animationLa.pulse(oldBucketId);
+                        if ($(oldCharId))
+                            this.updateTooltip(oldCharId, undefined, { force: true });
                     };
                 }
-                else {
-                    result.onEnd = () => {
-                        if (oldBucketId) {
-                            this.updateBucketCount(oldBucketId);
-                            const oldCharId = oldBucketId.replace(/^bucket_crystal_\w+_/, "");
-                            if ($(oldCharId))
-                                this.updateTooltip(oldCharId, undefined, { force: true });
-                        }
-                        this.updateBucketCount(bucketId);
+                break;
+            }
+            case "timetrack":
+                // Redirect timetrack container to timetrack_area and populate slots
+                result.location = "timetrack_area";
+                result.onEnd = () => this.createTimetrack(tokenKey);
+                break;
+            case "rune":
+                // Redirect rune_stone to the specific timetrack slot based on its state (step number)
+                if (tokenKey === "rune_stone" && loc.startsWith("timetrack_")) {
+                    result.location = `slot_${loc}_${tokenInfo.state}`;
+                }
+                break;
+            case "die":
+                // Dice landing on display_battle: show evaporate effect at the attack target
+                if (loc === "display_battle" && args.anim_target) {
+                    const target = args.anim_target;
+                    result.onEnd = (node) => {
+                        this.animationLa.evaporate(node, target);
                     };
                 }
-            }
-            else if (oldBucketId) {
-                // Crystal returning to supply — suppress slide, just pulse the old bucket
-                const oldCharId = oldBucketId.replace(/^bucket_crystal_\w+_/, "");
-                result.noa = true;
-                result.onEnd = () => {
-                    this.updateBucketCount(oldBucketId);
-                    this.animationLa.pulse(oldBucketId);
-                    if ($(oldCharId))
-                        this.updateTooltip(oldCharId, undefined, { force: true });
-                };
-            }
-        }
-        else if (tokenKey.startsWith("timetrack_")) {
-            // Redirect timetrack container to timetrack_area and populate slots
-            result.location = "timetrack_area";
-            result.onEnd = () => this.createTimetrack(tokenKey);
-        }
-        else if (tokenKey === "rune_stone" && loc.startsWith("timetrack_")) {
-            // Redirect rune_stone to the specific timetrack slot based on its state (step number)
-            result.location = `slot_${loc}_${tokenInfo.state}`;
-        }
-        else if (loc === "display_battle" && tokenKey.startsWith("die_") && args.anim_target) {
-            // Dice landing on display_battle: show evaporate effect at the attack target
-            const target = args.anim_target;
-            result.onEnd = (node) => {
-                this.animationLa.evaporate(node, target);
-            };
-        }
-        else if (tokenKey.startsWith("display_battle")) {
-            result.nop = true;
-        }
-        else if (tokenKey.startsWith("tableau")) {
-            result.nop = true;
+                break;
+            case "display":
+                if (tokenKey.startsWith("display_battle")) {
+                    result.nop = true;
+                }
+                break;
+            case "tableau":
+                result.nop = true;
+                break;
         }
         return result;
     }
