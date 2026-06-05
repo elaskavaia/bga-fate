@@ -760,4 +760,39 @@ final class GameTest extends TestCase {
         $this->setupHeroAndTokens();
         $this->assertEquals(0, $this->game->evaluateExpression("brute or skeleton", PCOLOR, "monster_goblin_1"));
     }
+
+    public function testGetPlayerColorsInOrderStartsWithFirstPlayer(): void {
+        // 4-hero game so we have a non-trivial player order to rotate.
+        $game = $this->game(0); // initWithHeros() — 4 players
+
+        $allColors = $game->getPlayerColors();
+        $this->assertCount(4, $allColors);
+
+        $firstId = $game->getFirstPlayer();
+        $players = $game->loadPlayersBasicInfos();
+        $firstColor = $players[$firstId]["player_color"];
+
+        $ordered = $game->getPlayerColorsInOrder();
+        $this->assertSame($firstColor, $ordered[0], "first slot must be the first-player's color");
+        $sortedAll = $allColors;
+        $sortedOrdered = $ordered;
+        sort($sortedAll);
+        sort($sortedOrdered);
+        $this->assertSame($sortedAll, $sortedOrdered, "rotation should preserve the color set");
+    }
+
+    public function testGetPlayerColorsInOrderRotatesFromExplicitStartingPlayer(): void {
+        $game = $this->game(0); // 4 players
+        $allColors = $game->getPlayerColors();
+        $players = $game->loadPlayersBasicInfos();
+        $playerIds = array_keys($players);
+
+        // Pick a non-first player as the starting anchor and verify the rotation lands there.
+        $startingId = $playerIds[1] ?? $playerIds[0];
+        $startingColor = $players[$startingId]["player_color"];
+
+        $ordered = $game->getPlayerColorsInOrder($startingId);
+        $this->assertSame($startingColor, $ordered[0]);
+        $this->assertCount(count($allColors), $ordered);
+    }
 }

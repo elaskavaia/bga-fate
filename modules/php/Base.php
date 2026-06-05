@@ -390,6 +390,16 @@ class Base extends Table {
     }
 
     /**
+     * Player colors rotated so the first-player's color is first, then turn order.
+     * Use when a rule says "in player order" (e.g. monster die maneuver chaining).
+     */
+    public function getPlayerColorsInOrder(?int $starting = null) {
+        $starting = $starting ?? $this->getFirstPlayer();
+        $players = $this->loadPlayersBasicInfos();
+        return array_map(fn($id) => $players[$id]["player_color"], $this->getPlayerIdsInOrder($starting));
+    }
+
+    /**
      *
      * @return integer player id based on hex $color, player is not in the list return 0
      */

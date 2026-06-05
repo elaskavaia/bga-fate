@@ -29,7 +29,8 @@ class Op_monsterDieManeuver extends Operation {
         $this->game->systemAssert("ERR:monsterDieManeuver:badDir:$dir", $dir === "cw" || $dir === "ccw");
         $clockwise = $dir === "cw";
 
-        foreach ($this->game->getPlayerColors() as $color) {
+        // "in player order" starting from the first player.
+        foreach ($this->game->getPlayerColorsInOrder() as $color) {
             $heroHex = $this->game->hexMap->getCharacterHex($this->game->getHeroTokenId($color));
             if ($heroHex === null || $this->game->hexMap->isInGrimheim($heroHex)) {
                 continue;
