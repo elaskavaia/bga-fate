@@ -137,6 +137,10 @@
     height: 24px;
     line-height: 24px;
   }
+
+  #selection_area & {
+    height: 32px;
+  }
 }
 
 .tracker::after,
@@ -165,19 +169,17 @@
   .miniboard_banner {
     flex-basis: 100%;
     height: auto !important;
-    text-align: center;
     font-weight: bold;
     font-size: 18px;
-    color: var(--player-color, #333);
-    background: color-mix(in srgb, var(--player-color, #555) 15%, transparent);
+    color: white;
     padding: 2px 6px;
-    border-radius: 3px;
     order: -1;
   }
 
   & > * {
     position: relative !important;
     height: 32px;
+    filter: drop-shadow(0px 0px 3px black);
     &::after {
       position: absolute;
       top: 9px;
@@ -225,13 +227,15 @@
 
 .upgrade_cost {
   background-color: unset;
+  height: 32px;
+  aspect-ratio: 1;
   &::before {
-    content: "\f062";
+    content: "\f0fe";
     font-family: FontAwesome;
     font-size: 32px;
     position: absolute;
     top: 5%;
-    color: #535151;
+    color: #e3a322;
   }
 }
 
