@@ -14,7 +14,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 
 #### Bugs (code disagrees with rules)
 
-- [ ] **R.20.3 — `Op_adj` ignores hero's own-hex terrain.** Rule (RULES.md:412): "a character is adjacent to terrains of its own hex AND adjacent hexes". [Op_adj.php:46](../../modules/php/Operations/Op_adj.php#L46) only iterates `getAdjacentHexes($hex)`, never the hero's own hex. **Impact**: any quest/effect using `adj(forest)`, `adj(mountain)` etc. — e.g. Dwarf Mail (`adj(mountain):gainTracker:check('countTracker>=7'):gainEquip`) — under-counts when the hero stands ON the matching terrain.
+- [x] **R.20.3 — `Op_adj` ignores hero's own-hex terrain.** Fixed in [Op_adj.php](../../modules/php/Operations/Op_adj.php) — own-hex is now checked before the adjacent-hex loop via a shared `matches()` helper. Quests like Dwarf Mail's `adj(mountain)` now count when the hero stands on the matching terrain. Regression test: `Op_adjTest::testGatePassesWhenHeroIsOnTerrain`.
 
 #### Missing rules / unimplemented options
 

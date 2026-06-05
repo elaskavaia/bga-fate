@@ -19,6 +19,17 @@ final class Op_adjTest extends AbstractOpTestCase {
         $this->assertFalse($this->op->noValidTargets());
     }
 
+    /**
+     * R.20.3 — "a character is adjacent to terrains of its own hex AND adjacent hexes".
+     * So adj(mountain) must also pass when the hero stands ON a mountain.
+     */
+    public function testGatePassesWhenHeroIsOnTerrain(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_14_1"); // mountain
+        $this->createOp("adj(mountain)");
+        $this->assertFalse($this->op->isVoid());
+        $this->assertFalse($this->op->noValidTargets());
+    }
+
     public function testGateVoidsWhenHeroNotAdjacent(): void {
         // Hero starts in Grimheim — no mountain neighbors.
         $this->createOp("adj(mountain)");

@@ -43,14 +43,24 @@ class Op_adj extends Operation {
         }
         $hex = $this->game->getHero($this->getOwner())->getHex();
         $this->game->systemAssert("ERR:adj:heroNotOnMap", $hex !== null);
+        if ($this->matches($hex, $expected)) {
+            return ["confirm"];
+        }
         foreach ($this->game->hexMap->getAdjacentHexes($hex) as $adjHex) {
-            $named = $this->game->hexMap->getHexNamedLocation($adjHex);
-            $terrain = $this->game->hexMap->getHexTerrain($adjHex);
-            if ($named === $expected || $terrain === $expected) {
-                return parent::getPossibleMoves();
+            if ($this->matches($adjHex, $expected)) {
+                return ["confirm"];
             }
         }
         return ["q" => Material::ERR_PREREQ, "err" => clienttranslate("Not adjacent to required location")];
+    }
+
+    function matches(string $adjHex, string $expected) {
+        $named = $this->game->hexMap->getHexNamedLocation($adjHex);
+        $terrain = $this->game->hexMap->getHexTerrain($adjHex);
+        if ($named === $expected || $terrain === $expected) {
+            return true;
+        }
+        return false;
     }
 
     function resolve(): void {
