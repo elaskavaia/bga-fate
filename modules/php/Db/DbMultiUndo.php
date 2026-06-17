@@ -268,17 +268,22 @@ class DbMultiUndo {
         $next = $this->getNextMoveId();
 
         if ($move_id == 0) {
-            $move_id = (int) $this->getEarliestSavedMoveId($player_id);
+            // === null (not falsy): move_id 0 is a valid savepoint (first move / setup barrier).
+            $earliest = $this->getEarliestSavedMoveId($player_id);
+            if ($earliest === null) {
+                $this->errorCannotUndo();
+            }
+            $move_id = (int) $earliest;
         } elseif ($move_id == -1) {
             $latest_saved_move_id = (int) $this->getLatestSavedMoveId($next + 1, $player_id);
-            $prev = (int) $this->getLatestSavedMoveId($latest_saved_move_id, $player_id);
-            if (!$prev) {
-                $prev = (int) $this->getEarliestSavedMoveId($player_id);
+            $prev = $this->getLatestSavedMoveId($latest_saved_move_id, $player_id);
+            if ($prev === null) {
+                $prev = $this->getEarliestSavedMoveId($player_id);
             }
-            $move_id = $prev;
-        }
-        if (!$move_id) {
-            $this->errorCannotUndo();
+            if ($prev === null) {
+                $this->errorCannotUndo();
+            }
+            $move_id = (int) $prev;
         }
 
         // if ($move_id >= $next - 1) {

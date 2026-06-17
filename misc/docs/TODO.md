@@ -46,7 +46,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 
 #### Open per-card sweeps (not a code search — needs reading every card's `r` declaration)
 
-- [ ] **R.6.7** — "Move +1" vs "Move 1 area" is a card-text distinction; per-card sweep across `card_*_material.csv`.
+- [x] **R.6.7** — "Move +1" vs "Move 1 area" is a card-text distinction; per-card sweep across `card_*_material.csv`.
 - [ ] **R.7.9** — Always-on / on-trigger abilities skipping `spendUse` — correctness depends on each card's `r` declaration.
 
 

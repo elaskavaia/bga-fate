@@ -188,17 +188,17 @@ export class GameMachine {
     const altTarget = paramInfo.tokenIdUi;
     if (!altTarget) return undefined;
 
-    const cardId = altTarget;
-    if (cardId) {
-      let tokenNode = $(cardId);
-      if (!tokenNode) {
-        this.game.prepareToken(cardId);
-        tokenNode = $(cardId)!;
-        tokenNode.id = `${cardId}_temp`;
-        return tokenNode.outerHTML;
-      }
-      return this.cloneForReplication(tokenNode);
-    }
+    let tokenNode = $(altTarget);
+    if (tokenNode) return this.cloneForReplication(tokenNode);
+
+    // No live token (e.g. gaining from the supply): materialize it just to grab its HTML.
+    this.game.prepareToken(altTarget);
+    tokenNode = $(altTarget);
+    if (!tokenNode) return undefined;
+    tokenNode.id = `${altTarget}_temp`;
+    const html = tokenNode.outerHTML;
+    tokenNode.remove(); // remove the temp node so it does not leak into the live DOM
+    return html;
   }
 
   cloneForReplication(div: HTMLElement) {
