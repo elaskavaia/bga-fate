@@ -105,6 +105,7 @@ removeDamage|Remove Damage|wicon_health
 
 # movement
 move|Move Hero|wicon_move
+moveStep|Move Hero|wicon_move
 step|Step|wicon_move
 moveMonster|Move Monster|wicon_move
 

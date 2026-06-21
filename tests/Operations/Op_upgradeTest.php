@@ -29,7 +29,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Testing possible moves — not enough XP
+    // Testing possible moves - not enough XP
     // -------------------------------------------------------------------------
 
     public function testNotEnoughXpReturnsError(): void {
@@ -43,7 +43,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Testing possible moves — enough XP
+    // Testing possible moves - enough XP
     // -------------------------------------------------------------------------
 
     public function testEnoughXpShowsDeckCard(): void {
@@ -81,7 +81,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // resolve — gain new ability
+    // resolve - gain new ability
     // -------------------------------------------------------------------------
 
     public function testGainMovesCardToTableau(): void {
@@ -123,7 +123,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
 
     public function testGainManaGeneratedImmediately(): void {
         $this->giveXp(5);
-        // Sure Shot I (card_ability_1_3) has mana=1 — move it to deck to test mana generation on gain
+        // Sure Shot I (card_ability_1_3) has mana=1 - move it to deck to test mana generation on gain
         $this->game->tokens->moveToken("card_ability_1_3", "deck_ability_" . PCOLOR, 999);
         $op = $this->op;
         $this->call_resolve("card_ability_1_3");
@@ -133,7 +133,7 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // resolve — improve card
+    // resolve - improve card
     // -------------------------------------------------------------------------
 
     public function testImproveFlipsCardToLevel2(): void {

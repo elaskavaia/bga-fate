@@ -4,45 +4,45 @@
 
 #### General Framework definitions
 
-- **Operation (Simple)** — atomic game action with no sub-operations (e.g. move a token, draw a card)
-- **Operation (Complex)** — operation that delegates to sub-operations like OR choice, sequence, etc
-- **Effect** — what an ability/card *does* when triggered or played, expressed as operation DSL
-- **Precondition** — predicate that must hold before an effect can trigger, expressed as operation DSL evaluated for success/failure
-- **DSL (Operation DSL)** — mini-language used in CSVs (effect/precondition columns) that compiles into a queue of operations. Full grammar and examples in [EFFECTS_DSL.md](EFFECTS_DSL.md) (covers both the Op DSL and the Math DSL used in `pre` fields and predicate arguments).
-- **Token** — every physical game piece (hero, monster, card, crystal, die, marker); has an id, location, and state
-- **Location** — where a token lives (a hex, a deck, a hand, a tableau, supply, limbo); a string key, not a coordinate
-- **Token State** — small integer attached to a token (e.g. die face value, timetrack step, card side)
-- **Material** — static information about the game, the "rulebook data" vs. runtime token instances
-- **Owner** — player color string (e.g. `"ff0000"`), not player id — used in this game to identify players
+- **Operation (Simple)** - atomic game action with no sub-operations (e.g. move a token, draw a card)
+- **Operation (Complex)** - operation that delegates to sub-operations like OR choice, sequence, etc
+- **Effect** - what an ability/card *does* when triggered or played, expressed as operation DSL
+- **Precondition** - predicate that must hold before an effect can trigger, expressed as operation DSL evaluated for success/failure
+- **DSL (Operation DSL)** - mini-language used in CSVs (effect/precondition columns) that compiles into a queue of operations. Full grammar and examples in [EFFECTS_DSL.md](EFFECTS_DSL.md) (covers both the Op DSL and the Math DSL used in `pre` fields and predicate arguments).
+- **Token** - every physical game piece (hero, monster, card, crystal, die, marker); has an id, location, and state
+- **Location** - where a token lives (a hex, a deck, a hand, a tableau, supply, limbo); a string key, not a coordinate
+- **Token State** - small integer attached to a token (e.g. die face value, timetrack step, card side)
+- **Material** - static information about the game, the "rulebook data" vs. runtime token instances
+- **Owner** - player color string (e.g. `"ff0000"`), not player id - used in this game to identify players
 
 #### Game specific
 
-- **Hero vs. Player** — Hero is the in-game character; player is the seat. 
-- **Limbo** — special location for tokens that exist but aren't on the board yet, or are "out of the game" already
-- **Supply** — pool of unowned tokens available to draw/spawn from
-- **Tableau** — a player's personal area where their hero card, abilities, equipment, and earned crystals live
-- **Grimheim** — the town the heroes defend; a 7-hex cluster, also a location key on town pieces
+- **Hero vs. Player** - Hero is the in-game character; player is the seat. 
+- **Limbo** - special location for tokens that exist but aren't on the board yet, or are "out of the game" already
+- **Supply** - pool of unowned tokens available to draw/spawn from
+- **Tableau** - a player's personal area where their hero card, abilities, equipment, and earned crystals live
+- **Grimheim** - the town the heroes defend; a 7-hex cluster, also a location key on town pieces
 
 ### Operation-Based State Machine
 
 The game logic is built around an operation-based state machine:
 
-- **OpMachine** (`modules/php/OpCommon/OpMachine.php`) — Core state machine that manages operation queue and execution
-- **Operation** (`modules/php/OpCommon/Operation.php`) — Abstract base class for all game operations
-- **Operation implementations** (`modules/php/Operations/Op_*.php`) — Concrete operations
-- **ComplexOperation** — Operations that can contain sub-operations (delegates)
-- **CountableOperation** — Operations that can be repeated a specific number of times
+- **OpMachine** (`modules/php/OpCommon/OpMachine.php`) - Core state machine that manages operation queue and execution
+- **Operation** (`modules/php/OpCommon/Operation.php`) - Abstract base class for all game operations
+- **Operation implementations** (`modules/php/Operations/Op_*.php`) - Concrete operations
+- **ComplexOperation** - Operations that can contain sub-operations (delegates)
+- **CountableOperation** - Operations that can be repeated a specific number of times
 
 Operations are queued, pushed or inserted in the Machine and executed sequentially based on rank, enabling complex game flows.
 
 ### Token Management
 
-- **DbTokens** (`modules/php/Db/DbTokens.php`) — Token storage, notifications, counters, and material-based creation
+- **DbTokens** (`modules/php/Db/DbTokens.php`) - Token storage, notifications, counters, and material-based creation
 - Tokens represent all physical game pieces (cards, dice, workers, resources, etc.)
 
 ### Hex Map
 
-- **HexMap** (`modules/php/Common/HexMap.php`) — All hex grid logic: adjacency, distance, terrain queries, pathfinding, and monster movement helpers
+- **HexMap** (`modules/php/Common/HexMap.php`) - All hex grid logic: adjacency, distance, terrain queries, pathfinding, and monster movement helpers
 - Accessed via `$this->game->hexMap->` from operations and `$game->hexMap->` from tests
 - Key functions: `getAdjacentHexes`, `getReachableHexes`, `getDistanceMapToGrimheim`, `getMonsterNextHex`, `getMonstersOnMap`, `isHeroAdjacentTo`, `getHexesInLocation`, `isOccupied`, `isInGrimheim`
 
@@ -50,22 +50,22 @@ Operations are queued, pushed or inserted in the Machine and executed sequential
 
 State classes in `modules/php/States/` handle different game phases:
 
-- GameDispatch — Main game flow dispatcher
-- PlayerTurn — Individual player turn handling
-- MultiPlayerMaster/MultiPlayerTurnPrivate/MultiPlayerWaitPrivate — Multiplayer coordination
-- PlayerTurnConfirm — Turn confirmation state (Non-Machine state)
-- MachineHalted — Error/debug state
+- GameDispatch - Main game flow dispatcher
+- PlayerTurn - Individual player turn handling
+- MultiPlayerMaster/MultiPlayerTurnPrivate/MultiPlayerWaitPrivate - Multiplayer coordination
+- PlayerTurnConfirm - Turn confirmation state (Non-Machine state)
+- MachineHalted - Error/debug state
 
 ### Client-Side Code
 
 TypeScript files in `src/` compile to a single `Game.js`:
 
-- **Game.ts** — Main game class (extends GameMachine), entry point for client logic
-- **Game0Basics.ts** — First file in compilation order, basic definitions
-- **Game1Tokens.ts** — Token rendering and management
-- **GameMachine.ts** — Client-side state machine handling
-- **LaAnimations.ts** — Animation utilities
-- **LaZoom.ts** — Zoom
+- **Game.ts** - Main game class (extends GameMachine), entry point for client logic
+- **Game0Basics.ts** - First file in compilation order, basic definitions
+- **Game1Tokens.ts** - Token rendering and management
+- **GameMachine.ts** - Client-side state machine handling
+- **LaAnimations.ts** - Animation utilities
+- **LaZoom.ts** - Zoom
 
 SCSS files in `src/css/` compile to `fate.css` with `GameXBody.scss` as the entry point.
 
@@ -75,20 +75,20 @@ SCSS files in `src/css/` compile to `fate.css` with `GameXBody.scss` as the entr
 
 Following the project's token naming pattern (`key = supertype_type_instance`):
 
-- `hero_<hero>` — Hero miniature (e.g. `hero_1` = Bjorn)
-- `house_<n>` — Town piece (e.g. `house_0` = well)
-- `monster_<type>_<n>` — Monster tile (e.g. `monster_goblin_5`, `monster_troll_2`)
-- `card_monster_<n>` — Monster card (e.g. `card_monster_12`); type includes `ctype_yellow` or `ctype_red`
-- `card_hero_<hero>_<n>` — Hero card (e.g. `card_hero_1_1` = Level I starting, `card_hero_1_2` = Level II upgraded). Odd `<n>` = front (Level I), even `<n>` = back (Level II). Two-sided card.
-- `card_ability_<hero>_<n>` — Ability card (e.g. `card_ability_1_3`). Odd `<n>` = Level I, even `<n>` = Level II (flipped side). These are two-sided cards.
-- `card_equip_<hero>_<n>` — Equipment card (e.g. `card_equip_1_7`)
-- `card_event_<hero>_<n>_<i>` — Event card (e.g. `card_event_1_15_2`) — trailing `<i>` distinguishes duplicate copies of the same card
-- `marker_<color>_<n>` — Player marker (e.g. `marker_ff0000_1`)
-- `monster_legend_<n>_<level>` — Legend monster tile. 6 legends numbered 1–6 (1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr). `_1` = yellow (Level I), `_2` = red (Level II) — same two-sided pattern as ability cards. `_1` starts in `supply_monster`, `_2` starts in `limbo`. When a red legend card is drawn, swap `_1` out and place `_2` on the map. Stats in `monster_material.csv`. Legends destroy 3 town pieces on entering Grimheim and can swap places with blocking monsters during movement.
-- `crystal_green_<n>` — Mana crystal (individual tokens on cards). Also used as stun marker on monsters (Suppressive Fire): a green crystal on a monster means it skips its next movement and the crystal is removed.
-- `crystal_yellow_<n>` — Gold/XP crystal (individual tokens on cards)
-- `crystal_red_<n>` — Damage crystal (individual tokens on cards and things)
-- `rune_stone` — Time track marker (singleton)
+- `hero_<hero>` - Hero miniature (e.g. `hero_1` = Bjorn)
+- `house_<n>` - Town piece (e.g. `house_0` = well)
+- `monster_<type>_<n>` - Monster tile (e.g. `monster_goblin_5`, `monster_troll_2`)
+- `card_monster_<n>` - Monster card (e.g. `card_monster_12`); type includes `ctype_yellow` or `ctype_red`
+- `card_hero_<hero>_<n>` - Hero card (e.g. `card_hero_1_1` = Level I starting, `card_hero_1_2` = Level II upgraded). Odd `<n>` = front (Level I), even `<n>` = back (Level II). Two-sided card.
+- `card_ability_<hero>_<n>` - Ability card (e.g. `card_ability_1_3`). Odd `<n>` = Level I, even `<n>` = Level II (flipped side). These are two-sided cards.
+- `card_equip_<hero>_<n>` - Equipment card (e.g. `card_equip_1_7`)
+- `card_event_<hero>_<n>_<i>` - Event card (e.g. `card_event_1_15_2`) - trailing `<i>` distinguishes duplicate copies of the same card
+- `marker_<color>_<n>` - Player marker (e.g. `marker_ff0000_1`)
+- `monster_legend_<n>_<level>` - Legend monster tile. 6 legends numbered 1-6 (1=Queen, 2=Seer, 3=Grendel, 4=Surt, 5=Hrungbald, 6=Nidhuggr). `_1` = yellow (Level I), `_2` = red (Level II) - same two-sided pattern as ability cards. `_1` starts in `supply_monster`, `_2` starts in `limbo`. When a red legend card is drawn, swap `_1` out and place `_2` on the map. Stats in `monster_material.csv`. Legends destroy 3 town pieces on entering Grimheim and can swap places with blocking monsters during movement.
+- `crystal_green_<n>` - Mana crystal (individual tokens on cards). Also used as stun marker on monsters (Suppressive Fire): a green crystal on a monster means it skips its next movement and the crystal is removed.
+- `crystal_yellow_<n>` - Gold/XP crystal (individual tokens on cards)
+- `crystal_red_<n>` - Damage crystal (individual tokens on cards and things)
+- `rune_stone` - Time track marker (singleton)
 
 Shortening of words:
 - Equipment -> equip
@@ -96,25 +96,25 @@ Shortening of words:
 
 **Location naming:**
 
-- `hex_<x>_<y>` — Board hex area (e.g. `hex_9_9` = Grimheim)
-- `supply_monster` — Monster supply
-- `hand_<color>` — Player hand (e.g. `hand_ff0000`)
-- `tableau_<color>` — Player area (e.g. `tableau_ff0000`)
-- `pboard_<color>` — Player board
-- `cards_<color>` — Active cards area
-- `deck_ability_<color>` — Ability pile
-- `deck_equip_<color>` — Equipment pile
-- `deck_event_<color>` — Event deck
-- `discard_<color>` — Discard pile 
-- `deck_monster_yellow` / `deck_monster_red` — Monster card decks
-- `timetrack_<n>` — Time track step slot; actual step tracked as `token_state` on `rune_stone`
+- `hex_<x>_<y>` - Board hex area (e.g. `hex_9_9` = Grimheim)
+- `supply_monster` - Monster supply
+- `hand_<color>` - Player hand (e.g. `hand_ff0000`)
+- `tableau_<color>` - Player area (e.g. `tableau_ff0000`)
+- `pboard_<color>` - Player board
+- `cards_<color>` - Active cards area
+- `deck_ability_<color>` - Ability pile
+- `deck_equip_<color>` - Equipment pile
+- `deck_event_<color>` - Event deck
+- `discard_<color>` - Discard pile 
+- `deck_monster_yellow` / `deck_monster_red` - Monster card decks
+- `timetrack_<n>` - Time track step slot; actual step tracked as `token_state` on `rune_stone`
 
 
 ### Dice
 
 The "state" of the die token is the dice value (1-6). These side values will map to sides of real die.
-- `die_attack_<n>` — Attack die (1..20).
-- `die_monster_<n>` — Monster die
+- `die_attack_<n>` - Attack die (1..20).
+- `die_monster_<n>` - Monster die
 
 
 ---
@@ -125,9 +125,9 @@ The "state" of the die token is the dice value (1-6). These side values will map
 
 Domain model objects wrapping game tokens. Obtain instances via factory methods on `Game`: `getHero($owner)`, `getHeroById($heroId)`, `getMonster($monsterId)`, `getCharacter($id)`.
 
-- **Character** — base class for anything that occupies a hex (heroes, monsters). Provides position, crystals, armor, cover, and damage-resolution helpers shared between heroes and monsters.
-- **Hero** — extends Character. Adds owner (player color), tableau/hand access, attribute trackers (strength/range/move/health/hand), action markers, XP gain, and knock-out handling (move to Grimheim + destroy 2 houses).
-- **Monster** — extends Character. Adds faction, health, XP reward, and kill handling (remove from map, award XP to attacker).
+- **Character** - base class for anything that occupies a hex (heroes, monsters). Provides position, crystals, armor, cover, and damage-resolution helpers shared between heroes and monsters.
+- **Hero** - extends Character. Adds owner (player color), tableau/hand access, attribute trackers (strength/range/move/health/hand), action markers, XP gain, and knock-out handling (move to Grimheim + destroy 2 houses).
+- **Monster** - extends Character. Adds faction, health, XP reward, and kill handling (remove from map, award XP to attacker).
 
 Faction effects are handled inside `Character` damage resolution: 
 Dead faction's rune die results count as hits; Draugr have armor=1.
@@ -136,9 +136,9 @@ Dead faction's rune die results count as hits; Draugr have armor=1.
 
 Wrapper around a card token, instantiated on the fly during trigger dispatch. `Op_trigger::resolve()` calls `Game::instantiateCard($card, $op)`, which picks a bespoke subclass when available and falls back to `CardGeneric` otherwise.
 
-- **Card** — base class. Provides id/owner/state accessors, crystal counters (damage/mana/gold), trigger routing (walks the trigger chain most-specific → least-specific and calls the first matching `on<TriggerName>` hook), playability checks, and `useCard` (notify + queue the `r` expression + discard if event).
-- **CardGeneric** (`modules/php/Model/CardGeneric.php`) — default class for cards driven entirely by Material data. Implements the standard voluntary trigger flow: matches the Material `on` field, validates the `r` expression has targets, and queues a deduplicated `useCard` op that offers all matching cards in one prompt.
-- **Bespoke card classes** (`modules/php/Cards/Card<Type>_<Name>.php`, etc.) — per-card subclasses for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name is derived from the Material `name` field, e.g. `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Override `on<TriggerName>()` hooks; can still delegate to the CSV `r` field via `queue($r)`.
+- **Card** - base class. Provides id/owner/state accessors, crystal counters (damage/mana/gold), trigger routing (walks the trigger chain most-specific → least-specific and calls the first matching `on<TriggerName>` hook), playability checks, and `useCard` (notify + queue the `r` expression + discard if event).
+- **CardGeneric** (`modules/php/Model/CardGeneric.php`) - default class for cards driven entirely by Material data. Implements the standard voluntary trigger flow: matches the Material `on` field, validates the `r` expression has targets, and queues a deduplicated `useCard` op that offers all matching cards in one prompt.
+- **Bespoke card classes** (`modules/php/Cards/Card<Type>_<Name>.php`, etc.) - per-card subclasses for cards needing custom behavior (passive effects, complex logic, multiple triggers). Class name is derived from the Material `name` field, e.g. `"Home Sewn Cape"` → `CardEquip_HomeSewnCape`. Override `on<TriggerName>()` hooks; can still delegate to the CSV `r` field via `queue($r)`.
 
 ---
 
@@ -150,29 +150,39 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 
 ### Common Machine Operations 
 
-- `nop` — No-op placeholder
-- `savepoint` — Marks an undo savepoint
-- `or` — Player picks one branch from multiple choices. Notation: `a/b`
-- `order` — Player picks execution order for a set of ops. Notation: `a+b`
-- `seq` — Runs sub-operations in sequence. Notation: `a,b` or `a;b` (; is lower op priority)
-- `paygain` — Runs sub-operations in sequence. Notation: `cost:effect`
+- `nop` - No-op placeholder
+- `savepoint` - Marks an undo savepoint
+- `or` - Player picks one branch from multiple choices. Notation: `a/b`
+- `order` - Player picks execution order for a set of ops. Notation: `a+b`
+- `seq` - Runs sub-operations in sequence. Notation: `a,b` or `a;b` (; is lower op priority)
+- `paygain` - Runs sub-operations in sequence. Notation: `cost:effect`
 - `counter` - Modify next operation on stack with count from resolving its expression
 
 
 ### Main Game Operations
 
-- `turn` (player) — Main player turn: pick 2 actions + free actions 
-- `turnconf` (player) — Confirm end of turn (undo checkpoint) 
-- `turnEnd` (auto) — Reset turn state, queue next player or monsterTurn 
-- `turnMonster` (auto) — Advance time track; check win/loss; queue next round 
-- `actionMove` (main) — Hero moves up to 3 hexes 
-- `actionAttack` (main) — Hero attacks monster within range 
-- `actionPrepare` (main) — Draw 1 event card 
-- `actionFocus` (main) — Add 1 mana to a card 
-- `actionMend` (main) — Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) 
-- `actionPractice` (main) — Gain 1 XP (yellow crystal) 
-- `useCard` (free) — Unified card activation: offers all playable cards (abilities, equipment, events) from tableau and hand matching the current trigger.
-- `shareGold` (free) — Give gold to another hero — *notimpl*
+- `turn` (player) - Main player turn: pick 2 actions + free actions 
+- `turnconf` (player) - Confirm end of turn (undo checkpoint) 
+- `turnEnd` (auto) - Reset turn state, queue next player or monsterTurn 
+- `turnMonster` (auto) - Advance time track; check win/loss; queue next round 
+- `actionMove` (main) - Hero moves up to 3 hexes 
+- `actionAttack` (main) - Hero attacks monster within range 
+- `actionPrepare` (main) - Draw 1 event card 
+- `actionFocus` (main) - Add 1 mana to a card 
+- `actionMend` (main) - Remove 2 damage from hero (5 in Grimheim, may target equipment cards too) 
+- `actionPractice` (main) - Gain 1 XP (yellow crystal) 
+- `useCard` (free) - Unified card activation: offers all playable cards (abilities, equipment, events) from tableau and hand matching the current trigger.
+- `shareGold` (free) - Give gold to another hero - *notimpl*
+
+
+### Step-by-step Move (`Op_moveStep`)
+
+`actionMove` normally delegates to `Op_move` (one click walks the shortest path to the chosen hex, up to N areas). When the acting hero has an active **per-step incentive** it delegates to `Op_moveStep` instead - a budgeted loop that lets the player route deliberately: each click is one hop (or a fast multi-hop to a far hex), and the hero may step back and forth to re-enter areas. `Op_actionMove::hasStepIncentive` enables it when:
+
+- the active quest (top of `deck_equip_<owner>`) has `quest_on=TStep`, or is a hardcoded custom step-quest (`STEP_QUEST_CARDS`, e.g. Shield's "enter Ogre Valley" branch), or
+- a tableau card reacts per step - a bespoke `onStep` hook (Treetreader II) or declarative `on=TStep`.
+
+Wrecking Ball is excluded (it owns its own move loop via `Op_c_wrecking`). Each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, on "End Move", budget exhaustion, or entering Grimheim. The loop re-queues itself with the reduced budget until then. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum. `Trigger::Step` is the root of the movement chain (`Move`'s parent), so a card `on=TStep` fires on every step including the last; `on=TMove` fires only on the last.
 
 
 ### Monster Die Variant
@@ -181,11 +191,11 @@ Optional difficulty toggle (game option `102` → `var_monster_die`). When on, `
 
 Effect dispatch splits two ways:
 
-- **Passive** (`attack`, `charge`) — handled inline by existing ops that already check `getMonsterDieSide()`. `Op_monsterAttack::getMonsterStrength` adds +1 strength when the side is `attack`; `Op_monsterMoveAll` grants rank-1 monsters one extra step when the side is `charge` (it does **not** stack with the skull-turn charge).
-- **Active** (`maneuver_*`, `push`, `ambush`) — `Op_rollMonsterDie` queues a one-shot handler that runs before `monsterMoveAll`:
-  - `Op_monsterDiePush` — every hero adjacent to a monster moves one hex along the per-hex `dir` tag via `HexMap::getMonsterNextHex`. Stay-put if the destination is occupied, off-map, or impassable for the hero (mountain/lake without a named location). Pushes are silent moves — they do **not** fire end-of-movement triggers.
-  - `Op_monsterDieAmbush` — queues one `spawn(goblin)` per hero not currently in Grimheim. `Op_spawn` lets the player pick the adjacent free hex (RULES.md "Ambush": heroes place the spawned monster); empty supply or fully-blocked rings are silent skips.
-  - `Op_monsterDieManeuver(cw|ccw)` — iterates heroes in player order; for each hero, all currently-adjacent monsters rotate one ring position simultaneously using `HexMap::rotateAroundCenter`. Within a hero's group, monsters do not block each other (lift-then-place via `HexMap::moveCharacterOnMap`); only another hero, off-map, or Grimheim affects the result. Rotating into Grimheim triggers the standard monster-enters-Grimheim destruction path. A monster adjacent to multiple heroes gets a rotation pass per anchor.
+- **Passive** (`attack`, `charge`) - handled inline by existing ops that already check `getMonsterDieSide()`. `Op_monsterAttack::getMonsterStrength` adds +1 strength when the side is `attack`; `Op_monsterMoveAll` grants rank-1 monsters one extra step when the side is `charge` (it does **not** stack with the skull-turn charge).
+- **Active** (`maneuver_*`, `push`, `ambush`) - `Op_rollMonsterDie` queues a one-shot handler that runs before `monsterMoveAll`:
+  - `Op_monsterDiePush` - every hero adjacent to a monster moves one hex along the per-hex `dir` tag via `HexMap::getMonsterNextHex`. Stay-put if the destination is occupied, off-map, or impassable for the hero (mountain/lake without a named location). Pushes are silent moves - they do **not** fire end-of-movement triggers.
+  - `Op_monsterDieAmbush` - queues one `spawn(goblin)` per hero not currently in Grimheim. `Op_spawn` lets the player pick the adjacent free hex (RULES.md "Ambush": heroes place the spawned monster); empty supply or fully-blocked rings are silent skips.
+  - `Op_monsterDieManeuver(cw|ccw)` - iterates heroes in player order; for each hero, all currently-adjacent monsters rotate one ring position simultaneously using `HexMap::rotateAroundCenter`. Within a hero's group, monsters do not block each other (lift-then-place via `HexMap::moveCharacterOnMap`); only another hero, off-map, or Grimheim affects the result. Rotating into Grimheim triggers the standard monster-enters-Grimheim destruction path. A monster adjacent to multiple heroes gets a rotation pass per anchor.
 
 
 ### Card Effect Operations 
@@ -200,12 +210,12 @@ See other operations in misc/op_material.csv
 from a filtered set. 
 
 Common target filters (passed as "parameter" of operation):
-- `self` — the acting hero
-- `adj` — adjacent character (monster or hero depending on action content, including self)
-- `range` — monster within hero's attack range
-- `range2`, `range3` — monster within fixed range N (not hero's attack range)
-- `any` — any card on hero's tableau
-- `equip` — equipment card on hero's tableau
+- `self` - the acting hero
+- `adj` - adjacent character (monster or hero depending on action content, including self)
+- `range` - monster within hero's attack range
+- `range2`, `range3` - monster within fixed range N (not hero's attack range)
+- `any` - any card on hero's tableau
+- `equip` - equipment card on hero's tableau
 
 **Filter conditions** (if uses non ident characters quotes needed):
 This is additional expression that is evaluated on the target using the MathExpression
@@ -218,15 +228,15 @@ engine (`Base::evaluateExpression`). Terms are resolved via `Game::evaluateTerm`
 Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quotes needed).
 
 **Not separate operations** (handled as modifiers/hooks on existing operations):
-- "Prevent monster from moving" — green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
+- "Prevent monster from moving" - green crystal placed on monster by `c_supfire`, checked by `monsterMoveAll` (crystal stays until next trigger)
 
 ### Cost and Predicate Operations
 
-**Predicates** are stateless guard ops — void the chain when their condition fails:
+**Predicates** are stateless guard ops - void the chain when their condition fails:
 
-- `on(EventXxx)` — runtime event gate (matches the trigger that fired)
-- `in(Location)` — hero is on a hex matching `loc` or terrain (e.g. `Grimheim`, `forest`)
-- `adj(Location)` — hero is adjacent to such a hex
+- `on(EventXxx)` - runtime event gate (matches the trigger that fired)
+- `in(Location)` - hero is on a hex matching `loc` or terrain (e.g. `Grimheim`, `forest`)
+- `adj(Location)` - hero is adjacent to such a hex
 
 **Costs** start with `spend` (e.g. `spendUse`, `spendMana`, `spendXp`). They also void on failure (e.g. `spendUse` voids if the card was already used this turn), so they double as guards.
 
@@ -234,9 +244,9 @@ Examples: `'rank<=2'`, `'hp<=2'`, `'rank3+legend'`, `trollkin` (bareword, no quo
 
 Examples:
 
-- `spendUse:spendMana:gainAtt_move` — once per turn, pay 1 mana to gain +1 move
-- `on(TActionAttack):2spendMana:2addDamage` — during attack, pay 2 mana for +2 damage
-- `in(Grimheim):2spendXp:upgrade` — in Grimheim, pay 2 XP to upgrade
+- `spendUse:spendMana:gainAtt_move` - once per turn, pay 1 mana to gain +1 move
+- `on(TActionAttack):2spendMana:2addDamage` - during attack, pay 2 mana for +2 damage
+- `in(Grimheim):2spendXp:upgrade` - in Grimheim, pay 2 XP to upgrade
 
 
 ### Trigger System
@@ -247,49 +257,49 @@ If `on` is empty, the card is a free-action play (no "once per turn" cap unless 
 
 **Trigger chain.** Triggers form a hierarchy: `ActionAttack` is a more specific `Roll`; `ActionMove` is a more specific `Move`. Each `Trigger` case has an optional `parent()`, and `chain()` returns `[self, parent, …]`. The chain is matched at two points:
 
-- `CardGeneric::canTriggerEffectOn` — matches the card's `on` field against any trigger in the dispatched chain (so `on=TRoll` fires during a dispatched `ActionAttack`).
-- `Op_on` — the `on(EventXxx)` predicate in `r` expressions matches the same way against the `event` data field seeded by `Card::useCard()`.
+- `CardGeneric::canTriggerEffectOn` - matches the card's `on` field against any trigger in the dispatched chain (so `on=TRoll` fires during a dispatched `ActionAttack`).
+- `Op_on` - the `on(EventXxx)` predicate in `r` expressions matches the same way against the `event` data field seeded by `Card::useCard()`.
 
 For bespoke cards with per-event hooks, `Card::onTrigger` walks most-specific → least-specific and calls the first matching `on<TriggerName>()`.
 
-**Dispatch.** `CardGeneric::onTrigger` checks `canBePlayed`, then `promptUseCard` queues (or extends) a single dedup'd `useCard` op per trigger. All cards matching anywhere in the chain share one prompt — e.g. during an attack roll, `on=TRoll` and `on=TActionAttack` cards appear together.
+**Dispatch.** `CardGeneric::onTrigger` checks `canBePlayed`, then `promptUseCard` queues (or extends) a single dedup'd `useCard` op per trigger. All cards matching anywhere in the chain share one prompt - e.g. during an attack roll, `on=TRoll` and `on=TActionAttack` cards appear together.
 
 **Where triggers are queued (operation → Trigger → description):**
 
 ```
 Op_turnStart
-  → Trigger::TurnStart        — at start of player turn (passive start-of-turn effects)
+  → Trigger::TurnStart - at start of player turn (passive start-of-turn effects)
 Op_roll
-  → Trigger::ActionAttack     — rolls initiated by Op_actionAttack (chains through Roll)
-  → Trigger::Roll             — all other hero rolls
+  → Trigger::ActionAttack - rolls initiated by Op_actionAttack (chains through Roll)
+  → Trigger::Roll - all other hero rolls
 Op_move
-  → Trigger::ActionMove       — moves queued by Op_actionMove (chains through Move)
-  → Trigger::Move             — all other movements (card-driven, forced moves, etc.)
+  → Trigger::ActionMove - moves queued by Op_actionMove (chains through Move)
+  → Trigger::Move - all other movements (card-driven, forced moves, etc.)
 Op_resolveHits
-  → Trigger::ResolveHits      — before damage is applied to a hero (for damage prevention)
+  → Trigger::ResolveHits - before damage is applied to a hero (for damage prevention)
 Op_dealDamage
-  → Trigger::MonsterKilled    — when a monster is killed
+  → Trigger::MonsterKilled - when a monster is killed
 Op_turnEnd
-  → Trigger::TurnEnd          — at end of player turn
+  → Trigger::TurnEnd - at end of player turn
 Op_turnMonster
-  → Trigger::MonsterMove      — before the Monsters Move step
+  → Trigger::MonsterMove - before the Monsters Move step
 Op_gainEquip
-  → Trigger::CardEnter        — when a card enters play (direct onTrigger call, not via Op_trigger)
+  → Trigger::CardEnter - when a card enters play (direct onTrigger call, not via Op_trigger)
 ```
 
 **Attack action trigger sequence (example):**
 
 ```
 actionAttack → player picks target → roll dice
-  → Trigger::ActionAttack  — single dispatch; chains through Roll.
+  → Trigger::ActionAttack - single dispatch; chains through Roll.
                              One useCard prompt offers every card whose `on`
-                             is anywhere in {ActionAttack, Roll} — e.g. Bjorn
+                             is anywhere in {ActionAttack, Roll} - e.g. Bjorn
                              Hero I (on=Roll) and Trollbane (on=ActionAttack)
                              in one list.
-  → resolveHits          — converts dice to damage
-    → Trigger::ResolveHits — damage prevention cards offered
-  → dealDamage           — applies damage to monster
-    → Trigger::MonsterKilled — if monster died, each matching card reacts
+  → resolveHits - converts dice to damage
+    → Trigger::ResolveHits - damage prevention cards offered
+  → dealDamage - applies damage to monster
+    → Trigger::MonsterKilled - if monster died, each matching card reacts
 ```
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
@@ -298,8 +308,8 @@ Triggered card effects (like `2addDamage` from Master Shot) are queued between t
 
 Quests are the only path to gain equipment past the starter card. Each row in [card_equip_material.csv](../card_equip_material.csv) carries two extra fields:
 
-- **`quest_on`** — trigger that fires the quest. Empty = player-initiated; a `Trigger` value = trigger-driven; `custom` = bespoke class.
-- **`quest_r`** — Op DSL chain (same parser as the active `r` field) that runs on match. Always ends in `gainEquip`.
+- **`quest_on`** - trigger that fires the quest. Empty = player-initiated; a `Trigger` value = trigger-driven; `custom` = bespoke class.
+- **`quest_r`** - Op DSL chain (same parser as the active `r` field) that runs on match. Always ends in `gainEquip`.
 
 **Three flavors:**
 
@@ -307,7 +317,7 @@ Quests are the only path to gain equipment past the starter card. Each row in [c
 - *Trigger-driven* (`quest_on=TStep|TMonsterKilled|TRoll|…`). `Op_trigger` walks `deck_equip_{owner}`'s top card and calls `triggerQuest($event)`. Default `Card::triggerQuest` queues `quest_r` when `quest_on` matches the trigger chain. Counter quests use **`gainTracker`** (red crystals on the deck-top card) plus `check('countTracker>=N')` to gate the claim. Examples: Belt of Youth (8 forest steps), Trollbane (5 trollkin XP via `counter(countMonsterXp):gainTracker`).
 - *Replacement-reward* (sub-pattern of trigger-driven, `?` makes the chain optional). Player gets a yes/no prompt at trigger time; on accept, the chain runs (typically `blockXp:gainEquip` to forfeit the kill reward in exchange for the card). Examples: Quiver, Helmet, Leather Purse.
 
-**Custom (`quest_on=custom`).** Bespoke `CardEquip_<Name>` class overrides `triggerQuest($event)` and dispatches by hand — used when a single card needs multiple triggers or non-DSL logic (e.g. Shield: enter Ogre Valley OR skip a troll's XP, two different triggers).
+**Custom (`quest_on=custom`).** Bespoke `CardEquip_<Name>` class overrides `triggerQuest($event)` and dispatches by hand - used when a single card needs multiple triggers or non-DSL logic (e.g. Shield: enter Ogre Valley OR skip a troll's XP, two different triggers).
 
 **Sweep + reveal.** `Op_gainEquip` moves the card from `deck_equip_{owner}` to `tableau_{owner}`, fires `Trigger::CardEnter`, sweeps any `gainTracker` red crystals back to supply, and reveals the new deck-top.
 
@@ -320,8 +330,8 @@ Hero attributes (strength, range, move, health) are stored as tracker tokens in 
 **Token IDs:** `tracker_strength_{color}`, `tracker_range_{color}`, `tracker_move_{color}`, `tracker_health_{color}`
 
 **How it works:**
-- `Hero::recalcTrackers()` — recomputes all trackers from base card values (tableau cards). Called at setup and end of turn.
-- `Hero::incTrackerValue($type, $delta)` — bumps a tracker mid-turn (e.g. Flexibility: `$hero->incTrackerValue("move", 1)`)
+- `Hero::recalcTrackers()` - recomputes all trackers from base card values (tableau cards). Called at setup and end of turn.
+- `Hero::incTrackerValue($type, $delta)` - bumps a tracker mid-turn (e.g. Flexibility: `$hero->incTrackerValue("move", 1)`)
 - Public getters (`getAttackStrength()`, `getAttackRange()`, `getMaxHealth()`, `getNumberOfMoves()`) read from trackers
 - Base computation methods (`calcBaseStrength()`, `calcBaseRange()`, `calcBaseMove()`, `calcBaseHealth()`) derive values from tableau cards
 
@@ -335,20 +345,20 @@ The client renders tokens by placing them inside DOM elements whose `id` matches
 
 ### Hex Board
 
-- `map_area` — Container div for the entire hex grid
-- `hex_{q}_{r}` — Individual hex cell (e.g. `hex_9_9` = Grimheim)
+- `map_area` - Container div for the entire hex grid
+- `hex_{q}_{r}` - Individual hex cell (e.g. `hex_9_9` = Grimheim)
 
 Hexes use pointy-top axial coordinates, center at (9,9), radius 8. Tokens placed at a hex location become children of that hex's div. Hexes get class `.active_slot` when they are valid move targets. First row is 1.
 
 ### Player Areas
 
-- `player_areas` — Wrapper for all player zones
-- `tableau_{playerColor}` — Individual player zone (tableau)
-- `hand_{color}` — Player's private hand of event cards
-- `discard_{color}` — Player's discard pile
-- `deck_event_{color}` — Player's event draw pile on tableau
-- `deck_ability_{color}` — Player's ability pile on tableau
-- `deck_equip_{color}` — Player's equipment pile on tableau
+- `player_areas` - Wrapper for all player zones
+- `tableau_{playerColor}` - Individual player zone (tableau)
+- `hand_{color}` - Player's private hand of event cards
+- `discard_{color}` - Player's discard pile
+- `deck_event_{color}` - Player's event draw pile on tableau
+- `deck_ability_{color}` - Player's ability pile on tableau
+- `deck_equip_{color}` - Player's equipment pile on tableau
 
 Player board tokens (crystals, cards, markers) should live in `tableau_{color}`. Player-colored tokens use `tableau_{color}` as their location on the server side; the client must map this to the correct DOM element.
 
@@ -357,8 +367,8 @@ Player board tokens (crystals, cards, markers) should live in `tableau_{color}`.
 
 The time track is not yet wired to a DOM element. Planned:
 
-- `timetrack_1` — Container for the time track strip
-- `timetrack_1_{n}` — Individual step slot (1–10 for short track) - mapped on client side from state of `rune_stone`
+- `timetrack_1` - Container for the time track strip
+- `timetrack_1_{n}` - Individual step slot (1-10 for short track) - mapped on client side from state of `rune_stone`
 
 The `rune_stone` token lives at location `timetrack_1` on the server. The client needs a matching div per step so the token can be parented there.
 
@@ -366,29 +376,29 @@ The `rune_stone` token lives at location `timetrack_1` on the server. The client
 
 When a player picks a main action, a marker token moves to `aslot_{color}_{actionType}`. These slots need matching DOM elements on the player board.
 
-- `aslot_{color}_{actionType}` — Slot showing which action the player chose (e.g. `aslot_ff0000_actionPractice`)
+- `aslot_{color}_{actionType}` - Slot showing which action the player chose (e.g. `aslot_ff0000_actionPractice`)
 
 ### Supply / Off-Board Locations
 
 These locations hold tokens that are not on the map. They should have a hidden or off-screen DOM element so token parenting doesn't break.
 
 
-- `supply_die_attack` — Attack and damage dice pool
-- `supply_die_monster` — Monster die pool
-- `supply_crystal_green` / `supply_crystal_red` / `supply_crystal_yellow` — Crystal supply pools
-- `supply_monster` — Undeployed monster tiles
+- `supply_die_attack` - Attack and damage dice pool
+- `supply_die_monster` - Monster die pool
+- `supply_crystal_green` / `supply_crystal_red` / `supply_crystal_yellow` - Crystal supply pools
+- `supply_monster` - Undeployed monster tiles
 
-- `deck_monster_yellow` / `deck_monster_red` — Monster card draw piles
-- `display_monsterturn` — Drawn monster cards during reinforcement (cleared at start of next monster turn); state 0 = placed, state 1 = skipped (grayed out)
+- `deck_monster_yellow` / `deck_monster_red` - Monster card draw piles
+- `display_monsterturn` - Drawn monster cards during reinforcement (cleared at start of next monster turn); state 0 = placed, state 1 = skipped (grayed out)
 
-- `oversurface` — Transparent overlay for phantom token animations (pointer-events: none)
-- `limbo` — Off-screen sink for tokens not yet placed
+- `oversurface` - Transparent overlay for phantom token animations (pointer-events: none)
+- `limbo` - Off-screen sink for tokens not yet placed
 
 ---
 
 ## Game Log Style
 
-Log messages use the hero name (e.g. `${token_name}`) instead of `${player_name}`. This matches the cooperative/thematic feel — the game narrates what characters do, not what players do.
+Log messages use the hero name (e.g. `${token_name}`) instead of `${player_name}`. This matches the cooperative/thematic feel - the game narrates what characters do, not what players do.
 
 Pattern: **"Character" does "stuff"**
 - `${token_name} moves to ${place_name}`
@@ -405,7 +415,7 @@ Hero names are colored via `tc` field in material (e.g. Bjorn = green, Alva = bl
 
 1. **Cooperative game**: All players win or lose together. No hidden scoring. The `is_coop: 1` flag is already set in gameinfos.
 2. **Player order**: Fixed order, chosen at start. All players act each round, then monsters act.
-3. **Hex board representation**: Store adjacency as a PHP array (or JSON data file). Do not try to compute hex math — the board is irregular with named locations.
+3. **Hex board representation**: Store adjacency as a PHP array (or JSON data file). Do not try to compute hex math - the board is irregular with named locations.
 4. **Monster movement**: Pre-compute paths from each board edge to Grimheim (following arrows + roads). Store as lookup table.
 5. **Crystals as counters**: Gold/experience and mana are tracked as individual crystal tokens.
 6. **Damage tracking**: Damage on heroes/monsters tracked using red crystals (`crystal_red`), same as the physical game's "damage dice" which are just counters. No separate damage tokens needed.
@@ -425,7 +435,7 @@ Card `effect` text in CSVs is the canonical, designer-facing description of what
 #### Markup syntax
 
 - Wrap each choice in a `<li>...</li>` tag inside the `effect` field, in OR-branch order. The surrounding `<ul>...</ul>` is recommended for client rendering but not required by the generator.
-- `<li>` tags are flat — no nesting, no attributes.
+- `<li>` tags are flat - no nesting, no attributes.
 - `<li>` content may include existing inline icon codes (`[MANA]`, `[DAMAGE]`, etc.) and other inline HTML.
 - Text outside the `<li>` items (preamble, trailing passive sentences, connectives) is allowed and is treated as non-choice text.
 
@@ -438,35 +448,35 @@ Two translatable artifacts per OR-card:
 - **The full `effect` string**, including the `<ul><li>` tags. Translators translate text and keep tags intact (same convention as keeping `[MANA]` icon codes today). Used by the client to render the card description.
 - **Each `<li>` content** as a separate translatable string. Used by `Op_or` for choice button labels.
 
-Cards without a `<ul>` block (single-effect cards, non-OR rules) translate the `effect` string as one unit — no per-choice strings emitted.
+Cards without a `<ul>` block (single-effect cards, non-OR rules) translate the `effect` string as one unit - no per-choice strings emitted.
 
-#### Semantics — what goes where
+#### Semantics - what goes where
 
 - **Inside `<li>`**: short, self-contained description of one choice. Should make sense as a button label. Typically cost + outcome (e.g. `2[MANA]: Move 1 area`).
 - **Outside `<ul>`**: passive text (effects that always apply, not tied to a choice), shared preamble. Translated as part of the full `effect` string; never used by the server.
 - Inline-OR prose ("Move into a forest area, or move out of a forest area.") must be rewritten as a list to be in scope. We control the text.
 - **Flavor text** stays in the `flavour` column. Never inside `effect`.
 
-Trailing periods inside `<li>` are not needed in the source — the list visually delimits items. Authoring convention: omit trailing punctuation inside `<li>`. Passive sentences outside `<ul>` keep their punctuation.
+Trailing periods inside `<li>` are not needed in the source - the list visually delimits items. Authoring convention: omit trailing punctuation inside `<li>`. Passive sentences outside `<ul>` keep their punctuation.
 
 #### Worked examples
 
-Flexibility I — three choices, no non-choice text:
+Flexibility I - three choices, no non-choice text:
 ```
 <ul><li>1[MANA]: Move +1</li><li>2[MANA]: Attack range +1 this turn</li><li>2[MANA]: Add 2 damage to your attack action</li></ul>
 ```
 
-Treetreader I — rewritten as list:
+Treetreader I - rewritten as list:
 ```
 <ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>
 ```
 
-Treetreader II — list plus a trailing passive sentence:
+Treetreader II - list plus a trailing passive sentence:
 ```
 <ul><li>Move into an adjacent forest area</li><li>Move out of a forest area</li></ul>Each time you move into a forest area, heal 1 damage.
 ```
 
-Home Sewn Cape — passive preamble, then list:
+Home Sewn Cape - passive preamble, then list:
 ```
 Add 1 [MANA] here every time you roll a [RUNE].<ul><li>2[MANA]: Move 1 area</li><li>3[MANA]: Prevent 2 damage</li></ul>
 ```
@@ -474,8 +484,8 @@ Add 1 [MANA] here every time you roll a [RUNE].<ul><li>2[MANA]: Move 1 area</li>
 #### Generated artifacts
 
 For an OR-card with a `<ul>` block, `genmat` emits in the card's Material entry:
-- `"effect" => clienttranslate("…full string with tags…"),` — full text preserved verbatim, used by the client to render the card description as a list.
-- `"effect_1" => clienttranslate("1[MANA]: Move +1"),` — first choice text.
+- `"effect" => clienttranslate("…full string with tags…"),` - full text preserved verbatim, used by the client to render the card description as a list.
+- `"effect_1" => clienttranslate("1[MANA]: Move +1"),` - first choice text.
 - `"effect_2" => clienttranslate("2[MANA]: Attack range +1 this turn"),`
 - … one per `<li>`, indexed from 1.
 
@@ -489,58 +499,58 @@ For a card without a `<ul>` block:
 
 If a translatable field contains `<li`, `genmat` must find at least one closed `<li>...</li>` pair, otherwise it fails the build with a clear error.
 
-Genmat does NOT validate that the `<li>` count matches the OR branch count in the `r` expression — that's a runtime concern (`Op_or` falls back to auto-name if `effect_$i` is missing).
+Genmat does NOT validate that the `<li>` count matches the OR branch count in the `r` expression - that's a runtime concern (`Op_or` falls back to auto-name if `effect_$i` is missing).
 
 ## Overview of card effects
 
 Card effects are categorized by card type (Ability, Equipment, Event) and how they interact with the action economy.
 
-**1. Activated / Free Action Effects (Abilities & Equipment)** — used as free actions any time during your turn (outside a main action, unless the card says otherwise).
+**1. Activated / Free Action Effects (Abilities & Equipment)** - used as free actions any time during your turn (outside a main action, unless the card says otherwise).
 
 * *Once-per-turn limit*: enforced explicitly via `spendUse` in the card's `r`, not implicit. Cards without `spendUse` (damage-prevention equipment, bespoke `r=custom` classes, "any number of times" cards) are unlimited.
 * *Mana-activated*: pay mana to trigger, e.g. `spendMana:addDamage`.
-* *Action modifiers*: used inside another action — e.g. add damage after the attack roll.
+* *Action modifiers*: used inside another action - e.g. add damage after the attack roll.
 
-**2. Triggered / Reactive Effects** — fire automatically or play in response to a game event, especially during the Monster Turn.
+**2. Triggered / Reactive Effects** - fire automatically or play in response to a game event, especially during the Monster Turn.
 
 * *Damage prevention*: triggers on `TResolveHits`. These cards typically omit `spendUse`, so they fire each time you take damage.
-* *Reaction events*: event cards with an `on=` trigger (e.g. `TMonsterMove`) — playable from hand during that window only.
+* *Reaction events*: event cards with an `on=` trigger (e.g. `TMonsterMove`) - playable from hand during that window only.
 
-**3. Static / Persistent Effects** — always-on modifications to base stats or rules.
+**3. Static / Persistent Effects** - always-on modifications to base stats or rules.
 
 * *Rule changes*: e.g. Embla moves 4 instead of 3; permanent strength bonuses from equipment on the tableau. Computed by `Hero::calcBaseStrength/Range/Move/Health` and stored in attribute trackers.
 * *Mana regeneration*: end-of-turn refill, applied during `Op_turnEnd`.
 
-**4. Instant / One-Time Effects (Events)** — drawn into hand, played from hand, discarded after resolving.
+**4. Instant / One-Time Effects (Events)** - drawn into hand, played from hand, discarded after resolving.
 
 * *Immediate resolution*: play, resolve `r`, discard.
 * *Flexibility*: any number per turn, outside a main action.
-* *Conditional*: some events have an `on=` trigger and only play during that window — same mechanism as triggered abilities.
+* *Conditional*: some events have an `on=` trigger and only play during that window - same mechanism as triggered abilities.
 
-**5. Replacement Effects** — replace one outcome with another; rare, used for specialized hero builds.
+**5. Replacement Effects** - replace one outcome with another; rare, used for specialized hero builds.
 
 
 
 ## Open questions for the designer
 
-> **Note on forum sources:** authoritative answers in `misc/docs/FORUM.md` come from the **Fryxelius brothers** — **Jonathan Fryxelius** = BGG `Lord_Aethan` (user `430700`), the game designer; and **Jacob Fryxelius** (user `430994`), also part of the publishing company, whose posts are tagged 🎲 *DESIGNER — confirmed*. Treat answers from either as official rulings.
+> **Note on forum sources:** authoritative answers in `misc/docs/FORUM.md` come from the **Fryxelius brothers** - **Jonathan Fryxelius** = BGG `Lord_Aethan` (user `430700`), the game designer; and **Jacob Fryxelius** (user `430994`), also part of the publishing company, whose posts are tagged 🎲 *DESIGNER - confirmed*. Treat answers from either as official rulings.
 
 These are questions we'd like to put to the designer on BGG. Each lists our current working assumption, why we're asking, and any partial information found in the forum.
 
 1. **If Embla is knocked out by the remaining unprevented damage from an attack she Riposted, is the 2 damage still dealt to the attacking monster?**
-   - *Current assumption:* yes — Riposte's "prevent + deal damage" resolves as a single effect at the moment the attack hits, so the monster takes 2 damage even if the unprevented remainder knocks Embla out.
-   - *Why it matters:* affects ordering in `Op_monsterAttack` — do we apply Riposte's outbound damage before/after the hero's knock-out check?
-   - *Forum:* Riposte is discussed in [BGG 3650916](https://boardgamegeek.com/thread/3650916) (once per attack; prevents + deals damage) and [BGG 3649944](https://boardgamegeek.com/thread/3649944) (self only). A related ruling at [BGG 3425406](https://boardgamegeek.com/thread/3425406) notes *"if Embla can kill a trollkin in a defense situation, that may alter the trollkin support in a subsequent attack against her"* — confirming defensive damage is dealt during attack resolution — but the specific "Embla knocked out mid-Riposte" case is not addressed.
+   - *Current assumption:* yes - Riposte's "prevent + deal damage" resolves as a single effect at the moment the attack hits, so the monster takes 2 damage even if the unprevented remainder knocks Embla out.
+   - *Why it matters:* affects ordering in `Op_monsterAttack` - do we apply Riposte's outbound damage before/after the hero's knock-out check?
+   - *Forum:* Riposte is discussed in [BGG 3650916](https://boardgamegeek.com/thread/3650916) (once per attack; prevents + deals damage) and [BGG 3649944](https://boardgamegeek.com/thread/3649944) (self only). A related ruling at [BGG 3425406](https://boardgamegeek.com/thread/3425406) notes *"if Embla can kill a trollkin in a defense situation, that may alter the trollkin support in a subsequent attack against her"* - confirming defensive damage is dealt during attack resolution - but the specific "Embla knocked out mid-Riposte" case is not addressed.
 
 ## Rule clarifications (resolved with designer)
 
-1. **Queen of the Hill I/II — the movement is the tactic, damage is thematic**: "Deal X damage to an adjacent monster and switch places with it." Clarified by the designer: the movement is a maneuver — Embla appears behind the monster and gently pushes them down the hill, which is what deals the damage thematically. Consequences:
+1. **Queen of the Hill I/II - the movement is the tactic, damage is thematic**: "Deal X damage to an adjacent monster and switch places with it." Clarified by the designer: the movement is a maneuver - Embla appears behind the monster and gently pushes them down the hill, which is what deals the damage thematically. Consequences:
    - The hero **always moves** into the target hex, even if the damage kills the monster (no "stay put on kill" fallback).
-   - The target hex must be one the hero could legally enter — mountain-adjacent monsters are not valid targets (unless Fleetfoot II is in play, where the hero can enter mountain areas). Enforced by `Op_c_queen::getPossibleMoves()` filtering on `HexMap::isImpassable($hex, "hero")` with `ERR_PREREQ` / "You cannot enter that terrain".
+   - The target hex must be one the hero could legally enter - mountain-adjacent monsters are not valid targets (unless Fleetfoot II is in play, where the hero can enter mountain areas). Enforced by `Op_c_queen::getPossibleMoves()` filtering on `HexMap::isImpassable($hex, "hero")` with `ERR_PREREQ` / "You cannot enter that terrain".
 
-2. **Orebiter — you attack the mountain, not a monster, and it consumes your attack action**: "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]." Clarified by the designer:
-   - Orebiter is activated by spending the **attack action on the player board** — same slot the regular attack action uses. The target is an **adjacent mountain hex**, not a monster. You're rolling dice to hit the gold vein; every point of damage dealt becomes 1 gold [XP].
-   - Because the attack action slot is consumed, you **cannot attack monsters with your attack action on the same turn**. Swift Strike (and any other free-action / triggered attack source) is still available — the restriction is on the main attack action only.
+2. **Orebiter - you attack the mountain, not a monster, and it consumes your attack action**: "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]." Clarified by the designer:
+   - Orebiter is activated by spending the **attack action on the player board** - same slot the regular attack action uses. The target is an **adjacent mountain hex**, not a monster. You're rolling dice to hit the gold vein; every point of damage dealt becomes 1 gold [XP].
+   - Because the attack action slot is consumed, you **cannot attack monsters with your attack action on the same turn**. Swift Strike (and any other free-action / triggered attack source) is still available - the restriction is on the main attack action only.
 
 
 3. **Sweeping Strike**
@@ -555,32 +565,32 @@ Boldur is the center of the "clock", so he sweeps around himself, going clockwis
 5. **Event deck IS reshuffled when exhausted** (per Jonathan Fryxelius):
 - *"Reshuffle and form a new deck, events never run out"* ([BGG 3479474](https://boardgamegeek.com/thread/3479474)).
 - *"if they were to run out, you would simply reshuffle all used cards into a new pile to draw from"* ([BGG 3432147](https://boardgamegeek.com/thread/3432147)).
-- Implication: implement reshuffle of the discard pile into a fresh deck when the draw deck is exhausted. Same applies to character/hero decks ("just reshuffle the discarded cards into a new deck" — same thread).
+- Implication: implement reshuffle of the discard pile into a fresh deck when the draw deck is exhausted. Same applies to character/hero decks ("just reshuffle the discarded cards into a new deck" - same thread).
 - ✅ Implemented for event decks via `DbTokens::autoreshuffle_custom`, wired in `Game::configureTokenAutoreshuffle`. `Hero::drawEventCard()` calls `getTokenOnTop($deck, /*no_deck_reform*/ false)` so the discard auto-reshuffles when the deck is empty.
 
 6. **Hero card effects CAN push monsters into Grimheim**:
-- Jacob Fryxelius on Embla's Sidekick/Kick: *"You can kick it 1 step in any direction that has an available area (no characters)"* ([BGG 3487338](https://boardgamegeek.com/thread/3487338)) — the only constraint is "available area, no characters". Grimheim is not excluded.
+- Jacob Fryxelius on Embla's Sidekick/Kick: *"You can kick it 1 step in any direction that has an available area (no characters)"* ([BGG 3487338](https://boardgamegeek.com/thread/3487338)) - the only constraint is "available area, no characters". Grimheim is not excluded.
 - Jonathan Fryxelius on Wrecking Ball: the card was *deliberately worded "character" rather than "monster"* so that it can push characters (including heroes) into Grimheim ([BGG 3431404](https://boardgamegeek.com/thread/3431404)).
 - Implication: `Op_moveMonster` (and similar push effects) should allow Grimheim as a destination, subject to standard occupancy rules. Remove any blanket "no Grimheim" filter on monster push targets.
 
 7. **Event discard pile is face up (visible to all players)**:
 - Designer confirmed: *"Face up is correct."*
-- Implication: render the event discard as a public stack — all players can see the top card / browse the pile.
+- Implication: render the event discard as a public stack - all players can see the top card / browse the pile.
 
 8. **Stitching may repair heroes OR equipment of other players, as long as that player is adjacent**:
 - Designer confirmed: *"Stitching may repair heroes or equipment of other players, as long as that player is adjacent."*
-- The "within range 1" qualifier applies to the *owning player*, not the equipment token — so a teammate's equipment is in range if the teammate's hero is in range. Self counts (range 0 ⊂ range 1, [BGG 3528335](https://boardgamegeek.com/thread/3528335)).
-- Implication: `Op_repairCard` for Stitching must allow targets in any tableau owned by an adjacent hero, not just the acting player's tableau. **Note**: the **Durability event card** ("Remove all damage from an equipment card") is a separate, no-range effect and still has no explicit cross-tableau ruling — but by analogy it most likely permits any equipment too.
+- The "within range 1" qualifier applies to the *owning player*, not the equipment token - so a teammate's equipment is in range if the teammate's hero is in range. Self counts (range 0 ⊂ range 1, [BGG 3528335](https://boardgamegeek.com/thread/3528335)).
+- Implication: `Op_repairCard` for Stitching must allow targets in any tableau owned by an adjacent hero, not just the acting player's tableau. **Note**: the **Durability event card** ("Remove all damage from an equipment card") is a separate, no-range effect and still has no explicit cross-tableau ruling - but by analogy it most likely permits any equipment too.
 
-9. **Windbite chains — every rune rolled (including on added dice) adds another die**:
+9. **Windbite chains - every rune rolled (including on added dice) adds another die**:
 - Designer confirmed: *"It chains and may add more and more dice. Theoretically, you could be asked to roll any amount of dice in the end. This is phrased as rolling extra dice rather than re-rolling the runes, because other cards may use these runes to add damage. So it is important that the rolled runes are not discarded."*
-- Implication: implementation must loop — after each batch of added dice is rolled, count new runes and add that many more dice. Critically, **rune results stay on the table** (not discarded/replaced) because other cards consume them for damage.
+- Implication: implementation must loop - after each batch of added dice is rolled, count new runes and add that many more dice. Critically, **rune results stay on the table** (not discarded/replaced) because other cards consume them for damage.
 - **Update our assumption**: replace the "one-shot" model in [Op_windbite](modules/php/Operations/) (or wherever the effect lives) with a recursive add-and-roll loop that preserves rune dice.
 
-10. **Displaced Main Weapons lose all parked tokens — strip them on replacement**:
+10. **Displaced Main Weapons lose all parked tokens - strip them on replacement**:
 - Designer confirmed: *"There is no way to get 'old' main weapons back, so their mana / damage / tokens are not relevant if they are replaced. Remove any information-bearing marks or tokens from a displaced weapon."*
-- Implication: when a new Main Weapon is placed on top of an old one, the operation must clear any crystals (mana, damage, etc.) and reset any quest-progress/state markers on the displaced weapon — return them to supply.
+- Implication: when a new Main Weapon is placed on top of an old one, the operation must clear any crystals (mana, damage, etc.) and reset any quest-progress/state markers on the displaced weapon - return them to supply.
 
 11. **"Move X" is always "up to X" unless the card says "move exactly"**:
 - Designer confirmed: *"The 'do as much as possible' is meant to convey that you don't have to perform all effects in order to play a card, just do what can be done and skip the rest. As for movement, it is always 'up to' that amount of steps unless specifically stated 'move exactly' (which - for now - doesn't occur anywhere in the game). So heroes may move 'up to 3 areas' in their movement action (or 4 areas if they are playing Embla). And if a card lets them move 2 steps, that may be up to 2 steps."*
-- Implication: **all** hero-movement card effects ("Move 2 areas", "Move 3 areas", etc.) are optional in magnitude — the player chooses 0..X steps. There is currently no "move exactly N" wording in the game, so we don't need to support a strict variant. This supersedes the earlier assumption that bare "Move X" was mandatory and only "Move up to X" was optional.
+- Implication: **all** hero-movement card effects ("Move 2 areas", "Move 3 areas", etc.) are optional in magnitude - the player chooses 0..X steps. There is currently no "move exactly N" wording in the game, so we don't need to support a strict variant. This supersedes the earlier assumption that bare "Move X" was mandatory and only "Move up to X" was optional.

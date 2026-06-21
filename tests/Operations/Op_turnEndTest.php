@@ -10,7 +10,7 @@ final class Op_turnEndTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         // setupGameTables already puts card_hero_1_1, card_ability_1_3 (Sure Shot I, mana=1),
-        // and card_equip_1_15 on tableau, and seeds 1 mana on Sure Shot I — drain that mana
+        // and card_equip_1_15 on tableau, and seeds 1 mana on Sure Shot I - drain that mana
         // so tests can reason about zero-start mana generation.
         foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3")) as $key) {
             $this->game->tokens->moveToken($key, "supply_crystal_green");
@@ -55,7 +55,7 @@ final class Op_turnEndTest extends AbstractOpTestCase {
     }
 
     public function testNoBattleDiceNoCrash(): void {
-        // No dice on display_battle — should not error
+        // No dice on display_battle - should not error
         $op = $this->op;
         $this->call_resolve();
         $this->assertTrue(true); // no exception

@@ -9,7 +9,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 use function Bga\Games\Fate\getPart;
 
 /**
- * upgrade: End-of-turn upgrade — spend XP for a new ability or card improvement.
+ * upgrade: End-of-turn upgrade - spend XP for a new ability or card improvement.
  *
  * Rules:
  * - Pay the experience (yellow) printed on the next step of your upgrade cost track,
@@ -147,7 +147,7 @@ class Op_upgrade extends Operation {
         $heroId = $this->game->getHeroTokenId($owner);
 
         $suppress = ["noa" => true];
-        // Move L1 to limbo (suppress slide — flip animation runs on L2 below)
+        // Move L1 to limbo (suppress slide - flip animation runs on L2 below)
         $this->dbSetTokenLocation($cardId, "limbo", 0, "", $suppress);
 
         // Move L2 to tableau; client plays a 3D flip from L1's sprite to L2's at this slot

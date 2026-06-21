@@ -527,6 +527,11 @@ class Material {
         "name" => clienttranslate("Move Hero"),
         "wicon" => "wicon_move",
 ],
+    "Op_moveStep" => [ 
+        "type" => "moveStep",
+        "name" => clienttranslate("Move Hero"),
+        "wicon" => "wicon_move",
+],
     "Op_step" => [ 
         "type" => "step",
         "name" => clienttranslate("Step"),

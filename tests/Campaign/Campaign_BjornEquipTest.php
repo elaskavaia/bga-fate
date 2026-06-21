@@ -17,7 +17,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->setupGame([1]); // Solo Bjorn
         $this->heroId = $this->game->getHeroTokenId($this->getActivePlayerColor());
 
-        // Seed monster deck — need several simple cards (setup draws 1, each turn end draws 1)
+        // Seed monster deck - need several simple cards (setup draws 1, each turn end draws 1)
         $this->seedDeck("deck_monster_yellow", [
             "card_monster_7", // Fiery Projectiles (Highlands, J,J,E)
             "card_monster_8", // Whirlwinds (Highlands, E,E,E,E,E)
@@ -63,10 +63,10 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $blackArrows = "card_equip_1_20";
         $color = $this->getActivePlayerColor();
 
-        // Card starts in supply — no yellow crystals on it
+        // Card starts in supply - no yellow crystals on it
         $this->assertEquals(0, $this->countTokens("crystal_yellow", $blackArrows));
 
-        // Gain equipment via Op_gainEquip — seeds deck so Black Arrows is on top, then run the op
+        // Gain equipment via Op_gainEquip - seeds deck so Black Arrows is on top, then run the op
         $this->seedDeck("deck_equip_$color", [$blackArrows]);
         $op = $this->game->machine->instantiateOperation("gainEquip", $color);
         $op->resolve();
@@ -83,8 +83,12 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $heroHex = "hex_5_9";
         $goblinHex = "hex_5_8";
 
-        // Gain equipment via Op_gainEquip — onEnter seeds 3 arrows
-        $this->seedDeck("deck_equip_$color", [$blackArrows]);
+        // Gain equipment via Op_gainEquip - onEnter seeds 3 arrows. Pin the next card too: once
+        // Black Arrows is taken, the new top of deck_equip becomes the active quest. Leave it random
+        // and it can land on Leather Purse (killed(trollkin):2spawn(brute)), whose quest fires when
+        // we kill the goblin (a trollkin) and queues an interactive spawn that desyncs this test.
+        // Bone Bane Bow's quest does not react to kills, so it is inert here.
+        $this->seedDeck("deck_equip_$color", [$blackArrows, "card_equip_1_16"]);
         $op = $this->game->machine->instantiateOperation("gainEquip", $color);
         $op->resolve();
         $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
@@ -92,7 +96,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // Place goblin adjacent to heroHex (Goblin has 2 health).
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
 
-        // Rig the roll to all misses (face 1) so the base attack deals 0 damage — the goblin can
+        // Rig the roll to all misses (face 1) so the base attack deals 0 damage - the goblin can
         // only die from the 3 guaranteed-hit dice that Black Arrows adds to THIS attack action.
         $this->seedRand([1, 1, 1]);
 
@@ -102,11 +106,11 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // Action 2: Attack the goblin
         $this->respond($goblinHex);
 
-        // TActionAttack trigger fires mid-attack (after the roll, before hits resolve) —
+        // TActionAttack trigger fires mid-attack (after the roll, before hits resolve) -
         // Black Arrows should be offered here so its +3 damage lands on this attack action.
         $this->assertValidTarget($blackArrows, "Black Arrows should be offered during the attack");
 
-        // Use Black Arrows — spends 1 arrow, adds 3 damage dice to this attack
+        // Use Black Arrows - spends 1 arrow, adds 3 damage dice to this attack
         $this->respond($blackArrows);
         $this->confirmCardEffect();
 
@@ -135,7 +139,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // Action 2: Attack goblin
         $this->respond($goblinHex);
 
-        // Black Arrows should NOT be offered — no arrows to spend
+        // Black Arrows should NOT be offered - no arrows to spend
         $this->assertNotValidTarget($blackArrows, "Black Arrows should not be usable with 0 arrows");
     }
 
@@ -152,7 +156,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
         $goblin = "monster_goblin_20";
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
-        $this->seedRand([5]); // goblin str=1 — one guaranteed hit
+        $this->seedRand([5]); // goblin str=1 - one guaranteed hit
 
         // Burn both player actions → end of player turn → monster turn → goblin attacks Bjorn.
         $this->respond("actionPractice");
@@ -161,7 +165,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->skipOp("turn");
         $this->skipOp("drawEvent");
 
-        // TResolveHits fires before dealDamage resolves — Helmet offered as a useCard target.
+        // TResolveHits fires before dealDamage resolves - Helmet offered as a useCard target.
         $this->assertOperation("useCard");
         $this->assertValidTarget($helmet);
         $this->respond($helmet);
@@ -215,11 +219,11 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->respond("hex_5_9");
 
         // TActionAttack + TRoll chain share one useCard prompt that lists both
-        // Quiver and Bjorn Hero I as options — pick Quiver directly.
+        // Quiver and Bjorn Hero I as options - pick Quiver directly.
         $this->assertOperation("useCard");
         $this->assertValidTarget($quiver);
         $this->respond($quiver);
-        // Quiver's addDamage auto-resolves; useCard re-queues offering Bjorn Hero I — dismiss it.
+        // Quiver's addDamage auto-resolves; useCard re-queues offering Bjorn Hero I - dismiss it.
         $this->skipUseCard("card_hero_1_1");
 
         // 1 durability spent (1 red crystal on the card)
@@ -254,12 +258,12 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->seedRand([3, 3, 5, 1, 1]);
         $this->respond("hex_5_9");
 
-        // TActionAttack useCard prompt — pick Bone Bane Bow.
+        // TActionAttack useCard prompt - pick Bone Bane Bow.
         $this->assertOperation("useCard");
         $this->assertValidTarget($bow);
         $this->respond($bow);
         // dealDamage(adj_attack) auto-resolves (one adjacent target),
-        // then a chained useCard prompt offers Bjorn Hero I — dismiss it.
+        // then a chained useCard prompt offers Bjorn Hero I - dismiss it.
         $this->skipUseCard("card_hero_1_1");
 
         // Primary took 1 damage from attack roll; secondary took 2 (rune count) from bow.
@@ -347,7 +351,7 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
             $args = $this->getOpArgs();
         }
 
-        // Trollbane should NOT be offered — filter rejects non-trollkin
+        // Trollbane should NOT be offered - filter rejects non-trollkin
         if (($args["type"] ?? "") === "useCard") {
             $this->assertNotValidTarget($trollbane, "Trollbane should not be usable against firehorde");
         }

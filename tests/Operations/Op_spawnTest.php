@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Tests for Op_spawn — places N monsters of a given type from supply_monster
+ * Tests for Op_spawn - places N monsters of a given type from supply_monster
  * onto free hexes adjacent to the acting hero. Placement is player-chosen
  * (RULES.md "Ambush"); each placement re-queues the remainder.
  */
@@ -79,7 +79,7 @@ final class Op_spawnTest extends AbstractOpTestCase {
         for ($i = 0; $i < 5; $i++) {
             $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($adj[$i], "");
         }
-        // Try to spawn 3 brutes — only 1 free hex
+        // Try to spawn 3 brutes - only 1 free hex
         $this->resolveSpawnChain("3spawn(brute)");
         $this->assertEquals(1, $this->countAdjacentMonsters("brute"));
     }
@@ -119,7 +119,7 @@ final class Op_spawnTest extends AbstractOpTestCase {
     }
 
     public function testBlockedSpawnIsSkippable(): void {
-        // Fully surround the hero — a mandatory spawn with no free hex must be skippable
+        // Fully surround the hero - a mandatory spawn with no free hex must be skippable
         // (else the machine hangs on a no-target op).
         $adj = $this->game->hexMap->getAdjacentHexes($this->heroHex);
         foreach ($adj as $i => $hex) {

@@ -57,7 +57,7 @@ num|hno|name|strength|health|durability|mana|r|on|quest|effect|flavour|attack_ra
 16|4|Shield|||2||spendDurab:2preventDamage|TResolveHits|<i>Enter the Ogre Valley or skip the gold [XP] from killing a troll.</i>|[DAMAGE]: Prevent 2 damage.|Breaking off one side of a troll breastplate should do the trick|||custom|
 21|4|Smiterbiter|1||||c_smiter|TActionAttack|<i>End your movement in the Marsh of Sorrow</i>, covered to the beard in yuck.|This is your Main Weapon. Spend stored damage to add that much damage to your attack action. If you kill a monster in an attack action, excess damage is stored here (max 3 stored).|I axed your first.||1|TMove|in(MarshOfSorrow):gainEquip
 # Equipment - Finkel (hno=5) - expansion, not implemented
-#15|5|Cane|||2||spendDurab:1move||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Move 1 area.|His cane is comforting – it makes him quite hopful.|
+#15|5|Cane|||2||spendDurab:1move||<i>Discard 2 cards from hand</i>. Nobody gets the first few spells right.|[DAMAGE]: Move 1 area.|His cane is comforting - it makes him quite hopful.|
 #26|5|Drink of the Tides|||||1heal(adj)||<i>End your movement next to water</i> to gather the seaweed.|Heal 1 damage from Finkel or an adjacent hero.||
 #19|5|Element Ring|||||custom|TActionAttack|<i>Spend a mend action adjacent to mountain, plains, and forest.</i>|Add 1 damage to each attack action.|Forged where the elements meet, this ring rules them all.|
 #21|5|Lightning Rod|||||custom|TActionAttack|<i>Spend a prepare action and 4 experience</i> [XP] to install it.|Each time you damage a monster, you may spend 1 mana [MANA] from any card to deal 1 additional damage.|Magic well grounded.|

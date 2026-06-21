@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Tests for Op_monsterDieAmbush — Phase D4.
+ * Tests for Op_monsterDieAmbush - Phase D4.
  * For each hero not in Grimheim, queues a spawn(goblin) op (owner = hero
  * color). Heroes in Grimheim are silently skipped per A6.
  */
@@ -27,7 +27,7 @@ final class Op_monsterDieAmbushTest extends AbstractOpTestCase {
 
         $this->call_resolve(); // ambush queues an interactive spawn(goblin)
 
-        // Spawn is now player-placed (RULES.md "Ambush") — it offers the hero's adjacent free hexes.
+        // Spawn is now player-placed (RULES.md "Ambush") - it offers the hero's adjacent free hexes.
         $spawn = $this->game->machine->instantiateOperation("spawn(goblin)", $this->owner);
         $targets = array_keys($spawn->getPossibleMoves());
         $this->assertNotEmpty($targets, "spawn should offer adjacent free hexes");

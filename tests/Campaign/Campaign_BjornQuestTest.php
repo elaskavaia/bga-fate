@@ -22,12 +22,12 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Bone Bane Bow (card_equip_1_16): quest_on= (empty — player-initiated),
+     * Bone Bane Bow (card_equip_1_16): quest_on= (empty - player-initiated),
      * quest_r=in(Nailfare):spendAction(actionMend):gainEquip.
      *
      * Player invokes the top-bar `completeQuest` free action while Bone Bane Bow
      * is on top of deck_equip_<color> AND the hero stands on a Nailfare hex
-     * (named location, lake terrain — explicitly passable per HexMap rules).
+     * (named location, lake terrain - explicitly passable per HexMap rules).
      * The chain spends a Mend action then runs gainEquip, which moves the card
      * to tableau and reveals the next deck-top.
      */
@@ -35,7 +35,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
 
         $bow = "card_equip_1_16";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Bone Bane Bow is claimed
+        $nextCard = "card_equip_1_17"; // Throwing Axes - surfaces after Bone Bane Bow is claimed
         $this->seedDeck("deck_equip_$color", [$bow, $nextCard]);
         $this->assertEquals($bow, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
@@ -49,7 +49,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertValidTarget($bow);
         $this->respond($bow);
 
-        // Chained spendAction(actionMend) is a single-confirm op — accept it.
+        // Chained spendAction(actionMend) is a single-confirm op - accept it.
         $this->confirmCardEffect();
 
         $this->assertEquals(
@@ -71,7 +71,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Black Arrows (card_equip_1_20): quest_on= (empty — player-initiated),
+     * Black Arrows (card_equip_1_20): quest_on= (empty - player-initiated),
      * quest_r=in(RobberCamp):spendAction(actionAttack):gainEquip.
      *
      * Player invokes the top-bar `completeQuest` free action while Black Arrows
@@ -83,7 +83,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
 
         $blackArrows = "card_equip_1_20";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Black Arrows
+        $nextCard = "card_equip_1_17"; // Throwing Axes - placeholder behind Black Arrows
         $this->seedDeck("deck_equip_$color", [$blackArrows, $nextCard]);
         $this->assertEquals($blackArrows, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
@@ -97,7 +97,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertValidTarget($blackArrows);
         $this->respond($blackArrows);
 
-        // Chained spendAction(actionAttack) is a single-confirm op — accept it.
+        // Chained spendAction(actionAttack) is a single-confirm op - accept it.
         $this->confirmCardEffect();
 
         $this->assertEquals(
@@ -119,7 +119,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Home Sewn Cape (card_equip_1_24): quest_on= (empty — player-initiated),
+     * Home Sewn Cape (card_equip_1_24): quest_on= (empty - player-initiated),
      * quest_r=check('countAdjMonsters==0'):spendAction(actionAttack):gainEquip.
      *
      * Positive path: hero stands on a hex with no adjacent monsters → check
@@ -130,7 +130,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
 
         $cape = "card_equip_1_24";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Cape
+        $nextCard = "card_equip_1_17"; // Throwing Axes - placeholder behind Cape
         $this->seedDeck("deck_equip_$color", [$cape, $nextCard]);
         $this->assertEquals($cape, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
@@ -144,7 +144,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertValidTarget($cape);
         $this->respond($cape);
 
-        // Chained spendAction(actionAttack) is a single-confirm op — accept it.
+        // Chained spendAction(actionAttack) is a single-confirm op - accept it.
         $this->confirmCardEffect();
 
         $this->assertEquals(
@@ -166,7 +166,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Negative path for Home Sewn Cape — adjacent monster makes
+     * Negative path for Home Sewn Cape - adjacent monster makes
      * check('countAdjMonsters==0') evaluate to 0, which hides the grouped
      * (spendAction(actionAttack):gainEquip) chain so neither op fires.
      */
@@ -189,22 +189,22 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals(
             "deck_equip_$color",
             $this->tokenLocation($cape),
-            "Cape should stay in deck — gate countAdjMonsters==0 fails with monster adjacent"
+            "Cape should stay in deck - gate countAdjMonsters==0 fails with monster adjacent"
         );
 
         $hero = $this->game->getHero($color);
-        $this->assertNotContains("actionAttack", $hero->getActionsTaken(), "Attack action should NOT be marked taken — gate hid the chain");
+        $this->assertNotContains("actionAttack", $hero->getActionsTaken(), "Attack action should NOT be marked taken - gate hid the chain");
 
         $this->assertEquals($cape, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"], "Cape should still be on top of deck");
     }
 
     /**
-     * Home Sewn Tunic (card_equip_1_23): quest_on= (empty — player-initiated),
+     * Home Sewn Tunic (card_equip_1_23): quest_on= (empty - player-initiated),
      * quest_r=spendAction(actionPractice):spendXp:gainEquip.
      *
      * Player invokes the top-bar `completeQuest` free action while Home Sewn Tunic
      * is on top of deck_equip_<color>. The chain spends a Practice action AND
-     * 1 XP (yellow crystal from tableau), then runs gainEquip — landing the card
+     * 1 XP (yellow crystal from tableau), then runs gainEquip - landing the card
      * on the tableau and revealing the next deck-top.
      *
      * No location gate (the quest text "Spend 1 practice action and 1 experience"
@@ -214,7 +214,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
 
         $tunic = "card_equip_1_23";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — placeholder behind Tunic
+        $nextCard = "card_equip_1_17"; // Throwing Axes - placeholder behind Tunic
         $this->seedDeck("deck_equip_$color", [$tunic, $nextCard]);
         $this->assertEquals($tunic, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
@@ -230,7 +230,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->respond($tunic);
 
         // Chain has two prompts: spendAction(actionPractice) then spendXp.
-        // Both are single-confirm ops — accept each.
+        // Both are single-confirm ops - accept each.
         $this->confirmCardEffect();
         $this->confirmCardEffect();
 
@@ -264,7 +264,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      *
      * Trigger-driven replacement-reward quest: when Bjorn kills a rank-3 (or
      * higher) monster while Quiver is on top of the deck, the player gets a
-     * yes/no prompt — accept to claim Quiver and forfeit the kill's XP, skip
+     * yes/no prompt - accept to claim Quiver and forfeit the kill's XP, skip
      * to take the XP normally.
      */
     public function testQuiverClaimsItselfOnRank3KillWhenAccepted(): void {
@@ -281,11 +281,11 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         $xpBefore = $this->countXp();
 
-        // Kill the troll outright via dealDamage(7) — fires TMonsterKilled in the standard pipeline.
+        // Kill the troll outright via dealDamage(7) - fires TMonsterKilled in the standard pipeline.
         $this->game->machine->push("dealDamage", $color, ["target" => $trollHex, "count" => 7]);
         $this->game->machine->dispatchAll();
 
-        // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt — accept it.
+        // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt - accept it.
         $this->confirmCardEffect();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"), "Troll should be killed");
@@ -298,7 +298,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Player declines the optional claim — Quiver stays in deck, XP awarded normally.
+     * Player declines the optional claim - Quiver stays in deck, XP awarded normally.
      */
     public function testQuiverDeclinedKeepsXp(): void {
         $color = $this->getActivePlayerColor();
@@ -326,7 +326,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
     /**
      * Negative path: rank-1 (goblin) kill doesn't satisfy killed('rank>=3'),
-     * so the chain voids before reaching the optional prompt — no choice
+     * so the chain voids before reaching the optional prompt - no choice
      * presented, Quiver stays in deck, XP awarded normally.
      */
     public function testQuiverStaysInDeckWhenKillIsRank1(): void {
@@ -345,7 +345,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
-        $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver should stay in deck — goblin is rank 1");
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($quiver), "Quiver should stay in deck - goblin is rank 1");
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
     }
 
@@ -370,11 +370,11 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
         $xpBefore = $this->countXp();
 
-        // Brute health=3 — dealDamage(3) kills it, fires TMonsterKilled.
+        // Brute health=3 - dealDamage(3) kills it, fires TMonsterKilled.
         $this->game->machine->push("dealDamage", $color, ["target" => $bruteHex, "count" => 3]);
         $this->game->machine->dispatchAll();
 
-        // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt — accept it.
+        // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt - accept it.
         $this->confirmCardEffect();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
@@ -387,7 +387,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Player declines the optional claim — Helmet stays in deck, XP awarded normally.
+     * Player declines the optional claim - Helmet stays in deck, XP awarded normally.
      */
     public function testHelmetDeclinedKeepsXp(): void {
         $color = $this->getActivePlayerColor();
@@ -402,7 +402,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $baseXp = $this->game->getMonster("monster_skeleton_1")->getXpReward();
         $xpBefore = $this->countXp();
 
-        // Skeleton health=3 — dealDamage(3) kills it, fires TMonsterKilled.
+        // Skeleton health=3 - dealDamage(3) kills it, fires TMonsterKilled.
         $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 3]);
         $this->game->machine->dispatchAll();
 
@@ -416,7 +416,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
     /**
      * Negative path: killing a goblin (tribe=goblin doesn't match brute|skeleton)
-     * voids the chain before the optional prompt — no choice presented, Helmet
+     * voids the chain before the optional prompt - no choice presented, Helmet
      * stays in deck, XP awarded normally.
      */
     public function testHelmetStaysInDeckWhenKillIsGoblin(): void {
@@ -438,7 +438,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals(
             "deck_equip_$color",
             $this->tokenLocation($helmet),
-            "Helmet stays in deck — goblin doesn't match brute|skeleton"
+            "Helmet stays in deck - goblin doesn't match brute|skeleton"
         );
         $this->assertEquals($xpBefore + 1, $this->countXp(), "Goblin's 1 XP awarded normally when chain voids");
     }
@@ -447,16 +447,16 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * Leather Purse (card_equip_1_19): quest_on=TMonsterKilled,
      * quest_r=killed(trollkin):?(2spawn(brute):gainEquip).
      *
-     * Trigger-driven optional claim — predicate matches any trollkin (goblin,
+     * Trigger-driven optional claim - predicate matches any trollkin (goblin,
      * brute, troll). On accept, 2 brutes spawn adjacent to the hero (the "cost"
-     * — bag's previous owners want it back) and Leather Purse lands on tableau.
-     * No blockXp in the chain — the kill XP is awarded either way.
+     * - bag's previous owners want it back) and Leather Purse lands on tableau.
+     * No blockXp in the chain - the kill XP is awarded either way.
      */
     public function testLeatherPurseClaimsItselfOnTrollkinKillSpawning2Brutes(): void {
         $color = $this->getActivePlayerColor();
 
         $purse = "card_equip_1_19";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Purse is claimed
+        $nextCard = "card_equip_1_17"; // Throwing Axes - surfaces after Purse is claimed
         $this->seedDeck("deck_equip_$color", [$purse, $nextCard]);
 
         $heroHex = "hex_11_8";
@@ -470,7 +470,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->push("dealDamage", $color, ["target" => $goblinHex, "count" => 2]);
         $this->game->machine->dispatchAll();
 
-        // Optional ?(2spawn(brute):gainEquip) pops a confirm prompt — accept it.
+        // Optional ?(2spawn(brute):gainEquip) pops a confirm prompt - accept it.
         $this->confirmCardEffect();
         $this->game->machine->dispatchAll();
 
@@ -506,7 +506,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals($nextCard, $newTop["key"], "Throwing Axes should surface as the new deck-top");
     }
 
-    /** Player declines the optional claim — no spawns, card stays in deck. */
+    /** Player declines the optional claim - no spawns, card stays in deck. */
     public function testLeatherPurseDeclinedKeepsCardInDeck(): void {
         $color = $this->getActivePlayerColor();
 
@@ -536,7 +536,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
     /**
      * Negative path: killed(trollkin) fails on a firehorde monster (sprite),
-     * so the chain voids before the optional prompt — no choice, card stays.
+     * so the chain voids before the optional prompt - no choice, card stays.
      */
     public function testLeatherPurseStaysInDeckWhenKillIsNotTrollkin(): void {
         $color = $this->getActivePlayerColor();
@@ -554,7 +554,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_sprite_1"));
-        $this->assertEquals("deck_equip_$color", $this->tokenLocation($purse), "Leather Purse stays in deck — sprite isn't trollkin");
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($purse), "Leather Purse stays in deck - sprite isn't trollkin");
         $this->assertEquals(
             $brutesBefore,
             count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster")),
@@ -574,7 +574,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $color = $this->getActivePlayerColor();
 
         $trollbane = "card_equip_1_22";
-        $nextCard = "card_equip_1_17"; // Throwing Axes — surfaces after Trollbane is claimed
+        $nextCard = "card_equip_1_17"; // Throwing Axes - surfaces after Trollbane is claimed
         $this->seedDeck("deck_equip_$color", [$trollbane, $nextCard]);
 
         $heroHex = "hex_11_8";
@@ -609,7 +609,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
 
     /**
      * Negative path: killing a non-trollkin monster (firehorde sprite) should
-     * NOT bump the tracker — killed(trollkin) voids the chain.
+     * NOT bump the tracker - killed(trollkin) voids the chain.
      */
     public function testTrollbaneIgnoresNonTrollkinKills(): void {
         $color = $this->getActivePlayerColor();
@@ -625,7 +625,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->machine->dispatchAll();
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_sprite_1"));
-        $this->assertEquals("deck_equip_$color", $this->tokenLocation($trollbane), "Trollbane stays in deck — sprite isn't trollkin");
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($trollbane), "Trollbane stays in deck - sprite isn't trollkin");
         $this->assertEquals(0, $this->countTokens("crystal_red", $trollbane), "No tracker crystal added on non-trollkin kill");
     }
 }

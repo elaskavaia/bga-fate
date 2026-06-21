@@ -86,7 +86,7 @@ abstract class CampaignBaseTest extends TestCase {
     }
 
     /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true).
-     * Sends "confirm" only when the active op is in a single-choice/confirm state — i.e. it has
+     * Sends "confirm" only when the active op is in a single-choice/confirm state - i.e. it has
      * exactly one valid target or "confirm" is explicitly listed. Single-target ops accept
      * "confirm" via target substitution in Operation::_getCheckedArg. No-op otherwise so tests
      * stay agnostic about whether a separate confirm step exists. */
@@ -216,7 +216,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /**
      * Limbo every card sitting in any equip deck. Useful in setUp when the
-     * test doesn't care about random deck contents — TMonsterKilled-quest
+     * test doesn't care about random deck contents - TMonsterKilled-quest
      * cards (Helmet, Quiver) on top of a shuffled deck will auto-claim
      * matching kills mid-test and stall the chain. Tests that need specific
      * equipment use seedDeck.
@@ -267,7 +267,7 @@ abstract class CampaignBaseTest extends TestCase {
         $args = $this->getOpArgs();
         $this->assertEquals($args["type"] ?? "", $optype);
         $this->skip();
-        // See skipIfOp() — drawEvent and demote are queued back-to-back by Op_turnEnd;
+        // See skipIfOp() - drawEvent and demote are queued back-to-back by Op_turnEnd;
         // auto-swallow trailing demote so callers don't need a second boilerplate skip.
         if ($optype === "drawEvent") {
             $next = $this->getOpArgs();

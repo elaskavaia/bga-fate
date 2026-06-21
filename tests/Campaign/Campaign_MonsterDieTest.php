@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . "/CampaignBase.php";
 
 /**
- * Integration tests for the Monster Die variant — Phase D2 passive effects:
+ * Integration tests for the Monster Die variant - Phase D2 passive effects:
  *   - `attack` (side 3) → every monster attacks with +1 strength this turn
  *   - `charge` (side 5) → rank-1 monsters move +1 step this turn
  *
@@ -37,7 +37,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     /**
      * Force the die onto display_monsterturn at the requested side, bypassing the
      * random roll. Op_rollMonsterDie's leftover-sweep will move it back to supply
-     * and re-roll — to keep the side fixed we also disable the variant flag *for
+     * and re-roll - to keep the side fixed we also disable the variant flag *for
      * this test*. The downstream readers (`getMonsterDieSide()`) only inspect the
      * physical die state, so they pick up our seeded value either way.
      */
@@ -67,7 +67,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     public function testChargeGivesRank1MonstersExtraStep(): void {
         $this->seedDieSide(5); // charge
 
-        // Goblin (rank 1, move=2) on a road hex — base move would land at hex_12_4.
+        // Goblin (rank 1, move=2) on a road hex - base move would land at hex_12_4.
         // With charge +1 it should reach hex_12_5.
         $monster = "monster_goblin_20";
         $this->game->getMonster($monster)->moveTo("hex_12_2", "");
@@ -91,7 +91,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     }
 
     public function testNonChargeSideLeavesMovementUnchanged(): void {
-        $this->seedDieSide(3); // attack — irrelevant to movement
+        $this->seedDieSide(3); // attack - irrelevant to movement
 
         $monster = "monster_goblin_20";
         $this->game->getMonster($monster)->moveTo("hex_12_2", "");
@@ -105,7 +105,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     public function testAttackSideGivesEveryMonsterPlusOneStrength(): void {
         $this->seedDieSide(3); // attack
 
-        // Place a goblin adjacent to the hero (hex_7_9) — base strength=1, so with +1 it
+        // Place a goblin adjacent to the hero (hex_7_9) - base strength=1, so with +1 it
         // should roll 2 attack dice onto display_battle.
         $monster = "monster_goblin_20";
         $this->game->getMonster($monster)->moveTo("hex_7_8", "");
@@ -117,7 +117,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     }
 
     public function testEndOfMonsterTurnSweepsDieBackToSupply(): void {
-        $this->seedDieSide(3); // attack — any side
+        $this->seedDieSide(3); // attack - any side
 
         $this->game->getMonster("monster_goblin_20")->moveTo("hex_12_2", "");
         $this->driveOneMonsterTurn();
@@ -130,7 +130,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     }
 
     public function testNonAttackSideLeavesStrengthUnchanged(): void {
-        $this->seedDieSide(5); // charge — irrelevant to strength
+        $this->seedDieSide(5); // charge - irrelevant to strength
 
         $monster = "monster_goblin_20";
         $this->game->getMonster($monster)->moveTo("hex_7_8", "");
@@ -147,14 +147,14 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     // -------------------------------------------------------------------------
 
     public function testRealRollPathParksDieOnDisplay(): void {
-        // Skip seedDieSide — let the real Op_rollMonsterDie roll the die during the turn.
+        // Skip seedDieSide - let the real Op_rollMonsterDie roll the die during the turn.
         $this->driveOneMonsterTurn();
 
         $onDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_monster", "display_monsterturn");
         // Sweep at end of monster turn means the die is back in supply now.
         $this->assertCount(0, $onDisplay, "die swept off display at turn end");
 
-        // But during the turn the side must have been one of the 6 valid rules — confirm via
+        // But during the turn the side must have been one of the 6 valid rules - confirm via
         // the roll log line we always emit.
         $sideRules = ["maneuver_1", "maneuver_2", "attack", "push", "charge", "ambush"];
         $rollLogs = array_filter($this->game->notify->_getNotifications(), fn($n) => str_contains($n["log"] ?? "", "Monsters roll"));
@@ -164,7 +164,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     public function testChargeWithNoMonstersDoesNotCrash(): void {
         $this->seedDieSide(5); // charge
 
-        // No monster placed — deliberately empty map.
+        // No monster placed - deliberately empty map.
         $this->driveOneMonsterTurn();
 
         // Just reaching here without exception is the assertion.
@@ -195,9 +195,9 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     }
 
     public function testChargeSideDoesNotStackWithSkullTurn(): void {
-        $this->seedDieSide(5); // charge — would normally give rank-1 +1 step
+        $this->seedDieSide(5); // charge - would normally give rank-1 +1 step
 
-        // Force a skull-turn time-track spot (slot 9 of timetrack_1 = tm_red_skull) — already
+        // Force a skull-turn time-track spot (slot 9 of timetrack_1 = tm_red_skull) - already
         // grants every monster +1 step. The Monster Die charge side must NOT add a SECOND +1.
         $this->game->tokens->moveToken("rune_stone", "timetrack_1", 8); // step 9 after the +1 advance
 
@@ -212,7 +212,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     }
 
     // -------------------------------------------------------------------------
-    // Phase D3 / D4 / D5: active sides — full roll-dispatch path
+    // Phase D3 / D4 / D5: active sides - full roll-dispatch path
     // -------------------------------------------------------------------------
 
     public function testPushSideMovesAdjacentHeroTowardGrimheim(): void {
@@ -228,7 +228,7 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
 
     public function testPushSideLeavesUnadjacentHeroPut(): void {
         $this->game->tokens->moveToken($this->heroId, "hex_12_7");
-        // No monster adjacent — clearMonstersFromMap in setUp already cleared the map.
+        // No monster adjacent - clearMonstersFromMap in setUp already cleared the map.
         $this->forceRollSide(4); // push
 
         $this->driveOneMonsterTurn();

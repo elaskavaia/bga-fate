@@ -75,4 +75,64 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
         $op = $this->op;
         $this->assertEquals(3, $op->getNumberOfMoves());
     }
+
+    // -------------------------------------------------------------------------
+    // step mode selection (delegate to moveStep when routing matters)
+    // -------------------------------------------------------------------------
+
+    public function testNormalMoveWithoutStepIncentive(): void {
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("[1,3]move", $type, "no per-step incentive -> normal one-click move");
+    }
+
+    public function testStepModeWhenActiveQuestListensOnStep(): void {
+        // Raven's Claw (card_equip_3_22) has quest_on=TStep; put it on top of the equipment deck.
+        $this->game->tokens->moveToken("card_equip_3_22", "deck_equip_" . PCOLOR, 9999);
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type, $data] = $op->getDelegateInfo();
+        $this->assertEquals("moveStep", $type);
+        $this->assertSame(3, $data["budget"]);
+        $this->assertSame(0, $data["moved"]);
+    }
+
+    public function testStepModeWhenTableauCardListensOnStep(): void {
+        // Treetreader II (card_ability_2_6) has an onStep hook.
+        $this->game->tokens->moveToken("card_ability_2_6", "tableau_" . PCOLOR);
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("moveStep", $type);
+    }
+
+    public function testHardcodedCustomStepQuestEnablesStepMode(): void {
+        // Shield (card_equip_4_16) is a quest_on=custom quest whose triggerQuest reacts to Step;
+        // it's caught via the hardcoded allowlist (no declarative quest_on=TStep to read).
+        $this->game->tokens->moveToken("card_equip_4_16", "deck_equip_" . PCOLOR, 9999);
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("moveStep", $type);
+    }
+
+    public function testCustomCardDoesNotEnableStepMode(): void {
+        // Bloodline Crystal (card_equip_2_25) has on=custom but no onStep hook: it must NOT be
+        // mistaken for a per-step listener (regression for the canTriggerEffectOn false-positive).
+        $this->game->tokens->moveToken("card_equip_2_25", "tableau_" . PCOLOR);
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("[1,3]move", $type, "an on=custom card is not a step incentive");
+    }
+
+    public function testWreckingBallDisablesStepMode(): void {
+        $this->game->tokens->moveToken("card_ability_2_6", "tableau_" . PCOLOR); // step incentive
+        $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("[1,3]move", $type, "Wrecking Ball owns the move loop; step mode stays off");
+    }
 }

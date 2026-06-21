@@ -8,7 +8,7 @@ use Bga\Games\Fate\OpCommon\Operation;
 /**
  * Monster Die `ambush` side: each hero gets a goblin spawned on an adjacent
  * hex. Heroes in Grimheim are skipped (A6 of MDICE.md). Empty supply / no free
- * adjacent hex is also a silent skip — Op_spawn already handles both.
+ * adjacent hex is also a silent skip - Op_spawn already handles both.
  *
  * Queued from Op_rollMonsterDie when side 6 (`ambush`) is rolled.
  *
