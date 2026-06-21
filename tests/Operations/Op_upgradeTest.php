@@ -162,10 +162,11 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $op = $this->op;
         $this->call_resolve("card_ability_1_3");
 
-        // Crystals should now be on L2 card (2 added + 1 from setup = 3 green)
+        // Crystals transfer to L2 (2 added + 1 from setup = 3 green), then Sure Shot II (mana=2)
+        // generates its own 2 mana this turn = 5 green total.
         $greenOnL2 = $this->countGreenCrystals("card_ability_1_4");
         $redOnL2 = $this->countRedCrystals("card_ability_1_4");
-        $this->assertEquals(3, $greenOnL2);
+        $this->assertEquals(5, $greenOnL2);
         $this->assertEquals(1, $redOnL2);
         // Nothing left on L1
         $greenOnL1 = $this->countGreenCrystals("card_ability_1_3");
@@ -180,6 +181,46 @@ final class Op_upgradeTest extends AbstractOpTestCase {
         $this->call_resolve("card_ability_1_3");
         $this->assertEquals(2, $this->getXp()); // 7 - 5 = 2
         $this->assertEquals(6, $this->getUpgradeCost());
+    }
+
+    public function testImproveGeneratesUpgradedCardMana(): void {
+        $this->giveXp(5);
+        $before = $this->countGreenCrystals("card_ability_1_3"); // 1 from setup, sits on L1
+        $this->call_resolve("card_ability_1_3");
+        // L1 mana transfers to L2, then Sure Shot II (mana=2) generates its full 2 this same turn.
+        $this->assertEquals($before + 2, $this->countGreenCrystals("card_ability_1_4"));
+        $this->assertEquals(0, $this->countGreenCrystals("card_ability_1_3"));
+    }
+
+    // -------------------------------------------------------------------------
+    // End-of-turn mana generation (runs on both resolve and skip)
+    // -------------------------------------------------------------------------
+
+    public function testSkipStillGeneratesMana(): void {
+        // Even when no upgrade is taken, end-of-turn mana generation still runs. Sure Shot I has mana=1.
+        $before = $this->countGreenCrystals("card_ability_1_3");
+        $this->op->skip();
+        $this->assertEquals($before + 1, $this->countGreenCrystals("card_ability_1_3"));
+    }
+
+    public function testSkipGeneratesNoManaForCardWithoutManaField(): void {
+        // First Bow (card_equip_1_15) has no mana field.
+        $this->op->skip();
+        $this->assertEquals(0, $this->countGreenCrystals("card_equip_1_15"));
+    }
+
+    public function testSkipGeneratesNoManaForHeroCard(): void {
+        $this->op->skip();
+        $this->assertEquals(0, $this->countGreenCrystals("card_hero_1_1"));
+    }
+
+    public function testMana2CardGenerates2(): void {
+        $this->game->tokens->moveToken("card_ability_1_4", $this->getPlayersTableau()); // Sure Shot II, mana=2
+        $before4 = $this->countGreenCrystals("card_ability_1_4");
+        $before3 = $this->countGreenCrystals("card_ability_1_3");
+        $this->op->skip();
+        $this->assertEquals($before4 + 2, $this->countGreenCrystals("card_ability_1_4"));
+        $this->assertEquals($before3 + 1, $this->countGreenCrystals("card_ability_1_3"));
     }
 
     // -------------------------------------------------------------------------

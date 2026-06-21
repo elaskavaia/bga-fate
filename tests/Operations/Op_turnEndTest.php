@@ -21,63 +21,8 @@ final class Op_turnEndTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_actionMove");
     }
 
-    // -------------------------------------------------------------------------
-    // Mana generation
-    // -------------------------------------------------------------------------
-
-    public function testManaGeneratedForCardWithManaField(): void {
-        $op = $this->op;
-        $this->call_resolve();
-
-        // Sure Shot I has mana=1, should get 1 green crystal
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
-        $this->assertCount(1, $crystals);
-    }
-
-    public function testNoManaGeneratedForCardWithoutManaField(): void {
-        $op = $this->op;
-        $this->call_resolve();
-
-        // First Bow has no mana field — should get no green crystals
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_equip_1_15");
-        $this->assertCount(0, $crystals);
-    }
-
-    public function testManaAccumulatesAcrossTurns(): void {
-        // Pre-place 1 mana on the card
-        $this->game->tokens->pickTokensForLocation(1, "supply_crystal_green", "card_ability_1_3");
-
-        $op = $this->op;
-        $this->call_resolve();
-
-        // Should now have 2 green crystals
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
-        $this->assertCount(2, $crystals);
-    }
-
-    public function testMana2CardGenerates2(): void {
-        // Add Sure Shot II (mana=2) to tableau
-        $this->game->tokens->moveToken("card_ability_1_4", $this->getPlayersTableau());
-
-        $op = $this->op;
-        $this->call_resolve();
-
-        // Sure Shot II should get 2 green crystals
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_4");
-        $this->assertCount(2, $crystals);
-
-        // Sure Shot I should still get 1
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_1_3");
-        $this->assertCount(1, $crystals);
-    }
-
-    public function testHeroCardGetsNoMana(): void {
-        $op = $this->op;
-        $this->call_resolve();
-
-        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_green", "card_hero_1_1");
-        $this->assertCount(0, $crystals);
-    }
+    // Note: end-of-turn mana generation now runs inside Op_upgrade (so a gained/improved card
+    // generates its mana the same turn). See Op_upgradeTest for mana-generation coverage.
 
     // -------------------------------------------------------------------------
     // Action markers reset

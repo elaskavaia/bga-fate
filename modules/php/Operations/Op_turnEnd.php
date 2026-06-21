@@ -35,23 +35,13 @@ class Op_turnEnd extends Operation {
         }
         $this->queueTrigger(Trigger::TurnEnd);
         $hero = $this->game->getHero($owner);
-        // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities)
+        // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities).
+        //    Step 3 (mana generation) runs inside Op_upgrade, after the upgrade resolves or is
+        //    skipped, so a freshly gained/improved card produces its mana this same turn.
         $this->queue("upgrade");
-        // 3. Add mana to cards with mana generation (green icon)
-
-        $cards = $hero->getTableauCards();
-        foreach ($cards as $card) {
-            $cardId = $card["key"];
-            $manaGen = (int) $this->game->material->getRulesFor($cardId, "mana", 0);
-            if ($manaGen > 0) {
-                $hero->moveCrystals("green", $manaGen, $cardId, [
-                    "message" => clienttranslate('${char_name} adds ${count} [MANA] onto ${place_name}'),
-                ]);
-            }
-        }
 
         // Let each tableau card reset its per-turn state (base class clears state=1).
-        foreach ($cards as $card) {
+        foreach ($hero->getTableauCards() as $card) {
             $this->game->instantiateCard($card, $this)->setUsed(false);
         }
 
