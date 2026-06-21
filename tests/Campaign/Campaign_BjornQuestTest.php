@@ -474,6 +474,17 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->confirmCardEffect();
         $this->game->machine->dispatchAll();
 
+        // Player places each of the 2 brutes on a chosen adjacent area (RULES.md: player places).
+        $adjacent = $this->game->hexMap->getAdjacentHexes($heroHex);
+        for ($i = 0; $i < 2; $i++) {
+            $this->assertEquals("spawn", $this->getOpArgs()["type"] ?? "", "Leather Purse should prompt to place each brute");
+            $chosen = $this->getOpArgs()["target"][0];
+            $this->assertContains($chosen, $adjacent, "offered placement hex must be adjacent to the hero");
+            $this->respond($chosen);
+        }
+        $this->confirmCardEffect();
+        $this->game->machine->dispatchAll();
+
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"), "Goblin should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($purse), "Leather Purse should land on tableau on trollkin kill");
 

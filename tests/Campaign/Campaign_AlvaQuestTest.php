@@ -284,8 +284,8 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
      *
      * Player invokes the top-bar `completeQuest` free action while Elven Arrows is on
      * top of deck_equip_<color> AND the hero stands in the Troll Caves. The "cost" is
-     * a spawn — Op_spawn pulls a troll from supply_monster onto the first free
-     * adjacent hex (clockwise) — and then gainEquip moves the card to tableau.
+     * a spawn — the player places a troll from supply_monster on a chosen adjacent
+     * hex — and then gainEquip moves the card to tableau.
      */
     public function testElvenArrowsLandsOnTableauAndSpawnsTrollOnCompleteQuestInTrollCaves(): void {
         $color = $this->getActivePlayerColor();
@@ -309,7 +309,14 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->assertValidTarget($arrows);
         $this->respond($arrows);
 
-        // spawn(troll) auto-resolves; gainEquip may surface a single-confirm or auto-resolve.
+        // The spawn is player-placed: the quest prompts for an adjacent area for the troll.
+        $this->assertEquals("spawn", $this->getOpArgs()["type"] ?? "", "Elven Arrows quest should prompt to place the troll");
+        $adjHexes = $this->game->hexMap->getAdjacentHexes($heroHex);
+        $chosen = $this->getOpArgs()["target"][0];
+        $this->assertContains($chosen, $adjHexes, "offered placement hex must be adjacent to the hero");
+        $this->respond($chosen);
+
+        // gainEquip may surface a single-confirm or auto-resolve.
         $this->confirmCardEffect();
 
         $this->assertEquals(
@@ -321,17 +328,12 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $trollsAfter = count($this->game->tokens->getTokensOfTypeInLocation("monster_troll", "supply_monster"));
         $this->assertEquals($trollsBefore - 1, $trollsAfter, "One troll should leave supply (spawned next to hero)");
 
-        // The spawned troll should be on a hex adjacent to the hero.
-        $adjHexes = $this->game->hexMap->getAdjacentHexes($heroHex);
-        $spawnedTroll = null;
-        foreach ($adjHexes as $hex) {
-            $charId = $this->game->hexMap->getCharacterOnHex($hex);
-            if ($charId !== null && str_starts_with($charId, "monster_troll")) {
-                $spawnedTroll = $charId;
-                break;
-            }
-        }
-        $this->assertNotNull($spawnedTroll, "A troll should have spawned on a hex adjacent to the hero");
+        // The troll landed on the chosen adjacent hex.
+        $this->assertEquals(
+            1,
+            count($this->game->tokens->getTokensOfTypeInLocation("monster_troll", $chosen)),
+            "the troll should be placed on the chosen adjacent hex"
+        );
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");

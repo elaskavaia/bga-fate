@@ -4653,6 +4653,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Black Arrows"),
         "r" => "spendGold:3addDamage",
+        "on" => "TActionAttack",
         "quest" => "<i>Spend 1 attack action in the Robber Camp</i> to loot it.",
         "effect" => clienttranslate("Starts with 3 arrows here (use [XP] markers).<br>Spend 1 arrow to add 3 damage to this attack action."),
         "flavour" => "Painted black for the funeral they are about to attend.",

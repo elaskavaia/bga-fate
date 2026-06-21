@@ -242,18 +242,17 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
 
         $goblinsBefore = $this->countTokens("monster_goblin", "hex%");
         $this->driveOneMonsterTurn();
-        $goblinsAfter = $this->countTokens("monster_goblin", "hex%");
 
-        $this->assertEquals($goblinsBefore + 1, $goblinsAfter, "ambush should spawn exactly one goblin on the map");
-
-        // Spawned goblin must sit on a hex adjacent to the hero.
+        // Ambush now prompts the player to place the goblin themselves (RULES.md "Ambush").
+        $this->assertEquals("spawn", $this->getOpArgs()["type"] ?? "", "ambush should prompt to place the goblin");
         $heroHex = $this->tokenLocation($this->heroId);
         $adjacent = $this->game->hexMap->getAdjacentHexes($heroHex);
-        $goblinsAdjacent = 0;
-        foreach ($adjacent as $hex) {
-            $goblinsAdjacent += count($this->game->tokens->getTokensOfTypeInLocation("monster_goblin", $hex));
-        }
-        $this->assertEquals(1, $goblinsAdjacent, "the new goblin landed on an adjacent hex");
+        $chosen = $this->getOpArgs()["target"][0];
+        $this->assertContains($chosen, $adjacent, "offered placement hex must be adjacent to the hero");
+        $this->respond($chosen);
+
+        $this->assertEquals($goblinsBefore + 1, $this->countTokens("monster_goblin", "hex%"), "ambush spawns exactly one goblin");
+        $this->assertEquals(1, $this->countTokens("monster_goblin", $chosen), "the new goblin landed on the chosen adjacent hex");
     }
 
     public function testAmbushSideSkipsHeroInGrimheim(): void {

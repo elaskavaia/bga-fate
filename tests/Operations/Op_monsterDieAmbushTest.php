@@ -21,18 +21,25 @@ final class Op_monsterDieAmbushTest extends AbstractOpTestCase {
         $this->assertContains("spawn(goblin)", $types, "ambush must queue a spawn(goblin) op for the live hero");
     }
 
-    public function testGoblinLandsOnAdjacentHexAfterDispatch(): void {
+    public function testGoblinLandsOnChosenAdjacentHex(): void {
         $heroHex = $this->game->tokens->getTokenLocation("hero_1");
         $adjacent = $this->game->hexMap->getAdjacentHexes($heroHex);
 
-        $this->call_resolve();
-        $this->dispatchAll();
+        $this->call_resolve(); // ambush queues an interactive spawn(goblin)
 
-        $goblinsAdjacent = 0;
-        foreach ($adjacent as $hex) {
-            $goblinsAdjacent += count($this->game->tokens->getTokensOfTypeInLocation("monster_goblin", $hex));
-        }
-        $this->assertEquals(1, $goblinsAdjacent, "exactly one goblin should land on a hex adjacent to the hero");
+        // Spawn is now player-placed (RULES.md "Ambush") — it offers the hero's adjacent free hexes.
+        $spawn = $this->game->machine->instantiateOperation("spawn(goblin)", $this->owner);
+        $targets = array_keys($spawn->getPossibleMoves());
+        $this->assertNotEmpty($targets, "spawn should offer adjacent free hexes");
+        $chosen = $targets[0];
+        $this->assertContains($chosen, $adjacent, "offered hex must be adjacent to the hero");
+
+        $spawn->action_resolve(["target" => $chosen]);
+        $this->assertEquals(
+            1,
+            count($this->game->tokens->getTokensOfTypeInLocation("monster_goblin", $chosen)),
+            "goblin lands on the chosen adjacent hex"
+        );
     }
 
     public function testHeroInGrimheimIsSkipped(): void {

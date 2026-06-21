@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 /**
- * Tests for Op_spawn — pulls N monsters of a given type from supply_monster
- * and places them on free hexes adjacent to the acting hero.
+ * Tests for Op_spawn — places N monsters of a given type from supply_monster
+ * onto free hexes adjacent to the acting hero. Placement is player-chosen
+ * (RULES.md "Ambush"); each placement re-queues the remainder.
  */
 final class Op_spawnTest extends AbstractOpTestCase {
     private string $heroHex = "hex_11_8";
@@ -36,18 +37,39 @@ final class Op_spawnTest extends AbstractOpTestCase {
         return $count;
     }
 
+    /** Drive a spawn op to completion, always choosing the first offered free hex. */
+    private function resolveSpawnChain(string $opType): void {
+        $op = $this->createOp($opType);
+        while ($op !== null) {
+            $targets = array_keys($op->getPossibleMoves());
+            if (empty($targets)) {
+                break; // supply exhausted or ring full - silent skip
+            }
+            $op->action_resolve(["target" => $targets[0]]);
+            $op = $this->topSpawnOp();
+        }
+    }
+
+    /** Next queued spawn op for the owner (the re-queued remainder), or null. */
+    private function topSpawnOp() {
+        foreach ($this->game->machine->getTopOperations($this->owner) as $row) {
+            if (str_contains($row["type"] ?? "", "spawn(")) {
+                return $this->game->machine->instantiateOperationFromDbRow($row);
+            }
+        }
+        return null;
+    }
+
     public function testSpawnsOneMonsterOnAdjacentHex(): void {
         $supplyBefore = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
-        $this->createOp("spawn(brute)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("spawn(brute)");
         $this->assertEquals(1, $this->countAdjacentMonsters("brute"));
         $supplyAfter = count($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster"));
         $this->assertEquals($supplyBefore - 1, $supplyAfter);
     }
 
     public function testSpawnsMultipleOnDistinctHexes(): void {
-        $this->createOp("3spawn(goblin)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("3spawn(goblin)");
         $this->assertEquals(3, $this->countAdjacentMonsters("goblin"));
     }
 
@@ -58,8 +80,7 @@ final class Op_spawnTest extends AbstractOpTestCase {
             $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($adj[$i], "");
         }
         // Try to spawn 3 brutes — only 1 free hex
-        $this->createOp("3spawn(brute)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("3spawn(brute)");
         $this->assertEquals(1, $this->countAdjacentMonsters("brute"));
     }
 
@@ -70,8 +91,7 @@ final class Op_spawnTest extends AbstractOpTestCase {
         foreach (array_slice($brutes, $brutesAvailable) as $tokenId) {
             $this->game->tokens->moveToken($tokenId, "limbo");
         }
-        $this->createOp("3spawn(brute)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("3spawn(brute)");
         $this->assertEquals($brutesAvailable, $this->countAdjacentMonsters("brute"));
     }
 
@@ -79,8 +99,7 @@ final class Op_spawnTest extends AbstractOpTestCase {
         foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("monster_brute", "supply_monster")) as $tokenId) {
             $this->game->tokens->moveToken($tokenId, "limbo");
         }
-        $this->createOp("spawn(brute)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("spawn(brute)");
         $this->assertEquals(0, $this->countAdjacentMonsters("brute"));
     }
 
@@ -89,8 +108,45 @@ final class Op_spawnTest extends AbstractOpTestCase {
         foreach ($adj as $i => $hex) {
             $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($hex, "");
         }
-        $this->createOp("spawn(brute)");
-        $this->op->resolve();
+        $this->resolveSpawnChain("spawn(brute)");
         $this->assertEquals(0, $this->countAdjacentMonsters("brute"));
+    }
+
+    public function testPlacementIsMandatoryWhenHexIsFree(): void {
+        // With a free adjacent hex and supply available, the player cannot skip placement.
+        $op = $this->createOp("spawn(brute)");
+        $this->assertFalse($op->canSkip(), "spawn must be mandatory while a free adjacent hex exists");
+    }
+
+    public function testBlockedSpawnIsSkippable(): void {
+        // Fully surround the hero — a mandatory spawn with no free hex must be skippable
+        // (else the machine hangs on a no-target op).
+        $adj = $this->game->hexMap->getAdjacentHexes($this->heroHex);
+        foreach ($adj as $i => $hex) {
+            $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($hex, "");
+        }
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("spawn(brute)");
+        $this->assertTrue($op->canSkip(), "a blocked spawn must auto-skip instead of hanging");
+    }
+
+    public function testConstrainedMultiSpawnDrainsViaMachine(): void {
+        // Real machine path (not the hand-driven helper): a multi-spawn whose ring fills
+        // mid-chain must auto-skip the remainder, not hang on a mandatory no-target op.
+        $adj = $this->game->hexMap->getAdjacentHexes($this->heroHex);
+        for ($i = 0; $i < 5; $i++) {
+            $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($adj[$i], "");
+        }
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->game->machine->push("3spawn(brute)", $this->owner);
+        $this->dispatchAll();
+
+        $this->assertEquals(1, $this->countAdjacentMonsters("brute"), "only the single free hex gets a brute");
+        $leftover = array_filter(
+            $this->game->machine->getTopOperations($this->owner),
+            fn($row) => str_contains($row["type"] ?? "", "spawn(")
+        );
+        $this->assertCount(0, $leftover, "remaining spawns must auto-skip, not hang the machine");
     }
 }

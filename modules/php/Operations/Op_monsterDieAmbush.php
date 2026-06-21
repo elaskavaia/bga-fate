@@ -13,9 +13,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Queued from Op_rollMonsterDie when side 6 (`ambush`) is rolled.
  *
  * Per A7: a single op handles all heroes by queueing one Op_spawn(goblin) per
- * hero (owner = hero's color). Auto-pick of the adjacent hex matches the
- * existing Leather Purse / Elven Arrows spawn flow — interactive picker is a
- * future refinement.
+ * hero (owner = hero's color). Each hero's player then places the goblin on a
+ * chosen adjacent hex (RULES.md "Ambush"), matching the Leather Purse / Elven
+ * Arrows spawn flow.
  */
 class Op_monsterDieAmbush extends Operation {
     function resolve(): void {

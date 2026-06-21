@@ -172,9 +172,15 @@ abstract class CampaignBaseTest extends TestCase {
     protected function spawnMonsterAdjacent(string $type, int $count = 1): array {
         $color = $this->getActivePlayerColor();
         $supplyBefore = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
-        $expr = $count > 1 ? "{$count}spawn($type)" : "spawn($type)";
-        $op = $this->game->machine->instantiateOperation($expr, $color);
-        $op->resolve();
+        // Spawn is player-placed; for setup, place each monster on the first offered free hex.
+        for ($i = 0; $i < $count; $i++) {
+            $op = $this->game->machine->instantiateOperation("spawn($type)", $color);
+            $targets = array_keys($op->getPossibleMoves());
+            if (empty($targets)) {
+                break; // supply exhausted or adjacent ring full
+            }
+            $op->action_resolve(["target" => $targets[0]]);
+        }
         $supplyAfter = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
         return array_keys(array_diff_key($supplyBefore, $supplyAfter));
     }

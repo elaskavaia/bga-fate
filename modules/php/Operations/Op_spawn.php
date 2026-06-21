@@ -14,52 +14,93 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
- * spawn(<type>): pull N monster tokens of the given type from supply_monster
- * and place them on free hexes adjacent to the acting hero, walking clockwise
- * from the hero's first neighbour. Stops when either the supply pool or the
- * free-hex ring is exhausted — silent partial spawn.
+ * spawn(<type>): place N monster tokens of the given type from supply_monster
+ * onto free hexes adjacent to the acting hero. The player chooses each hex
+ * (RULES.md "Ambush": heroes place the spawned monster themselves). Placing one
+ * monster re-queues the remainder so the player picks each hex in turn.
+ * Mandatory while a free adjacent hex exists; auto-skips when the supply pool
+ * or the free-hex ring is exhausted (silent partial spawn).
  *
  * Used by quest side-effects:
  *   killed(trollkin):2spawn(brute):...      // Leather Purse
- *   in(TrollCaves):spawn(troll):gainEquip   // Elven Arrows (sketch)
+ *   in(TrollCaves):spawn(troll):gainEquip   // Elven Arrows
+ * and by Op_monsterDieAmbush (spawn(goblin) per hero).
  *
  * Params:
  *  - count (Countable prefix): number of monsters to spawn (default 1)
- *  - param(0): monster type stem, e.g. "brute" → matches monster_brute_*
+ *  - param(0): monster type stem, e.g. "brute" -> matches monster_brute_*
  */
 class Op_spawn extends CountableOperation {
-    function resolve(): void {
+    private function getMonsterType(): string {
         $type = $this->getParam(0, "");
         $this->game->systemAssert("ERR:spawn:noType", $type !== "");
-        $count = (int) $this->getCount();
+        return $type;
+    }
 
+    private function supplyHasMonster(string $type): bool {
+        return count($this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster")) > 0;
+    }
+
+    private function getFreeAdjacentHexes(): array {
         $heroId = $this->game->getHeroTokenId($this->getOwner());
         $heroHex = $this->game->hexMap->getCharacterHex($heroId);
         $this->game->systemAssert("ERR:spawn:noHeroHex:$heroId", $heroHex !== null);
-
-        $adjHexes = $this->game->hexMap->getAdjacentHexes($heroHex);
-        $supplyTokens = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
-
-        $placed = 0;
-        foreach ($adjHexes as $hex) {
-            if ($placed >= $count) {
-                break;
+        $hexes = [];
+        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
+            if ($this->game->hexMap->getCharacterOnHex($hex) === null) {
+                $hexes[$hex] = ["q" => Material::RET_OK];
             }
-            if ($this->game->hexMap->getCharacterOnHex($hex) !== null) {
-                continue;
-            }
-            $monsterId = array_key_first($supplyTokens);
-            if ($monsterId === null) {
-                break;
-            }
-            unset($supplyTokens[$monsterId]);
-            $this->game->getMonster($monsterId)->moveTo($hex, clienttranslate('${char_name} spawned adjacent to ${char_name2}'), [
-                "char_name2" => $heroId,
-            ]);
-            $placed++;
         }
+        return $hexes;
+    }
+
+    function getPrompt() {
+        return clienttranslate("Choose an adjacent area to place the spawned monster");
+    }
+
+    function getPossibleMoves(): array {
+        $type = $this->getParam(0, "");
+        if ($type === "" || !$this->supplyHasMonster($type)) {
+            return []; // no type (generic probe) or supply exhausted - nothing to place
+        }
+        return $this->getFreeAdjacentHexes();
+    }
+
+    function resolve(): void {
+        $type = $this->getMonsterType();
+        $hex = $this->getCheckedArg();
+        $heroId = $this->game->getHeroTokenId($this->getOwner());
+
+        $supply = $this->game->tokens->getTokensOfTypeInLocation("monster_$type", "supply_monster");
+        $monsterId = array_key_first($supply);
+        $this->game->systemAssert("ERR:spawn:noSupply:$type", $monsterId !== null);
+
+        $this->game->getMonster($monsterId)->moveTo($hex, clienttranslate('${char_name} spawned adjacent to ${char_name2}'), [
+            "char_name2" => $heroId,
+        ]);
+
+        $remaining = (int) $this->getCount() - 1;
+        if ($remaining > 0) {
+            $this->queue("{$remaining}spawn($type)");
+        }
+    }
+
+    public function canSkip() {
+        // Placement is mandatory while a free adjacent hex exists; an exhausted supply or
+        // fully-blocked ring (no valid targets) must skip silently so it never hangs the
+        // machine -- e.g. a surrounded hero on Ambush, or a multi-spawn whose ring fills mid-chain.
+        return $this->isOptional() || $this->noValidTargets();
+    }
+
+    public function isTrivial(): bool {
+        return $this->isOneChoice();
+    }
+
+    public function getUiArgs() {
+        return ["buttons" => false];
     }
 }

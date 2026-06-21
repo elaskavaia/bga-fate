@@ -89,8 +89,12 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $op->resolve();
         $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
 
-        // Place goblin adjacent to heroHex
+        // Place goblin adjacent to heroHex (Goblin has 2 health).
         $this->game->getMonster($goblin)->moveTo($goblinHex, "");
+
+        // Rig the roll to all misses (face 1) so the base attack deals 0 damage — the goblin can
+        // only die from the 3 guaranteed-hit dice that Black Arrows adds to THIS attack action.
+        $this->seedRand([1, 1, 1]);
 
         // Action 1: Move hero from Grimheim to heroHex (adjacent to goblin)
         $this->respond($heroHex);
@@ -98,20 +102,18 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // Action 2: Attack the goblin
         $this->respond($goblinHex);
 
-        // Now in free-action phase after attack — Black Arrows should be offered
-        $this->assertValidTarget($blackArrows, "Black Arrows should be usable after attack");
+        // TActionAttack trigger fires mid-attack (after the roll, before hits resolve) —
+        // Black Arrows should be offered here so its +3 damage lands on this attack action.
+        $this->assertValidTarget($blackArrows, "Black Arrows should be offered during the attack");
 
-        // Count dice on display_battle before using arrows
-        $diceBefore = $this->countTokens("die_attack", "display_battle");
-
-        // Use Black Arrows — spends 1 arrow, adds 3 damage dice
+        // Use Black Arrows — spends 1 arrow, adds 3 damage dice to this attack
         $this->respond($blackArrows);
         $this->confirmCardEffect();
 
-        // Verify: 1 arrow spent (2 remaining), 3 damage dice added
+        // 1 arrow spent (2 remaining), and the 3 arrow hits killed the goblin (proving the damage
+        // landed on this attack action, not after it resolved).
         $this->assertEquals(2, $this->countTokens("crystal_yellow", $blackArrows));
-        $diceAfter = $this->countTokens("die_attack", "display_battle");
-        $this->assertEquals($diceBefore + 3, $diceAfter, "Black Arrows should add 3 damage dice");
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin), "Goblin should be killed by the 3 arrow hits");
     }
 
     public function testBlackArrowsNotOfferedWhenNoArrows(): void {
