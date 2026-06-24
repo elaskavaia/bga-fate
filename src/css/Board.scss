@@ -22,36 +22,10 @@
   align-items: flex-end;
 }
 
-// Each pile_monster shows one token shape + a count badge
+// Each pile_monster shows one token shape, a count badge, and a static stats box
+// (.stats_attack, built in Game.ts — styled in Minis.scss, shared with map characters)
 .pile_monster {
   @include v.pile-counter(".monster");
-
-  // Static stats overlay (attack / gold / health) — horizontal row along the bottom.
-  // Built in Game.ts when the pile container is first created.
-  .pile_stats {
-    position: absolute;
-    width: 54%;
-    left: 23%;
-    bottom: 0px;
-    z-index: 10;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    pointer-events: none;
-
-    > span {
-      display: inline-flex;
-      align-items: center;
-      &::after {
-        position: relative;
-        left: 12px;
-        bottom: 0px;
-      }
-    }
-  }
-}
-.pile_monster .pile_stats > span.wicon_gold {
-  display: none;
 }
 
 // Crystal supply piles: stack with counter (same trick as monster piles)
@@ -130,7 +104,7 @@
 }
 .map_wrapper > .monster_legend_3 {
   top: 1%;
-  left: 1%;
+  left: 3%;
 }
 .map_wrapper > .monster_legend_4 {
   bottom: 1%;
@@ -250,6 +224,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px;
+  margin: 10px;
 
   .card {
     order: 10;

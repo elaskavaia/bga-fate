@@ -2557,6 +2557,12 @@ class Game extends Game1Tokens {
                         if (handCounter)
                             handCounter.dataset.limit = String(tokenInfo.state);
                     }
+                    // Hero attack/health changed (upgrade, equip) — refresh its stats box on the map
+                    if (tokenKey.startsWith("tracker_strength") || tokenKey.startsWith("tracker_health")) {
+                        const player = Object.values(this.gamedatas.players ?? {}).find((p) => p.color === color);
+                        if (player)
+                            result.onEnd = () => this.refreshAttackStat(`hero_${player.heroNo}`);
+                    }
                 }
                 break;
             case "marker":
@@ -2577,14 +2583,8 @@ class Game extends Game1Tokens {
                     else {
                         const subId = "supply_" + monsterType;
                         if (!$(subId)) {
-                            const atk = this.getRulesFor(monsterType, "strength", 0);
-                            const gold = this.getRulesFor(monsterType, "xp", 0);
-                            const hp = this.getRulesFor(monsterType, "health", 0);
-                            const stats = `<div class="pile_stats">` +
-                                `<span class="tracker wicon wicon_strength" data-state="${atk}"></span>` +
-                                `<span class="tracker wicon wicon_gold" data-state="${gold}"></span>` +
-                                `<span class="tracker wicon wicon_health" data-state="${hp}"></span>` +
-                                `</div>`;
+                            const attackHtml = this.buildAttackStat(monsterType);
+                            const stats = attackHtml ? `<div class="stats_attack">${attackHtml}</div>` : "";
                             placeHtml(`<div id="${subId}" class="pile_monster ${monsterType}">${stats}</div>`, "map_wrapper");
                         }
                         result.location = subId;
@@ -2719,7 +2719,69 @@ class Game extends Game1Tokens {
                 const max = parseInt(this.getRulesFor(monsterMatch[1], "health", "0"));
                 if (max > 0)
                     bucket.dataset.max = String(max);
+                // refresh the attack box for monsters whose attack depends on damage (e.g. Nidhuggr)
+                this.refreshAttackStat(monsterMatch[1]);
             }
+        }
+    }
+    /** Inner html for a character/pile .stats_attack box: attack / max-health.
+     *  Returns null for non-combatants (no stats, e.g. gold veins) so no box is shown. */
+    buildAttackStat(charId) {
+        let atk = 0;
+        let hp = 0;
+        if (getPart(charId, 0) === "hero") {
+            const heroNo = getIntPart(charId, 1);
+            const player = Object.values(this.gamedatas.players).find((p) => p.heroNo === heroNo);
+            if (player) {
+                atk = this.getTokenState(`tracker_strength_${player.color}`);
+                hp = this.getTokenState(`tracker_health_${player.color}`);
+            }
+        }
+        else {
+            hp = parseInt(this.getRulesFor(charId, "health", "0"));
+            if (getPart(charId, 1) === "legend" && getPart(charId, 2) === "6") {
+                // Nidhuggr: attack equals its current remaining health (max - damage)
+                const dmg = parseInt($(`bucket_crystal_red_${charId}`)?.dataset.state ?? "0");
+                atk = hp - dmg;
+            }
+            else {
+                atk = parseInt(this.getRulesFor(charId, "strength", "0"));
+            }
+        }
+        if (!atk && !hp)
+            return null;
+        return `<b class="atk">${atk}</b><span class="slash">/</span><b class="hp">${hp}</b>`;
+    }
+    /** Ensure a map character carries its .stats_attack box and refresh its content. */
+    refreshAttackStat(charId) {
+        const node = $(charId);
+        if (!node)
+            return;
+        let box = node.querySelector(":scope > .stats_attack");
+        const html = this.buildAttackStat(charId);
+        if (html === null) {
+            box?.remove();
+            return;
+        }
+        if (!box) {
+            box = document.createElement("div");
+            box.className = "stats_attack";
+            node.appendChild(box);
+        }
+        box.innerHTML = html;
+    }
+    updateToken(tokenNode, placeInfo) {
+        super.updateToken(tokenNode, placeInfo);
+        const charId = placeInfo.key;
+        const mainType = getPart(charId, 0);
+        if (mainType === "hero") {
+            this.refreshAttackStat(charId);
+        }
+        else if (mainType === "monster") {
+            const loc = placeInfo.location ?? "";
+            // only map characters get a box; supply monsters live in piles (the pile has its own)
+            if (loc.startsWith("hex_") || loc === "map_wrapper")
+                this.refreshAttackStat(charId);
         }
     }
     getTokenPresentaton(type, tokenKey, args = {}, strict = false) {

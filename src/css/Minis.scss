@@ -73,22 +73,88 @@
       border-radius: 50%;
     }
   }
-  // Red crystal bucket: damage indicator (red badge, bottom-right)
-  .bucket_crystal_red {
-    bottom: 7%;
-    right: 41%;
+  // Red crystal bucket -> single damage die, bottom-left (sketch 03).
+  // dice_red.webp = 7 faces: 1-6 show pips; the 7th is blank for 7+ (count overlaid).
+  // data-state = damage count; max HP lives in .stats_attack (data-max unused here).
+  > .bucket_crystal_red {
+    left: 7%;
+    right: auto;
+    bottom: 6%;
+    background-image: url(img/dice_red.webp);
+    background-size: 700% 100%;
+    background-repeat: no-repeat;
+    background-position: 100% 0%; // default: blank face (7+), numeral overlaid below
+    filter: unset;
 
-    &::after {
-      background-color: #e53935;
+    // 7+ damage: blank die + centered numeral (shown by default; hidden for 1-6)
+    &[data-state]::after {
+      content: attr(data-state);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: none;
+      border-radius: 0;
+      aspect-ratio: unset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: small;
+    }
+
+    // 1-6 damage: pick the matching pip face, hide the numeral
+    &[data-state="1"] {
+      background-position: 0% 0%;
+    }
+    &[data-state="2"] {
+      background-position: 16.6667% 0%;
+    }
+    &[data-state="3"] {
+      background-position: 33.3333% 0%;
+    }
+    &[data-state="4"] {
+      background-position: 50% 0%;
+    }
+    &[data-state="5"] {
+      background-position: 66.6667% 0%;
+    }
+    &[data-state="6"] {
+      background-position: 83.3333% 0%;
+    }
+    &[data-state="1"]::after,
+    &[data-state="2"]::after,
+    &[data-state="3"]::after,
+    &[data-state="4"]::after,
+    &[data-state="5"]::after,
+    &[data-state="6"]::after {
+      content: "";
     }
   }
 }
 
-// Damage badge for monsters/heroes: pill showing "damage/max" HP, only when damaged.
-// data-state is the damage count, data-max is the character's max HP (set in updateBucketCount).
+// Static attack/health box (MTG power/toughness style), bottom-right of the figure.
+// Built/filled in Game.ts (buildAttackStat); shared by map characters and supply piles.
+.stats_attack {
+  position: absolute;
+  right: 16%;
+  bottom: 6%;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  padding: 0px 4px;
+  border-radius: 7px;
+  background-color: #d69a5e;
+  color: #4b2a08;
+  font-size: small;
+  pointer-events: none;
+
+  .slash {
+    margin: 0 1px;
+  }
+}
+
+// Miniboard damage mirror: pill showing "damage/max" HP, only when damaged.
+// data-state is the damage count, data-max is max HP (set in updateBucketCount).
 // :not([data-state="0"]) suppresses the badge after a full heal — data-max is sticky.
-.monster > .bucket_crystal_red[data-max]:not([data-state="0"])::after,
-.hero > .bucket_crystal_red[data-max]:not([data-state="0"])::after,
 .miniboard_damage[data-max]:not([data-state="0"])::after {
   content: attr(data-state) "/" attr(data-max);
   width: auto;
