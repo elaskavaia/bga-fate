@@ -9,6 +9,8 @@
  *
  */
 
+import { Token } from "./Game1Tokens";
+
 export interface CustomPlayer extends Player {
   heroNo?: number;
 }
