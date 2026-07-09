@@ -64,6 +64,7 @@ When the chrome-devtools-mcp plugin is available, you can drive a real browser a
 - Open a table: `https://studio.boardgamearena.com/tableview?table=<TABLE_ID>` (ask the user for the current table id)
 - Act as a specific test player: append `&as=<PLAYER_ID>` (e.g. `...&as=2300663`)
 - Login session persists in the MCP browser profile (`~/.cache/chrome-devtools-mcp/`); if redirected to the login page, ask the user to log in in the MCP-controlled Chrome window, then retry
+- **The game runs inside `iframe#gameIframe`** on the tableview page. `evaluate_script` executes against the top document, so `document.getElementById(...)` will NOT find game DOM. Reach it via `document.getElementById('gameIframe').contentDocument` (and `.contentWindow` for `getComputedStyle` / `localStorage`). The iframe is same-origin, so this works.
 
 ### Code Formatting
 
