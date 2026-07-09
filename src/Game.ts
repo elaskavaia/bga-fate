@@ -11,6 +11,7 @@
 
 import { getIntPart, getParentParts, getPart, placeHtml } from "./Game0Basics";
 import { Game1Tokens, Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
+import { LaHand } from "./LaHand";
 import { LaZoom } from "./LaZoom";
 import { PlayerTurn } from "./PlayerTurn";
 import { CustomGamedatas, CustomPlayer } from "./types";
@@ -36,6 +37,7 @@ class PlayerTurnConfirm {
 export class Game extends Game1Tokens {
   private playerTurn: PlayerTurn;
   private zoomControls!: LaZoom;
+  private handControls!: LaHand;
 
   constructor(bga: Bga) {
     super(bga);
@@ -105,7 +107,10 @@ export class Game extends Game1Tokens {
       if (!this.bga.players.isCurrentPlayerSpectator()) {
         const myColor = this.player_color;
         const name = _("Hand");
-        placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, "players_panels");
+        placeHtml(
+          `<div id="hand_park_home"><div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`,
+          "players_panels"
+        );
       }
 
       const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
@@ -153,6 +158,17 @@ export class Game extends Game1Tokens {
       this.setupTokens(gamedatas);
       this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
       this.zoomControls.setup();
+
+      const handWrapper = document.querySelector<HTMLElement>("#hand_park_home > .hand_wrapper");
+      if (handWrapper) {
+        this.handControls = new LaHand({
+          handWrapper,
+          parkedHome: $("hand_park_home")!,
+          floatHostParent: this.bga.gameArea.getElement(),
+          storagePrefix: "fate"
+        });
+        this.handControls.setup();
+      }
 
       this.setupNotifications();
 

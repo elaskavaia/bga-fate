@@ -1528,6 +1528,79 @@ class Game1Tokens extends Game0Basics {
  * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
  * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
  *
+ * Floating hand controls: lets the current player's hand either float (fixed at
+ * the bottom of the screen, collapsible) or sit parked on the table where it was
+ * originally placed. Mode + open/closed state persist in localStorage.
+ *
+ * The floating host lives OUTSIDE the zoomed board (`thething`) so `position:
+ * fixed` anchors to the viewport instead of the scaled board.
+ * -----
+ */
+class LaHand {
+    constructor(opts) {
+        this.place = "floating";
+        this.open = true;
+        this.wrapper = opts.handWrapper;
+        this.parkedHome = opts.parkedHome;
+        this.storagePrefix = opts.storagePrefix;
+        this.floatHost = document.createElement("div");
+        this.floatHost.id = "hand_float_host";
+        this.floatHost.className = "hand_float_host";
+        opts.floatHostParent.appendChild(this.floatHost);
+    }
+    get placeKey() {
+        return `${this.storagePrefix}_hand_place`;
+    }
+    get openKey() {
+        return `${this.storagePrefix}_hand_open`;
+    }
+    setup() {
+        this.place = localStorage.getItem(this.placeKey) === "parked" ? "parked" : "floating";
+        this.open = localStorage.getItem(this.openKey) !== "0";
+        this.addControls();
+        this.apply();
+    }
+    addControls() {
+        this.wrapper.insertAdjacentHTML("afterbegin", `<div class="hand_controls">
+        <button id="button_hand_open" class="hand_button" title="${_("Click to open or close your hand")}">
+          <i class="fa fa-arrow-circle-o-down icon_down"></i>
+          <i class="fa fa-arrow-circle-o-up icon_up"></i>
+        </button>
+        <button id="button_hand_place" class="hand_button" title="${_("Click to float your hand or park it on the table")}">
+          <i class="fa fa-hand-paper-o icon_float"></i>
+          <i class="fa fa-window-maximize icon_park"></i>
+        </button>
+      </div>`);
+        $("button_hand_place").addEventListener("click", () => this.setPlace(this.place === "floating" ? "parked" : "floating"));
+        $("button_hand_open").addEventListener("click", () => this.setOpen(!this.open));
+    }
+    setPlace(place) {
+        this.place = place;
+        localStorage.setItem(this.placeKey, place);
+        this.apply();
+    }
+    setOpen(open) {
+        this.open = open;
+        localStorage.setItem(this.openKey, open ? "1" : "0");
+        this.apply();
+    }
+    apply() {
+        if (this.place === "floating") {
+            this.floatHost.appendChild(this.wrapper);
+        }
+        else {
+            this.parkedHome.appendChild(this.wrapper);
+        }
+        this.wrapper.dataset.place = this.place;
+        this.wrapper.dataset.open = this.open ? "1" : "0";
+    }
+}
+
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
  * Reusable board zoom controls: Fit / Zoom-in / Zoom-out buttons anchored to
  * the sticky action bar (#page-title). Uses CSS `zoom` to scale a target
  * element; persists mode + scale in localStorage.
@@ -2305,7 +2378,7 @@ class Game extends Game1Tokens {
             if (!this.bga.players.isCurrentPlayerSpectator()) {
                 const myColor = this.player_color;
                 const name = _("Hand");
-                placeHtml(`<div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div>`, "players_panels");
+                placeHtml(`<div id="hand_park_home"><div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`, "players_panels");
             }
             const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
             orderedPlayerIds.forEach((pid) => {
@@ -2341,6 +2414,16 @@ class Game extends Game1Tokens {
             this.setupTokens(gamedatas);
             this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
             this.zoomControls.setup();
+            const handWrapper = document.querySelector("#hand_park_home > .hand_wrapper");
+            if (handWrapper) {
+                this.handControls = new LaHand({
+                    handWrapper,
+                    parkedHome: $("hand_park_home"),
+                    floatHostParent: this.bga.gameArea.getElement(),
+                    storagePrefix: "fate"
+                });
+                this.handControls.setup();
+            }
             this.setupNotifications();
             if (gamedatas.endBanner) {
                 if (gamedatas.endBanner.isWellDestroyed)

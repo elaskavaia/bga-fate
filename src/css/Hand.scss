@@ -1,0 +1,90 @@
+@use "variables" as v;
+
+// Empty anchor outside the zoomed board; the floating wrapper docks here.
+.hand_float_host {
+  position: relative;
+}
+
+// Control buttons ride along in the top-right corner of the hand wrapper.
+.hand_controls {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.hand_button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  background: white;
+  color: #2d5a3d;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+
+  &:hover {
+    background: #e0e0e0;
+  }
+}
+
+// Icon visibility is driven by the wrapper's data-place / data-open state.
+.hand_wrapper {
+  .icon_park,
+  .icon_up {
+    display: none;
+  }
+
+  &[data-place="parked"] #button_hand_open {
+    display: none;
+  }
+
+  &[data-place="floating"] {
+    .icon_float {
+      display: none;
+    }
+    .icon_park {
+      display: inline-block;
+    }
+  }
+
+  &[data-open="0"] {
+    .icon_down {
+      display: none;
+    }
+    .icon_up {
+      display: inline-block;
+    }
+  }
+}
+
+// --- Floating mode: fixed to the bottom of the viewport, collapsible ---
+.hand_wrapper[data-place="floating"] {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: 96vw;
+  margin-top: 0;
+  z-index: 100;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
+  transition: transform 0.4s;
+
+  // Collapsed: slide down leaving just the controls peeking above the fold.
+  &[data-open="0"] {
+    transform: translate(-50%, calc(100% - 34px));
+  }
+
+  .hand {
+    max-width: 96vw;
+  }
+}
