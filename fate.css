@@ -497,6 +497,11 @@
   z-index: 10;
 }
 
+#map_area:has(.active_slot) .hex > .hero,
+#map_area:has(.active_slot) .hex > .monster {
+  pointer-events: none;
+}
+
 .hero {
   aspect-ratio: 1;
   height: 94px;
@@ -2353,6 +2358,13 @@ html:before {
   display: inline-block;
 }
 
+@media (max-width: 740px) {
+  .game_top_bar {
+    position: static;
+    top: auto;
+    width: 100%;
+  }
+}
 .selection_area {
   display: flex;
   justify-content: center;

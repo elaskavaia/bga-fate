@@ -11,6 +11,16 @@
   z-index: 10;
 }
 
+// The figure is 100% tall and overflows its hex; a click on the overflow lands on the figure's
+// (inactive) source hex instead of the target hex under the pointer, needing a second click.
+// Make figures click-through only while hexes are selection targets, so they keep hover/tooltips otherwise.
+#map_area:has(.active_slot) {
+  .hex > .hero,
+  .hex > .monster {
+    pointer-events: none;
+  }
+}
+
 // Hero and monster miniatures
 .hero {
   aspect-ratio: 1;

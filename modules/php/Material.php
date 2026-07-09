@@ -4936,6 +4936,7 @@ class Material {
         "name" => clienttranslate("Tiara"),
         "quest" => "<i>Find it in the Dark Forest</i>. Turns out you're a princess after all!",
         "effect" => clienttranslate("Starts with 6 gold [XP] on this card. Gain 1 gold [XP] from here each turn."),
+        "quest_on" => "TMove",
         "quest_r" => "in(DarkForest):gainEquip",
 ],
     "card_equip_2_19" => [ 

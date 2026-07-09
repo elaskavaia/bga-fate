@@ -37,6 +37,27 @@ final class Op_spawnTest extends AbstractOpTestCase {
         return $count;
     }
 
+    /** First adjacent hex that is a legal spawn target (not Grimheim). */
+    private function firstNonGrimheimAdjacent(): string {
+        foreach ($this->game->hexMap->getAdjacentHexes($this->heroHex) as $hex) {
+            if (!$this->game->hexMap->isInGrimheim($hex)) {
+                return $hex;
+            }
+        }
+        $this->fail("hero has no non-Grimheim neighbour");
+    }
+
+    /** Occupy every adjacent hex except $freeHex, so spawn has exactly one legal target. */
+    private function fillAdjacentExcept(string $freeHex): void {
+        $i = 1;
+        foreach ($this->game->hexMap->getAdjacentHexes($this->heroHex) as $hex) {
+            if ($hex !== $freeHex) {
+                $this->game->getMonster("monster_goblin_" . $i++)->moveTo($hex, "");
+            }
+        }
+        $this->game->hexMap->invalidateOccupancy();
+    }
+
     /** Drive a spawn op to completion, always choosing the first offered free hex. */
     private function resolveSpawnChain(string $opType): void {
         $op = $this->createOp($opType);
@@ -74,11 +95,9 @@ final class Op_spawnTest extends AbstractOpTestCase {
     }
 
     public function testStopsWhenAdjRingIsFull(): void {
-        // Fill 5 of the 6 adj hexes with already-spawned goblins
-        $adj = $this->game->hexMap->getAdjacentHexes($this->heroHex);
-        for ($i = 0; $i < 5; $i++) {
-            $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($adj[$i], "");
-        }
+        // Leave exactly one free NON-Grimheim hex (Grimheim is never a spawn target).
+        $free = $this->firstNonGrimheimAdjacent();
+        $this->fillAdjacentExcept($free);
         // Try to spawn 3 brutes - only 1 free hex
         $this->resolveSpawnChain("3spawn(brute)");
         $this->assertEquals(1, $this->countAdjacentMonsters("brute"));
@@ -130,14 +149,32 @@ final class Op_spawnTest extends AbstractOpTestCase {
         $this->assertTrue($op->canSkip(), "a blocked spawn must auto-skip instead of hanging");
     }
 
+    public function testSpawnNeverTargetsGrimheim(): void {
+        // hex_11_8's NW neighbour hex_10_8 is a Grimheim hex; adjacent spawn must exclude Grimheim
+        // (moving/pushing a monster INTO Grimheim is a separate, designer-allowed path).
+        $adjacentGrimheim = array_filter($this->game->hexMap->getAdjacentHexes($this->heroHex), fn($hex) => $this->game->hexMap->isInGrimheim($hex));
+        $this->assertNotEmpty($adjacentGrimheim, "test fixture: hero must stand next to Grimheim or this test is vacuous");
+        $targets = array_keys($this->createOp("spawn(brute)")->getPossibleMoves());
+        $this->assertNotEmpty($targets, "hero still has free non-Grimheim neighbours to spawn onto");
+        foreach ($targets as $hex) {
+            $this->assertFalse($this->game->hexMap->isInGrimheim($hex), "adjacent spawn must not offer Grimheim hex $hex");
+        }
+        // Full chain: no spawned brute ends up on a Grimheim hex.
+        $this->resolveSpawnChain("3spawn(brute)");
+        foreach ($this->game->hexMap->getHexesInGrimheim() as $gHex) {
+            $charId = $this->game->hexMap->getCharacterOnHex($gHex);
+            $this->assertFalse(
+                $charId !== null && str_starts_with($charId, "monster_brute"),
+                "no spawned brute should land on Grimheim hex $gHex"
+            );
+        }
+    }
+
     public function testConstrainedMultiSpawnDrainsViaMachine(): void {
         // Real machine path (not the hand-driven helper): a multi-spawn whose ring fills
         // mid-chain must auto-skip the remainder, not hang on a mandatory no-target op.
-        $adj = $this->game->hexMap->getAdjacentHexes($this->heroHex);
-        for ($i = 0; $i < 5; $i++) {
-            $this->game->getMonster("monster_goblin_" . ($i + 1))->moveTo($adj[$i], "");
-        }
-        $this->game->hexMap->invalidateOccupancy();
+        $free = $this->firstNonGrimheimAdjacent();
+        $this->fillAdjacentExcept($free);
 
         $this->game->machine->push("3spawn(brute)", $this->owner);
         $this->dispatchAll();

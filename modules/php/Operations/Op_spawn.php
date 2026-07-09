@@ -51,7 +51,9 @@ class Op_spawn extends CountableOperation {
         $this->game->systemAssert("ERR:spawn:noHeroHex:$heroId", $heroHex !== null);
         $hexes = [];
         foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
-            if ($this->game->hexMap->getCharacterOnHex($hex) === null) {
+            // Grimheim is off-limits for adjacent spawns (moving/pushing a monster INTO Grimheim is a
+            // separate, designer-allowed path - see R.22.6 - and is not routed through here).
+            if ($this->game->hexMap->getCharacterOnHex($hex) === null && !$this->game->hexMap->isInGrimheim($hex)) {
                 $hexes[$hex] = ["q" => Material::RET_OK];
             }
         }

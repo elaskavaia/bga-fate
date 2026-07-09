@@ -236,15 +236,19 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
     }
 
     /**
-     * Tiara (card_equip_2_16): quest_on= (empty - player-initiated),
-     * quest_r=in(DarkForest):gainEquip.
+     * Tiara (card_equip_2_16): quest_on=TMove, quest_r=in(DarkForest):gainEquip.
      *
-     * Player invokes the top-bar `completeQuest` free action while Tiara is on top
-     * of deck_equip_<color> AND the hero stands on a Dark Forest hex. No cost - the
-     * gate alone gates the claim. On success, Tiara's onCardEnter seeds 6 yellow
-     * crystals on the card.
+     * Move-triggered quest: it auto-completes when the hero's Move ends on a Dark
+     * Forest hex. Op_step emits Trigger::Move on the final step of a move (unless the
+     * move came from Op_actionMove, which emits the more specific ActionMove); the
+     * Tiara listens on TMove, and its in(DarkForest) gate then checks the landing hex.
+     * On success gainEquip moves the card to tableau, whose onCardEnter seeds 6 [XP].
+     *
+     * We drive a genuine one-hop `move` op (no Op_actionMove reason, so the closing
+     * trigger is exactly TMove) from a non-Dark-Forest hex onto an adjacent Dark
+     * Forest hex, so both the TMove trigger and the in(DarkForest) gate fire.
      */
-    public function testTiaraLandsOnTableauAfterCompleteQuestInDarkForest(): void {
+    public function testTiaraAutoCompletesWhenMovingIntoDarkForest(): void {
         $color = $this->getActivePlayerColor();
 
         $tiara = "card_equip_2_16";
@@ -252,22 +256,31 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->seedDeck("deck_equip_$color", [$tiara, $nextCard]);
         $this->assertEquals($tiara, $this->game->tokens->getTokenOnTop("deck_equip_$color")["key"]);
 
-        // Place hero on a Dark Forest hex so the in(DarkForest) gate passes.
-        $this->game->tokens->moveToken($this->heroId, "hex_9_1");
+        // Start OUTSIDE the Dark Forest, adjacent to a Dark Forest hex:
+        // hex_6_5 is plains (no location); hex_6_4 is plains inside DarkForest.
+        $startHex = "hex_6_5";
+        $darkForestHex = "hex_6_4";
+        $this->game->tokens->moveToken($this->heroId, $startHex);
+        $this->game->hexMap->invalidateOccupancy();
+        $this->assertContains(
+            $darkForestHex,
+            $this->game->hexMap->getAdjacentHexes($startHex),
+            "test fixture: Dark Forest hex must be adjacent so a single move lands on it"
+        );
 
-        $this->respond("completeQuest");
-
-        $this->assertOperation("completeQuest");
-        $this->assertValidTarget($tiara);
-        $this->respond($tiara);
+        // One-hop move ending on the Dark Forest hex. reason is NOT Op_actionMove, so
+        // Op_step's final step emits Trigger::Move (TMove) - the Tiara's quest trigger.
+        $this->game->machine->push("move", $color, ["target" => $darkForestHex]);
+        $this->game->machine->dispatchAll();
 
         // gainEquip may auto-resolve or surface a single-confirm; either way this is a no-op or a confirm.
         $this->confirmCardEffect();
 
+        $this->assertEquals($darkForestHex, $this->tokenLocation($this->heroId), "hero should have moved onto the Dark Forest hex");
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($tiara),
-            "Tiara should land on tableau after completeQuest in Dark Forest"
+            "Tiara should auto-complete and land on tableau when the move ends in Dark Forest"
         );
 
         // onCardEnter seeds 6 yellow crystals on the card.

@@ -57,6 +57,14 @@ Key commands: `b file.php:line` (breakpoint), `r` (run), `c` (continue), `s` (st
 
 The harness runs PHP server logic locally and renders a client snapshot (`staging/snapshot.html`) for visual inspection — no real BGA server needed. See [misc/docs/HARNESS.md](misc/docs/HARNESS.md) for usage details.
 
+### Debugging on real BGA Studio (chrome-devtools-mcp)
+
+When the chrome-devtools-mcp plugin is available, you can drive a real browser against a live BGA Studio game (screenshots, DOM snapshots, console logs, network, clicks):
+
+- Open a table: `https://studio.boardgamearena.com/tableview?table=<TABLE_ID>` (ask the user for the current table id)
+- Act as a specific test player: append `&as=<PLAYER_ID>` (e.g. `...&as=2300663`)
+- Login session persists in the MCP browser profile (`~/.cache/chrome-devtools-mcp/`); if redirected to the login page, ask the user to log in in the MCP-controlled Chrome window, then retry
+
 ### Code Formatting
 
 - Prettier is configured with PHP plugin (see package.json)

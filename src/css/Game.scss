@@ -402,6 +402,17 @@ $logsBgColor: #fff;
   }
 }
 
+// On narrow screens the buttons flex-wrap onto several rows, growing past min-height. Keeping the bar
+// absolute (top:100%) means #page-title reserves no height for it, so it overlaps the map below. Drop it
+// back into normal flow on mobile so #page-title grows and the map starts below the buttons.
+@media (max-width: 740px) {
+  .game_top_bar {
+    position: static;
+    top: auto;
+    width: 100%;
+  }
+}
+
 .selection_area {
   display: flex;
   justify-content: center;
