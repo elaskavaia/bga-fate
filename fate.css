@@ -1778,7 +1778,7 @@
   padding: 5px;
 }
 
-.hand_wrapper {
+.hand_area {
   background-color: rgba(245, 222, 179, 0.4901960784);
   position: relative;
   display: flex;
@@ -1787,7 +1787,7 @@
   width: 100%;
   padding-left: 20px;
 }
-.hand_wrapper::after {
+.hand_area::after {
   position: absolute;
   top: 0;
   left: 0;
@@ -1804,7 +1804,7 @@
   justify-content: center;
   padding: 10px 0;
 }
-.hand_wrapper {
+.hand_area {
   margin-top: 10px;
   padding-left: 20px;
   box-sizing: border-box;
@@ -1888,7 +1888,7 @@
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
-.hand_float_host {
+.hand_wrapper {
   position: relative;
 }
 
@@ -1919,27 +1919,27 @@
   background: #e0e0e0;
 }
 
-.hand_wrapper .icon_park,
-.hand_wrapper .icon_up {
+.hand_area .icon_park,
+.hand_area .icon_up {
   display: none;
 }
-.hand_wrapper[data-place=parked] #button_hand_open {
+.hand_area[data-place=parked] #button_hand_open {
   display: none;
 }
-.hand_wrapper[data-place=floating] .icon_float {
+.hand_area[data-place=floating] .icon_float {
   display: none;
 }
-.hand_wrapper[data-place=floating] .icon_park {
+.hand_area[data-place=floating] .icon_park {
   display: inline-block;
 }
-.hand_wrapper[data-open="0"] .icon_down {
+.hand_area[data-open="0"] .icon_down {
   display: none;
 }
-.hand_wrapper[data-open="0"] .icon_up {
+.hand_area[data-open="0"] .icon_up {
   display: inline-block;
 }
 
-.hand_wrapper[data-place=floating] {
+.hand_area[data-place=floating] {
   position: fixed;
   left: 50%;
   bottom: 0;
@@ -1953,10 +1953,10 @@
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
   transition: transform 0.4s;
 }
-.hand_wrapper[data-place=floating][data-open="0"] {
+.hand_area[data-place=floating][data-open="0"] {
   transform: translate(-50%, calc(100% - 34px));
 }
-.hand_wrapper[data-place=floating] .hand {
+.hand_area[data-place=floating] .hand {
   max-width: 96vw;
 }
 

@@ -1,11 +1,12 @@
 @use "variables" as v;
 
-// Empty anchor outside the zoomed board; the floating wrapper docks here.
-.hand_float_host {
+// Static float dock, lives outside the zoomed board; the hand_area docks here
+// when floating. Empty (no layout impact) when the hand is parked.
+.hand_wrapper {
   position: relative;
 }
 
-// Control buttons ride along in the top-right corner of the hand wrapper.
+// Control buttons ride along in the top-right corner of the hand area.
 .hand_controls {
   position: absolute;
   top: 2px;
@@ -34,8 +35,8 @@
   }
 }
 
-// Icon visibility is driven by the wrapper's data-place / data-open state.
-.hand_wrapper {
+// Icon visibility is driven by the hand_area's data-place / data-open state.
+.hand_area {
   .icon_park,
   .icon_up {
     display: none;
@@ -65,7 +66,7 @@
 }
 
 // --- Floating mode: fixed to the bottom of the viewport, collapsible ---
-.hand_wrapper[data-place="floating"] {
+.hand_area[data-place="floating"] {
   position: fixed;
   left: 50%;
   bottom: 0;

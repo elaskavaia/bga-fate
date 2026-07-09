@@ -7,20 +7,22 @@
  * the bottom of the screen, collapsible) or sit parked on the table where it was
  * originally placed. Mode + open/closed state persist in localStorage.
  *
- * The floating host lives OUTSIDE the zoomed board (`thething`) so `position:
- * fixed` anchors to the viewport instead of the scaled board.
+ * Names mirror galacticcruise: `hand_area` is the element that moves; it docks
+ * into the static `hand_wrapper` when floating and into the parked home on the
+ * table when parked. `hand_wrapper` lives OUTSIDE the zoomed board (`thething`)
+ * so `position: fixed` anchors to the viewport instead of the scaled board.
  * -----
  */
 
 type HandPlace = "floating" | "parked";
 
 export interface LaHandOptions {
-  // the hand wrapper element to relocate (e.g. the ".hand_wrapper" div)
-  handWrapper: HTMLElement;
-  // where the hand sits when parked (its original parent)
+  // the element that moves between docks (the ".hand_area" div)
+  handArea: HTMLElement;
+  // where the hand sits when parked on the table (its original slot)
   parkedHome: HTMLElement;
-  // where the floating host is attached (outside the zoomed board)
-  floatHostParent: HTMLElement;
+  // where the floating dock is attached (outside the zoomed board)
+  floatDockParent: HTMLElement;
   // prefix for localStorage keys (e.g. "fate")
   storagePrefix: string;
 }
@@ -28,20 +30,20 @@ export interface LaHandOptions {
 export class LaHand {
   private place: HandPlace = "floating";
   private open: boolean = true;
-  private readonly wrapper: HTMLElement;
+  private readonly area: HTMLElement;
   private readonly parkedHome: HTMLElement;
-  private floatHost!: HTMLElement;
+  private floatDock!: HTMLElement;
   private readonly storagePrefix: string;
 
   constructor(opts: LaHandOptions) {
-    this.wrapper = opts.handWrapper;
+    this.area = opts.handArea;
     this.parkedHome = opts.parkedHome;
     this.storagePrefix = opts.storagePrefix;
 
-    this.floatHost = document.createElement("div");
-    this.floatHost.id = "hand_float_host";
-    this.floatHost.className = "hand_float_host";
-    opts.floatHostParent.appendChild(this.floatHost);
+    this.floatDock = document.createElement("div");
+    this.floatDock.id = "hand_wrapper";
+    this.floatDock.className = "hand_wrapper";
+    opts.floatDockParent.appendChild(this.floatDock);
   }
 
   private get placeKey() {
@@ -60,7 +62,7 @@ export class LaHand {
   }
 
   private addControls() {
-    this.wrapper.insertAdjacentHTML(
+    this.area.insertAdjacentHTML(
       "afterbegin",
       `<div class="hand_controls">
         <button id="button_hand_open" class="hand_button" title="${_("Click to open or close your hand")}">
@@ -92,11 +94,11 @@ export class LaHand {
 
   private apply() {
     if (this.place === "floating") {
-      this.floatHost.appendChild(this.wrapper);
+      this.floatDock.appendChild(this.area);
     } else {
-      this.parkedHome.appendChild(this.wrapper);
+      this.parkedHome.appendChild(this.area);
     }
-    this.wrapper.dataset.place = this.place;
-    this.wrapper.dataset.open = this.open ? "1" : "0";
+    this.area.dataset.place = this.place;
+    this.area.dataset.open = this.open ? "1" : "0";
   }
 }

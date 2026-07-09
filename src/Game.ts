@@ -108,7 +108,7 @@ export class Game extends Game1Tokens {
         const myColor = this.player_color;
         const name = _("Hand");
         placeHtml(
-          `<div id="hand_park_home"><div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`,
+          `<div id="hand_park_home"><div class="hand_area" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`,
           "players_panels"
         );
       }
@@ -159,12 +159,12 @@ export class Game extends Game1Tokens {
       this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
       this.zoomControls.setup();
 
-      const handWrapper = document.querySelector<HTMLElement>("#hand_park_home > .hand_wrapper");
-      if (handWrapper) {
+      const handArea = document.querySelector<HTMLElement>("#hand_park_home > .hand_area");
+      if (handArea) {
         this.handControls = new LaHand({
-          handWrapper,
+          handArea,
           parkedHome: $("hand_park_home")!,
-          floatHostParent: this.bga.gameArea.getElement(),
+          floatDockParent: this.bga.gameArea.getElement(),
           storagePrefix: "fate"
         });
         this.handControls.setup();
@@ -211,7 +211,7 @@ export class Game extends Game1Tokens {
           const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
           const color = player.color;
           $(`tableau_${color}`)!.dataset.name = this.getTr(tname);
-          const hand: HTMLElement | null = document.querySelector(`.hand_wrapper > #hand_${color}`);
+          const hand: HTMLElement | null = document.querySelector(`.hand_area > #hand_${color}`);
           if (hand) hand.parentElement!.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
         });
       });
@@ -380,7 +380,7 @@ export class Game extends Game1Tokens {
 
     placeHtml(`<div id="map_area">${hexHtml}</div>`, parent);
 
-    parent.querySelectorAll(".hex").forEach((node: HTMLElement) => {
+    parent.querySelectorAll<HTMLElement>(".hex").forEach((node) => {
       this.addListenerWithGuard(node, (e) => this.onToken(e));
       this.updateTooltip(node.id);
     });

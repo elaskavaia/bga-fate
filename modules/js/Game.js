@@ -1532,21 +1532,23 @@ class Game1Tokens extends Game0Basics {
  * the bottom of the screen, collapsible) or sit parked on the table where it was
  * originally placed. Mode + open/closed state persist in localStorage.
  *
- * The floating host lives OUTSIDE the zoomed board (`thething`) so `position:
- * fixed` anchors to the viewport instead of the scaled board.
+ * Names mirror galacticcruise: `hand_area` is the element that moves; it docks
+ * into the static `hand_wrapper` when floating and into the parked home on the
+ * table when parked. `hand_wrapper` lives OUTSIDE the zoomed board (`thething`)
+ * so `position: fixed` anchors to the viewport instead of the scaled board.
  * -----
  */
 class LaHand {
     constructor(opts) {
         this.place = "floating";
         this.open = true;
-        this.wrapper = opts.handWrapper;
+        this.area = opts.handArea;
         this.parkedHome = opts.parkedHome;
         this.storagePrefix = opts.storagePrefix;
-        this.floatHost = document.createElement("div");
-        this.floatHost.id = "hand_float_host";
-        this.floatHost.className = "hand_float_host";
-        opts.floatHostParent.appendChild(this.floatHost);
+        this.floatDock = document.createElement("div");
+        this.floatDock.id = "hand_wrapper";
+        this.floatDock.className = "hand_wrapper";
+        opts.floatDockParent.appendChild(this.floatDock);
     }
     get placeKey() {
         return `${this.storagePrefix}_hand_place`;
@@ -1561,7 +1563,7 @@ class LaHand {
         this.apply();
     }
     addControls() {
-        this.wrapper.insertAdjacentHTML("afterbegin", `<div class="hand_controls">
+        this.area.insertAdjacentHTML("afterbegin", `<div class="hand_controls">
         <button id="button_hand_open" class="hand_button" title="${_("Click to open or close your hand")}">
           <i class="fa fa-arrow-circle-o-down icon_down"></i>
           <i class="fa fa-arrow-circle-o-up icon_up"></i>
@@ -1586,13 +1588,13 @@ class LaHand {
     }
     apply() {
         if (this.place === "floating") {
-            this.floatHost.appendChild(this.wrapper);
+            this.floatDock.appendChild(this.area);
         }
         else {
-            this.parkedHome.appendChild(this.wrapper);
+            this.parkedHome.appendChild(this.area);
         }
-        this.wrapper.dataset.place = this.place;
-        this.wrapper.dataset.open = this.open ? "1" : "0";
+        this.area.dataset.place = this.place;
+        this.area.dataset.open = this.open ? "1" : "0";
     }
 }
 
@@ -2378,7 +2380,7 @@ class Game extends Game1Tokens {
             if (!this.bga.players.isCurrentPlayerSpectator()) {
                 const myColor = this.player_color;
                 const name = _("Hand");
-                placeHtml(`<div id="hand_park_home"><div class="hand_wrapper" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`, "players_panels");
+                placeHtml(`<div id="hand_park_home"><div class="hand_area" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`, "players_panels");
             }
             const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
             orderedPlayerIds.forEach((pid) => {
@@ -2414,12 +2416,12 @@ class Game extends Game1Tokens {
             this.setupTokens(gamedatas);
             this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
             this.zoomControls.setup();
-            const handWrapper = document.querySelector("#hand_park_home > .hand_wrapper");
-            if (handWrapper) {
+            const handArea = document.querySelector("#hand_park_home > .hand_area");
+            if (handArea) {
                 this.handControls = new LaHand({
-                    handWrapper,
+                    handArea,
                     parkedHome: $("hand_park_home"),
-                    floatHostParent: this.bga.gameArea.getElement(),
+                    floatDockParent: this.bga.gameArea.getElement(),
                     storagePrefix: "fate"
                 });
                 this.handControls.setup();
@@ -2458,7 +2460,7 @@ class Game extends Game1Tokens {
                     const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
                     const color = player.color;
                     $(`tableau_${color}`).dataset.name = this.getTr(tname);
-                    const hand = document.querySelector(`.hand_wrapper > #hand_${color}`);
+                    const hand = document.querySelector(`.hand_area > #hand_${color}`);
                     if (hand)
                         hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
                 });
