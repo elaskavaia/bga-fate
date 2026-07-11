@@ -157,15 +157,30 @@
   font-size: small;
   pointer-events: none;
 
-  .slash {
-    margin: 0 1px;
+  .composite {
+    position: relative;
   }
+
+  .composite > * {
+    font-weight: bold;
+  }
+
+  .composite_second_important .composite_second {
+    color: red;
+    font-size: medium;
+  }
+}
+
+// stats box shows remaining health, so the redundant damage die is hidden
+.hero:has(> .stats_attack) > .bucket_crystal_red,
+.monster:has(> .stats_attack) > .bucket_crystal_red {
+  display: none;
 }
 
 // Miniboard damage mirror: pill showing "damage/max" HP, only when damaged.
 // data-state is the damage count, data-max is max HP (set in updateBucketCount).
 // :not([data-state="0"]) suppresses the badge after a full heal — data-max is sticky.
-.miniboard_damage[data-max]:not([data-state="0"])::after {
+.tracker_damage[data-max]:not([data-state="0"])::after {
   content: attr(data-state) "/" attr(data-max);
   width: auto;
   aspect-ratio: unset;

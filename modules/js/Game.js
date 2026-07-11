@@ -2427,6 +2427,7 @@ class Game extends Game1Tokens {
                 this.handControls.setup();
             }
             this.setupNotifications();
+            this.setupCardCatalog();
             if (gamedatas.endBanner) {
                 if (gamedatas.endBanner.isWellDestroyed)
                     this.bga.gameArea.addLastTurnBanner(gamedatas.endBanner.message);
@@ -2448,24 +2449,24 @@ class Game extends Game1Tokens {
                 }
                 // hero damage mirror on miniboard
                 const heroNo = player.heroNo;
+                // damage
                 const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);
                 const initialState = srcBucket?.dataset.state ?? "0";
-                placeHtml(`<div id="miniboard_damage_${color}" class="bucket bucket_crystal_red miniboard_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`, `miniboard_${color}`);
+                placeHtml(`<div id="tracker_damage_${color}" class="bucket bucket_crystal_red tracker_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`, `miniboard_${color}`);
+                // Boldur's hero cards grant "Armor. (Always prevents 1 damage)" - static signature pill
+                if (player.heroNo == 4)
+                    placeHtml(`<div id="tracker_armor_${color}" class="tracker_armor tracker wicon wicon_armor" data-state="1"></div>`, `miniboard_${color}`);
                 // marker tracking cost of upgrade
                 const marker = $(`marker_${color}_3`);
                 $(`miniboard_${color}`).appendChild(marker);
                 marker.classList.add("bucket", "upgrade_cost");
                 this.updateTooltip("upgrade_cost", marker);
-                Object.values(gamedatas.players).forEach((player) => {
-                    const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
-                    const color = player.color;
-                    $(`tableau_${color}`).dataset.name = this.getTr(tname);
-                    const hand = document.querySelector(`.hand_area > #hand_${color}`);
-                    if (hand)
-                        hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
-                });
+                const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
+                $(`tableau_${color}`).dataset.name = this.getTr(tname);
+                const hand = document.querySelector(`.hand_area > #hand_${color}`);
+                if (hand)
+                    hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
             });
-            this.setupCardCatalog();
         }
         catch (e) {
             console.error(e);
@@ -2812,13 +2813,14 @@ class Game extends Game1Tokens {
     /** Inner html for a character/pile .stats_attack box: attack / max-health.
      *  Returns null for non-combatants (no stats, e.g. gold veins) so no box is shown. */
     buildAttackStat(charId) {
-        let atk = 0;
+        let attack = 0;
         let hp = 0;
+        const damage = parseInt($(`bucket_crystal_red_${charId}`)?.dataset.state ?? "0");
         if (getPart(charId, 0) === "hero") {
             const heroNo = getIntPart(charId, 1);
             const player = Object.values(this.gamedatas.players).find((p) => p.heroNo === heroNo);
             if (player) {
-                atk = this.getTokenState(`tracker_strength_${player.color}`);
+                attack = this.getTokenState(`tracker_strength_${player.color}`);
                 hp = this.getTokenState(`tracker_health_${player.color}`);
             }
         }
@@ -2826,16 +2828,24 @@ class Game extends Game1Tokens {
             hp = parseInt(this.getRulesFor(charId, "health", "0"));
             if (getPart(charId, 1) === "legend" && getPart(charId, 2) === "6") {
                 // Nidhuggr: attack equals its current remaining health (max - damage)
-                const dmg = parseInt($(`bucket_crystal_red_${charId}`)?.dataset.state ?? "0");
-                atk = hp - dmg;
+                attack = hp - damage;
             }
             else {
-                atk = parseInt(this.getRulesFor(charId, "strength", "0"));
+                attack = parseInt(this.getRulesFor(charId, "strength", "0"));
             }
         }
-        if (!atk && !hp)
+        if (!attack && !hp)
             return null;
-        return `<b class="atk">${atk}</b><span class="slash">/</span><b class="hp">${hp}</b>`;
+        const remhealth = hp - damage;
+        const important = damage > 0;
+        return this.buildCompositeCounter({
+            [`counter_attack_${charId}`]: attack,
+            [`counter_remhealth_${charId}`]: remhealth
+        }, important ? "composite_second_important" : "");
+    }
+    buildCompositeCounter(pair, classes = "") {
+        const [[firstId, firstValue], [secondId, secondValue]] = Object.entries(pair);
+        return `<div class="composite ${classes}"><div id="${firstId}" class="composite_first">${firstValue}</div><span class="composite_separator"></span><div id="${secondId}" class="composite_second">${secondValue}</div></div>`;
     }
     /** Ensure a map character carries its .stats_attack box and refresh its content. */
     refreshAttackStat(charId) {

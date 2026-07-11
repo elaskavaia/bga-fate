@@ -156,72 +156,163 @@
   text-shadow: v.$textShadowBlack;
 }
 
-// Miniboard in BGA player panel
+// Miniboard in BGA player panel: hero portrait with two rows of stat pills at the bottom.
+// Row 1 (combat): attack, defence, damage. Row 2 (economy): hand n/N, signature stat, gold/cost x/y.
 .miniboard {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-around;
-  padding: 4px 0;
+  align-content: flex-end;
+  // spreading is done with margin-left:auto on row members (not space-between),
+  // so the gold+cost capsule can stay glued together
+  justify-content: flex-start;
+  gap: 6px 4px;
+  padding: 6px;
   position: relative;
-  gap: 16px;
+  min-height: 150px;
+  box-sizing: border-box;
+
+  // forced row break between the combat and economy pills
+  &::after {
+    content: "";
+    flex-basis: 100%;
+    height: 0;
+    order: 4;
+  }
 
   .miniboard_banner {
-    flex-basis: 100%;
-    height: auto !important;
+    position: absolute;
+    top: 0;
+    left: 0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 15px;
     color: white;
-    padding: 2px 6px;
-    order: -1;
+    padding: 3px 10px 4px 8px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.25));
+    border-radius: 0 0 10px 0;
+    text-shadow: 0 1px 2px black;
   }
 
-  & > * {
+  // every stat token becomes a light translucent pill: icon (::before) + value (::after)
+  & > *:not(.miniboard_banner) {
     position: relative !important;
-    height: 32px;
-    filter: drop-shadow(0px 0px 3px black);
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    width: auto;
+    aspect-ratio: auto;
+    padding: 0 8px 0 4px;
+    border-radius: 13px;
+    background-color: rgba(255, 255, 255, 0.62);
+    background-image: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    filter: none;
+
+    &::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background-image: url(img/tokens.webp);
+      background-size: 600% 300%;
+      background-repeat: no-repeat;
+      background-position: inherit; // sprite cell comes from the token's wicon_/crystal class
+    }
     &::after {
-      position: absolute;
-      top: 9px;
-      left: 12px;
+      position: static;
+      margin-left: 3px;
+      color: #111;
+      font-size: 14px;
+      text-shadow: none;
     }
   }
-  .counter {
-    aspect-ratio: 1;
-  }
 
+  // combat row
   .wicon_strength {
     order: 1;
   }
   .wicon_health {
     order: 2;
+    margin-left: auto;
   }
-  .wicon_range {
+  .tracker_damage {
     order: 3;
+    margin-left: auto;
+    &:not([data-state="0"]) {
+      background-color: rgba(255, 215, 215, 0.68);
+      &::after {
+        color: #8a0f0f;
+      }
+    }
   }
-  .wicon_move {
-    order: 4;
-  }
+
+  // economy row
   .counter_hand {
     order: 5;
     &::after {
       content: attr(data-state) "/" attr(data-limit);
-      left: 8px;
+    }
+  }
+  .tracker_range {
+    order: 6;
+    margin-left: auto;
+  }
+  .tracker_move {
+    order: 7;
+    margin-left: auto;
+  }
+  .tracker_armor {
+    order: 8;
+    margin-left: auto;
+  }
+  // gold + next-level cost joined into one x/y capsule
+  .bucket_crystal_yellow {
+    order: 9;
+    margin-left: auto;
+    padding-right: 0;
+    border-radius: 13px 0 0 13px;
+  }
+  .upgrade_cost {
+    order: 10;
+    margin-left: -4px; // cancel flex gap so bucket+cost read as one pill
+    padding-left: 0;
+    border-radius: 0 13px 13px 0;
+    &::before {
+      content: none;
+    }
+    &::after {
+      content: "/" attr(data-state);
+      margin-left: 0;
     }
   }
 
+  // signature stats show only when they differ from the baseline (range 1, move 3)
+  .tracker_range[data-state="1"],
+  .tracker_move[data-state="3"],
   .tracker_hand {
     display: none;
   }
+}
 
-  .bucket_crystal_yellow {
-    order: 6;
+// dark theme: washed-out artwork with dark pills (BGA sets data-theme on html)
+html[data-theme="dark"] .miniboard {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.26);
+    backdrop-filter: saturate(0.85) brightness(1.18) contrast(0.82);
   }
-  .miniboard_damage {
-    order: 7;
+  & > *:not(.miniboard_banner) {
+    background-color: rgba(0, 0, 0, 0.62);
+    &::after {
+      color: #fff;
+    }
   }
-  .upgrade_cost {
-    order: 8;
+  .tracker_damage:not([data-state="0"]) {
+    background-color: rgba(120, 20, 20, 0.75);
+    &::after {
+      color: #ffd7d7;
+    }
   }
 }
 
@@ -253,6 +344,9 @@
 }
 .wicon_hand {
   background-position: 100% 100%;
+}
+.wicon_armor {
+  background-position: 100% 50%;
 }
 .wicon_damage,
 .wicon_red {
@@ -321,4 +415,16 @@
   background-image: url("img/dice.png");
   background-size: 600% 200%;
   background-position: 100% 100%;
+}
+
+.composite > * {
+  display: inline-block;
+  position: relative;
+}
+.composite_separator {
+  margin: 0 1px;
+
+  &::before {
+    content: "/";
+  }
 }
