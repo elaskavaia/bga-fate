@@ -2437,30 +2437,33 @@ class Game extends Game1Tokens {
             // last minute tweaks for miniboard
             Object.values(gamedatas.players).forEach((player) => {
                 const color = player.color;
-                // attach hand counter to miniboard
                 const mini = $(`miniboard_${color}`);
-                const handCounter = $(`counter_hand_${color}`);
-                if (handCounter && mini) {
-                    mini.appendChild(handCounter);
-                    handCounter.classList.add("counter_hand", "wicon_hand", "wicon");
-                    const handMaxCounter = $(`tracker_hand_${color}`);
-                    if (handMaxCounter)
-                        handCounter.dataset.limit = handMaxCounter.dataset.state;
-                }
+                const heroNo = Number(player.heroNo);
+                // hand count + limit stitched into one n/N composite (both stay live nodes)
+                const handComposite = this.wrapComposite($(`counter_hand_${color}`), $(`tracker_hand_${color}`), "minicomposite_hand wicon_hand wicon");
+                handComposite.id = `minicomposite_hand_${color}`;
+                mini.appendChild(handComposite);
+                this.updateTooltip("minicomposite_hand", handComposite);
                 // hero damage mirror on miniboard
-                const heroNo = player.heroNo;
                 // damage
                 const srcBucket = $(`bucket_crystal_red_hero_${heroNo}`);
                 const initialState = srcBucket?.dataset.state ?? "0";
                 placeHtml(`<div id="tracker_damage_${color}" class="bucket bucket_crystal_red tracker_damage" data-hero="hero_${heroNo}" data-state="${initialState}"></div>`, `miniboard_${color}`);
+                this.updateTooltip("tracker_damage", $(`tracker_damage_${color}`));
                 // Boldur's hero cards grant "Armor. (Always prevents 1 damage)" - static signature pill
-                if (player.heroNo == 4)
+                if (heroNo == 4) {
                     placeHtml(`<div id="tracker_armor_${color}" class="tracker_armor tracker wicon wicon_armor" data-state="1"></div>`, `miniboard_${color}`);
-                // marker tracking cost of upgrade
+                    this.updateTooltip(`tracker_armor_${color}`);
+                }
+                // gold bucket + upgrade cost marker stitched into one x/y composite (both stay live nodes)
                 const marker = $(`marker_${color}_3`);
-                $(`miniboard_${color}`).appendChild(marker);
                 marker.classList.add("bucket", "upgrade_cost");
                 this.updateTooltip("upgrade_cost", marker);
+                const goldBucket = $(`bucket_crystal_yellow_tableau_${color}`);
+                const miniGoldComposite = this.wrapComposite(goldBucket, marker, "minicomposite_gold");
+                miniGoldComposite.id = `minicomposite_gold_${color}`;
+                mini.appendChild(miniGoldComposite);
+                this.updateTooltip(miniGoldComposite.id);
                 const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
                 $(`tableau_${color}`).dataset.name = this.getTr(tname);
                 const hand = document.querySelector(`.hand_area > #hand_${color}`);
@@ -2639,9 +2642,9 @@ class Game extends Game1Tokens {
                     result.location = `miniboard_${color}`;
                     result.noa = true;
                     if (tokenKey.startsWith("tracker_hand")) {
-                        const handCounter = $(`counter_hand_${color}`);
-                        if (handCounter)
-                            handCounter.dataset.limit = String(tokenInfo.state);
+                        // hand limit lives inside the hand composite; update state in place, don't relocate
+                        result.nop = true;
+                        break;
                     }
                     // Hero attack/health changed (upgrade, equip) — refresh its stats box on the map
                     if (tokenKey.startsWith("tracker_strength") || tokenKey.startsWith("tracker_health")) {
@@ -2656,6 +2659,9 @@ class Game extends Game1Tokens {
                     const color = getPart(loc, 1);
                     result.location = `miniboard_${color}`;
                     result.noa = true;
+                    // upgrade cost marker lives inside the gold composite; update state in place, don't relocate
+                    if (getPart(tokenKey, 2) === "3")
+                        result.nop = true;
                 }
                 break;
             case "monster":
@@ -2845,7 +2851,23 @@ class Game extends Game1Tokens {
     }
     buildCompositeCounter(pair, classes = "") {
         const [[firstId, firstValue], [secondId, secondValue]] = Object.entries(pair);
-        return `<div class="composite ${classes}"><div id="${firstId}" class="composite_first">${firstValue}</div><span class="composite_separator"></span><div id="${secondId}" class="composite_second">${secondValue}</div></div>`;
+        return `<div class="composite ${classes}"><div id="${firstId}" class="composite_first" data-state="${firstValue}"></div><span class="composite_separator"></span><div id="${secondId}" class="composite_second" data-state="${secondValue}"></div></div>`;
+    }
+    // Composite around two live nodes (e.g. gold bucket + cost marker) that must keep their identity:
+    // moves them into the shared .composite shell so they render via the same CSS as buildCompositeCounter.
+    wrapComposite(first, second, classes = "") {
+        var _a, _b;
+        const composite = document.createElement("div");
+        composite.className = `composite ${classes}`.trim();
+        // value renders from data-state; default empty nodes (e.g. gold bucket with no crystals) to 0
+        (_a = first.dataset).state ?? (_a.state = "0");
+        (_b = second.dataset).state ?? (_b.state = "0");
+        first.classList.add("composite_first");
+        second.classList.add("composite_second");
+        const separator = document.createElement("span");
+        separator.className = "composite_separator";
+        composite.append(first, separator, second);
+        return composite;
     }
     /** Ensure a map character carries its .stats_attack box and refresh its content. */
     refreshAttackStat(charId) {

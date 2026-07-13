@@ -61,6 +61,9 @@ class Hero extends Character {
     function createHeroTrackers() {
         $color = $this->owner;
         foreach ($this->game->material->getTokensWithPrefix("tracker_") as $trackerId => $info) {
+            if (($info["create"] ?? 0) == 0) {
+                continue; // strings-only entries (e.g. tooltip-only stat pills) are not DB tokens
+            }
             $this->game->tokens->createToken("{$trackerId}_{$color}", "tableau_{$color}", 0);
         }
     }

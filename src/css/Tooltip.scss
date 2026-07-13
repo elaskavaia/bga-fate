@@ -15,6 +15,9 @@
 }
 
 .tooltipcontainer {
+  // parchment must live here, not only on .dijitTooltipContainer: dark theme overrides the
+  // framework container with a dark gradient, leaving our black text on dark grey.
+  background-image: url(img/bg1.jpg);
   background-size: cover;
   position: relative;
   display: flex;

@@ -50,4 +50,10 @@ att_red|Damage
 att_yellow|XP
 att_green|Tag
 
-upgrade_cost|Upgrade Cost|Shows current upgrade cost (max. 10)
+upgrade_cost|Upgrade Cost|Current upgrade cost (max. 10)
+
+# Miniboard stat pills (synthetic UI elements, not tokens)
+tracker_damage|Damage|Damage this hero has taken
+tracker_armor|Armor|Always prevents 1 damage
+minicomposite_hand|Hand|Cards in hand / Hand limit
+minicomposite_gold|Gold|Gold(XP) / Cost to upgrade

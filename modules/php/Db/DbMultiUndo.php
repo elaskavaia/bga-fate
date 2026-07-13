@@ -318,6 +318,10 @@ class DbMultiUndo {
             $player_id
         );
 
+        // Reserved BGA notif: triggers the client full-state reload. Without it the DB reverts
+        // but the UI keeps showing the post-action state.
+        $this->game->notify->all("undoRestorePoint", "", []);
+
         $this->notifyUndoMoveMeta($meta);
     }
 

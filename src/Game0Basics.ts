@@ -335,7 +335,7 @@ export class Game0Basics {
 
 /** This is essentically dojo.place but without dojo */
 export function placeHtml(html: string, parent: ElementOrId, how: InsertPosition = "beforeend") {
-  $(parent).insertAdjacentHTML(how, html);
+  $(parent)!.insertAdjacentHTML(how, html);
 }
 export function getIntPart(word: string, i: number) {
   return parseInt(getPart(word, i));

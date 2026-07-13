@@ -92,12 +92,13 @@ describe("Game.getPlaceRedirect", () => {
     expect(result.onEnd).to.be.undefined;
   });
 
-  it("should redirect tracker tokens from tableau to miniboard and set hand limit", () => {
-    document.body.insertAdjacentHTML("beforeend", '<div id="counter_hand_red"></div>');
+  it("should redirect the hand tracker to miniboard and keep it in place (nop)", () => {
+    // The hand limit now renders from tracker_hand's own data-state inside the hand composite,
+    // so the redirect must update state in place (nop) rather than relocate the node out of it.
     const result = game.getPlaceRedirect({ key: "tracker_hand_red", location: "tableau_red", state: 5 });
     expect(result.location).to.equal("miniboard_red");
     expect(result.noa).to.be.true;
-    expect($("counter_hand_red")!.dataset.limit).to.equal("5");
+    expect(result.nop).to.be.true;
   });
 
   it("should redirect non-hand tracker without touching any counter", () => {

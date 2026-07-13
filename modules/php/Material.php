@@ -3791,7 +3791,24 @@ class Material {
 ],
     "upgrade_cost" => [ 
         "name" => clienttranslate("Upgrade Cost"),
-        "tooltip" => clienttranslate("Shows current upgrade cost (max. 10)"),
+        "tooltip" => clienttranslate("Current upgrade cost (max. 10)"),
+],
+// # Miniboard stat pills (synthetic UI elements, not tokens)
+    "tracker_damage" => [ 
+        "name" => clienttranslate("Damage"),
+        "tooltip" => clienttranslate("Damage this hero has taken"),
+],
+    "tracker_armor" => [ 
+        "name" => clienttranslate("Armor"),
+        "tooltip" => clienttranslate("Always prevents 1 damage"),
+],
+    "minicomposite_hand" => [ 
+        "name" => clienttranslate("Hand"),
+        "tooltip" => clienttranslate("Cards in hand / Hand limit"),
+],
+    "minicomposite_gold" => [ 
+        "name" => clienttranslate("Gold"),
+        "tooltip" => clienttranslate("Gold(XP) / Cost to upgrade"),
 ],
             /* --- gen php end strings_material --- */
             /* --- gen php begin time_material --- */

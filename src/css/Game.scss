@@ -297,10 +297,6 @@ button.bgabutton > * {
   max-width: 500px;
 }
 
-.player-board {
-  background-color: #f8f8f8;
-}
-
 .score-sheet {
   background-image: url(img/starbg.jpg);
   background-size: cover;
@@ -346,27 +342,6 @@ html:before {
   z-index: -1;
 }
 
-//$logsBgColor: #c6ebe2ba; // #b5e6e3;
-$logsBgColor: #fff;
-
-#logs {
-  // background-image: url(img/bg2.webp);
-  background-position-y: 8%;
-
-  .roundedbox {
-    background-color: $logsBgColor;
-  }
-}
-
-#right-side-first-part {
-  // background-image: url(img/bg2.webp);
-  background-position-y: 8%;
-
-  .player-board {
-    background-color: $logsBgColor;
-  }
-}
-
 // Force border-box on player_boards children to prevent horizontal scrollbar overflow on mobile.
 #player_boards > div {
   box-sizing: border-box !important;
@@ -379,7 +354,6 @@ $logsBgColor: #fff;
 
 #page-title {
   line-height: 24px;
-  background-color: $logsBgColor !important;
   box-sizing: border-box !important;
 }
 
@@ -396,10 +370,12 @@ $logsBgColor: #fff;
   gap: 10px;
   flex-wrap: wrap;
   font-weight: normal;
+  pointer-events: none; // bar overlaps the map (top:100%); let clicks fall through its empty areas
 
   & > * {
     position: relative;
     display: inline-block;
+    pointer-events: auto; // but the buttons themselves stay clickable
   }
 }
 

@@ -527,7 +527,9 @@ class OpMachine {
 
     function action_undo(int $player_id, int $move_id = 0) {
         try {
-            $this->game->undoRestorePoint();
+            // Custom undo restores only token/machine/stats. The framework-native undoRestorePoint()
+            // restores the full DB including `global`, wiping next_move_id ("did not retrieve current move_id counter").
+            $this->game->dbMultiUndo->undoRestorePoint($player_id, $move_id);
         } catch (Exception $e) {
             $this->game->userAssert($e->getMessage());
         }

@@ -171,6 +171,9 @@
   position: relative;
   min-height: 150px;
   box-sizing: border-box;
+  // --game-bga-player-panel-color IS the panel text color (BGA sets the panel's `color` to it) and
+  // it auto-flips light/dark with the framework theme; #111 fallback for the harness (no framework CSS)
+  --stat-text: var(--game-bga-player-panel-color, #111);
 
   // forced row break between the combat and economy pills
   &::after {
@@ -220,7 +223,7 @@
     &::after {
       position: static;
       margin-left: 3px;
-      color: #111;
+      color: var(--stat-text);
       font-size: 14px;
       text-shadow: none;
     }
@@ -246,11 +249,8 @@
   }
 
   // economy row
-  .counter_hand {
+  .minicomposite_hand {
     order: 5;
-    &::after {
-      content: attr(data-state) "/" attr(data-limit);
-    }
   }
   .tracker_range {
     order: 6;
@@ -264,69 +264,48 @@
     order: 8;
     margin-left: auto;
   }
-  // gold + next-level cost joined into one x/y capsule
-  .bucket_crystal_yellow {
+  // gold + next-level cost stitched into one x/y composite (see wrapComposite)
+  // modeled like the hand pill: outer ::before is the icon, inner live nodes are pure value holders
+  .minicomposite_gold {
     order: 9;
     margin-left: auto;
-    padding-right: 0;
-    border-radius: 13px 0 0 13px;
+    background-position: 20% 0%; // gold crystal cell for the pill ::before
   }
-  .upgrade_cost {
-    order: 10;
-    margin-left: -4px; // cancel flex gap so bucket+cost read as one pill
-    padding-left: 0;
-    border-radius: 0 13px 13px 0;
-    &::before {
-      content: none;
-    }
+
+  // inner composite nodes are value-only: strip the token sprite/sizing the framework re-applies,
+  // since the icon is drawn by the outer pill ::before
+  .composite > * {
+    height: 18px;
+    line-height: 18px;
+    width: auto;
+    aspect-ratio: auto;
+    background: none;
+    filter: none;
+    vertical-align: middle;
+
+    // .bucket/.tracker::after force white + a heavy text-shadow; match the flat pill value instead
     &::after {
-      content: "/" attr(data-state);
-      margin-left: 0;
+      color: var(--stat-text);
+      text-shadow: none;
     }
   }
 
   // signature stats show only when they differ from the baseline (range 1, move 3)
   .tracker_range[data-state="1"],
-  .tracker_move[data-state="3"],
-  .tracker_hand {
+  .tracker_move[data-state="3"] {
     display: none;
   }
 }
 
-// dark theme: washed-out artwork with dark pills (BGA sets data-theme on html)
 html[data-theme="dark"] .miniboard {
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.26);
-    backdrop-filter: saturate(0.85) brightness(1.18) contrast(0.82);
-  }
   & > *:not(.miniboard_banner) {
     background-color: rgba(0, 0, 0, 0.62);
-    &::after {
-      color: #fff;
-    }
   }
   .tracker_damage:not([data-state="0"]) {
     background-color: rgba(120, 20, 20, 0.75);
     &::after {
       color: #ffd7d7;
     }
-  }
-}
-
-.upgrade_cost {
-  background-color: unset;
-  height: 32px;
-  aspect-ratio: 1;
-  &::before {
-    content: "\f0fe";
-    font-family: FontAwesome;
-    font-size: 32px;
-    position: absolute;
-    top: 5%;
-    color: #e3a322;
   }
 }
 
@@ -420,6 +399,10 @@ html[data-theme="dark"] .miniboard {
 .composite > * {
   display: inline-block;
   position: relative;
+
+  &::after {
+    content: attr(data-state);
+  }
 }
 .composite_separator {
   margin: 0 1px;
