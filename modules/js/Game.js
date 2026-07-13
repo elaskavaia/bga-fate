@@ -162,16 +162,9 @@ class Game0Basics {
         console.error(msg);
     }
     divYou() {
-        var color = "black";
-        var color_bg = "";
-        if (this.gamedatas.players[this.player_id]) {
-            color = this.gamedatas.players[this.player_id].color;
-        }
-        if (this.gamedatas.players[this.player_id] && this.gamedatas.players[this.player_id].color_back) {
-            color_bg = "background-color:#" + this.gamedatas.players[this.player_id].color_back + ";";
-        }
-        var you = '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + _("You") + "</span>";
-        return you;
+        return this.bga.players.getFormattedPlayerName(gameui.player_id, {
+            replaceByYou: true
+        });
     }
     cloneAndFixIds(orig, postfix, removeInlineStyle) {
         if (!$(orig)) {
