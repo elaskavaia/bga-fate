@@ -66,15 +66,19 @@
 }
 
 // --- Floating mode: fixed to the bottom of the viewport, collapsible ---
+// Reserve the right 240px (BGA's action-button / panel column) so the floating hand never covers
+// them - centred versions sat on top and made the buttons unclickable. Centre the hand in the space
+// that is left, but max(..., 0) clamps it flush-LEFT once the screen is too narrow to centre (mobile).
+// Left-anchored, so no translateX centring. (Pattern from galacticcruise; the 240px reserve is tunable.)
 .hand_area[data-place="floating"] {
   position: fixed;
-  left: 50%;
+  left: calc(max((100% - 240px - 52em) / 2, 0px));
   bottom: 0;
-  transform: translateX(-50%);
   width: auto;
-  max-width: 96vw;
+  max-width: calc(100% - 240px);
   margin-top: 0;
   z-index: 100;
+  background-color: #f5deb3;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
@@ -82,10 +86,10 @@
 
   // Collapsed: slide down leaving just the controls peeking above the fold.
   &[data-open="0"] {
-    transform: translate(-50%, calc(100% - 34px));
+    transform: translateY(calc(100% - 34px));
   }
 
   .hand {
-    max-width: 96vw;
+    max-width: 100%;
   }
 }

@@ -83,7 +83,7 @@ class Op_turn extends Operation {
         // Offer main actions if the player still has actions remaining
 
         foreach ($allops as $action => $actionInfo) {
-            $res[$action] = ["q" => 0, "name" => $actionInfo["name"], "replicate" => true];
+            $res[$action] = ["q" => 0, "name" => $actionInfo["name"], "imagebuttons" => true];
             $inline = $actionInfo["inline"] ?? 0;
             $kind = $actionInfo["kind"] ?? "main";
             if (in_array($action, $actionsTaken)) {

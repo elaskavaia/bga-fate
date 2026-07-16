@@ -26,6 +26,7 @@ export interface LaZoomOptions {
 export class LaZoom {
   private mode: ZoomMode = "fit";
   private scale: number = 1;
+  private fitOnly: boolean = false;
   private readonly opts: Required<LaZoomOptions>;
 
   constructor(
@@ -60,10 +61,7 @@ export class LaZoom {
       </div>`
     );
 
-    const savedMode = localStorage.getItem(this.modeKey);
-    const savedScale = parseFloat(localStorage.getItem(this.scaleKey) ?? "");
-    this.mode = savedMode === "manual" ? "manual" : "fit";
-    this.scale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
+    this.readStoredZoom();
 
     $("layout_home")!.addEventListener("click", () => this.setMode("fit"));
     $("layout_zoom_in")!.addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
@@ -78,13 +76,35 @@ export class LaZoom {
     this.apply();
   };
 
+  /**
+   * "Scale to fit" mode: hide the zoom buttons and always fit the board to the screen,
+   * ignoring (and never writing) the stored zoom. Turning it off restores the stored zoom.
+   */
+  setFitOnly(fitOnly: boolean) {
+    this.fitOnly = fitOnly;
+    const controls = $("board_layout_controls");
+    if (controls) controls.style.display = fitOnly ? "none" : "";
+    if (fitOnly) this.mode = "fit";
+    else this.readStoredZoom();
+    this.apply();
+  }
+
+  private readStoredZoom() {
+    const savedMode = localStorage.getItem(this.modeKey);
+    const savedScale = parseFloat(localStorage.getItem(this.scaleKey) ?? "");
+    this.mode = savedMode === "manual" ? "manual" : "fit";
+    this.scale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
+  }
+
   setMode(mode: ZoomMode) {
+    if (this.fitOnly) return;
     this.mode = mode;
     localStorage.setItem(this.modeKey, mode);
     this.apply();
   }
 
   zoomByFactor(factor: number) {
+    if (this.fitOnly) return;
     const target = $(this.opts.targetId);
     const current = this.mode === "fit" ? parseFloat(target.dataset.scale ?? "1") || 1 : this.scale;
     const next = Math.min(this.opts.maxScale, Math.max(this.opts.minScale, current * factor));

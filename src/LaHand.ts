@@ -25,20 +25,29 @@ export interface LaHandOptions {
   floatDockParent: HTMLElement;
   // prefix for localStorage keys (e.g. "fate")
   storagePrefix: string;
+  // routes the corner button through the owner of the place setting (LocalSettings), so the
+  // menu control and the button stay in sync. Without it the button applies the place directly.
+  onPlaceToggle?: (place: HandPlace) => void;
 }
 
 export class LaHand {
-  private place: HandPlace = "floating";
+  private place: HandPlace = "parked";
   private open: boolean = true;
   private readonly area: HTMLElement;
   private readonly parkedHome: HTMLElement;
   private floatDock!: HTMLElement;
   private readonly storagePrefix: string;
+  private readonly onPlaceToggle?: (place: HandPlace) => void;
 
   constructor(opts: LaHandOptions) {
     this.area = opts.handArea;
     this.parkedHome = opts.parkedHome;
     this.storagePrefix = opts.storagePrefix;
+    this.onPlaceToggle = opts.onPlaceToggle;
+
+    // BGA re-runs setup on undo/reconnect; without this each pass would append another
+    // #hand_wrapper (duplicate DOM id) and orphan the previous dock (cf. LaZoom's dedup guard).
+    document.querySelectorAll("#hand_wrapper").forEach((old) => old.remove());
 
     this.floatDock = document.createElement("div");
     this.floatDock.id = "hand_wrapper";
@@ -46,15 +55,13 @@ export class LaHand {
     opts.floatDockParent.appendChild(this.floatDock);
   }
 
-  private get placeKey() {
-    return `${this.storagePrefix}_hand_place`;
-  }
   private get openKey() {
     return `${this.storagePrefix}_hand_open`;
   }
 
+  // `place` is owned by LocalSettings (the menu setting), which calls setPlace() on setup;
+  // only the collapsed/expanded state is persisted here.
   setup() {
-    this.place = localStorage.getItem(this.placeKey) === "parked" ? "parked" : "floating";
     this.open = localStorage.getItem(this.openKey) !== "0";
 
     this.addControls();
@@ -76,13 +83,16 @@ export class LaHand {
       </div>`
     );
 
-    $("button_hand_place")!.addEventListener("click", () => this.setPlace(this.place === "floating" ? "parked" : "floating"));
+    $("button_hand_place")!.addEventListener("click", () => {
+      const next: HandPlace = this.place === "floating" ? "parked" : "floating";
+      if (this.onPlaceToggle) this.onPlaceToggle(next);
+      else this.setPlace(next);
+    });
     $("button_hand_open")!.addEventListener("click", () => this.setOpen(!this.open));
   }
 
   setPlace(place: HandPlace) {
     this.place = place;
-    localStorage.setItem(this.placeKey, place);
     this.apply();
   }
 

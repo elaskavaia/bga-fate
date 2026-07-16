@@ -1678,6 +1678,16 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   height: 1042px;
 }
 
+#current_player_panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+#current_player_panel:empty {
+  display: none;
+}
+
 #players_panels {
   display: flex;
   flex-direction: column;
@@ -2021,23 +2031,32 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 
 .hand_area[data-place=floating] {
   position: fixed;
-  left: 50%;
+  left: max((100% - 240px - 52em) / 2, 0px);
   bottom: 0;
-  transform: translateX(-50%);
   width: auto;
-  max-width: 96vw;
+  max-width: calc(100% - 240px);
   margin-top: 0;
   z-index: 100;
+  background-color: #f5deb3;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
   transition: transform 0.4s;
 }
 .hand_area[data-place=floating][data-open="0"] {
-  transform: translate(-50%, calc(100% - 34px));
+  transform: translateY(calc(100% - 34px));
 }
 .hand_area[data-place=floating] .hand {
-  max-width: 96vw;
+  max-width: 100%;
+}
+
+.localsettings_select {
+  display: block;
+  width: 100%;
+}
+
+.localsettings_group .row-label label {
+  cursor: pointer;
 }
 
 /* tooltips */
@@ -2215,19 +2234,33 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 #thething {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-areas: "current" "board" "others";
+  justify-items: center;
   margin-right: 2px;
 }
 
 @container fate_thething_wrap (min-width: 1696px) {
   #thething {
-    flex-direction: row;
-    align-items: flex-start;
+    grid-template-columns: auto auto;
+    grid-template-areas: "board current" "board others";
     justify-content: center;
+    align-items: start;
   }
 }
+#current_player_panel {
+  grid-area: current;
+}
+
+#board_area {
+  grid-area: board;
+}
+
+#players_panels {
+  grid-area: others;
+}
+
 #board_area {
   display: flex;
   flex-direction: column;
@@ -2290,6 +2323,9 @@ button.bgabutton > * {
   content: " x " attr(data-count);
 }
 
+.fateaction {
+  position: relative;
+}
 .fateaction.err_4::after {
   content: "✓";
   position: absolute;
@@ -2336,6 +2372,10 @@ button.bgabutton > * {
 
 #overall-content {
   overflow: visible;
+}
+
+.player-board {
+  background-color: transparent;
 }
 
 .catalog {

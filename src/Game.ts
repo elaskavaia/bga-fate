@@ -13,6 +13,7 @@ import { getIntPart, getParentParts, getPart, placeHtml } from "./Game0Basics";
 import { Game1Tokens, Token, TokenMoveInfo, AnimArgs, TokenDisplayInfo } from "./Game1Tokens";
 import { LaHand } from "./LaHand";
 import { LaZoom } from "./LaZoom";
+import { LocalSettings } from "./LocalSettings";
 import { PlayerTurn } from "./PlayerTurn";
 import { CustomGamedatas, CustomPlayer } from "./types";
 
@@ -38,6 +39,7 @@ export class Game extends Game1Tokens {
   private playerTurn: PlayerTurn;
   private zoomControls!: LaZoom;
   private handControls!: LaHand;
+  private localSettings!: LocalSettings;
 
   constructor(bga: Bga) {
     super(bga);
@@ -77,6 +79,10 @@ export class Game extends Game1Tokens {
       placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
       placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
 
+      // Current player's own hand + tableau; kept separate so the layout can put it first
+      // when stacked vertically (see #thething grid in Game.scss). Empty for spectators.
+      placeHtml(`<div id="current_player_panel" class="current_player_panel"></div>`, "thething");
+
       // Board area: map + monster turn display + supply (right side in wide layout)
       const mapWrapper = "map_wrapper";
       placeHtml(
@@ -109,7 +115,7 @@ export class Game extends Game1Tokens {
         const name = _("Hand");
         placeHtml(
           `<div id="hand_park_home"><div class="hand_area" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`,
-          "players_panels"
+          "current_player_panel"
         );
       }
 
@@ -119,7 +125,8 @@ export class Game extends Game1Tokens {
         const color = player.color;
         const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
         const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
-        placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
+        const tableauParent = color == this.player_color ? "current_player_panel" : "players_panels";
+        placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, tableauParent);
         ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
           const name = this.getTr(_("${hero}'s ${deck}"), {
             hero: heroName,
@@ -167,10 +174,16 @@ export class Game extends Game1Tokens {
           handArea,
           parkedHome: $("hand_park_home")!,
           floatDockParent: this.bga.gameArea.getElement(),
-          storagePrefix: "fate"
+          storagePrefix: "fate",
+          onPlaceToggle: (place) => {
+            const prop = this.localSettings.getLocalSettingById("handplace")!;
+            this.localSettings.applyChanges(prop, place);
+          }
         });
         this.handControls.setup();
       }
+
+      this.setupLocalSettings();
 
       this.setupNotifications();
 
@@ -239,6 +252,27 @@ export class Game extends Game1Tokens {
       this.inSetup = false;
     }
     console.log("Ending game setup");
+  }
+
+  private setupLocalSettings() {
+    this.localSettings = new LocalSettings("fate", [
+      {
+        key: "zoomcontrols",
+        label: _("Board zoom"),
+        choice: { fit: _("Scale to fit"), controls: _("Show zoom controls") },
+        default: "fit",
+        onChange: (value) => this.zoomControls.setFitOnly(value == "fit")
+      },
+      {
+        key: "handplace",
+        label: _("Hand placement"),
+        choice: { parked: _("On the table"), floating: _("Floating") },
+        default: "parked",
+        onChange: (value) => this.handControls?.setPlace(value == "floating" ? "floating" : "parked")
+      }
+    ]);
+    this.localSettings.setup();
+    this.localSettings.renderContents("ingame_menu_content");
   }
 
   private setupCardCatalog() {

@@ -1533,24 +1533,26 @@ class Game1Tokens extends Game0Basics {
  */
 class LaHand {
     constructor(opts) {
-        this.place = "floating";
+        this.place = "parked";
         this.open = true;
         this.area = opts.handArea;
         this.parkedHome = opts.parkedHome;
         this.storagePrefix = opts.storagePrefix;
+        this.onPlaceToggle = opts.onPlaceToggle;
+        // BGA re-runs setup on undo/reconnect; without this each pass would append another
+        // #hand_wrapper (duplicate DOM id) and orphan the previous dock (cf. LaZoom's dedup guard).
+        document.querySelectorAll("#hand_wrapper").forEach((old) => old.remove());
         this.floatDock = document.createElement("div");
         this.floatDock.id = "hand_wrapper";
         this.floatDock.className = "hand_wrapper";
         opts.floatDockParent.appendChild(this.floatDock);
     }
-    get placeKey() {
-        return `${this.storagePrefix}_hand_place`;
-    }
     get openKey() {
         return `${this.storagePrefix}_hand_open`;
     }
+    // `place` is owned by LocalSettings (the menu setting), which calls setPlace() on setup;
+    // only the collapsed/expanded state is persisted here.
     setup() {
-        this.place = localStorage.getItem(this.placeKey) === "parked" ? "parked" : "floating";
         this.open = localStorage.getItem(this.openKey) !== "0";
         this.addControls();
         this.apply();
@@ -1566,12 +1568,17 @@ class LaHand {
           <i class="fa fa-window-maximize icon_park"></i>
         </button>
       </div>`);
-        $("button_hand_place").addEventListener("click", () => this.setPlace(this.place === "floating" ? "parked" : "floating"));
+        $("button_hand_place").addEventListener("click", () => {
+            const next = this.place === "floating" ? "parked" : "floating";
+            if (this.onPlaceToggle)
+                this.onPlaceToggle(next);
+            else
+                this.setPlace(next);
+        });
         $("button_hand_open").addEventListener("click", () => this.setOpen(!this.open));
     }
     setPlace(place) {
         this.place = place;
-        localStorage.setItem(this.placeKey, place);
         this.apply();
     }
     setOpen(open) {
@@ -1606,6 +1613,7 @@ class LaZoom {
         this.bga = bga;
         this.mode = "fit";
         this.scale = 1;
+        this.fitOnly = false;
         this.boundOnResize = () => {
             this.apply();
         };
@@ -1630,22 +1638,44 @@ class LaZoom {
         <button id="layout_zoom_in" class="layout_button" title="${_("Zoom in")}"><i class="fa fa-search-plus"></i></button>
         <button id="layout_zoom_out" class="layout_button" title="${_("Zoom out")}"><i class="fa fa-search-minus"></i></button>
       </div>`);
-        const savedMode = localStorage.getItem(this.modeKey);
-        const savedScale = parseFloat(localStorage.getItem(this.scaleKey) ?? "");
-        this.mode = savedMode === "manual" ? "manual" : "fit";
-        this.scale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
+        this.readStoredZoom();
         $("layout_home").addEventListener("click", () => this.setMode("fit"));
         $("layout_zoom_in").addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
         $("layout_zoom_out").addEventListener("click", () => this.zoomByFactor(1 / this.opts.stepFactor));
         window.addEventListener("resize", this.boundOnResize);
         this.apply();
     }
+    /**
+     * "Scale to fit" mode: hide the zoom buttons and always fit the board to the screen,
+     * ignoring (and never writing) the stored zoom. Turning it off restores the stored zoom.
+     */
+    setFitOnly(fitOnly) {
+        this.fitOnly = fitOnly;
+        const controls = $("board_layout_controls");
+        if (controls)
+            controls.style.display = fitOnly ? "none" : "";
+        if (fitOnly)
+            this.mode = "fit";
+        else
+            this.readStoredZoom();
+        this.apply();
+    }
+    readStoredZoom() {
+        const savedMode = localStorage.getItem(this.modeKey);
+        const savedScale = parseFloat(localStorage.getItem(this.scaleKey) ?? "");
+        this.mode = savedMode === "manual" ? "manual" : "fit";
+        this.scale = Number.isFinite(savedScale) && savedScale > 0 ? savedScale : 1;
+    }
     setMode(mode) {
+        if (this.fitOnly)
+            return;
         this.mode = mode;
         localStorage.setItem(this.modeKey, mode);
         this.apply();
     }
     zoomByFactor(factor) {
+        if (this.fitOnly)
+            return;
         const target = $(this.opts.targetId);
         const current = this.mode === "fit" ? parseFloat(target.dataset.scale ?? "1") || 1 : this.scale;
         const next = Math.min(this.opts.maxScale, Math.max(this.opts.minScale, current * factor));
@@ -1701,6 +1731,111 @@ class LaZoom {
             if (i < panels.length - 1)
                 p.parentNode?.removeChild(p);
         });
+    }
+}
+
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * Browser-local settings (localStorage only). Deliberately NOT BGA preferences:
+ * nothing is sent to the server, so none of BGA's preference classes or
+ * data-preference-id hooks are used - their JS would try to persist these.
+ *
+ * Modelled on bga-mars LocalSettings, trimmed to the select-style choices this
+ * game needs and with the dojo calls dropped (fate does not load dojo).
+ * -----
+ */
+class LocalSettings {
+    constructor(gameName, props = []) {
+        this.gameName = gameName;
+        this.props = props;
+    }
+    setup() {
+        for (const prop of this.props) {
+            this.applyChanges(prop, this.readProp(prop.key), false);
+        }
+    }
+    getLocalSettingById(key) {
+        return this.props.find((prop) => prop.key == key) ?? null;
+    }
+    getDivId() {
+        return `${this.gameName}_localsettings`;
+    }
+    /**
+     * Renders the settings block into the in-game menu. Returns false when the menu is not
+     * present (e.g. the local harness), so callers can ignore it.
+     */
+    renderContents(parentId) {
+        const parent = document.getElementById(parentId);
+        if (!parent)
+            return false;
+        // BGA re-runs setup on undo/reconnect; drop a previous copy rather than stack duplicates.
+        document.getElementById(this.getDivId())?.remove();
+        const groups = this.props.map((prop) => this.renderProp(prop)).join("");
+        const html = `
+      <div id="${this.getDivId()}" class="localsettings">
+        <h2>${_("Local Settings")}</h2>
+        ${groups}
+      </div>`;
+        // Sit right after the last native preference, so we land at the end of the
+        // preferences block instead of below the game options.
+        const prefs = parent.querySelectorAll(".preference_choice");
+        const anchor = prefs.length ? prefs[prefs.length - 1] : null;
+        if (anchor)
+            anchor.insertAdjacentHTML("afterend", html);
+        else
+            parent.insertAdjacentHTML("beforeend", html);
+        for (const prop of this.props) {
+            $(this.getInputId(prop)).addEventListener("change", (event) => {
+                this.applyChanges(prop, event.target.value);
+            });
+        }
+        return true;
+    }
+    getInputId(prop) {
+        return `localsettings_prop_${prop.key}`;
+    }
+    renderProp(prop) {
+        const inputId = this.getInputId(prop);
+        const options = Object.entries(prop.choice)
+            .map(([value, label]) => `<option value="${value}" ${value == prop.value ? "selected" : ""}>${label}</option>`)
+            .join("");
+        // row-data/row-label/row-value are BGA's layout-only classes (as used by the static
+        // "Game options" rows) - borrowed for a native look, without any of the classes or
+        // data-preference-id hooks their preference JS binds to.
+        return `
+      <div class="localsettings_group row-data row-data-large">
+        <div class="row-label"><label for="${inputId}">${prop.label}</label></div>
+        <div class="row-value">
+          <select id="${inputId}" class="localsettings_select">${options}</select>
+        </div>
+      </div>`;
+    }
+    applyChanges(prop, newValue, write = true) {
+        prop.value = newValue !== undefined && prop.choice[newValue] ? newValue : prop.default;
+        const input = $(this.getInputId(prop));
+        if (input && input.value != prop.value)
+            input.value = prop.value;
+        $("ebd-body").dataset[`localsetting_${prop.key}`] = prop.value;
+        if (write)
+            this.writeProp(prop.key, prop.value);
+        prop.onChange?.(prop.value);
+    }
+    getLocalStorageItemId(key) {
+        return `${this.gameName}.${key}`;
+    }
+    readProp(key) {
+        return localStorage.getItem(this.getLocalStorageItemId(key)) ?? undefined;
+    }
+    writeProp(key, value) {
+        try {
+            localStorage.setItem(this.getLocalStorageItemId(key), value);
+        }
+        catch (e) {
+            console.error(e);
+        }
     }
 }
 
@@ -2347,6 +2482,9 @@ class Game extends Game1Tokens {
       </div>`, title);
             placeHtml(`<div id="thething_wrap">        <div id="thething"></div>      </div>`, this.bga.gameArea.getElement());
             placeHtml(`<div id="limbo"></div>`, this.bga.gameArea.getElement());
+            // Current player's own hand + tableau; kept separate so the layout can put it first
+            // when stacked vertically (see #thething grid in Game.scss). Empty for spectators.
+            placeHtml(`<div id="current_player_panel" class="current_player_panel"></div>`, "thething");
             // Board area: map + monster turn display + supply (right side in wide layout)
             const mapWrapper = "map_wrapper";
             placeHtml(`<div id="board_area">
@@ -2373,7 +2511,7 @@ class Game extends Game1Tokens {
             if (!this.bga.players.isCurrentPlayerSpectator()) {
                 const myColor = this.player_color;
                 const name = _("Hand");
-                placeHtml(`<div id="hand_park_home"><div class="hand_area" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`, "players_panels");
+                placeHtml(`<div id="hand_park_home"><div class="hand_area" data-name="${name}"><div id="hand_${myColor}" class="hand"></div></div></div>`, "current_player_panel");
             }
             const orderedPlayerIds = this.getOrderedPlayerIds(gamedatas);
             orderedPlayerIds.forEach((pid) => {
@@ -2381,7 +2519,8 @@ class Game extends Game1Tokens {
                 const color = player.color;
                 const hnoClass = player.heroNo ? `hno_${player.heroNo}` : "";
                 const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
-                placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, "players_panels");
+                const tableauParent = color == this.player_color ? "current_player_panel" : "players_panels";
+                placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, tableauParent);
                 ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
                     const name = this.getTr(_("${hero}'s ${deck}"), {
                         hero: heroName,
@@ -2415,10 +2554,15 @@ class Game extends Game1Tokens {
                     handArea,
                     parkedHome: $("hand_park_home"),
                     floatDockParent: this.bga.gameArea.getElement(),
-                    storagePrefix: "fate"
+                    storagePrefix: "fate",
+                    onPlaceToggle: (place) => {
+                        const prop = this.localSettings.getLocalSettingById("handplace");
+                        this.localSettings.applyChanges(prop, place);
+                    }
                 });
                 this.handControls.setup();
             }
+            this.setupLocalSettings();
             this.setupNotifications();
             this.setupCardCatalog();
             if (gamedatas.endBanner) {
@@ -2472,6 +2616,26 @@ class Game extends Game1Tokens {
             this.inSetup = false;
         }
         console.log("Ending game setup");
+    }
+    setupLocalSettings() {
+        this.localSettings = new LocalSettings("fate", [
+            {
+                key: "zoomcontrols",
+                label: _("Board zoom"),
+                choice: { fit: _("Scale to fit"), controls: _("Show zoom controls") },
+                default: "fit",
+                onChange: (value) => this.zoomControls.setFitOnly(value == "fit")
+            },
+            {
+                key: "handplace",
+                label: _("Hand placement"),
+                choice: { parked: _("On the table"), floating: _("Floating") },
+                default: "parked",
+                onChange: (value) => this.handControls?.setPlace(value == "floating" ? "floating" : "parked")
+            }
+        ]);
+        this.localSettings.setup();
+        this.localSettings.renderContents("ingame_menu_content");
     }
     setupCardCatalog() {
         const root = this.bga.gameArea.getElement();

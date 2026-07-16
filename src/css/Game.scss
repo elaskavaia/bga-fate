@@ -13,6 +13,7 @@
 @use "Board";
 @use "LaZoom";
 @use "Hand";
+@use "LocalSettings";
 @use "Tooltip";
 
 // @import url("https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap");
@@ -49,20 +50,38 @@
   display: none;
 }
 
-// Default (narrow): stack panels on top of board area
+// Default (narrow): one column. Your own hand/tableau goes first so it stays reachable
+// without scrolling past the map; the board and opponents follow.
 #thething {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-areas:
+    "current"
+    "board"
+    "others";
+  justify-items: center;
   margin-right: 2px; // overflow buffer
 }
-// Wide layout: panels left, board area right
+// Wide enough to split left/right: board on the left, you above the opponents on the right.
 @container fate_thething_wrap (min-width: 1696px) {
   #thething {
-    flex-direction: row;
-    align-items: flex-start;
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "board current"
+      "board others";
     justify-content: center;
+    align-items: start;
   }
+}
+
+#current_player_panel {
+  grid-area: current;
+}
+#board_area {
+  grid-area: board;
+}
+#players_panels {
+  grid-area: others;
 }
 
 // Board area: map + monster turn + supply, stacked vertically
@@ -144,6 +163,7 @@ button.bgabutton > * {
 }
 // err_4 = ERR_MAX: action already taken this turn
 .fateaction {
+  position: relative;
   &.err_4 {
     &::after {
       content: "✓";
@@ -203,6 +223,10 @@ button.bgabutton > * {
 
 #overall-content {
   overflow: visible; // when hidden it prevents sticky position to work
+}
+
+.player-board {
+  background-color: transparent;
 }
 
 // --- Card catalog: collapsible folders listing all cards, shown below the board ---

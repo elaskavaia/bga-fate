@@ -1,0 +1,12 @@
+// Browser-local settings block inside the in-game menu. The rows reuse BGA's row-data
+// layout classes, so only the control itself needs styling.
+.localsettings_select {
+  display: block;
+  width: 100%;
+}
+
+.localsettings_group {
+  .row-label label {
+    cursor: pointer;
+  }
+}
