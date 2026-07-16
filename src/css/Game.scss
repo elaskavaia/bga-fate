@@ -232,6 +232,7 @@ button.bgabutton > * {
 // --- Card catalog: collapsible folders listing all cards, shown below the board ---
 .catalog {
   width: 100%;
+  box-sizing: border-box; // this prevents overflow
   padding: 0 12px;
   display: flex;
   flex-direction: column;
