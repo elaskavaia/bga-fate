@@ -38,6 +38,10 @@ use ReflectionClass;
 use Throwable;
 
 class OpMachine {
+    /** Max length of a queued op `type`: must equal the machine.`type` column width in dbmodel.sql.
+     *  DSL type expressions are STATIC (authored in material or fixed literals) so their length is
+     *  bounded and known - never build a type by unbounded runtime string concatenation. */
+    const MAX_TYPE_LEN = 64;
     const MA_GAME_DISPATCH_MAX = 1000;
     const GAME_MULTI_COLOR = "000000";
     const GAME_BARIER_COLOR = "";
@@ -159,7 +163,7 @@ class OpMachine {
     }
 
     function instantiateSimpleOperation(string $type, ?string $owner = null, mixed $data = null): Operation {
-        if (strlen($type) > 80) {
+        if (strlen($type) > self::MAX_TYPE_LEN) {
             throw new SystemException("Cannot instantiate op");
         }
 
