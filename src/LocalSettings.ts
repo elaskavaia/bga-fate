@@ -70,6 +70,15 @@ export class LocalSettings {
     if (anchor) anchor.insertAdjacentHTML("afterend", html);
     else parent.insertAdjacentHTML("beforeend", html);
 
+    // The BGA menu reacts to taps bubbling out of its content; on mobile that steals focus from our
+    // select just as the native picker opens, dismissing it (the select receives the full tap
+    // sequence untouched, then an external blur - traced on-device). Their own preference rows are
+    // exempt from that reaction; ours are not, so keep our interactions to ourselves.
+    const block = document.getElementById(this.getDivId())!;
+    for (const type of ["pointerup", "touchend", "mouseup", "click"]) {
+      block.addEventListener(type, (event) => event.stopPropagation());
+    }
+
     for (const prop of this.props) {
       $(this.getInputId(prop))!.addEventListener("change", (event) => {
         this.applyChanges(prop, (event.target as HTMLSelectElement).value);

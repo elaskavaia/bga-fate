@@ -21,6 +21,8 @@ export interface LaZoomOptions {
   maxScale?: number;
   // zoom step multiplier (defaults to 1.1 = +10% per click)
   stepFactor?: number;
+  // delay before re-fitting after a resize/rotation, so layout settles first (default 250ms)
+  settleDelayMs?: number;
 }
 
 export class LaZoom {
@@ -37,6 +39,7 @@ export class LaZoom {
       minScale: 0.3,
       maxScale: 4.0,
       stepFactor: 1.1,
+      settleDelayMs: 250,
       ...opts
     };
   }
@@ -52,6 +55,8 @@ export class LaZoom {
     this.destroyDivOtherCopies("board_layout_controls");
     const host = document.getElementById("page-title")!;
 
+    // Hidden by default in CSS; only the zoomcontrols setting reveals them (setFitOnly(false)), so
+    // a short-circuited settings path cannot leave stray buttons over the top bar.
     host.insertAdjacentHTML(
       "beforeend",
       `<div id="board_layout_controls" class="board_layout_controls">
@@ -67,13 +72,24 @@ export class LaZoom {
     $("layout_zoom_in")!.addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
     $("layout_zoom_out")!.addEventListener("click", () => this.zoomByFactor(1 / this.opts.stepFactor));
 
-    window.addEventListener("resize", this.boundOnResize);
+    // A phone rotation fires resize/orientationchange BEFORE the viewport width settles, so an
+    // immediate re-fit samples a transient width and the wrong scale sticks. Debounce every
+    // viewport signal and measure after layout calms.
+    window.addEventListener("resize", this.scheduleApply);
+    window.addEventListener("orientationchange", this.scheduleApply);
+    window.visualViewport?.addEventListener("resize", this.scheduleApply);
 
     this.apply();
   }
 
-  private boundOnResize = () => {
-    this.apply();
+  private applyTimer: ReturnType<typeof setTimeout> | undefined;
+  private scheduleApply = () => {
+    if (this.applyTimer !== undefined) clearTimeout(this.applyTimer);
+    this.applyTimer = setTimeout(() => {
+      this.applyTimer = undefined;
+      const raf = window.requestAnimationFrame ?? ((cb: FrameRequestCallback) => cb(0));
+      raf(() => this.apply());
+    }, this.opts.settleDelayMs);
   };
 
   /**
@@ -82,8 +98,7 @@ export class LaZoom {
    */
   setFitOnly(fitOnly: boolean) {
     this.fitOnly = fitOnly;
-    const controls = $("board_layout_controls");
-    if (controls) controls.style.display = fitOnly ? "none" : "";
+    $("board_layout_controls")?.classList.toggle("controls_visible", !fitOnly);
     if (fitOnly) this.mode = "fit";
     else this.readStoredZoom();
     this.apply();

@@ -183,11 +183,11 @@ button.bgabutton > * {
     &::after {
       content: "⊘";
       position: absolute;
-      bottom: 3px;
-      right: -9px;
+      bottom: 14%;
+      right: -18%;
       height: 50%;
       aspect-ratio: 1;
-      font-size: 20px;
+      font-size: medium;
       color: red;
     }
   }

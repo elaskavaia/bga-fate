@@ -1614,13 +1614,20 @@ class LaZoom {
         this.mode = "fit";
         this.scale = 1;
         this.fitOnly = false;
-        this.boundOnResize = () => {
-            this.apply();
+        this.scheduleApply = () => {
+            if (this.applyTimer !== undefined)
+                clearTimeout(this.applyTimer);
+            this.applyTimer = setTimeout(() => {
+                this.applyTimer = undefined;
+                const raf = window.requestAnimationFrame ?? ((cb) => cb(0));
+                raf(() => this.apply());
+            }, this.opts.settleDelayMs);
         };
         this.opts = {
             minScale: 0.3,
             maxScale: 4.0,
             stepFactor: 1.1,
+            settleDelayMs: 250,
             ...opts
         };
     }
@@ -1633,6 +1640,8 @@ class LaZoom {
     setup() {
         this.destroyDivOtherCopies("board_layout_controls");
         const host = document.getElementById("page-title");
+        // Hidden by default in CSS; only the zoomcontrols setting reveals them (setFitOnly(false)), so
+        // a short-circuited settings path cannot leave stray buttons over the top bar.
         host.insertAdjacentHTML("beforeend", `<div id="board_layout_controls" class="board_layout_controls">
         <button id="layout_home" class="layout_button active" title="${_("Fit to screen")}"><i class="fa6 fa6-arrows-to-dot"></i></button>
         <button id="layout_zoom_in" class="layout_button" title="${_("Zoom in")}"><i class="fa fa-search-plus"></i></button>
@@ -1642,7 +1651,12 @@ class LaZoom {
         $("layout_home").addEventListener("click", () => this.setMode("fit"));
         $("layout_zoom_in").addEventListener("click", () => this.zoomByFactor(this.opts.stepFactor));
         $("layout_zoom_out").addEventListener("click", () => this.zoomByFactor(1 / this.opts.stepFactor));
-        window.addEventListener("resize", this.boundOnResize);
+        // A phone rotation fires resize/orientationchange BEFORE the viewport width settles, so an
+        // immediate re-fit samples a transient width and the wrong scale sticks. Debounce every
+        // viewport signal and measure after layout calms.
+        window.addEventListener("resize", this.scheduleApply);
+        window.addEventListener("orientationchange", this.scheduleApply);
+        window.visualViewport?.addEventListener("resize", this.scheduleApply);
         this.apply();
     }
     /**
@@ -1651,9 +1665,7 @@ class LaZoom {
      */
     setFitOnly(fitOnly) {
         this.fitOnly = fitOnly;
-        const controls = $("board_layout_controls");
-        if (controls)
-            controls.style.display = fitOnly ? "none" : "";
+        $("board_layout_controls")?.classList.toggle("controls_visible", !fitOnly);
         if (fitOnly)
             this.mode = "fit";
         else
@@ -1787,6 +1799,14 @@ class LocalSettings {
             anchor.insertAdjacentHTML("afterend", html);
         else
             parent.insertAdjacentHTML("beforeend", html);
+        // The BGA menu reacts to taps bubbling out of its content; on mobile that steals focus from our
+        // select just as the native picker opens, dismissing it (the select receives the full tap
+        // sequence untouched, then an external blur - traced on-device). Their own preference rows are
+        // exempt from that reaction; ours are not, so keep our interactions to ourselves.
+        const block = document.getElementById(this.getDivId());
+        for (const type of ["pointerup", "touchend", "mouseup", "click"]) {
+            block.addEventListener(type, (event) => event.stopPropagation());
+        }
         for (const prop of this.props) {
             $(this.getInputId(prop)).addEventListener("change", (event) => {
                 this.applyChanges(prop, event.target.value);

@@ -1939,12 +1939,15 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   top: 100%;
   left: 8px;
   margin-top: 8px;
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   z-index: 1000;
   padding: 4px;
+}
+.board_layout_controls.controls_visible {
+  display: flex;
 }
 .board_layout_controls .layout_button {
   width: 32px;
@@ -2037,7 +2040,7 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   max-width: calc(100% - 240px);
   margin-top: 0;
   z-index: 100;
-  background-color: #f5deb3;
+  background-color: rgba(86, 103, 78, 0.631372549);
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
@@ -2339,11 +2342,11 @@ button.bgabutton > * {
 .fateaction.err_2::after, .fateaction.err_6::after {
   content: "⊘";
   position: absolute;
-  bottom: 3px;
-  right: -9px;
+  bottom: 14%;
+  right: -18%;
   height: 50%;
   aspect-ratio: 1;
-  font-size: 20px;
+  font-size: medium;
   color: red;
 }
 
