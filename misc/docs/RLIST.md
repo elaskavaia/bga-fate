@@ -180,7 +180,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.13.8 | **Charge** = +1 additional step. Never more than +1. | [RULES.md:271](RULES.md#L271) | charge is `+= 1` once; never compounded (`Op_monsterMoveAll.php:79–80`) | ✅ |
 | R.13.9 | Charge cause A — Monster-Dice charge side → rank-1 monsters charge. | [RULES.md:272](RULES.md#L272) | rank-1 + die `charge` → +1 (`Op_monsterMoveAll.php:58–62`) | ✅ |
 | R.13.10 | Charge cause B — skull turn → all monsters charge. | [RULES.md:273](RULES.md#L273) | `tm_red_skull` sets `isChargeTurn=true` for everyone | ✅ |
-| R.13.11 | Charge cause C — attack-driven charge: monster that can't attack after normal move but could after +1 step, charges. | [RULES.md:274](RULES.md#L274) | implemented after normal move at `Op_monsterMoveAll.php:92–97` | ✅ |
+| R.13.11 | Charge cause C — attack-driven charge: monster that can't attack after normal move but could after +1 step, charges. | [RULES.md:274](RULES.md#L274) | after normal move at `Op_monsterMoveAll.php:90–100`; uses `getAttackRange` (Fire Horde reaches 2), not adjacency; tested `testFireHordeChargesIntoRange2` / `testFireHordeDoesNotChargeWhenAlreadyInRange2` | ✅ |
 | R.13.12 | If a monster is **not** adjacent to a hero, it moves normally — even if that takes it out of attack range. | [RULES.md:276](RULES.md#L276) | adjacency only blocks the *start* of move, not mid-path | ✅ |
 | R.13.13 | Legends **swap places** with monsters blocking their path. | [RULES.md:278](RULES.md#L278) | swap with non-Legend at `Op_monsterMoveAll.php:124–136`; tested | ✅ |
 | R.13.14 | Monster entering Grimheim → tile removed + 1 Town Piece (3 for Legend). | [RULES.md:280](RULES.md#L280) | `Game.php:621–626` | ✅ |

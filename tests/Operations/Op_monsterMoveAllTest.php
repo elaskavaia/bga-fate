@@ -236,6 +236,45 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
+    // Charge rule C: extra step to get into attack range (RULES.md §274)
+    // Path: hex_15_7 -> hex_14_7 -> hex_13_7 -> hex_12_8 -> hex_11_8 (Grimheim-ward)
+    // Hero at hex_11_8: distances hex_14_7=3, hex_13_7=2, hex_12_8=1.
+    // -------------------------------------------------------------------------
+
+    public function testRange1MonsterChargesToBecomeAdjacent(): void {
+        // Control: a range-1 monster ends normal move 2 away and charges to adjacency.
+        $this->game->tokens->moveToken("monster_imp_1", "hex_14_7");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+
+        $this->call_resolve();
+
+        $loc = $this->game->tokens->getTokenLocation("monster_imp_1");
+        $this->assertEquals("hex_12_8", $loc, "Range-1 monster should charge one extra step to reach the hero");
+    }
+
+    public function testFireHordeChargesIntoRange2(): void {
+        // Fire Horde (range 2) ends normal move 3 away (out of range); charging to 2 lets it attack.
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_15_7");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+
+        $this->call_resolve();
+
+        $loc = $this->game->tokens->getTokenLocation("monster_sprite_1");
+        $this->assertEquals("hex_13_7", $loc, "Fire Horde should charge to get within its range-2 attack (distance 2)");
+    }
+
+    public function testFireHordeDoesNotChargeWhenAlreadyInRange2(): void {
+        // Fire Horde (range 2) ends normal move 2 away, already able to attack -> must NOT charge closer.
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_14_7");
+        $this->game->tokens->moveToken("hero_1", "hex_11_8");
+
+        $this->call_resolve();
+
+        $loc = $this->game->tokens->getTokenLocation("monster_sprite_1");
+        $this->assertEquals("hex_13_7", $loc, "Fire Horde already within range 2 should not take an unnecessary charge step");
+    }
+
+    // -------------------------------------------------------------------------
     // Stun (stunmarker — Suppressive Fire)
     // -------------------------------------------------------------------------
 

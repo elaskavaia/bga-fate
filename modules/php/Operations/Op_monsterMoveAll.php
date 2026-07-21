@@ -87,12 +87,16 @@ class Op_monsterMoveAll extends Operation {
             }
         }
 
-        // Charge rule C: if monster finished normal move and is not adjacent to a hero,
-        // but would be after 1 extra step, it charges to get into attack range
-        if (!$charge && !$this->game->hexMap->isHeroAdjacentTo($currentHex)) {
-            $nextHex = $this->game->hexMap->getMonsterNextHex($currentHex);
-            if ($nextHex !== null && $this->game->hexMap->isHeroAdjacentTo($nextHex)) {
-                $this->moveMonsterOneStep($monsterId, $currentHex, clienttranslate('${token_name} charges toward the nearest hero!'));
+        // Charge rule C: if monster finished normal move and cannot attack a hero,
+        // but would be able to after 1 extra step, it charges to get into attack range.
+        // Uses the monster's attack range (Fire Horde reaches 2), not just adjacency.
+        if (!$charge) {
+            $range = $this->game->getMonster($monsterId)->getAttackRange();
+            if (!$this->game->hexMap->isCharacterTypeInRange($currentHex, $range, "hero")) {
+                $nextHex = $this->game->hexMap->getMonsterNextHex($currentHex);
+                if ($nextHex !== null && $this->game->hexMap->isCharacterTypeInRange($nextHex, $range, "hero")) {
+                    $this->moveMonsterOneStep($monsterId, $currentHex, clienttranslate('${token_name} charges toward the nearest hero!'));
+                }
             }
         }
     }
