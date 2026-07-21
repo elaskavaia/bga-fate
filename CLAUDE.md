@@ -73,6 +73,11 @@ When the chrome-devtools-mcp plugin is available, you can drive a real browser a
 - Brace style: 1tbs
 
 
+### Naming (all languages)
+
+- **Getter naming.** Methods that return a value start with `get` (`getCardCost`, `getGoldOn`) - in PHP and TypeScript alike. The only sanctioned exceptions are `is` for boolean predicates (`isEndOfGame`) and `count` for methods that also double as barewords in the expression engine (`countCardsInHand`, descriptive even then). Do not invent bare-noun getters (`cardCost()`) or new player concepts - use the framework's own (`getActivePlayerId`, `getActivePlayerList`, `getMostlyActivePlayerId`).
+
+
 ### Material System
 
 Game elements (tokens, cards, operations) are defined in CSV files in `misc/` and auto-generated into `Material.php`. Generated sections are marked with `--- gen php begin <name> ---` / `--- gen php end <name> ---`. When adding new game elements, update the CSV and run `npm run genmat` — do not edit generated sections directly.
