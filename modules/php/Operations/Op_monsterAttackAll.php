@@ -38,8 +38,11 @@ class Op_monsterAttackAll extends Operation {
         }
 
         foreach ($byHero as $heroId => $monsterIds) {
+            // Real buckets are keyed by hero token id; Seer of Odin (II) sits under an
+            // integer auto-index key and needs no pinned target (it hits every hero).
+            $targetHex = is_string($heroId) ? $this->game->hexMap->getCharacterHex($heroId) : null;
             foreach ($monsterIds as $monsterId) {
-                $this->queue("monsterAttack", null, ["char" => $monsterId, "target" => $this->game->hexMap->getCharacterHex($heroId)]);
+                $this->queue("monsterAttack", null, ["char" => $monsterId, "target" => $targetHex]);
             }
         }
     }

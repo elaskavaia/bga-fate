@@ -109,6 +109,20 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         $this->assertCount(0, $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1"));
     }
 
+    public function testAttackAllWithSeerPresentDoesNotCrash(): void {
+        // Regression: Seer of Odin (II) buckets under an integer auto-index key.
+        // The grouping pass must not feed that int to getCharacterHex() (prod TypeError).
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent to hero_1
+        $this->game->getMonster("monster_legend_2_2")->moveTo("hex_2_8", "");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $op = $this->game->machine->instantiateOperation("monsterAttackAll", null);
+        $op->resolve();
+
+        $queued = $this->game->machine->db->getOperations(null, "monsterAttack");
+        $this->assertCount(2, $queued, "Both the goblin and the Seer should queue a monsterAttack");
+    }
+
     // -------------------------------------------------------------------------
     // Trollkin faction bonus
     // -------------------------------------------------------------------------
