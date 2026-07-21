@@ -141,6 +141,35 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         $this->assertCount(2, $crystals);
     }
 
+    public function testHrungbaldDoublesTrollkinSupport(): void {
+        // Same setup as testTrollkinFactionBonus, but Hrungbald is on the board (anywhere):
+        // the adjacent brute now grants +2 instead of +1, so goblin attacks at strength 3.
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8"); // adjacent to hero on hex_11_8
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_7"); // adjacent to goblin
+        $this->game->tokens->moveToken("monster_legend_5_1", "hex_2_2"); // Hrungbald in play, far away
+
+        // Seed 3 dice (strength 1 + 2 doubled support): hit, hit, hit → 3 damage
+        $this->game->randQueue = [5, 5, 5];
+        $this->resolveMonsterAttack("monster_goblin_1");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(3, $crystals);
+    }
+
+    public function testHrungbaldInLimboDoesNotDoubleSupport(): void {
+        // Hrungbald II starts in limbo (not on a board hex) — support stays +1.
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_7");
+        $this->assertEquals("limbo", $this->game->tokens->getTokenLocation("monster_legend_5_2"));
+
+        // Seed 2 dice (strength 1 + 1 bonus): hit, hit → 2 damage
+        $this->game->randQueue = [5, 5];
+        $this->resolveMonsterAttack("monster_goblin_1");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(2, $crystals);
+    }
+
     public function testNonTrollkinNoFactionBonus(): void {
         // Sprite (firehorde) + goblin (trollkin) adjacent to hero — sprite gets no trollkin bonus
         $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8");

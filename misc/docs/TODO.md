@@ -15,6 +15,43 @@
 
 
 
+### Legend special abilities (mostly unimplemented)
+
+Dictated by Victoria 2026-07-21 (voice; garbled bits marked CONFIRM). Level I = yellow `_1`, Level II = red `_2`.
+For each unbuilt one: implement (server) + tooltip note (`buildLegendTooltip`) + test, then check off.
+Faction effects (trollkin support, firehorde range, dead runes) are separate and already covered (RLIST R.18/R.19).
+
+Card format: the card prints the faction line, then that legend's own ability. An ability applies to the legend
+only, unless its text explicitly names the faction/others - e.g. Hrungbald "double the Trollkin support",
+Surt LI "all Fire Horde", Queen LII "other Dead".
+
+Checkbox = implemented + tested. Verified against code 2026-07-21.
+
+**Legend 1 - Queen of the Dead** (dead)
+- [ ] LI: may only be damaged by adjacent characters (range-2+ deals nothing). Queen only (FORUM.md:110). No code.
+- [ ] LII: all other Dead have +1 health while she is in play. No code.
+
+**Legend 2 - Seer of Odin** (DEAD both levels - material wrongly says firehorde)
+- [ ] Faction data fix: `monster_legend_2_1/2` are `firehorde`, must be `dead`. Set + regen; drops range 2 (its special attack ignores range anyway), gains dead rune-as-hit; also fix the stale "Seer=firehorde" in RLIST R.19.6 / TODO.md:84 (standing rule TODO.md:80: each legend uses its printed faction).
+- [ ] LI: on arrival, place skeletons in all unoccupied areas adjacent to Temple Ruins. Confirmed verbatim + designer-approved (FORUM.md:2934). Card spawn string is `"L"` (tile only) - ability not encoded. No code.
+- [x] LII: as its attack, deals 1 unpreventable damage to every hero. `Op_monsterAttack::resolveSeerAttack`.
+
+**Legend 3 - Grendel** (trollkin)
+- [x] LI: no unique ability - Trollkin support only. Nothing to build.
+- [ ] LII: attacks twice; each rune counts as two hits. "Attacks twice" confirmed FORUM.md:116/1327 (the 2 attacks may split across 2 heroes). No code.
+
+**Legend 4 - Surt** (firehorde)
+- [ ] LI: runes count as hits for all Fire Horde while Surt is on the board (grant `dead`-style rune-as-hit; hook `Monster::countHit`, gated like `isHrungbaldInPlay`). No code.
+- [ ] LII: attack range 3, Surt only (resolves FORUM.md:115; the FORUM.md:673 "all fire horde" remark is superseded). No code.
+
+**Legend 5 - Hrungbald** (trollkin)
+- [x] LI + LII: doubles the Trollkin support (+2 per adjacent trollkin while on the board). `Op_monsterAttack::isHrungbaldInPlay`, tooltip, test `testHrungbaldDoublesTrollkinSupport`.
+
+**Legend 6 - Nidhuggr** (wyrm) - strength = remaining health, both levels
+- [x] Client indicator + tooltip show strength = remaining health.
+- [x] Server: `Monster::getBaseAttackStrength` returns remaining health for Wyrm; `Op_monsterAttack::getMonsterStrength` uses it. Test `Campaign_LegendAbilityTest::testNidhuggrAttacksWithRemainingHealth`.
+
+
 ### Rules-sweep gaps (RLIST 2026-06-02)
 
 Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-refs back to RLIST rule IDs. Bugs at the top, missing rules/options below, behaviour-drift items needing a design decision after that, and untested-but-implemented coverage gaps at the bottom.

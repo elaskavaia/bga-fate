@@ -251,6 +251,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.19.4 | Each Legend tile has yellow + red sides — pick matching spot type. | [RULES.md:364](RULES.md#L364) | yellow/red deck maps to `_1`/`_2` via `legend` column in `monstercard_material.csv`; spot type drives deck choice | ✅ |
 | R.19.5 | Roster: Grendel, Nidhuggr, Surt, Queen, Hrungbald, Seer of Odin. | [RULES.md:366–371](RULES.md#L366) | all 6 present in `monster_material.csv:40–51` with both variants | ✅ |
 | R.19.6 | Each Legend belongs to its printed faction and shares faction abilities. | DESIGN.md "Legend factions" | factions: Queen=dead, Seer/Surt=firehorde, Grendel/Hrungbald=trollkin, Nidhuggr=wyrm; faction-keyed code applies uniformly | ✅ |
+| R.19.7 | **Hrungbald** doubles trollkin support: all trollkin get +2 (not +1) per adjacent trollkin while he is on the board. | [FORUM.md:6898](FORUM.md#L6898) | `Op_monsterAttack::getMonsterStrength` uses `isHrungbaldInPlay` (either legend_5 level on a hex); `testHrungbaldDoublesTrollkinSupport` | ✅ |
 
 ## 20. Clarifications (from RULES.md "Clarifications" section)
 

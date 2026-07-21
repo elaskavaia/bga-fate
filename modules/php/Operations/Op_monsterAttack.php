@@ -154,24 +154,25 @@ class Op_monsterAttack extends Operation {
     }
 
     /**
-     * Get monster attack strength including Trollkin faction bonus.
-     * Trollkin monsters get +1 for each other adjacent Trollkin monster near the target hero.
+     * Get monster attack strength: base (Wyrm uses remaining health) plus Trollkin support
+     * (doubled by Hrungbald) plus the Monster-Die attack side.
      */
     private function getMonsterStrength(string $monsterHex): int {
         $monsterId = $this->game->hexMap->getCharacterOnHex($monsterHex);
-        $strength = (int) $this->game->getRulesFor($monsterId, "strength", 1);
-        $faction = $this->game->getRulesFor($monsterId, "faction", "");
+        $monster = $this->game->getMonster($monsterId);
+        $strength = $monster->getBaseAttackStrength();
+        $faction = $monster->getFaction();
 
         if ($faction === "trollkin") {
-            //**Trollkin Effect:** All trollkin get +1 attack strength for each other trollkin adjacent to them.
-
+            // Trollkin support: +1 strength per adjacent trollkin, doubled to +2 while Hrungbald is on the board.
+            $support = $this->isHrungbaldInPlay() ? 2 : 1;
             $adjacentHexes = $this->game->hexMap->getAdjacentHexes($monsterHex);
             foreach ($adjacentHexes as $hex) {
                 $char = $this->game->hexMap->getCharacterOnHex($hex);
                 if ($char !== null && $char !== $monsterId && getPart($char, 0) === "monster") {
                     $otherFaction = $this->game->getRulesFor($char, "faction", "");
                     if ($otherFaction === $faction) {
-                        $strength++;
+                        $strength += $support;
                     }
                 }
             }
@@ -183,5 +184,15 @@ class Op_monsterAttack extends Operation {
         }
 
         return $strength;
+    }
+
+    /** Hrungbald (either level) on a board hex doubles the trollkin support bonus for all trollkin. */
+    private function isHrungbaldInPlay(): bool {
+        foreach (["monster_legend_5_1", "monster_legend_5_2"] as $hrungbald) {
+            if (str_starts_with((string) $this->game->tokens->getTokenLocation($hrungbald), "hex_")) {
+                return true;
+            }
+        }
+        return false;
     }
 }

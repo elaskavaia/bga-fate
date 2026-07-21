@@ -45,6 +45,17 @@ class Monster extends Character {
     }
 
     /**
+     * Base attack strength before support/die modifiers.
+     * Wyrm (Nidhuggr) attacks with its remaining health instead of a fixed value.
+     */
+    function getBaseAttackStrength(): int {
+        if ($this->getFaction() === "wyrm") {
+            return $this->getRemainingHealth();
+        }
+        return (int) $this->getRulesFor("strength", 1);
+    }
+
+    /**
      * Kill cleanup. Runs from Op_finishKill, after TMonsterKilled has
      * dispatched, so trigger handlers see the monster still on its hex with
      * its bonus crystals intact.
