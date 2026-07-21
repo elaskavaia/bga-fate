@@ -385,13 +385,14 @@ describe("Game.onClickSanity", () => {
     expect(result.active).to.be.true;
   });
 
-  it("should return active=true for button_ prefixed ids without active_slot class", () => {
+  it("should treat button_ prefixed ids as active and strip the prefix", () => {
     const el = document.createElement("div");
     el.id = "button_confirm";
     document.body.appendChild(el);
 
     const result = game.onClickSanity(makeClickEvent(el));
-    expect(result.targetId).to.equal("button_confirm");
+    // prefix stripped so the server receives the bare target, not the button's DOM id
+    expect(result.targetId).to.equal("confirm");
     expect(result.active).to.be.true;
   });
 

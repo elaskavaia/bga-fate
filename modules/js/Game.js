@@ -941,6 +941,10 @@ class Game1Tokens extends Game0Basics {
         }
         if (target?.dataset.targetId)
             result.targetId = target.dataset.targetId;
+        // Toolbar image buttons wrap inner content with no dataset, so the click falls back to the
+        // bound element id "button_<target>". Strip the prefix (house pattern, cf. bga-mars) so the
+        // server receives the bare target instead of rejecting it (checkUserTargetSelection).
+        result.targetId = result.targetId.replace(/^button_/, "");
         result.active = true;
         return result;
     }
