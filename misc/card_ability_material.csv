@@ -1,4 +1,4 @@
-num|hno|name|strength|health|mana|r|on|effect|flavour
+num|hno|name|strength|health|mana|r|on|effect|flavour|attack_range
 #fields: num - card number, hno - hero number, ctype - card type, count - how many of these cards in deck,
 #strength,durability - damage capacity, mana - mana generation per turn
 #set ctype=ability
@@ -8,8 +8,8 @@ num|hno|name|strength|health|mana|r|on|effect|flavour
 #set _noquotes=create
 #set _noquotes=attack_range
 # Abilities - Bjorn (hno=1)
-9|1|Eagle Eye I|1|||||You have attack range +1|If I can see it, I can hit it.
-10|1|Eagle Eye II|2|||||You have attack range +2. Always ignore the armor|Yeah, why shoot the armor?
+9|1|Eagle Eye I||||||You have attack range +1|If I can see it, I can hit it.|1
+10|1|Eagle Eye II||||||You have attack range +2. Always ignore the armor|Yeah, why shoot the armor?|2
 11|1|Long Shot I||||2addDamage(2)|TActionAttack|Add 2 damage to your attack action if target is at range 2 or more.|Sure, it's a long shot. But Bjorn enjoys a challenge.
 12|1|Long Shot II||||addDamage(dist)|TActionAttack|Add damage to your attack action based on the distance to the target (e.g. add 3 damage if the target is 3 areas away).|Oh, and always ignore cover.
 13|1|Nailed Together I||||c_nailed|TMonsterKilled|If you kill a monster in an attack action, all remaining damage may be dealt to a second monster behind it (adjacent and further away).|

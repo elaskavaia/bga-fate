@@ -231,14 +231,11 @@ class Hero extends Character {
     /** Compute base attack range from equipment cards. Default is 1. */
     function calcBaseRange(): int {
         $cards = $this->getTableauCards();
-        $maxRange = 1;
+        $range = 1;
         foreach ($cards as $card => $info) {
-            $range = (int) $this->game->material->getRulesFor($card, "attack_range", 0);
-            if ($range > $maxRange) {
-                $maxRange = $range;
-            }
+            $range += (int) $this->game->material->getRulesFor($card, "attack_range", 0);
         }
-        return $maxRange;
+        return $range;
     }
 
     /** Compute base move range. Default is 3, Embla (hero 3) has 4. Wrecking Ball II grants +1. */
