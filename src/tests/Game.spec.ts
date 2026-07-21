@@ -573,3 +573,60 @@ describe("Game.handleStackedTooltips", () => {
     expect(addTooltipHtml.calledWith("hex_5_5", combined)).to.be.true;
   });
 });
+
+describe("Game.getEffectiveMonsterAttack", () => {
+  let game: Game;
+
+  function placeMonster(hexId: string, monsterId: string): void {
+    let hex = $(hexId);
+    if (!hex) {
+      hex = document.createElement("div");
+      hex.id = hexId;
+      $("map_wrapper")!.appendChild(hex);
+    }
+    const monster = document.createElement("div");
+    monster.id = monsterId;
+    hex.appendChild(monster);
+  }
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="ebd-body"><div id="map_wrapper"></div></div>';
+    game = new Game(createMockBga());
+    sinon.stub(game, "getRulesFor").callsFake((id: string, key?: string, def?: any) => {
+      if (key === "faction") return id.startsWith("monster_sprite") ? "firehorde" : "trollkin";
+      if (key === "rule" && id === "side_die_monster_3") return "attack";
+      return def;
+    });
+    sinon.stub(game, "getTokenState").returns(3);
+  });
+
+  it("adds +1 per adjacent trollkin", () => {
+    placeMonster("hex_5_9", "monster_goblin_1");
+    placeMonster("hex_5_8", "monster_brute_1"); // axial neighbor of (5,9)
+    expect(game.getEffectiveMonsterAttack("monster_goblin_1", 1)).to.equal(2);
+  });
+
+  it("doubles support to +2 while Hrungbald is on the board", () => {
+    placeMonster("hex_5_9", "monster_goblin_1");
+    placeMonster("hex_5_8", "monster_brute_1");
+    placeMonster("hex_2_2", "monster_legend_5_1"); // Hrungbald in play, far away
+    expect(game.getEffectiveMonsterAttack("monster_goblin_1", 1)).to.equal(3);
+  });
+
+  it("gives no trollkin support to a non-trollkin attacker", () => {
+    placeMonster("hex_5_9", "monster_sprite_1");
+    placeMonster("hex_5_8", "monster_brute_1");
+    expect(game.getEffectiveMonsterAttack("monster_sprite_1", 1)).to.equal(1);
+  });
+
+  it("adds +1 while the monster die shows its attack side", () => {
+    placeMonster("hex_5_9", "monster_goblin_1"); // no trollkin neighbor
+    const display = document.createElement("div");
+    display.id = "display_monsterturn";
+    const die = document.createElement("div");
+    die.id = "die_monster";
+    display.appendChild(die);
+    $("ebd-body")!.appendChild(display);
+    expect(game.getEffectiveMonsterAttack("monster_goblin_1", 1)).to.equal(2);
+  });
+});

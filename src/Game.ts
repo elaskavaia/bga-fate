@@ -627,6 +627,43 @@ export class Game extends Game1Tokens {
     }
   }
 
+  /** Current hex id of a character (its DOM parent), or null when not on the map. */
+  getCharHex(charId: string): string | null {
+    const parent = $(charId)?.parentElement?.id;
+    return parent?.startsWith("hex_") ? parent : null;
+  }
+
+  /** Hrungbald (either level) on a board hex doubles trollkin support for all trollkin. */
+  isHrungbaldInPlay(): boolean {
+    return this.getCharHex("monster_legend_5_1") !== null || this.getCharHex("monster_legend_5_2") !== null;
+  }
+
+  /** +1 to every monster's attack while the optional Monster Die shows its "attack" side. */
+  getMonsterDieAttackBonus(): number {
+    if ($("die_monster")?.parentElement?.id !== "display_monsterturn") return 0;
+    const state = this.getTokenState("die_monster");
+    return this.getRulesFor(`side_die_monster_${state}`, "rule", "") === "attack" ? 1 : 0;
+  }
+
+  /** Effective monster attack strength: base + trollkin support + monster-die bonus. Mirrors server getMonsterStrength. */
+  getEffectiveMonsterAttack(charId: string, base: number): number {
+    let attack = base;
+    const hex = this.getCharHex(charId);
+    if (hex && this.getRulesFor(charId, "faction", "") === "trollkin") {
+      const support = this.isHrungbaldInPlay() ? 2 : 1;
+      const q = getIntPart(hex, 1);
+      const r = getIntPart(hex, 2);
+      // Axial neighbors, matching server HexMap::getAdjacentHexes.
+      for (const [dq, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]]) {
+        const other = $(`hex_${q + dq}_${r + dr}`)?.querySelector(':scope > [id^="monster_"]');
+        if (other && this.getRulesFor(other.id, "faction", "") === "trollkin") {
+          attack += support;
+        }
+      }
+    }
+    return attack + this.getMonsterDieAttackBonus();
+  }
+
   /** Inner html for a character/pile .stats_attack box: attack / max-health.
    *  Returns null for non-combatants (no stats, e.g. gold veins) so no box is shown. */
   buildAttackStat(charId: string): string | null {
@@ -648,6 +685,7 @@ export class Game extends Game1Tokens {
       } else {
         attack = parseInt(this.getRulesFor(charId, "strength", "0"));
       }
+      attack = this.getEffectiveMonsterAttack(charId, attack);
     }
 
     if (!attack && !hp) return null;
@@ -708,10 +746,18 @@ export class Game extends Game1Tokens {
     if (mainType === "hero") {
       this.refreshAttackStat(charId);
     } else if (mainType === "monster") {
-      const loc = placeInfo.location ?? "";
-      // only map characters get a box; supply monsters live in piles (the pile has its own)
-      if (loc.startsWith("hex_") || loc === "map_wrapper") this.refreshAttackStat(charId);
+      // A monster entering, leaving, or moving on the map (Hrungbald included) changes its
+      // neighbors' trollkin support, so refresh every map monster's indicator, not just this one.
+      this.refreshAllMonsterAttackStats();
+    } else if (charId === "die_monster") {
+      // Monster-die "attack" side grants every monster +1 for the turn.
+      this.refreshAllMonsterAttackStats();
     }
+  }
+
+  /** Refresh the attack indicator on every monster currently on a board hex. */
+  refreshAllMonsterAttackStats(): void {
+    document.querySelectorAll('[id^="hex_"] > [id^="monster_"]').forEach((el) => this.refreshAttackStat(el.id));
   }
 
   getTokenPresentaton(type: string, tokenKey: string, args?: any, strict?: false): string;
@@ -930,9 +976,10 @@ export class Game extends Game1Tokens {
     }
     tokenInfo.tooltip += this.ttStats(rows);
 
-    // Special ability notes for legends with * strength
+    // Special ability notes for legends
     const specialAbility: Record<string, string> = {
       "2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
+      "5": _("Doubles the Trollkin support effect: every Trollkin gets +2 attack strength per adjacent Trollkin instead of +1."),
       "6": _("Wyrm: Nidhuggr's strength is the same as its remaining health.")
     };
     if (specialAbility[legendNum]) tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[legendNum]);
