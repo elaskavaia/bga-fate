@@ -38,7 +38,7 @@ Checkbox = implemented + tested. Verified against code 2026-07-21.
 
 **Legend 3 - Grendel** (trollkin)
 - [x] LI: no unique ability - Trollkin support only. Nothing to build.
-- [ ] LII: attacks twice; each rune counts as two hits. "Attacks twice" confirmed FORUM.md:116/1327 (the 2 attacks may split across 2 heroes). No code.
+- [x] LII: attacks twice; each rune counts as two hits. `Op_monsterAttackAll` queues Grendel II (`monster_legend_3_2`) twice; `Monster::countHit` returns 2 for its runes; client tooltip note (3_2). Tests `MonsterTest::testGrendelIIRuneCountsAsTwoHits`, `Campaign_LegendAbilityTest::testGrendelIIAttacksTwice`. (Full "may split between 2 heroes" inherits the R.14.2 pick-first targeting limitation.)
 
 **Legend 4 - Surt** (firehorde)
 - [x] LI: runes count as hits for all Fire Horde while Surt I (`monster_legend_4_1`) is on the board. `Monster::countHit` gated on `Game::isMonsterOnBoard`; client tooltip note (4_1). Tests: `Op_monsterAttackTest::testSurtIGrantsFirehordeRuneAsHit` / `testSurtIIDoesNotGrantFirehordeRune`.

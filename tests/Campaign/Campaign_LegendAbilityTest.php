@@ -40,6 +40,17 @@ class Campaign_LegendAbilityTest extends CampaignBaseTest {
         );
     }
 
+    public function testGrendelIIAttacksTwice(): void {
+        // Grendel II (red) makes two attacks in the monster turn.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_legend_3_2")->moveTo("hex_7_8", ""); // adjacent to hero
+        $this->game->randQueue = array_fill(0, 20, 1); // all misses so the hero survives both attacks
+
+        $this->driveOneMonsterTurn();
+
+        $this->assertCount(2, $this->attackStrengths(), "Grendel II makes two attacks");
+    }
+
     public function testNidhuggrAttacksWithRemainingHealth(): void {
         // Wyrm: Nidhuggr's attack strength equals its remaining health, not the fixed
         // material strength (0). Health 13 minus 10 damage => attacks at strength 3.

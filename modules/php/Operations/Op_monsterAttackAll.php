@@ -43,6 +43,10 @@ class Op_monsterAttackAll extends Operation {
             $targetHex = is_string($heroId) ? $this->game->hexMap->getCharacterHex($heroId) : null;
             foreach ($monsterIds as $monsterId) {
                 $this->queue("monsterAttack", null, ["char" => $monsterId, "target" => $targetHex]);
+                // Grendel II attacks twice (a second attack re-targets if the first freed the hex).
+                if ($monsterId === "monster_legend_3_2") {
+                    $this->queue("monsterAttack", null, ["char" => $monsterId, "target" => $targetHex]);
+                }
             }
         }
     }

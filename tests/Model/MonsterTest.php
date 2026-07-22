@@ -113,6 +113,14 @@ final class MonsterTest extends TestCase {
         $this->assertEquals(2, $this->game->getMonster("monster_legend_4_1")->getAttackRange());
     }
 
+    public function testGrendelIIRuneCountsAsTwoHits(): void {
+        $grendel = $this->game->getMonster("monster_legend_3_2");
+        $this->assertEquals(2, $grendel->countHit("rune"), "Grendel II: each rune = 2 hits");
+        $this->assertEquals(1, $grendel->countHit("hit"), "a normal hit is still 1");
+        // Ordinary trollkin runes remain misses.
+        $this->assertEquals(0, $this->game->getMonster("monster_goblin_1")->countHit("rune"));
+    }
+
     public function testQueenIIGivesOtherDeadPlusOneHealth(): void {
         $skeleton = $this->game->getMonster("monster_skeleton_1"); // dead
         $goblin = $this->game->getMonster("monster_goblin_1"); // trollkin

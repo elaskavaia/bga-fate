@@ -91,6 +91,10 @@ class Monster extends Character {
     }
 
     function countHit(string $rule, ?string $defenderHex = null): int {
+        // Grendel II: each rune counts as two hits.
+        if ($rule === "rune" && $this->id === "monster_legend_3_2") {
+            return 2;
+        }
         $isHit = parent::countHit($rule, $defenderHex);
         if (!$isHit && $rule === "rune") {
             $attackerFaction = $this->game->material->getRulesFor($this->id, "faction", "");
