@@ -70,10 +70,17 @@ class Op_actionAttack extends Operation {
             $this->queue("c_orebiter", null, ["card" => self::OREBITER]);
         } else {
             $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, 0, "");
-            $this->queue("roll", null, [
+            $rollData = [
                 "target" => $targetHex,
                 "count" => $strength,
-            ]);
+            ];
+            // Forward the source card (e.g. Rapid Strike) so the ActionAttack trigger
+            // can tell reactive weapons which card queued this attack (Eitri's Pick).
+            $sourceCard = $this->getDataField("card");
+            if ($sourceCard) {
+                $rollData["card"] = $sourceCard;
+            }
+            $this->queue("roll", null, $rollData);
         }
 
         $this->queue("endOfAttack");

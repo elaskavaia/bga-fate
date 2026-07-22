@@ -221,27 +221,25 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         // Recalc strength after equipping Eitri's Pick (+2 strength).
         $this->game->getHero($color)->recalcTrackers();
 
-        // Boldur outside Grimheim, troll (h=6) adjacent.
+        // Boldur outside Grimheim, troll (h=6) adjacent — survives an all-miss volley
+        // so every die of the single Rapid Strike attack is rolled and countable.
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
         $troll = "monster_troll_1";
         $this->game->getMonster($troll)->moveTo("hex_7_8", "");
 
-        // Boldur I(3) + First Pick(1) + Eitri's Pick(2) = 6 base dice.
-        // Rapid Strike via Eitri's hook adds 2 more = 8 dice total.
-        // Seed 7 hits + 1 miss → 7 damage to the troll (kills it, h=7).
-        $this->seedRand([5, 5, 5, 5, 5, 5, 5, 1]);
+        $baseStrength = $this->game->getHero($color)->getAttackStrength();
 
-        // Activate Rapid Strike I via useCard.
+        // Seed a big pile of misses; count how many are actually consumed by the attack.
+        $seeded = array_fill(0, 20, 1);
+        $this->seedRand($seeded);
+
+        // Activate Rapid Strike I; the sole monster in range auto-resolves the target,
+        // so the whole attack resolves inside this one response.
         $this->respond($rapid);
 
-        // Rapid Strike's r-chain auto-resolves spendUse + 3spendMana, then prompts for
-        // the actionAttack target.
-        $this->respond("hex_7_8");
-
-        // Troll dead — 7 hits matches its health exactly.
-        $this->assertEquals("supply_monster", $this->tokenLocation($troll));
-        // Confirm exactly 8 dice rolled — the 2 from Eitri's hook on top of 6 base.
-        $this->assertEmpty($this->game->randQueue, "Should have rolled exactly 8 dice");
+        // Eitri's hook must add 2 dice on top of base strength for a Rapid Strike attack.
+        $rolled = count($seeded) - count($this->game->randQueue);
+        $this->assertEquals($baseStrength + 2, $rolled, "Eitri's Pick should add 2 attack dice via Rapid Strike");
     }
 
     // --- Precision Axes (card_equip_4_26) ---

@@ -94,7 +94,8 @@ class Op_roll extends CountableOperation {
         // offered during attack rolls. Op_addRoll overrides getEmittedTrigger() to
         // demote ActionAttack → Roll since added dice are not a new attack action.
         if ($this->shouldEmitTrigger() && str_starts_with($attackerId, "hero_")) {
-            $this->queueTrigger($this->getEmittedTrigger());
+            $sourceCard = $this->getDataField("card");
+            $this->queueTrigger($this->getEmittedTrigger(), null, $sourceCard ? ["card" => $sourceCard] : null);
         }
 
         // Queue resolveHits to convert dice into dealDamage.
