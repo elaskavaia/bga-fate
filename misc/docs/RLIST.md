@@ -236,7 +236,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 |---|---|---|---|---|
 | R.18.1 | **Trollkin effect** — +1 strength per other adjacent trollkin. Applies to Legend trollkin. | [RULES.md:320](RULES.md#L320) | `Op_monsterAttack::getMonsterStrength`; Grendel/Hrungbald CSV `faction=trollkin` | ✅ |
 | R.18.2 | **Goblin additional effect** — moves 2 areas (3 with charge). | [RULES.md:322](RULES.md#L322) | Goblin `move=2`; `Op_monsterMoveAll` loops `move` steps; charge adds +1 | ✅ |
-| R.18.3 | **Fire Horde effect** — range 2. Applies to Legend fire horde. | [RULES.md:336](RULES.md#L336) | `Monster::getAttackRange` returns 2 for `firehorde`; Seer/Surt CSV match | ✅ |
+| R.18.3 | **Fire Horde effect** — range 2. Applies to Legend fire horde. | [RULES.md:336](RULES.md#L336) | `Monster::getAttackRange` returns 2 for `firehorde`; Surt is the only firehorde legend (Seer is Dead) | ✅ |
 | R.18.4 | **Dead effect** — runes count as hits when the dead attack. Applies to Queen. | [RULES.md:348](RULES.md#L348) | `Monster::countHit` upgrades rune → hit for `faction=dead`; Queen has it | ✅ |
 | R.18.5 | **Draugr armor** — prevents 1 damage per damage event. | [RULES.md:350](RULES.md#L350) | Draugr armor=1 in CSV; `applyArmor` in `Op_resolveHits::queueDamage` | ✅ |
 | R.18.6 | Per-monster stat lines per the rulebook table. | [RULES.md:324–356](RULES.md#L324) | material CSVs | ✅ |
@@ -250,7 +250,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.19.3 | Legends switch places with blockers. | [RULES.md:362,278](RULES.md#L362) | `Op_monsterMoveAll.php:123–138` | ✅ |
 | R.19.4 | Each Legend tile has yellow + red sides — pick matching spot type. | [RULES.md:364](RULES.md#L364) | yellow/red deck maps to `_1`/`_2` via `legend` column in `monstercard_material.csv`; spot type drives deck choice | ✅ |
 | R.19.5 | Roster: Grendel, Nidhuggr, Surt, Queen, Hrungbald, Seer of Odin. | [RULES.md:366–371](RULES.md#L366) | all 6 present in `monster_material.csv:40–51` with both variants | ✅ |
-| R.19.6 | Each Legend belongs to its printed faction and shares faction abilities. | DESIGN.md "Legend factions" | factions: Queen=dead, Seer/Surt=firehorde, Grendel/Hrungbald=trollkin, Nidhuggr=wyrm; faction-keyed code applies uniformly | ✅ |
+| R.19.6 | Each Legend belongs to its printed faction and shares faction abilities. | DESIGN.md "Legend factions" | factions: Queen/Seer=dead, Surt=firehorde, Grendel/Hrungbald=trollkin, Nidhuggr=wyrm; faction-keyed code applies uniformly | ✅ |
 | R.19.7 | **Hrungbald** doubles trollkin support: all trollkin get +2 (not +1) per adjacent trollkin while he is on the board. | [FORUM.md:6898](FORUM.md#L6898) | `Op_monsterAttack::getMonsterStrength` uses `isHrungbaldInPlay` (either legend_5 level on a hex); `testHrungbaldDoublesTrollkinSupport` | ✅ |
 
 ## 20. Clarifications (from RULES.md "Clarifications" section)

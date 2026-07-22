@@ -39,8 +39,8 @@ monster_draugr|Draugr|10|monster dead rank3|2|supply_monster|#6c3483|dead|3|6|5|
 # Numbering matches yellow monster cards 1-6: 1=Queen| 2=Seer| 3=Grendel| 4=Surt| 5=Hrungbald| 6=Nidhuggr
 monster_legend_1_1|Queen of the Dead (I)|1|monster legend|1|supply_monster|#6c3483|dead||7|11|6||
 monster_legend_1_2|Queen of the Dead (II)|1|monster legend|1|limbo|#6c3483|dead||7|11|6||
-monster_legend_2_1|Seer of Odin (I)|1|monster legend|1|supply_monster|#c86020|firehorde||3|5|3||
-monster_legend_2_2|Seer of Odin (II)|1|monster legend|1|limbo|#c86020|firehorde||0|6|4||
+monster_legend_2_1|Seer of Odin (I)|1|monster legend|1|supply_monster|#c86020|dead||3|5|3||
+monster_legend_2_2|Seer of Odin (II)|1|monster legend|1|limbo|#c86020|dead||0|6|4||
 monster_legend_3_1|Grendel (I)|1|monster legend|1|supply_monster|#4a7a3a|trollkin||7|12|6||
 monster_legend_3_2|Grendel (II)|1|monster legend|1|limbo|#4a7a3a|trollkin||4|15|7||
 monster_legend_4_1|Surt (I)|1|monster legend|1|supply_monster|#c94420|firehorde||4|7|5||

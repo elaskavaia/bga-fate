@@ -984,7 +984,7 @@ export class Game extends Game1Tokens {
     };
     if (specialAbility[legendNum]) tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[legendNum]);
 
-    // Faction effect — same map as regular monsters; lets the player see Seer/Surt are firehorde, Queen is dead, etc.
+    // Faction effect — same map as regular monsters; lets the player see Surt is firehorde, Queen/Seer are dead, etc.
     const eff = this.factionEffectText(tokenInfo.faction);
     if (eff) tokenInfo.tooltip += this.ttSection(_("Faction Effect"), eff);
 

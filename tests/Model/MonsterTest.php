@@ -98,6 +98,15 @@ final class MonsterTest extends TestCase {
         $this->assertEquals(1, $monster->getAttackRange());
     }
 
+    public function testSeerOfOdinIsDeadFaction(): void {
+        // Seer of Odin is a Dead legend at both levels (not Fire Horde): range 1, gets dead rune-as-hit.
+        foreach (["monster_legend_2_1", "monster_legend_2_2"] as $seer) {
+            $monster = $this->game->getMonster($seer);
+            $this->assertEquals("dead", $monster->getFaction(), "$seer faction");
+            $this->assertEquals(1, $monster->getAttackRange(), "$seer attack range");
+        }
+    }
+
     // -------------------------------------------------------------------------
     // getHealth / getXpReward
     // -------------------------------------------------------------------------

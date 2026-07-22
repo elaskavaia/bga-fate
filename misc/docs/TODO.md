@@ -31,8 +31,8 @@ Checkbox = implemented + tested. Verified against code 2026-07-21.
 - [ ] LI: may only be damaged by adjacent characters (range-2+ deals nothing). Queen only (FORUM.md:110). No code.
 - [ ] LII: all other Dead have +1 health while she is in play. No code.
 
-**Legend 2 - Seer of Odin** (DEAD both levels - material wrongly says firehorde)
-- [ ] Faction data fix: `monster_legend_2_1/2` are `firehorde`, must be `dead`. Set + regen; drops range 2 (its special attack ignores range anyway), gains dead rune-as-hit; also fix the stale "Seer=firehorde" in RLIST R.19.6 / TODO.md:84 (standing rule TODO.md:80: each legend uses its printed faction).
+**Legend 2 - Seer of Odin** (DEAD both levels)
+- [x] Faction data fix: `monster_legend_2_1/2` set to `dead` (were `firehorde`); regen; range now 1, gains dead rune-as-hit. Stale "Seer=firehorde" notes corrected in RLIST R.18.3/R.19.6 + the audit item. Test `MonsterTest::testSeerOfOdinIsDeadFaction`.
 - [ ] LI: on arrival, place skeletons in all unoccupied areas adjacent to Temple Ruins. Confirmed verbatim + designer-approved (FORUM.md:2934). Card spawn string is `"L"` (tile only) - ability not encoded. No code.
 - [x] LII: as its attack, deals 1 unpreventable damage to every hero. `Op_monsterAttack::resolveSeerAttack`.
 
@@ -118,7 +118,7 @@ Designer ruling: *"Legends have a faction written on the legend card. Since Nidh
 
 - [x] **Fix Nidhuggr faction: `dead` → `wyrm`** in [monster_material.csv:50-51](../../misc/monster_material.csv#L50). (Note: armor was never inherited from faction — only rune-as-hit was wrongly granted.)
 - [x] **Add Wyrm as a new faction** — string label added in `strings_material.csv`. No shared abilities; existing faction-lookup paths (`Monster::getAttackRange`, `Monster::countHit`, `Op_monsterAttack::getMonsterStrength`) treat unknown factions as a no-op, so "wyrm" is handled gracefully.
-- [x] **Audit faction-scoped iteration** — existing iterators already use `getRulesFor(monsterId, "faction")` and filter on `getPart(char, 0) === "monster"`, which includes legends. Confirmed: Trollkin adjacency bonus ([Op_monsterAttack.php:165](../../modules/php/Operations/Op_monsterAttack.php#L165)) counts legend trollkin (Grendel/Hrungbald); Fire Horde range 2 ([Monster.php:28](../../modules/php/Model/Monster.php#L28)) applies to Seer/Surt; Dead rune-as-hit ([Monster.php:65](../../modules/php/Model/Monster.php#L65)) applies to Queen. Tests in [tests/Model/MonsterTest.php](../../tests/Model/MonsterTest.php) pin the Nidhuggr and Queen behavior.
+- [x] **Audit faction-scoped iteration** — existing iterators already use `getRulesFor(monsterId, "faction")` and filter on `getPart(char, 0) === "monster"`, which includes legends. Confirmed: Trollkin adjacency bonus ([Op_monsterAttack.php:165](../../modules/php/Operations/Op_monsterAttack.php#L165)) counts legend trollkin (Grendel/Hrungbald); Fire Horde range 2 ([Monster.php:28](../../modules/php/Model/Monster.php#L28)) applies to Surt (Seer is Dead, corrected 2026-07-21); Dead rune-as-hit ([Monster.php:65](../../modules/php/Model/Monster.php#L65)) applies to Queen and Seer. Tests in [tests/Model/MonsterTest.php](../../tests/Model/MonsterTest.php) pin the Nidhuggr and Queen behavior.
 
 
 ### Low priority
