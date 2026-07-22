@@ -33,7 +33,7 @@ Checkbox = implemented + tested. Verified against code 2026-07-21.
 
 **Legend 2 - Seer of Odin** (DEAD both levels)
 - [x] Faction data fix: `monster_legend_2_1/2` set to `dead` (were `firehorde`); regen; range now 1, gains dead rune-as-hit. Stale "Seer=firehorde" notes corrected in RLIST R.18.3/R.19.6 + the audit item. Test `MonsterTest::testSeerOfOdinIsDeadFaction`.
-- [ ] LI: on arrival, place skeletons in all unoccupied areas adjacent to Temple Ruins. Confirmed verbatim + designer-approved (FORUM.md:2934). Card spawn string is `"L"` (tile only) - ability not encoded. No code.
+- [x] LI: on arrival, place skeletons in all unoccupied areas adjacent to Temple Ruins. Confirmed verbatim + designer-approved (FORUM.md:2934). `Op_reinforcement::spawnSeerSkeletons` (fires when monster_legend_2_1 is placed); client tooltip note (2_1). Test `Op_reinforcementTest::testSeerSpawnsSkeletonsAroundTempleRuins`.
 - [x] LII: as its attack, deals 1 unpreventable damage to every hero. `Op_monsterAttack::resolveSeerAttack`.
 
 **Legend 3 - Grendel** (trollkin)

@@ -52,6 +52,20 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $this->assertEquals(8, $monstersPlaced);
     }
 
+    public function testSeerSpawnsSkeletonsAroundTempleRuins(): void {
+        // Seer of Odin card (card_monster_2, spawn "L" at Temple Ruins hex_12_4).
+        $this->game->tokens->moveToken("card_monster_2", "deck_monster_yellow");
+        $this->game->tokens->setTokenState("card_monster_2", 999); // top
+
+        $this->game->setPlayersNumber(1);
+        $this->createReinforcementOp()->resolve();
+
+        // Seer at Temple Ruins; a skeleton in each of its 6 unoccupied neighbours.
+        $this->assertEquals("hex_12_4", $this->game->tokens->getTokenLocation("monster_legend_2_1"));
+        $skeletons = $this->game->tokens->getTokensOfTypeInLocation("monster_skeleton", "hex%");
+        $this->assertCount(6, $skeletons, "one skeleton per unoccupied hex adjacent to the Temple Ruins");
+    }
+
     public function testCorrectMonsterTypesPlaced(): void {
         // Card 31 "Strolling" in OgreValley: T,T,B (2 trolls + 1 brute)
         $this->game->tokens->moveToken("card_monster_31", "deck_monster_yellow");

@@ -137,7 +137,36 @@ class Op_reinforcement extends Operation {
         foreach ($placements as $monsterId => $hex) {
             $this->game->getMonster($monsterId)->moveTo($hex, "");
         }
+
+        // Seer of Odin (I): on arrival, skeletons rise in every unoccupied area next to the Temple Ruins.
+        if (isset($placements["monster_legend_2_1"])) {
+            $this->spawnSeerSkeletons();
+        }
         return true;
+    }
+
+    /** Place a skeleton in each unoccupied, monster-passable area adjacent to the Temple Ruins. */
+    private function spawnSeerSkeletons(): void {
+        $targetHexes = [];
+        foreach ($this->game->hexMap->getHexesInLocation("TempleRuins") as $templeHex) {
+            foreach ($this->game->hexMap->getAdjacentHexes($templeHex) as $hex) {
+                if (
+                    !in_array($hex, $targetHexes, true) &&
+                    !$this->game->hexMap->isOccupied($hex) &&
+                    !$this->game->hexMap->isInGrimheim($hex) &&
+                    $this->game->hexMap->getHexTerrain($hex) !== "lake"
+                ) {
+                    $targetHexes[] = $hex;
+                }
+            }
+        }
+        foreach ($targetHexes as $hex) {
+            $skeletons = $this->game->tokens->getTokensOfTypeInLocation("monster_skeleton", "supply_monster");
+            if (empty($skeletons)) {
+                break; // skeleton supply exhausted
+            }
+            $this->game->getMonster(reset($skeletons)["key"])->moveTo($hex, clienttranslate('A skeleton rises near the Temple Ruins'));
+        }
     }
 
     /** Get the legend token ID for a monster card, or null if not a legend card. */
