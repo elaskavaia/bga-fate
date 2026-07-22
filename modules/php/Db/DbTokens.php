@@ -503,7 +503,7 @@ class DbTokens {
         return reset($res)["key"];
     }
 
-    function getTokenState($token_id, $def = 0) {
+    function getTokenState($token_id, int $def = 0): int {
         $res = $this->getTokenInfo($token_id);
         if ($res == null) {
             return $def;
@@ -511,7 +511,7 @@ class DbTokens {
         return (int) $res["state"];
     }
 
-    function getTokenLocation($token_id) {
+    function getTokenLocation($token_id): string|null {
         $res = $this->getTokenInfo($token_id);
         if ($res == null) {
             return null;

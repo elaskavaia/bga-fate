@@ -22,6 +22,11 @@ class Monster extends Character {
         return $this->getRulesFor("faction");
     }
 
+    /** True if this monster token currently sits on a board hex (as opposed to supply/limbo). */
+    function isOnBoard(): bool {
+        return str_starts_with($this->game->tokens->getTokenLocation($this->id) ?? "", "hex_");
+    }
+
     /**
      * Surt II has attack range 3 (himself only); Fire Horde faction has range 2; others default to 1.
      */
@@ -44,7 +49,16 @@ class Monster extends Character {
     }
 
     function getEffectiveHealth(): int {
-        return $this->getHealth();
+        $health = $this->getHealth();
+        // Queen II: every other Dead monster has +1 health while she is on the board.
+        if (
+            $this->getFaction() === "dead" &&
+            $this->id !== "monster_legend_1_2" &&
+            $this->game->getMonster("monster_legend_1_2")->isOnBoard()
+        ) {
+            $health += 1;
+        }
+        return $health;
     }
 
     /**
@@ -82,7 +96,7 @@ class Monster extends Character {
             $attackerFaction = $this->game->material->getRulesFor($this->id, "faction", "");
             if ($attackerFaction === "dead") {
                 $isHit = true;
-            } elseif ($attackerFaction === "firehorde" && $this->game->isMonsterOnBoard("monster_legend_4_1")) {
+            } elseif ($attackerFaction === "firehorde" && $this->game->getMonster("monster_legend_4_1")->isOnBoard()) {
                 // Surt I: runes count as hits for all Fire Horde while he is on the board.
                 $isHit = true;
             }

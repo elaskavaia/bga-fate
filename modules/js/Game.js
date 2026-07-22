@@ -3046,7 +3046,7 @@ class Game extends Game1Tokens {
             }
         }
         else {
-            hp = parseInt(this.getRulesFor(charId, "health", "0"));
+            hp = this.getMonsterMaxHealth(charId, this.getRulesFor(charId, "faction", ""), parseInt(this.getRulesFor(charId, "health", "0")));
             if (getPart(charId, 1) === "legend" && getPart(charId, 2) === "6") {
                 // Nidhuggr: attack equals its current remaining health (max - damage)
                 attack = hp - damage;
@@ -3257,6 +3257,13 @@ class Game extends Game1Tokens {
             return 3;
         return this.factionAttackRange(faction);
     }
+    /** Max health for a monster: other Dead monsters get +1 while Queen II (monster_legend_1_2) is on the board. */
+    getMonsterMaxHealth(tokenId, faction, baseHealth) {
+        if (faction === "dead" && tokenId !== "monster_legend_1_2" && this.getCharHex("monster_legend_1_2") !== null) {
+            return baseHealth + 1;
+        }
+        return baseHealth;
+    }
     factionEffectText(faction) {
         const map = {
             trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
@@ -3277,7 +3284,7 @@ class Game extends Game1Tokens {
         let rows = "";
         tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " - " + tokenInfo.rank);
         rows += this.ttRow(_("Strength"), tokenInfo.strength, "strength");
-        rows += this.ttRow(_("Health"), tokenInfo.health, "health");
+        rows += this.ttRow(_("Health"), this.getMonsterMaxHealth(tokenInfo.tokenId, tokenInfo.faction, Number(tokenInfo.health)), "health");
         rows += this.ttRow(_("Gold"), tokenInfo.xp, "gold");
         if (tokenInfo.move)
             rows += this.ttRow(_("Move"), tokenInfo.move, "move");
@@ -3338,6 +3345,7 @@ class Game extends Game1Tokens {
         const trollkinDouble = _("Doubles the Trollkin support effect: every Trollkin gets +2 attack strength per adjacent Trollkin instead of +1.");
         const wyrmStrength = _("Wyrm: Nidhuggr's strength is the same as its remaining health.");
         const specialAbility = {
+            "1_2": _("All other Dead monsters have +1 health while she is in play."),
             "2_2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
             "4_1": _("Runes count as hits for all Fire Horde while Surt is in play."),
             "5_1": trollkinDouble,

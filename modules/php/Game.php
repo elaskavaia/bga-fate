@@ -743,11 +743,6 @@ class Game extends Base {
         return new Monster($this, $monsterId);
     }
 
-    /** True if a monster token currently sits on a board hex (as opposed to supply/limbo). */
-    function isMonsterOnBoard(string $monsterId): bool {
-        return str_starts_with((string) $this->tokens->getTokenLocation($monsterId), "hex_");
-    }
-
     /** Factory: create a Character model (Hero or Monster) from any character token id. */
     function getCharacter(string $characterId): Character {
         if (str_starts_with($characterId, "hero")) {

@@ -113,6 +113,22 @@ final class MonsterTest extends TestCase {
         $this->assertEquals(2, $this->game->getMonster("monster_legend_4_1")->getAttackRange());
     }
 
+    public function testQueenIIGivesOtherDeadPlusOneHealth(): void {
+        $skeleton = $this->game->getMonster("monster_skeleton_1"); // dead
+        $goblin = $this->game->getMonster("monster_goblin_1"); // trollkin
+        $base = $skeleton->getHealth();
+
+        // Queen II not on the board: no bonus.
+        $this->assertEquals($base, $skeleton->getEffectiveHealth());
+
+        // Queen II on the board: other Dead get +1, non-dead unaffected, Queen herself unaffected.
+        $this->game->tokens->moveToken("monster_legend_1_2", "hex_5_5");
+        $this->assertEquals($base + 1, $skeleton->getEffectiveHealth(), "skeleton +1 with Queen II in play");
+        $this->assertEquals($goblin->getHealth(), $goblin->getEffectiveHealth(), "non-dead unaffected");
+        $queen = $this->game->getMonster("monster_legend_1_2");
+        $this->assertEquals($queen->getHealth(), $queen->getEffectiveHealth(), "Queen does not buff herself");
+    }
+
     // -------------------------------------------------------------------------
     // getHealth / getXpReward
     // -------------------------------------------------------------------------
