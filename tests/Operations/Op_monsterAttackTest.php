@@ -198,6 +198,17 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         $this->assertCount(1, $crystals);
     }
 
+    public function testSurtIIAttacksAtRange3(): void {
+        // Surt II has range 3: hero_1 at hex_11_8, Surt at hex_14_7 (distance 3, beyond firehorde range 2).
+        $this->game->tokens->moveToken("monster_legend_4_2", "hex_14_7");
+
+        $this->game->randQueue = [5, 5, 5, 5, 5, 5, 5]; // Surt II strength 7, all hits
+        $this->resolveMonsterAttack("monster_legend_4_2");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(7, $crystals);
+    }
+
     public function testTrollkinDoesNotAttackAtRange2(): void {
         // Goblin (trollkin) has range 1, hero_1 at hex_11_8, goblin at hex_13_7 (distance 2)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");

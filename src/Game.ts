@@ -881,6 +881,12 @@ export class Game extends Game1Tokens {
     return faction === "firehorde" ? 2 : 1;
   }
 
+  /** Attack range for a monster: Surt II reaches 3 (himself only), otherwise the faction range. */
+  private getMonsterAttackRange(tokenId: string, faction: string): number {
+    if (tokenId === "monster_legend_4_2") return 3;
+    return this.factionAttackRange(faction);
+  }
+
   private factionEffectText(faction: string): string | undefined {
     const map: Record<string, string> = {
       trollkin: _("All Trollkin get +1 attack strength for each other Trollkin adjacent to them."),
@@ -969,8 +975,8 @@ export class Game extends Game1Tokens {
       dual(_("Strength"), "strength", "strength");
       dual(_("Health"), "health", "health");
       dual(_("Gold"), "xp", "gold");
-      // Range follows the legend's faction (firehorde legends get +1).
-      const range = this.factionAttackRange(tokenInfo.faction);
+      // Range: Surt II reaches 3, firehorde legends 2, otherwise 1.
+      const range = this.getMonsterAttackRange(tokenInfo.tokenId, tokenInfo.faction);
       if (range > 1) rows += this.ttRow(_("Range"), String(range), "range");
       dual(_("Armor"), "armor");
     }

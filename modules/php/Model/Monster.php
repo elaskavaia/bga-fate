@@ -23,9 +23,12 @@ class Monster extends Character {
     }
 
     /**
-     * Fire Horde faction has range 2, others default to 1.
+     * Surt II has attack range 3 (himself only); Fire Horde faction has range 2; others default to 1.
      */
     function getAttackRange(): int {
+        if ($this->id === "monster_legend_4_2") {
+            return 3;
+        }
         if ($this->getFaction() === "firehorde") {
             return 2;
         }

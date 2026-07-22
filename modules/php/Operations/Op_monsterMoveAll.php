@@ -89,7 +89,7 @@ class Op_monsterMoveAll extends Operation {
 
         // Charge rule C: if monster finished normal move and cannot attack a hero,
         // but would be able to after 1 extra step, it charges to get into attack range.
-        // Uses the monster's attack range (Fire Horde reaches 2), not just adjacency.
+        // Uses the monster's attack range (Fire Horde 2, Surt II 3), not just adjacency.
         if (!$charge) {
             $range = $this->game->getMonster($monsterId)->getAttackRange();
             if (!$this->game->hexMap->isCharacterTypeInRange($currentHex, $range, "hero")) {

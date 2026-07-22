@@ -42,7 +42,7 @@ Checkbox = implemented + tested. Verified against code 2026-07-21.
 
 **Legend 4 - Surt** (firehorde)
 - [ ] LI: runes count as hits for all Fire Horde while Surt is on the board (grant `dead`-style rune-as-hit; hook `Monster::countHit`, gated like `isHrungbaldInPlay`). No code.
-- [ ] LII: attack range 3, Surt only (resolves FORUM.md:115; the FORUM.md:673 "all fire horde" remark is superseded). No code.
+- [x] LII: attack range 3, Surt only. `Monster::getAttackRange` (id monster_legend_4_2); client tooltip via `getMonsterAttackRange`. Tests: `MonsterTest::testSurtIIHasRange3`, `Op_monsterAttackTest::testSurtIIAttacksAtRange3`. (Resolves FORUM.md:115; the FORUM.md:673 "all fire horde" remark is superseded.)
 
 **Legend 5 - Hrungbald** (trollkin)
 - [x] LI + LII: doubles the Trollkin support (+2 per adjacent trollkin while on the board). `Op_monsterAttack::isHrungbaldInPlay`, tooltip, test `testHrungbaldDoublesTrollkinSupport`.

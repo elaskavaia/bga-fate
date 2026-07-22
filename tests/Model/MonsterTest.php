@@ -107,6 +107,12 @@ final class MonsterTest extends TestCase {
         }
     }
 
+    public function testSurtIIHasRange3(): void {
+        // Surt II (red) has attack range 3, himself only; Surt I stays firehorde range 2.
+        $this->assertEquals(3, $this->game->getMonster("monster_legend_4_2")->getAttackRange());
+        $this->assertEquals(2, $this->game->getMonster("monster_legend_4_1")->getAttackRange());
+    }
+
     // -------------------------------------------------------------------------
     // getHealth / getXpReward
     // -------------------------------------------------------------------------
