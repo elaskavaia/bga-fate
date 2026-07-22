@@ -84,7 +84,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 - [ ] **R.6.6** — No dedicated `Op_actionPracticeTest`.
 - [ ] **R.7.4, R.7.5, R.7.8** — Event-card timing rules ("can't interrupt mid-action", "after roll", "free actions never count as attack action") work architecturally but no rule-named tests pin them.
 - [ ] **R.10.7** — Mana-on-gained-ability fires this turn; `Campaign_UpgradeTest::testUpgradeGainNewAbility` doesn't assert.
-- [ ] **R.10.8** — 10-gold upgrade cost cap is implicit (`min(cost+1, 10)`); no test pinning behavior at the cap.
+- [x] **R.10.8** — Upgrade cost track (5, 6, 8, 10 then 10) is explicit in `Op_upgrade::COST_TRACK`; `testCostAdvancesFrom8To10` / `testCostStaysAt10` pin the cap.
 - [ ] **R.13.15** — Suppressive Fire `stunmarker` is only checked in the normal-move loop (correct per rule); no test confirms Monster-Dice rotation / Legend push *bypass* it.
 - [ ] **R.15.4** — Legend yellow/red side selection (correct side per turn track) not asserted.
 

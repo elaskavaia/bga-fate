@@ -142,7 +142,8 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.10.5 | Upgrade option B: improve a card (flip L1→L2). | [RULES.md:235](RULES.md#L235) | `Op_upgrade::resolveImprove`; transfers parked tokens; tested | ✅ |
 | R.10.6 | At most 1 upgrade per turn. | [RULES.md:238](RULES.md#L238) | `Op_upgrade` queued exactly once in `Op_turnEnd.php:39` | ✅ |
 | R.10.7 | If the new ability has mana-generation, it generates this same turn. | [RULES.md:239](RULES.md#L239) | mana-gen applied immediately after card move (`Op_upgrade.php:114–121`); **not asserted in any test** | ⚠️ |
-| R.10.8 | At the red square on the cost track, all subsequent upgrades cost 10. | [RULES.md:240](RULES.md#L240) | `min(cost+1, 10)` cap (`Op_upgrade.php:95`); no explicit "red-square" position concept; **no 10-cap test** | ⚠️ |
+| R.10.8 | At the red square on the cost track, all subsequent upgrades cost 10. | [RULES.md:240](RULES.md#L240) | `Op_upgrade::COST_TRACK` holds the last step (10); `testCostAdvancesFrom8To10`, `testCostStaysAt10` pin the cap | ✅ |
+| R.10.9 | Upgrade-cost track steps are 5, 6, 8, 10 (values printed on the player board, not in the rulebook text). | player board art (confirmed by owner) | `Op_upgrade::COST_TRACK = [5, 6, 8, 10]`; `testCostAdvancesFrom6To8`, `testCostAdvancesFrom8To10` | ✅ |
 
 ## 11. Monster Turn
 

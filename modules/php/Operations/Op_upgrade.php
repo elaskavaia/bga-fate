@@ -28,9 +28,20 @@ use function Bga\Games\Fate\getPart;
  * Used by: Op_turnEnd (queued at end of each turn)
  */
 class Op_upgrade extends Operation {
+    // Printed upgrade cost track: pay each step in turn, then the red square (10) forever.
+    private const COST_TRACK = [5, 6, 8, 10];
+
     private function getUpgradeCost(): int {
         $owner = $this->getOwner();
         return (int) $this->game->tokens->getTokenState("marker_{$owner}_3");
+    }
+
+    private static function getNextCost(int $current): int {
+        $idx = array_search($current, self::COST_TRACK, true);
+        if ($idx === false || $idx + 1 >= count(self::COST_TRACK)) {
+            return self::COST_TRACK[count(self::COST_TRACK) - 1]; // red square: all future upgrades cost 10
+        }
+        return self::COST_TRACK[$idx + 1];
     }
 
     private static function getLevel2Id(string $cardId): string {
@@ -92,9 +103,9 @@ class Op_upgrade extends Operation {
         // Pay XP
         $this->instantiateOperation("{$cost}spendXp")->resolve(); // instant resolve
 
-        // Advance upgrade cost marker
+        // Advance upgrade cost marker along the printed track (5, 6, 8, 10, then 10).
         $markerId = "marker_{$owner}_3";
-        $newCost = min($cost + 1, 10);
+        $newCost = self::getNextCost($cost);
         $this->dbSetTokenState($markerId, $newCost, "", ["nod" => true]);
 
         $targetLoc = $this->game->tokens->getTokenLocation($target);

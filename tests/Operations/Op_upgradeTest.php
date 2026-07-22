@@ -227,11 +227,18 @@ final class Op_upgradeTest extends AbstractOpTestCase {
     // cost progression
     // -------------------------------------------------------------------------
 
-    public function testCostCapsAt10(): void {
-        // Set marker to state 9 (cost=9), upgrade should advance to 10
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", $this->getPlayersTableau(), 9);
-        $this->giveXp(9);
-        $op = $this->op;
+    public function testCostAdvancesFrom6To8(): void {
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", $this->getPlayersTableau(), 6);
+        $this->giveXp(6);
+        $topCard = $this->game->tokens->getTokenOnTop("deck_ability_" . PCOLOR);
+        $this->call_resolve($topCard["key"]);
+        $this->assertEquals(8, $this->getUpgradeCost());
+    }
+
+    public function testCostAdvancesFrom8To10(): void {
+        // Reaching the red square (10) — the last printed step.
+        $this->game->tokens->moveToken("marker_" . PCOLOR . "_3", $this->getPlayersTableau(), 8);
+        $this->giveXp(8);
         $topCard = $this->game->tokens->getTokenOnTop("deck_ability_" . PCOLOR);
         $this->call_resolve($topCard["key"]);
         $this->assertEquals(10, $this->getUpgradeCost());

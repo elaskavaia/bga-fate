@@ -51,7 +51,7 @@ See CLAUDE.md for project overview
 [x] Quest progress tracking (red crystals on deck-top equip via `gainTracker` + `countTracker`)
 [x] Quest completion → new equipment active (`Op_completeQuest` for player-initiated, `Op_trigger` walks deck-top for trigger-driven, bespoke `CardEquip_*` classes for custom)
 [x] `effect_gainEquipment($cardId, $owner)` — places an equipment card on the player's tableau and fires `trigger(enter)`. Should be called from quest completion, upgrade flow, and starting equipment setup ([Game.php:127](modules/php/Game.php#L127)). Black Arrows ("starts with 3 arrows here") and Tiara ("starts with 6 gold here") need this for their `onEnter` hook to fire.
-[x] Upgrade cost track: 5, 6, 7, 8, 9, 10...
+[x] Upgrade cost track: 5, 6, 8, 10 (red square), then 10 for all further upgrades
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
 
