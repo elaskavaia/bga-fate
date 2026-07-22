@@ -48,6 +48,17 @@ class Op_applyDamage extends Operation {
         $defender = $this->game->getCharacter($defenderId);
         $targetHex = $defender->getHex();
 
+        // Queen I: may only be damaged by adjacent characters - ranged/remote damage is prevented.
+        if ($defenderId === "monster_legend_1_1" && $amount > 0) {
+            $attackerHex = $this->game->getCharacter($attackerId)->getHex();
+            if ($attackerHex === null || $targetHex === null || $this->game->hexMap->getHexDistance($attackerHex, $targetHex) > 1) {
+                $this->game->notifyMessage(clienttranslate('${char_name} may only be damaged by adjacent characters - no damage dealt'), [
+                    "char_name" => $defenderId,
+                ]);
+                return;
+            }
+        }
+
         // 1. Place the red crystals on the defender (was each caller's job).
         $this->game->effect_moveCrystals($attackerId, "red", $amount, $defenderId, ["message" => ""]);
 

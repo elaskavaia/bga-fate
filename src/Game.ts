@@ -996,6 +996,7 @@ export class Game extends Game1Tokens {
     );
     const wyrmStrength = _("Wyrm: Nidhuggr's strength is the same as its remaining health.");
     const specialAbility: Record<string, string> = {
+      "1_1": _("May only be damaged by adjacent characters."),
       "1_2": _("All other Dead monsters have +1 health while she is in play."),
       "2_2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
       "4_1": _("Runes count as hits for all Fire Horde while Surt is in play."),

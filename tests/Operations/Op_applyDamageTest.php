@@ -79,6 +79,20 @@ final class Op_applyDamageTest extends AbstractOpTestCase {
         $this->assertEquals(1, $this->countRedCrystals("monster_brute_1"));
     }
 
+    public function testQueenIOnlyDamagedByAdjacentCharacters(): void {
+        $queen = "monster_legend_1_1";
+
+        // Attacker hero_1 at hex_11_8; Queen at hex_13_7 (distance 2) - ranged damage prevented.
+        $this->game->getMonster($queen)->moveTo("hex_13_7", "");
+        $this->createOp("applyDamage", ["attacker" => "hero_1", "target" => $queen, "amount" => 1])->resolve();
+        $this->assertEquals(0, $this->countRedCrystals($queen), "non-adjacent attacker deals no damage to Queen I");
+
+        // Queen adjacent (hex_12_8, distance 1) - damage applies.
+        $this->game->getMonster($queen)->moveTo("hex_12_8", "");
+        $this->createOp("applyDamage", ["attacker" => "hero_1", "target" => $queen, "amount" => 1])->resolve();
+        $this->assertEquals(1, $this->countRedCrystals($queen), "adjacent attacker damages Queen I");
+    }
+
     public function testFinishKillRunsCleanupAfterDispatch(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 

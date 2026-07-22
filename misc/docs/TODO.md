@@ -28,7 +28,7 @@ Surt LI "all Fire Horde", Queen LII "other Dead".
 Checkbox = implemented + tested. Verified against code 2026-07-21.
 
 **Legend 1 - Queen of the Dead** (dead)
-- [ ] LI: may only be damaged by adjacent characters (range-2+ deals nothing). Queen only (FORUM.md:110). No code.
+- [x] LI: may only be damaged by adjacent characters (range-2+ deals nothing). Queen only (FORUM.md:110). `Op_applyDamage` drops damage from a non-adjacent attacker; client tooltip note (1_1). Test `Op_applyDamageTest::testQueenIOnlyDamagedByAdjacentCharacters`.
 - [x] LII: all other Dead monsters have +1 health while Queen II (`monster_legend_1_2`) is on the board. `Monster::getEffectiveHealth` gated on `Monster::isOnBoard`; client indicator/tooltip via `getMonsterMaxHealth` + tooltip note (1_2). Test `MonsterTest::testQueenIIGivesOtherDeadPlusOneHealth`.
 
 **Legend 2 - Seer of Odin** (DEAD both levels)
