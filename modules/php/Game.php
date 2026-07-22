@@ -413,6 +413,13 @@ class Game extends Base {
             // Op_monsterAttack stores the attacker's token id as marker_instigator's location.
             $instigatorId = $this->tokens->getTokenLocation("marker_instigator");
             return (int) ($instigatorId !== "" && $context === $instigatorId);
+        } elseif ($x === "rank") {
+            // Legends carry no printed rank; treat them as rank 4 so rank-bounded
+            // effects (e.g. Suppressive Fire I "rank<=2") never include them.
+            if (getPart($context, 1) === "legend") {
+                return 4;
+            }
+            return (int) $this->getRulesFor($context, "rank", 0);
         }
 
         //id|name|count|type|create|location|tc|faction|rank|strength|health|xp|move|armor

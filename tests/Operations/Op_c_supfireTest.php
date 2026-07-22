@@ -65,6 +65,18 @@ final class Op_c_supfireTest extends AbstractOpTestCase {
         $this->assertValidTarget("hex_12_8");
     }
 
+    public function testLevelIExcludesLegend(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8"); // Queen of the Dead (I) — legend, rank 4
+        $this->createOp("c_supfire(inRange3,'rank<=2')");
+        $this->assertNoValidTargets();
+    }
+
+    public function testLevelIIOffersLegend(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_12_8"); // legend, no rank filter at Level II
+        $this->createOp("c_supfire(inRange3)");
+        $this->assertValidTarget("hex_12_8");
+    }
+
     // -------------------------------------------------------------------------
     // "Cannot choose same monster next turn" — stun marker exclusion
     // -------------------------------------------------------------------------

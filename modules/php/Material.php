@@ -4776,7 +4776,7 @@ class Material {
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
         "quest_on" => "TMonsterKilled",
-        "quest_r" => "killed('rank>=3'):?(blockXp:gainEquip)",
+        "quest_r" => "killed('rank==3'):?(blockXp:gainEquip)",
 ],
     "card_equip_1_17" => [ 
         "ctype" => "equip",
@@ -4910,7 +4910,7 @@ class Material {
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
         "flavour" => "Makes your enemies quiver in their boots.",
         "quest_on" => "TMonsterKilled",
-        "quest_r" => "killed('rank>=3'):?(blockXp:gainEquip)",
+        "quest_r" => "killed('rank==3'):?(blockXp:gainEquip)",
 ],
     "card_equip_2_20" => [ 
         "ctype" => "equip",
