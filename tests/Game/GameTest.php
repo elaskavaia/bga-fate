@@ -297,6 +297,18 @@ final class GameTest extends TestCase {
         $this->assertCount(1, $hand, "Hero should have exactly 1 card in hand after setup");
     }
 
+    public function testSetupStartingResourcesAre2GoldAnd1Mana() {
+        $game = $this->game;
+        $game->setupGameTables();
+        $heroNo = $this->getHeroNumber(PCOLOR);
+
+        $gold = count($game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+        $mana = count($game->tokens->getTokensOfTypeInLocation("crystal_green", "card_ability_{$heroNo}_3"));
+
+        $this->assertEquals(2, $gold, "Hero starts with 2 gold on tableau");
+        $this->assertEquals(1, $mana, "Hero starts with 1 mana on the starting ability card");
+    }
+
     public function testinstantiateAllOperations() {
         $this->game(0);
         $token_types = $this->game->material->get();
