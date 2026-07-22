@@ -188,11 +188,6 @@ class Op_monsterAttack extends Operation {
 
     /** Hrungbald (either level) on a board hex doubles the trollkin support bonus for all trollkin. */
     private function isHrungbaldInPlay(): bool {
-        foreach (["monster_legend_5_1", "monster_legend_5_2"] as $hrungbald) {
-            if (str_starts_with((string) $this->game->tokens->getTokenLocation($hrungbald), "hex_")) {
-                return true;
-            }
-        }
-        return false;
+        return $this->game->isMonsterOnBoard("monster_legend_5_1") || $this->game->isMonsterOnBoard("monster_legend_5_2");
     }
 }

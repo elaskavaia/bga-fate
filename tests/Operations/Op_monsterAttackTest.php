@@ -209,6 +209,33 @@ final class Op_monsterAttackTest extends AbstractOpTestCase {
         $this->assertCount(7, $crystals);
     }
 
+    // -------------------------------------------------------------------------
+    // Surt I: runes count as hits for all Fire Horde while he is on the board
+    // -------------------------------------------------------------------------
+
+    public function testSurtIGrantsFirehordeRuneAsHit(): void {
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8"); // firehorde, adjacent to hero_1
+        $this->game->tokens->moveToken("monster_legend_4_1", "hex_2_2"); // Surt I in play, far away
+
+        $this->game->randQueue = [3]; // sprite strength 1, rolls a rune
+        $this->resolveMonsterAttack("monster_sprite_1");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(1, $crystals, "rune counts as a hit while Surt I is in play");
+    }
+
+    public function testSurtIIDoesNotGrantFirehordeRune(): void {
+        // Surt II grants range 3, not the rune buff - a firehorde rune stays a miss.
+        $this->game->tokens->moveToken("monster_sprite_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_legend_4_2", "hex_2_2"); // Surt II in play
+
+        $this->game->randQueue = [3]; // rune
+        $this->resolveMonsterAttack("monster_sprite_1");
+
+        $crystals = $this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1");
+        $this->assertCount(0, $crystals, "rune stays a miss - Surt II grants range, not the rune buff");
+    }
+
     public function testTrollkinDoesNotAttackAtRange2(): void {
         // Goblin (trollkin) has range 1, hero_1 at hex_11_8, goblin at hex_13_7 (distance 2)
         $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");

@@ -982,13 +982,21 @@ export class Game extends Game1Tokens {
     }
     tokenInfo.tooltip += this.ttStats(rows);
 
-    // Special ability notes for legends
+    // Special ability notes for legends, keyed by legendNum_level (abilities differ per level).
+    const trollkinDouble = _(
+      "Doubles the Trollkin support effect: every Trollkin gets +2 attack strength per adjacent Trollkin instead of +1."
+    );
+    const wyrmStrength = _("Wyrm: Nidhuggr's strength is the same as its remaining health.");
     const specialAbility: Record<string, string> = {
-      "2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
-      "5": _("Doubles the Trollkin support effect: every Trollkin gets +2 attack strength per adjacent Trollkin instead of +1."),
-      "6": _("Wyrm: Nidhuggr's strength is the same as its remaining health.")
+      "2_2": _("As her attack, deals 1 unpreventable damage to all heroes everywhere."),
+      "4_1": _("Runes count as hits for all Fire Horde while Surt is in play."),
+      "5_1": trollkinDouble,
+      "5_2": trollkinDouble,
+      "6_1": wyrmStrength,
+      "6_2": wyrmStrength
     };
-    if (specialAbility[legendNum]) tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[legendNum]);
+    const abilityKey = `${legendNum}_${level}`;
+    if (specialAbility[abilityKey]) tokenInfo.tooltip += this.ttSection(_("Ability"), specialAbility[abilityKey]);
 
     // Faction effect — same map as regular monsters; lets the player see Surt is firehorde, Queen/Seer are dead, etc.
     const eff = this.factionEffectText(tokenInfo.faction);

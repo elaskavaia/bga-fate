@@ -82,6 +82,9 @@ class Monster extends Character {
             $attackerFaction = $this->game->material->getRulesFor($this->id, "faction", "");
             if ($attackerFaction === "dead") {
                 $isHit = true;
+            } elseif ($attackerFaction === "firehorde" && $this->game->isMonsterOnBoard("monster_legend_4_1")) {
+                // Surt I: runes count as hits for all Fire Horde while he is on the board.
+                $isHit = true;
             }
         }
         return $isHit ? 1 : 0;

@@ -41,7 +41,7 @@ Checkbox = implemented + tested. Verified against code 2026-07-21.
 - [ ] LII: attacks twice; each rune counts as two hits. "Attacks twice" confirmed FORUM.md:116/1327 (the 2 attacks may split across 2 heroes). No code.
 
 **Legend 4 - Surt** (firehorde)
-- [ ] LI: runes count as hits for all Fire Horde while Surt is on the board (grant `dead`-style rune-as-hit; hook `Monster::countHit`, gated like `isHrungbaldInPlay`). No code.
+- [x] LI: runes count as hits for all Fire Horde while Surt I (`monster_legend_4_1`) is on the board. `Monster::countHit` gated on `Game::isMonsterOnBoard`; client tooltip note (4_1). Tests: `Op_monsterAttackTest::testSurtIGrantsFirehordeRuneAsHit` / `testSurtIIDoesNotGrantFirehordeRune`.
 - [x] LII: attack range 3, Surt only. `Monster::getAttackRange` (id monster_legend_4_2); client tooltip via `getMonsterAttackRange`. Tests: `MonsterTest::testSurtIIHasRange3`, `Op_monsterAttackTest::testSurtIIAttacksAtRange3`. (Resolves FORUM.md:115; the FORUM.md:673 "all fire horde" remark is superseded.)
 
 **Legend 5 - Hrungbald** (trollkin)
