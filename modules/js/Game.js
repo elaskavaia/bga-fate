@@ -2985,6 +2985,8 @@ class Game extends Game1Tokens {
                     if (mirror)
                         mirror.dataset.max = String(max);
                 }
+                // Refresh the hero figure's remaining-health box now, not only on its next move (BGA #233794).
+                this.refreshAttackStat(heroMatch[1]);
             }
             // Monster damage bucket: stash max HP so the badge can render "damage/max".
             const monsterMatch = bucketId.match(/^bucket_crystal_red_(monster_.+)$/);
