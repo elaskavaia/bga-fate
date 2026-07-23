@@ -644,6 +644,10 @@ class Material {
         "type" => "c_orebiter",
         "name" => clienttranslate("Orebiter"),
 ],
+    "Op_c_mining" => [ 
+        "type" => "c_mining",
+        "name" => clienttranslate("Mining Equipment"),
+],
     "Op_c_smiter" => [ 
         "type" => "c_smiter",
         "name" => clienttranslate("Smiterbiter"),
@@ -5249,7 +5253,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Mining Equipment"),
         "durability" => 2,
-        "r" => "spendDurab:custom",
+        "r" => "spendDurab:c_mining",
         "quest" => "<i>Pay 1 gold</i> [XP] for the equipment. Then <i>pay 2 gold</i> [XP] for insureance and taxes.",
         "effect" => clienttranslate("[DAMAGE]: Gain 2 gold [XP] if you stand adjacent to a mountain area.<br>[DAMAGE]: Gain 3 gold [XP] if you stand adjacent to 3 mountain areas."),
         "flavour" => "I'm digging this gold rush…",
