@@ -37,15 +37,19 @@ class Op_spendManaAny extends Op_spendMana {
     function getPossibleMoves() {
         $hero = $this->game->getHero($this->getOwner());
         $targets = [];
+        $total = 0;
         foreach ($hero->getTableauCards() as $card) {
             $cardId = $card["key"];
             $mana = count($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $cardId));
             if ($mana > 0) {
                 $targets[$cardId] = ["q" => Material::RET_OK];
+                $total += $mana;
             }
         }
-        if (empty($targets)) {
-            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No mana available to spend")];
+        // Void unless the FULL remaining cost is affordable — spendManaAny pays one unit per
+        // iteration, so offering it with only partial mana strands the last unit mid-payment.
+        if ($total < (int) $this->getCount()) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not enough mana available to spend")];
         }
         return $targets;
     }

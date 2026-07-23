@@ -127,6 +127,52 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
         $this->assertNotEquals("limbo", $this->tokenLocation($house));
     }
 
+    public function testInspireDefenseNotOfferedWithoutMana(): void {
+        $color = $this->getActivePlayerColor();
+        $inspire = "card_event_2_30_1";
+        $this->seedHand($inspire, $color);
+
+        // Alva starts in Grimheim so the in(Grimheim) gate passes...
+        $this->assertTrue($this->game->hexMap->isInGrimheim($this->tokenLocation($this->heroId)));
+
+        // ...but strip every mana crystal so the 2spendManaAny cost is unpayable.
+        foreach ($this->game->getHero($color)->getTableauCards() as $card) {
+            foreach ($this->game->tokens->getTokensOfTypeInLocation("crystal_green", $card["key"]) as $key => $g) {
+                $this->game->tokens->moveToken($key, "supply_crystal_green");
+            }
+        }
+
+        // Destroy a house so addTownPiece isn't the reason the card would be void.
+        $house = array_key_first($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+        $this->game->tokens->moveToken($house, "limbo");
+
+        // The card must NOT be offered: the gate passes but the cost behind it can't be paid.
+        $this->assertNotValidTarget($inspire, "Inspire Defense should be hidden when its 2-mana cost is unpayable");
+    }
+
+    public function testInspireDefenseNotOfferedWithPartialMana(): void {
+        // Regression for the softlock: with only 1 of the 2 required mana, the card was
+        // still offered (spendManaAny only checks that *some* mana exists), then crashed
+        // mid-payment (checkUserTargetSelection:01) when the second unit had no source.
+        $color = $this->getActivePlayerColor();
+        $inspire = "card_event_2_30_1";
+        $this->seedHand($inspire, $color);
+
+        // Alva in Grimheim; leave EXACTLY 1 mana (starting mana on card_ability_2_3) but cost is 2.
+        $this->assertTrue($this->game->hexMap->isInGrimheim($this->tokenLocation($this->heroId)));
+        $totalMana = 0;
+        foreach ($this->game->getHero($color)->getTableauCards() as $card) {
+            $totalMana += $this->countTokens("crystal_green", $card["key"]);
+        }
+        $this->assertEquals(1, $totalMana, "precondition: exactly 1 mana on the board");
+
+        $house = array_key_first($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+        $this->game->tokens->moveToken($house, "limbo");
+
+        // Must NOT be offered: 2 mana can't be paid from a 1-mana board.
+        $this->assertNotValidTarget($inspire, "Inspire Defense must be hidden when only 1 of 2 mana is available");
+    }
+
     // --- Back Down! (card_event_2_35) ---
     // r=killMonster(inRange,'rank<=2 and closerToGrimheim')
 
