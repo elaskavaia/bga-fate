@@ -28,9 +28,6 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * "Play an event card from your hand. Perform its effect, then place it
  *  in your discard pile."
  *
- * Multiplicity (`NdiscardEvent`): the player picks one card per prompt; on
- * resolve we re-queue `(N-1)discardEvent` until count is exhausted. Used by
- * paid quests like Bloodline Crystal (`2discardEvent`) and Heels.
  */
 class Op_discardEvent extends CountableOperation {
     function getPrompt() {
@@ -40,6 +37,12 @@ class Op_discardEvent extends CountableOperation {
     function getPossibleMoves() {
         $hero = $this->game->getHero($this->getOwner());
         $cards = $hero->getHandCards();
+        // "Discard ANOTHER card": the event card that queued this cost is still in hand
+        // so it must not count toward payment
+        $selfCard = $this->getDataField("card", "");
+        if ($selfCard !== "") {
+            unset($cards[$selfCard]);
+        }
         if (count($cards) < $this->getCount()) {
             return ["q" => Material::ERR_NOT_ENOUGH, "err" => clienttranslate("Not enough event cards")];
         }
