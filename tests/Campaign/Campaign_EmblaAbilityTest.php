@@ -86,6 +86,25 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("hex_7_8", $this->tokenLocation($this->heroId));
     }
 
+    public function testQueenOfTheHillIOncePerTurn(): void {
+        $color = $this->getActivePlayerColor();
+        $cardId = "card_ability_3_11";
+        $this->game->tokens->moveToken($cardId, "tableau_$color");
+
+        // Brute (health=3) survives 2 damage and swaps, staying adjacent to the hero —
+        // so a second activation is blocked only by the spendUse once-per-turn guard.
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+
+        $this->respond($cardId);
+
+        // Card marked used; brute still adjacent but the card can't be activated again.
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "spendUse flips card state to 1");
+        $this->assertEquals("hex_7_9", $this->tokenLocation($brute), "brute swapped onto hero's old hex (still adjacent)");
+        $this->assertNotValidTarget($cardId, "Queen of the Hill cannot be used a second time this turn");
+    }
+
     // --- In Charge I (card_ability_3_5) ---
     // r=killMonster(adj,'rank==1'), on=TActionMove — after each move action, may kill
     // an adjacent rank 1 monster.
