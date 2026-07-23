@@ -5,14 +5,14 @@ declare(strict_types=1);
 require_once __DIR__ . "/CampaignBase.php";
 
 /**
- * Reproduces BGA report #233796 (display): using Boldur's Dwarf Mail
- * (card_equip_4_18, r=preventDamage) logs a client error
+ * Verifies the fix for BGA report #233796 (display): using Boldur's Dwarf Mail
+ * (card_equip_4_18, r=preventDamage) used to log a client error
  *   "string.substitute could not find key \"count\" in template"
  * for the prompt 'Prevent ${count} of ${max} damage?'.
  *
- * Root cause: Op_preventDamage::getExtraArgs() overrides
- * CountableOperation::getExtraArgs() and returns only "max", dropping the
- * "count" key that the prompt template references.
+ * Was caused by Op_preventDamage::getExtraArgs() overriding
+ * CountableOperation::getExtraArgs() and returning only "max", dropping the
+ * "count" key that the prompt template references. Now fixed by merging parent args.
  */
 class Campaign_DwarfMailLogTest extends CampaignBaseTest {
     protected function setUp(): void {
@@ -56,12 +56,12 @@ class Campaign_DwarfMailLogTest extends CampaignBaseTest {
         // "max" is supplied, so string.substitute only chokes on the missing "count".
         $this->assertArrayHasKey("max", $args, "sanity: \${max} is resolvable");
 
-        // BUGGY BEHAVIOR pinned for BGA #233796: 'count' is missing from getExtraArgs;
-        // flip this assertion once Op_preventDamage merges parent args.
-        $this->assertArrayNotHasKey(
+        // Fixed for BGA #233796: Op_preventDamage merges parent args, so both
+        // placeholders the prompt references now resolve on the client.
+        $this->assertArrayHasKey(
             "count",
             $args,
-            "prompt references \${count} but the arg is absent - client string.substitute fails"
+            "prompt references \${count}; the arg must be present or client string.substitute fails"
         );
     }
 }

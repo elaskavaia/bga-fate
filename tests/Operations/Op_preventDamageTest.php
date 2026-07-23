@@ -96,7 +96,10 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
     public function testGetExtraArgsExposesMaxToClient(): void {
         $this->queueDealDamage(5);
         $op = $this->createOp("2preventDamage");
-        $this->assertEquals(["max" => 5], $op->getExtraArgs());
+        $args = $op->getExtraArgs();
+        $this->assertEquals(5, $args["max"]);
+        // Parent's ${count} must survive so the prompt template resolves (BGA #233796).
+        $this->assertArrayHasKey("count", $args);
     }
 
     public function testGetPromptIncludesCountAndMaxPlaceholders(): void {

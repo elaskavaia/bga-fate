@@ -65,7 +65,8 @@ class Op_preventDamage extends CountableOperation {
 
     #[Override]
     public function getExtraArgs() {
-        return ["max" => $this->getCurrentDamage()];
+        // Merge parent args so the prompt's ${count} placeholder resolves (BGA #233796).
+        return array_merge(parent::getExtraArgs(), ["max" => $this->getCurrentDamage()]);
     }
 
     function getCurrentDamage(): int {
