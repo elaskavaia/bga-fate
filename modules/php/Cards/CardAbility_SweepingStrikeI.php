@@ -25,6 +25,12 @@ class CardAbility_SweepingStrikeI extends CardGeneric {
     }
 
     public function onMonsterKilled(Trigger $event): void {
+        // Guard like CardGeneric::onTriggerDefault: a cleave kill re-fires MonsterKilled,
+        // but by then the sweep is spent (no overkill left), so c_sweep is void and the
+        // card must not re-prompt with an empty target list (BGA #233927).
+        if (!$this->canBePlayed($event)) {
+            return;
+        }
         $this->promptUseCard($event);
     }
 }
