@@ -11,7 +11,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  *
  * Two-step operation:
  * - Step 1: player selects a monster hex in attack range
- * - Step 2: player chooses mana amount (2 to min(mana_on_card, remaining_health, 4))
+ * - Step 2: player chooses mana amount (2 to min(mana_on_card, 4); overkill allowed)
  * - Then queues NspendMana:NdealDamage with chosen N and preset target
  *
  * Data Fields:
@@ -49,11 +49,8 @@ class Op_c_sureshotII extends Operation {
     }
 
     private function getMaxMana(): int {
-        $max = min($this->getManaOnCard(), 4);
-        if ($this->isStep2()) {
-            $max = min($max, $this->getMonsterRemainingHealth());
-        }
-        return $max;
+        // overkill allowed (rules: deal as much as possible), so no remaining-health cap
+        return min($this->getManaOnCard(), 4);
     }
 
     function getPrompt() {

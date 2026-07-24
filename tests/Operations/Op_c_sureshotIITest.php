@@ -82,25 +82,35 @@ final class Op_c_sureshotIITest extends AbstractOpTestCase {
         $this->assertNotContains("choice_4", $targets);
     }
 
-    public function testStep2CapsAtMonsterRemainingHealth(): void {
-        // Goblin health=2, no pre-damage → max=2
+    public function testStep2AllowsOverkillOnLowHealthMonster(): void {
+        // Goblin health=2, full mana=4 -> overkill offers up to choice_4
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
 
         $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
-        $this->assertNotContains("choice_3", $targets);
+        $this->assertContains("choice_3", $targets);
+        $this->assertContains("choice_4", $targets);
     }
 
-    public function testStep2CapsAtDamagedMonsterHealth(): void {
-        // Brute health=3, pre-damage 1 → remaining=2 → max=2
-        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+    // BGA #233970: a 1-HP monster is offered in step 1 (in range); overkill must
+    // keep step 2 non-empty (min spend 2 > 1 health) so the player is not softlocked.
+    // Drives the full step1 -> resolve -> step2 chain, the reported trigger path.
+    public function testStep2OneHpMonsterStillOffersChoices(): void {
+        // Goblin health=2, pre-damage 1 -> remaining 1
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1");
+        $this->assertEquals(4, $this->getMana());
 
-        $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_brute_1");
+        $this->createOp(null, ["card" => $this->cardId]);
+        $this->assertContains("hex_12_8", $this->op->getArgsTarget()); // step 1 offers the 1-HP monster
+        $this->call_resolve("hex_12_8");
+
         $this->createOp(null, ["card" => $this->cardId, "target" => "hex_12_8"]);
         $targets = $this->op->getArgsTarget();
         $this->assertContains("choice_2", $targets);
-        $this->assertNotContains("choice_3", $targets);
+        $this->assertContains("choice_3", $targets);
+        $this->assertContains("choice_4", $targets);
     }
 
     public function testStep2ResolveQueuesSpendManaAndDealDamage(): void {

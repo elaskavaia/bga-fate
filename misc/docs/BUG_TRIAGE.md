@@ -1,0 +1,53 @@
+# Bug Triage - project config and state
+
+Game-specific configuration and running state for the `game-bug-triage` skill.
+The skill itself is game-independent; everything project-specific lives here.
+Read this file at the start of every triage run.
+
+## Game reference
+
+- **BGA game id:** 2758 (Fate: Defenders of Grimheim)
+- **Bug list:** https://boardgamearena.com/bugs?game=2758
+- **Single report:** https://boardgamearena.com/bug?id=<REPORT_ID>
+
+## Rules sources (for `rules`-type reports)
+
+Check a reporter's claim against these, in order, before assuming the code is wrong:
+
+1. [RULES.md](RULES.md) - the rulebook.
+2. [FORUM.md](FORUM.md) - designer clarifications and rulings saved from the forum.
+
+## Deploy model
+
+Process: **creating a git tag = deployed.** To decide if a fix is live:
+
+- Find the fix commit: `git log --oneline -i --grep='#<reportid>'` (commit messages reference `BGA #<id>`).
+- Is it in the latest tag: `git merge-base --is-ancestor <commit> <latest-tag> && echo LIVE`.
+- List tags containing it: `git tag --contains <commit> --sort=creatordate | head`.
+
+In the latest deployed tag -> **Fixed**. Committed/tagged but that tag not deployed -> **Waiting for deploy**. When unsure whether a tag is deployed, ask.
+
+## Investigation and tests
+
+- Integration tests live under `tests/Campaign/`. Targeted unit tests mirror source layout.
+- A reproducing test must be **green**, asserting the current buggy behavior, with a comment pinning it for `BGA #<id>` (flip the assertion when the fix lands) - see the skill's CONFIRMED note.
+
+## Bug triage last checked
+
+**2026-07-24 08:39 EDT** - only triage BGA reports created/updated after this time; bump this line to `date` at run start after each run.
+
+## Tracked bugs
+
+Internal record of triaged reports (root cause, fix, test) - never put this detail in a public bug comment.
+
+
+- [x] **Sure Shot II softlock on overkill target (BGA #233970).** FIXED. Removed the step-2 remaining-health cap in [Op_c_sureshotII::getMaxMana](../../modules/php/Operations/Op_c_sureshotII.php#L51) so max = `min(manaOnCard, 4)` (overkill allowed, rules-consistent). Step 2 now always offers `choice_2..max`, no empty non-skippable target set. Tests: `Op_c_sureshotIITest::testStep2OneHpMonsterStillOffersChoices` (end-to-end step1->step2) and `testStep2AllowsOverkillOnLowHealthMonster`; obsolete cap tests removed; `Campaign_BjornSoloTest::testSureShotIISelectMonsterThenMana` updated (choice_4 now valid).
+- [ ] **Riposte usable vs non-adjacent (ranged) attacker (BGA #233845).** CONFIRMED (green test `Campaign_EmblaAbilityTest::testRiposteIWronglyOfferedAgainstNonAdjacentRangedAttacker`). Rule (RULES.md:263): Riposte only vs an ADJACENT monster. Riposte row [card_ability_material.csv:45](../../misc/card_ability_material.csv) `r=2spendMana:(2preventDamage:2dealDamage)` has no `adj` gate; [Op_preventDamage::getPossibleMoves](../../modules/php/Operations/Op_preventDamage.php#L55) / `findDealDamageOp(true)` offer Riposte for any pending incoming `dealDamage` with an attacker set, never checking attacker adjacency. Ranged attackers exist (Fire Horde range 2, Surt II range 3 - [Monster.php:33](../../modules/php/Model/Monster.php#L33)), so a non-adjacent attacker reaching `TResolveHits` is reachable. FIX (scope to Riposte ONLY - `Op_preventDamage` is shared by Dodge/Stoneskin/Dreadnought which are NOT adjacency-limited): add an attacker-adjacency gate to Riposte's `r`, or a `requireAdjacentAttacker` flag on `Op_preventDamage` that rejects when hex distance attacker->defender > 1.
+- [ ] **Sweeping Strike re-offers after all adjacent monsters dead (BGA #233927).** CONFIRMED (green test `Campaign_BoldurSweepTest::testSweepingStrikeReoffersAfterBothMonstersDead`). Boldur `card_ability_4_5`/`_4_6`. The cleave hit routes through [Op_c_sweep](../../modules/php/Operations/Op_c_sweep.php#L78) -> [Op_applyDamage](../../modules/php/Operations/Op_applyDamage.php#L93), which fires `Trigger::MonsterKilled` unconditionally on any kill; [CardAbility_SweepingStrikeI::onMonsterKilled](../../modules/php/Cards/CardAbility_SweepingStrikeI.php#L27) then calls `promptUseCard` unconditionally. So killing the 2nd monster via cleave re-fires MonsterKilled and re-prompts useCard with an empty target list (dead-end prompt; Cancel exits cleanly, both stay killed - matches report). The commit 6b5b921 assumption that "cleave bypasses dealDamage so it cannot re-trigger" is wrong. FIX: suppress MonsterKilled for the cleave kill (flag through applyDamage), or guard `onMonsterKilled` so it does not re-prompt once a sweep is already spent this action.
+
+## Triage run log
+
+Short log of each run: date, reports touched, outcome.
+
+- **2026-07-23** - New Boldur reports from Vigilante8 (table 887519986): #233796 Dwarf Mail `${count}` -> Confirmed (green test `Campaign_DwarfMailLogTest`); #233793 Mining Equipment unusable -> Confirmed (green test `Campaign_MiningEquipmentTest`); #233794 health count not refreshing -> left Open (client-side lead, not server-testable). No deploy sweep needed (nothing Waiting for deploy). Marker bumped to 08:32.
+- **2026-07-24** - Deploy sweep: tag v260724-0836 shipped fixes for #233794 (health refresh), #233793 (Mining Equipment), #233796 (Dwarf Mail `${count}`) -> all flipped to Fixed and removed from Tracked bugs above. New Open reports triaged and Confirmed via background repro tests (no production code edited): #233970 Sure Shot II overkill softlock (`Op_c_sureshotIITest::testStep2OneHpMonsterHasNoValidChoiceBug`); #233845 Riposte vs ranged/non-adjacent attacker (`Campaign_EmblaAbilityTest::testRiposteIWronglyOfferedAgainstNonAdjacentRangedAttacker`); #233927 Sweeping Strike re-offer loop (`Campaign_BoldurSweepTest::testSweepingStrikeReoffersAfterBothMonstersDead`). #233815 (Undo persists, references fixed #233685) left untouched - Victoria had already replied to the reporter. Marker bumped to 08:39.

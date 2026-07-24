@@ -642,11 +642,11 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->confirmCardEffect();
 
         // Step 1 auto-resolves (only one monster in range)
-        // Step 2: choose mana amount — brute health=3, so max=3
+        // Step 2: choose mana amount — mana=4, overkill allowed so max=4 (brute health=3)
         $this->assertOperation("c_sureshotII");
         $this->assertValidTarget("choice_2");
         $this->assertValidTarget("choice_3");
-        $this->assertNotValidTarget("choice_4");
+        $this->assertValidTarget("choice_4");
         $this->respond("choice_3");
 
         // spendMana + dealDamage auto-resolve → brute killed (health=3, 3 damage)
