@@ -1,23 +1,29 @@
 ---
 name: game-bug-triage
-description: Triage Board Game Arena bug reports for Fate (Defenders of Grimheim) by driving a real browser against boardgamearena.com/bugs, reading each report, cross-referencing the codebase and git history to decide what is already fixed, and updating report status/comments. Use this skill whenever Victoria wants to look at, go through, triage, or respond to BGA bug reports, player reports, or the bug list, mark a report confirmed/fixed/waiting-for-deploy, or check whether a reported bug is already handled - even if she does not say the word "triage" (e.g. "open the bugs page", "look at the second one", "mark that one fixed", "is this bug already deployed?").
+description: Triage Board Game Arena bug reports - drive a browser against the BGA bug tracker, decide each report's true state against the code, and update its status/comments. Use whenever the user wants to look at, go through, triage, or respond to BGA bug reports or the bug list, mark a report confirmed/fixed/waiting-for-deploy, or check whether a reported bug is already handled - even without the word "triage" (e.g. "open the bugs page", "look at the second one", "mark that one fixed", "is this bug already deployed?").
 argument-hint: optionally "auto" for headless/cron mode (abort if the browser is not authenticated)
 ---
 
-# Fate BGA Bug Triage
+# BGA Bug Triage
 
 Drive a real browser against the BGA bug tracker, read reports, decide their true state against the code, and update them. This skill assumes the `chrome-devtools-mcp` browser tools are available.
 
+## Project config: BUG_TRIAGE.md
+
+This skill is game-independent. Everything project-specific - the **game id and bug-list URL**, the **rules source docs**, the **deploy model** (how to tell if a fix is live), the **test locations**, the **last-checked marker**, the **tracked-bug list**, and the **triage run log** - lives in a `BUG_TRIAGE.md` in the project's docs directory (search for `BUG_TRIAGE.md` if you don't know the path).
+
+**Read BUG_TRIAGE.md first, every run.** It tells you which game to open and how this project decides state. This skill file describes the *procedure*; BUG_TRIAGE.md supplies the *facts*. Where the text below refers to the game id, the rules docs, the deploy check, or the marker/log, take the concrete value from BUG_TRIAGE.md.
+
 ## Scope: what a run covers
 
-A run is two passes. A time window alone is not enough, because the changes that matter most often happen *without the report being touched* - most importantly, when Victoria deploys, a batch of **Waiting for deploy** reports should become **Fixed** even though nothing on them changed.
+A run is two passes. A time window alone is not enough, because the changes that matter most often happen *without the report being touched* - most importantly, when a deploy ships, a batch of **Waiting for deploy** reports should become **Fixed** even though nothing on them changed.
 
 **1. Status sweeps - always, regardless of when the report last changed.** Filter the list by status and re-evaluate:
 
-- **Waiting for deploy** -> re-check each against what is now deployed. Find its fix commit (`git log --oneline --grep='#<reportid>'`, or the card/op from the `TODO.md` entry) and test whether it has shipped: `git merge-base --is-ancestor <commit> <latest-tag> && echo LIVE`. If the fix is in the latest (deployed) tag, promote the report to **Fixed**. This is exactly how a deploy gets reflected: right after Victoria cuts/deploys a tag, a run flips every now-shipped Waiting-for-deploy report to Fixed.
+- **Waiting for deploy** -> re-check each against what is now deployed, using the deploy check from BUG_TRIAGE.md (find the fix commit, test whether it is in the latest deployed tag). If the fix has shipped, promote the report to **Fixed**. This is exactly how a deploy gets reflected: right after a tag is cut/deployed, a run flips every now-shipped Waiting-for-deploy report to Fixed.
 - **Open** -> always revisit; they are unresolved by definition.
 
-**2. New / changed since the last check - for everything else.** Only look at reports **created or updated since the last check**, tracked by a marker in `misc/docs/TODO.md`:
+**2. New / changed since the last check - for everything else.** Only look at reports **created or updated since the last check**, tracked by the marker in BUG_TRIAGE.md:
 
 `**Bug triage last checked:** <timestamp>`
 
@@ -29,19 +35,19 @@ Capture the current time (`date`) at run start; after the run, overwrite the mar
 
 Headless/cron mode is triggered by the skill argument **`auto`** (e.g. a daily cron invokes `game-bug-triage auto`). In this mode there is no one to do the login handoff, so: take a snapshot first and **if the page shows the login screen or a "Visitor-NNN" user, abort immediately with a clear notice** ("bug triage skipped: browser not authenticated") - never attempt to log in, and don't silently report "nothing to triage". Also be aware the chrome-devtools MCP may not be present at all in a non-interactive run; if the browser tools can't be loaded, abort the same way.
 
-Auth does not survive on its own here: the cron-launched browser must reuse the **same persistent profile that holds Victoria's BGA login** (the chrome-devtools-mcp user-data dir, `~/.cache/chrome-devtools-mcp/`). A run that spins up a fresh/temporary context has no cookie and lands on the login page - which is exactly the abort case above, not something to work around. If `auto` runs keep losing the session, the fix is in the cron's browser/MCP launch config (point it at that profile), not in this skill. A logged-in interactive session and a headless run can also fight over one profile, so don't run both against the same browser at once.
+Auth does not survive on its own here: the cron-launched browser must reuse the **same persistent profile that holds the BGA login** (the chrome-devtools-mcp user-data dir, `~/.cache/chrome-devtools-mcp/`). A run that spins up a fresh/temporary context has no cookie and lands on the login page - which is exactly the abort case above, not something to work around. If `auto` runs keep losing the session, the fix is in the cron's browser/MCP launch config (point it at that profile), not in this skill. A logged-in interactive session and a headless run can also fight over one profile, so don't run both against the same browser at once.
 
-(Without the `auto` argument the skill runs interactively as usual - on a login page it asks Victoria to log in and waits, per the Login section above.)
+(Without the `auto` argument the skill runs interactively as usual - on a login page it asks the user to log in and waits, per the Login section below.)
 
 ## The bug list
 
-- Fate's game id is **2758**. The list lives at `https://boardgamearena.com/bugs?game=2758`.
+- Take the **game id** and list URL from BUG_TRIAGE.md. The list lives at `https://boardgamearena.com/bugs?game=<GAME_ID>`.
 - A single report is `https://boardgamearena.com/bug?id=<REPORT_ID>`.
 - Load the tools with `ToolSearch` (`select:mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page,...take_snapshot,...click,...fill`), then `navigate_page`.
 
 ### Login
 
-The list requires being logged in as Victoria. If `take_snapshot` shows "Login to Board Game Arena!" or a "Visitor-NNN" user, **stop and ask her to log in** in the MCP-controlled Chrome window, then retry. This session cannot run an OAuth flow - do not attempt to log in yourself or ask for credentials/codes.
+The list requires being logged in. If `take_snapshot` shows "Login to Board Game Arena!" or a "Visitor-NNN" user, **stop and ask the user to log in** in the MCP-controlled Chrome window, then retry. This session cannot run an OAuth flow - do not attempt to log in yourself or ask for credentials/codes.
 
 ## Reading, not looking
 
@@ -59,26 +65,23 @@ From a `bug?id=` snapshot, pull:
 - **Table link** and dev-tools block: "Load on the Studio" (loads the exact dump), table chat log, and the dump's move number - these are your reproduction handles.
 - **Comments**: prior reporter/developer notes. A report may already have a dev reply; don't re-answer.
 
-Summarize each report back to Victoria concisely (status, votes, the concrete claim, repro pointer) and connect it to recent work when you can - many reports map directly onto recent commits or cards.
+Summarize each report back to the user concisely (status, votes, the concrete claim, repro pointer) and connect it to recent work when you can - many reports map directly onto recent commits or cards.
 
 ### Non-English reports
 
-Players report in many languages. When the title or details are not in English, **post a comment with a faithful English translation and submit it** - Victoria and other triagers read English, and the translated text becomes part of the report for everyone who looks later. Keep it a plain translation (no added analysis or internals), leave the status unchanged, and still summarize it for Victoria in the chat.
+Players report in many languages. When the title or details are not in English, **post a comment with a faithful English translation and submit it** - the maintainers read English, and the translated text becomes part of the report for everyone who looks later. Keep it a plain translation (no added analysis or internals), leave the status unchanged, and still summarize it for the user in the chat.
 
 ## Deciding the true state
 
 ### Rules reports: is the reporter even right?
 
-For a `rules`-type report, the first action is to check the claim against the actual rules, **before** assuming the code is wrong - reporters often misremember a rule. The source of truth, in order:
-
-1. `misc/docs/RULES.md` - the rulebook.
-2. If the rule isn't spelled out there, `misc/docs/FORUM.md` - designer clarifications and rulings saved from the forum.
+For a `rules`-type report, the first action is to check the claim against the actual rules, **before** assuming the code is wrong - reporters often misremember a rule. The source of truth is the rules docs listed in BUG_TRIAGE.md (rulebook first, then saved forum clarifications).
 
 If the rules contradict the reporter, it's likely **Not a bug** (explain the rule in a player-facing comment). If the rules confirm the claim, it's a real report - proceed to whether it's already handled.
 
 ### Already fixed? (do this BEFORE any investigation)
 
-**Always run this check first - for every report, including one opened minutes ago.** A fix may already be committed and deployed even for a brand-new report (Victoria often fixes and deploys same-day, and a report can be filed against an old client). Skipping it wastes an investigation and mis-labels a Fixed bug as Confirmed. The very first thing to grep is the **report id itself**, since commit messages reference it (`BGA #<id>`):
+**Always run this check first - for every report, including one opened minutes ago.** A fix may already be committed and deployed even for a brand-new report (same-day fix+deploy is common, and a report can be filed against an old client). Skipping it wastes an investigation and mis-labels a Fixed bug as Confirmed. Use the deploy check from BUG_TRIAGE.md. The very first thing to grep is the **report id itself**, since commit messages reference it (`BGA #<id>`):
 
 - `git log --oneline -i --grep='<report-id>'` - a hit here usually IS the fix. Fall back to `--grep='<card/keyword>'` if the id isn't referenced.
 - `git merge-base --is-ancestor <commit> <latest-tag> && echo IN` - is that commit in the latest release tag?
@@ -86,7 +89,7 @@ If the rules contradict the reporter, it's likely **Not a bug** (explain the rul
 
 If the fix commit is in the latest deployed tag -> the report is **Fixed** right now; do not open an investigation. Only when there is no fix commit do you move on to rules-check / investigation.
 
-**Deployed vs waiting**: a fix living in a release **tag** is not automatically live. Victoria's process is that **creating a tag = deployed**, so if the fix is in the latest tag, it is live -> **Fixed**. If it is only committed/tagged but she has not cut/deployed that tag, it is **Waiting for deploy**. When unsure whether the tag is deployed, ask her rather than guessing.
+**Deployed vs waiting**: a fix living in a release **tag** is not automatically live. Per the deploy model in BUG_TRIAGE.md, if the fix is in the latest deployed tag it is live -> **Fixed**; if it is only committed/tagged but that tag isn't deployed, it is **Waiting for deploy**. When unsure whether the tag is deployed, ask rather than guessing.
 
 Locating the exact card/operation and diagnosing an unshipped bug is **not triage work** - hand that to the investigation agent below.
 
@@ -96,15 +99,20 @@ Most reports are thin: no replay/move pointer, no repro steps, no clear statemen
 
 ## Deep investigation via a background agent
 
-When a report does warrant it, spin off a background `general-purpose` agent to find and **prove** the cause. Its boundary: it may **write and run tests** (an integration test under `tests/Campaign/`, or a targeted unit test) to try to reproduce the bug, but it must **not edit any production code** - no `modules/php` source, no CSVs, no `.ts`/`.scss`. It has no browser. It reports back one of:
+When a report does warrant it, spin off a background `general-purpose` agent to find and **prove** the cause. Its boundary: it may **write and run tests** (an integration test, or a targeted unit test - locations in BUG_TRIAGE.md) to try to reproduce the bug, but it must **not edit any production code**. It has no browser. Two hard rules to state explicitly in its prompt, because agents left to their own devices break them:
+
+- **No git operations, ever.** The agent must run **zero** git commands - no `git revert`, `checkout`, `reset`, `stash`, `commit`, `add`, `rm`, `restore`, branch/worktree changes, nothing that touches the working tree or history. Multiple agents share one repo; one agent reverting or stashing clobbers another's work and the maintainer's. The agent only *creates its own new test file* and runs it. If it thinks something needs reverting or committing, it says so in its report and leaves it for you.
+- **Run only its own test, never the full suite.** The agent runs the single test file/method it just wrote (e.g. `npm run test -- --filter <method> <file>`), not `npm run tests` / `predeploy` / any broad run. A full suite is slow, may be red for unrelated known bugs, and several agents running it at once thrash the machine.
+
+It reports back one of:
 
 - **CONFIRMED** - it wrote a test that reproduces the bug, and reports the test name plus file:line root cause and a proposed fix in prose. This is the only outcome that earns a **Confirmed** status on the report. **The agent must LEAVE that test in the tree - never delete it** (it's the most valuable output). But the test must be **GREEN, not red**: write it to assert the *current buggy behavior* - i.e. reverse the check condition so what it asserts is the broken output the bug produces - and add a clear comment saying this documents buggy behavior for BGA #\<id\> and that the assertion should be flipped once the fix lands. Rationale: a failing/red test breaks `predeploy` for everyone until the fix ships, which can be a while; a green test that pins the wrong-but-current behavior keeps the suite passing while still capturing the exact defect (the fix then inverts the assertion to lock in the correct behavior). Tell the agent this explicitly in its prompt, and have it report the test's file path and method name.
 - **UNCONFIRMED** - a plausible hypothesis from reading code, but no test reproduces it yet. It says what it tried and why it couldn't repro. Treat this as a lead, not a fact.
 - **NOT FOUND** - no lead; plus a short list of specific questions to ask the reporter (move number, what they expected vs saw, which card/hero/monster, did F5 help). This is what makes a dead end useful - you turn those questions into an **Info needed** comment.
 
-**A code-reading hypothesis is not a confirmation.** Finding a code path that _could_ produce the symptom is easy to get wrong - it happened here: a confident "cause" for #233418 was later shown to have no reproducible case. Only a test that actually reproduces the bug proves it. So the agent's job is to _try to write that test_, not just narrate a trace.
+**A code-reading hypothesis is not a confirmation.** Finding a code path that _could_ produce the symptom is easy to get wrong - it has happened here: a confident "cause" was later shown to have no reproducible case. Only a test that actually reproduces the bug proves it. So the agent's job is to _try to write that test_, not just narrate a trace.
 
-You keep the browser and any `TODO.md` edits, because the MCP is a single shared Chrome session and a second agent navigating in parallel would clobber your tab. Keep triaging other reports while it runs.
+You keep the browser and any BUG_TRIAGE.md edits, because the MCP is a single shared Chrome session and a second agent navigating in parallel would clobber your tab. Keep triaging other reports while it runs.
 
 **Time-box it.** The read-only hypothesis pass should be quick (~a minute); if the agent then attempts a reproducing test, hold it to **one focused attempt** - if that test doesn't repro, it returns UNCONFIRMED rather than grinding through variations. There is no wall-clock kill switch on the agent, so this budget has to live in its prompt.
 
@@ -116,17 +124,22 @@ The status control is a button showing the current status; clicking it reveals t
 - **Info needed** - the report is too thin to act on; you've asked the reporter for the specific missing detail. The landing spot for the "ask, don't dig" flow and for an agent's NOT FOUND questions.
 - **Confirmed** - reproduced by a test (see the rule below). Real bug, cause understood, fix pending.
 - **Waiting for deploy** - fixed in code but not yet live (fix committed/tagged but that tag isn't deployed).
-- **Fixed** - fix is deployed and live (in the latest deployed tag). Git-verified, no re-test needed.
-- **Duplicate** - the same issue as another report already on the list. Use it when a new report restates a bug you're already tracking; in the comment, point the reporter to the canonical report number so votes/discussion consolidate there. Prefer keeping the older / more-detailed / higher-voted one as canonical. (Example this project has seen: a second "Bjorn attack range" report was closed Duplicate against the original.)
-- **Won't fix** - real behavior but a deliberate decision not to change it (out of scope, by design, not worth the cost). Victoria's call, not yours - don't set it on your own.
+- **Fixed** - fix is deployed and live (in the latest deployed tag). Git-verified, no re-test needed. On setting this, remove the report's entry from the Tracked bugs list in BUG_TRIAGE.md (see "Recording internally").
+- **Duplicate** - the same issue as another report already on the list. Use it when a new report restates a bug you're already tracking; in the comment, point the reporter to the canonical report number so votes/discussion consolidate there. Prefer keeping the older / more-detailed / higher-voted one as canonical.
+- **Won't fix** - real behavior but a deliberate decision not to change it (out of scope, by design, not worth the cost). The maintainer's call, not yours - don't set it on your own.
 - **Works for me** - couldn't reproduce and it looks environmental or transient, but you can't positively say the rules make it correct. Weaker than Not a bug.
-- **Not a bug** - the behavior is correct per the rules (`RULES.md` / `FORUM.md`); the reporter misunderstood. Explain the rule in a player-facing comment.
+- **Not a bug** - the behavior is correct per the rules docs; the reporter misunderstood. Explain the rule in a player-facing comment.
 
 If no news leave the status unchanged (post a comment without moving the report). Use when you're only replying. _(If unsure it behaves this way, verify by reload after posting.)_
 
-**Feature requests are not bugs - reclassify.** If a report asks for a *new feature or capability* rather than reporting broken behavior ("add a token display mode", "let me sort my hand"), it doesn't belong in the bug list. Use the **Reclassify as suggestion** link on the report so players can vote on it as a suggestion. If one report mixes a real bug with a feature ask, handle the bug and, in a player-facing comment, ask the reporter to raise the feature separately as its own suggestion so it can gather votes on its own.
+**Feature requests are not bugs - and never need investigating.** A report asking for a *new feature or capability* rather than reporting broken behavior ("add a token display mode", "let me sort my hand") has no "true state" to reproduce, so **never open an investigation or write a test for it**. What to do depends on its type:
 
-**Don't confirm without a reproducing test.** Set a report to **Confirmed** only when an integration test actually reproduces the bug. A plausible code trace is a hypothesis, not a confirmation - record it in `TODO.md` as a lead and leave the report **Open** (or **Info needed** if it's thin), but do not flip it to Confirmed until a test reproduces the failure (green, pinning the buggy behavior - see the CONFIRMED note above). (Deployed fixes still go straight to **Fixed** - that path is verified by git, not by re-testing.)
+- **Type is already `suggestion`** - nothing to do. It's already out of the bug list and voting where it belongs; leave it alone and move on.
+- **Type is `bug` but it's really a feature request** - use the **Reclassify as suggestion** link on the report so players can vote on it as a suggestion.
+
+If one report mixes a real bug with a feature ask, handle the bug and, in a player-facing comment, ask the reporter to raise the feature separately as its own suggestion so it can gather votes on its own.
+
+**Don't confirm without a reproducing test.** Set a report to **Confirmed** only when an integration test actually reproduces the bug. A plausible code trace is a hypothesis, not a confirmation - record it in BUG_TRIAGE.md as a lead and leave the report **Open** (or **Info needed** if it's thin), but do not flip it to Confirmed until a test reproduces the failure (green, pinning the buggy behavior - see the CONFIRMED note above). (Deployed fixes still go straight to **Fixed** - that path is verified by git, not by re-testing.)
 
 To change status:
 
@@ -138,16 +151,19 @@ To change status:
 
 **Never put technical details (root cause, file names, card ids, code) in a public bug comment.** Reports are player-facing. A comment should say only what a player needs: that it's confirmed, or fixed, or what info is missing. The BGA status template already gets this right - prefer it over writing your own. Keep all root-cause/fix detail internal (see below).
 
-Post a comment without a status change only when Victoria asks you to reply to a reporter (e.g. "tell them point 2 is fixed pending deploy"). Same discipline: user-facing wording, no internals. On a multi-claim report, keep the status OPEN if any claim is still unresolved.
+Post a comment without a status change only when the user asks you to reply to a reporter (e.g. "tell them point 2 is fixed pending deploy"). Same discipline: user-facing wording, no internals. On a multi-claim report, keep the status OPEN if any claim is still unresolved.
 
-## Recording the fix internally
+## Recording internally
 
-Record findings in `misc/docs/TODO.md` (this is where internals live, not the bug report). Add a `[ ]` entry to the running bug list at the top of the file, in the existing style: reference the BGA report id and the card/op id, and give the concrete fix plus a test note. Match surrounding formatting; don't disturb other entries.
+Two places in BUG_TRIAGE.md, both internal (never in a public bug comment):
+
+- **Tracked bugs** - add a `[ ]` entry referencing the BGA report id and the card/op id, with the concrete fix plus a test note. Match the surrounding style; don't disturb other entries. **When a report reaches Fixed (deployed), delete its entry from this list** - it's resolved and no longer needs tracking; the run log keeps the history. (Entries stay while a bug is Open / Confirmed / Waiting for deploy; only a live-fixed report gets removed.)
+- **Triage run log** - after each run, append a short line: the date, which reports you touched, and the outcome (status changes, tests written, marker bumped). This is the at-a-glance history of what triage has done - and the durable record after a fixed entry is removed above.
 
 Be honest about certainty. A **CONFIRMED** finding (backed by a reproducing test) can state the cause plainly and name the test. An **UNCONFIRMED** lead must be written as a hypothesis - say "suspected cause / no reproducible case yet", not a flat assertion - so a future reader doesn't act on an unproven trace as if it were fact.
 
 ## Guardrails
 
-- Changing a report's status and posting a comment are **outward-facing, in Victoria's name**. Do them when she has asked (directly or via the triage flow she set up); when in doubt about whether to post, confirm first.
+- Changing a report's status and posting a comment are **outward-facing, in the maintainer's name**. Do them when asked (directly or via the triage flow set up for this); when in doubt about whether to post, confirm first.
 - Do not use the `gh` CLI or any GitHub tooling - triage is git + browser only.
-- Report outcomes faithfully: after each update, tell her exactly what status it now shows and what the public comment says.
+- Report outcomes faithfully: after each update, say exactly what status it now shows and what the public comment says.
