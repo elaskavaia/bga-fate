@@ -69,9 +69,8 @@ class Base extends Table {
     }
 
     function getAvailColors() {
-        $gameinfos = self::getGameinfos();
-        $default_colors = $gameinfos["player_colors"];
-        return $default_colors;
+        // must match player_colors in gameinfos.inc.php; static so construction works before gameinfos loads
+        return ["2e7d32", "0000ff", "ffa500", "ff0000"];
     }
     /*
         setupNewGame:
