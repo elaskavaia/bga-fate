@@ -334,6 +334,12 @@ class Campaign_EmblaAbilityTest extends CampaignBaseTest {
         $this->assertEquals($manaBefore - 3, $this->countTokens("crystal_green", $riposte), "3 mana spent");
     }
 
+    // Riposte adjacency gate (BGA #233845) is covered by Op_preventDamageTest
+    // (adjacent -> offered, non-adjacent -> not, plain preventDamage -> not gated).
+    // A full-turn campaign repro is finicky: the monster move phase runs first and a
+    // ranged monster closes toward Grimheim, so the attack lands from range 2 only when
+    // the hero sits off that path; the op-level tests pin the behavior more reliably.
+
     // --- Fleetfoot I (card_ability_3_7) ---
     // r=spendUse:move, no trigger — manual free-action, once per turn.
     // "Move 1 area."

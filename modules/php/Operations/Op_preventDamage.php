@@ -53,11 +53,31 @@ class Op_preventDamage extends CountableOperation {
     }
 
     function getPossibleMoves() {
-        if (!$this->findDealDamageOp(true)) {
+        $incoming = $this->findDealDamageOp(true);
+        if (!$incoming) {
+            return ["q" => Material::ERR_NOT_APPLICABLE];
+        }
+        // param(0)="adj" (Riposte) limits use to an adjacent attacker; other users (Dodge,
+        // Stoneskin, Dreadnought) carry no param and prevent damage from any range.
+        if ($this->getParam(0) === "adj" && !$this->attackerIsAdjacent($incoming)) {
             return ["q" => Material::ERR_NOT_APPLICABLE];
         }
         return parent::getPossibleMoves();
     }
+
+    private function attackerIsAdjacent(Op_dealDamage $incoming): bool {
+        $attackerId = $incoming->getDataField("attacker");
+        $defenderHex = $incoming->getDataField("target"); // on an incoming dealDamage, target is the defender hex
+        if ($attackerId === null || $defenderHex === null) {
+            return false;
+        }
+        $attackerHex = $this->game->hexMap->getCharacterHex($attackerId);
+        if ($attackerHex === null) {
+            return false;
+        }
+        return in_array($attackerHex, $this->game->hexMap->getAdjacentHexes($defenderHex), true);
+    }
+
     #[Override]
     function getPrompt() {
         return clienttranslate('Prevent ${count} of ${max} damage?');

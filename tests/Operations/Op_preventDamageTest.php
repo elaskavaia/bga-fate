@@ -67,6 +67,33 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
         $this->assertNoValidTargets();
     }
 
+    // -------------------------------------------------------------------------
+    // Attacker-adjacency gate: preventDamage(adj) (Riposte) only vs an adjacent
+    // attacker; the unparametrized op (Dodge/Stoneskin/Dreadnought) is not gated.
+    // BGA #233845
+    // -------------------------------------------------------------------------
+
+    public function testRiposteAdjOfferedWhenAttackerAdjacent(): void {
+        $this->queueDealDamage(3); // goblin at hex_12_8 is adjacent to hero at hex_11_8
+        $op = $this->createOp("2preventDamage(adj)");
+        $this->assertFalse($op->noValidTargets(), "Riposte applies against an adjacent attacker");
+    }
+
+    public function testRiposteAdjNotOfferedWhenAttackerNotAdjacent(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8"); // distance 2, ranged
+        $this->queueDealDamage(3);
+        $this->createOp("2preventDamage(adj)");
+        $this->assertNoValidTargets("Riposte must not apply against a non-adjacent attacker");
+    }
+
+    public function testPreventWithoutAdjParamAppliesRegardlessOfDistance(): void {
+        // Dodge/Stoneskin/Dreadnought carry no (adj) param and prevent damage at any range.
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8"); // distance 2
+        $this->queueDealDamage(3);
+        $op = $this->createOp("2preventDamage");
+        $this->assertFalse($op->noValidTargets(), "plain preventDamage is not adjacency-gated");
+    }
+
     public function testPreventDoesNotAffectOtherOperations(): void {
         $this->game->machine->push("roll", PCOLOR, ["count" => 3]);
         $this->queueDealDamage(3);
