@@ -1,10 +1,10 @@
 # Pre-release checklist
 ## ''' License '''
-[  ] BGA must have a license for the game for a project to be moved to production, even to alpha. If you don't have license yet you can continue checking other stuff from the list below, but at the end it cannot be moved until license situation is cleared.
+[ x] BGA must have a license for the game for a project to be moved to production, even to alpha. If you don't have license yet you can continue checking other stuff from the list below, but at the end it cannot be moved until license situation is cleared.
 ## ''' Metadata and graphics '''
 [  ] [[Game_meta-information: gameinfos.inc.php]] has correct and up to date information about the game.
-[  ] Game box graphics is 3D version of the game box (if available) and publisher icon is correct (see [[Game art: img directory]]). Space around the box has to be transparent, not white.
-[  ] You have added the requested images in the Game Metadata Manager to make the game page pretty
+[ x ] Game box graphics is 3D version of the game box (if available) and publisher icon is correct (see [[Game art: img directory]]). Space around the box has to be transparent, not white.
+[ x ] You have added the requested images in the Game Metadata Manager to make the game page pretty
 [  ] There are no images in the img directory that are not needed anymore
 [  ] Multiple images (i.e. cards) are compressed in "Sprite" (see [[Game art: img directory]])
 [  ] Each image should not exceed 4Mb
