@@ -41,6 +41,9 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * compatibility with existing card text.
  */
 class Op_removeDamage extends CountableOperation {
+    /** Home Sewn Tunic: "Spend 1 mend action to remove all damage from this card." */
+    public const CARD_TUNIC = "card_equip_1_23";
+
     function getPrompt() {
         return clienttranslate('Choose a hero or card to remove damage from (${count} [DAMAGE] left)');
     }
@@ -177,7 +180,13 @@ class Op_removeDamage extends CountableOperation {
         // instead of isOneChoice() so a preset `target` (e.g. from actionMend) doesn't
         // masquerade as the sole choice and apply the whole count to one target.
         $singleChoice = $this->countDamagedCandidates() <= 1;
-        $perUnit = $this->getMode() === "max" ? $this->damageOn($tokenId) : ($singleChoice ? $count : 1);
+        $perUnit = match (true) {
+            $this->getMode() === "max" => $this->damageOn($tokenId),
+            // Tunic strips in one pick, but only within the budget so the rest stays spendable
+            $tokenId === self::CARD_TUNIC => min($count, $this->damageOn($tokenId)),
+            $singleChoice => $count,
+            default => 1,
+        };
         $this->removeFrom($heroId, $tokenId, $perUnit);
 
         // Re-queue the remainder when more damaged targets exist.

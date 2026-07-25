@@ -26,6 +26,9 @@ class Op_actionMend extends Operation {
         if ($this->isInGrimheim()) {
             return clienttranslate("Choose a hero or equipment to repair (up to 5 damage)");
         }
+        if ($this->canRepairTunic()) {
+            return clienttranslate("Choose a hero or equipment to repair");
+        }
         return clienttranslate("Choose a hero to heal (up to 2 damage)");
     }
 
@@ -36,11 +39,33 @@ class Op_actionMend extends Operation {
         return $this->game->hexMap->isInGrimheim($currentHex);
     }
 
-    function getPossibleMoves() {
-        if (!$this->isInGrimheim()) {
-            return $this->getPossibleMovesDelegate("2heal");
+    /**
+     * Home Sewn Tunic repairs itself with a mend action anywhere on the map, unlike
+     * the Grimheim-only equipment repair granted by Freyja's Well.
+     */
+    private function canRepairTunic(): bool {
+        $tunic = Op_removeDamage::CARD_TUNIC;
+        if (!$this->game->getHero($this->getOwner())->heroHasCardsOnTableau($tunic)) {
+            return false;
         }
-        return $this->getPossibleMovesDelegate("5removeDamage");
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $tunic)) > 0;
+    }
+
+    function getPossibleMoves() {
+        if ($this->isInGrimheim()) {
+            return $this->getPossibleMovesDelegate("5removeDamage");
+        }
+        $moves = $this->getPossibleMovesDelegate("2heal");
+        if ($this->canRepairTunic()) {
+            unset($moves["q"], $moves["err"]);
+            $tunic = Op_removeDamage::CARD_TUNIC;
+            $moves[$tunic] = [
+                "q" => Material::RET_OK,
+                "name" => $this->game->getTokenName($tunic),
+                "delegate" => "removeDamage(max)",
+            ];
+        }
+        return $moves;
     }
 
     function resolve(): void {
