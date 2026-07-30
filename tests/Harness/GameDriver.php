@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Bga\GameFramework\States\GameState;
+use Bga\GameFramework\StateType;
 use Bga\GameFramework\Table;
 
 use function Bga\Games\Fate\toJson;
@@ -190,6 +191,11 @@ class GameDriver {
             $this->game->gamestate->jumpToState($nextState);
         }
 
+        // BGA ends the request when control returns to a player: that is when notifications flush
+        // and the pending undo savepoint is written - once, not once per intermediate game state.
+        if (($this->states[$nextState] ?? null)?->type !== StateType::GAME) {
+            $this->game->sendNotifications();
+        }
         $this->debugLog("  → Dispatched → state:  $nextState");
     }
 

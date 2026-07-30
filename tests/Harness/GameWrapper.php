@@ -6,6 +6,7 @@ use Bga\Games\Fate\Game;
 use Bga\Games\Fate\OpCommon\OpMachine;
 use Bga\Games\Fate\StateConstants;
 use Bga\Games\Fate\Stubs\MachineInMem;
+use Bga\Games\Fate\Stubs\MultiUndoInMem;
 use Bga\Games\Fate\Stubs\TokensInMem;
 
 /**
@@ -15,6 +16,7 @@ use Bga\Games\Fate\Stubs\TokensInMem;
  */
 class GameWrapper extends Game implements HarnessGameInterface {
     var $xtable;
+    public MultiUndoInMem $undoStore;
 
     /** When set, getHeroOrder() returns this fixed list instead of shuffling. */
     private ?array $heroOrder = null;
@@ -24,6 +26,17 @@ class GameWrapper extends Game implements HarnessGameInterface {
         $this->xtable = [];
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
         $this->tokens = new TokensInMem($this);
+        $this->undoStore = new MultiUndoInMem($this);
+        $this->dbMultiUndo = $this->undoStore;
+    }
+
+    /**
+     * BGA flushes notifications at the end of every request, which assigns the move its id and
+     * then runs the deferred undo savepoint (Base::sendNotifications -> doUndoSavePoint).
+     */
+    function sendNotifications() {
+        $this->undoStore->advanceMove();
+        parent::sendNotifications();
     }
 
     function _getAvailColors() {

@@ -32,6 +32,7 @@ The BGA framework does a lot of work that normally only runs on their servers or
 
 **Server side (PHP):**
 - **Database** — all token and machine state normally lives in MySQL; replaced with in-memory implementations (`TokensInMem`, `MachineInMem`) that mirror the real DB API
+- **Undo snapshots** — `DbMultiUndo` normally copies whole DB tables into the `multiundo` table; `MultiUndoInMem` keeps all of its logic (barrier clearing, move-id math, active-player checks) and stores the in-memory token + machine tables instead. The move counter stands in for BGA's `next_move_id`: `GameWrapper::sendNotifications()` advances it, and `GameDriver::runDispatchLoop()` calls that once control returns to a player (never after an intermediate `StateType::GAME` hop), which is where the deferred savepoint is flushed (`Game::doCustomUndoSavePoint`)
 - **Framework base class** (`Table`) — the BGA `Table` class wires up DB connections, player data, notifications, game state transitions; replaced with stubs in `bga-sharedcode` that provide the same interface without a real server
 - **Notify** — `$this->notify->all(...)` normally pushes to BGA's real-time channel; the `Notify` stub in `bga-sharedcode` records all calls to `$this->notify->log` and supports `addDecorator`, so no replacement is needed
 - **Game state machine** — `gamestate->jumpToState()`, `changeActivePlayer()`, etc. are normally server-side BGA infra; stubbed to track current state in memory
@@ -217,6 +218,7 @@ class GameWrapper extends Game {
         parent::__construct();
         $this->machine = new OpMachine(new MachineInMem($this, $this->xtable));
         $this->tokens = new TokensInMem($this);
+        $this->dbMultiUndo = new MultiUndoInMem($this);
     }
 
     // Harness contract
