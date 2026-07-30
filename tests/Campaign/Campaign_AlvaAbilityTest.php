@@ -366,7 +366,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
     }
 
     // --- Treetreader I (card_ability_2_5) ---
-    // r=(in(forest):move)/move(forest), no `on` — manual free-action.
+    // r=(in(forest):spendUse:move)/(spendUse:move(forest)), no `on` — manual free-action.
     // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
 
     public function testTreetreaderIMovesIntoAdjacentForest(): void {
@@ -403,7 +403,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
     }
 
     // --- Treetreader II (card_ability_2_6) ---
-    // r=(in(forest):move)/move(forest), on=custom — manual free-action.
+    // r=(in(forest):spendUse:move)/(spendUse:move(forest)), on=custom — manual free-action.
     // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
     // Passive: each time the hero moves into a forest area, heal 1 damage (onStep handler).
 

@@ -96,6 +96,12 @@ killMonster(inRange,'rank<=2 and closerToGrimheim')
                                 ; OR of three pay-to-get branches
 ```
 
+### Where to put a cost on a multi-branch card
+
+`cost:(A/B)` and `(cost:A)/(cost:B)` are not interchangeable for card effects. `Card::createOperationForCardEffect` sets `l_confirm`/`l_skip` on the top-level op only, and `withData(merge)` strips `l_*` before it reaches delegates. Wrapping therefore buries the `Op_or`, which loses both the branch prompt (a single viable branch auto-resolves and silently pays the cost) and the per-branch button labels `Op_or` reads from `effect_1`, `effect_2`. Use the per-branch form whenever the card has bullet-labelled choices.
+
+An `in(...)`/`on(...)` gate must stay leftmost in its own chain so the void state propagates before any sub-op runs: `(in(forest):spendUse:move)`, not `(spendUse:in(forest):move)`.
+
 ### Round-tripping
 
 `OpExpression::__toString()` regenerates a normalized string from the parse tree. Parentheses are inserted only where precedence demands them, so the output may differ syntactically from the input while remaining semantically equivalent.
