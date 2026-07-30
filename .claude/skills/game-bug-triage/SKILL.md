@@ -12,11 +12,11 @@ Drive a real browser against the BGA bug tracker, read reports, decide their tru
 
 This skill is game-independent. Everything project-specific - the **game id and bug-list URL**, the **rules source docs**, the **deploy model** (how to tell if a fix is live), the **test locations**, the **last-checked marker**, the **tracked-bug list**, and the **triage run log** - lives in a `BUG_TRIAGE.md` in the project's docs directory (search for `BUG_TRIAGE.md` if you don't know the path).
 
-**Read BUG_TRIAGE.md first, every run.** It tells you which game to open and how this project decides state. This skill file describes the *procedure*; BUG_TRIAGE.md supplies the *facts*. Where the text below refers to the game id, the rules docs, the deploy check, or the marker/log, take the concrete value from BUG_TRIAGE.md.
+**Read BUG_TRIAGE.md first, every run.** It tells you which game to open and how this project decides state. This skill file describes the _procedure_; BUG_TRIAGE.md supplies the _facts_. Where the text below refers to the game id, the rules docs, the deploy check, or the marker/log, take the concrete value from BUG_TRIAGE.md.
 
 ## Scope: what a run covers
 
-A run is two passes. A time window alone is not enough, because the changes that matter most often happen *without the report being touched* - most importantly, when a deploy ships, a batch of **Waiting for deploy** reports should become **Fixed** even though nothing on them changed.
+A run is two passes. A time window alone is not enough, because the changes that matter most often happen _without the report being touched_ - most importantly, when a deploy ships, a batch of **Waiting for deploy** reports should become **Fixed** even though nothing on them changed.
 
 **1. Status sweeps - always, regardless of when the report last changed.** Filter the list by status and re-evaluate:
 
@@ -55,6 +55,8 @@ Use `take_snapshot`. The snapshot is the page's accessibility tree as **text** -
 
 If a reporter attached a screenshot, BGA does not host it - they paste an **external image link** (snipboard.io or similar), which appears in the snapshot as a link URL. To see it, open/fetch that URL; never screenshot the bug page itself.
 
+You can use tools like `wget` to fetch that screenshot directly from the provided link.
+
 ## What each report tells you
 
 From a `bug?id=` snapshot, pull:
@@ -91,26 +93,75 @@ If the fix commit is in the latest deployed tag -> the report is **Fixed** right
 
 **Deployed vs waiting**: a fix living in a release **tag** is not automatically live. Per the deploy model in BUG_TRIAGE.md, if the fix is in the latest deployed tag it is live -> **Fixed**; if it is only committed/tagged but that tag isn't deployed, it is **Waiting for deploy**. When unsure whether the tag is deployed, ask rather than guessing.
 
+**A tag is not proof the bug is gone.** "Fix committed, tag cut, tag deployed" only says the code shipped, not that it worked. Before flipping a batch of reports to Fixed, open the error in the studio log (below) and read its **Release** breakdown: the fix is confirmed only when the events are attributed to the old release and none to the current one. A fix can also ship and immediately regress into a _different_ error at the same line, so scan the whole-game error list for anything new on the current release too. This has actually happened here - a fix went live and reintroduced the same softlock through a new exception within minutes.
+
 Locating the exact card/operation and diagnosing an unshipped bug is **not triage work** - hand that to the investigation agent below.
+
+### Server errors: read the studio error log
+
+When a report's symptom is a server error ("The server reported an error", a repeated failure, a turn that will not confirm), there is a definitive server-side answer. Do not ask the reporter and do not infer from the title. All three views live under `https://studio.boardgamearena.com/studioissues?game=<gamename>`, using the studio short name rather than the numeric bug-tracker game id:
+
+- **Per table** - `&tableId=<TABLE_ID>`, which the report page also links directly as "User errors related to this table". A hit gives you the exception, the `file:line` and the release it occurred on - that is proof, not a hypothesis. `No errors!` is information too: the report is **not** that bug, so do not close it as one.
+- **Whole game** - no extra parameter. Every live error with first/last seen, event count and affected-table count. This is where you find an incident nobody has reported yet, and where you check that a deploy did not introduce something new.
+- **Per error** - `&id=<ERROR_ID>`. Its **Bga.Table** breakdown lists the affected tables; its **Release** breakdown attributes events to game versions.
+
+**Match reports to a bug by table id, never by title.** Titles mislead in both directions: a report titled "rerolling a die or selecting keep as is result in server error" was really the end-of-game crash (the reporter's own text said "just end the game"), while one whose title matched the crash perfectly had no server-side record at all.
+
+The report page also states "N player(s)" beside the dump info - the quickest way to tell a solo-only bug from a multiplayer one.
+
+### Same-day clusters are one incident, not N reports
+
+When several reports land close together describing the same moment, work **error-first** rather than report-first: find the error in the studio log, take its table list, then match the open reports against it. One pass replaces N investigations and yields proof instead of a hunch. A crash introduced by a deploy typically produces a burst of reports within hours, all wording the same failure differently, and often with different `type` values (`block`, `action`, `access`) that hide the connection in the list view.
+
+## Automated error reports (no reporter)
+
+The studio error log records crashes nobody filed a report for. Triaging those is a **different workflow** from the tracker: there is no reporter to ask, no status to flip and no comment to post. The output is a decision plus an internal record, not a tracker update. Run this when asked to look at auto-recorded / auto-generated errors, JS errors, or "what is crashing".
+
+The log lives at `https://studio.boardgamearena.com/studioissues?game=<gamename>` (the studio short name, e.g. `wayfarers` - not the numeric bug-tracker game id). Filter by project:
+
+- `&projects=frontend` - browser/JS errors, the auto-recorded ones
+- `&projects=backend` - server/PHP errors
+- unfiltered - both, interleaved and sorted by event count
+
+For each error worth keeping, read these before deciding anything:
+
+- **Release breakdown** - the most useful field, but read it correctly (see the trap below). If every event is attributed to a game version older than the current one, it is **already fixed**; note it and move on rather than investigating.
+- **Events vs user count** - a high event count against one or two users means somebody is stuck retrying the same action (a block), and matters far more than the raw number suggests. Many users with a couple of events each is a broad but survivable glitch.
+- **First / last seen** - an error that stopped on its own usually died with a release; one still firing minutes ago is live.
+- **Table breakdown** - cross-check these table ids against open reports. Reports and auto errors are two views of the same incident, and connecting them turns a vague report into a proven one (and tells you which errors are already covered).
+
+**Trap: for JS errors, `Release` is not the game version.** On a backend/PHP error `Release` is the game version (`yourgame@260727-0846`) and can be trusted directly. On a frontend/JS error it is the **BGA site** release (`gameserver@260722-1430`), which says nothing about your game. There, the game version appears only inside the **stack trace file paths** (`[yourgame]/260727-0846//modules/js/Game.js`) and in the `Culprit` line - read the version from those instead. Getting this wrong makes a live JS bug look like it belongs to some unrelated release.
+
+**One defect can appear as many issue ids.** Grouping keys off the stack, and minified frame positions shift on every deploy, so the same JS bug spawns a fresh id each release - and a second set of ids for each browser engine, since the wording differs (Chrome: "Cannot read properties of undefined (reading 'x')"; WebKit: "undefined is not an object (evaluating '<the whole expression>')"). Before concluding you have N bugs, check whether they share a culprit function. Sum their events for the real blast radius; the top row alone understates it badly. The WebKit wording is a gift - it quotes the failing expression verbatim, which often identifies the line without any source map.
+
+**Trim the noise before spending effort.** A frontend list contains plenty that is not your game: browser-extension errors, failures fetching third-party modules, and transient network noise. Their giveaway is a stack with no frame in your game's code - one such entry was found pointing at a completely different game's `Game.js`. Say you are skipping them and why - do not silently drop them, and do not open an investigation into one.
+
+**A crash is not automatically a player-visible bug.** Weigh impact separately from volume: an exception thrown _after_ the framework has already correctly refused an action (a locked interface, a click that was not allowed) is log noise, not a block - which is why a bug with a hundred affected users can have zero reports. Fix it, but do not let the event count set the priority on its own.
+
+**Do not open a report for an auto error.** These are for you to fix, not to file. If an auto error matches an existing player report, work the report; otherwise record it in BUG_TRIAGE.md (tracked bugs or the run log) with its error id, release attribution and blast radius, and let the maintainer decide priority.
 
 ## When a report lacks detail, ask - don't dig
 
 Most reports are thin: no replay/move pointer, no repro steps, no clear statement of what was expected. The right response is almost always to **ask the reporter for what's missing** (set status **Info needed**, request the specific detail - move number, what they expected vs saw, whether F5 helped), not to launch an investigation. Deep root-cause hunting is the exception, reserved for a report that is concrete and reproducible but whose cause still isn't obvious.
 
+Exception: **a thin report of a server error is not thin at all** - check the studio error log first (above). The table id in the report is enough to get the exception and its release, so asking the reporter would waste a round trip on a question the server already answers.
+
 ## Deep investigation via a background agent
 
 When a report does warrant it, spin off a background `general-purpose` agent to find and **prove** the cause. Its boundary: it may **write and run tests** (an integration test, or a targeted unit test - locations in BUG_TRIAGE.md) to try to reproduce the bug, but it must **not edit any production code**. It has no browser. Two hard rules to state explicitly in its prompt, because agents left to their own devices break them:
 
-- **No git operations, ever.** The agent must run **zero** git commands - no `git revert`, `checkout`, `reset`, `stash`, `commit`, `add`, `rm`, `restore`, branch/worktree changes, nothing that touches the working tree or history. Multiple agents share one repo; one agent reverting or stashing clobbers another's work and the maintainer's. The agent only *creates its own new test file* and runs it. If it thinks something needs reverting or committing, it says so in its report and leaves it for you.
+- **No git operations, ever.** The agent must run **zero** git commands - no `git revert`, `checkout`, `reset`, `stash`, `commit`, `add`, `rm`, `restore`, branch/worktree changes, nothing that touches the working tree or history. Multiple agents share one repo; one agent reverting or stashing clobbers another's work and the maintainer's. The agent only _creates its own new test file_ and runs it. If it thinks something needs reverting or committing, it says so in its report and leaves it for you.
 - **Run only its own test, never the full suite.** The agent runs the single test file/method it just wrote (e.g. `npm run test -- --filter <method> <file>`), not `npm run tests` / `predeploy` / any broad run. A full suite is slow, may be red for unrelated known bugs, and several agents running it at once thrash the machine.
 
 It reports back one of:
 
-- **CONFIRMED** - it wrote a test that reproduces the bug, and reports the test name plus file:line root cause and a proposed fix in prose. This is the only outcome that earns a **Confirmed** status on the report. **The agent must LEAVE that test in the tree - never delete it** (it's the most valuable output). But the test must be **GREEN, not red**: write it to assert the *current buggy behavior* - i.e. reverse the check condition so what it asserts is the broken output the bug produces - and add a clear comment saying this documents buggy behavior for BGA #\<id\> and that the assertion should be flipped once the fix lands. Rationale: a failing/red test breaks `predeploy` for everyone until the fix ships, which can be a while; a green test that pins the wrong-but-current behavior keeps the suite passing while still capturing the exact defect (the fix then inverts the assertion to lock in the correct behavior). Tell the agent this explicitly in its prompt, and have it report the test's file path and method name.
+- **CONFIRMED** - it wrote a test that reproduces the bug, and reports the test name plus file:line root cause and a proposed fix in prose. This is the only outcome that earns a **Confirmed** status on the report. **The agent must LEAVE that test in the tree - never delete it** (it's the most valuable output). But the test must be **GREEN, not red**: write it to assert the _current buggy behavior_ - i.e. reverse the check condition so what it asserts is the broken output the bug produces - and add a clear comment saying this documents buggy behavior for BGA #\<id\> and that the assertion should be flipped once the fix lands. Rationale: a failing/red test breaks `predeploy` for everyone until the fix ships, which can be a while; a green test that pins the wrong-but-current behavior keeps the suite passing while still capturing the exact defect (the fix then inverts the assertion to lock in the correct behavior). Tell the agent this explicitly in its prompt, and have it report the test's file path and method name.
 - **UNCONFIRMED** - a plausible hypothesis from reading code, but no test reproduces it yet. It says what it tried and why it couldn't repro. Treat this as a lead, not a fact.
 - **NOT FOUND** - no lead; plus a short list of specific questions to ask the reporter (move number, what they expected vs saw, which card/hero/monster, did F5 help). This is what makes a dead end useful - you turn those questions into an **Info needed** comment.
 
 **A code-reading hypothesis is not a confirmation.** Finding a code path that _could_ produce the symptom is easy to get wrong - it has happened here: a confident "cause" was later shown to have no reproducible case. Only a test that actually reproduces the bug proves it. So the agent's job is to _try to write that test_, not just narrate a trace.
+
+**A green test is not proof at a framework boundary.** The vendored framework stubs the tests run against are not the production framework, and they are often more forgiving - a stub guarding a lookup with `isset()` where production reads the key directly will pass a test on code that throws live. When a finding depends on how a framework call behaves, say so and lean on the studio error log instead of the local suite.
 
 You keep the browser and any BUG_TRIAGE.md edits, because the MCP is a single shared Chrome session and a second agent navigating in parallel would clobber your tab. Keep triaging other reports while it runs.
 
@@ -132,7 +183,7 @@ The status control is a button showing the current status; clicking it reveals t
 
 If no news leave the status unchanged (post a comment without moving the report). Use when you're only replying. _(If unsure it behaves this way, verify by reload after posting.)_
 
-**Feature requests are not bugs - and never need investigating.** A report asking for a *new feature or capability* rather than reporting broken behavior ("add a token display mode", "let me sort my hand") has no "true state" to reproduce, so **never open an investigation or write a test for it**. What to do depends on its type:
+**Feature requests are not bugs - and never need investigating.** A report asking for a _new feature or capability_ rather than reporting broken behavior ("add a token display mode", "let me sort my hand") has no "true state" to reproduce, so **never open an investigation or write a test for it**. What to do depends on its type:
 
 - **Type is already `suggestion`** - nothing to do. It's already out of the bug list and voting where it belongs; leave it alone and move on.
 - **Type is `bug` but it's really a feature request** - use the **Reclassify as suggestion** link on the report so players can vote on it as a suggestion.

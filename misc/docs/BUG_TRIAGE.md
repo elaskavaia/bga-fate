@@ -9,6 +9,7 @@ Read this file at the start of every triage run.
 - **BGA game id:** 2758 (Fate: Defenders of Grimheim)
 - **Bug list:** https://boardgamearena.com/bugs?game=2758
 - **Single report:** https://boardgamearena.com/bug?id=<REPORT_ID>
+- **Studio error log:** https://studio.boardgamearena.com/studioissues?game=fate - studio short name is `fate`, not the numeric id above. Add `&tableId=<TABLE_ID>` for one table, `&id=<ERROR_ID>` for one error, `&projects=frontend|backend` to filter. NOTE: short name not yet verified against the server.
 
 ## Rules sources (for `rules`-type reports)
 
