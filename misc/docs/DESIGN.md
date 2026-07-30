@@ -321,7 +321,7 @@ Quests are the only path to gain equipment past the starter card. Each row in [c
 
 **Sweep + reveal.** `Op_gainEquip` moves the card from `deck_equip_{owner}` to `tableau_{owner}`, fires `Trigger::CardEnter`, sweeps any `gainTracker` red crystals back to supply, and reveals the new deck-top.
 
-Math terms used by quest predicates (in `Game::evaluateTerm`): `adj`, `range` (hex distance to context monster), `countTracker`, `countMonsterXp` (base XP + bonus yellow crystals), `countDice`, `countRunes`, `countAdjMonsters`, `countAdjMountains`, `countAdjLegends`, `closerToGrimheim`, `healthRem`. Predicates for `killed(<expr>)` evaluate against the just-killed monster (read via `marker_attack`'s hex), so `killed(trollkin)`, `killed('rank>=3')`, `killed(adj)`, `killed('range>=2')` all compose freely.
+Math terms used by quest predicates (in `Game::evaluateTerm`): `adj`, `range` (hex distance to context monster), `countTracker`, `countMonsterXp` (base XP + bonus yellow crystals), `countDice`, `countRunes`, `countAdjMonsters`, `countAdjMountains`, `countAdjLegends`, `closerToGrimheim`, `healthRem`. Predicates for `killed(<expr>)` evaluate against the just-killed monster (read via `marker_attack`'s hex), so `killed(trollkin)`, `killed('rank>=3')`, `killed(adj)`, `killed('range>=2')` all compose freely. Known limitation: in a multi-kill the marker has already advanced to the next target, so these predicates can score the wrong monster (see BUG_TRIAGE.md). `countMonsterXp` is not affected - the kill path passes the monster explicitly.
 
 ### Hero Attribute Trackers
 

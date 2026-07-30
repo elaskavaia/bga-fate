@@ -255,6 +255,7 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
 
         // Bjorn strength=3, all hits
         $this->seedRand([5, 5, 5]);
+        $xpBefore = $this->countXp();
         $this->respond("actionAttack");
         $this->respond("hex_6_9"); // pick goblin_20
 
@@ -294,6 +295,9 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin1));
         // Goblin_2 should be untouched
         $this->assertEquals(0, $this->countDamage($goblin2));
+        // Each pierce kill scores its own monster, not whatever marker_attack has advanced
+        // onto (the surviving brute is worth 2) - BGA #234242.
+        $this->assertEquals(2, $this->countXp() - $xpBefore, "both goblin kills award 1 XP each");
     }
 
     public function testBjornIIHeroCardDeals3Damage(): void {

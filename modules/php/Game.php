@@ -586,15 +586,20 @@ class Game extends Base {
     }
 
     /**
-     * Total XP yielded by the monster on the current attack hex (just-killed monster during TMonsterKilled):
-     * base reward + bonus yellow crystals parked on the monster (Prey etc.).
+     * Total XP yielded by a just-killed monster: base reward + bonus yellow crystals
+     * parked on it (Prey etc.).
+     *
+     * Prefers the explicit $context monster. A multi-kill (Sweeping Strike cleave, Nailed
+     * Together pierce) advances marker_attack to the next target before the earlier kill is
+     * finalized, so the attack hex identifies the wrong monster. The attack hex stays the
+     * fallback for bareword use in expressions, where Op_counter passes the source CARD id
+     * as context - hence the monster_ prefix test rather than a null check.
      */
     function countMonsterXp($owner = null, $context = null, $options = null): int {
-        $hex = $this->getAttackHex();
-        if ($hex === null) {
-            $monsterId = $context;
-        } else {
-            $monsterId = $this->hexMap->getCharacterOnHex($hex);
+        $monsterId = is_string($context) && str_starts_with($context, "monster_") ? $context : null;
+        if ($monsterId === null) {
+            $hex = $this->getAttackHex();
+            $monsterId = $hex === null ? null : $this->hexMap->getCharacterOnHex($hex);
         }
         if ($monsterId === null || !str_starts_with($monsterId, "monster_")) {
             return 0;

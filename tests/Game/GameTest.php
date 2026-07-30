@@ -569,6 +569,15 @@ final class GameTest extends TestCase {
         $this->assertEquals(3, $this->game->evaluateExpression("countMonsterXp", PCOLOR));
     }
 
+    public function testCountMonsterXpPrefersContextOverAttackHex(): void {
+        $this->setupHeroAndTokens();
+        // marker_attack has already advanced to the next target of a multi-kill (BGA #234247).
+        $this->game->tokens->moveToken("monster_brute_1", "hex_12_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_8");
+        $this->assertEquals(1, $this->game->countMonsterXp(null, "monster_goblin_1"));
+    }
+
     public function testCountMonsterXpZeroWhenAttackHexEmpty(): void {
         $this->setupHeroAndTokens();
         // No marker_attack placed → no attack hex
