@@ -37,6 +37,7 @@ class Game extends Base {
     public DbTokens $tokens;
     public HexMap $hexMap;
     public DbMultiUndo $dbMultiUndo;
+    protected array $undoSavepointMeta = [];
 
     function __construct() {
         Game::$instance = $this;
@@ -850,12 +851,29 @@ class Game extends Base {
 
     public function customUndoSavepoint(int $player_id, int $barrier = 0, string $label = "undo"): void {
         //$this->debugLog("customUndoSavepoint $player_id bar= $barrier");
-        if ($this->isMultiActive()) {
-            $this->dbMultiUndo->doSaveUndoSnapshot(["barrier" => $barrier, "label" => $label], $player_id, true);
-        } else {
-            $this->dbMultiUndo->doSaveUndoSnapshot(["barrier" => $barrier, "label" => $label], $player_id, true);
-            $this->undoSavepoint();
+        if ($this->isSolo()) {
+            $player_id = $this->getFirstPlayer();
         }
+        $this->undoSavepointMeta = [
+            "barrier" => $barrier,
+            "label" => $label,
+            "player_id" => $player_id,
+        ];
+        $this->undoSavepoint();
+    }
+
+    function doCustomUndoSavePoint() {
+        if ($this->isMultiActive()) {
+            return;
+        }
+        if (empty($this->undoSavepointMeta)) {
+            return;
+        }
+        $meta = $this->undoSavepointMeta;
+        $player_id = (int) ($meta["player_id"] ?? 0);
+        unset($meta["player_id"]);
+        $this->undoSavepointMeta = [];
+        $this->dbMultiUndo->doSaveUndoSnapshot($meta, $player_id, false);
     }
 
     function debug_q() {
