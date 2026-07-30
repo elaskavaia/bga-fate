@@ -8,19 +8,15 @@ require_once __DIR__ . "/CampaignBase.php";
  * Reproduction tests for BGA bug #235064 ("Alva's Treetreader multiple bugs").
  *
  * Treetreader I (card_ability_2_5) / II (card_ability_2_6):
- *   r=(in(forest):spendUse:move)/(spendUse:move(forest)), effect bullets:
- *     <li>Move into an adjacent forest area</li>   -> choice_0 label, drives branch 0
- *     <li>Move out of a forest area</li>            -> choice_1 label, drives branch 1
+ *   r=(spendUse:move(forest))/(in(forest):spendUse:move), effect bullets:
+ *     <li>Move into an adjacent forest area</li>   -> choice_0, branch 0 = move(forest)
+ *     <li>Move out of a forest area</li>            -> choice_1, branch 1 = in(forest):move
  *
- * The two effect bullets are in the REVERSE order of the two DSL branches, so each
- * button drives the opposite behavior of its label:
- *   - "Move into an adjacent forest area" runs in(forest):move (an UNFILTERED move) ->
- *     it offers every adjacent hex, not just forest.
- *   - "Move out of a forest area" runs move(forest) (a forest-ONLY move) -> it forces
- *     you back into a forest instead of out of it.
- * The assertions marked "BUG:" pin that CURRENT behavior and must be flipped when it is fixed.
- *
- * The once-per-turn limit (spendUse) is fixed and verified.
+ * Op_or labels choice_$i from effect_($i+1), so the bullets must be listed in the same
+ * order as the branches. They were reversed, making each button do the opposite of its
+ * label. "Out of a forest" is an unfiltered move by design (FORUM.md: standing in a
+ * forest next to Grimheim, you may step out into Grimheim); it overlaps branch 0 on
+ * forest neighbours, which is legal under either bullet.
  */
 class Campaign_TreetreaderBug235064Test extends CampaignBaseTest {
     // Forest hex in the OgreValley cluster: ring has 3 forest neighbors (hex_3_8, hex_4_8,
@@ -67,10 +63,8 @@ class Campaign_TreetreaderBug235064Test extends CampaignBaseTest {
         $this->assertNotEmpty($this->nonForest($ring), "need a non-forest neighbor");
     }
 
-    // --- Claim 3: "Move INTO a forest" button offers non-forest tiles too ---
-    // The button labeled "Move into an adjacent forest area" (choice_0) actually runs
-    // branch 0 = in(forest):move (an unfiltered move), so it offers EVERY adjacent hex.
-    public function testMoveIntoForestButtonOffersNonForestBug235064(): void {
+    // --- Claim 3: "Move INTO a forest" button offered non-forest tiles too ---
+    public function testMoveIntoForestOffersOnlyForestBug235064(): void {
         $cardId = $this->placeTreetreaderI();
 
         $this->respond($cardId);
@@ -81,16 +75,12 @@ class Campaign_TreetreaderBug235064Test extends CampaignBaseTest {
         $this->respond("choice_0");
         $offered = $this->getOpArgs()["target"] ?? [];
 
-        $this->assertNotEmpty($offered, "sanity: move-into should offer something");
-        // BUG: a "move into a forest" action offers non-forest destinations. Once fixed,
-        // change assertNotEmpty -> assertEmpty (only forest hexes should be offered).
-        $this->assertNotEmpty($this->nonForest($offered), "buggy: 'Move into a forest' offers non-forest destinations");
+        $this->assertNotEmpty($this->forestOnly($offered), "move-into should offer forest destinations");
+        $this->assertEmpty($this->nonForest($offered), "'Move into a forest' must not offer non-forest destinations");
     }
 
-    // --- Claim 2: "Move OUT of a forest" button offers only forest tiles ---
-    // The button labeled "Move out of a forest area" (choice_1) actually runs
-    // branch 1 = move(forest), so it offers ONLY forest hexes (keeping you in the forest).
-    public function testMoveOutOfForestButtonOffersOnlyForestBug235064(): void {
+    // --- Claim 2: "Move OUT of a forest" button offered only forest tiles ---
+    public function testMoveOutOfForestOffersNonForestBug235064(): void {
         $cardId = $this->placeTreetreaderI();
 
         $this->respond($cardId);
@@ -101,11 +91,11 @@ class Campaign_TreetreaderBug235064Test extends CampaignBaseTest {
         $this->respond("choice_1");
         $offered = $this->getOpArgs()["target"] ?? [];
 
-        $this->assertNotEmpty($offered, "sanity: move-out should offer something");
-        $this->assertNotEmpty($this->forestOnly($offered), "move-out offered no forest either");
-        // BUG: a "move out of a forest" action offers ONLY forest destinations. Once fixed,
-        // change assertEmpty -> assertNotEmpty (non-forest hexes should be offered).
-        $this->assertEmpty($this->nonForest($offered), "buggy: 'Move out of a forest' offers only forest destinations");
+        $this->assertNotEmpty($this->nonForest($offered), "'Move out of a forest' must offer non-forest destinations");
+        $this->assertNotEmpty(
+            $this->forestOnly($offered),
+            "out branch is unfiltered by design (FORUM.md:5305), forest neighbors stay offered"
+        );
     }
 
     // --- Claim 1: Treetreader can be activated unlimited times in one turn ---
@@ -130,20 +120,23 @@ class Campaign_TreetreaderBug235064Test extends CampaignBaseTest {
         $this->assertNotValidTarget($cardId, "Treetreader no longer offered this turn");
     }
 
-    // Second row of the same data change, driven through the other branch. Also pins that
-    // the `on=custom` passive is NOT gated by the use: spendUse resolves before the move,
-    // so the card is already marked used by the time the forest-entry heal fires.
-    public function testTreetreaderIIOncePerTurnAndPassiveStillHealsBug235064(): void {
+    // Treetreader II is a separate CSV row carrying its own copy of the same `r`, so it gets
+    // its own label/branch check. Also pins that the `on=custom` passive is NOT gated by the
+    // use: spendUse resolves before the move, so the card is already marked used by the time
+    // the forest-entry heal fires.
+    public function testTreetreaderIIBranchesAndPassiveBug235064(): void {
         $cardId = $this->placeTreetreader("card_ability_2_6");
         $this->game->effect_moveCrystals("supply_red", "red", 2, $this->heroId, ["message" => ""]);
         $this->assertEquals(2, $this->countDamage($this->heroId));
 
         $this->respond($cardId);
-        $this->respond("choice_1");
+        $this->assertStringContainsString("Move into", $this->getOpArgs()["info"]["choice_0"]["name"] ?? "");
 
-        $forestTargets = $this->forestOnly($this->getOpArgs()["target"] ?? []);
-        $this->assertNotEmpty($forestTargets, "need a forest hex to hop to");
-        $this->respond($forestTargets[0]);
+        $this->respond("choice_0");
+        $offered = $this->getOpArgs()["target"] ?? [];
+        $this->assertNotEmpty($offered, "move-into should offer forest destinations");
+        $this->assertEmpty($this->nonForest($offered), "'Move into a forest' must not offer non-forest destinations");
+        $this->respond($offered[0]);
 
         $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "Treetreader II marked used after one activation");
         $this->assertNotValidTarget($cardId, "Treetreader II no longer offered this turn");

@@ -366,8 +366,8 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
     }
 
     // --- Treetreader I (card_ability_2_5) ---
-    // r=(in(forest):spendUse:move)/(spendUse:move(forest)), no `on` — manual free-action.
-    // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
+    // r=(spendUse:move(forest))/(in(forest):spendUse:move), no `on` — manual free-action.
+    // Branch 0: move into an adjacent forest. Branch 1: while in a forest, move anywhere adjacent.
 
     public function testTreetreaderIMovesIntoAdjacentForest(): void {
         $color = $this->getActivePlayerColor();
@@ -379,8 +379,8 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
-        // Branch 0=in(forest):move (Alva not in forest → unavailable); 1=move(forest).
-        $this->respond("choice_1");
+        // Branch 1=in(forest):move is unavailable (Alva not in forest); take branch 0=move(forest).
+        $this->respond("choice_0");
         $this->respond("hex_5_8");
 
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
@@ -391,20 +391,20 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $cardId = "card_ability_2_5";
         $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
 
-        // Alva in forest (hex_5_8) → branch 0=in(forest):move offers any adjacent hex.
+        // Alva in forest (hex_5_8) → branch 1=in(forest):move offers any adjacent hex.
         $this->game->tokens->moveToken($this->heroId, "hex_5_8");
 
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
-        $this->respond("choice_0");
+        $this->respond("choice_1");
         $this->respond("hex_5_9");
 
         $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
     }
 
     // --- Treetreader II (card_ability_2_6) ---
-    // r=(in(forest):spendUse:move)/(spendUse:move(forest)), on=custom — manual free-action.
-    // In forest: move to any adjacent hex. Outside: move into an adjacent forest hex.
+    // r=(spendUse:move(forest))/(in(forest):spendUse:move), on=custom — manual free-action.
+    // Branch 0: move into an adjacent forest. Branch 1: while in a forest, move anywhere adjacent.
     // Passive: each time the hero moves into a forest area, heal 1 damage (onStep handler).
 
     public function testTreetreaderIIHealsWhenMovingIntoForest(): void {
@@ -419,8 +419,8 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
-        // Branches: 0=in(forest):move (not applicable here), 1=move(forest). Only branch 1 viable.
-        $this->respond("choice_1");
+        // Branch 1=in(forest):move not applicable here; only branch 0=move(forest) is viable.
+        $this->respond("choice_0");
         $this->respond("hex_5_8");
 
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
@@ -439,8 +439,8 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
         $this->assertValidTarget($cardId);
         $this->respond($cardId);
-        // Branches: 0=in(forest):move (applicable, Alva is in forest), 1=move(forest). Pick 0.
-        $this->respond("choice_0");
+        // Branch 1=in(forest):move applies (Alva is in forest) and reaches the plains hex.
+        $this->respond("choice_1");
         $this->respond("hex_5_9");
 
         // Hero stepped into plains, not forest → heal guard returns early, no damage removed.
