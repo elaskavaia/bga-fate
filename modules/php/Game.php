@@ -475,8 +475,8 @@ class Game extends Base {
             "sides" => implode(" ", $sides),
             "dmg" => $dmg,
         ]);
-        // global undo reset, information revealed
-        $this->customUndoSavepoint(0, 1, "roll");
+        // information revealed: barrier so the roll cannot be rewound, anchored after it
+        $this->customUndoSavepoint((int) $this->getActivePlayerId(), 1, "roll");
     }
 
     function effect_addAttackDiceDamage(string $attackerId, int $strength): void {

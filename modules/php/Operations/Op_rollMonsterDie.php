@@ -41,7 +41,7 @@ class Op_rollMonsterDie extends Operation {
             default => null,
         };
 
-        // Roll result is hidden info that becomes public — non-rewindable.
-        $this->game->customUndoSavepoint(0, 1, "roll");
+        // Roll result is hidden info that becomes public — barrier anchored after the roll.
+        $this->game->customUndoSavepoint((int) $this->game->getActivePlayerId(), 1, "roll");
     }
 }
