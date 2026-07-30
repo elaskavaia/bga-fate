@@ -96,6 +96,20 @@ class Op_c_nailed extends Operation {
         }
     }
 
+    /**
+     * A chain step is queued before its overkill is known, so it can land void (exact kill
+     * leaves 0 overkill, or nothing behind the new target). Unlike the card-driven op it gets
+     * no l_skip, so without this it would be a mandatory unsatisfiable prompt (BGA #234580).
+     * Only widens the void case: with real targets the op still auto-resolves rather than
+     * turning into an optional prompt.
+     */
+    function canSkip() {
+        if ($this->noValidTargets()) {
+            return true;
+        }
+        return parent::canSkip();
+    }
+
     function getExtraArgs() {
         return ["overkill" => $this->getOverkill()];
     }
