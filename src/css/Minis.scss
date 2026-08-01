@@ -22,25 +22,45 @@
 }
 
 // Hero and monster miniatures
+// Sprite is white with dark shading: multiply tints it with the hero color, the mask
+// restores transparency. Drawn on ::before so the mask does not clip child badges.
 .hero {
   aspect-ratio: 1;
   height: 94px;
-  background-image: url(img/mini_heroes.png);
-  background-size: 600% auto;
+  position: relative;
   filter: v.$dropShadow2;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url(img/mini_heroes.png);
+    background-size: 600% auto;
+    background-position: var(--hero-pos);
+    background-color: var(--hero-color);
+    background-blend-mode: multiply;
+    mask-image: url(img/mini_heroes.png);
+    mask-size: 600% auto;
+    mask-position: var(--hero-pos);
+  }
 }
 
+// Colors follow player_colors in gameinfos.inc.php (hero N -> Nth color)
 .hero_1 {
-  background-position: 20% 0%;
+  --hero-pos: 20% 0%;
+  --hero-color: #2e7d32; // Bjorn green
 }
 .hero_2 {
-  background-position: 0% 0%;
+  --hero-pos: 0% 0%;
+  --hero-color: #5c7ce0; // Alva blue (softened for multiply)
 }
 .hero_3 {
-  background-position: 60% 0%;
+  --hero-pos: 60% 0%;
+  --hero-color: #ffa500; // Embla orange
 }
 .hero_4 {
-  background-position: 40% 0%;
+  --hero-pos: 40% 0%;
+  --hero-color: #e0655a; // Boldur red (softened for multiply)
 }
 
 // Monster miniatures (sprite sheet: 3x3 grid, rows = factions, cols = rank 3→1)
