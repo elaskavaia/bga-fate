@@ -302,7 +302,9 @@ class DbMultiUndo {
 
         $this->game->setUndoSavepoint(false); // unset it because it was set by bga undo
         //$this->dbMultiUndo->doSaveUndoSnapshot(["barrier" => $barrier, "label" => $label], $player_id, true);
-        $this->clearSnapshotsAfter($move_id, $player_id);
+        // move_id + 1: keep the barrier we just restored to, so a later action can undo back to it
+        // again (BGA #235314). Without it undo wipes the turn-start point and the next undo fails.
+        $this->clearSnapshotsAfter($move_id + 1, $player_id);
         $this->deleteGamelogs($move_id);
         //$this->rewriteHistory($move_id, $next, $player_id);
         //$this->game->setGameStateValue("next_move_id", $next);

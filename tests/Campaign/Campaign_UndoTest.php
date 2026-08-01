@@ -87,6 +87,66 @@ class Campaign_UndoTest extends CampaignBaseTest {
     }
 
     /**
+     * Two seats, first player's turn: one action taken, undo must rewind to the turn-start barrier
+     * exactly as in solo. Reproduces BGA #235314 (undo unavailable after the first action in a
+     * multiplayer game).
+     */
+    public function testUndoAfterAnActionReturnsToTheStartOfTheTurnTwoPlayers(): void {
+        $this->setupGame([1, 2]); // Bjorn, Alva
+        $this->syncCurrentPlayerToActive();
+        $this->color = $this->getActivePlayerColor();
+        $this->heroId = $this->game->getHeroTokenId($this->color);
+        $this->clearMonstersFromMap();
+
+        $startHex = $this->tokenLocation($this->heroId);
+        $moveTarget = "hex_7_9"; // one step out of Grimheim
+        $this->assertValidTarget($moveTarget);
+
+        $this->respond($moveTarget);
+        $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "the hero moved");
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertNotCount(0, $moves, "there is a turn-start snapshot to undo to");
+
+        $this->undo();
+
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "the hero is back where the turn started");
+        $this->assertSame("turn", $this->opType(), "with the action choice offered again");
+        $this->assertContains($moveTarget, $this->getOpArgs()["target"] ?? [], "the same move is available again");
+    }
+
+    /**
+     * BGA #235314: undo twice in one turn. The first undo rewinds to the turn-start barrier; the
+     * player then takes another action and undoes again. The second undo must still reach the same
+     * turn-start barrier - but undoRestorePoint cleared the very snapshot it restored to
+     * (clearSnapshotsAfter used move_id >=), so the barrier was gone and the second undo failed
+     * with "Nothing to undo".
+     */
+    public function testUndoTwiceInOneTurnStillReachesTheTurnStart(): void {
+        $startHex = $this->tokenLocation($this->heroId);
+        $moveTarget = "hex_7_9";
+        $this->assertValidTarget($moveTarget);
+
+        // First action + undo: works, and lands back at the turn start.
+        $this->respond($moveTarget);
+        $this->undo();
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "first undo returned to turn start");
+        $this->assertSame("turn", $this->opType(), "action choice offered again");
+
+        // Second action + undo: must reach the same turn-start barrier.
+        $this->assertValidTarget($moveTarget);
+        $this->respond($moveTarget);
+        $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "the hero moved again");
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertNotCount(0, $moves, "the turn-start barrier survives the first undo");
+
+        $this->undo();
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "second undo also returned to turn start");
+        $this->assertSame("turn", $this->opType(), "action choice offered again after the second undo");
+    }
+
+    /**
      * An attack roll reveals information, so it too is a barrier: undo stops right after the roll.
      * The dice a player has already seen stay rolled and the spent action stays spent - only the
      * decisions taken after the reveal can be taken back.
