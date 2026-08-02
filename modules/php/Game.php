@@ -1042,6 +1042,17 @@ class Game extends Base {
         $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
     }
 
+    /** BGA #235445: gainMana prompt with an equip card (Alva's Bracers, holding 1 mana) among the targets. */
+    function debug_Op_gainMana235445() {
+        $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
+        $heroId = $this->getHeroTokenId($color);
+        $cardId = "card_equip_2_23";
+        $this->tokens->dbSetTokenLocation($cardId, "tableau_$color", 0);
+        $this->effect_moveCrystals($heroId, "green", 1, $cardId, ["message" => ""]);
+        $this->machine->push("?gainMana", $color);
+        $this->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+    }
+
     function debug_Op_gainXp() {
         $color = $this->getPlayerColorById((int) $this->getCurrentPlayerId());
         $this->machine->push("2gainXp", $color);
