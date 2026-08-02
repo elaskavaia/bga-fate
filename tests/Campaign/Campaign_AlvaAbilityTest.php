@@ -31,7 +31,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
     // --- Alva Hero I (card_hero_2_1) ---
     // "End your move action in a forest to add 1 mana [MANA] to any card."
-    // Listens on Trigger::ActionMove; queues ?gainMana when Alva ends the move action in a forest.
+    // Listens on Trigger::ActionMove; queues gainMana when Alva ends the move action in a forest.
 
     public function testAlvaHeroIAddsManaWhenMoveActionEndsInForest(): void {
         // Hail of Arrows I (card_ability_2_3, mana=1) is on Alva's starting tableau and is the
@@ -44,7 +44,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
 
         $this->respond("hex_5_8"); // turn op inlines actionMove targets, so picking the hex directly works
 
-        // Trigger fired, ?gainMana auto-resolved on the sole valid target — back at PlayerTurn
+        // Trigger fired, gainMana auto-resolved on the sole valid target — back at PlayerTurn
         // with the second action available.
         $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
@@ -69,7 +69,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->respond("hex_5_8");
 
         // Hero II listens on Trigger::Move (any movement). Op_actionMove queues Op_move which
-        // emits Trigger::Move on completion → ?gainMana auto-resolves on Hail of Arrows I.
+        // emits Trigger::Move on completion → gainMana auto-resolves on Hail of Arrows I.
         $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
         $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));

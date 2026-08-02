@@ -163,10 +163,10 @@ class Card {
             return false;
         }
 
-        // Probe the chain — leading predicates (in(forest), terrain(forest)) make
-        // it void if they fail, but cost ops (spendAction, spendXp) prompt instead.
+        // Probe the chain — leading predicates (in(forest), terrain(forest)) leave it
+        // targetless if they fail, but cost ops (spendAction, spendXp) prompt instead.
         $op = $this->op->instantiateOperation($questR, $this->owner, ["card" => $this->id, "event" => $event->value]);
-        if ($op->isVoid()) {
+        if ($op->noValidTargets()) {
             $errorRes = array_merge($errorRes, $op->getErrorInfo());
             return false;
         }

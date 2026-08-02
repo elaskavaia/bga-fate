@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * Scenario from the report: Alva ends a move in a forest with two mana cards on her
  * tableau: Alva's Bracers (card_equip_2_23, holding 1 crystal) and Hail of Arrows II
- * (card_ability_2_4). The racial queues `?gainMana`.
+ * (card_ability_2_4). The racial queues `gainMana`.
  *
  * 1. "No prompt / auto-assign" does not reproduce: with two mana cards the server
  *    prompts (testOffersChoiceNotAutoAssignWithTwoManaCards).

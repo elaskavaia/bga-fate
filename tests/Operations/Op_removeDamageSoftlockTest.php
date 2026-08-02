@@ -7,13 +7,12 @@ use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Reproduces BGA #234859: gaining red crystals (heal / removeDamage) while there is
- * NO damage anywhere on the board dead-ends in a player state that offers zero
- * clickable targets and no Skip button ("[Error: No damage to remove] ... (3 left)").
+ * Verifies the fix for BGA #234859: gaining red crystals (heal / removeDamage) while
+ * there is NO damage anywhere on the board used to dead-end in a player state with
+ * zero clickable targets and no Skip button ("[Error: No damage to remove] ... (3 left)").
  *
- * The op is mandatory (mcount > 0) and non-skippable, has no valid targets, and
- * cannot be resolved automatically, so top-level machine dispatch (dispatchOne ->
- * onEnteringGameState -> auto -> PlayerTurn) routes it to a stuck player state.
+ * Op_removeDamage::canSkip now returns true when there are no valid targets, so the
+ * op auto-skips during dispatch instead of routing to a stuck player state.
  */
 final class Op_removeDamageSoftlockTest extends TestCase {
     private GameUT $game;
@@ -33,13 +32,11 @@ final class Op_removeDamageSoftlockTest extends TestCase {
     }
 
     /**
-     * documents buggy behavior for BGA #234859; flip once fixed
-     *
      * Board has zero damage. A mandatory 3removeDamage (as produced by the
-     * red-crystal / heal reward) should silently complete, but instead becomes a
-     * targetless, unskippable, non-auto-resolvable op => softlock.
+     * red-crystal / heal reward) silently completes: skippable-when-empty, so the
+     * engine auto-dispatches it instead of parking a targetless player state.
      */
-    public function testGain3RemoveDamageWithNoDamageSoftlocks(): void {
+    public function testGain3RemoveDamageWithNoDamageAutoSkips(): void {
         // Sanity: nothing on the board carries damage.
         $this->assertEquals(0, count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "hero_1")));
 
@@ -47,8 +44,8 @@ final class Op_removeDamageSoftlockTest extends TestCase {
 
         $this->assertEquals(3, (int) $this->op->getCount(), "reward is 3 removeDamage, matching the '(3 left)' prompt");
         $this->assertTrue($this->op->noValidTargets(), "nothing to heal, so no valid targets");
-        $this->assertCount(0, $this->op->getArgsTarget(), "player is shown zero clickable targets");
-        $this->assertFalse($this->op->canSkip(), "BUG: op refuses to skip when there is nothing to remove");
-        $this->assertFalse($this->op->canResolveAutomatically(), "BUG: engine cannot auto-dispatch, so it routes to a stuck player state");
+        $this->assertCount(0, $this->op->getArgsTarget(), "no clickable targets exist");
+        $this->assertTrue($this->op->canSkip(), "empty removeDamage is skippable");
+        $this->assertTrue($this->op->canResolveAutomatically(), "engine auto-dispatches the skip, no stuck player state");
     }
 }

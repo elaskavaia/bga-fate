@@ -62,7 +62,7 @@ class Op_gainMana extends CountableOperation {
 
     public function canSkip() {
         if ($this->noValidTargets()) {
-            return parent::canSkip();
+            return true;
         }
         return false; //mandatory is possible
     }

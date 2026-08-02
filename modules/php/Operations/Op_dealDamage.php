@@ -110,7 +110,7 @@ class Op_dealDamage extends CountableOperation {
 
     public function canSkip() {
         if ($this->noValidTargets()) {
-            return parent::canSkip();
+            return true;
         }
         return false; // mandatory if possible
     }

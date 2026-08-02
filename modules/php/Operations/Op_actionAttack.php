@@ -37,7 +37,7 @@ class Op_actionAttack extends Operation {
         // Picking it dispatches to Op_c_orebiter which prompts for the actual mountain hex.
         if ($hero->heroHasCardsOnTableau(self::OREBITER)) {
             $op = $this->instantiateOperation("c_orebiter", $this->getOwner(), ["card" => self::OREBITER]);
-            if (!$op->isVoid()) {
+            if (!$op->noValidTargets()) {
                 $hexes[self::OREBITER] = ["q" => 0, "buttons" => true];
             }
         }

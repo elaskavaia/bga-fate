@@ -30,8 +30,6 @@ class CardHero_AlvaHeroI extends CardGeneric {
         if (!$hero->isInForest()) {
             return;
         }
-        // ?gainMana → optional (min=0), so the op auto-skips silently if Alva has no
-        // mana-target cards on her tableau instead of throwing a "no valid targets" error.
-        $this->queue("?gainMana");
+        $this->queue("gainMana");
     }
 }

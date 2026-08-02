@@ -62,8 +62,8 @@ abstract class ComplexOperation extends CountableOperation {
 
     function paramInfo(Operation $sub) {
         $err = "";
-        if ($sub->isVoid()) {
-            $err = $sub->getError();
+        if ($sub->noValidTargets()) {
+            $err = $sub->getError() ?: $sub->getNoValidTargetError();
         }
         $q = 0;
         $max = 0;

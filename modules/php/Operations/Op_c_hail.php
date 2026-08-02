@@ -60,7 +60,7 @@ class Op_c_hail extends CountableOperation {
         }
 
         $manaOp = $this->getPayOp();
-        if ($manaOp->isVoid()) {
+        if ($manaOp->noValidTargets()) {
             return $manaOp->getErrorInfo();
         }
 

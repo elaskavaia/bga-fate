@@ -39,7 +39,7 @@ class Op_paygain extends Op_seq {
             return [];
         }
         foreach ($this->delegates as $sub) {
-            if ($sub->isVoid()) {
+            if ($sub->noValidTargets()) {
                 return $sub->getErrorInfo();
             }
         }

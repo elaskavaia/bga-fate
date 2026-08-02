@@ -68,6 +68,18 @@ class Op_or extends ComplexOperation {
         return $res;
     }
 
+    /** A choice has something to offer iff at least one branch does. Skippability of an
+     * empty branch (isVoid false) is a sequential-execution concept and irrelevant here:
+     * there is no "next step" after a chosen branch, so an all-empty or offers nothing. */
+    function noValidTargets(): bool {
+        foreach ($this->delegates as $sub) {
+            if (!$sub->noValidTargets()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // Game specific override to inject proper names for buttons from card rules
     function paramInfo(Operation $sub, ?int $i = null) {
         $arg = parent::paramInfo($sub);

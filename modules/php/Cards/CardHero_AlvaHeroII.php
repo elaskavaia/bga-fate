@@ -30,6 +30,6 @@ class CardHero_AlvaHeroII extends CardGeneric {
         if (!$hero->isInForest()) {
             return;
         }
-        $this->queue("?gainMana");
+        $this->queue("gainMana");
     }
 }
