@@ -592,12 +592,12 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 
 .hero_1 {
   --hero-pos: 20% 0%;
-  --hero-color: #2e7d32;
+  --hero-color: #86df8a;
 }
 
 .hero_2 {
   --hero-pos: 0% 0%;
-  --hero-color: #5c7ce0;
+  --hero-color: #8cb7f5;
 }
 
 .hero_3 {
@@ -607,7 +607,7 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 
 .hero_4 {
   --hero-pos: 40% 0%;
-  --hero-color: #e0655a;
+  --hero-color: #f49e96;
 }
 
 .monster {
@@ -1929,13 +1929,13 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 .miniboard.hno_1 {
   background-image: url("img/cards/bjorn_cards_hq.webp");
   background-size: 600% auto;
-  background-position: 100% 95%;
+  background-position: 100% 92%;
 }
 
 .miniboard.hno_2 {
   background-image: url("img/cards/alva_cards_hq.webp");
   background-size: 600% auto;
-  background-position: 100% 95%;
+  background-position: 100% 93%;
 }
 
 .miniboard.hno_3 {

@@ -48,11 +48,11 @@
 // Colors follow player_colors in gameinfos.inc.php (hero N -> Nth color)
 .hero_1 {
   --hero-pos: 20% 0%;
-  --hero-color: #2e7d32; // Bjorn green
+  --hero-color: #86df8a; // Bjorn green
 }
 .hero_2 {
   --hero-pos: 0% 0%;
-  --hero-color: #5c7ce0; // Alva blue (softened for multiply)
+  --hero-color: #8cb7f5; // Alva blue (softened for multiply)
 }
 .hero_3 {
   --hero-pos: 60% 0%;
@@ -60,7 +60,7 @@
 }
 .hero_4 {
   --hero-pos: 40% 0%;
-  --hero-color: #e0655a; // Boldur red (softened for multiply)
+  --hero-color: #f49e96; // Boldur red (softened for multiply)
 }
 
 // Monster miniatures (sprite sheet: 3x3 grid, rows = factions, cols = rank 3→1)
