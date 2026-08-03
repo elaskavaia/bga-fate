@@ -576,38 +576,32 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   position: relative;
   filter: drop-shadow(2px 2px 3px black);
 }
+
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url(img/mini_heroes.png);
-  background-size: 600% auto;
+  background-image: url(img/mini_heroes_color.webp);
+  background-size: auto 100%;
   background-position: var(--hero-pos);
-  background-color: var(--hero-color);
-  background-blend-mode: multiply;
-  mask-image: url(img/mini_heroes.png);
-  mask-size: 600% auto;
-  mask-position: var(--hero-pos);
+  aspect-ratio: 256/312;
+  top: unset;
 }
 
 .hero_1 {
-  --hero-pos: 20% 0%;
-  --hero-color: #86df8a;
+  --hero-pos: 33% 0%;
 }
 
 .hero_2 {
   --hero-pos: 0% 0%;
-  --hero-color: #8cb7f5;
 }
 
 .hero_3 {
-  --hero-pos: 60% 0%;
-  --hero-color: #ffa500;
+  --hero-pos: 100% 0%;
 }
 
 .hero_4 {
-  --hero-pos: 40% 0%;
-  --hero-color: #f49e96;
+  --hero-pos: 66% 0%;
 }
 
 .monster {
