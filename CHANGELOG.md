@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-03 (v260803-1041)
+
+- Fixed a second undo in the same turn failing with "Nothing to undo" (#235314)
+- Fixed a reward with nothing to give leaving the turn stuck: no target, no Skip button (#234859)
+- Hero miniatures on the map are now colored
+
 ## 2026-07-30 (v260730-1944)
 
 - Fixed Treetreader: usable once per turn, and its two move options now match their labels (#235064)
