@@ -495,7 +495,7 @@ class HexMap {
 
     /**
      * BFS reachability: returns all hexes reachable from $startHex within $maxSteps.
-     * Grimheim counts as one area (0 cost between its hexes).
+     * Grimheim counts as one area, so from inside it no Grimheim hex is a destination.
      * Entering Grimheim ends movement. Exiting Grimheim costs 1 step.
      * @return array<string, int> hex => distance (only hexes the character can stop on)
      */
@@ -540,6 +540,12 @@ class HexMap {
         }
         // Remove start hex
         unset($visited[$startHex]);
+        // Grimheim is one area, so every hex in it is where the hero already stands.
+        if ($startInGrimheim) {
+            foreach ($this->getHexesInGrimheim() as $gHex) {
+                unset($visited[$gHex]);
+            }
+        }
         // Destinations must be stoppable — drop occupied hexes the character only passed through.
         return array_filter($visited, fn($_d, $hex) => $this->canStopOn($hex, $character), ARRAY_FILTER_USE_BOTH);
     }

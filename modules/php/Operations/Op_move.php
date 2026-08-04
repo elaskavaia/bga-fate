@@ -103,7 +103,10 @@ class Op_move extends CountableOperation {
         if ($this->game->hexMap->isInGrimheim($target)) {
             $target = $hero->getRulesFor("location", $target);
         }
-        $path = $this->game->hexMap->getPath($hero->getHex(), $target, $hero);
+        $from = $hero->getHex();
+        $path = $this->game->hexMap->getPath($from, $target, $hero);
+        // A move that queues no steps would spend the action for nothing (BGA #235653).
+        $this->game->systemAssert("ERR:move:emptyPath:$from:$target", count($path) > 0);
 
         foreach ($path as $hex) {
             $isFinal = $hex === $target;

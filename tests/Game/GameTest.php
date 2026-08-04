@@ -108,15 +108,18 @@ final class GameTest extends TestCase {
     public function testGetReachableHexes() {
         $game = $this->game;
 
-        // From a Grimheim hex, all Grimheim hexes are at distance 0
+        // From a Grimheim hex, no Grimheim hex is a destination - it is all one area
         $reachable = $game->hexMap->getReachableHexes("hex_9_9", 3, $this->hero());
-        $this->assertArrayHasKey("hex_9_8", $reachable); // Grimheim
-        $this->assertArrayHasKey("hex_10_8", $reachable); // Grimheim
-        $this->assertEquals(0, $reachable["hex_9_8"]);
+        $this->assertArrayNotHasKey("hex_9_8", $reachable); // Grimheim
+        $this->assertArrayNotHasKey("hex_10_8", $reachable); // Grimheim
 
         // Adjacent non-Grimheim hex at distance 1
         $this->assertArrayHasKey("hex_11_8", $reachable);
         $this->assertEquals(1, $reachable["hex_11_8"]);
+
+        // Exiting Grimheim keeps going for the whole budget
+        $this->assertEquals(2, $reachable["hex_12_8"]);
+        $this->assertEquals(3, $reachable["hex_13_8"]);
 
         // Start hex excluded
         $this->assertArrayNotHasKey("hex_9_9", $reachable);

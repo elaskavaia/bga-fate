@@ -20,10 +20,10 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
     // -------------------------------------------------------------------------
 
     public function testReachableHexesFromGrimheim(): void {
-        // Grimheim hexes (other than starting hex) are reachable at distance 0
-        $this->assertValidTarget("hex_9_8");
-        $this->assertValidTarget("hex_10_8");
-        $this->assertValidTarget("hex_8_10");
+        // Grimheim is one area, so no hex inside it is a destination (BGA #235653)
+        $this->assertNotValidTarget("hex_9_8");
+        $this->assertNotValidTarget("hex_10_8");
+        $this->assertNotValidTarget("hex_8_10");
 
         // Adjacent to Grimheim (distance 1)
         $this->assertValidTarget("hex_11_8");
