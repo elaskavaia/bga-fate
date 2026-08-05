@@ -271,6 +271,37 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertEquals(2, $this->countDamage($secondary));
     }
 
+    /**
+     * The bow deals its rune damage while the TActionAttack prompt is still chaining, so a kill
+     * it causes fires TMonsterKilled with the answered prompt's continuation still queued. That
+     * is the state Card::promptUseCard keys on when deciding not to merge a later trigger into
+     * an already-answered prompt (see Op_useCardTest). No shipped card is playable on
+     * TMonsterKilled at that instant - c_nailed and c_sweep both need attack overkill, which
+     * only exists after resolveHits - so this pins the state, not the merge.
+     */
+    public function testBoneBaneBowKillLeavesAnAnsweredPromptPending(): void {
+        $bow = "card_equip_1_16";
+        $color = $this->getActivePlayerColor();
+        $this->clearHand($color);
+        $this->clearEquipDecks();
+        $this->game->tokens->moveToken($bow, "tableau_$color");
+        $this->game->tokens->moveToken("card_equip_1_15", "limbo"); // leave Bone Bane Bow the sole main weapon
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_5_9", "");
+        $this->game->getMonster("monster_brute_2")->moveTo("hex_4_9", "");
+
+        $this->seedRand([3, 3, 3, 3, 5]); // 4 runes + 1 hit: the bow deals 4 to a 3-health brute
+        $this->respond("hex_5_9");
+        $this->assertOperation("useCard");
+        $this->respond($bow);
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_2"), "bow killed the second brute");
+        $pending = $this->game->machine->findOperation($color, "useCard");
+        $this->assertNotNull($pending, "the TActionAttack prompt is still chaining after the kill");
+        $this->assertEquals([$bow], $pending->getDataField("excluded", []), "it is the answered prompt's continuation");
+        $this->assertEquals(["TActionAttack"], $pending->getDataField("on", []), "no shipped card prompts on the kill here");
+    }
+
     // --- Home Sewn Cape (card_equip_1_24) spend branches ---
     // r=(spendUse:2spendMana:1move)/(on(TResolveHits):3spendMana:2preventDamage), on=custom.
 

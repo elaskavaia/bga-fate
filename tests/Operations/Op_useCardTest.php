@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
@@ -100,5 +101,51 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->assertValidTarget($this->abilityCard);
         $this->assertValidTarget($this->equipCard);
         $this->assertValidTarget($this->eventCard);
+    }
+
+    // -------------------------------------------------------------------------
+    // Card::promptUseCard merging (BGA #235866 investigation)
+    // -------------------------------------------------------------------------
+
+    /** Queue a pending useCard prompt directly, then fire a later trigger through Card::promptUseCard. */
+    private function promptOverPending(array $data, Trigger $event): array {
+        $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
+        $this->game->machine->queue("useCard", $this->owner, $data);
+
+        $frame = $this->game->machine->instantiateOperation("nop", $this->owner, []);
+        $this->game->instantiateCard($this->abilityCard, $frame)->promptUseCard($event);
+
+        return array_map(
+            fn($op) => ["on" => $op->getDataField("on", []), "excluded" => $op->getDataField("excluded", [])],
+            $this->game->machine->findOperationOps($this->owner, "useCard")
+        );
+    }
+
+    /**
+     * Op_useCard::resolve re-queues itself with an `excluded` list after a non-Manual play, so a
+     * pending useCard carrying `excluded` is the tail of a prompt the player already answered.
+     * A later trigger must get its own prompt - merged into the tail it would be offered under
+     * the stale event and Op_or would grey out the branch gated on the new one.
+     */
+    public function testAnsweredPromptDoesNotSwallowALaterTrigger(): void {
+        $ops = $this->promptOverPending(
+            ["l_confirm" => true, "on" => ["TActionAttack"], "excluded" => [$this->abilityCard]],
+            Trigger::MonsterKilled
+        );
+
+        $this->assertCount(2, $ops, "the kill must get its own prompt");
+        $this->assertEquals(["on" => ["TMonsterKilled"], "excluded" => []], $ops[0], "the new moment is offered first");
+        $this->assertContains(["on" => ["TActionAttack"], "excluded" => [$this->abilityCard]], $ops, "answered prompt untouched");
+    }
+
+    /**
+     * The merge itself must stay: two triggers firing before the player answers anything
+     * produce ONE prompt, not two.
+     */
+    public function testUnansweredPromptStillMergesASecondTrigger(): void {
+        $ops = $this->promptOverPending(["l_confirm" => true, "on" => ["TActionAttack"]], Trigger::MonsterKilled);
+
+        $this->assertCount(1, $ops, "both triggers share one prompt");
+        $this->assertEquals(["TActionAttack", "TMonsterKilled"], $ops[0]["on"]);
     }
 }

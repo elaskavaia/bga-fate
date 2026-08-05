@@ -302,7 +302,9 @@ class Card {
         $owner = $this->getOwner();
         $action = "useCard";
 
-        $op = $this->game->machine->findOperation($owner, $action);
+        // A useCard carrying `excluded` is the tail of a prompt the player already answered;
+        // merging a later trigger into it would offer the new moment under the stale event.
+        $op = $this->game->machine->findOperation($owner, $action, fn($pending) => empty($pending->getDataField("excluded")));
         if (!$op) {
             $this->queue($action, null, ["l_confirm" => true, "on" => [$event->value]]);
         } else {
