@@ -5311,7 +5311,7 @@ class Material {
         "r" => "c_smiter",
         "on" => "TActionAttack",
         "quest" => "<i>End your movement in the Marsh of Sorrow</i>, covered to the beard in yuck.",
-        "effect" => clienttranslate("This is your Main Weapon. Spend stored damage to add that much damage to your attack action. If you kill a monster in an attack action, excess damage is stored here (max 3 stored)."),
+        "effect" => clienttranslate("This is your Main Weapon. If you kill a monster in an attack action, excess damage is stored here (max 3). Damage stored here may be added to your attack action."),
         "flavour" => "I axed your first.",
         "mw" => 1,
         "quest_on" => "TMove",
