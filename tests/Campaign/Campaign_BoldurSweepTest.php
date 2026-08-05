@@ -152,4 +152,97 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->assertEquals(5, $this->countDamage($troll), "Sweeping Strike II should add +3 (countAdjMonsters)");
         $this->assertEquals("hex_4_9", $this->tokenLocation($troll), "Troll should still be alive");
     }
+
+    // -------------------------------------------------------------------------
+    // BGA #235866 "sweeping Strike Not allowing DMG to second target".
+    //
+    // The reporter attached the TActionAttack prompt with the cleave bullet greyed out -
+    // expected, nothing has died yet - and concluded the cleave was unreachable. It is not:
+    // the cleave is offered again on TMonsterKilled. These pin the reported combos.
+    // -------------------------------------------------------------------------
+
+    /** Boldur at hex_7_9, brute SW (hex_6_10) = attack target, troll W (hex_6_9) = first hex clockwise from SW. */
+    private function setupRapidStrikeBoard(): void {
+        $this->clearEquipDecks();
+        $this->game->tokens->moveToken("card_ability_4_5", "tableau_" . $this->color); // Sweeping Strike I
+        $this->game->tokens->moveToken("card_ability_4_4", "tableau_" . $this->color); // Rapid Strike II
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, "card_ability_4_4", ["message" => ""]);
+        $this->seedHand("card_event_4_32", $this->color); // Berserk
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_6_10", "");
+        $this->game->getMonster("monster_troll_1")->moveTo("hex_6_9", "");
+        $this->seedRand([5, 5, 1, 1]); // 2 hits
+    }
+
+    public function testSweepAfterRapidStrikeAndBerserk(): void {
+        $this->setupRapidStrikeBoard();
+
+        $this->respond("card_ability_4_4"); // Rapid Strike II: pay 2 mana, start attack action
+        $this->respond("hex_6_10");
+        $this->respond("card_ability_4_5"); // TActionAttack useCard
+        $this->respond("choice_0"); // +1 damage branch (branch 2 is greyed here - no kill yet)
+        $this->respond("card_event_4_32"); // Berserk: 1 unpreventable health for +3 damage
+
+        // 2 hits + 1 (Sweeping Strike) + 3 (Berserk) = 6 on a 3-health brute -> 3 overkill.
+        $this->assertOperation("useCard");
+        $this->assertValidTarget("card_ability_4_5", "cleave must be re-offered on TMonsterKilled");
+        $this->respond("card_ability_4_5");
+        $this->respond("choice_1"); // c_sweep branch
+        $this->skipIfOp("c_sweep");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "brute killed");
+        $this->assertEquals(3, $this->countDamage("monster_troll_1"), "3 overkill swept clockwise onto the troll");
+    }
+
+    /**
+     * Exact reported board: both monsters are 3-health brutes adjacent to Boldur. Target brute
+     * is W of him, second brute is NW = the very next hex clockwise from the target. Player
+     * takes the only enabled pre-attack button ("Add 1 damage to each attack action").
+     *
+     * Pins current behavior: choosing branch 1 does NOT lock the card out of the later cleave.
+     * Sweeping Strike has no `spendUse` in its `r` expression, so the once-per-turn ability lock
+     * (RULES.md "Abilities (free actions vs. ongoing effects)") never engages - correct, since
+     * both bullets are `on(...)` triggers.
+     */
+    public function testChoosingAddDamageBranchDoesNotBlockCleave(): void {
+        $sweep = "card_ability_4_5";
+        $this->game->tokens->moveToken($sweep, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+
+        $target = "monster_brute_1"; // W of Boldur
+        $second = "monster_brute_2"; // NW of Boldur = next clockwise from W
+        $this->game->getMonster($target)->moveTo("hex_6_9", "");
+        $this->game->getMonster($second)->moveTo("hex_7_8", "");
+
+        $this->seedRand([5, 5, 5, 5]); // 4 hits + 1 Sweeping Strike = 5 vs health 3 -> 2 overkill
+
+        $this->respond("actionAttack");
+        $this->respond("hex_6_9");
+        $this->respond($sweep);
+        $this->respond("choice_0"); // the only enabled button on the reporter's screenshot
+
+        $this->assertEquals(0, $this->game->tokens->getTokenState($sweep, 0), "card must not be marked used");
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($sweep, "cleave must still be offered on TMonsterKilled");
+        $this->respond($sweep);
+        $this->respond("choice_1");
+        $this->skipIfOp("c_sweep");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($target), "target brute killed");
+        $this->assertEquals(2, $this->countDamage($second), "2 overkill swept clockwise onto the NW brute");
+    }
+
+    public function testSweepStillOfferedWhenActionAttackPromptSkipped(): void {
+        // Reporter saw the second bullet greyed out and may have dismissed the prompt.
+        // Skipping the TActionAttack offer must not forfeit the later cleave offer.
+        $this->setupRapidStrikeBoard();
+
+        $this->respond("card_ability_4_4");
+        $this->respond("hex_6_10");
+        $this->skip(); // dismiss the TActionAttack useCard prompt entirely
+
+        // 2 hits only = 2 damage on a 3-health brute -> no kill, so no cleave prompt.
+        $this->assertEquals(2, $this->countDamage("monster_brute_1"), "no bonus damage after skipping");
+        $this->assertEquals(0, $this->countDamage("monster_troll_1"), "no cleave without a kill");
+    }
 }
