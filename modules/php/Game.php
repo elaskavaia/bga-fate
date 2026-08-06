@@ -589,7 +589,7 @@ class Game extends Base {
      * Total XP yielded by a just-killed monster: base reward + bonus yellow crystals
      * parked on it (Prey etc.).
      *
-     * Prefers the explicit $context monster. A multi-kill (Sweeping Strike cleave, Nailed
+     * Prefers the explicit $context monster. A multi-kill (Sweeping Strike sweep, Nailed
      * Together pierce) advances marker_attack to the next target before the earlier kill is
      * finalized, so the attack hex identifies the wrong monster. The attack hex stays the
      * fallback for bareword use in expressions, where Op_counter passes the source CARD id

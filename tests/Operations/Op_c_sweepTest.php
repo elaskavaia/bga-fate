@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Op_c_sweep — Sweeping Strike cleave.
+ * Op_c_sweep — Sweeping Strike sweep.
  *
  * Boldur sits in the centre of a 6-hex "clock". After killing an adjacent monster,
  * overkill damage carries to the next monster encountered walking clockwise around
@@ -55,23 +55,36 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->assertNoValidTargets();
     }
 
+    /** Clockwise order picks the victim, so the op only offers yes/no - assert who got hit. */
+    private function sweep(): void {
+        $this->createOp("c_sweep");
+        $this->assertValidTargetCount(1, "the sweep is a confirm, not a target pick");
+        $this->call_resolve();
+        $this->dispatchAll();
+    }
+
+    private function countDamage(string $monsterId): int {
+        return count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", $monsterId));
+    }
+
+    private function sweepAndCountDamage(string $monsterId): int {
+        $this->sweep();
+        return $this->countDamage($monsterId);
+    }
+
     public function testFindsNextMonsterClockwise(): void {
         // Killed at NW. Next CW = NE (hex_5_8). Place a goblin there.
         $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8");
         $this->setAttackMarker("hex_4_9", 1);
-        $this->createOp("c_sweep");
-        $this->assertValidTarget("hex_5_8");
-        $this->assertValidTargetCount(1);
+        $this->assertEquals(1, $this->sweepAndCountDamage("monster_goblin_1"));
     }
 
     public function testSkipsEmptyHexesUntilLiveMonster(): void {
         // Killed at NW (hex_4_9). Next CW = NE (hex_5_8) [empty], E (hex_6_8) [empty],
-        // SE (hex_6_9) [goblin] → cleave should land on hex_6_9.
+        // SE (hex_6_9) [goblin] → sweep should land on hex_6_9.
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
         $this->setAttackMarker("hex_4_9", 1);
-        $this->createOp("c_sweep");
-        $this->assertValidTarget("hex_6_9");
-        $this->assertValidTargetCount(1);
+        $this->assertEquals(1, $this->sweepAndCountDamage("monster_goblin_1"));
     }
 
     public function testPicksFirstMonsterNotFurther(): void {
@@ -80,9 +93,9 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8");
         $this->game->tokens->moveToken("monster_goblin_2", "hex_6_9");
         $this->setAttackMarker("hex_4_9", 1);
-        $this->createOp("c_sweep");
-        $this->assertValidTarget("hex_5_8");
-        $this->assertNotValidTarget("hex_6_9");
+        $this->sweep();
+        $this->assertEquals(1, $this->countDamage("monster_goblin_1"));
+        $this->assertEquals(0, $this->countDamage("monster_goblin_2"), "the further monster is not touched");
     }
 
     public function testWalksAcrossWrapAroundRing(): void {
@@ -90,8 +103,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         // before wrapping back to the killed hex itself.
         $this->game->tokens->moveToken("monster_goblin_1", "hex_4_10");
         $this->setAttackMarker("hex_4_9", 1);
-        $this->createOp("c_sweep");
-        $this->assertValidTarget("hex_4_10");
+        $this->assertEquals(1, $this->sweepAndCountDamage("monster_goblin_1"));
     }
 
     public function testResolveDealsOverkillDamage(): void {
@@ -106,7 +118,7 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->assertCount(1, $crystals, "Goblin should take 1 overkill damage");
     }
 
-    public function testResolveCanKillCleaveTarget(): void {
+    public function testResolveCanKillSweepTarget(): void {
         // Goblin health=2; pre-place 1 damage so overkill=2 finishes it.
         $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8");
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
@@ -119,11 +131,11 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
 
-    public function testNoChainAfterCleaveKill(): void {
-        // 2-enemy cap is structural: even if cleave kills the second monster with
+    public function testNoChainAfterSweepKill(): void {
+        // 2-enemy cap is structural: even if sweep kills the second monster with
         // leftover damage and another monster sits clockwise from it, no further
-        // cleave is queued.
-        $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8"); // cleave target
+        // sweep is queued.
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8"); // the monster the sweep will hit
         $this->game->tokens->moveToken("monster_goblin_2", "hex_6_8"); // sits CW from #1
         $this->game->effect_moveCrystals("hero_1", "red", 1, "monster_goblin_1", ["message" => ""]);
         $this->setAttackMarker("hex_4_9", 5); // 5 overkill — kills #1 with 4 to spare

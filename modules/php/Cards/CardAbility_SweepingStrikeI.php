@@ -14,19 +14,29 @@ use Bga\Games\Fate\Model\Trigger;
  *    in clockwise order."
  *
  * Listens on two distinct trigger families (TActionAttack + TMonsterKilled),
- * which CardGeneric's single `on=` field cannot express. Each hook just queues
- * the standard useCard prompt — the OR-split inside the card's `r` expression
- * uses `on(TXxx):` gates to pick the matching branch, and Op_or::isTrivial
- * auto-resolves to the single non-void branch.
+ * which CardGeneric's single `on=` field cannot express.
+ *
+ * The damage bullet has no "may" in its card text, so it is applied without
+ * asking. Only the sweep is offered, via the standard useCard prompt (r=c_sweep).
  */
 class CardAbility_SweepingStrikeI extends CardGeneric {
+    /** Level I adds a flat 1; level II scales with adjacent monsters. */
+    protected function getDamageEffect(): string {
+        return "addDamage";
+    }
+
     public function onActionAttack(Trigger $event): void {
-        $this->promptUseCard($event);
+        $this->queue($this->getDamageEffect());
     }
 
     public function onMonsterKilled(Trigger $event): void {
-        // Guard like CardGeneric::onTriggerDefault: a cleave kill re-fires MonsterKilled,
-        // but by then the sweep is spent (no overkill left), so c_sweep is void and the
+        // One sweep per attack action (2 enemies max, DESIGN.md §"Sweeping Strike"). The
+        // sweep's own kill re-fires MonsterKilled, and with damage still left over and another
+        // monster on the ring it would otherwise offer itself again, forever.
+        if ($this->op->getDataField("spendsExcess")) {
+            return;
+        }
+        // Guard like CardGeneric::onTriggerDefault: without overkill c_sweep is void and the
         // card must not re-prompt with an empty target list (BGA #233927).
         if (!$this->canBePlayed($event)) {
             return;

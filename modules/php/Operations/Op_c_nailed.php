@@ -22,6 +22,10 @@ use function Bga\Games\Fate\getPart;
  * - Deals overkill damage to chosen monster
  * - Level II: if that monster also dies, updates marker_attack and re-queues
  *
+ * Queues its damage with `spendsExcess` (see Op_applyDamage), which does two things: the
+ * damage is taken back out of Smiterbiter's pending pool once it lands, and the kill it
+ * causes does not offer this card again - level II's real chain is the re-queue below.
+ *
  * Used by: Nailed Together I (c_nailed), Nailed Together II (c_nailed(chain))
  */
 class Op_c_nailed extends Operation {
@@ -87,6 +91,7 @@ class Op_c_nailed extends Operation {
             "attacker" => $attackerId,
             "target" => $defenderId,
             "amount" => $overkill,
+            "spendsExcess" => true,
         ]);
 
         // Level II: chain on kill — Op_applyDamage updates marker_attack with the new overkill,
@@ -96,18 +101,8 @@ class Op_c_nailed extends Operation {
         }
     }
 
-    /**
-     * A chain step is queued before its overkill is known, so it can land void (exact kill
-     * leaves 0 overkill, or nothing behind the new target). Unlike the card-driven op it gets
-     * no l_skip, so without this it would be a mandatory unsatisfiable prompt (BGA #234580).
-     * Only widens the void case: with real targets the op still auto-resolves rather than
-     * turning into an optional prompt.
-     */
     function canSkip() {
-        if ($this->noValidTargets()) {
-            return true;
-        }
-        return parent::canSkip();
+        return true;
     }
 
     function getExtraArgs() {

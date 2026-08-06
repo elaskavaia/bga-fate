@@ -8,12 +8,11 @@ require_once __DIR__ . "/CampaignBase.php";
  * Integration tests for Sweeping Strike I/II (card_ability_4_5, card_ability_4_6).
  *
  * Bespoke card classes (CardAbility_SweepingStrikeI/II) wire the card to two
- * trigger families that the generic CSV-only `on=` field cannot express:
- * onActionAttack (for the passive +damage branch) and onMonsterKilled (for the
- * cleave). Each hook just calls promptUseCard($event); the OR-split inside the
- * card's `r` expression then routes to the right branch via on(...) gates.
+ * trigger families that the generic CSV-only `on=` field cannot express.
+ * onActionAttack queues the damage effect outright - that bullet has no "may" -
+ * while onMonsterKilled prompts, since the sweep does.
  *
- * Hard cap: at most 2 enemies hit per attack (no chain after the cleave kill).
+ * Hard cap: at most 2 enemies hit per attack (no chain after the sweep kill).
  * Designer rule clarification: DESIGN.md §"Sweeping Strike".
  */
 class Campaign_BoldurSweepTest extends CampaignBaseTest {
@@ -41,39 +40,36 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->seedRand([1, 1, 1, 1]); // all miss
         $this->respond("actionAttack");
         // With only the troll on the map, Op_actionAttack's target is auto-picked.
-        $this->respond($cardId); // useCard prompt for TActionAttack
-        $this->respond("choice_0"); // Op_or → addDamage branch
+        // The damage bullet is passive - no prompt to answer.
 
         $this->assertEquals(1, $this->countDamage($troll), "Sweeping Strike I should add 1 damage to attack");
         $this->assertEquals("hex_4_9", $this->tokenLocation($troll), "Troll should still be alive");
     }
 
-    public function testSweepingStrikeICleavesAfterKill(): void {
+    public function testSweepingStrikeISweepsAfterKill(): void {
         $cardId = "card_ability_4_5";
         $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
         $primary = "monster_goblin_1";
-        $cleave = "monster_goblin_2";
+        $second = "monster_goblin_2";
         $this->game->getMonster($primary)->moveTo("hex_4_9", "");
-        $this->game->getMonster($cleave)->moveTo("hex_5_8", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
 
         $this->seedRand([5, 5, 1, 1]);
 
         $this->respond("actionAttack");
         $this->respond("hex_4_9");
-        $this->respond($cardId);
-        $this->respond("choice_0"); // confirm add damage
         $this->respond($cardId); // use card for sweep
-        $this->respond("choice_1"); // confirm sweep
+        $this->confirmCardEffect(); // the sweep target is fixed by clockwise order
 
         $this->assertEquals("supply_monster", $this->tokenLocation($primary), "Primary goblin should be dead");
-        $this->assertEquals(1, $this->countDamage($cleave), "Cleave goblin should take 1 overkill damage");
+        $this->assertEquals(1, $this->countDamage($second), "Second goblin should take 1 overkill damage");
     }
 
     public function testSweepingStrikeDoesNotReofferAfterBothMonstersDead(): void {
         // BGA #233927: two goblins (health=2) adjacent. Primary dies with enough overkill
-        // that the sweep also kills the second goblin. The cleave kill re-fires
+        // that the sweep also kills the second goblin. The sweep kill re-fires
         // Trigger::MonsterKilled, but the sweep is spent (no overkill left) so c_sweep is
         // void; CardAbility_SweepingStrikeI::onMonsterKilled must NOT re-prompt useCard.
         $cardId = "card_ability_4_5";
@@ -81,53 +77,81 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
         $primary = "monster_goblin_1";
-        $cleave = "monster_goblin_2";
+        $second = "monster_goblin_2";
         $this->game->getMonster($primary)->moveTo("hex_4_9", "");
-        $this->game->getMonster($cleave)->moveTo("hex_5_8", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
 
-        $this->seedRand([5, 5, 5, 1]); // 3 hits + 1 passive = 4 on primary; overkill 2 kills cleave
+        $this->seedRand([5, 5, 5, 1]); // 3 hits + 1 passive = 4 on primary; overkill 2 kills the second goblin
 
         $this->respond("actionAttack");
         $this->respond("hex_4_9");
-        $this->respond($cardId);
-        $this->respond("choice_0"); // add damage branch
         $this->respond($cardId); // use card for sweep
-        $this->respond("choice_1"); // confirm sweep -> kills cleave goblin
+        $this->confirmCardEffect(); // sweep -> kills the second goblin
 
-        // No spurious re-offer: the cleave kill re-fires MonsterKilled but c_sweep is void,
+        // No spurious re-offer: the sweep kill re-fires MonsterKilled but c_sweep is void,
         // so the trigger chain settles cleanly (finishKill sweeps both to supply) instead of
         // leaving a dead-end useCard prompt the player must Cancel out of.
         $args = $this->getOpArgs();
         $this->assertNotEquals("useCard", $args["type"] ?? "", "no spurious useCard re-offer (bug #233927)");
         $this->assertEquals("supply_monster", $this->tokenLocation($primary), "Primary goblin (3 hits + 1 passive) should be dead");
-        $this->assertEquals("supply_monster", $this->tokenLocation($cleave), "Cleave goblin (2 overkill) should be dead");
+        $this->assertEquals("supply_monster", $this->tokenLocation($second), "Second goblin (2 overkill) should be dead");
     }
 
-    public function testSweepingStrikeIDoesNotCleaveWithoutOverkill(): void {
+    /**
+     * One sweep per attack action. The sweep's own kill re-fires TMonsterKilled, so with
+     * damage still left over and a third monster on the ring the card used to offer itself
+     * again - and again, each time hitting a corpse that was already dead.
+     */
+    public function testSweepingStrikeDoesNotChainOntoAThirdMonster(): void {
+        $cardId = "card_ability_4_5";
+        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $primary = "monster_goblin_1"; // health 2, W of Boldur
+        $second = "monster_goblin_2"; // health 2, next clockwise
+        $third = "monster_goblin_3"; // clockwise again - must be left alone
+        $this->game->getMonster($primary)->moveTo("hex_4_9", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
+        $this->game->getMonster($third)->moveTo("hex_6_8", "");
+
+        // 4 hits + 1 passive = 5 on a 2-health goblin -> 3 over, sweep kills with 1 to spare.
+        $this->seedRand([5, 5, 5, 5]);
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond($cardId);
+        $this->confirmCardEffect();
+
+        $args = $this->getOpArgs();
+        $this->assertNotEquals("useCard", $args["type"] ?? "", "the sweep must not offer itself again");
+        $this->assertEquals("supply_monster", $this->tokenLocation($primary));
+        $this->assertEquals("supply_monster", $this->tokenLocation($second));
+        $this->assertEquals(0, $this->countDamage($third), "the third monster is beyond the 2-enemy cap");
+    }
+
+    public function testSweepingStrikeIDoesNotSweepWithoutOverkill(): void {
         // Goblin health=2, armor=0. 1 hit + 1 sweep die = 2 damage → exact kill, 0 overkill.
-        // c_sweep should bail on ERR_NOT_APPLICABLE; cleave goblin takes nothing.
+        // c_sweep should bail on ERR_NOT_APPLICABLE; the second goblin takes nothing.
         $cardId = "card_ability_4_5";
         $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
         $primary = "monster_goblin_1";
-        $cleave = "monster_goblin_2";
+        $second = "monster_goblin_2";
         $this->game->getMonster($primary)->moveTo("hex_4_9", "");
-        $this->game->getMonster($cleave)->moveTo("hex_5_8", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
 
         $this->seedRand([5, 1, 1, 1]); // 1 hit + sweep(1) = 2 damage → kill with 0 overkill
 
         $this->respond("actionAttack");
         $this->respond("hex_4_9");
-        $this->respond($cardId); // useCard for TActionAttack
-        $this->respond("choice_0"); // addDamage branch
         // No overkill -> c_sweep is void, so onMonsterKilled does not prompt useCard
         // (BGA #233927). skipIfOp is a defensive no-op should any prompt appear.
         $this->skipIfOp("useCard");
 
         $this->assertEquals("supply_monster", $this->tokenLocation($primary));
-        $this->assertEquals(0, $this->countDamage($cleave), "No overkill → no cleave damage");
-        $this->assertEquals("hex_5_8", $this->tokenLocation($cleave), "Cleave goblin should still be alive");
+        $this->assertEquals(0, $this->countDamage($second), "No overkill → no sweep damage");
+        $this->assertEquals("hex_5_8", $this->tokenLocation($second), "Second goblin should still be alive");
     }
 
     public function testSweepingStrikeIIScalesWithAdjacentMonsterCount(): void {
@@ -145,8 +169,6 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 1, 1]); // 2 hits, 2 misses
         $this->respond("actionAttack");
         $this->respond("hex_4_9");
-        $this->respond($cardId); // useCard for TActionAttack
-        $this->respond("choice_0"); // counter(countAdjMonsters):addDamage branch
 
         // 2 base hits + 3 sweep = 5 damage. Troll health=7 → survives.
         $this->assertEquals(5, $this->countDamage($troll), "Sweeping Strike II should add +3 (countAdjMonsters)");
@@ -156,9 +178,9 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
     // -------------------------------------------------------------------------
     // BGA #235866 "sweeping Strike Not allowing DMG to second target".
     //
-    // The reporter attached the TActionAttack prompt with the cleave bullet greyed out -
-    // expected, nothing has died yet - and concluded the cleave was unreachable. It is not:
-    // the cleave is offered again on TMonsterKilled. These pin the reported combos.
+    // The reporter attached the TActionAttack prompt with the sweep bullet greyed out -
+    // expected, nothing has died yet - and concluded the sweep was unreachable. It is not:
+    // the sweep is offered again on TMonsterKilled. These pin the reported combos.
     // -------------------------------------------------------------------------
 
     /** Boldur at hex_7_9, brute SW (hex_6_10) = attack target, troll W (hex_6_9) = first hex clockwise from SW. */
@@ -179,16 +201,13 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
 
         $this->respond("card_ability_4_4"); // Rapid Strike II: pay 2 mana, start attack action
         $this->respond("hex_6_10");
-        $this->respond("card_ability_4_5"); // TActionAttack useCard
-        $this->respond("choice_0"); // +1 damage branch (branch 2 is greyed here - no kill yet)
         $this->respond("card_event_4_32"); // Berserk: 1 unpreventable health for +3 damage
 
         // 2 hits + 1 (Sweeping Strike) + 3 (Berserk) = 6 on a 3-health brute -> 3 overkill.
         $this->assertOperation("useCard");
-        $this->assertValidTarget("card_ability_4_5", "cleave must be re-offered on TMonsterKilled");
+        $this->assertValidTarget("card_ability_4_5", "sweep must be re-offered on TMonsterKilled");
         $this->respond("card_ability_4_5");
-        $this->respond("choice_1"); // c_sweep branch
-        $this->skipIfOp("c_sweep");
+        $this->confirmCardEffect(); // sweep onto the troll
 
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "brute killed");
         $this->assertEquals(3, $this->countDamage("monster_troll_1"), "3 overkill swept clockwise onto the troll");
@@ -196,15 +215,14 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
 
     /**
      * Exact reported board: both monsters are 3-health brutes adjacent to Boldur. Target brute
-     * is W of him, second brute is NW = the very next hex clockwise from the target. Player
-     * takes the only enabled pre-attack button ("Add 1 damage to each attack action").
+     * is W of him, second brute is NW = the very next hex clockwise from the target.
      *
-     * Pins current behavior: choosing branch 1 does NOT lock the card out of the later cleave.
-     * Sweeping Strike has no `spendUse` in its `r` expression, so the once-per-turn ability lock
-     * (RULES.md "Abilities (free actions vs. ongoing effects)") never engages - correct, since
-     * both bullets are `on(...)` triggers.
+     * The passive damage does NOT lock the card out of the later sweep. Sweeping Strike has no
+     * `spendUse` in its `r` expression, so the once-per-turn ability lock (RULES.md "Abilities
+     * (free actions vs. ongoing effects)") never engages - correct, since both bullets are
+     * `on(...)` triggers.
      */
-    public function testChoosingAddDamageBranchDoesNotBlockCleave(): void {
+    public function testPassiveDamageDoesNotBlockSweep(): void {
         $sweep = "card_ability_4_5";
         $this->game->tokens->moveToken($sweep, "tableau_" . $this->color);
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
@@ -218,31 +236,29 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
 
         $this->respond("actionAttack");
         $this->respond("hex_6_9");
-        $this->respond($sweep);
-        $this->respond("choice_0"); // the only enabled button on the reporter's screenshot
 
         $this->assertEquals(0, $this->game->tokens->getTokenState($sweep, 0), "card must not be marked used");
         $this->assertOperation("useCard");
-        $this->assertValidTarget($sweep, "cleave must still be offered on TMonsterKilled");
+        $this->assertValidTarget($sweep, "sweep must still be offered on TMonsterKilled");
         $this->respond($sweep);
-        $this->respond("choice_1");
-        $this->skipIfOp("c_sweep");
+        $this->confirmCardEffect(); // sweep onto the NW brute
 
         $this->assertEquals("supply_monster", $this->tokenLocation($target), "target brute killed");
         $this->assertEquals(2, $this->countDamage($second), "2 overkill swept clockwise onto the NW brute");
     }
 
-    public function testSweepStillOfferedWhenActionAttackPromptSkipped(): void {
-        // Reporter saw the second bullet greyed out and may have dismissed the prompt.
-        // Skipping the TActionAttack offer must not forfeit the later cleave offer.
+    public function testPassiveDamageAppliesWhenTheAttackPromptIsSkipped(): void {
+        // The reporter dismissed the pre-attack prompt because the sweep bullet was greyed.
+        // The damage bullet is passive now, so it lands whether or not anything is answered -
+        // the only card still offered at attack time here is Berserk.
         $this->setupRapidStrikeBoard();
 
         $this->respond("card_ability_4_4");
         $this->respond("hex_6_10");
-        $this->skip(); // dismiss the TActionAttack useCard prompt entirely
+        $this->skip(); // decline Berserk
 
-        // 2 hits only = 2 damage on a 3-health brute -> no kill, so no cleave prompt.
-        $this->assertEquals(2, $this->countDamage("monster_brute_1"), "no bonus damage after skipping");
-        $this->assertEquals(0, $this->countDamage("monster_troll_1"), "no cleave without a kill");
+        // 2 hits + 1 passive = 3 on a 3-health brute: exact kill, no overkill to sweep with.
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "brute killed by the passive +1");
+        $this->assertEquals(0, $this->countDamage("monster_troll_1"), "no overkill, so no sweep");
     }
 }

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Cards\CardEquip_Smiterbiter;
 use Bga\Games\Fate\Model\GoldVein;
 use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Trigger;
@@ -30,6 +31,10 @@ use Bga\Games\Fate\OpCommon\Operation;
  *  - target: defender token id (required)
  *  - attacker: attacker token id; defaults to the owner's hero
  *  - amount: damage amount to apply (required)
+ *  - spendsExcess: this damage is drawn from Smiterbiter's pending excess pool. Set by
+ *    Op_c_sweep and Op_c_nailed. Landing it takes that much back out of the pool, and it
+ *    is passed on to the kill trigger, where CardAbility_SweepingStrikeI and
+ *    CardAbility_NailedTogetherI read it to ignore a kill their own effect caused.
  */
 class Op_applyDamage extends Operation {
     public function getPossibleMoves() {
@@ -57,6 +62,11 @@ class Op_applyDamage extends Operation {
                 ]);
                 return;
             }
+        }
+
+        // Withdraw only once the damage is known to land - a refusal above leaves it excess.
+        if ($this->getDataField("spendsExcess")) {
+            $this->getSmiterbiter()?->removePendingExcess($amount);
         }
 
         // 1. Place the red crystals on the defender (was each caller's job).
@@ -93,7 +103,12 @@ class Op_applyDamage extends Operation {
         if ($result["killed"]) {
             $trigger = $defender instanceof Hero ? Trigger::HeroKnockedOut : Trigger::MonsterKilled;
             if (!($defender instanceof GoldVein)) {
-                $this->queueTrigger($trigger);
+                // Carry the flag so a sweep's own kill does not offer that sweep again.
+                $this->queueTrigger($trigger, null, ["spendsExcess" => $this->getDataField("spendsExcess")]);
+                if (!($defender instanceof Hero)) {
+                    // "If you kill a MONSTER" - overkill on a knocked-out hero is not excess.
+                    $this->getSmiterbiter()?->addPendingExcess(-$result["remaining"]);
+                }
             }
             $this->queue("finishKill", null, [
                 "attacker" => $attackerId,
@@ -101,6 +116,25 @@ class Op_applyDamage extends Operation {
                 "amount" => $amount,
             ]);
         }
+    }
+
+    /**
+     * Smiterbiter's pending-excess pool, or null when this damage must not touch it:
+     * a monster's overkill is not the hero's to bank (monster attacks run this same
+     * pipeline and heroes can be overkilled), and outside an attack action nothing
+     * would ever commit the pool, so it would sit on the card forever.
+     */
+    private function getSmiterbiter(): ?CardEquip_Smiterbiter {
+        $attackerId = $this->getDataField("attacker");
+        if ($attackerId !== null && !str_starts_with($attackerId, "hero_")) {
+            return null;
+        }
+        if (!$this->game->machine->findOperation($this->getOwner(), "endOfAttack")) {
+            return null;
+        }
+        /** @var CardEquip_Smiterbiter $card */
+        $card = $this->game->instantiateCard(CardEquip_Smiterbiter::CARD_ID, $this);
+        return $card;
     }
 
     public function canSkip() {

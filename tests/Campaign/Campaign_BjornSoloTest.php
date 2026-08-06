@@ -226,6 +226,49 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
     }
 
+    /**
+     * Level I pierces ONE monster: "all remaining damage may be dealt to a second monster
+     * behind it". Level II is the one that says "and so on". The pierce kill re-fires
+     * TMonsterKilled, so with damage still left over and a third monster further back the card
+     * must not be offered a second time - the same shape as the Sweeping Strike loop.
+     */
+    public function testNailedTogetherIPiercesOnlyOnce(): void {
+        $this->clearMonstersFromMap();
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_ability_1_13", "tableau_$color"); // Nailed Together I
+
+        $this->moveHeroOutOfGrimheim();
+        // Hero at hex_7_9, three monsters straight back: target, pierce victim, then one more.
+        $target = "monster_goblin_20";
+        $second = "monster_goblin_1";
+        $third = "monster_brute_1";
+        $this->game->getMonster($target)->moveTo("hex_6_9", "");
+        $this->game->getMonster($second)->moveTo("hex_5_9", "");
+        $this->game->getMonster($third)->moveTo("hex_4_9", "");
+
+        // Both goblins health 2, pre-damaged 1: 3 hits kill the target with 2 over, the pierce
+        // kills the second with 1 still to spare - which is what could feed a third hit.
+        $this->game->effect_moveCrystals("hero_1", "red", 1, $target, ["message" => ""]);
+        $this->game->effect_moveCrystals("hero_1", "red", 1, $second, ["message" => ""]);
+
+        $this->seedRand([5, 5, 5]); // Bjorn strength 3, all hits
+        $this->respond("actionAttack");
+        $this->respond("hex_6_9");
+
+        $args = $this->getOpArgs();
+        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
+            $this->skip(); // Bjorn hero card fires on the roll - not what this test is about
+        }
+        $this->respond("card_ability_1_13");
+        $this->respond("hex_5_9");
+
+        $args = $this->getOpArgs();
+        $this->assertNotEquals("useCard", $args["type"] ?? "", "the pierce must not offer itself again");
+        $this->assertEquals("supply_monster", $this->tokenLocation($target));
+        $this->assertEquals("supply_monster", $this->tokenLocation($second));
+        $this->assertEquals(0, $this->countDamage($third), "level I pierces one monster, not a chain");
+    }
+
     public function testNailedTogetherIIChainWithChoice(): void {
         $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();
@@ -280,14 +323,15 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         // Choose goblin_1 at hex_5_9 — it dies (1 pre-damage + 2 overkill = 3 ≥ 2), chain continues
         $this->respond("hex_5_9");
 
-        // c_nailed kills now fire TMonsterKilled, which re-prompts useCard for any
-        // on=TMonsterKilled card on the tableau — including Nailed Together II itself.
-        // The chain semantics consume one Nailed Together activation across the whole
-        // pierce sequence, so skip the recursive re-prompt.
+        // The pierce kill fires TMonsterKilled, but CardAbility_NailedTogetherI ignores a kill
+        // the pierce itself caused, so the card is not re-offered - the chain below is the
+        // c_nailed(chain) step Op_c_nailed re-queued. skipIfOp stays as a defensive no-op.
         $this->skipIfOp("useCard");
 
-        // Chain: c_nailed again — brute at hex_4_9 is behind hex_5_9
-        // Auto-resolves since only one monster behind
+        // Chain: c_nailed again — brute at hex_4_9 is the only monster behind hex_5_9. Each
+        // pierce is a "may", so the step asks even with one target rather than auto-resolving.
+        $this->respond("hex_4_9");
+
         // Brute should have 1 damage (chain overkill from goblin_1)
         $this->assertEquals(1, $this->countDamage($brute), "Brute should have 1 chain damage");
         // Both goblins should be dead

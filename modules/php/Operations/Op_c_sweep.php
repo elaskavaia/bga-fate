@@ -6,8 +6,6 @@ namespace Bga\Games\Fate\Operations;
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
-use function Bga\Games\Fate\getPart;
-
 /**
  * c_sweep: Sweeping Strike — carry overkill damage to the next monster clockwise
  * around the hero after killing an adjacent monster in an attack action.
@@ -18,9 +16,10 @@ use function Bga\Games\Fate\getPart;
  *  - Hero is the centre of the "clock"; sweep walks clockwise around the hero's
  *    own ring of 6 adjacent hexes, starting just past the killed hex.
  *  - Hits the first live monster encountered, dealing the overkill amount.
- *  - Hard cap: at most 1 cleave hit per attack (2 enemies total). Damage left
- *    after the cleave kill is wasted — no chain.
- *  - Auto-resolves: cleave is mandatory once the card is in play and a target exists.
+ *  - Hard cap: at most 1 sweep hit per attack (2 enemies total). Damage left
+ *    after the sweep kill is wasted — no chain.
+ *  - Clockwise order picks the victim, so the player only answers yes/no; the card
+ *    says "may", and declining leaves the damage to Smiterbiter as excess.
  *
  * Bails (ERR_NOT_APPLICABLE) when:
  *  - There's no current attack hex.
@@ -28,23 +27,39 @@ use function Bga\Games\Fate\getPart;
  *  - There's no overkill damage left.
  *  - No live monster is found anywhere on the hero's adjacent ring.
  *
+ * Queues its damage with `spendsExcess` (see Op_applyDamage), which does two things: the
+ * damage is taken back out of Smiterbiter's pending pool once it lands, and the kill it
+ * causes does not offer this card again.
+ *
  * Used by: Sweeping Strike I (card_ability_4_5), Sweeping Strike II (card_ability_4_6).
  */
 class Op_c_sweep extends Operation {
     function getPrompt() {
-        return clienttranslate('Sweeping Strike deals ${overkill} damage to ${token_name}');
+        return clienttranslate('Sweeping Strike deals ${overkill} damage to the next monster clockwise');
     }
 
     private function getOverkill(): int {
         return $this->game->tokens->getTokenState("marker_attack", 0);
     }
 
-    private function getKilledHex(): ?string {
+    private function getAttackHex(): ?string {
         return $this->game->getAttackHex();
     }
 
+    /** The monster the sweep would hit - clockwise order picks it, the player does not. */
+    private function getSweepHex(): ?string {
+        $killedHex = $this->getAttackHex();
+        $heroHex = $this->game->getHero($this->getOwner())->getHex();
+        foreach ($this->game->hexMap->getAdjacentHexesClockwise($heroHex, $killedHex) as $hex) {
+            if ($this->game->hexMap->getCharacterOnHex($hex, "monster") !== null) {
+                return $hex;
+            }
+        }
+        return null;
+    }
+
     function getPossibleMoves() {
-        $killedHex = $this->getKilledHex();
+        $killedHex = $this->getAttackHex();
         if ($killedHex === null) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No attack target")];
         }
@@ -58,35 +73,32 @@ class Op_c_sweep extends Operation {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No overkill damage")];
         }
 
-        foreach ($this->game->hexMap->getAdjacentHexesClockwise($heroHex, $killedHex) as $hex) {
-            $charId = $this->game->hexMap->getCharacterOnHex($hex, "monster");
-            if ($charId !== null) {
-                return [$hex => ["q" => Material::RET_OK]];
-            }
+        if ($this->getSweepHex() === null) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No monster to sweep into")];
         }
-        return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No monster to sweep into")];
+        return parent::getPossibleMoves(); // yes/no - there is nothing to pick
     }
 
     function resolve(): void {
-        $targetHex = $this->getCheckedArg();
-        $overkill = $this->getOverkill();
-        $attackerId = $this->game->getHeroTokenId($this->getOwner());
+        $targetHex = $this->getSweepHex();
+        $this->game->systemAssert("ERR:c_sweep:noSweepTarget", $targetHex !== null);
 
-        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
+        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, "monster");
         $this->game->systemAssert("ERR:c_sweep:noMonsterOnHex:$targetHex", $defenderId !== null);
 
         $this->queue("applyDamage", null, [
-            "attacker" => $attackerId,
+            "attacker" => $this->game->getHeroTokenId($this->getOwner()),
             "target" => $defenderId,
-            "amount" => $overkill,
+            "amount" => $this->getOverkill(),
+            "spendsExcess" => true,
         ]);
+    }
+
+    public function canSkip() {
+        return true;
     }
 
     function getExtraArgs() {
         return ["overkill" => $this->getOverkill()];
-    }
-
-    public function getUiArgs() {
-        return ["buttons" => false];
     }
 }

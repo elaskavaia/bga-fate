@@ -161,8 +161,10 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
 
     // --- Smiterbiter (card_equip_4_21) ---
     // r=c_smiter, on=TActionAttack — useCard prompt to spend stored reds for added damage.
-    // Storage path: onMonsterKilled hook auto-pulls min(overkill, 3 - stored) reds onto the
-    // card directly (bypasses useCard / r entirely).
+    // Storage path is passive and lives in the damage pipeline: a kill's overkill is held on
+    // the card as yellow, a sweep takes back what it deals, and Op_endOfAttack commits what
+    // is left to red (max 3). Excess is the remainder after the sweep, not a parallel claim
+    // on it (FORUM.md designer ruling).
 
     public function testSmiterbiterStoresOverkillThenSpendsOnNextAttack(): void {
         $color = $this->getActivePlayerColor();
@@ -202,6 +204,183 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
 
         $this->assertEquals(0, $this->countTokens("crystal_red", $cardId), "All reds spent off card");
         $this->assertEquals(6, $this->countDamage($troll));
+    }
+
+    private const SMITERBITER = "card_equip_4_21";
+    private const SWEEPING_STRIKE = "card_ability_4_5";
+
+    /**
+     * Boldur at hex_5_9 holding Smiterbiter and Sweeping Strike I, two 2-health goblins:
+     * the attack target W of him, the sweep target NW = next clockwise. 5 dice (Boldur I 3 +
+     * First Pick 1 + Smiterbiter 1); 4 hits + the passive 1 = 5 damage, so the first kill
+     * leaves 3 over.
+     */
+    private function setupSweepBoard(string $secondMonster = "monster_goblin_2"): string {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $this->game->tokens->moveToken(self::SWEEPING_STRIKE, "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_4_9", "");
+        $this->game->getMonster($secondMonster)->moveTo("hex_5_8", "");
+        $this->seedRand([5, 5, 5, 5, 1]); // 4 hits + 1 passive = 5 on a 2-health goblin
+        return $color;
+    }
+
+    private function countPending(): int {
+        return $this->countTokens("crystal_yellow", self::SMITERBITER);
+    }
+
+    private function countStored(): int {
+        return $this->countTokens("crystal_red", self::SMITERBITER);
+    }
+
+    /**
+     * The double-dip guard. Before the excess pool existed, Smiterbiter banked the whole
+     * leftover at kill time AND the sweep spent the same leftover again.
+     */
+    public function testSmiterbiterBanksOnlyWhatTheSweepDidNotSpend(): void {
+        $this->setupSweepBoard();
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond(self::SWEEPING_STRIKE);
+        $this->confirmCardEffect(); // sweep the 3 leftover into the second goblin
+        $this->skipIfOp("useCard"); // nothing left to play on the sweep kill
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"), "attack target dead");
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_2"), "second monster dead");
+        $this->assertEquals(1, $this->countStored(), "all 3 leftover were dealt; the 1 stored is what the sweep kill itself left over");
+        $this->assertEquals(0, $this->countPending(), "nothing left pending after the attack");
+    }
+
+    public function testDecliningTheSweepMakesTheWholeLeftoverExcess(): void {
+        $this->setupSweepBoard();
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->skip(); // decline the sweep
+        $this->skipIfOp("useCard");
+
+        $this->assertEquals(3, $this->countStored(), "declining is what makes the damage excess");
+        $this->assertEquals(0, $this->countPending());
+    }
+
+    public function testSweepIntoASurvivorBanksNothing(): void {
+        $this->setupSweepBoard("monster_troll_1"); // health 7, survives 3
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond(self::SWEEPING_STRIKE);
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard");
+
+        $this->assertEquals(3, $this->countDamage("monster_troll_1"), "all 3 leftover were dealt");
+        $this->assertEquals(0, $this->countStored(), "damage that was dealt is not excess");
+        $this->assertEquals(0, $this->countPending());
+    }
+
+    public function testASweepDoesNotEatDamageBankedEarlier(): void {
+        $color = $this->setupSweepBoard();
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, self::SMITERBITER, ["message" => ""]);
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->skipIfOp("useCard"); // decline spending the 2 already stored
+        $this->respond(self::SWEEPING_STRIKE);
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard");
+
+        $this->assertEquals(3, $this->countStored(), "2 banked before the attack plus 1 excess");
+        $this->assertEquals(0, $this->countPending());
+        $this->assertEquals("tableau_$color", $this->tokenLocation(self::SMITERBITER));
+    }
+
+    /**
+     * Monster attacks run the same damage pipeline and also reach Op_endOfAttack, and a hero
+     * CAN be overkilled - evaluateDamage reports the excess before Hero::finalizeDamage clamps
+     * damage to 5. Smiterbiter must not bank a monster's leftover from punching its owner.
+     *
+     * Driven with the automa colour, the way Op_turnMonster queues it, since that owner is what
+     * keeps the whole monster turn out of the player's tableau.
+     */
+    public function testAMonsterOverkillingBoldurBanksNothing(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $this->game->getHero($color)->recalcTrackers();
+
+        $boldurHex = "hex_7_9";
+        $this->game->tokens->moveToken($this->heroId, $boldurHex);
+        $brute = "monster_brute_1"; // strength 3
+        $this->game->getMonster($brute)->moveTo("hex_7_8", "");
+        // 4 damage already taken: 3 hits, 1 absorbed by Boldur's armor, so 2 land on a hero
+        // one hit from knockout - one point of it is overkill.
+        $this->game->effect_moveCrystals($this->heroId, "red", 4, $this->heroId, ["message" => ""]);
+        $this->seedRand([5, 5, 5]);
+
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->game->machine->instantiateOperation("monsterAttack", $this->game->getAutomaColor(), [
+            "char" => $brute,
+            "target" => $boldurHex,
+        ]);
+        $op->resolve();
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(5, $this->countDamage($this->heroId), "sanity: Boldur was knocked out, so there WAS overkill");
+        $this->assertEquals(0, $this->countStored(), "a monster's overkill is not the hero's to bank");
+        $this->assertEquals(0, $this->countPending());
+    }
+
+    /**
+     * "If you kill a monster in an ATTACK ACTION". Damage from anywhere else never reaches
+     * Op_endOfAttack, so a deposit there would sit on the card forever and be banked as the
+     * next attack's excess.
+     */
+    public function testAKillOutsideAnAttackActionDepositsNothing(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $goblin = "monster_goblin_1"; // health 2
+        $this->game->getMonster($goblin)->moveTo("hex_4_9", "");
+
+        // Straight into the damage pipeline with no attack action around it: 5 damage on a
+        // 2-health goblin is 3 overkill, and none of it is excess.
+        $this->game->machine->push("applyDamage", $color, [
+            "attacker" => $this->heroId,
+            "target" => $goblin,
+            "amount" => 5,
+        ]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin), "sanity: the goblin died with damage to spare");
+        $this->assertEquals(0, $this->countPending(), "nothing would ever commit this, so it must not be held");
+        $this->assertEquals(0, $this->countStored());
+    }
+
+    /**
+     * "If you kill a MONSTER". A hero knocked out mid-attack is overkilled the same way
+     * (evaluateDamage reports the excess before Hero::finalizeDamage clamps to 5), but that
+     * leftover is not excess damage and must not be banked. Constructed directly: no shipped
+     * card damages a hero hard enough during its owner's own attack action.
+     */
+    public function testKnockingOutAHeroDuringAnAttackBanksNothing(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $this->game->machine->push("endOfAttack", $color, []); // put us inside an attack action
+        $this->game->machine->push("applyDamage", $color, [
+            "attacker" => $this->heroId,
+            "target" => $this->heroId,
+            "amount" => 7, // health 5, so 2 over
+        ]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals(5, $this->countDamage($this->heroId), "sanity: knocked out, so there WAS overkill");
+        $this->assertEquals(0, $this->countPending(), "a hero's leftover damage is not excess");
+        $this->assertEquals(0, $this->countStored());
     }
 
     // --- Eitri's Pick (card_equip_4_22) ---
