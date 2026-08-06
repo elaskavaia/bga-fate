@@ -555,6 +555,16 @@ These are questions we'd like to put to the designer on BGG. Each lists our curr
 
 3. **Sweeping Strike**
 Boldur is the center of the "clock", so he sweeps around himself, going clockwise around himself. However, he may only hit a maximum of 2 enemies with this effect, any excess damage after that is wasted. (We actually did have an unlimited version in betatesting, but it was simply too powerful.)
+- The damage bullet has no "may" in its card text, so it is applied without asking. Only the sweep prompts. `CardAbility_SweepingStrikeI::onActionAttack` queues the damage effect directly; `r=c_sweep` covers the sweep alone.
+- Clockwise order picks the victim, so the sweep prompt is a plain confirm/skip - there is nothing to select.
+- The 2-enemy cap is enforced by the `spendsExcess` flag: `Op_applyDamage` carries it into the kill trigger, and `onMonsterKilled` ignores a kill the sweep itself caused. Without it the sweep re-offers on its own kill and chains until it runs out of monsters, re-hitting corpses that are still on their hex (the kill trigger fires before `Op_finishKill` clears them).
+
+3b. **Smiterbiter's "excess damage" is the remainder, not a parallel claim**
+Designer ruling (FORUM.md, "Smiterbiter + Sweeping Strike"): *"if your sweeping strike goes against a second monster, the damage is dealt to that monster, so it isn't 'excess damage'."* Excess is therefore only knowable once the attack action is over, which is why storage cannot happen at kill time:
+- `Op_applyDamage` puts a kill's overkill on Smiterbiter as **yellow** crystals (pending), gated on the attacker being the owner's hero and on an `endOfAttack` being queued.
+- The sweep ops (`Op_c_sweep`, `Op_c_nailed`) mark their damage `spendsExcess`, and `Op_applyDamage` withdraws that much when the damage lands - after the Queen I refusal guard, so refused damage stays excess.
+- `Op_endOfAttack` commits what is left to **red**, capped at 3, and returns the remainder to the supply. Capping at deposit time would let a withdrawal eat damage banked on an earlier turn.
+- Yellow because nothing can reach it there: XP is only counted in `tableau_<color>` and `spendGold` is scoped to the host card of its rule. Green would be handed out as free mana by `Op_spendManaAny`, which sweeps every tableau card.
 
 4. **Wrecking Ball**
 - he can only push 1 character. However, he can move that character to the area he came from.
