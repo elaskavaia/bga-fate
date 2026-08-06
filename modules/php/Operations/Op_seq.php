@@ -50,7 +50,7 @@ class Op_seq extends ComplexOperation {
         // cannot look beyond first sub, world can change after its executed
         $sub = $this->delegates[0];
 
-        if ($sub->isVoid()) {
+        if ($sub->noValidTargets()) {
             return $sub->getErrorInfo();
         }
 

@@ -68,10 +68,16 @@ final class Op_addDamageTest extends AbstractOpTestCase {
         $this->assertFalse($op->isVoid());
     }
 
-    public function testNoParamVoid(): void {
+    /**
+     * With no dice on display_battle there is nothing to add damage to. The op is not `isVoid`,
+     * because canSkip() makes it auto-skip rather than becoming a mandatory unsatisfiable
+     * prompt; callers gate on noValidTargets (Op_seq, Op_paygain) rather than on void-ness.
+     */
+    public function testNoParamHasNoTargets(): void {
         $this->game->tokens->moveToken("die_attack_1", "limbo", 1);
         $op = $this->createOp("2addDamage");
-        $this->assertTrue($op->isVoid());
+        $this->assertTrue($op->noValidTargets());
+        $this->assertTrue($op->canSkip(), "auto-skips instead of blocking");
     }
 
     // --- Param: numeric minimum distance ---

@@ -22,7 +22,7 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Operations\Op_seq;
 
-/** Sequence of operations, no user choice. Usually pay/gain that is shown diffrently then sequence */
+/** Sequence of operations, no user choice. Usually pay:gain that is shown diffrently then sequence */
 class Op_paygain extends Op_seq {
     public function requireConfirmation() {
         return true;

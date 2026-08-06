@@ -98,4 +98,11 @@ class Op_addDamage extends CountableOperation {
         $attackerId = $this->game->getHeroTokenId($this->getOwner());
         $this->game->effect_addAttackDiceDamage($attackerId, $amount);
     }
+
+    public function canSkip() {
+        if ($this->noValidTargets()) {
+            return true;
+        }
+        return parent::canSkip();
+    }
 }
