@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-06 (v260806-2001)
+
+- Fixed Sweeping Strike and Smiterbiter double-spending the same damage, and looping after a kill (#235866)
+- Fixed moving inside Grimheim wasting the action (#235653)
+- Fixed card prompts with nothing to pick
+- Fixed Smiterbiter tooltip typos
+
 ## 2026-08-03 (v260803-1041)
 
 - Fixed a second undo in the same turn failing with "Nothing to undo" (#235314)
