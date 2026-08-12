@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-08-12 (v260812-1018)
+
+- Fixed monsters taking no damage once the crystal supply ran out (#237220)
+- Fixed monsters returning from Grimheim still damaged
+
 ## 2026-08-06 (v260806-2001)
 
 - Fixed Sweeping Strike and Smiterbiter double-spending the same damage, and looping after a kill (#235866)
