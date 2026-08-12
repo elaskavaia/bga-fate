@@ -73,6 +73,18 @@ class Monster extends Character {
     }
 
     /**
+     * A monster leaving the supply must arrive pristine. Crystals are parented to the
+     * monster token, so any that slipped into the supply with it would otherwise ride
+     * back onto the board and the token would spawn already damaged (BGA #237220).
+     */
+    function moveTo(string $location, string $message = "*", array $args = []): void {
+        if ($this->game->tokens->getTokenLocation($this->id) === "supply_monster") {
+            $this->game->effect_clearCrystals($this->id, $this->id);
+        }
+        parent::moveTo($location, $message, $args);
+    }
+
+    /**
      * Kill cleanup. Runs from Op_finishKill, after TMonsterKilled has
      * dispatched, so trigger handlers see the monster still on its hex with
      * its bonus crystals intact.

@@ -361,6 +361,18 @@ final class GameTest extends TestCase {
         $this->assertEquals($tableau + 3, $game->tokens->countTokensInLocation("tableau_" . PCOLOR));
     }
 
+    public function testMoveCrystalsGainMintsWhenSupplyIsEmpty() {
+        $game = $this->game;
+        $game->tokens->createAllTokens();
+
+        $game->tokens->moveAllTokensInLocation("supply_crystal_yellow", "limbo");
+
+        $game->effect_moveCrystals("hero_1", "yellow", 3, "tableau_" . PCOLOR);
+
+        $this->assertEquals(3, $game->tokens->countTokensInLocation("tableau_" . PCOLOR));
+        $this->assertEquals(0, $game->tokens->countTokensInLocation("supply_crystal_yellow"));
+    }
+
     public function testMoveCrystalsPay() {
         $game = $this->game;
         $game->tokens->createAllTokens();

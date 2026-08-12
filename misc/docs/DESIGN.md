@@ -385,8 +385,8 @@ These locations hold tokens that are not on the map. They should have a hidden o
 
 - `supply_die_attack` - Attack and damage dice pool
 - `supply_die_monster` - Monster die pool
-- `supply_crystal_green` / `supply_crystal_red` / `supply_crystal_yellow` - Crystal supply pools
-- `supply_monster` - Undeployed monster tiles
+- `supply_crystal_green` / `supply_crystal_red` / `supply_crystal_yellow` - Crystal supply pools. **Unlimited**: the 50 per colour in `token_material.csv` is the physical component count, not a game limit, so `effect_moveCrystals` mints the shortfall when a pool runs dry and ids can run past `_50`.
+- `supply_monster` - Undeployed monster tiles. A monster token in here must hold no crystals - they are parented to the token and would otherwise ride back onto the board on the next spawn. `Monster::moveTo` sweeps on the way out; the kill and Grimheim paths sweep on the way in.
 
 - `deck_monster_yellow` / `deck_monster_red` - Monster card draw piles
 - `display_monsterturn` - Drawn monster cards during reinforcement (cleared at start of next monster turn); state 0 = placed, state 1 = skipped (grayed out)

@@ -30,6 +30,8 @@ use Bga\Games\Fate\States\GameDispatch;
 
 class Game extends Base {
     const GAME_STAGE = "game_stage";
+    /** Sanity bound on a single crystal gain - the supply mints on demand, so nothing else caps it. */
+    const MAX_CRYSTALS_PER_MOVE = 50;
 
     public static Game $instance;
     public OpMachine $machine;
@@ -337,6 +339,20 @@ class Game extends Base {
         }
     }
 
+    /**
+     * The crystal supplies never run out. The 50 of each colour in the box are a component
+     * count, not a game limit, so mint the shortfall rather than silently placing fewer
+     * crystals than the caller asked for (BGA #237220).
+     */
+    private function replenishCrystalSupply(string $type, int $needed): void {
+        $this->systemAssert("ERR:moveCrystals:absurdAmount:$type:$needed", $needed <= self::MAX_CRYSTALS_PER_MOVE);
+        $supply = "supply_crystal_$type";
+        $missing = $needed - count($this->tokens->getTokensOfTypeInLocation("crystal_$type", $supply));
+        for ($i = 0; $i < $missing; $i++) {
+            $this->tokens->createTokenAutoInc("crystal_$type", $supply, 0, 1);
+        }
+    }
+
     function effect_moveCrystals(string $charId, string $type, int $inc, string $location, array $options = []) {
         if ($inc == 0) {
             return;
@@ -348,8 +364,8 @@ class Game extends Base {
         $supply = "supply_crystal_$type";
 
         if ($inc > 0) {
+            $this->replenishCrystalSupply($type, $inc);
             $tokens = $this->tokens->pickTokensForLocation($inc, $supply, $location);
-            // TODO: unlimited? create more if needed
             $this->tokens->dbSetTokensLocation($tokens, $location, 0, $message, $options);
         } else {
             $needed = abs($inc);
@@ -635,6 +651,9 @@ class Game extends Base {
         $isLegend = str_contains($monsterId, "legend");
         $destroyCount = $isLegend ? 3 : 1;
         $this->effect_destroyHouses($destroyCount, $monsterId);
+        // Crystals are parented to the monster token, so they would ride into the supply and
+        // come back on the next spawn - the kill path sweeps them in Monster::finalizeDamage.
+        $this->effect_clearCrystals($monsterId, $monsterId);
         $this->getMonster($monsterId)->moveTo("supply_monster", clienttranslate('${token_name} goes home happy'));
     }
 
