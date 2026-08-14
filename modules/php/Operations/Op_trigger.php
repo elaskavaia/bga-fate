@@ -30,15 +30,19 @@ class Op_trigger extends Operation {
             $this->game->tokens->getTokensOfTypeInLocation("card", "hand_$owner")
         );
 
-        foreach ($cards as $cardId => $card) {
-            $cardObj = $this->game->instantiateCard($card, $this);
-            $cardObj->onTrigger($event);
-        }
-
+        // Quest first: a card effect can kill again (Nailed Together, Sweeping Strike), and
+        // that kill's whole lifecycle including finishKill resolves before anything this
+        // dispatch queued after it - a quest queued behind the effect would then resolve
+        // against a board its kill has already left (BGA #236913).
         $card = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
         if ($card) {
             $cardObj = $this->game->instantiateCard($card, $this);
             $cardObj->triggerQuest($event);
+        }
+
+        foreach ($cards as $cardId => $card) {
+            $cardObj = $this->game->instantiateCard($card, $this);
+            $cardObj->onTrigger($event);
         }
     }
 }
