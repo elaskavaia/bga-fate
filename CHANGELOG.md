@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-15 (v260815-1331)
+
+- Fixed a kill quest halting the game after a multi-kill with Nailed Together or Sweeping Strike (#236913)
+
 ## 2026-08-12 (v260812-1018)
 
 - Fixed monsters taking no damage once the crystal supply ran out (#237220)
