@@ -46,6 +46,11 @@ class Character {
         return false;
     }
 
+    /** This character's attacks bypass the defender's armor. Overridden by Hero for Eagle Eye II. */
+    function canIgnoreArmor(): bool {
+        return false;
+    }
+
     function isInForest(): bool {
         $hex = $this->getHex();
         return $hex !== null && $this->game->hexMap->getHexTerrain($hex) === "forest";

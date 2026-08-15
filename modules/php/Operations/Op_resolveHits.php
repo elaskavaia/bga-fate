@@ -112,7 +112,7 @@ class Op_resolveHits extends Operation {
 
         if ($hits <= 0) {
             $hits = 0;
-        } else {
+        } elseif (!$this->game->getCharacter($attackerId)->canIgnoreArmor()) {
             $defender = $this->game->getCharacter($defenderId);
             $hits = $defender->applyArmor($hits);
         }

@@ -171,6 +171,11 @@ class Hero extends Character {
         return $this->heroNum === 4 ? 1 : 0;
     }
 
+    /** Eagle Eye II: "Always ignore the armor". */
+    function canIgnoreArmor(): bool {
+        return $this->heroHasCardsOnTableau("card_ability_1_10");
+    }
+
     /** Returns the current attack strength from tracker. */
     function getAttackStrength(): int {
         return $this->game->tokens->getTrackerValue($this->owner, "strength");

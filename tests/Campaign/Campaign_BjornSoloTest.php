@@ -132,25 +132,25 @@ class Campaign_BjornSoloTest extends CampaignBaseTest {
         $this->assertContains("actionFocus", $hero->getActionsTaken());
     }
 
-    public function testEagleEyeAddsAttackRange(): void {
+    public function testEagleEyeAddsRangeAndStrength(): void {
         $color = $this->getActivePlayerColor();
         $hero = $this->game->getHero($color);
         $baseRange = $hero->getAttackRange();
         $baseStrength = $hero->getAttackStrength();
 
-        // Eagle Eye I: attack range +1, strength unchanged
+        // Eagle Eye I: attack range +1 and strength +1 (the printed corner badge, BGA #237686)
         $this->game->tokens->moveToken("card_ability_1_9", "tableau_$color");
         $hero->recalcTrackers();
         $this->assertEquals($baseRange + 1, $hero->getAttackRange());
-        $this->assertEquals($baseStrength, $hero->getAttackStrength());
+        $this->assertEquals($baseStrength + 1, $hero->getAttackStrength());
         $this->assertNotValidTarget("card_ability_1_9"); // passive, not a useCard target
 
-        // Swap to Eagle Eye II: attack range +2
+        // Swap to Eagle Eye II: attack range +2 and strength +2
         $this->game->tokens->moveToken("card_ability_1_9", "limbo");
         $this->game->tokens->moveToken("card_ability_1_10", "tableau_$color");
         $hero->recalcTrackers();
         $this->assertEquals($baseRange + 2, $hero->getAttackRange());
-        $this->assertEquals($baseStrength, $hero->getAttackStrength());
+        $this->assertEquals($baseStrength + 2, $hero->getAttackStrength());
     }
 
     public function testLongShotINotOfferedAtRange1(): void {
