@@ -81,6 +81,53 @@ final class Op_moveStepTest extends AbstractOpTestCase {
         $this->assertNotContains("moveStep", $types, "the loop stops on End Move");
     }
 
+    /** Puts Wrecking Ball II on the tableau and a monster in range so the option is live. */
+    private function setUpWreckingBall(): void {
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        $this->game->hexMap->invalidateOccupancy();
+    }
+
+    public function testWreckingBallOfferedAtEveryPrompt(): void {
+        $this->setUpWreckingBall();
+        $first = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
+        $this->assertContains("card_ability_4_8", $first->getArgsTarget(), "offered on the first prompt");
+
+        $later = $this->createOp("moveStep", ["budget" => 1, "moved" => 2]);
+        $this->assertContains("card_ability_4_8", $later->getArgsTarget(), "still offered mid-loop");
+    }
+
+    public function testWreckingBallNotOfferedWithoutOccupantInRange(): void {
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
+        $this->assertNotContains("card_ability_4_8", $op->getArgsTarget(), "nothing in range to ram");
+    }
+
+    public function testWreckingBallNotOfferedOnceBudgetIsSpent(): void {
+        $this->setUpWreckingBall();
+        $op = $this->createOp("moveStep", ["budget" => 0, "moved" => 3]);
+        $this->assertEquals(["endOfMove"], $op->getArgsTarget());
+    }
+
+    public function testWreckingBallHandsRemainingBudgetToPendulumLoop(): void {
+        $this->setUpWreckingBall();
+        $this->createOp("moveStep", ["budget" => 2, "moved" => 1, "reason" => "Op_actionMove"]);
+        $this->call_resolve("card_ability_4_8");
+
+        $this->assertNotContains("moveStep", $this->allQueuedTypes(), "c_wrecking ends the move itself");
+        $wrecking = null;
+        foreach ($this->game->machine->getTopOperations($this->owner) as $row) {
+            if (($row["type"] ?? "") === "c_wrecking") {
+                $wrecking = $this->game->machine->instantiateOperationFromDbRow($row);
+                break;
+            }
+        }
+        $this->assertNotNull($wrecking, "the pendulum loop is queued");
+        $this->assertEquals(2, $wrecking->getDataField("budget"), "the unspent steps carry over");
+        $this->assertEquals("Op_actionMove", $wrecking->getReason(), "reason propagates so the closing trigger is ActionMove");
+    }
+
     public function testBackAndForthReEntryIsAllowed(): void {
         // Step to hex_12_8, then the start hex must be offered again so the player can step back
         // (re-entering areas is the whole point of step mode).

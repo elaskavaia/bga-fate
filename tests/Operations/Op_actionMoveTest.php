@@ -141,21 +141,21 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
         $this->assertSame(3, $data["budget"]);
     }
 
-    public function testWreckingBallOverridesConfirmMovePreference(): void {
+    public function testWreckingBallKeepsConfirmMovePreference(): void {
         $this->enableConfirmMovePreference();
         $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II
         /** @var Op_actionMove */
         $op = $this->op;
         [$type] = $op->getDelegateInfo();
-        $this->assertEquals("[1,3]move", $type, "Wrecking Ball owns the move loop even with the preference on");
+        $this->assertEquals("moveStep", $type, "Wrecking Ball no longer vetoes step mode -- moveStep offers it too");
     }
 
-    public function testWreckingBallDisablesStepMode(): void {
+    public function testWreckingBallDoesNotDisableStepMode(): void {
         $this->game->tokens->moveToken("card_ability_2_6", "tableau_" . PCOLOR); // step incentive
         $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II
         /** @var Op_actionMove */
         $op = $this->op;
         [$type] = $op->getDelegateInfo();
-        $this->assertEquals("[1,3]move", $type, "Wrecking Ball owns the move loop; step mode stays off");
+        $this->assertEquals("moveStep", $type, "a step incentive still wins with Wrecking Ball on the tableau");
     }
 }

@@ -29,9 +29,10 @@ use function Bga\Games\Fate\getPart;
  *   - card_ability_4_7 Wrecking Ball I
  *   - card_ability_4_8 Wrecking Ball II (also passive +1 move)
  *
- * Wired in via Op_move::getPossibleMoves (Orebiter pattern): when the card is
- * on the tableau and at least one adjacent hex is occupied, the card id is
- * offered as an extra move target. Picking it dispatches here.
+ * Wired in via Op_move::getPossibleMoves and Op_moveStep::getPossibleMoves
+ * (Orebiter pattern): when the card is on the tableau and at least one adjacent
+ * hex is occupied, the card id is offered as an extra move target. Picking it
+ * dispatches here.
  *
  * Two phases per iteration, gated by whether the `displaced` data field is set:
  *   - displaced unset: pick next destination hex (any non-impassable adjacent hex)

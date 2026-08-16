@@ -183,7 +183,7 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - the active quest (top of `deck_equip_<owner>`) has `quest_on=TStep`, or is a hardcoded custom step-quest (`STEP_QUEST_CARDS`, e.g. Shield's "enter Ogre Valley" branch), or
 - a tableau card reacts per step - a bespoke `onStep` hook (Treetreader II) or declarative `on=TStep`.
 
-Wrecking Ball is excluded (it owns its own move loop via `Op_c_wrecking`). Each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, on "End Move", budget exhaustion, or entering Grimheim. The loop re-queues itself with the reduced budget until then. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum. `Trigger::Step` is the root of the movement chain (`Move`'s parent), so a card `on=TStep` fires on every step including the last; `on=TMove` fires only on the last.
+Wrecking Ball is not excluded: `Op_moveStep` offers the card as an extra target at every prompt (same rule as `Op_move`), scoped to the budget still left. Picking it hands the remaining budget to `Op_c_wrecking`, which ends the move itself. Each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, on "End Move", budget exhaustion, or entering Grimheim. The loop re-queues itself with the reduced budget until then. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum. `Trigger::Step` is the root of the movement chain (`Move`'s parent), so a card `on=TStep` fires on every step including the last; `on=TMove` fires only on the last.
 
 
 ### Monster Die Variant

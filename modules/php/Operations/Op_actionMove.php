@@ -25,11 +25,6 @@ use Bga\Games\Fate\OpCommon\Operation;
  * player can route deliberately. See DESIGN.md "Step-by-step Move".
  */
 class Op_actionMove extends Operation {
-    // Boldur's Wrecking Ball runs its own movement loop (Op_c_wrecking via Op_move); leave that
-    // path intact rather than overriding it with step mode.
-    private const WRECKING_BALL_I = "card_ability_4_7";
-    private const WRECKING_BALL_II = "card_ability_4_8";
-
     // Custom quests whose triggerQuest reacts to TStep but have no declarative quest_on=TStep
     // to read (their step logic lives in a bespoke override). Add new ones here.
     private const STEP_QUEST_CARDS = ["card_equip_4_16"]; // Shield - "enter Ogre Valley" branch
@@ -74,15 +69,11 @@ class Op_actionMove extends Operation {
     /**
      * True when a deliberate route matters this move: the player asked for step mode via the
      * MA_PREF_CONFIRM_MOVE preference, the active quest fires per step, or a tableau card reacts
-     * on each step. Disabled while Wrecking Ball is available (it owns the move loop).
-     * See DESIGN.md "Step-by-step Move".
+     * on each step. See DESIGN.md "Step-by-step Move".
      */
     private function hasStepIncentive(): bool {
         $owner = $this->getOwner();
         $hero = $this->game->getHero($owner);
-        if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_I, self::WRECKING_BALL_II)) {
-            return false;
-        }
         if ($this->game->getUserPreference($this->getPlayerId(), Material::MA_PREF_CONFIRM_MOVE) == 1) {
             return true;
         }

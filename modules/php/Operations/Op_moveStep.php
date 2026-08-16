@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -66,6 +67,11 @@ class Op_moveStep extends Operation {
         $targets = [];
         if ($budget > 0) {
             $targets = array_keys($this->game->hexMap->getReachableHexes($hero->getHex(), $budget, $hero));
+            // Wrecking Ball stays on offer at every prompt, scoped to the budget still left.
+            $wreckingCard = $hero->getWreckingCard();
+            if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($hero->getHex(), $budget)) {
+                $targets[] = $wreckingCard;
+            }
         }
         // Offer the early-stop only after at least one step (keeps the "move at least 1 area" minimum).
         if ($this->getMoved() >= 1) {
@@ -80,6 +86,17 @@ class Op_moveStep extends Operation {
 
         if ($arg === "endOfMove") {
             $this->queueFinalTrigger();
+            return;
+        }
+
+        // Wrecking Ball hands the rest of the budget to its own pendulum loop, which ends the
+        // move itself (its "End Move" sentinel fires the closing trigger) -- do not re-queue here.
+        if ($arg === Hero::WRECKING_BALL_I || $arg === Hero::WRECKING_BALL_II) {
+            $this->queue("c_wrecking", null, [
+                "budget" => $this->getBudget(),
+                "card" => $arg,
+                "reason" => $this->getReason(),
+            ]);
             return;
         }
 
