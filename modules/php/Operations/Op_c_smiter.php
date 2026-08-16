@@ -39,7 +39,7 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_c_smiter extends CountableOperation {
     function getPrompt() {
-        return clienttranslate('Spend stored damage from ${place_name}');
+        return clienttranslate("Spend stored damage from Smiterbiter");
     }
 
     private function getCardId(): string {
