@@ -75,6 +75,11 @@ class GameWrapper extends Game implements HarnessGameInterface {
 
     // ── Debug functions ──────────────────────────────────────────────────────
 
+    /** Set a player preference (e.g. 102 = confirm end of movement) for the rest of the run. */
+    public function debug_setPreference(int $code, int $value): void {
+        $this->userPreferences->_set((int) $this->getCurrentPlayerId(), $code, $value);
+    }
+
     /** Reset and set up a 1-player game with hero 1 (Bjorn). */
     public function debug_setupGame_h1(): void {
         $this->setupGameWithHero(1);

@@ -63,10 +63,6 @@ class GameUT extends Game {
         $this->_setPlayerBasicInfoFromColors($colors);
     }
 
-    function getUserPreference(int $player_id, int $code): int {
-        return 0;
-    }
-
     private ?array $heroOrder = [1, 2, 3, 4]; // deterministic by default in tests
 
     public function setHeroOrder(array $order): void {
