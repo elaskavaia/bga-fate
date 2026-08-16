@@ -137,4 +137,12 @@ final class Op_killMonsterTest extends AbstractOpTestCase {
         $diceOnDisplay = $this->game->tokens->getTokensOfTypeInLocation("die_attack", "display_battle");
         $this->assertCount(0, $diceOnDisplay);
     }
+
+    public function testArmorDoesNotBluntAnOutrightKill(): void {
+        // Draugr has armor=1; a kill effect is not damage, so it must not survive on 1 health.
+        $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_draugr_1"));
+    }
 }

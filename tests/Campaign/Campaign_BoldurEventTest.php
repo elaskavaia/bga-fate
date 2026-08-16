@@ -147,33 +147,51 @@ class Campaign_BoldurEventTest extends CampaignBaseTest {
     // --- Dodge (card_event_4_35) ---
     // r=2preventDamage, on=TResolveHits — reactively prevent up to 2 incoming damage.
 
-    public function testDodgePreventsIncomingMonsterDamage(): void {
-        $color = $this->getActivePlayerColor();
-        $dodge = "card_event_4_35_1";
-        $this->seedHand($dodge, $color);
-
-        // Move Boldur out of Grimheim, place a goblin adjacent so it attacks on the monster turn.
+    /** Boldur under attack on the monster turn, with $hits guaranteed hits from an adjacent $monster. */
+    private function runMonsterAttackOnBoldur(string $monster, int $hits): void {
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
-        $goblin = "monster_goblin_20";
-        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
-        $this->seedRand([5]); // goblin str=1 — one guaranteed hit
+        $this->game->getMonster($monster)->moveTo("hex_7_8", "");
+        $this->seedRand(array_fill(0, $hits, 5));
 
-        // Burn both player actions → end of player turn → monster turn → goblin attacks Boldur.
+        // Burn both player actions → end of player turn → monster turn → the monster attacks Boldur.
         $this->respond("actionPractice");
         $this->respond("actionFocus");
 
         $this->skipOp("turn");
         $this->skipOp("drawEvent");
+    }
+
+    public function testDodgePreventsIncomingMonsterDamage(): void {
+        $color = $this->getActivePlayerColor();
+        $dodge = "card_event_4_35_1";
+        $this->seedHand($dodge, $color);
+
+        // Brute str=3 → 3 hits; Boldur's armor eats 1, leaving 2 for Dodge to prevent.
+        $this->runMonsterAttackOnBoldur("monster_brute_15", 3);
 
         // TResolveHits fires before dealDamage resolves — Dodge offered as a useCard target.
         $this->assertOperation("useCard");
         $this->assertValidTarget($dodge);
         $this->respond($dodge);
 
-        // 1 hit prevented (Dodge prevents up to 2, only 1 incoming) → Boldur takes 0 damage.
         $this->assertEquals(0, $this->countDamage($this->heroId));
         // Card moved out of hand (discarded after use).
         $this->assertNotEquals("hand_$color", $this->tokenLocation($dodge));
+    }
+
+    /**
+     * BGA #236177: armor resolves before prevention (FORUM.md:6519), so a hit Boldur's
+     * armor fully absorbs must not offer Dodge - the card would be spent for nothing.
+     */
+    public function testDodgeNotOfferedWhenArmorAbsorbsTheWholeHit(): void {
+        $color = $this->getActivePlayerColor();
+        $dodge = "card_event_4_35_1";
+        $this->seedHand($dodge, $color);
+
+        $this->runMonsterAttackOnBoldur("monster_goblin_20", 1); // goblin str=1 — armor eats it
+
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertEquals("hand_$color", $this->tokenLocation($dodge), "Dodge stays in hand");
     }
 
     // --- Rest (card_event_4_30) ---
@@ -221,6 +239,26 @@ class Campaign_BoldurEventTest extends CampaignBaseTest {
         $this->assertEquals($newHex, $this->tokenLocation($troll), "Troll was moved by Kick");
         $this->assertNotEquals("hex_7_8", $newHex, "Troll moved off its original hex");
         $this->assertNotEquals("hand_$color", $this->tokenLocation($kick), "Kick discarded after use");
+    }
+
+    /**
+     * BGA #236177: Draugr armor prevents 1 damage "each time it is dealt damage"
+     * (RULES.md:350), not just damage from attack dice. Kick's single point bounces off.
+     */
+    public function testKickDamageIsAbsorbedByDraugrArmor(): void {
+        $color = $this->getActivePlayerColor();
+        $kick = "card_event_4_31_1";
+        $this->seedHand($kick, $color);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $draugr = "monster_draugr_1";
+        $this->game->getMonster($draugr)->moveTo("hex_7_8", "");
+
+        $this->respond($kick);
+        $this->assertOperation("moveMonster");
+        $this->respond($this->getOpArgs()["target"][0]);
+
+        $this->assertEquals(0, $this->countDamage($draugr), "Draugr armor absorbs Kick's single damage");
     }
 
     // --- Maneuver (card_event_4_29) ---

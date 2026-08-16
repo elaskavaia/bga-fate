@@ -218,7 +218,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.16.7 | Die side **Rune** = MISS (some effects key off it). | [RULES.md:299](RULES.md#L299) | side 3 = `rune`; base `countHit` returns 0; Dead/Boldur overrides hook | ✅ |
 | R.16.8 | "This attack action" cards may be played after the dice roll. | [RULES.md:301](RULES.md#L301) | `Trigger::Roll` and `Trigger::ActionAttack` post-roll | ✅ |
 | R.16.9 | Defender prevention during resolution. | [RULES.md:301](RULES.md#L301) | `Trigger::ResolveHits` queued to defender before damage applied (`Op_resolveHits.php:122`) | ✅ |
-| R.16.10 | After all modifying effects, sum hits and apply damage. | [RULES.md:301](RULES.md#L301) | `countHits` → `applyArmor` → `Op_dealDamage` → `Op_applyDamage` | ✅ |
+| R.16.10 | After all modifying effects, sum hits and apply damage. | [RULES.md:301](RULES.md#L301) | `countHits` → `Op_dealDamage` (`applyArmor`) → `Op_applyDamage` | ✅ |
 | R.16.11 | Monster damage = damage dice; ≥ health → killed. | [RULES.md:303](RULES.md#L303) | `Op_applyDamage` places red crystals; `evaluateDamage` triggers `MonsterKilled` | ✅ |
 | R.16.12 | Hero damage = red crystals; ≥ health → knocked out. | [RULES.md:304](RULES.md#L304) | same path; KO when totalDamage ≥ effectiveHealth | ✅ |
 
@@ -239,7 +239,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.18.2 | **Goblin additional effect** — moves 2 areas (3 with charge). | [RULES.md:322](RULES.md#L322) | Goblin `move=2`; `Op_monsterMoveAll` loops `move` steps; charge adds +1 | ✅ |
 | R.18.3 | **Fire Horde effect** — range 2. Applies to Legend fire horde. | [RULES.md:336](RULES.md#L336) | `Monster::getAttackRange` returns 2 for `firehorde`; Surt is the only firehorde legend (Seer is Dead) | ✅ |
 | R.18.4 | **Dead effect** — runes count as hits when the dead attack. Applies to Queen. | [RULES.md:348](RULES.md#L348) | `Monster::countHit` upgrades rune → hit for `faction=dead`; Queen has it | ✅ |
-| R.18.5 | **Draugr armor** — prevents 1 damage per damage event. | [RULES.md:350](RULES.md#L350) | Draugr armor=1 in CSV; `applyArmor` in `Op_resolveHits::queueDamage` | ✅ |
+| R.18.5 | **Draugr armor** — prevents 1 damage per damage event. | [RULES.md:350](RULES.md#L350) | Draugr armor=1 in CSV; `applyArmor` in `Op_dealDamage::getEffectiveDamage` (every preventable damage source, BGA #236177) | ✅ |
 | R.18.6 | Per-monster stat lines per the rulebook table. | [RULES.md:324–356](RULES.md#L324) | material CSVs | ✅ |
 
 ## 19. Legends

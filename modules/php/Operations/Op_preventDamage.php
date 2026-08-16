@@ -62,6 +62,11 @@ class Op_preventDamage extends CountableOperation {
         if ($this->getParam(0) === "adj" && !$this->attackerIsAdjacent($incoming)) {
             return ["q" => Material::ERR_NOT_APPLICABLE];
         }
+        // Armor resolves first (designer ruling), so a hit it fully absorbs leaves
+        // nothing to prevent - do not burn a once-per-turn card on it.
+        if ($incoming->getEffectiveDamage() <= 0) {
+            return ["q" => Material::ERR_NOT_APPLICABLE];
+        }
         return parent::getPossibleMoves();
     }
 
@@ -91,7 +96,7 @@ class Op_preventDamage extends CountableOperation {
 
     function getCurrentDamage(): int {
         $dealDamageOp = $this->findDealDamageOp(true);
-        return $dealDamageOp ? (int) $dealDamageOp->getCount() : 0;
+        return $dealDamageOp ? $dealDamageOp->getEffectiveDamage() : 0;
     }
 
     #[Override]
@@ -100,7 +105,9 @@ class Op_preventDamage extends CountableOperation {
         $this->game->systemAssert("ERR:preventDamage:noDealDamageOnStack", $dealDamageOp);
 
         $currentCount = (int) $dealDamageOp->getCount();
-        $prevented = min((int) $this->getCount(), $currentCount);
+        // Clamp against post-armor damage, but subtract from the raw count - armor is
+        // re-applied when dealDamage resolves and must not be double-counted here.
+        $prevented = min((int) $this->getCount(), $dealDamageOp->getEffectiveDamage());
         $newCount = $currentCount - $prevented;
 
         $this->game->machine->setCounts($dealDamageOp, $newCount);

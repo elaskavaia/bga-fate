@@ -90,22 +90,46 @@ class Op_dealDamage extends CountableOperation {
         return (int) $this->getCount();
     }
 
+    /** An outright kill effect is not damage, so armor cannot blunt it. Overridden by Op_killMonster. */
+    protected function isArmorApplicable(): bool {
+        return true;
+    }
+
+    function getAttackerId(): string {
+        return (string) ($this->getDataField("attacker") ?? $this->game->getHeroTokenId($this->getOwner()));
+    }
+
+    /**
+     * Damage that will actually land once the defender's armor has absorbed its share.
+     * Op_preventDamage reads this so a prevention card is only offered (and only spent)
+     * on damage armor did not already eat.
+     */
+    function getEffectiveDamage(?string $targetHex = null): int {
+        $targetHex ??= (string) $this->getDataField("target", "");
+        $defenderId = $targetHex ? $this->game->hexMap->getCharacterOnHex($targetHex, null) : null;
+        if ($defenderId === null) {
+            return (int) $this->getCount();
+        }
+        $amount = $this->getDamageAmount($defenderId);
+        if ($amount <= 0 || !$this->isArmorApplicable() || $this->game->getCharacter($this->getAttackerId())->canIgnoreArmor()) {
+            return $amount;
+        }
+        return $this->game->getCharacter($defenderId)->applyArmor($amount);
+    }
+
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
-        $attackerId = $this->getDataField("attacker");
-        if ($attackerId === null) {
-            $attackerId = $this->game->getHeroTokenId($this->getOwner());
-        }
-
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null);
         if (!$defenderId) {
             $this->notifyMessage(clienttranslate("hmm, attack target no longer there, let's move on"));
             return;
         }
 
-        $amount = $this->getDamageAmount($defenderId);
-
-        $this->queue("applyDamage", null, ["attacker" => $attackerId, "target" => $defenderId, "amount" => $amount]);
+        $this->queue("applyDamage", null, [
+            "attacker" => $this->getAttackerId(),
+            "target" => $defenderId,
+            "amount" => $this->getEffectiveDamage($targetHex),
+        ]);
     }
 
     public function canSkip() {

@@ -137,6 +137,44 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
         $this->assertStringContainsString('${max}', $prompt);
     }
 
+    // -------------------------------------------------------------------------
+    // Armor resolves before prevention (FORUM.md:6519) — a prevention card is
+    // only offered on, and only spends itself against, what armor left over.
+    // -------------------------------------------------------------------------
+
+    private function initBoldurUnderAttack(int $count): void {
+        $this->init(4); // Boldur, armor=1
+        $this->game->tokens->moveToken("hero_4", "hex_11_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
+        // Monster-turn ops are automa-owned; using the player color here would make
+        // retargetCounterAttackDamage mistake this incoming hit for a counter-attack.
+        $this->game->machine->push("dealDamage", $this->game->getAutomaColor(), [
+            "target" => "hex_11_8",
+            "attacker" => "monster_goblin_1",
+            "count" => $count,
+        ]);
+    }
+
+    public function testNotOfferedWhenArmorAbsorbsEverything(): void {
+        $this->initBoldurUnderAttack(1);
+        $this->createOp("1preventDamage");
+        $this->assertNoValidTargets("armor already ate the only hit - nothing left to prevent");
+    }
+
+    public function testMaxExcludesTheDamageArmorAbsorbs(): void {
+        $this->initBoldurUnderAttack(3);
+        $op = $this->createOp("1preventDamage");
+        $this->assertEquals(2, $op->getCurrentDamage());
+    }
+
+    public function testPreventionStacksWithArmorWithoutDoubleCounting(): void {
+        $this->initBoldurUnderAttack(3);
+        $this->createOp("1preventDamage")->resolve();
+        $pending = $this->game->machine->findOperation(null, "dealDamage");
+        $this->assertEquals(2, (int) $pending->getCount(), "prevention comes off the raw count");
+        $this->assertEquals(1, $pending->getEffectiveDamage(), "3 damage - 1 prevented - 1 armor, armor counted once");
+    }
+
     public function testGetCurrentDamageReflectsPostPreventCount(): void {
         $this->queueDealDamage(5);
         $op = $this->createOp("2preventDamage");

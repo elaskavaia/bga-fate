@@ -38,4 +38,8 @@ class Op_killMonster extends Op_dealDamage {
         $monster = $this->game->getMonster($defenderId);
         return $monster->getRemainingHealth();
     }
+
+    protected function isArmorApplicable(): bool {
+        return false;
+    }
 }

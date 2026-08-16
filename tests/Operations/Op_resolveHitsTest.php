@@ -49,13 +49,16 @@ final class Op_resolveHitsTest extends AbstractOpTestCase {
         ]);
         $op->resolve();
 
-        // 1 hit - 1 armor = 0 → dealDamage queued with count=0 (per-defender side effects still fire,
-        // amount=0 is benign: effect_moveCrystals no-ops on 0, evaluateDamage(0) is harmless).
+        // resolveHits passes raw hits along; armor is taken off inside Op_dealDamage (BGA #236177),
+        // so prevention effects see what armor left rather than the raw roll.
         $ops = $this->game->machine->getAllOperations(PCOLOR);
         $dealDamageOps = array_values(array_filter($ops, fn($o) => str_contains($o["type"], "dealDamage")));
         $this->assertCount(1, $dealDamageOps, "dealDamage queued even when armor absorbs all hits");
         $d = $this->opData($dealDamageOps[0]);
-        $this->assertEquals(0, (int) $d["count"]);
+        $this->assertEquals(1, (int) $d["count"], "raw hits are carried; armor is applied when dealDamage resolves");
+
+        $this->dispatchAll();
+        $this->assertEquals(0, $this->countRedCrystals("monster_draugr_1"), "armor absorbs the single hit");
     }
 
     public function testNoArmorMonsterTakesFullDamage(): void {

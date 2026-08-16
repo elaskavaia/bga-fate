@@ -269,4 +269,60 @@ final class Op_dealDamageTest extends AbstractOpTestCase {
         $this->dispatchAll();
         $this->assertEquals(1, $this->getDamage("monster_goblin_1"));
     }
+
+    // -------------------------------------------------------------------------
+    // Armor (BGA #236177) — Draugr armor=1 absorbs 1 from every damage event,
+    // not just attack-dice damage. RULES.md:350, FORUM.md:481.
+    // -------------------------------------------------------------------------
+
+    private function placeDraugr(): void {
+        $this->game->tokens->moveToken("monster_draugr_1", "hex_12_8");
+    }
+
+    public function testArmorAbsorbsSinglePointOfCardDamage(): void {
+        $this->placeDraugr();
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->assertEquals(0, $this->getDamage("monster_draugr_1"));
+    }
+
+    public function testArmorAbsorbsOnlyOnePerDamageEvent(): void {
+        $this->placeDraugr();
+        $this->createOp("3dealDamage");
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->assertEquals(2, $this->getDamage("monster_draugr_1"));
+    }
+
+    public function testArmorAppliesAgainToASecondDamageEvent(): void {
+        $this->placeDraugr();
+        $this->createOp("2dealDamage");
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->createOp("2dealDamage")->action_resolve([Operation::ARG_TARGET => "hex_12_8"]);
+        $this->dispatchAll();
+        $this->assertEquals(2, $this->getDamage("monster_draugr_1"), "each event is armored separately, not the turn total");
+    }
+
+    public function testEagleEyeIIIgnoresArmorOnCardDamage(): void {
+        $this->placeDraugr();
+        $this->game->tokens->moveToken("card_ability_1_10", $this->getPlayersTableau());
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->assertEquals(1, $this->getDamage("monster_draugr_1"));
+    }
+
+    public function testUnarmoredMonsterTakesFullCardDamage(): void {
+        $this->game->tokens->moveToken("monster_troll_1", "hex_12_8");
+        $this->createOp("3dealDamage");
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll();
+        $this->assertEquals(3, $this->getDamage("monster_troll_1"));
+    }
+
+    public function testGetEffectiveDamageReportsPostArmorAmount(): void {
+        $this->placeDraugr();
+        $op = $this->createOp("2dealDamage", ["target" => "hex_12_8"]);
+        $this->assertEquals(1, $op->getEffectiveDamage());
+    }
 }

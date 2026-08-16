@@ -110,12 +110,7 @@ class Op_resolveHits extends Operation {
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
         $this->game->systemAssert("ERR:resolveHits:noCharOnHex:$targetHex", $defenderId !== null);
 
-        if ($hits <= 0) {
-            $hits = 0;
-        } elseif (!$this->game->getCharacter($attackerId)->canIgnoreArmor()) {
-            $defender = $this->game->getCharacter($defenderId);
-            $hits = $defender->applyArmor($hits);
-        }
+        $hits = max(0, $hits);
 
         $defenderOwner = str_starts_with($defenderId, "hero_") ? $this->game->getHeroOwner($defenderId) : null;
         if ($defenderOwner) {
