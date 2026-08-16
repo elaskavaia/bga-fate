@@ -74,7 +74,7 @@ class Op_c_sweep extends Operation {
         }
 
         if ($this->getSweepHex() === null) {
-            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No monster to sweep into")];
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No monster adjacent to hero")];
         }
         return parent::getPossibleMoves(); // yes/no - there is nothing to pick
     }

@@ -129,6 +129,100 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countDamage($third), "the third monster is beyond the 2-enemy cap");
     }
 
+    /** Find a log entry whose template contains $needle. */
+    private function findLog(string $needle): ?string {
+        foreach ($this->game->notify->_getNotifications() as $notif) {
+            $log = $notif["log"] ?? "";
+            if (is_string($log) && str_contains($log, $needle)) {
+                return $log;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Smiterbiter's stored damage is what lands the kill here. It is spent from the card, not
+     * drawn from the pending-excess pool, so it must not carry `spendsExcess` and must not
+     * suppress the sweep the way the sweep's own kill does.
+     */
+    public function testSweepOfferedWhenSmiterbiterDamageLandsTheKill(): void {
+        $sweep = "card_ability_4_5";
+        $smiter = "card_equip_4_21";
+        $rapid = "card_ability_4_4";
+        $this->clearEquipDecks();
+        $this->game->tokens->moveToken($sweep, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($smiter, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($rapid, "tableau_" . $this->color);
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $rapid, ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "red", 3, $smiter, ["message" => ""]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $primary = "monster_skeleton_1"; // health 3, NW of Boldur
+        $second = "monster_skeleton_2"; // NE = next clockwise
+        $this->game->getMonster($primary)->moveTo("hex_6_9", "");
+        $this->game->getMonster($second)->moveTo("hex_7_8", "");
+
+        $this->seedRand([5, 5, 1, 1]); // 2 hits + 1 passive = 3, exactly lethal before Smiterbiter
+
+        $this->respond($rapid);
+        $this->respond("hex_6_9");
+        $this->respond($smiter);
+        $this->respond("3"); // 3 stored damage -> 6 total, 3 overkill
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($sweep, "Smiterbiter's damage must not suppress the sweep");
+    }
+
+    /**
+     * The clock is centred on Boldur, not on the monster he killed - a monster that only
+     * touches the corpse is out of reach. Silently skipping that reads as a broken card,
+     * so the void sweep names its missing precondition in the log.
+     */
+    public function testVoidSweepIsExplainedInTheLog(): void {
+        $cardId = "card_ability_4_5";
+        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+
+        $primary = "monster_goblin_1"; // NW of Boldur
+        $second = "monster_goblin_2"; // touches the goblin, not Boldur
+        $this->game->getMonster($primary)->moveTo("hex_6_9", "");
+        $this->game->getMonster($second)->moveTo("hex_5_9", "");
+
+        $this->seedRand([5, 5, 5, 5]); // 4 hits + 1 passive = 5 vs health 2 -> 3 overkill wasted
+
+        $this->respond("actionAttack");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($primary));
+        $this->assertEquals(0, $this->countDamage($second), "out of reach - the sweep ring is Boldur's own");
+        $this->assertNotNull($this->findLog("not used"), "the void sweep must say why it did nothing");
+    }
+
+    /** Kills outside an attack action never involved the card - no explanation to give. */
+    public function testNoExplanationForKillsOutsideAnAttack(): void {
+        $cardId = "card_ability_4_5";
+        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_6_9", "");
+
+        $this->seedRand([5, 5, 5, 5]);
+        $this->respond("actionAttack");
+        $this->skipIfOp("useCard");
+        $notifsBefore = count($this->game->notify->_getNotifications());
+
+        // A free-action kill: marker_attack is back in limbo, so the card never applied.
+        $op = $this->game->machine->instantiateOperation("applyDamage", $this->color, [
+            "target" => "monster_goblin_2",
+            "amount" => 5,
+        ]);
+        $this->game->getMonster("monster_goblin_2")->moveTo("hex_7_8", "");
+        $op->action_resolve(["target" => "monster_goblin_2"]);
+
+        $logs = array_slice($this->game->notify->_getNotifications(), $notifsBefore);
+        foreach ($logs as $notif) {
+            $this->assertStringNotContainsString("not used", (string) ($notif["log"] ?? ""));
+        }
+    }
+
     public function testSweepingStrikeIDoesNotSweepWithoutOverkill(): void {
         // Goblin health=2, armor=0. 1 hit + 1 sweep die = 2 damage → exact kill, 0 overkill.
         // c_sweep should bail on ERR_NOT_APPLICABLE; the second goblin takes nothing.

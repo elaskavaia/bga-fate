@@ -38,9 +38,26 @@ class CardAbility_SweepingStrikeI extends CardGeneric {
         }
         // Guard like CardGeneric::onTriggerDefault: without overkill c_sweep is void and the
         // card must not re-prompt with an empty target list (BGA #233927).
-        if (!$this->canBePlayed($event)) {
+        $errorRes = [];
+        if (!$this->canBePlayed($event, $errorRes)) {
+            $this->explainMiss($errorRes);
             return;
         }
         $this->promptUseCard($event);
+    }
+
+    /**
+     * A void sweep is indistinguishable from a card that forgot to fire, and the clock is
+     * centred on the hero rather than on the monster he killed - a distinction players
+     * regularly miss. Name the missing precondition in the log instead of going quiet.
+     */
+    private function explainMiss(array $errorRes): void {
+        if ($this->game->getAttackHex() === null) {
+            return; // kill outside an attack action - the card never applied in the first place
+        }
+        $this->game->notifyMessage(clienttranslate('${token_name} not used: ${reason_tr}'), [
+            "token_name" => $this->id,
+            "reason_tr" => $errorRes["err"] ?? "",
+        ]);
     }
 }

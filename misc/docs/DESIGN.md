@@ -557,6 +557,7 @@ These are questions we'd like to put to the designer on BGG. Each lists our curr
 Boldur is the center of the "clock", so he sweeps around himself, going clockwise around himself. However, he may only hit a maximum of 2 enemies with this effect, any excess damage after that is wasted. (We actually did have an unlimited version in betatesting, but it was simply too powerful.)
 - The damage bullet has no "may" in its card text, so it is applied without asking. Only the sweep prompts. `CardAbility_SweepingStrikeI::onActionAttack` queues the damage effect directly; `r=c_sweep` covers the sweep alone.
 - Clockwise order picks the victim, so the sweep prompt is a plain confirm/skip - there is nothing to select.
+- A void sweep logs why (`CardAbility_SweepingStrikeI::explainMiss`). Players read the clock as centred on the monster rather than on Boldur, so a monster that only touches the corpse looks like a missed trigger. Kills outside an attack action are excluded - the card never applied there.
 - The 2-enemy cap is enforced by the `spendsExcess` flag: `Op_applyDamage` carries it into the kill trigger, and `onMonsterKilled` ignores a kill the sweep itself caused. Without it the sweep re-offers on its own kill and chains until it runs out of monsters, re-hitting corpses that are still on their hex (the kill trigger fires before `Op_finishKill` clears them).
 
 3b. **Smiterbiter's "excess damage" is the remainder, not a parallel claim**
