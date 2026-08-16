@@ -10,14 +10,15 @@
     "watch:scss": "sass --watch src/css/Game.scss fate.css",
     "watch": "npm run watch:ts && npm run watch:scss",
     "build": "npm run build:ts && npm run build:scss && npm run genmat",
-    "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests && npm run play",
+    "predeploy": "npm run build && npm run lint:php && npm run tests && npm run jstests && npm run play && npm run sync:check",
     "genmat": "php8.4 misc/other/genmat.php misc/*.csv",
     "lint:php": "find modules/php/ -name '*.php' -exec php -l {} + && echo 'All PHP files OK'",
     "test": "APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit  --display-deprecations --display-warnings --bootstrap ./tests/_autoload.php",
     "tests": "npm run test -- tests",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap ./tests/_autoload.php --coverage-text",
     "jstests": "NODE_OPTIONS='--disable-warning=MODULE_TYPELESS_PACKAGE_JSON' TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts",
-    "play": "php8.4 tests/Harness/play.php && ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts"
+    "play": "php8.4 tests/Harness/play.php && ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts",
+    "sync:check": "python3 misc/other/sync_check.py"
   },
   "author": "Alena Laskavaia",
   "license": "EPL2.0",
