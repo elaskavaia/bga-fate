@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
+use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -38,9 +39,6 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  * Treetreader (move(forest)).
  */
 class Op_move extends CountableOperation {
-    private const WRECKING_BALL_I = "card_ability_4_7";
-    private const WRECKING_BALL_II = "card_ability_4_8";
-
     function getPrompt() {
         return clienttranslate("Select where to move");
     }
@@ -77,8 +75,8 @@ class Op_move extends CountableOperation {
         // Wrecking Ball: extends the move target list with a "ram into occupied"
         // choice when the card is on the tableau and at least one adjacent hex
         // is occupied by a character.
-        $wreckingCard = $this->getWreckingCard();
-        if ($wreckingCard !== null && $this->hasReachableOccupiedHex($currentHex, $maxSteps)) {
+        $wreckingCard = $hero->getWreckingCard();
+        if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($currentHex, $maxSteps)) {
             $targets[] = $wreckingCard;
         }
 
@@ -90,7 +88,7 @@ class Op_move extends CountableOperation {
         $hero = $this->game->getHero($this->getOwner());
 
         // Wrecking Ball: dispatch to the pendulum loop instead of the precomputed path.
-        if ($target === self::WRECKING_BALL_I || $target === self::WRECKING_BALL_II) {
+        if ($target === Hero::WRECKING_BALL_I || $target === Hero::WRECKING_BALL_II) {
             $this->queue("c_wrecking", null, [
                 "budget" => $hero->getNumberOfMoves(),
                 "card" => $target,
@@ -116,39 +114,6 @@ class Op_move extends CountableOperation {
                 "reason" => $this->getReason(),
             ]);
         }
-    }
-
-    private function getWreckingCard(): ?string {
-        $hero = $this->game->getHero($this->getOwner());
-        if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_II)) {
-            return self::WRECKING_BALL_II;
-        }
-        if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_I)) {
-            return self::WRECKING_BALL_I;
-        }
-        return null;
-    }
-
-    /**
-     * Wrecking Ball is worth offering if any occupied hex sits within the move budget —
-     * the pendulum loop in Op_c_wrecking lets Boldur walk in first and then ram. Using a
-     * straight-line hex distance is fine because c_wrecking can pass through any non-
-     * impassable hex (including occupied ones), so terrain isn't a meaningful filter here.
-     */
-    private function hasReachableOccupiedHex(string $heroHex, int $budget): bool {
-        foreach ($this->game->hexMap->getOccupancyMap() as $hexId => $_chars) {
-            if ($hexId === $heroHex) {
-                continue;
-            }
-            // Only character-occupied hexes can be rammed; ignore stuff like crystals.
-            if ($this->game->hexMap->getCharacterOnHex($hexId) === null) {
-                continue;
-            }
-            if ($this->game->hexMap->getHexDistance($heroHex, $hexId) <= $budget) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public function getUiArgs() {

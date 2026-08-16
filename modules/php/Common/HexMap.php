@@ -470,6 +470,27 @@ class HexMap {
         return $this->firstCharacter($occ[$hexId] ?? [], $characterType);
     }
 
+    /**
+     * True if any character-occupied hex sits within $budget of $heroHex. Uses straight-line hex
+     * distance on purpose: the Wrecking Ball loop that consults this can pass through any
+     * non-impassable hex (including occupied ones), so terrain isn't a meaningful filter here.
+     */
+    function hasReachableOccupiedHex(string $heroHex, int $budget): bool {
+        foreach ($this->getOccupancyMap() as $hexId => $_chars) {
+            if ($hexId === $heroHex) {
+                continue;
+            }
+            // Only character-occupied hexes can be rammed; ignore stuff like crystals.
+            if ($this->getCharacterOnHex($hexId) === null) {
+                continue;
+            }
+            if ($this->getHexDistance($heroHex, $hexId) <= $budget) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** True if $character can traverse this hex as an intermediate step of a multi-hex move.
      *  Allows occupied hexes for characters that can ignore occupancy (Fleetfoot II). */
     function canPassThrough(string $hexId, Character $character): bool {

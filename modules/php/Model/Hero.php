@@ -22,6 +22,9 @@ use function Bga\Games\Fate\getPart;
  * Hero character: has an owner (player color), tableau with cards, and derived stats.
  */
 class Hero extends Character {
+    public const WRECKING_BALL_I = "card_ability_4_7";
+    public const WRECKING_BALL_II = "card_ability_4_8";
+
     private string $owner;
     private int $heroNum;
 
@@ -101,6 +104,17 @@ class Hero extends Character {
             }
         }
         return false;
+    }
+
+    /** Boldur's Wrecking Ball card on the tableau (level II wins), or null. */
+    function getWreckingCard(): ?string {
+        if ($this->heroHasCardsOnTableau(self::WRECKING_BALL_II)) {
+            return self::WRECKING_BALL_II;
+        }
+        if ($this->heroHasCardsOnTableau(self::WRECKING_BALL_I)) {
+            return self::WRECKING_BALL_I;
+        }
+        return null;
     }
 
     /** Returns all cards in this hero's hand. */
@@ -246,7 +260,7 @@ class Hero extends Character {
     /** Compute base move range. Default is 3, Embla (hero 3) has 4. Wrecking Ball II grants +1. */
     function calcBaseMove(): int {
         $base = $this->heroNum === 3 ? 4 : 3;
-        if ($this->heroHasCardsOnTableau("card_ability_4_8")) {
+        if ($this->heroHasCardsOnTableau(self::WRECKING_BALL_II)) {
             $base += 1;
         }
         return $base;
