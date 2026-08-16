@@ -179,6 +179,7 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 
 `actionMove` normally delegates to `Op_move` (one click walks the shortest path to the chosen hex, up to N areas). When the acting hero has an active **per-step incentive** it delegates to `Op_moveStep` instead - a budgeted loop that lets the player route deliberately: each click is one hop (or a fast multi-hop to a far hex), and the hero may step back and forth to re-enter areas. `Op_actionMove::hasStepIncentive` enables it when:
 
+- the player turned on the "Confirm end of movement" preference (`Material::MA_PREF_CONFIRM_MOVE`, id 102 in `gamepreferences.json`, off by default) - step mode then applies to every move of that player, or
 - the active quest (top of `deck_equip_<owner>`) has `quest_on=TStep`, or is a hardcoded custom step-quest (`STEP_QUEST_CARDS`, e.g. Shield's "enter Ogre Valley" branch), or
 - a tableau card reacts per step - a bespoke `onStep` hook (Treetreader II) or declarative `on=TStep`.
 

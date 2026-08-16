@@ -13,5 +13,21 @@
       }
     },
     "default": 1
+  },
+  "102": {
+    "$comment": "MA_PREF_CONFIRM_MOVE",
+    "name": "Confirm end of movement",
+    "needReload": false,
+    "values": {
+      "1": {
+        "name": "Confirm",
+        "description": "Move one area at a time, with the number of remaining areas shown, until you press End Move"
+      },
+      "0": {
+        "name": "Do not Confirm",
+        "description": "One click moves the hero all the way to the destination"
+      }
+    },
+    "default": 0
   }
 }

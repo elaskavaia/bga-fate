@@ -72,15 +72,19 @@ class Op_actionMove extends Operation {
     }
 
     /**
-     * True when a deliberate route matters this move: the active quest fires per step, or a
-     * tableau card reacts on each step. Disabled while Wrecking Ball is available (it owns the
-     * move loop). See DESIGN.md "Step-by-step Move".
+     * True when a deliberate route matters this move: the player asked for step mode via the
+     * MA_PREF_CONFIRM_MOVE preference, the active quest fires per step, or a tableau card reacts
+     * on each step. Disabled while Wrecking Ball is available (it owns the move loop).
+     * See DESIGN.md "Step-by-step Move".
      */
     private function hasStepIncentive(): bool {
         $owner = $this->getOwner();
         $hero = $this->game->getHero($owner);
         if ($hero->heroHasCardsOnTableau(self::WRECKING_BALL_I, self::WRECKING_BALL_II)) {
             return false;
+        }
+        if ($this->game->getUserPreference($this->getPlayerId(), Material::MA_PREF_CONFIRM_MOVE) == 1) {
+            return true;
         }
         // Active quest (top of the equipment deck) that advances per step: declarative
         // quest_on=TStep, or a hardcoded custom quest whose step logic is in a bespoke override.

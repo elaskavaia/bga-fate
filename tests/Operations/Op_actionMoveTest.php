@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Material;
 use Bga\Games\Fate\Operations\Op_actionMove;
 
 final class Op_actionMoveTest extends AbstractOpTestCase {
@@ -125,6 +126,28 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
         $op = $this->op;
         [$type] = $op->getDelegateInfo();
         $this->assertEquals("[1,3]move", $type, "an on=custom card is not a step incentive");
+    }
+
+    private function enableConfirmMovePreference(): void {
+        $this->game->userPreferences->_set(PCOLOR_ID, Material::MA_PREF_CONFIRM_MOVE, 1);
+    }
+
+    public function testConfirmMovePreferenceEnablesStepMode(): void {
+        $this->enableConfirmMovePreference();
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type, $data] = $op->getDelegateInfo();
+        $this->assertEquals("moveStep", $type, "preference forces step mode without any card incentive");
+        $this->assertSame(3, $data["budget"]);
+    }
+
+    public function testWreckingBallOverridesConfirmMovePreference(): void {
+        $this->enableConfirmMovePreference();
+        $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("[1,3]move", $type, "Wrecking Ball owns the move loop even with the preference on");
     }
 
     public function testWreckingBallDisablesStepMode(): void {

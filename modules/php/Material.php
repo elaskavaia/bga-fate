@@ -27,6 +27,7 @@ class Material {
     const ERR_SILENT = 100;
 
     const MA_PREF_CONFIRM_TURN = 101;
+    const MA_PREF_CONFIRM_MOVE = 102;
 
     const TIME_TRACK_SHORT_LENGTH = 12;
     const TIME_TRACK_LONG_LENGTH = 16;
