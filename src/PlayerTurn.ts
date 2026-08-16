@@ -12,9 +12,13 @@
 import { getPart } from "./Game0Basics";
 import { GameMachine } from "./GameMachine";
 import type { Game } from "./Game";
-import { ParamInfo } from "./types";
+import { OpInfo, ParamInfo } from "./types";
+
+type OpRenderer = (opInfo: OpInfo) => void;
 
 export class PlayerTurn extends GameMachine {
+  private onLeavingHook?: () => void;
+
   constructor(game: Game, bga: Bga) {
     super(game, bga);
   }
@@ -24,17 +28,52 @@ export class PlayerTurn extends GameMachine {
       // merge private
       const priv = args._private;
       delete args._private;
-      super.onEnteringStatePrivate({ ...args, ...priv });
+      this.onEnteringStatePrivate({ ...args, ...priv });
     } else {
-      super.onEnteringStatePrivate(args);
+      this.onEnteringStatePrivate(args);
     }
+  }
+
+  onEnteringStatePrivate(opInfo: OpInfo) {
+    this.runLeavingHook();
+    $("ebd-body").dataset.optype = opInfo.type;
+    super.onEnteringStatePrivate(opInfo);
+    const renderer = (this as any)[`onEntering_Op_${opInfo.type}`] as OpRenderer | undefined;
+    if (renderer) renderer.call(this, opInfo);
   }
 
   onLeavingState(args: any, isCurrentPlayerActive: boolean) {
     super.onLeavingState(args);
+    this.runLeavingHook();
+  }
+
+  private runLeavingHook() {
+    const hook = this.onLeavingHook;
+    this.onLeavingHook = undefined;
+    if (hook) hook();
+    $("ebd-body").dataset.optype = undefined;
   }
 
   onPlayerActivationChange(args: any, isCurrentPlayerActive: boolean) {}
+
+  onEntering_Op_turn(opInfo: OpInfo) {
+    let anyActiveHexes = false;
+    document.querySelectorAll(".hex").forEach((node: any) => {
+      if (opInfo.info[node.id]) {
+        node.dataset.action = (opInfo.info[node.id] as any).action;
+        anyActiveHexes = true;
+      }
+    });
+    if (anyActiveHexes) {
+      $("map_area").classList.add("fadeinactive");
+    }
+    this.onLeavingHook = () => {
+      document.querySelectorAll(".hex").forEach((node: any) => {
+        node.dataset.action = undefined;
+      });
+      $("map_area").classList.remove("fadeinactive");
+    };
+  }
 
   createCustomButtonImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
     if (target.startsWith("action")) {

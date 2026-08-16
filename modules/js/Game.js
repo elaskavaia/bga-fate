@@ -2402,16 +2402,50 @@ class PlayerTurn extends GameMachine {
             // merge private
             const priv = args._private;
             delete args._private;
-            super.onEnteringStatePrivate({ ...args, ...priv });
+            this.onEnteringStatePrivate({ ...args, ...priv });
         }
         else {
-            super.onEnteringStatePrivate(args);
+            this.onEnteringStatePrivate(args);
         }
+    }
+    onEnteringStatePrivate(opInfo) {
+        this.runLeavingHook();
+        $("ebd-body").dataset.optype = opInfo.type;
+        super.onEnteringStatePrivate(opInfo);
+        const renderer = this[`onEntering_Op_${opInfo.type}`];
+        if (renderer)
+            renderer.call(this, opInfo);
     }
     onLeavingState(args, isCurrentPlayerActive) {
         super.onLeavingState(args);
+        this.runLeavingHook();
+    }
+    runLeavingHook() {
+        const hook = this.onLeavingHook;
+        this.onLeavingHook = undefined;
+        if (hook)
+            hook();
+        $("ebd-body").dataset.optype = undefined;
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
+    onEntering_Op_turn(opInfo) {
+        let anyActiveHexes = false;
+        document.querySelectorAll(".hex").forEach((node) => {
+            if (opInfo.info[node.id]) {
+                node.dataset.action = opInfo.info[node.id].action;
+                anyActiveHexes = true;
+            }
+        });
+        if (anyActiveHexes) {
+            $("map_area").classList.add("fadeinactive");
+        }
+        this.onLeavingHook = () => {
+            document.querySelectorAll(".hex").forEach((node) => {
+                node.dataset.action = undefined;
+            });
+            $("map_area").classList.remove("fadeinactive");
+        };
+    }
     createCustomButtonImageHtml(target, paramInfo) {
         if (target.startsWith("action")) {
             const opKey = `Op_${target}`;

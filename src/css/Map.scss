@@ -8,6 +8,7 @@ $hex-width-pct: calc(100% / $grid-cols); // one hex width as % of map_area
 $hex-height-pct: calc(100% / $grid-rows * 2); // one hex height as % of map_area (hex-height = 2 * hex-size)
 $hex-bg: #d4c9a8;
 $hex-bg-hover: #8ec2ac67;
+
 $hex-border-color: #8b7d5e;
 $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 
@@ -86,5 +87,23 @@ $hex-clip: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     top: 50%;
     left: 50%;
     translate: -50% -50%;
+  }
+  // Turn action selection: dim what is not a target, tint move targets green
+  $hex-bg-dimmed: #00000073;
+  $hex-bg-move: #4caf5047;
+  $hex-bg-attack: #f443368c;
+
+  .fadeinactive & {
+    &:not(.active_slot)::after {
+      background-color: $hex-bg-dimmed;
+    }
+
+    &[data-action="actionMove"]::after {
+      background-color: $hex-bg-move;
+    }
+
+    &[data-action="actionAttack"]::after {
+      background-color: $hex-bg-attack;
+    }
   }
 }

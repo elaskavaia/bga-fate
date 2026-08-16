@@ -125,6 +125,15 @@
   left: 50%;
   translate: -50% -50%;
 }
+.fadeinactive .hex:not(.active_slot)::after {
+  background-color: rgba(0, 0, 0, 0.4509803922);
+}
+.fadeinactive .hex[data-action=actionMove]::after {
+  background-color: rgba(76, 175, 80, 0.2784313725);
+}
+.fadeinactive .hex[data-action=actionAttack]::after {
+  background-color: rgba(244, 67, 54, 0.5490196078);
+}
 
 /**
  * fate.scss
