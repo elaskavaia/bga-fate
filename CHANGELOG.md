@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-16 (v260816-0944)
+
+- Fixed Eagle Eye missing its +1/+2 attack strength, and Eagle Eye II now ignores armor (#237686)
+
 ## 2026-08-15 (v260815-1331)
 
 - Fixed a kill quest halting the game after a multi-kill with Nailed Together or Sweeping Strike (#236913)
