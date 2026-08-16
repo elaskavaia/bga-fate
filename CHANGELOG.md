@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-16 (v260816-1201)
+
+- Move and attack targets are now tinted on the map during action selection
+- Sweeping Strike now explains in the log when it has no monster to sweep into
+- Fixed the Smiterbiter prompt showing a raw variable name
+
 ## 2026-08-16 (v260816-0944)
 
 - Fixed Eagle Eye missing its +1/+2 attack strength, and Eagle Eye II now ignores armor (#237686)
