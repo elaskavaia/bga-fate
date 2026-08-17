@@ -540,13 +540,17 @@ class Game extends Base {
         return $count;
     }
 
-    /** Count mountain-terrain hexes adjacent to the active hero. Used by evaluateExpression("countAdjMountains"). */
+    /** Count mountain-terrain hexes adjacent to the active hero, including the hero's own hex (RULES.md Adjacency). Used by evaluateExpression("countAdjMountains"). */
     function countAdjMountains(?string $owner = null, $context = null, $options = null): int {
         $heroHex = $this->getHero($owner)->getHex();
         if ($heroHex === null) {
             return 0;
         }
         $count = 0;
+        // RULES.md Adjacency: own area's terrain counts as adjacent too (BGA #238473)
+        if ($this->hexMap->getHexTerrain($heroHex) === "mountain") {
+            $count++;
+        }
         foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
             if ($this->hexMap->getHexTerrain($hex) === "mountain") {
                 $count++;
