@@ -546,6 +546,10 @@ class Game extends Base {
         if ($heroHex === null) {
             return 0;
         }
+        // RULES.md Grimheim: heroes in town cannot interact with terrain outside it.
+        if ($this->hexMap->isInGrimheim($heroHex)) {
+            return 0;
+        }
         $count = 0;
         // RULES.md Adjacency: own area's terrain counts as adjacent too (BGA #238473)
         if ($this->hexMap->getHexTerrain($heroHex) === "mountain") {

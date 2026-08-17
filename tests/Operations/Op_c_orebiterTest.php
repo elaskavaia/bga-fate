@@ -28,8 +28,9 @@ final class Op_c_orebiterTest extends AbstractOpTestCase {
     }
 
     public function testNoAdjacentMountainNoValidTargets(): void {
-        // Move hero to a hex with no mountain neighbors (Grimheim hex_8_9).
-        $this->game->tokens->moveToken("hero_4", "hex_8_9");
+        // Plains hex_7_9 has no mountain on it or next to it - and is outside Grimheim,
+        // so this exercises the empty target walk, not the Grimheim short-circuit.
+        $this->game->tokens->moveToken("hero_4", "hex_7_9");
         $this->createOp();
 
         $this->assertNoValidTargets();
@@ -43,6 +44,15 @@ final class Op_c_orebiterTest extends AbstractOpTestCase {
         $this->assertValidTarget("hex_6_6");
         $this->assertValidTarget("hex_5_7"); // neighbor mountains still offered
         $this->assertValidTarget("hex_6_7");
+    }
+
+    public function testGrimheimBorderMountainIsNotTarget(): void {
+        // Grimheim isolation (RULES.md): no terrain interaction from inside town,
+        // even though mountain hex_9_11 is axially adjacent to border hex_9_10.
+        $this->game->tokens->moveToken("hero_4", "hex_9_10");
+        $this->createOp(null, ["reason" => "Op_actionAttack"]);
+
+        $this->assertNoValidTargets();
     }
 
     public function testResolvePlacesGoldVeinAndQueuesRoll(): void {
