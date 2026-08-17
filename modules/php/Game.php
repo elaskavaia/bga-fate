@@ -451,7 +451,7 @@ class Game extends Base {
     function effect_rollAttackDice(string $attackerId, string $defenderHex, int $strength, bool $add = false): void {
         $this->notifyMessage(clienttranslate('${char_name} attacks ${token_name} with strength ${strength}'), [
             "char_name" => $attackerId,
-            "token_name" => $this->game->hexMap->getCharacterOnHex($defenderHex),
+            "token_name" => $this->game->hexMap->getCharacterOnHex($defenderHex, null, $attackerId),
             "strength" => $strength,
         ]);
 

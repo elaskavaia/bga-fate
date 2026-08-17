@@ -552,6 +552,7 @@ These are questions we'd like to put to the designer on BGG. Each lists our curr
 2. **Orebiter - you attack the mountain, not a monster, and it consumes your attack action**: "You may attack adjacent mountain areas. For each damage dealt, gain 1 gold [XP]." Clarified by the designer:
    - Orebiter is activated by spending the **attack action on the player board** - same slot the regular attack action uses. The target is an **adjacent mountain hex**, not a monster. You're rolling dice to hit the gold vein; every point of damage dealt becomes 1 gold [XP].
    - Because the attack action slot is consumed, you **cannot attack monsters with your attack action on the same turn**. Swift Strike (and any other free-action / triggered attack source) is still available - the restriction is on the main attack action only.
+   - Adjacency includes the hero's own hex (BGA #238473 ruling): standing on a mountain, the hero may mine it. The gold vein then shares the hex with the attacker, so defender resolution in the attack pipeline (`Op_resolveHits`, `Op_dealDamage`, `Op_addDamage`, the roll announcement) passes the attacker as the `$excludeId` argument of `HexMap::getCharacterOnHex` - an attacker is never its own defender.
 
 
 3. **Sweeping Strike**

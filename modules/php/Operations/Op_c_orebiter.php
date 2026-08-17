@@ -31,7 +31,8 @@ class Op_c_orebiter extends Operation {
         $hero = $this->game->getHero($this->getOwner());
         $heroHex = $hero->getHex();
         $targets = [];
-        foreach ($this->game->hexMap->getAdjacentHexes($heroHex) as $hex) {
+        // RULES.md Adjacency (BGA #238473): the hero's own hex counts as adjacent terrain.
+        foreach ([$heroHex, ...$this->game->hexMap->getAdjacentHexes($heroHex)] as $hex) {
             if ($this->game->hexMap->getHexTerrain($hex) === "mountain") {
                 $targets[$hex] = ["q" => Material::RET_OK];
             }

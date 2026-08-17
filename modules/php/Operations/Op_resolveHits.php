@@ -107,7 +107,8 @@ class Op_resolveHits extends Operation {
 
     /** Queue a dealDamage for one half of a split. Always queues (even 0 hits) so per-defender side effects fire. */
     private function queueDamage(string $attackerId, string $targetHex, int $hits): void {
-        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
+        // Exclude the attacker: it shares the hex with its target when Orebiter mines the hero's own hex.
+        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null, $attackerId);
         $this->game->systemAssert("ERR:resolveHits:noCharOnHex:$targetHex", $defenderId !== null);
 
         $hits = max(0, $hits);

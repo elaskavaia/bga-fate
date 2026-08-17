@@ -57,7 +57,9 @@ class Op_addDamage extends CountableOperation {
         if ($hex === null) {
             return false;
         }
-        $defenderId = $this->game->hexMap->getCharacterOnHex($hex, null);
+        // Exclude the owner's hero: it shares the hex with its target when Orebiter mines the hero's own hex
+        // (addDamage only fires on hero-initiated rolls, so the hero is never the legitimate defender here).
+        $defenderId = $this->game->hexMap->getCharacterOnHex($hex, null, $this->game->getHeroTokenId($this->getOwner()));
         if ($defenderId === null) {
             return false;
         }

@@ -427,9 +427,13 @@ class HexMap {
      * look it up directly by id.
      * @param array<string, int> $entry flat tokenId => state hash for one hex
      * @param string|null $characterType optional filter: "hero" or "monster"
+     * @param string|null $excludeId token to skip - a character is never its own co-occupant of interest
      */
-    private function firstCharacter(array $entry, ?string $characterType = null): ?string {
+    private function firstCharacter(array $entry, ?string $characterType = null, ?string $excludeId = null): ?string {
         foreach (array_keys($entry) as $id) {
+            if ($id === $excludeId) {
+                continue;
+            }
             $p = getPart($id, 0);
             if ($p !== "hero" && $p !== "monster") {
                 continue;
@@ -464,10 +468,12 @@ class HexMap {
      * If multiple characters share the hex (transient overlap), returns one arbitrarily.
      * @param string $hexId hex to check
      * @param string|null $characterType optional filter: "hero" or "monster"
+     * @param string|null $excludeId token to skip - lets attack code resolve the defender
+     *        when the attacker shares the hex with its target (Orebiter own-hex mining)
      */
-    function getCharacterOnHex(string $hexId, ?string $characterType = null): ?string {
+    function getCharacterOnHex(string $hexId, ?string $characterType = null, ?string $excludeId = null): ?string {
         $occ = $this->getOccupancyMap();
-        return $this->firstCharacter($occ[$hexId] ?? [], $characterType);
+        return $this->firstCharacter($occ[$hexId] ?? [], $characterType, $excludeId);
     }
 
     /**

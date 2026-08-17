@@ -35,6 +35,16 @@ final class Op_c_orebiterTest extends AbstractOpTestCase {
         $this->assertNoValidTargets();
     }
 
+    public function testOwnMountainHexIsValidTarget(): void {
+        // BGA #238473 adjacency: standing ON a Troll Caves mountain, the own hex is minable.
+        $this->game->tokens->moveToken("hero_4", "hex_6_6");
+        $this->createOp(null, ["reason" => "Op_actionAttack"]);
+
+        $this->assertValidTarget("hex_6_6");
+        $this->assertValidTarget("hex_5_7"); // neighbor mountains still offered
+        $this->assertValidTarget("hex_6_7");
+    }
+
     public function testResolvePlacesGoldVeinAndQueuesRoll(): void {
         $this->call_resolve("hex_5_7");
 

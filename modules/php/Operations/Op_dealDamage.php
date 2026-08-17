@@ -106,7 +106,8 @@ class Op_dealDamage extends CountableOperation {
      */
     function getEffectiveDamage(?string $targetHex = null): int {
         $targetHex ??= (string) $this->getDataField("target", "");
-        $defenderId = $targetHex ? $this->game->hexMap->getCharacterOnHex($targetHex, null) : null;
+        // Exclude the attacker: it shares the hex with its target when Orebiter mines the hero's own hex.
+        $defenderId = $targetHex ? $this->game->hexMap->getCharacterOnHex($targetHex, null, $this->getAttackerId()) : null;
         if ($defenderId === null) {
             return (int) $this->getCount();
         }
@@ -119,7 +120,7 @@ class Op_dealDamage extends CountableOperation {
 
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
-        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null);
+        $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex, null, $this->getAttackerId());
         if (!$defenderId) {
             $this->notifyMessage(clienttranslate("hmm, attack target no longer there, let's move on"));
             return;

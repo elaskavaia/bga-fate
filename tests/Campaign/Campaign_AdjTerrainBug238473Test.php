@@ -72,4 +72,33 @@ class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
         $this->assertNotNull($newTop, "deck_equip should have a new top card");
         $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
     }
+
+    /**
+     * Orebiter (card_equip_4_19) end to end from ON the mountain: the own hex is
+     * offered, the gold vein placed there resolves as the defender (not the hero
+     * sharing the hex), and each hit pays 1 gold [XP]. Neighbor-hex mining is
+     * covered by Campaign_BoldurEquipTest::testOrebiterMinesGoldFromAdjacentMountain.
+     */
+    public function testOrebiterMinesTheMountainHeroStandsOn(): void {
+        $orebiter = "card_equip_4_19";
+        $this->clearHand($this->color);
+        $this->game->tokens->moveToken($orebiter, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_6_6");
+
+        $xpBefore = $this->countXp();
+        $damageBefore = $this->countDamage($this->heroId);
+        $strength = $this->game->getHero($this->color)->getAttackStrength();
+        $this->seedRand(array_fill(0, $strength, 5)); // all hits
+
+        // No monsters on the map: the attack auto-resolves onto the Orebiter card,
+        // then Op_c_orebiter prompts for the mountain hex.
+        $this->respond("actionAttack");
+        $this->assertValidTarget("hex_6_6", "own mountain hex is an Orebiter target");
+        $this->respond("hex_6_6");
+
+        $this->assertEquals($xpBefore + $strength, $this->countXp(), "1 gold per damage dealt");
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goldvein"));
+        $this->assertEquals($damageBefore, $this->countDamage($this->heroId), "hero must not become his own defender");
+        $this->assertEquals("hex_6_6", $this->tokenLocation($this->heroId), "hero stays on the mined hex");
+    }
 }
