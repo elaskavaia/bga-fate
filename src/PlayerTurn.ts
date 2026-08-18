@@ -57,10 +57,23 @@ export class PlayerTurn extends GameMachine {
   onPlayerActivationChange(args: any, isCurrentPlayerActive: boolean) {}
 
   onEntering_Op_turn(opInfo: OpInfo) {
+    this.markHexes(opInfo);
+  }
+  onEntering_Op_moveStep(opInfo: OpInfo) {
+    this.markHexes(opInfo, "actionMove");
+  }
+  onEntering_Op_move(opInfo: OpInfo) {
+    this.markHexes(opInfo, "actionMove");
+  }
+  onEntering_Op_c_wrecking(opInfo: OpInfo) {
+    this.markHexes(opInfo, "actionMove");
+  }
+
+  markHexes(opInfo: OpInfo, actionFallback?: string) {
     let anyActiveHexes = false;
     document.querySelectorAll(".hex").forEach((node: any) => {
       if (opInfo.info[node.id]) {
-        node.dataset.action = (opInfo.info[node.id] as any).action;
+        node.dataset.action = (opInfo.info[node.id] as any).action ?? actionFallback;
         anyActiveHexes = true;
       }
     });

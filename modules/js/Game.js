@@ -2429,10 +2429,22 @@ class PlayerTurn extends GameMachine {
     }
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
     onEntering_Op_turn(opInfo) {
+        this.markHexes(opInfo);
+    }
+    onEntering_Op_moveStep(opInfo) {
+        this.markHexes(opInfo, "actionMove");
+    }
+    onEntering_Op_move(opInfo) {
+        this.markHexes(opInfo, "actionMove");
+    }
+    onEntering_Op_c_wrecking(opInfo) {
+        this.markHexes(opInfo, "actionMove");
+    }
+    markHexes(opInfo, actionFallback) {
         let anyActiveHexes = false;
         document.querySelectorAll(".hex").forEach((node) => {
             if (opInfo.info[node.id]) {
-                node.dataset.action = opInfo.info[node.id].action;
+                node.dataset.action = opInfo.info[node.id].action ?? actionFallback;
                 anyActiveHexes = true;
             }
         });

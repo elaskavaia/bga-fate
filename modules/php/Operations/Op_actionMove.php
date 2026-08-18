@@ -117,6 +117,6 @@ class Op_actionMove extends Operation {
     }
 
     function getPrompt() {
-        return clienttranslate("Select where to move");
+        return clienttranslate("Choose where to move");
     }
 }

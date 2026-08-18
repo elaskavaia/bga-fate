@@ -58,7 +58,7 @@ class Op_moveMonster extends CountableOperation {
             // check if monster still alive
             $monsterId = $this->game->hexMap->getCharacterOnHex($monsterHex, "monster");
             if ($monsterId) {
-                return clienttranslate("Select where to move the monster");
+                return clienttranslate("Choose where to move the monster");
             } else {
                 return clienttranslate("Looks like your monster is dead");
             }

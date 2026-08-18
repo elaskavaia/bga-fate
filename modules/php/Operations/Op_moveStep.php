@@ -49,7 +49,7 @@ class Op_moveStep extends Operation {
     }
 
     function getPrompt() {
-        return clienttranslate('Move: choose where to go (${count} step(s) left) or end the move');
+        return clienttranslate('Choose next step or end the move (${count} left)');
     }
 
     function getExtraArgs() {
@@ -70,12 +70,12 @@ class Op_moveStep extends Operation {
             // Wrecking Ball stays on offer at every prompt, scoped to the budget still left.
             $wreckingCard = $hero->getWreckingCard();
             if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($hero->getHex(), $budget)) {
-                $targets[] = $wreckingCard;
+                $targets[$wreckingCard] = ["q" => 0, "buttons" => true];
             }
         }
         // Offer the early-stop only after at least one step (keeps the "move at least 1 area" minimum).
         if ($this->getMoved() >= 1) {
-            $targets["endOfMove"] = ["q" => 0, clienttranslate("End Move")];
+            $targets["endOfMove"] = ["q" => 0, "name" => clienttranslate("End Move")];
         }
         return $targets;
     }

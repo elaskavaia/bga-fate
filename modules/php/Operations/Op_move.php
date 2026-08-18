@@ -40,7 +40,7 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_move extends CountableOperation {
     function getPrompt() {
-        return clienttranslate("Select where to move");
+        return clienttranslate("Choose where to move");
     }
 
     function getPossibleMoves(): array {
@@ -77,7 +77,7 @@ class Op_move extends CountableOperation {
         // is occupied by a character.
         $wreckingCard = $hero->getWreckingCard();
         if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($currentHex, $maxSteps)) {
-            $targets[] = $wreckingCard;
+            $targets[$wreckingCard] = ["q" => 0, "buttons" => true];
         }
 
         return $targets;

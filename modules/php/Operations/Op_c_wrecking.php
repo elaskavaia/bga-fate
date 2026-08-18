@@ -17,8 +17,6 @@ namespace Bga\Games\Fate\Operations;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
-use function Bga\Games\Fate\getPart;
-
 /**
  * c_wrecking: Wrecking Ball pendulum loop. Drives an interactive iterative move
  * action where Boldur may step into occupied hexes, deal 1 damage to the
@@ -58,15 +56,15 @@ class Op_c_wrecking extends Operation {
 
     function getPrompt() {
         if ($this->getDisplaced() !== "") {
-            return clienttranslate('Choose where to push ${char2_name}');
+            return clienttranslate('Choose where to push ${char_name}');
         }
-        return clienttranslate('Wrecking Ball: choose where to move (${count} step(s) left)');
+        return clienttranslate('Choose next step or end the move (${count} left)');
     }
 
     function getExtraArgs() {
         $displaced = $this->getDisplaced();
         if ($displaced !== "") {
-            return ["char2_name" => $displaced];
+            return ["char_name" => $displaced];
         }
         return ["count" => $this->getBudget()];
     }
@@ -75,12 +73,12 @@ class Op_c_wrecking extends Operation {
         $hero = $this->game->getHero($this->getOwner());
         $boldurHex = $hero->getHex();
         $this->game->systemAssert("ERR:c_wrecking:noHeroHex:" . $this->getOwner(), $boldurHex !== null);
-
+        $targets = [];
         $displaced = $this->getDisplaced();
         if ($displaced) {
             // push phase — must always pick a destination (no early-stop here)
             $displacedChar = $this->game->getCharacter($displaced);
-            $targets = [];
+
             foreach ($this->game->hexMap->getAdjacentHexes($boldurHex) as $hex) {
                 if ($this->game->hexMap->canStopOn($hex, $displacedChar)) {
                     $targets[] = $hex;
@@ -91,7 +89,7 @@ class Op_c_wrecking extends Operation {
 
         // Destination phase: list adjacent hexes plus an "endOfMove" sentinel
         // so the player can stop the pendulum early.
-        $targets = ["endOfMove" => ["q" => 0, clienttranslate("End Move")]];
+        $targets["endOfMove"] = ["q" => 0, "name" => clienttranslate("End Move")];
         if ($this->getBudget() > 0) {
             foreach ($this->game->hexMap->getAdjacentHexes($boldurHex) as $hex) {
                 if ($this->game->hexMap->isImpassable($hex, $hero)) {
@@ -112,9 +110,9 @@ class Op_c_wrecking extends Operation {
             $character = $this->game->getCharacter($displaced);
 
             // Push first so the damage pipeline sees a single-occupant hex.
-            $character->moveTo($pushHex, clienttranslate('${char_name} pushes ${char2_name} with Wrecking Ball'), [
+            $character->moveTo($pushHex, clienttranslate('${char_name} pushes ${char_name2} with Wrecking Ball'), [
                 "char_name" => $attackerId,
-                "char2_name" => $displaced,
+                "char_name2" => $displaced,
             ]);
 
             // Run damage through the proper pipeline (cover, armor, damage effects, kill trigger).
@@ -155,7 +153,6 @@ class Op_c_wrecking extends Operation {
             $this->queue("c_wrecking", null, [
                 "displaced" => $occupant,
                 "budget" => $newBudget,
-                "reason" => $this->getReason(),
             ]);
         } else {
             $this->queue("c_wrecking", null, ["budget" => $newBudget, "reason" => $this->getReason()]);
