@@ -60,6 +60,8 @@ See CLAUDE.md for project overview
 ### Tests
 
 [x] Test quest completion conditions (per-hero `Campaign_*QuestTest.php` covering all 4 categories)
+[ ] Refactor: share the adjacent-mountain hex selection between `countAdjMountains` and `Op_c_orebiter` (one helper returning the hex list; counter counts it, Orebiter offers it) - separate commit after the Orebiter fix lands
+[ ] Refactor: merge bug-named campaign tests into hero/card-grouped files (`Campaign_EagleEyeBug237686Test` -> Bjorn ability, `Campaign_TreetreaderBug235064Test` -> `Campaign_AlvaAbilityTest`, `Campaign_MultiKillMarkerBugTest` -> `Campaign_BoldurSweepTest`, `Campaign_LongShotRangeBugTest` -> Bjorn, `Campaign_GainManaPromptBug235445Test` -> Alva, `Campaign_UndoBug235518Test` -> `Campaign_UndoTest`, `Campaign_AdjTerrainBug238473Test`, `Campaign_MultiKillXpBugTest`, `Campaign_SpeedyAttackSoftlockTest`); keep `BGA #<id>` citations in method docstrings so grep still finds them; update test names referenced by active BUG_TRIAGE.md entries. OPEN: also fold the 4 `tests/Operations/Op_*Bug*Test.php` files into their op's main test file? And teach the `game-bug-fix` skill to add methods to grouped files instead of creating new Bug-named files.
 
 
 
