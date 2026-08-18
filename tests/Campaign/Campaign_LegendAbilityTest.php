@@ -28,7 +28,7 @@ class Campaign_LegendAbilityTest extends CampaignBaseTest {
     }
 
     /** Strength value from each "${char} attacks ${target} with strength ${strength}" notify line. */
-    private function attackStrengths(): array {
+    private function getAttackStrengths(): array {
         return array_map(
             fn($n) => $n["args"]["strength"] ?? null,
             array_values(
@@ -48,7 +48,7 @@ class Campaign_LegendAbilityTest extends CampaignBaseTest {
 
         $this->driveOneMonsterTurn();
 
-        $this->assertCount(2, $this->attackStrengths(), "Grendel II makes two attacks");
+        $this->assertCount(2, $this->getAttackStrengths(), "Grendel II makes two attacks");
     }
 
     public function testNidhuggrAttacksWithRemainingHealth(): void {
@@ -61,6 +61,6 @@ class Campaign_LegendAbilityTest extends CampaignBaseTest {
 
         $this->driveOneMonsterTurn();
 
-        $this->assertEquals([3], $this->attackStrengths(), "Nidhuggr attacks at remaining health (13 - 10 = 3)");
+        $this->assertEquals([3], $this->getAttackStrengths(), "Nidhuggr attacks at remaining health (13 - 10 = 3)");
     }
 }
