@@ -28,6 +28,6 @@
         "description": "One click moves the hero all the way to the destination"
       }
     },
-    "default": 0
+    "default": 1
   }
 }
