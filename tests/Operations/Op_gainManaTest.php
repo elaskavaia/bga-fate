@@ -6,6 +6,10 @@ use Bga\Games\Fate\Material;
 use Bga\Games\Fate\OpCommon\Operation;
 
 final class Op_gainManaTest extends AbstractOpTestCase {
+    private const BRACERS = "card_equip_2_23"; // mana generation 1, activation costs 3 mana
+
+    private const HAIL_II = "card_ability_2_4"; // mana generation 2, activation costs 1-4 mana
+
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_11_8");
@@ -103,5 +107,48 @@ final class Op_gainManaTest extends AbstractOpTestCase {
             $op->canResolveAutomatically(),
             "with multiple valid targets the user must pick — auto-resolve must be disabled"
         );
+    }
+
+    /**
+     * BGA #235445 ("Alva's racial not asking for target") scenario: the move ends in a forest with
+     * two mana cards on the tableau - Alva's Bracers holding 1 crystal, plus Hail of Arrows II.
+     * Verdict: NOT A BUG on either count. With two mana cards the server prompts, and a card
+     * holding as many crystals as its `mana` value is NOT "full" - the `mana` material field is
+     * per-turn mana GENERATION (see Op_upgrade::generateTurnMana), not storage capacity. Bracers
+     * generates 1/turn but costs 3 [MANA] to activate, so stacking past 1 is correct save-up
+     * behavior. Designer ruling FORUM.md:475: "Mana generation has no limit".
+     */
+    private function setUpTwoManaCards(): void {
+        // Remove Bjorn's default mana card so the target count reflects only the two placed here.
+        $this->game->tokens->moveToken("card_ability_1_3", "limbo");
+        $tableau = $this->getPlayersTableau();
+        $this->game->tokens->moveToken(self::BRACERS, $tableau);
+        $this->game->tokens->moveToken(self::HAIL_II, $tableau);
+
+        // Bracers holds 1 crystal, matching the reporter's screenshot.
+        $green = array_keys($this->game->tokens->getTokensOfTypeInLocation("crystal_green", "supply_crystal_green"));
+        $this->game->tokens->moveToken($green[0], self::BRACERS);
+    }
+
+    public function testOffersChoiceNotAutoAssignWithTwoManaCards(): void {
+        $this->setUpTwoManaCards();
+        $op = $this->createOp("?gainMana");
+        $this->assertEqualsCanonicalizing([self::BRACERS, self::HAIL_II], $op->getArgsTarget());
+        $this->assertFalse($op->isOneChoice(), "two mana cards -> not a single choice");
+        $this->assertFalse($op->canResolveAutomatically(), "server prompts the player; it does not auto-assign");
+    }
+
+    public function testCardHoldingItsGenerationValueIsStillOffered(): void {
+        $this->setUpTwoManaCards();
+        $this->createOp("?gainMana");
+        $this->assertEquals(1, $this->countGreenCrystals(self::BRACERS), "precondition: Bracers holds 1 crystal");
+        $this->assertValidTarget(self::BRACERS, "no capacity concept: any mana card is a valid target");
+    }
+
+    public function testManaAccumulatesBeyondGenerationValue(): void {
+        $this->setUpTwoManaCards();
+        $this->createOp("gainMana");
+        $this->call_resolve(self::BRACERS);
+        $this->assertEquals(2, $this->countGreenCrystals(self::BRACERS), "saving up toward the 3-mana activation cost");
     }
 }

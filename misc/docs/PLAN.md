@@ -54,14 +54,16 @@ See CLAUDE.md for project overview
 [x] Upgrade cost track: 5, 6, 8, 10 (red square), then 10 for all further upgrades
 [x] End-of-turn upgrade option: spend XP for new ability or card improvement
 [x] Mana generation at end of turn — Op_turnEnd iterates cards with mana field, generates crystals
+[ ] Refactor: share the adjacent-mountain hex selection between `countAdjMountains` and `Op_c_orebiter` (one helper returning the hex list; counter counts it, Orebiter offers it) - separate commit after the Orebiter fix lands
 
 ### Client
 
 ### Tests
 
-[x] Test quest completion conditions (per-hero `Campaign_*QuestTest.php` covering all 4 categories)
-[ ] Refactor: share the adjacent-mountain hex selection between `countAdjMountains` and `Op_c_orebiter` (one helper returning the hex list; counter counts it, Orebiter offers it) - separate commit after the Orebiter fix lands
-[ ] Refactor: merge bug-named campaign tests into hero/card-grouped files (`Campaign_EagleEyeBug237686Test` -> Bjorn ability, `Campaign_TreetreaderBug235064Test` -> `Campaign_AlvaAbilityTest`, `Campaign_MultiKillMarkerBugTest` -> `Campaign_BoldurSweepTest`, `Campaign_LongShotRangeBugTest` -> Bjorn, `Campaign_GainManaPromptBug235445Test` -> Alva, `Campaign_UndoBug235518Test` -> `Campaign_UndoTest`, `Campaign_AdjTerrainBug238473Test`, `Campaign_MultiKillXpBugTest`, `Campaign_SpeedyAttackSoftlockTest`); keep `BGA #<id>` citations in method docstrings so grep still finds them; update test names referenced by active BUG_TRIAGE.md entries. OPEN: also fold the 4 `tests/Operations/Op_*Bug*Test.php` files into their op's main test file? And teach the `game-bug-fix` skill to add methods to grouped files instead of creating new Bug-named files.
+
+
+[x] Refactor: merge bug-named campaign tests into hero/card-grouped files - all 9 merged, 332 test methods preserved. New `Campaign_BjornAbilityTest` (Bjorn's ability/hero cards split out of `Campaign_BjornSoloTest`, plus Eagle Eye and Long Shot) and `Campaign_TerrainAdjacencyTest` (AdjTerrain + GrimheimTerrainIsolation); Treetreader and the gainMana prompt -> `Campaign_AlvaAbilityTest`; Speedy Attack -> `Campaign_AlvaEventTest`; multi-kill XP and sweep -> `Campaign_BoldurSweepTest`; multi-kill Helmet quest -> `Campaign_BjornQuestTest`; "Nothing to undo" -> `Campaign_UndoTest`. `BGA #<id>` citations kept in method docstrings, BUG_TRIAGE.md references updated.
+[x] Refactor: fold the 4 `tests/Operations/Op_*Bug*Test.php` files into their op's main test file - Tunic mend -> `Op_actionMendTest`, crystal supply -> `Op_applyDamageTest`, two-mana-card prompt -> `Op_gainManaTest`, premature move end -> `Op_moveStepTest`, plus `HeroMoveAdjacentMonsterBug234817Test` -> `HexMapTest` (it owns `getReachableHexes`). `BGA #<id>` citations moved to the fixture helper / method docstrings. No bug-named test files remain. The `game-bug-fix` skill in `~/.claude/skills/` already carries the "add to the grouped file, never create `*Bug<id>Test`" rule; the stale duplicate that shadowed it at `.claude/skills/game-bug-fix/` is deleted.
 
 
 

@@ -17,6 +17,7 @@ require_once __DIR__ . "/CampaignBase.php";
  */
 class Campaign_BoldurSweepTest extends CampaignBaseTest {
     private string $heroId;
+
     private string $color;
 
     protected function setUp(): void {
@@ -127,6 +128,82 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation($primary));
         $this->assertEquals("supply_monster", $this->tokenLocation($second));
         $this->assertEquals(0, $this->countDamage($third), "the third monster is beyond the 2-enemy cap");
+    }
+
+    /**
+     * BGA #236791 attempt - NOT reproduced, kept as a regression guard.
+     *
+     * The sweep kill leaves 1 damage over and both corpses are still on their hexes
+     * (Op_finishKill for either is still queued), so if the spendsExcess guard in
+     * CardAbility_SweepingStrikeI::onMonsterKilled did not fire the card would offer
+     * itself again and land back on the first corpse. It does fire: each goblin is
+     * killed once and scores 1 XP once.
+     */
+    public function testSweepMultiKillScoresEachMonsterOnce(): void {
+        $this->clearEquipDecks(); // a quest on the equip deck-top would interleave with the kills
+        $sweep = "card_ability_4_5";
+        $this->game->tokens->moveToken($sweep, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+
+        $first = "monster_goblin_1"; // W of Boldur, the attack target
+        $second = "monster_goblin_2"; // NW = next hex clockwise
+        $this->game->getMonster($first)->moveTo("hex_6_9", "");
+        $this->game->getMonster($second)->moveTo("hex_7_8", "");
+        $this->game->effect_moveCrystals($this->heroId, "red", 1, $second, ["message" => ""]);
+
+        $xpBefore = $this->countXp();
+        $this->seedRand([5, 5, 5]); // 3 hits + 1 passive = 4 vs health 2 -> 2 overkill
+
+        $this->respond("actionAttack");
+        $this->respond("hex_6_9");
+        $this->respond($sweep);
+        $this->confirmCardEffect(); // clockwise order picks the NW goblin
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($first));
+        $this->assertEquals("supply_monster", $this->tokenLocation($second));
+        $this->assertEquals(2, $this->countXp() - $xpBefore, "1 XP per goblin, scored once each");
+        $this->assertEquals("turn", $this->getOpArgs()["type"] ?? "", "attack settles, no re-offered sweep");
+    }
+
+    /**
+     * BGA #234247 / #234242 - multi-kill XP/gold under-award. Game::countMonsterXp() used to
+     * ignore the killed-monster $context it is passed by Monster::finalizeDamage() and read the
+     * monster on the shared marker_attack hex instead; in a multi-kill that hex has already
+     * advanced to the next target, so the earlier kill scored 0.
+     *
+     * Sweeping Strike I kills the primary goblin AND sweeps a second monster dead in one
+     * attack action. The victims are worth different amounts on purpose, so the total also
+     * pins WHICH monster each kill scored - the old bug was misattribution, not a lost kill.
+     */
+    public function testSweepMultiKillAwardsXpForEveryMonster(): void {
+        $cardId = "card_ability_4_5";
+        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $primary = "monster_goblin_1";
+        $second = "monster_brute_1";
+        $this->game->getMonster($primary)->moveTo("hex_4_9", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
+        $this->game->effect_moveCrystals($this->heroId, "red", 1, $second, ["message" => ""]);
+
+        $this->assertEquals(1, $this->game->getMonster($primary)->getXpReward(), "sanity: goblin is worth 1 XP");
+        $this->assertEquals(2, $this->game->getMonster($second)->getXpReward(), "sanity: brute is worth 2 XP");
+        $xpBefore = $this->countXp();
+
+        // 3 hits + 1 Sweeping Strike passive = 4 damage on primary (health 2),
+        // overkill 2 kills the brute behind it (health 3, already down 1).
+        $this->seedRand([5, 5, 5, 1]);
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond($cardId); // use card for sweep
+        $this->confirmCardEffect(); // sweep -> kills the brute
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($primary), "primary goblin dead");
+        $this->assertEquals("supply_monster", $this->tokenLocation($second), "second monster dead");
+
+        $xpGained = $this->countXp() - $xpBefore;
+        $this->assertEquals(3, $xpGained, "each kill scores its own monster: goblin 1 + brute 2 (BGA #234247)");
     }
 
     /** Find a log entry whose template contains $needle. */
@@ -354,5 +431,18 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         // 2 hits + 1 passive = 3 on a 3-health brute: exact kill, no overkill to sweep with.
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "brute killed by the passive +1");
         $this->assertEquals(0, $this->countDamage("monster_troll_1"), "no overkill, so no sweep");
+    }
+
+    /**
+     * Answers the standing question about the sweep cap: an arbitrary data field does
+     * survive queue -> db row -> re-instantiate, so the spendsExcess flag that
+     * Op_applyDamage carries into the kill trigger is readable by the card handlers.
+     */
+    public function testTriggerDataFieldSurvivesTheQueue(): void {
+        $this->game->machine->queue("trigger(TMonsterKilled)", $this->color, ["spendsExcess" => true]);
+        $op = $this->game->machine->findOperation($this->color, "trigger(TMonsterKilled)");
+        $this->assertNotNull($op, "trigger op is in the machine");
+        $this->assertTrue((bool) $op->getDataField("spendsExcess"), "spendsExcess survives the machine round trip");
+        $op->destroy();
     }
 }

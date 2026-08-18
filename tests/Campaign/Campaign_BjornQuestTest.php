@@ -628,4 +628,76 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertEquals("deck_equip_$color", $this->tokenLocation($trollbane), "Trollbane stays in deck - sprite isn't trollkin");
         $this->assertEquals(0, $this->countTokens("crystal_red", $trollbane), "No tracker crystal added on non-trollkin kill");
     }
+
+    private string $nailed;
+
+    /**
+     * BGA #236913 - VERIFIES THE FIX. Bjorn kills two brutes in one attack action via
+     * Nailed Together I while Helmet (quest_r = killed('brute or skeleton'):
+     * ?(blockXp:gainEquip)) sits on top of the equip deck.
+     *
+     * Before the fix, the first kill's quest chain was queued BEHIND the pierce effect,
+     * so the pierce's whole subtree - including finishKill for the second brute - ran
+     * first, and the stale chain's killed() gate then found an empty hex and dead-ended
+     * the turn on "[Error: No killed monster on attack hex] killed?" with no skip button.
+     * Op_trigger now dispatches the quest before card effects, and the trigger carries
+     * the dying monster's id for the gate to read.
+     */
+    private function killTwoBrutesWithNailedTogether(): void {
+        $color = $this->getActivePlayerColor();
+        $this->clearHand($color);
+        $this->nailed = "card_ability_1_13";
+        $this->game->tokens->moveToken($this->nailed, "tableau_" . $color);
+        $this->seedDeck("deck_equip_" . $color, ["card_equip_1_21"]); // Helmet
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_6_9", "");
+        $this->game->getMonster("monster_brute_2")->moveTo("hex_5_9", "");
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, "monster_brute_1", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, "monster_brute_2", ["message" => ""]);
+
+        $this->seedRand([5, 5]); // 2 hits on a health-3 brute already at 2 -> kill, 1 overkill
+
+        $this->respond("actionAttack");
+        $this->respond("hex_6_9");
+        $this->skipIfOp("useCard"); // Bjorn Hero I offers its TRoll ability first
+        // Helmet quest, offered for the FIRST kill - the brute is still on its hex, so the
+        // killed() gate identifies it from the attack hex.
+        $this->assertOperation("paygain");
+    }
+
+    private function pierceSecondBrute(): void {
+        $this->assertOperation("useCard");
+        $this->respond($this->nailed);
+        $this->respond("hex_5_9"); // pierce the brute behind, exact kill
+    }
+
+    public function testHelmetTakenOnFirstKillIsNotOfferedAgain(): void {
+        $this->killTwoBrutesWithNailedTogether();
+        $xpBefore = $this->countXp();
+        $this->respond("1"); // forfeit XP, take the Helmet
+
+        $this->assertEquals("tableau_" . $this->getActivePlayerColor(), $this->tokenLocation("card_equip_1_21"), "Helmet claimed");
+        $this->pierceSecondBrute();
+
+        $this->assertEquals("turn", $this->getOpArgs()["type"] ?? "", "no stale quest, no dead end (BGA #236913)");
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"));
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_2"));
+        $this->assertEquals(2, $this->countXp() - $xpBefore, "first kill's XP forfeited for the Helmet, second awarded");
+    }
+
+    public function testHelmetDeclinedOnFirstKillIsOfferedAgainForSecond(): void {
+        $this->killTwoBrutesWithNailedTogether();
+        $xpBefore = $this->countXp();
+        $this->skip(); // decline for the first kill
+
+        $this->pierceSecondBrute();
+
+        $this->assertOperation("paygain"); // Helmet still on top: fresh offer for the second kill
+        $this->respond("1");
+
+        $this->assertEquals("tableau_" . $this->getActivePlayerColor(), $this->tokenLocation("card_equip_1_21"), "Helmet claimed");
+        $this->assertEquals("turn", $this->getOpArgs()["type"] ?? "");
+        $this->assertEquals(2, $this->countXp() - $xpBefore, "first kill's XP awarded, second forfeited for the Helmet");
+    }
 }

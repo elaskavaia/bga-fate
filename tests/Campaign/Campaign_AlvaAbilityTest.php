@@ -11,6 +11,10 @@ require_once __DIR__ . "/CampaignBase.php";
 class Campaign_AlvaAbilityTest extends CampaignBaseTest {
     private string $heroId;
 
+    private const BRACERS = "card_equip_2_23"; // mana gen 1
+
+    private const HAIL_I = "card_ability_2_3"; // mana gen 1, on Alva's starting tableau
+
     protected function setUp(): void {
         parent::setUp();
         $this->setupGame([2]); // Solo Alva
@@ -73,6 +77,64 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
         $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
         $this->assertEquals($manaBefore + 1, $this->countTokens("crystal_green", $hailId));
+    }
+
+    /**
+     * BGA #235445 ("Alva's racial not asking for target"): the move ends in a forest with TWO mana
+     * cards on the tableau, so gainMana must prompt instead of auto-assigning. Op_gainManaTest
+     * proves the op in isolation; this drives the full turn dispatch chain the reporter used.
+     */
+    public function testForestTriggerWithTwoManaCardsPromptsForTarget(): void {
+        $this->game->tokens->moveToken(self::BRACERS, "tableau_" . $this->getActivePlayerColor());
+        $hailBefore = $this->countTokens("crystal_green", self::HAIL_I);
+        $bracersBefore = $this->countTokens("crystal_green", self::BRACERS);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9"); // plains, forest neighbor hex_5_8
+        $this->respond("hex_5_8");
+
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+        $this->assertOperation("gainMana");
+        $this->assertValidTarget(self::HAIL_I);
+        $this->assertValidTarget(self::BRACERS);
+        $this->assertEquals($hailBefore, $this->countTokens("crystal_green", self::HAIL_I), "no mana auto-added before the choice");
+        $this->assertEquals($bracersBefore, $this->countTokens("crystal_green", self::BRACERS));
+
+        $this->respond(self::BRACERS);
+
+        $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"]);
+        $this->assertEquals($bracersBefore + 1, $this->countTokens("crystal_green", self::BRACERS), "chosen card got the mana");
+        $this->assertEquals($hailBefore, $this->countTokens("crystal_green", self::HAIL_I));
+    }
+
+    /**
+     * The reporter's table had 4 players; solo passes (test above). The #235314 undo bug
+     * also only reproduced in multiplayer, so drive the same scenario with a second seat.
+     */
+    public function testForestTriggerWithTwoManaCardsPromptsInMultiplayer(): void {
+        $this->setupGame([2, 1]); // Alva first, Bjorn second
+        $this->syncCurrentPlayerToActive();
+        $color = $this->getActivePlayerColor();
+        $this->heroId = $this->game->getHeroTokenId($color);
+        $this->clearMonstersFromMap();
+        $this->clearHand($color);
+        $this->clearEquipDecks();
+        $this->game->tokens->moveToken(self::BRACERS, "tableau_$color");
+
+        $hailBefore = $this->countTokens("crystal_green", self::HAIL_I);
+        $bracersBefore = $this->countTokens("crystal_green", self::BRACERS);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+        $this->respond("hex_5_8");
+
+        $this->assertEquals("hex_5_8", $this->tokenLocation($this->heroId));
+        $this->assertOperation("gainMana");
+        $this->assertValidTarget(self::HAIL_I);
+        $this->assertValidTarget(self::BRACERS);
+        $this->assertEquals($hailBefore, $this->countTokens("crystal_green", self::HAIL_I), "no mana auto-added before the choice");
+
+        $this->respond(self::BRACERS);
+        $this->assertEquals($bracersBefore + 1, $this->countTokens("crystal_green", self::BRACERS), "chosen card got the mana");
+        $this->assertEquals($hailBefore, $this->countTokens("crystal_green", self::HAIL_I));
     }
 
     // --- Flexibility I (card_ability_2_13) ---
@@ -368,6 +430,43 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
     // --- Treetreader I (card_ability_2_5) ---
     // r=(spendUse:move(forest))/(in(forest):spendUse:move), no `on` — manual free-action.
     // Branch 0: move into an adjacent forest. Branch 1: while in a forest, move anywhere adjacent.
+    // Op_or labels choice_$i from effect_($i+1), so the bullets must be listed in the same order as
+    // the branches. They were reversed, making each button do the opposite of its label (BGA
+    // #235064, "Alva's Treetreader multiple bugs"). "Out of a forest" is an unfiltered move by
+    // design (FORUM.md: standing in a forest next to Grimheim, you may step out into Grimheim); it
+    // overlaps branch 0 on forest neighbours, which is legal under either bullet.
+
+    // Forest hex in the OgreValley cluster: ring has 3 forest neighbors (hex_3_8, hex_4_8,
+    // hex_2_10) and 3 non-forest neighbors (hex_4_9, hex_2_9, hex_3_10), no mountains.
+    // Multiple forest neighbors means move(forest) prompts instead of auto-resolving.
+    private const FOREST_HEX = "hex_3_9";
+
+    private function placeTreetreader(string $cardId): string {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($cardId, "tableau_$color", 0);
+        $this->game->tokens->moveToken($this->heroId, self::FOREST_HEX);
+        return $cardId;
+    }
+
+    private function placeTreetreaderI(): string {
+        return $this->placeTreetreader("card_ability_2_5");
+    }
+
+    private function nonForest(array $hexes): array {
+        return array_values(array_filter($hexes, fn($h) => is_string($h) && $this->game->hexMap->getHexTerrain($h) !== "forest"));
+    }
+
+    private function forestOnly(array $hexes): array {
+        return array_values(array_filter($hexes, fn($h) => is_string($h) && $this->game->hexMap->getHexTerrain($h) === "forest"));
+    }
+
+    /** Sanity: the chosen forest hex really does have both forest and non-forest neighbors. */
+    public function testTreetreaderForestHexHasMixedNeighbors(): void {
+        $hero = $this->game->getHeroById($this->heroId);
+        $ring = array_keys($this->game->hexMap->getReachableHexes(self::FOREST_HEX, 1, $hero));
+        $this->assertGreaterThanOrEqual(2, count($this->forestOnly($ring)), "need 2+ forest neighbors so move(forest) prompts");
+        $this->assertNotEmpty($this->nonForest($ring), "need a non-forest neighbor");
+    }
 
     public function testTreetreaderIMovesIntoAdjacentForest(): void {
         $color = $this->getActivePlayerColor();
@@ -400,6 +499,65 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->respond("hex_5_9");
 
         $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
+    }
+
+    /** BGA #235064 claim 3: the "Move INTO a forest" button offered non-forest tiles too. */
+    public function testTreetreaderIMoveIntoForestOffersOnlyForest(): void {
+        $cardId = $this->placeTreetreaderI();
+
+        $this->respond($cardId);
+
+        $info = $this->getOpArgs()["info"] ?? [];
+        $this->assertStringContainsString("Move into", $info["choice_0"]["name"] ?? "");
+
+        $this->respond("choice_0");
+        $offered = $this->getOpArgs()["target"] ?? [];
+
+        $this->assertNotEmpty($this->forestOnly($offered), "move-into should offer forest destinations");
+        $this->assertEmpty($this->nonForest($offered), "'Move into a forest' must not offer non-forest destinations");
+    }
+
+    /** BGA #235064 claim 2: the "Move OUT of a forest" button offered only forest tiles. */
+    public function testTreetreaderIMoveOutOfForestOffersNonForest(): void {
+        $cardId = $this->placeTreetreaderI();
+
+        $this->respond($cardId);
+
+        $info = $this->getOpArgs()["info"] ?? [];
+        $this->assertStringContainsString("Move out", $info["choice_1"]["name"] ?? "");
+
+        $this->respond("choice_1");
+        $offered = $this->getOpArgs()["target"] ?? [];
+
+        $this->assertNotEmpty($this->nonForest($offered), "'Move out of a forest' must offer non-forest destinations");
+        $this->assertNotEmpty(
+            $this->forestOnly($offered),
+            "out branch is unfiltered by design (FORUM.md:5305), forest neighbors stay offered"
+        );
+    }
+
+    /**
+     * BGA #235064 claim 1: Treetreader could be activated unlimited times in one turn. Ability
+     * cards may only be used once per turn (RULES.md line 185/420), enforced by the spendUse
+     * prefix which flips the card token to used.
+     */
+    public function testTreetreaderICanOnlyBeUsedOncePerTurn(): void {
+        $cardId = $this->placeTreetreaderI();
+
+        $this->assertEquals(0, $this->game->tokens->getTokenState($cardId), "card starts unused");
+        $this->assertValidTarget($cardId, "Treetreader offered as a free action");
+
+        $this->respond($cardId);
+        $this->respond("choice_0");
+
+        $offered = $this->getOpArgs()["target"] ?? [];
+        $forestTargets = $this->forestOnly($offered);
+        $this->assertNotEmpty($forestTargets, "need a forest hex to hop to");
+        $this->respond($forestTargets[0]);
+
+        $this->assertEquals("PlayerTurn", $this->getStateArgs()["name"], "back at PlayerTurn");
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "Treetreader marked used after one activation");
+        $this->assertNotValidTarget($cardId, "Treetreader no longer offered this turn");
     }
 
     // --- Treetreader II (card_ability_2_6) ---
@@ -446,6 +604,34 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         // Hero stepped into plains, not forest → heal guard returns early, no damage removed.
         $this->assertEquals("hex_5_9", $this->tokenLocation($this->heroId));
         $this->assertEquals(2, $this->countDamage($this->heroId));
+    }
+
+    // BGA #235064: Treetreader II is a separate CSV row carrying its own copy of the same `r`, so it gets
+    // its own label/branch check. Also pins that the `on=custom` passive is NOT gated by the
+    // use: spendUse resolves before the move, so the card is already marked used by the time
+    // the forest-entry heal fires.
+    public function testTreetreaderIIBranchesAndPassive(): void {
+        $cardId = $this->placeTreetreader("card_ability_2_6");
+        $this->game->effect_moveCrystals("supply_red", "red", 2, $this->heroId, ["message" => ""]);
+        $this->assertEquals(2, $this->countDamage($this->heroId));
+
+        $this->respond($cardId);
+        $this->assertStringContainsString("Move into", $this->getOpArgs()["info"]["choice_0"]["name"] ?? "");
+
+        $this->respond("choice_0");
+        $offered = $this->getOpArgs()["target"] ?? [];
+        $this->assertNotEmpty($offered, "move-into should offer forest destinations");
+        $this->assertEmpty($this->nonForest($offered), "'Move into a forest' must not offer non-forest destinations");
+        $this->respond($offered[0]);
+
+        $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "Treetreader II marked used after one activation");
+        $this->assertNotValidTarget($cardId, "Treetreader II no longer offered this turn");
+        $this->assertEquals(1, $this->countDamage($this->heroId), "forest-entry passive still heals with the use spent");
+    }
+
+    /** Harness has a sticky currentPlayerId; sync it to active so the action targets the right player. */
+    private function syncCurrentPlayerToActive(): void {
+        $this->game->_setCurrentPlayerId((int) $this->game->getActivePlayerId());
     }
 
     // --- Starsong I (card_ability_2_7) ---

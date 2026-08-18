@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\OpCommon\Operation;
+
 /**
  * Tests for Op_moveStep - the budgeted, step-by-step move loop used when the hero has an
  * active per-step incentive. Hero starts at hex_11_8 (open plains): hex_12_8 is distance 1,
@@ -22,6 +24,16 @@ final class Op_moveStepTest extends AbstractOpTestCase {
 
     private function pendingTypes(): array {
         return array_map(fn($row) => $row["type"] ?? "", $this->game->machine->getTopOperations($this->owner));
+    }
+
+    /** The top-rank queued op of $type, or null if the loop ended without re-queuing one. */
+    private function findQueuedOp(string $type): ?Operation {
+        foreach ($this->game->machine->getTopOperations($this->owner) as $row) {
+            if (($row["type"] ?? "") === $type) {
+                return $this->game->machine->instantiateOperationFromDbRow($row);
+            }
+        }
+        return null;
     }
 
     /** Every queued op type (not just the top-rank ones), so a trigger behind a step is visible. */
@@ -116,13 +128,7 @@ final class Op_moveStepTest extends AbstractOpTestCase {
         $this->call_resolve("card_ability_4_8");
 
         $this->assertNotContains("moveStep", $this->allQueuedTypes(), "c_wrecking ends the move itself");
-        $wrecking = null;
-        foreach ($this->game->machine->getTopOperations($this->owner) as $row) {
-            if (($row["type"] ?? "") === "c_wrecking") {
-                $wrecking = $this->game->machine->instantiateOperationFromDbRow($row);
-                break;
-            }
-        }
+        $wrecking = $this->findQueuedOp("c_wrecking");
         $this->assertNotNull($wrecking, "the pendulum loop is queued");
         $this->assertEquals(2, $wrecking->getDataField("budget"), "the unspent steps carry over");
         $this->assertEquals("Op_actionMove", $wrecking->getReason(), "reason propagates so the closing trigger is ActionMove");
@@ -135,14 +141,98 @@ final class Op_moveStepTest extends AbstractOpTestCase {
         $this->call_resolve("hex_12_8");
         $this->dispatchAll();
 
-        $next = null;
-        foreach ($this->game->machine->getTopOperations($this->owner) as $row) {
-            if (($row["type"] ?? "") === "moveStep") {
-                $next = $this->game->machine->instantiateOperationFromDbRow($row);
-                break;
-            }
-        }
+        $next = $this->findQueuedOp("moveStep");
         $this->assertNotNull($next, "a follow-up moveStep should be queued");
         $this->assertContains($this->heroHex, $next->getArgsTarget(), "the hex just left is offered again (back-and-forth)");
+    }
+    /**
+     * BGA #234817 "Move next to enemy costs all movement points" - reporter clarified: in
+     * step-by-step move mode (driven by a TStep quest / onStep card) the move "automatically ENDS"
+     * with budget remaining as soon as (1) the hero steps next to a monster, or (2) a step
+     * completes a quest. The loop can only end early if the follow-up moveStep collapses to a
+     * single choice ("End Move"), which happens only when getPossibleMoves offers no reachable hex.
+     *
+     * RESULT: neither sub-claim reproduces server-side. The two tests below are GREEN and assert
+     * the CORRECT (non-buggy) behavior - the loop keeps offering destinations. They are regression
+     * guards, not a captured bug. If the reported symptom is real it lives in the TypeScript client
+     * (the server never auto-ends here while free hexes remain). Should a future change make the
+     * server end early with budget + free hexes left, these assertions flip red.
+     */
+    private function initAlvaOnEmptyMap(): void {
+        $this->init(2); // Alva (hero_2) - owns the Belt of Youth forest quest
+        foreach (["hero_1", "hero_2", "hero_3", "hero_4"] as $token) {
+            $this->game->tokens->moveToken($token, "limbo");
+        }
+        foreach ($this->game->tokens->getTokensOfTypeInLocation(null, "hex%") as $token) {
+            if (str_starts_with($token["key"], "monster")) {
+                $this->game->tokens->moveToken($token["key"], "limbo");
+            }
+        }
+        $this->game->hexMap->invalidateOccupancy();
+    }
+
+    private function heroId(): string {
+        return $this->game->getHeroTokenId($this->owner);
+    }
+
+    /**
+     * BGA #234817 sub-claim 1: stepping next to a monster with free hexes still in budget. Open
+     * plains x=11..15,y=7..9; hero starts hex_12_8, monster parked at hex_14_8, so stepping east to
+     * hex_13_8 lands the hero directly adjacent while budget (2) and free hexes remain all around.
+     */
+    public function testStepNextToMonsterDoesNotEndMovePrematurely(): void {
+        $this->initAlvaOnEmptyMap();
+        $this->game->tokens->moveToken($this->heroId(), "hex_12_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_14_8");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->createOp("moveStep", ["budget" => 3, "moved" => 0, "reason" => "Op_actionMove"]);
+        $this->call_resolve("hex_13_8"); // step adjacent to the monster
+        $this->dispatchAll();
+
+        $this->assertEquals("hex_13_8", $this->game->tokens->getTokenLocation($this->heroId()), "hero took the single step next to the monster");
+
+        $hero = $this->game->getHero($this->owner);
+        $reachable = $this->game->hexMap->getReachableHexes("hex_13_8", 2, $hero);
+        $this->assertNotEmpty($reachable, "reachable hexes remain around the adjacent monster");
+        $this->assertArrayNotHasKey("hex_14_8", $reachable, "cannot stop on the monster's hex");
+
+        $follow = $this->findQueuedOp("moveStep");
+        $this->assertNotNull($follow, "the loop re-queues a follow-up moveStep (move did NOT end)");
+        $targets = $follow->getArgsTarget();
+        $this->assertGreaterThan(1, count($targets), "more than just End Move is offered -> no premature auto-end");
+        $this->assertContains("endOfMove", $targets, "End Move is offered");
+        $freeTargets = array_values(array_filter($targets, fn($t) => $t !== "endOfMove"));
+        $this->assertNotEmpty($freeTargets, "at least one free destination hex is still offered next to the monster");
+    }
+
+    /**
+     * BGA #234817 sub-claim 2: a step completes a quest (Belt of Youth: enter 8 forest areas).
+     * Deck-top = card_equip_2_22 seeded with 7 trackers; hero on forest hex_8_3, so stepping into
+     * the adjacent forest hex_9_3 is the 8th forest and fires gainEquip.
+     */
+    public function testStepCompletingQuestDoesNotEndMovePrematurely(): void {
+        $this->initAlvaOnEmptyMap();
+        $belt = "card_equip_2_22"; // Belt of Youth - in(forest):gainTracker,check('countTracker>=8'):gainEquip
+        $this->game->tokens->moveToken($belt, "deck_equip_" . $this->owner, 9999); // force to deck top
+        // Seed 7 trackers so the next forest entry (the 8th) completes the quest.
+        $this->game->effect_moveCrystals($this->heroId(), "red", 7, $belt);
+        $this->assertEquals(7, $this->game->evaluateExpression("countTracker", $this->owner), "quest primed one step short");
+
+        $this->game->tokens->moveToken($this->heroId(), "hex_8_3"); // forest
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->createOp("moveStep", ["budget" => 3, "moved" => 0, "reason" => "Op_actionMove"]);
+        $this->call_resolve("hex_9_3"); // adjacent forest -> 8th forest -> quest completes
+        $this->dispatchAll();
+
+        $this->assertEquals("hex_9_3", $this->game->tokens->getTokenLocation($this->heroId()), "hero took the completing step");
+        $this->assertEquals("tableau_" . $this->owner, $this->game->tokens->getTokenLocation($belt), "quest completed mid-step (Belt gained)");
+
+        $follow = $this->findQueuedOp("moveStep");
+        $this->assertNotNull($follow, "the loop continues after quest completion: " . implode(",", $this->allQueuedTypes()));
+        $targets = $follow->getArgsTarget();
+        $this->assertGreaterThan(1, count($targets), "destinations remain after quest completion -> no premature auto-end");
+        $this->assertContains("endOfMove", $targets, "End Move is offered");
     }
 }

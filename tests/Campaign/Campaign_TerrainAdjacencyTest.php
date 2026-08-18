@@ -5,25 +5,39 @@ declare(strict_types=1);
 require_once __DIR__ . "/CampaignBase.php";
 
 /**
- * BGA #238473: standing on a terrain must count as adjacent to it.
+ * Terrain adjacency for heroes: which mountains countAdjMountains sees, and how the mountain cards
+ * (Dvalin's Pick, Mining Equipment, Orebiter) follow it.
  *
- * RULES.md:412 "Adjacency - You are considered to be adjacent to the terrain
- * type of your own area as well as adjacent areas." Designer ruling on the
- * report: "When counting number of adjacent terrain areas, count the one you
- * are currently in." countAdjMountains only walked the neighbor ring, so a
- * hero standing on a Troll Caves mountain (RULES.md:54 - heroes may occupy
- * them) with 2 more mountains adjacent counted 2 instead of 3.
+ * BGA #238473 (DESIGNER report): RULES.md:412 "Adjacency - You are considered to be adjacent to the
+ * terrain type of your own area as well as adjacent areas." Designer ruling on the report: "When
+ * counting number of adjacent terrain areas, count the one you are currently in." countAdjMountains
+ * only walked the neighbor ring, so a hero standing on a Troll Caves mountain (RULES.md:54 - heroes
+ * may occupy them) with 2 more mountains adjacent counted 2 instead of 3.
+ *
+ * Grimheim is the exception (maintainer ruling, follow-up to the same report): RULES.md:65 - heroes
+ * inside Grimheim "cannot interact with characters or terrain outside of it and vice versa". So a
+ * hero in town is NOT adjacent to any mountain, even on border hex_9_10 whose neighbor hex_9_11 is
+ * a mountain (the one RULES.md:67 excludes when leaving town).
  */
-class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
+class Campaign_TerrainAdjacencyTest extends CampaignBaseTest {
     private string $heroId;
+
     private string $color;
 
     protected function setUp(): void {
         parent::setUp();
-        $this->setupGame([4]); // solo Boldur - the countAdjMountains consumers are his quest cards
+        $this->setupGame([4]); // solo Boldur - owner of both mountain cards
         $this->color = $this->getActivePlayerColor();
         $this->heroId = $this->game->getHeroTokenId($this->color);
         $this->clearMonstersFromMap();
+        $this->clearHand($this->color);
+    }
+
+    /** Map sanity: the guard is only meaningful if a mountain really borders town. */
+    public function testMapFactMountainBordersGrimheim(): void {
+        $this->assertTrue($this->game->hexMap->isInGrimheim("hex_9_10"));
+        $this->assertEquals("mountain", $this->game->hexMap->getHexTerrain("hex_9_11"));
+        $this->assertContains("hex_9_11", $this->game->hexMap->getAdjacentHexes("hex_9_10"));
     }
 
     /** Designer's scenario: on hex_6_6 (Troll Caves mountain) with mountains hex_5_7 and hex_6_7 adjacent. */
@@ -45,6 +59,12 @@ class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, "hex_9_9");
 
         $this->assertEquals(0, $this->game->countAdjMountains($this->color), "own Grimheim hex adds nothing");
+    }
+
+    public function testCountAdjMountainsIsZeroInsideGrimheim(): void {
+        $this->game->tokens->moveToken($this->heroId, "hex_9_10");
+
+        $this->assertEquals(0, $this->game->countAdjMountains($this->color), "no terrain adjacency from inside town");
     }
 
     /**
@@ -73,6 +93,15 @@ class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
         $this->assertEquals($nextCard, $newTop["key"], "Orebiter should surface as the new deck-top");
     }
 
+    public function testMiningEquipmentNotOfferedInsideGrimheim(): void {
+        $miningEquipment = "card_equip_4_17";
+        $this->game->tokens->moveToken($miningEquipment, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_9_10");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->assertNotValidTarget($miningEquipment, "no mountain interaction from inside town");
+    }
+
     /**
      * Orebiter (card_equip_4_19) end to end from ON the mountain: the own hex is
      * offered, the gold vein placed there resolves as the defender (not the hero
@@ -81,7 +110,6 @@ class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
      */
     public function testOrebiterMinesTheMountainHeroStandsOn(): void {
         $orebiter = "card_equip_4_19";
-        $this->clearHand($this->color);
         $this->game->tokens->moveToken($orebiter, "tableau_" . $this->color);
         $this->game->tokens->moveToken($this->heroId, "hex_6_6");
 
@@ -100,5 +128,15 @@ class Campaign_AdjTerrainBug238473Test extends CampaignBaseTest {
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_goldvein"));
         $this->assertEquals($damageBefore, $this->countDamage($this->heroId), "hero must not become his own defender");
         $this->assertEquals("hex_6_6", $this->tokenLocation($this->heroId), "hero stays on the mined hex");
+    }
+
+    public function testOrebiterNotOfferedInsideGrimheim(): void {
+        $orebiter = "card_equip_4_19";
+        $this->game->tokens->moveToken($orebiter, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_9_10");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $attack = $this->game->machine->instantiateOperation("actionAttack", $this->color);
+        $this->assertArrayNotHasKey($orebiter, $attack->getPossibleMoves(), "Orebiter must not join the attack list in town");
     }
 }
