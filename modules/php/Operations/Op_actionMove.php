@@ -16,7 +16,6 @@ namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
 use Bga\Games\Fate\Model\Trigger;
-use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Move action: hero moves up to 3 areas (some abilities may change this).
@@ -24,7 +23,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Op_moveStep (budgeted step-by-step) when the hero has an active per-step incentive so the
  * player can route deliberately. See DESIGN.md "Step-by-step Move".
  */
-class Op_actionMove extends Operation {
+class Op_actionMove extends AbsOp_action {
     // Custom quests whose triggerQuest reacts to TStep but have no declarative quest_on=TStep
     // to read (their step logic lives in a bespoke override). Add new ones here.
     private const STEP_QUEST_CARDS = ["card_equip_4_16"]; // Shield - "enter Ogre Valley" branch
@@ -59,6 +58,7 @@ class Op_actionMove extends Operation {
     }
 
     function resolve(): void {
+        $this->spendTurnSlot();
         // The delegate reads getReason() == "Op_actionMove" and emits Trigger::ActionMove
         // on completion (chains through Trigger::Move). One trigger per move.
         [$type, $data] = $this->getDelegateInfo();
@@ -68,8 +68,9 @@ class Op_actionMove extends Operation {
 
     /**
      * True when a deliberate route matters this move: the player asked for step mode via the
-     * MA_PREF_CONFIRM_MOVE preference, the active quest fires per step, or a tableau card reacts
-     * on each step. See DESIGN.md "Step-by-step Move".
+     * MA_PREF_CONFIRM_MOVE preference, Wrecking Ball is on the tableau (moving into occupied hexes is offered per
+     * step), the active quest fires per step, or a tableau card reacts on each step.
+     * See DESIGN.md "Step-by-step Move".
      */
     private function hasStepIncentive(): bool {
         $owner = $this->getOwner();
@@ -77,12 +78,15 @@ class Op_actionMove extends Operation {
         if ($this->game->getUserPreference($this->getPlayerId(), Material::MA_PREF_CONFIRM_MOVE) == 1) {
             return true;
         }
+        if ($hero->getWreckingCard() !== null) {
+            return true;
+        }
         // Active quest (top of the equipment deck) that advances per step: declarative
         // quest_on=TStep, or a hardcoded custom quest whose step logic is in a bespoke override.
         $top = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
         if ($top !== null) {
             $questOn = (string) $this->game->material->getRulesFor($top["key"], "quest_on", "");
-            if ($this->listensOnStep($questOn) || in_array($top["key"], self::STEP_QUEST_CARDS, true)) {
+            if ($this->hasStepListeners($questOn) || in_array($top["key"], self::STEP_QUEST_CARDS, true)) {
                 return true;
             }
         }
@@ -93,14 +97,14 @@ class Op_actionMove extends Operation {
             if (method_exists($this->game->instantiateCard($card, $this), "onStep")) {
                 return true;
             }
-            if ($this->listensOnStep((string) $this->game->material->getRulesFor($card["key"], "on", ""))) {
+            if ($this->hasStepListeners((string) $this->game->material->getRulesFor($card["key"], "on", ""))) {
                 return true;
             }
         }
         return false;
     }
 
-    private function listensOnStep(string $on): bool {
+    private function hasStepListeners(string $on): bool {
         if ($on === "") {
             return false;
         }
@@ -118,5 +122,9 @@ class Op_actionMove extends Operation {
 
     function getPrompt() {
         return clienttranslate("Choose where to move");
+    }
+
+    public function getIconicName(): string {
+        return clienttranslate("Move [Op_actionMove]");
     }
 }

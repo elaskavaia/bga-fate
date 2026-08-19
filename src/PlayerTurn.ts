@@ -69,6 +69,14 @@ export class PlayerTurn extends GameMachine {
     this.markHexes(opInfo, "actionMove");
   }
 
+  onEntering_Op_actionMove(opInfo: OpInfo) {
+    this.markHexes(opInfo, "actionMove");
+  }
+
+  onEntering_Op_actionAttack(opInfo: OpInfo) {
+    this.markHexes(opInfo, "actionAttack");
+  }
+
   markHexes(opInfo: OpInfo, actionFallback?: string) {
     let anyActiveHexes = false;
     document.querySelectorAll(".hex").forEach((node: any) => {

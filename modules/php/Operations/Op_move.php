@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 
 /**
@@ -50,11 +49,18 @@ class Op_move extends CountableOperation {
         }
         $owner = $this->getOwner();
         $hero = $this->game->getHero($owner);
-        $currentHex = $this->game->tokens->getTokenLocation($hero->getId());
         $maxSteps = (int) $this->getCount();
-        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $maxSteps, $hero);
-
         $filter = $this->getParam(0, "");
+
+        // Wrecking Ball works on any movement (designer: "always active"): unfiltered
+        // moves delegate to the step loop, which owns the occupied-hex targets. Filtered moves
+        // keep the one-click flow for now (destination filter; see PLAN_WRECKING_MOVE.md).
+        if ($filter === "" && $hero->getWreckingCard() !== null) {
+            return $this->getPossibleMovesDelegate("moveStep", ["budget" => $maxSteps, "moved" => 0]);
+        }
+
+        $currentHex = $this->game->tokens->getTokenLocation($hero->getId());
+        $reachable = $this->game->hexMap->getReachableHexes($currentHex, $maxSteps, $hero);
         if ($filter === "locationOnly") {
             $reachable = array_filter(
                 $reachable,
@@ -70,28 +76,21 @@ class Op_move extends CountableOperation {
             );
         }
 
-        $targets = array_keys($reachable);
-
-        // Wrecking Ball: extends the move target list with a "ram into occupied"
-        // choice when the card is on the tableau and at least one adjacent hex
-        // is occupied by a character.
-        $wreckingCard = $hero->getWreckingCard();
-        if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($currentHex, $maxSteps)) {
-            $targets[$wreckingCard] = ["q" => 0, "buttons" => true];
-        }
-
-        return $targets;
+        return array_keys($reachable);
     }
 
     function resolve(): void {
-        $target = $this->getDataField("target", "") ?: $this->getCheckedArg();
+        $presetTarget = $this->getDataField("target", "");
+        $target = $presetTarget ?: $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());
 
-        // Wrecking Ball: dispatch to the pendulum loop instead of the precomputed path.
-        if ($target === Hero::WRECKING_BALL_I || $target === Hero::WRECKING_BALL_II) {
-            $this->queue("c_wrecking", null, [
-                "budget" => $hero->getNumberOfMoves(),
-                "card" => $target,
+        // Wrecking Ball: hand over to the step loop (see getPossibleMoves). Preset
+        // targets are scripted moves and keep the direct path.
+        if ($presetTarget === "" && $this->getParam(0, "") === "" && $hero->getWreckingCard() !== null) {
+            $this->queue("moveStep", null, [
+                "budget" => (int) $this->getCount(),
+                "moved" => 0,
+                "target" => $target,
                 "reason" => $this->getReason(),
             ]);
             return;

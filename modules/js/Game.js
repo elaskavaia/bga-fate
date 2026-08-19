@@ -2440,6 +2440,12 @@ class PlayerTurn extends GameMachine {
     onEntering_Op_c_wrecking(opInfo) {
         this.markHexes(opInfo, "actionMove");
     }
+    onEntering_Op_actionMove(opInfo) {
+        this.markHexes(opInfo, "actionMove");
+    }
+    onEntering_Op_actionAttack(opInfo) {
+        this.markHexes(opInfo, "actionAttack");
+    }
     markHexes(opInfo, actionFallback) {
         let anyActiveHexes = false;
         document.querySelectorAll(".hex").forEach((node) => {

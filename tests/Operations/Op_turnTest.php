@@ -136,6 +136,8 @@ final class Op_turnTest extends AbstractOpTestCase {
 
         $op = $this->op;
         $this->call_resolve("actionPractice");
+        // The slot is spent when the action op resolves (spend flag), not when it is picked.
+        $this->game->machine->dispatchAll();
 
         $location = $this->game->tokens->getTokenLocation($markerKey);
         $this->assertEquals("aslot_" . PCOLOR . "_actionPractice", $location);
@@ -160,13 +162,14 @@ final class Op_turnTest extends AbstractOpTestCase {
         $this->call_resolve("actionPractice");
         $this->game->machine->dispatchAll(); // run actionPractice, returns to turn
 
-        // Second action
+        // Second action — instant one (prepare), so dispatch reaches its resolve and spends the slot.
         $turnOp = $this->game->machine->createTopOperationFromDbForOwner(null);
-        $turnOp->action_resolve([Operation::ARG_TARGET => "actionMove"]);
+        $turnOp->action_resolve([Operation::ARG_TARGET => "actionPrepare"]);
+        $this->game->machine->dispatchAll();
 
         $marker2 = "marker_" . PCOLOR . "_2";
         $location = $this->game->tokens->getTokenLocation($marker2);
-        $this->assertEquals("aslot_" . PCOLOR . "_actionMove", $location);
+        $this->assertEquals("aslot_" . PCOLOR . "_actionPrepare", $location);
     }
 
     // -------------------------------------------------------------------------

@@ -141,6 +141,15 @@ final class Op_actionMoveTest extends AbstractOpTestCase {
         $this->assertSame(3, $data["budget"]);
     }
 
+    public function testWreckingBallAloneEnablesStepMode(): void {
+        // Moving into occupied hexes is offered per step, so the card itself is a step incentive.
+        $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II
+        /** @var Op_actionMove */
+        $op = $this->op;
+        [$type] = $op->getDelegateInfo();
+        $this->assertEquals("moveStep", $type, "Wrecking Ball forces step mode without any other incentive");
+    }
+
     public function testWreckingBallKeepsConfirmMovePreference(): void {
         $this->enableConfirmMovePreference();
         $this->game->tokens->moveToken("card_ability_4_8", "tableau_" . PCOLOR); // Wrecking Ball II

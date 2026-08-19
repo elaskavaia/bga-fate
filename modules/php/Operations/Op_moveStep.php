@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -24,7 +23,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Treetreader II). See DESIGN.md "Step-by-step Move".
  *
  * Each prompt offers every hex reachable within the remaining budget (so a far click still
- * works as a fast "go there") PLUS an "End Move" sentinel. After resolving a click the loop
+ * works as a fast "go there"), occupied hexes Wrecking Ball can move into within the budget
+ * is on the tableau (auto-route adjacent, step in, push the occupant, deal 1 damage —
+ * see Op_c_wrecking), PLUS an "End Move" sentinel. After resolving a click the loop
  * re-queues itself with the reduced budget, letting the player keep stepping deliberately
  * (including back and forth to re-enter forests) until the budget runs out or they end the
  * move. All hops are emitted as non-final Op_step (TStep); the final ActionMove/Move trigger
@@ -67,10 +68,8 @@ class Op_moveStep extends Operation {
         $targets = [];
         if ($budget > 0) {
             $targets = array_keys($this->game->hexMap->getReachableHexes($hero->getHex(), $budget, $hero));
-            // Wrecking Ball stays on offer at every prompt, scoped to the budget still left.
-            $wreckingCard = $hero->getWreckingCard();
-            if ($wreckingCard !== null && $this->game->hexMap->hasReachableOccupiedHex($hero->getHex(), $budget)) {
-                $targets[$wreckingCard] = ["q" => 0, "buttons" => true];
+            if ($hero->getWreckingCard() !== null) {
+                $targets = array_merge($targets, $this->getWreckingTargets($budget));
             }
         }
         // Offer the early-stop only after at least one step (keeps the "move at least 1 area" minimum).
@@ -89,12 +88,33 @@ class Op_moveStep extends Operation {
             return;
         }
 
-        // Wrecking Ball hands the rest of the budget to its own pendulum loop, which ends the
-        // move itself (its "End Move" sentinel fires the closing trigger) -- do not re-queue here.
-        if ($arg === Hero::WRECKING_BALL_I || $arg === Hero::WRECKING_BALL_II) {
-            $this->queue("c_wrecking", null, [
-                "budget" => $this->getBudget(),
-                "card" => $arg,
+        // Wrecking Ball move into an occupied hex: walk adjacent to the occupied hex if needed (auto-route), step
+        // into it (transient multi-occupancy), then c_wrecking pushes the occupant and deals
+        // the damage, and the loop continues with the remaining budget.
+        $occupant = $hero->getWreckingCard() !== null ? $this->game->hexMap->getCharacterOnHex($arg) : null;
+        if ($occupant !== null) {
+            $stepsUsed = 1;
+            if ($this->game->hexMap->getHexDistance($hero->getHex(), $arg) > 1) {
+                $approach = $this->findWreckingApproach($arg);
+                $path = $this->game->hexMap->getPath($hero->getHex(), $approach, $hero);
+                foreach ($path as $hex) {
+                    $this->queue("step", null, [
+                        "hex" => $hex,
+                        "final" => false,
+                        "reason" => $this->getReason(),
+                    ]);
+                }
+                $stepsUsed += count($path);
+            }
+            $this->queue("step", null, [
+                "hex" => $arg,
+                "final" => false,
+                "reason" => $this->getReason(),
+            ]);
+            $this->queue("c_wrecking", null, ["displaced" => $occupant]);
+            $this->queue("moveStep", null, [
+                "budget" => $this->getBudget() - $stepsUsed,
+                "moved" => $this->getMoved() + $stepsUsed,
                 "reason" => $this->getReason(),
             ]);
             return;
@@ -123,6 +143,60 @@ class Op_moveStep extends Operation {
             "moved" => $this->getMoved() + count($path),
             "reason" => $this->getReason(),
         ]);
+    }
+
+    /**
+     * Wrecking Ball targets: occupied hexes the hero can reach and move into within $budget -
+     * adjacent to the current hex, or to any hex reachable with budget-1 steps (the move-in
+     * itself costs 1). Grimheim is excluded: it is not an "occupied area" (designer ruling),
+     * and a hex inside it cannot serve as an approach either (entering ends the move).
+     */
+    private function getWreckingTargets(int $budget): array {
+        $hero = $this->game->getHero($this->getOwner());
+        $hexMap = $this->game->hexMap;
+        $sources = [$hero->getHex() => 0];
+        if ($budget > 1) {
+            $sources += $hexMap->getReachableHexes($hero->getHex(), $budget - 1, $hero);
+        }
+        $targets = [];
+        foreach ($sources as $from => $dist) {
+            if ($dist > 0 && $hexMap->isInGrimheim($from)) {
+                continue;
+            }
+            foreach ($hexMap->getAdjacentHexes($from) as $hex) {
+                if (isset($targets[$hex])) {
+                    continue;
+                }
+                if ($hexMap->isInGrimheim($hex) || $hexMap->isImpassable($hex, $hero)) {
+                    continue;
+                }
+                if ($hexMap->getCharacterOnHex($hex) !== null) {
+                    $targets[$hex] = true;
+                }
+            }
+        }
+        return array_keys($targets);
+    }
+
+    /** Closest reachable hex adjacent to the Wrecking Ball target, to walk to before moving in. */
+    private function findWreckingApproach(string $target): string {
+        $hero = $this->game->getHero($this->getOwner());
+        $hexMap = $this->game->hexMap;
+        $reach = $hexMap->getReachableHexes($hero->getHex(), $this->getBudget() - 1, $hero);
+        $best = null;
+        $bestDist = PHP_INT_MAX;
+        foreach ($hexMap->getAdjacentHexes($target) as $hex) {
+            $dist = $reach[$hex] ?? null;
+            if ($dist === null || $hexMap->isInGrimheim($hex)) {
+                continue;
+            }
+            if ($dist < $bestDist) {
+                $best = $hex;
+                $bestDist = $dist;
+            }
+        }
+        $this->game->systemAssert("ERR:moveStep:noWreckingApproach:$target", $best !== null);
+        return $best;
     }
 
     private function queueFinalTrigger(): void {

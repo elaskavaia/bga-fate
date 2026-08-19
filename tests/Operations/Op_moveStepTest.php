@@ -93,45 +93,107 @@ final class Op_moveStepTest extends AbstractOpTestCase {
         $this->assertNotContains("moveStep", $types, "the loop stops on End Move");
     }
 
-    /** Puts Wrecking Ball II on the tableau and a monster in range so the option is live. */
+    /** Puts Wrecking Ball II on the tableau and a monster on an adjacent hex so a Wrecking Ball target exists. */
     private function setUpWreckingBall(): void {
         $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
         $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
     }
 
-    public function testWreckingBallOfferedAtEveryPrompt(): void {
+    public function testWreckingTargetOfferedAtEveryPrompt(): void {
         $this->setUpWreckingBall();
         $first = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
-        $this->assertContains("card_ability_4_8", $first->getArgsTarget(), "offered on the first prompt");
+        $this->assertContains("hex_12_8", $first->getArgsTarget(), "occupied adjacent hex is a Wrecking Ball move target");
 
         $later = $this->createOp("moveStep", ["budget" => 1, "moved" => 2]);
-        $this->assertContains("card_ability_4_8", $later->getArgsTarget(), "still offered mid-loop");
+        $this->assertContains("hex_12_8", $later->getArgsTarget(), "still offered mid-loop");
     }
 
-    public function testWreckingBallNotOfferedWithoutOccupantInRange(): void {
-        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+    public function testOccupiedHexNotOfferedWithoutWreckingCard(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_12_8");
         $this->game->hexMap->invalidateOccupancy();
         $op = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
-        $this->assertNotContains("card_ability_4_8", $op->getArgsTarget(), "nothing in range to ram");
+        $this->assertNotContains("hex_12_8", $op->getArgsTarget(), "no moving into occupied hexes without the card");
     }
 
-    public function testWreckingBallNotOfferedOnceBudgetIsSpent(): void {
+    public function testDistantWreckingTargetOfferedWithinBudget(): void {
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7"); // distance 2: walk 1 + move-in 1
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
+        $this->assertContains("hex_13_7", $op->getArgsTarget(), "occupied hex within budget is a Wrecking Ball move target");
+    }
+
+    public function testDistantWreckingTargetNotOfferedWhenBudgetTooSmall(): void {
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7"); // needs 2 budget
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("moveStep", ["budget" => 1, "moved" => 2]);
+        $this->assertNotContains("hex_13_7", $op->getArgsTarget(), "walk+move-in does not fit in 1 budget");
+    }
+
+    public function testDistantWreckingMoveAutoRoutesAndSpendsWalkSteps(): void {
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_13_7");
+        $this->game->hexMap->invalidateOccupancy();
+        $this->createOp("moveStep", ["budget" => 3, "moved" => 0, "reason" => "Op_actionMove"]);
+        $this->call_resolve("hex_13_7");
+        $this->dispatchAll(); // walk step(s) resolve; push phase becomes current
+
+        $this->assertEquals("hex_13_7", $this->heroHex(), "Boldur walked adjacent and moved in");
+
+        $wrecking = $this->findAnyQueuedOp("c_wrecking");
+        $this->assertNotNull($wrecking, "push phase is queued");
+        $this->assertEquals("monster_goblin_1", $wrecking->getDataField("displaced"));
+
+        $follow = $this->findAnyQueuedOp("moveStep");
+        $this->assertNotNull($follow, "the move loop continues after the wrecking move");
+        $this->assertEquals(1, $follow->getDataField("budget"), "walk (1) + move-in (1) spent from budget 3");
+        $this->assertEquals(2, $follow->getDataField("moved"));
+    }
+
+    public function testWreckingTargetNotOfferedOnceBudgetIsSpent(): void {
         $this->setUpWreckingBall();
         $op = $this->createOp("moveStep", ["budget" => 0, "moved" => 3]);
         $this->assertEquals(["endOfMove"], $op->getArgsTarget());
     }
 
-    public function testWreckingBallHandsRemainingBudgetToPendulumLoop(): void {
+    public function testHeroOccupiedHexIsWreckingTarget(): void {
+        // "Character" includes heroes (designer ruling) - a hero on an adjacent hex is a valid Wrecking Ball target.
+        $this->game->tokens->moveToken("card_ability_4_8", $this->getPlayersTableau());
+        $this->game->tokens->moveToken("hero_2", "hex_12_8");
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("moveStep", ["budget" => 3, "moved" => 0]);
+        $this->assertContains("hex_12_8", $op->getArgsTarget(), "hero-occupied adjacent hex is a Wrecking Ball move target");
+    }
+
+    /** First queued op of $type anywhere in the queue (not just the top rank). */
+    private function findAnyQueuedOp(string $type): ?Operation {
+        foreach ($this->game->machine->getAllOperations($this->owner) as $row) {
+            if (($row["type"] ?? "") === $type) {
+                return $this->game->machine->instantiateOperationFromDbRow($row);
+            }
+        }
+        return null;
+    }
+
+    public function testWreckingMoveStepsInQueuesPushAndContinuesLoop(): void {
         $this->setUpWreckingBall();
         $this->createOp("moveStep", ["budget" => 2, "moved" => 1, "reason" => "Op_actionMove"]);
-        $this->call_resolve("card_ability_4_8");
+        $this->call_resolve("hex_12_8");
+        $this->dispatchAll(); // run the step; the push phase becomes the current prompt
 
-        $this->assertNotContains("moveStep", $this->allQueuedTypes(), "c_wrecking ends the move itself");
-        $wrecking = $this->findQueuedOp("c_wrecking");
-        $this->assertNotNull($wrecking, "the pendulum loop is queued");
-        $this->assertEquals(2, $wrecking->getDataField("budget"), "the unspent steps carry over");
-        $this->assertEquals("Op_actionMove", $wrecking->getReason(), "reason propagates so the closing trigger is ActionMove");
+        $this->assertEquals("hex_12_8", $this->heroHex(), "Boldur stepped into the occupied hex");
+
+        $wrecking = $this->findAnyQueuedOp("c_wrecking");
+        $this->assertNotNull($wrecking, "push phase is queued");
+        $this->assertEquals("monster_goblin_1", $wrecking->getDataField("displaced"), "the occupant is displaced");
+
+        $follow = $this->findAnyQueuedOp("moveStep");
+        $this->assertNotNull($follow, "the move loop continues after the wrecking move");
+        $this->assertEquals(1, $follow->getDataField("budget"), "the move-in costs 1 budget");
+        $this->assertEquals(2, $follow->getDataField("moved"), "the move-in counts as a step taken");
+        $this->assertEquals("Op_actionMove", $follow->getReason(), "reason propagates so the closing trigger is ActionMove");
     }
 
     public function testBackAndForthReEntryIsAllowed(): void {

@@ -79,10 +79,13 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
     }
 
     // --- Wrecking Ball I (card_ability_4_7) ---
-    // r=nop, on=custom — bespoke Op_c_wrecking pendulum loop dispatched from Op_move
-    // when the card is on the tableau and an adjacent hex is occupied. Designer rule
-    // clarifications: pendulum swap allowed (push displaced into the hex Boldur
-    // came from); "character" includes heroes; cannot push out of Grimheim.
+    // r=nop, on=custom — the card makes Boldur move via Op_moveStep (step incentive),
+    // which offers occupied hexes within the move budget as targets; picking one steps in and
+    // dispatches Op_c_wrecking for the push. At the turn level an adjacent monster
+    // hex is claimed by BOTH actionAttack and actionMove (Wrecking Ball move), so clicking it asks
+    // via or-expression: choice_0 = actionMove (material order), choice_1 = actionAttack.
+    // Designer rule clarifications: pendulum swap allowed (push displaced into the hex
+    // Boldur came from); "character" includes heroes; cannot push out of Grimheim.
 
     /** Move Boldur to a plains hex outside Grimheim and arm the Wrecking Ball card. */
     private function placeWreckingBallI(): void {
@@ -92,18 +95,23 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->game->hexMap->invalidateOccupancy();
     }
 
-    public function testWreckingBallIRamsAdjacentMonsterDealsDamageAndPushes(): void {
+    /** Click the occupied hex at the turn level, then pick "move" in the attack-or-move chooser. */
+    private function wreckingMoveViaTurn(string $hex): void {
+        $this->assertValidTarget($hex);
+        $this->respond($hex);
+        $this->assertValidTarget("choice_0", "ambiguous hex asks attack vs move");
+        $this->respond("choice_0"); // actionMove -> moveStep moves into the preset hex
+    }
+
+    public function testWreckingBallIMovesIntoAdjacentMonsterDealsDamageAndPushes(): void {
         $this->placeWreckingBallI();
         $goblin = "monster_goblin_1";
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        // turn op inlines actionMove targets — wrecking card_id is offered alongside hexes.
-        $this->assertValidTarget("card_ability_4_7");
-        $this->respond("card_ability_4_7"); // launch the pendulum via Op_move
-        // c_wrecking destination phase — pick the occupied adjacent hex.
-        $this->assertOperation("c_wrecking");
-        $this->respond("hex_7_8");
+        // Occupied adjacent hex is directly clickable (BGA #238475); attack also
+        // claims it, so the or-chooser comes up first.
+        $this->wreckingMoveViaTurn("hex_7_8");
         // Push phase — choose where the displaced goblin goes. Pick hex_6_8 (a non-came-from neighbor).
         $this->assertOperation("c_wrecking");
         $this->respond("hex_6_8");
@@ -111,7 +119,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->respond("endOfMove");
         $this->skipIfOp("drawEvent");
 
-        $this->assertEquals("hex_7_8", $this->tokenLocation($this->heroId), "Boldur ended on the rammed hex");
+        $this->assertEquals("hex_7_8", $this->tokenLocation($this->heroId), "Boldur ended on the monster hex");
         $this->assertEquals("hex_6_8", $this->tokenLocation($goblin), "Goblin pushed to hex_6_8");
         $this->assertEquals(1, $this->countDamage($goblin), "Wrecking Ball deals 1 damage to displaced character");
     }
@@ -122,8 +130,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        $this->respond("card_ability_4_7");
-        $this->respond("hex_7_8"); // ram into goblin's hex
+        $this->wreckingMoveViaTurn("hex_7_8");
         // Pendulum: push displaced goblin into the hex Boldur just came from.
         $this->respond("hex_7_9");
         $this->respond("endOfMove");
@@ -134,8 +141,8 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($goblin));
     }
 
-    public function testWreckingBallIChainsMultipleRamsInOneAction(): void {
-        // Boldur's move = 3. Use a troll (health=7) so it survives multiple rams.
+    public function testWreckingBallIChainsMultipleHitsInOneAction(): void {
+        // Boldur's move = 3. Use a troll (health=7) so it survives multiple hits.
         $this->placeWreckingBallI();
         $troll = "monster_troll_1";
         $bystander = "monster_goblin_4";
@@ -143,10 +150,9 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($bystander)->moveTo("hex_7_10", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        $this->respond("card_ability_4_7");
-        $this->respond("hex_7_8"); // ram troll
+        $this->wreckingMoveViaTurn("hex_7_8"); // move into the troll hex
         $this->respond("hex_7_9"); // pendulum-swap troll back to Boldur's start
-        // Boldur on hex_7_8 now; step back to hex_7_9 (now occupied by troll) → ram again.
+        // Boldur on hex_7_8 now; hex_7_9 (occupied by troll) is a wrecking target mid-loop — no chooser.
         $this->respond("hex_7_9");
         $this->respond("hex_7_8"); // shove troll back to hex_7_8
         $this->respond("endOfMove");
@@ -154,62 +160,68 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
 
         $this->assertEquals("hex_7_9", $this->tokenLocation($this->heroId));
         $this->assertEquals("hex_7_8", $this->tokenLocation($troll));
-        $this->assertEquals(2, $this->countDamage($troll), "Troll rammed twice = 2 damage");
+        $this->assertEquals(2, $this->countDamage($troll), "Troll hit twice = 2 damage");
         $this->assertEquals(0, $this->countDamage($bystander), "Bystander never engaged");
     }
 
     /**
-     * Regression: with a monster 2 hexes away (not directly adjacent), Boldur's
-     * move action must still offer Wrecking Ball — Op_c_wrecking lets him walk
-     * one hex first and then ram. Previously the card was only surfaced when an
-     * adjacent hex was occupied, hiding the option in this scenario.
+     * Regression (BGA #238475 / #235051 spirit): a monster 2 hexes away is still reachable
+     * in one move action — the occupied hex is offered at the turn level and clicking it
+     * auto-routes (walk adjacent, then move in), like the old card-click pendulum did.
      */
-    public function testWreckingBallIOfferedWhenMonsterIsTwoHexesAway(): void {
+    public function testWreckingBallIMovesIntoDistantMonsterWithAutoRoute(): void {
         $this->placeWreckingBallI();
         $goblin = "monster_goblin_3";
         // Boldur at hex_7_9 (set by placeWreckingBallI); goblin at hex_7_7 — distance 2.
         $this->game->getMonster($goblin)->moveTo("hex_7_7", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        // Turn-level offer surfaces the card via the inlined actionMove targets.
-        $this->assertValidTarget("card_ability_4_7", "Wrecking Ball must be offered when monster is reachable via walk-then-ram");
+        // Out of attack range (melee), so no chooser: the click goes straight to the move.
+        $this->assertValidTarget("hex_7_7", "distant occupied hex is offered at the turn level");
+        $this->respond("hex_7_7");
+        // Push phase — pendulum the goblin into the hex Boldur just came from.
+        $this->assertOperation("c_wrecking");
+        $this->respond("hex_7_8");
+        $this->respond("endOfMove");
+        $this->skipIfOp("drawEvent");
+
+        $this->assertEquals("hex_7_7", $this->tokenLocation($this->heroId), "Boldur walked and moved in");
+        $this->assertEquals("hex_7_8", $this->tokenLocation($goblin), "Goblin pushed to the approach hex");
+        $this->assertEquals(1, $this->countDamage($goblin));
     }
 
-    public function testWreckingBallIEndOfMoveSentinelEndsAction(): void {
+    public function testMoveWithoutWreckingSpendsActionAndLeavesMonsterAlone(): void {
         $this->placeWreckingBallI();
         $goblin = "monster_goblin_5";
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        $this->respond("card_ability_4_7");
-        // Choose endOfMove immediately — no ram, no damage.
+        // Moving into the occupied hex is optional: step to a free hex and end the move.
+        $this->respond("hex_7_10");
         $this->assertValidTarget("endOfMove");
         $this->respond("endOfMove");
         $this->skipIfOp("drawEvent");
 
-        $this->assertEquals("hex_7_9", $this->tokenLocation($this->heroId), "Boldur did not move");
+        $this->assertEquals("hex_7_10", $this->tokenLocation($this->heroId), "Boldur took the plain step");
         $this->assertEquals("hex_7_8", $this->tokenLocation($goblin), "Goblin not displaced");
         $this->assertEquals(0, $this->countDamage($goblin));
-        // Move action consumed (the action marker placed when actionMove was queued).
+        // Move action consumed (the marker is placed by actionMove itself via the spend flag).
         $hero = $this->game->getHero($this->getActivePlayerColor());
         $this->assertContains("actionMove", $hero->getActionsTaken());
     }
 
     public function testWreckingBallIPushesIntoGrimheim(): void {
         // Designer rule: pushing into Grimheim is allowed and deals 1 damage as usual.
-        // Park Boldur at hex_8_8 (adjacent to Grimheim hex_8_9 and hex_9_8); a goblin at hex_7_8
-        // adjacent to Boldur. Push the goblin into Grimheim hex_8_9.
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_ability_4_7", "tableau_$color");
-        // Park Boldur at hex_8_7; goblin at hex_8_8 adjacent. After ram, Boldur on hex_8_8
+        // Park Boldur at hex_8_7; goblin at hex_8_8 adjacent. After moving in, Boldur on hex_8_8
         // whose neighbours include Grimheim hexes hex_8_9 and hex_9_8.
         $this->game->tokens->moveToken($this->heroId, "hex_8_7");
         $goblin = "monster_goblin_6";
         $this->game->getMonster($goblin)->moveTo("hex_8_8", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        $this->respond("card_ability_4_7");
-        $this->respond("hex_8_8");
+        $this->wreckingMoveViaTurn("hex_8_8");
         $this->assertValidTarget("hex_8_9");
         $this->respond("hex_8_9");
         $this->respond("endOfMove");
@@ -220,8 +232,28 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($goblin), "1 damage applied even when target lands in Grimheim");
     }
 
+    public function testAmbiguousHexChoosingAttackRollsDice(): void {
+        // The other side of the chooser: choice_1 = actionAttack performs a normal attack
+        // and spends the attack action, not the move.
+        $this->placeWreckingBallI();
+        $goblin = "monster_goblin_1";
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->game->hexMap->invalidateOccupancy();
+
+        // Boldur I (3) + First Pick (1) = 4 dice; 1 hit + 3 misses kills the goblin (h=1).
+        $this->seedRand([5, 1, 1, 1]);
+        $this->respond("hex_7_8");
+        $this->assertValidTarget("choice_1");
+        $this->respond("choice_1");
+
+        $this->assertEmpty($this->game->randQueue, "attack rolled its 4 dice");
+        $hero = $this->game->getHero($this->getActivePlayerColor());
+        $this->assertContains("actionAttack", $hero->getActionsTaken(), "attack action spent");
+        $this->assertNotContains("actionMove", $hero->getActionsTaken(), "move action untouched");
+    }
+
     // --- Wrecking Ball II (card_ability_4_8) ---
-    // Same ram/push behaviour as I, plus passive +1 move (Hero::calcBaseMove).
+    // Same move-in/push behaviour as I, plus passive +1 move (Hero::calcBaseMove).
 
     public function testWreckingBallIIGrantsPassivePlusOneMove(): void {
         $color = $this->getActivePlayerColor();
@@ -237,8 +269,8 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals(4, $hero->getNumberOfMoves(), "Wrecking Ball II grants passive +1 move");
     }
 
-    public function testWreckingBallIIRamsLikeLevelI(): void {
-        // Level II shares the ram mechanic; verify the card is offered as a target.
+    public function testWreckingBallIIMovesIntoOccupiedLikeLevelI(): void {
+        // Level II shares the mechanic; verify the occupied hex works as a move target.
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_ability_4_8", "tableau_$color");
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
@@ -246,9 +278,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
         $this->game->hexMap->invalidateOccupancy();
 
-        $this->assertValidTarget("card_ability_4_8");
-        $this->respond("card_ability_4_8");
-        $this->respond("hex_7_8");
+        $this->wreckingMoveViaTurn("hex_7_8");
         $this->respond("hex_6_8");
         $this->respond("endOfMove");
         $this->skipIfOp("drawEvent");

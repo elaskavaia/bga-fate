@@ -99,10 +99,15 @@ class Op_turn extends Operation {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgsInfo();
                     foreach ($info as $key => $value) {
-                        // Don't overwrite a valid target (q=0) from a previous action
                         $existingQ = $res[$key]["q"] ?? null;
                         $newQ = $value["q"] ?? 0;
-                        if ($existingQ === 0 && $newQ !== 0) {
+                        if ($existingQ === 0) {
+                            // Target already claimed by a previous action. If this action also
+                            // claims it, remember all claimants so resolve() can disambiguate.
+                            if ($newQ === 0) {
+                                $first = $res[$key]["action"] ?? "";
+                                $res[$key]["actions"] = array_merge($res[$key]["actions"] ?? [$first], [$action]);
+                            }
                             continue;
                         }
                         $res[$key] = $value;
@@ -130,30 +135,27 @@ class Op_turn extends Operation {
 
     function resolve(): void {
         $optype = $this->getCheckedArg();
-        $hero = $this->game->getHero($this->getOwner());
         $kind = $this->getActionKind($optype);
 
-        if ($kind === "main") {
-            $hero->placeActionMarker($optype);
-            $this->queue($optype);
-            $this->queue("turn");
-        } elseif ($kind === "free") {
-            $this->queue($optype);
-            $this->queue("turn");
-        } elseif ($kind === "") {
+        if ($kind === "") {
             // delegate: user picked a sub-target directly (e.g. a hex), resolve via parent action
             $argInfo = $this->getArgsInfo()[$optype];
+            $actions = $argInfo["actions"] ?? [];
+            if (count($actions) > 1) {
+                // Target claimed by several actions let the player pick via or-expression.
+                $this->queue(implode("/", $actions), null, ["target" => $optype, "spend" => 1, "reason" => ""]);
+                $this->queue("turn", null, ["reason" => ""]);
+                return;
+            }
             $action = $argInfo["action"] ?? "";
-            $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action !== "");
+            $this->game->systemAssert("ERR:turn:invalidDelegateAction", $action);
             $kind = $this->getActionKind($action);
 
-            if ($kind == "main") {
-                $hero->placeActionMarker($action);
-            }
-            $this->queue($action, null, ["target" => $optype]);
-            $this->queue("turn");
+            $this->queue($action, null, ["target" => $optype, "spend" => $kind === "main", "reason" => ""]);
+            $this->queue("turn", null, ["reason" => ""]);
         } else {
-            $this->game->systemAssert("ERR:turn:invalidDelegateAction3");
+            $this->queue($optype, null, ["spend" => $kind === "main", "reason" => ""]);
+            $this->queue("turn", null, ["reason" => ""]);
         }
     }
 
