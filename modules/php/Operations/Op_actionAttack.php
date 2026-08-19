@@ -15,14 +15,13 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Attack action: hero attacks a monster within range.
  * Player selects a target monster, then delegates to the roll pipeline:
  * roll → resolveHits → dealDamage.
  */
-class Op_actionAttack extends Operation {
+class Op_actionAttack extends AbsOp_action {
     private const OREBITER = "card_equip_4_19";
 
     function getPossibleMoves(): array {
@@ -58,6 +57,7 @@ class Op_actionAttack extends Operation {
     }
 
     function resolve(): void {
+        $this->spendTurnSlot();
         $target = $this->getDataField("target", "");
         $targetHex = $target ?: $this->getCheckedArg();
         $hero = $this->game->getHero($this->getOwner());

@@ -14,13 +14,12 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\OpCommon\Operation;
-
 /**
  * Practice action: add 1 experience (yellow crystal) to the player board.
  */
-class Op_actionPractice extends Operation {
+class Op_actionPractice extends AbsOp_action {
     function resolve(): void {
+        $this->spendTurnSlot();
         $this->queue($this->getDelegateOperation());
     }
 

@@ -14,13 +14,12 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\OpCommon\Operation;
-
 /**
  * Prepare action: hero prepares (charges a skill or readies equipment).
  */
-class Op_actionPrepare extends Operation {
+class Op_actionPrepare extends AbsOp_action {
     function resolve(): void {
+        $this->spendTurnSlot();
         $this->queue($this->getDelegateOperation());
     }
     function getDelegateOperation(): string {

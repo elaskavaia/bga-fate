@@ -15,13 +15,12 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
-use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * Mend action: remove 2 damage from hero (5 if in Grimheim).
  * In Grimheim, damage may also be removed from equipment cards.
  */
-class Op_actionMend extends Operation {
+class Op_actionMend extends AbsOp_action {
     function getPrompt() {
         if ($this->isInGrimheim()) {
             return clienttranslate("Choose a hero or equipment to repair (up to 5 damage)");
@@ -69,6 +68,7 @@ class Op_actionMend extends Operation {
     }
 
     function resolve(): void {
+        $this->spendTurnSlot();
         $target = $this->getCheckedArg();
         $args = $this->getArgs();
         $delegate = $args["info"][$target]["delegate"] ?? null;

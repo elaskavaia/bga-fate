@@ -14,13 +14,11 @@ declare(strict_types=1);
 
 namespace Bga\Games\Fate\Operations;
 
-use Bga\Games\Fate\OpCommon\Operation;
-
 /**
  * Focus action: Add 1 mana (green) to one of your cards.
  * Delegates to gainMana operation.
  */
-class Op_actionFocus extends Operation {
+class Op_actionFocus extends AbsOp_action {
     function getPrompt() {
         return $this->instantiateOperation($this->getDelegateOperation())->getPrompt();
     }
@@ -34,6 +32,7 @@ class Op_actionFocus extends Operation {
     }
 
     function resolve(): void {
+        $this->spendTurnSlot();
         $res = $this->getCheckedArg();
         $this->queue($this->getDelegateOperation(), null, ["target" => $res]);
     }
