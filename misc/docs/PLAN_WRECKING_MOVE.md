@@ -61,19 +61,21 @@ plus removal of the Op_c_wrecking / Op_moveStep code duplication.
 - [ ] Harness check: or-button labels (Attack / Move) and prompt rendering - visual pass
       still to do (server-side flow is test-covered).
 
-## Follow-up (agreed, not started): merge Op_move and Op_moveStep
+## Follow-up: merge Op_move and Op_moveStep - DONE
 
-One op ("move") instead of two; the split is historical. Decisions so far:
+One op ("move") instead of two; the split was historical.
 
-- budget becomes the count (CountableOperation native); "moved" data field stays for taken steps.
-- min-count semantics UNCHANGED: "1move" cannot be cancelled, mcount governs skippability as today.
-- hasStepIncentive moves out of Op_actionMove into the move op itself (or Hero); getDelegateInfo dies,
-  actionMove always queues "Nmove", card-driven moves get step mode for free.
-- Wrecking targets/approach port over; Op_moveStep deleted; closing trigger fired by the op
-  (all steps final=false, Op_step "final" branch becomes dead code to remove).
-- End Move gating by moved >= 1; consider replacing the endOfMove pseudo-target with skip +
-  getSkipName() "End Move".
-- Filter param must survive the loop re-queue (Seek Shelter mid-move).
+- [x] budget became the count (CountableOperation native); "moved" data field stays for taken steps.
+- [x] min-count semantics UNCHANGED: "1move" cannot be cancelled, mcount governs skippability as today.
+- [x] hasStepIncentive moved out of Op_actionMove into Op_move (isStepMode = incentive AND no filter);
+      getDelegateInfo died, actionMove always queues "[1,N]move", card moves get step mode for free.
+- [x] Wrecking targets/approach ported; Op_moveStep deleted (op file, material row, client handler,
+      test file merged into Op_moveTest).
+- Deviations from the original sketch:
+  - Op_step "final" branch is NOT dead code: Op_c_queen uses it, and the one-click path keeps a
+    final last step so the arrival is still logged (step-mode hops stay silent as before).
+  - endOfMove stays a pseudo-target; the skip/getSkipName("End Move") replacement was not taken
+    (would churn UI and tests for no behavior gain).
 
 ## Open question (Victoria to decide)
 

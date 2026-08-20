@@ -5,10 +5,10 @@ declare(strict_types=1);
 /**
  * Op_c_wrecking — Wrecking Ball push phase.
  *
- * Boldur has already stepped into the occupied hex (Op_moveStep Wrecking Ball branch);
+ * Boldur has already stepped into the occupied hex (Op_move Wrecking Ball branch);
  * this op lists adjacent hexes the displaced character can enter. Picking one
  * moves the character + queues dealDamage(1). The move loop itself continues
- * in Op_moveStep (queued by the Wrecking Ball branch, not by this op).
+ * in Op_move (queued by the Wrecking Ball branch, not by this op).
  *
  * Hero (default Bjorn) parked at hex_5_9 — clean non-Grimheim ring:
  *   NW hex_4_9, NE hex_5_8, E hex_6_8, SE hex_6_9, SW hex_5_10, W hex_4_10.
@@ -71,7 +71,7 @@ final class Op_c_wreckingTest extends AbstractOpTestCase {
     }
 
     public function testPushResolveDoesNotReQueueItself(): void {
-        // The loop lives in Op_moveStep now; the push phase must not spawn another c_wrecking.
+        // The loop lives in Op_move now; the push phase must not spawn another c_wrecking.
         $this->game->tokens->moveToken("monster_goblin_1", $this->heroHex);
         $this->createOp("c_wrecking", ["displaced" => "monster_goblin_1"]);
 

@@ -79,7 +79,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
     }
 
     // --- Wrecking Ball I (card_ability_4_7) ---
-    // r=nop, on=custom — the card makes Boldur move via Op_moveStep (step incentive),
+    // r=nop, on=custom — the card makes Boldur move in step mode (Op_move step incentive),
     // which offers occupied hexes within the move budget as targets; picking one steps in and
     // dispatches Op_c_wrecking for the push. At the turn level an adjacent monster
     // hex is claimed by BOTH actionAttack and actionMove (Wrecking Ball move), so clicking it asks
@@ -100,7 +100,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertValidTarget($hex);
         $this->respond($hex);
         $this->assertValidTarget("choice_0", "ambiguous hex asks attack vs move");
-        $this->respond("choice_0"); // actionMove -> moveStep moves into the preset hex
+        $this->respond("choice_0"); // actionMove -> the move op moves into the preset hex
     }
 
     public function testWreckingBallIMovesIntoAdjacentMonsterDealsDamageAndPushes(): void {

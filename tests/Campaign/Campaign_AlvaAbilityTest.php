@@ -29,7 +29,7 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->clearMonstersFromMap();
         $this->clearHand($this->getActivePlayerColor());
         // A shuffled equip deck can leave a TStep quest (Belt of Youth) on top, which reroutes
-        // move actions through Op_moveStep and stalls the chain waiting for "End Move".
+        // move actions through the Op_move step loop and stalls the chain waiting for "End Move".
         $this->clearEquipDecks();
     }
 

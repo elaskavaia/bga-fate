@@ -615,7 +615,7 @@ final class HexMapTest extends TestCase {
      * adjacent to a monster, with movement and open hexes remaining. Rules: only MONSTER movement
      * stops on adjacency to a hero; a hero may move past/around a monster (just not THROUGH the
      * occupied hex). This probes the shared core of the move action, used by Op_move and
-     * Op_moveStep; the end-to-end loop guards live in Op_moveStepTest.
+     * Op_move; the end-to-end step-loop guards live in Op_moveTest.
      *
      * Open plains field x=11..15,y=7..9. Hero at hex_12_8, monster at hex_13_8 (adjacent, east).
      */

@@ -175,18 +175,25 @@ Kinds: `auto` = server-resolves without player input; `player` = waits for playe
 - `shareGold` (free) - Give gold to another hero - *notimpl*
 
 
-### Step-by-step Move (`Op_moveStep`)
+### Step-by-step Move (`Op_move` step mode)
 
-`actionMove` normally delegates to `Op_move` (one click walks the shortest path to the chosen hex, up to N areas). When the acting hero has an active **per-step incentive** it delegates to `Op_moveStep` instead - a budgeted loop that lets the player route deliberately: each click is one hop (or a fast multi-hop to a far hex), and the hero may step back and forth to re-enter areas. `Op_actionMove::hasStepIncentive` enables it when:
+All hero movement runs through `Op_move` ("up to N areas", the count). It has two interaction styles and decides between them itself (`Op_move::isStepMode`); every move source - the Move action ("[1,N]move" queued by `Op_actionMove`), Maneuver, "Nmove" card effects - gets the same behavior for free:
+
+- **One-click**: pick a destination, the shortest path is walked and the move ends (the last step is final: logs the arrival and fires the closing trigger).
+- **Step mode**: the op re-queues itself after each click with the reduced count (data `moved` counts steps taken), letting the player route deliberately - each click is one hop (or a fast multi-hop to a far hex), including back and forth to re-enter areas.
+
+Step mode is on when the hero has a **per-step incentive** (`Op_move::hasStepIncentive`) and the move has no destination filter (filtered moves like `move(locationOnly)` / `move(forest)` stay one-click - a destination filter cannot be checked per step yet, see PLAN_WRECKING_MOVE.md open question):
 
 - the "Confirm end of movement" preference is on (`Material::MA_PREF_CONFIRM_MOVE`, id 102 in `gamepreferences.json`, on by default) - step mode then applies to every move of that player, or
 - Wrecking Ball is on the tableau (moving into occupied hexes is offered per step, see below), or
 - the active quest (top of `deck_equip_<owner>`) has `quest_on=TStep`, or is a hardcoded custom step-quest (`STEP_QUEST_CARDS`, e.g. Shield's "enter Ogre Valley" branch), or
 - a tableau card reacts per step - a bespoke `onStep` hook (Treetreader II) or declarative `on=TStep`.
 
-Each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, on "End Move", budget exhaustion, or entering Grimheim. The loop re-queues itself with the reduced budget until then. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum. `Trigger::Step` is the root of the movement chain (`Move`'s parent), so a card `on=TStep` fires on every step including the last; `on=TMove` fires only on the last.
+Once the loop has started (`moved >= 1`) step mode stays on for the rest of that move even if the incentive disappears - a TStep quest can complete mid-move and leave the deck top, and dropping to one-click there would strand the player with no "End Move" on a non-skippable op.
 
-**Wrecking Ball (move into occupied hexes)**: with the card on the tableau, `Op_moveStep` also offers occupied hexes within the remaining budget (not Grimheim, not impassable) as directly clickable targets at every prompt; a distant one auto-routes (walk adjacent first, shortest path). Picking one queues a non-final `Op_step` into the hex (transient multi-occupancy), then `Op_c_wrecking` - the push phase: choose where the displaced character goes (the hex Boldur came from is allowed - the pendulum swap), move it, deal 1 damage via the normal pipeline - then the loop continues with the remaining budget. Because it works on any movement (designer: "always active"), unfiltered `Op_move` (Maneuver, plain "Nmove" card effects) delegates to `Op_moveStep` when the card is present; filtered moves (`move(locationOnly)`, `move(forest)`) keep the one-click flow without it for now (see PLAN_WRECKING_MOVE.md open question).
+In step mode each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, from `Op_move`, on "End Move", count exhaustion, or entering Grimheim. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum ("[0,N]move" is instead declinable before the first step via skip, mcount=0). `Trigger::Step` is the root of the movement chain (`Move`'s parent), so a card `on=TStep` fires on every step including the last; `on=TMove` fires only on the last.
+
+**Wrecking Ball (move into occupied hexes)**: with the card on the tableau (itself a step incentive), `Op_move` also offers occupied hexes within the remaining count (not Grimheim, not impassable) as directly clickable targets at every prompt; a distant one auto-routes (walk adjacent first, shortest path). Picking one queues a non-final `Op_step` into the hex (transient multi-occupancy), then `Op_c_wrecking` - the push phase: choose where the displaced character goes (the hex Boldur came from is allowed - the pendulum swap), move it, deal 1 damage via the normal pipeline - then the loop continues with the remaining count. Works on any unfiltered movement (designer: "always active").
 
 **Attack-or-move disambiguation**: at the turn level an adjacent monster hex can be claimed by both `actionAttack` and `actionMove` (Wrecking Ball). `Op_turn` detects the collision when merging inline targets (the entry gets an `actions` list) and resolves the click by queueing the or-expression `actionMove/actionAttack` with the hex as preset `target` - the player picks via buttons. Main actions place their own action marker when queued with data `spend => 1` (`AbsOp_action::spendTurnSlot`); card-driven performs (Rapid Strike, Sophisticated, `performAction`) omit the flag and stay free.
 

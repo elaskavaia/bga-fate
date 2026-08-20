@@ -59,9 +59,6 @@ export class PlayerTurn extends GameMachine {
   onEntering_Op_turn(opInfo: OpInfo) {
     this.markHexes(opInfo);
   }
-  onEntering_Op_moveStep(opInfo: OpInfo) {
-    this.markHexes(opInfo, "actionMove");
-  }
   onEntering_Op_move(opInfo: OpInfo) {
     this.markHexes(opInfo, "actionMove");
   }

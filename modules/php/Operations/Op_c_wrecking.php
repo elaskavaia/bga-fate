@@ -18,9 +18,9 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * c_wrecking: Wrecking Ball push phase. Boldur has just stepped into the occupied
- * hex (Op_moveStep Wrecking Ball branch); this op asks where the displaced character goes,
+ * hex (Op_move Wrecking Ball branch); this op asks where the displaced character goes,
  * moves it there, then deals 1 damage through the proper pipeline (cover, armor,
- * damage effects, kill trigger). The move loop itself continues in Op_moveStep,
+ * damage effects, kill trigger). The move loop itself continues in Op_move,
  * which is queued right after this op.
  *
  * Used by:
