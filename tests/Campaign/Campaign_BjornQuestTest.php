@@ -648,6 +648,9 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->clearHand($color);
         $this->nailed = "card_ability_1_13";
         $this->game->tokens->moveToken($this->nailed, "tableau_" . $color);
+        // Helmet must be the ONLY quest in the deck: whatever the shuffle leaves under it can be
+        // another TMonsterKilled quest (Leather Purse) that claims the second brute kill.
+        $this->clearEquipDecks();
         $this->seedDeck("deck_equip_" . $color, ["card_equip_1_21"]); // Helmet
 
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
