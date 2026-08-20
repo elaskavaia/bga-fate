@@ -281,7 +281,85 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->assertSame("roll", reset($moves)["label"]);
     }
 
+    /**
+     * BGA #238872 ("Undo Movement doesn't work", solo, first turn). On a real table the only
+     * savepoint protecting the whole first solo turn is the one Game::setupGameTables writes,
+     * and it lands at move_id 0 (next_move_id is still 1 when the setup request flushes) -
+     * Victoria's dump diagnosis. This drives that exact shape: barrier at move 0, first move,
+     * undo, second move, undo again - and pins what the shared undo logic does with it.
+     */
+    public function testFirstTurnUndoWithTheSetupBarrierAtMoveZero(): void {
+        $this->setupGameWithBarrierAtMoveZero();
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertSame([0], array_keys($moves), "the setup barrier landed at move 0, as on a real table");
+
+        $startHex = $this->tokenLocation($this->heroId);
+        $moveTarget = "hex_7_9";
+        $this->assertValidTarget($moveTarget);
+        $this->respond($moveTarget);
+        $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "the hero moved");
+
+        $error = $this->tryUndo();
+        $this->assertNull($error, "first undo against the move-0 barrier is accepted");
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "the hero is back where the game started");
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertSame([0], array_keys($moves), "the move-0 barrier survives the restore");
+
+        $this->respond($moveTarget);
+        $error = $this->tryUndo();
+        $this->assertNull($error, "second undo against the move-0 barrier is accepted");
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "the hero is back again");
+    }
+
+    /**
+     * BGA #238872, the structural half. In solo the seat-switch savepoint (OpMachine::dispatchOne)
+     * never fires - the active player never changes - so the WHOLE first turn is protected only by
+     * the single savepoint flushed at the end of the setup request (Game::setupGameTables). Nothing
+     * between setup and the first action re-anchors one (euro re-anchors every turn in
+     * Op_turn::auto; Fate's Op_turnStart does not). This test simulates that one flush not
+     * persisting on the real table and pins the reporter's exact symptom: the first move then has
+     * no barrier behind it and undo answers "Nothing to undo". When a per-turn re-anchor lands
+     * (the fix), the empty-savepoint assertion below flips and this test must be updated.
+     */
+    public function testSoloFirstTurnHasNoBarrierBeyondTheSingleSetupSavepoint(): void {
+        // Simulate the setup-request savepoint never reaching the table.
+        $this->game->undoStore->clearSnapshotsAfter(0, $this->playerId());
+        $this->assertCount(0, $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId()));
+
+        $moveTarget = "hex_7_9";
+        $this->assertValidTarget($moveTarget);
+        $this->respond($moveTarget);
+        $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "the hero moved");
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertCount(0, $moves, "nothing in the solo first turn re-anchors a savepoint");
+
+        $error = $this->tryUndo();
+        $this->assertSame("Nothing to undo", $error, "the reporter's exact symptom");
+    }
+
     // -- helpers ----------------------------------------------------------------
+
+    /**
+     * Rebuild the game so the setup savepoint lands at move_id 0 the way production does:
+     * the in-mem counter normally starts one move later than a real table, so wind it back
+     * before setup flushes the deferred savepoint.
+     */
+    private function setupGameWithBarrierAtMoveZero(): void {
+        $this->game = new GameWrapper();
+        $this->driver = new GameDriver($this->game, $this->outputDir);
+        $this->driver->setVerbose(0);
+        $counter = new ReflectionProperty($this->game->undoStore, "nextMoveId");
+        $counter->setValue($this->game->undoStore, 0);
+        $this->setupGame([1]);
+        $this->color = $this->getActivePlayerColor();
+        $this->heroId = $this->game->getHeroTokenId($this->color);
+        $this->clearEquipDecks();
+        $this->clearMonstersFromMap();
+        $this->clearHand($this->color);
+    }
 
     private function playerId(): int {
         return (int) $this->game->getActivePlayerId();
