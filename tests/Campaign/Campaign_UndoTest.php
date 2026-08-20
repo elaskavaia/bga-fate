@@ -315,32 +315,110 @@ class Campaign_UndoTest extends CampaignBaseTest {
 
     /**
      * BGA #238872, the structural half. In solo the seat-switch savepoint (OpMachine::dispatchOne)
-     * never fires - the active player never changes - so the WHOLE first turn is protected only by
-     * the single savepoint flushed at the end of the setup request (Game::setupGameTables). Nothing
-     * between setup and the first action re-anchors one (euro re-anchors every turn in
-     * Op_turn::auto; Fate's Op_turnStart does not). This test simulates that one flush not
-     * persisting on the real table and pins the reporter's exact symptom: the first move then has
-     * no barrier behind it and undo answers "Nothing to undo". When a per-turn re-anchor lands
-     * (the fix), the empty-savepoint assertion below flips and this test must be updated.
+     * never fires - the active player never changes - so before the fix the WHOLE first turn was
+     * protected only by the savepoint the setup request defers (Game::setupGameTables). That write
+     * is pending in-process memory until the end-of-request flush; if the setup request ends
+     * without it, nothing re-anchored one and the first undo answered "Nothing to undo". Now
+     * Op_turnStart::auto re-anchors at the start of every player turn, so the dispatch request
+     * that presents the first turn writes its own barrier and the first move can be undone.
      */
-    public function testSoloFirstTurnHasNoBarrierBeyondTheSingleSetupSavepoint(): void {
-        // Simulate the setup-request savepoint never reaching the table.
-        $this->game->undoStore->clearSnapshotsAfter(0, $this->playerId());
-        $this->assertCount(0, $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId()));
+    public function testSoloFirstTurnReAnchorsItsOwnBarrier(): void {
+        $this->setupGameWithLostSetupSavepoint();
 
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertCount(1, $moves, "turnStart re-anchored a barrier of its own");
+
+        $startHex = $this->tokenLocation($this->heroId);
         $moveTarget = "hex_7_9";
         $this->assertValidTarget($moveTarget);
         $this->respond($moveTarget);
         $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "the hero moved");
 
-        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
-        $this->assertCount(0, $moves, "nothing in the solo first turn re-anchors a savepoint");
-
         $error = $this->tryUndo();
-        $this->assertSame("Nothing to undo", $error, "the reporter's exact symptom");
+        $this->assertNull($error, "first undo works without the setup savepoint");
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "the move was rewound");
+        $this->assertSame("turn", $this->opType(), "with the action choice offered again");
+    }
+
+    /**
+     * BGA #238872, the multiplayer interplay. On the turn handover the seat-switch anchor
+     * (OpMachine::dispatchOne) and the Op_turnStart anchor fire in the SAME request, and only one
+     * savepoint meta can be pending at a time - they must be idempotent (same player, both
+     * barrier=1) so the incoming player still gets exactly one turn-start barrier and can undo
+     * their first action.
+     */
+    public function testTurnHandoverAnchorsTheBarrierForTheIncomingPlayer(): void {
+        // Fresh wrapper: the gamestate stub caches active_player per state, and the solo
+        // setUp() game would leak its active player into the re-seated one.
+        $this->rebuildGame();
+        $this->setupGame([1, 2]); // Bjorn, Alva
+        $this->syncCurrentPlayerToActive();
+        $this->color = $this->getActivePlayerColor();
+        $this->clearMonstersFromMap();
+        $this->seedDeck("deck_event_$this->color", ["card_event_1_27_1"]);
+        $this->clearHand($this->color);
+
+        // Player 1 spends both actions and settles the end of turn, handing over to player 2.
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipIfOp("upgrade");
+        $this->skipIfOp("drawEvent");
+        $this->skipIfOp("demote");
+        $firstColor = $this->color;
+        $this->syncCurrentPlayerToActive();
+        $this->color = $this->getActivePlayerColor();
+        $this->heroId = $this->game->getHeroTokenId($this->color);
+        $this->assertNotSame($firstColor, $this->color, "the turn was handed over to player 2");
+
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertCount(1, $moves, "the handover left exactly one turn-start barrier for player 2");
+
+        $startHex = $this->tokenLocation($this->heroId);
+        $moveTarget = $this->outsideGrimheimTargets()[0];
+        $this->respond($moveTarget);
+        $this->assertSame($moveTarget, $this->tokenLocation($this->heroId), "player 2 moved");
+
+        $this->undo();
+
+        $this->assertSame($startHex, $this->tokenLocation($this->heroId), "player 2 is back at their turn start");
+        $this->assertSame("turn", $this->opType(), "with the action choice offered again");
     }
 
     // -- helpers ----------------------------------------------------------------
+
+    /** Replace the game with a fresh wrapper + driver, dropping all in-process state. */
+    private function rebuildGame(): void {
+        $this->game = new GameWrapper();
+        $this->driver = new GameDriver($this->game, $this->outputDir);
+        $this->driver->setVerbose(0);
+    }
+
+    /**
+     * Solo setup modelling the BGA #238872 loss: the setup request's deferred savepoint dies
+     * unflushed with that request's process, and the queued dispatch (reinforcement, turnStart,
+     * turn) runs as its own later request - the one whose flush must now carry the barrier.
+     */
+    private function setupGameWithLostSetupSavepoint(): void {
+        $this->rebuildGame();
+        $this->game->setPlayersNumber(1);
+        $this->game->loadDbState([]);
+        $this->game->setHeroOrder([1]);
+        $this->game->setupGameTables();
+        // The setup request dies before its flush: both the pending flag and the pending
+        // savepoint meta evaporate with the PHP process.
+        $this->game->setUndoSavepoint(false);
+        $meta = new ReflectionProperty($this->game, "undoSavepointMeta");
+        $meta->setValue($this->game, []);
+        $this->game->gamestate->jumpToState(StateConstants::STATE_GAME_DISPATCH);
+        $this->driver->runDispatchLoop();
+        $this->driver->emitGameStateChange();
+        $this->color = $this->getActivePlayerColor();
+        $this->heroId = $this->game->getHeroTokenId($this->color);
+        $this->clearEquipDecks();
+        $this->clearMonstersFromMap();
+        $this->clearHand($this->color);
+    }
 
     /**
      * Rebuild the game so the setup savepoint lands at move_id 0 the way production does:
@@ -348,9 +426,7 @@ class Campaign_UndoTest extends CampaignBaseTest {
      * before setup flushes the deferred savepoint.
      */
     private function setupGameWithBarrierAtMoveZero(): void {
-        $this->game = new GameWrapper();
-        $this->driver = new GameDriver($this->game, $this->outputDir);
-        $this->driver->setVerbose(0);
+        $this->rebuildGame();
         $counter = new ReflectionProperty($this->game->undoStore, "nextMoveId");
         $counter->setValue($this->game->undoStore, 0);
         $this->setupGame([1]);
