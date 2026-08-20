@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-19 (v260820-0855)
+
+- Wrecking Ball: click occupied areas directly; works on any move (#238475)
+- Step-by-step movement is now the default (#235315)
+- Standing on a terrain counts as adjacent to it (#238473)
+- Armor now applies to all preventable damage (#236177)
+
 ## 2026-08-16 (v260816-1201)
 
 - Move and attack targets are now tinted on the map during action selection
