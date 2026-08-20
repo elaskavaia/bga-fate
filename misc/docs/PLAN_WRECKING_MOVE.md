@@ -69,13 +69,15 @@ One op ("move") instead of two; the split was historical.
 - [x] min-count semantics UNCHANGED: "1move" cannot be cancelled, mcount governs skippability as today.
 - [x] hasStepIncentive moved out of Op_actionMove into Op_move (isStepMode = incentive AND no filter);
       getDelegateInfo died, actionMove always queues "[1,N]move", card moves get step mode for free.
-- [x] Wrecking targets/approach ported; Op_moveStep deleted (op file, material row, client handler,
-      test file merged into Op_moveTest).
+- [x] Wrecking targets/approach ported; Op_moveStep reduced to a compat shim extending Op_move
+      (its test file merged into Op_moveTest).
 - Deviations from the original sketch:
   - Op_step "final" branch is NOT dead code: Op_c_queen uses it, and the one-click path keeps a
     final last step so the arrival is still logged (step-mode hops stay silent as before).
   - endOfMove stays a pseudo-target; the skip/getSkipName("End Move") replacement was not taken
     (would churn UI and tests for no behavior gain).
+  - Op_moveStep could not simply be deleted: a game in progress at deploy time can have a
+    "moveStep" row in its machine queue, and an unknown op type fails to instantiate.
 
 ## Open question (Victoria to decide)
 
