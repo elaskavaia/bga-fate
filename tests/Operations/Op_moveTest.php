@@ -406,6 +406,25 @@ final class Op_moveTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
+    // legacy "moveStep" rows (games in progress across the merge deploy)
+    // -------------------------------------------------------------------------
+
+    public function testLegacyMoveStepRowStepsOnAndMigratesToMove(): void {
+        // No step incentive is set up: the old op forced step mode just by existing, and its
+        // remaining steps lived in "budget" rather than the count.
+        $op = $this->createOp("moveStep", ["budget" => 2, "moved" => 1, "reason" => "Op_actionMove"]);
+        $targets = $op->getArgsTarget();
+        $this->assertContains("hex_13_7", $targets, "budget 2 is read as the count (distance 2 offered)");
+        $this->assertContains("endOfMove", $targets, "step mode is forced regardless of incentive");
+
+        $this->call_resolve("hex_12_8");
+        $follow = $this->findAnyQueuedOp("move");
+        $this->assertNotNull($follow, "the loop continues as a plain move, so the legacy type dies out");
+        $this->assertEquals(1, $follow->getDataField("count"), "budget 2 minus the step taken");
+        $this->assertEquals(2, $follow->getDataField("moved"));
+    }
+
+    // -------------------------------------------------------------------------
     // BGA #234817 regression guards (ported from the former Op_moveStep tests)
     // -------------------------------------------------------------------------
 

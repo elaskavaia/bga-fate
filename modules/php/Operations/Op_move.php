@@ -203,7 +203,7 @@ class Op_move extends CountableOperation {
      * Sticky once the loop started: an incentive can disappear mid-move (a TStep quest completes and
      * leaves the deck top), and dropping to one-click there would strand the player with no "End Move".
      */
-    private function isStepMode(): bool {
+    protected function isStepMode(): bool {
         return $this->getParam(0, "") === "" && ($this->getMoved() >= 1 || $this->hasStepIncentive());
     }
 
