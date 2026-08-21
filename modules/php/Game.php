@@ -178,7 +178,9 @@ class Game extends Base {
         $color = $this->getPlayerColorById($startingPlayer);
         $this->machine->queue("reinforcement", $color);
         $this->machine->queue("turnStart", $color);
-        $this->customUndoSavepoint($startingPlayer, 1);
+        // Immediate write: the deferred flush never runs in the setup request, leaving solo
+        // turn 1 with no savepoint at all (BGA #238872). Replay from here is deterministic.
+        $this->customUndoSavepoint($startingPlayer, 1, immediate: true);
         return GameDispatch::class;
     }
 
@@ -881,7 +883,7 @@ class Game extends Base {
         }
     }
 
-    public function customUndoSavepoint(int $player_id, int $barrier = 0, string $label = "undo"): void {
+    public function customUndoSavepoint(int $player_id, int $barrier = 0, string $label = "undo", bool $immediate = false): void {
         //$this->debugLog("customUndoSavepoint $player_id bar= $barrier");
         if ($this->isSolo()) {
             $player_id = $this->getFirstPlayer();
@@ -891,7 +893,11 @@ class Game extends Base {
             "label" => $label,
             "player_id" => $player_id,
         ];
-        $this->undoSavepoint();
+        if ($immediate) {
+            $this->doCustomUndoSavePoint();
+        } else {
+            $this->undoSavepoint();
+        }
     }
 
     function doCustomUndoSavePoint() {

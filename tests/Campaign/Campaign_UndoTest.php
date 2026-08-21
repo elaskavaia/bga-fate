@@ -315,18 +315,18 @@ class Campaign_UndoTest extends CampaignBaseTest {
 
     /**
      * BGA #238872, the structural half. In solo the seat-switch savepoint (OpMachine::dispatchOne)
-     * never fires - the active player never changes - so before the fix the WHOLE first turn was
-     * protected only by the savepoint the setup request defers (Game::setupGameTables). That write
-     * is pending in-process memory until the end-of-request flush; if the setup request ends
-     * without it, nothing re-anchored one and the first undo answered "Nothing to undo". Now
-     * Op_turnStart::auto re-anchors at the start of every player turn, so the dispatch request
-     * that presents the first turn writes its own barrier and the first move can be undone.
+     * never fires - the active player never changes - so the WHOLE first turn is protected only
+     * by the setup savepoint. The deferred flush cannot be trusted for it: on a real table the
+     * setup request's sendNotifications batch never runs it (Victoria verified: multiundo empty).
+     * Game::setupGameTables therefore writes the savepoint IMMEDIATELY (customUndoSavepoint
+     * immediate: true), committing with the setup transaction - the barrier must exist even when
+     * the request's flush never happens, and the first move must be undoable.
      */
-    public function testSoloFirstTurnReAnchorsItsOwnBarrier(): void {
+    public function testSoloSetupWritesTheFirstBarrierImmediately(): void {
         $this->setupGameWithLostSetupSavepoint();
 
         $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
-        $this->assertCount(1, $moves, "turnStart re-anchored a barrier of its own");
+        $this->assertCount(1, $moves, "the immediate setup write survives the lost flush");
 
         $startHex = $this->tokenLocation($this->heroId);
         $moveTarget = "hex_7_9";
@@ -395,9 +395,10 @@ class Campaign_UndoTest extends CampaignBaseTest {
     }
 
     /**
-     * Solo setup modelling the BGA #238872 loss: the setup request's deferred savepoint dies
-     * unflushed with that request's process, and the queued dispatch (reinforcement, turnStart,
-     * turn) runs as its own later request - the one whose flush must now carry the barrier.
+     * Solo setup modelling the BGA #238872 request shape: the setup request's deferred flush
+     * never runs (pending flag and meta die with the PHP process - as on a real table), and the
+     * queued dispatch (reinforcement, turnStart, turn) runs afterwards. Only the immediate
+     * setup write can put a barrier on such a table.
      */
     private function setupGameWithLostSetupSavepoint(): void {
         $this->rebuildGame();
@@ -422,13 +423,13 @@ class Campaign_UndoTest extends CampaignBaseTest {
 
     /**
      * Rebuild the game so the setup savepoint lands at move_id 0 the way production does:
-     * the in-mem counter normally starts one move later than a real table, so wind it back
-     * before setup flushes the deferred savepoint.
+     * setup now writes it immediately (BGA #238872), and on a real table next_move_id is 1
+     * during the setup request, so pin the in-mem counter to 1 before setup runs.
      */
     private function setupGameWithBarrierAtMoveZero(): void {
         $this->rebuildGame();
         $counter = new ReflectionProperty($this->game->undoStore, "nextMoveId");
-        $counter->setValue($this->game->undoStore, 0);
+        $counter->setValue($this->game->undoStore, 1);
         $this->setupGame([1]);
         $this->color = $this->getActivePlayerColor();
         $this->heroId = $this->game->getHeroTokenId($this->color);
