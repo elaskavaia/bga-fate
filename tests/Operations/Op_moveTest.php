@@ -160,6 +160,24 @@ final class Op_moveTest extends AbstractOpTestCase {
         $this->assertTrue($this->game->hexMap->isInGrimheim($heroHex));
     }
 
+    public function testLeavingGrimheimCostsOneStep(): void {
+        // Grimheim is a single area, so exiting to any hex touching it is one step, whichever
+        // Grimheim hex the hero stands on. hex_9_9 is the centre; hex_10_7 touches Grimheim at
+        // hex_10_8 but is not adjacent to hex_9_9, so a raw hex path would charge 2.
+        $this->enableStepMode();
+        $this->game->tokens->moveToken("hero_1", "hex_9_9");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->createOp("move", ["count" => 2, "reason" => "Op_actionMove"]);
+        $this->call_resolve("hex_10_7");
+        $this->dispatchAll();
+
+        $this->assertEquals("hex_10_7", $this->getHeroHex(), "hero left Grimheim directly, no hop inside it");
+        $next = $this->findAnyQueuedOp("move");
+        $this->assertNotNull($next, "only 1 of the 2 areas was spent, so the loop continues");
+        $this->assertEquals(1, $next->getCount());
+    }
+
     // -------------------------------------------------------------------------
     // step mode selection (prompt tells the mode apart)
     // -------------------------------------------------------------------------

@@ -577,10 +577,13 @@ class HexMap {
         // parent[hex] = predecessor hex (null for seeded starts)
         $parent = [$from => null];
         $queue = [$from];
+        // Grimheim is one area, so every hex in it is a zero-cost start, not a step.
+        $starts = [$from => true];
         if ($startInGrimheim) {
             foreach ($this->getHexesInGrimheim() as $gHex) {
                 if (!isset($parent[$gHex])) {
                     $parent[$gHex] = $from;
+                    $starts[$gHex] = true;
                     $queue[] = $gHex;
                 }
             }
@@ -615,7 +618,7 @@ class HexMap {
             return [];
         }
         $path = [];
-        for ($cur = $to; $cur !== $from && $cur !== null; $cur = $parent[$cur]) {
+        for ($cur = $to; $cur !== null && !isset($starts[$cur]); $cur = $parent[$cur]) {
             array_unshift($path, $cur);
         }
         return $path;

@@ -574,6 +574,18 @@ final class HexMapTest extends TestCase {
         $this->assertSame("hex_11_8", end($path));
     }
 
+    public function testGetPathOutOfGrimheimCostsOneStep(): void {
+        // Grimheim is one area: leaving it for any adjacent hex is a single step, even
+        // when that hex touches a different Grimheim hex than the one the hero stands on.
+        // hex_10_9 is Boldur's start, hex_10_7 is adjacent to Grimheim via hex_10_8.
+        $this->clearHeroesExcept("hero_1");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->assertSame(["hex_10_7"], $this->game->hexMap->getPath("hex_10_9", "hex_10_7", $this->hero));
+        $reachable = $this->game->hexMap->getReachableHexes("hex_10_9", 1, $this->hero);
+        $this->assertSame(1, $reachable["hex_10_7"] ?? null);
+    }
+
     public function testGetPathWithinGrimheimIsEmpty(): void {
         // Grimheim is a single area — moving between its hexes is a no-op.
         $this->assertSame([], $this->game->hexMap->getPath("hex_9_9", "hex_8_9", $this->hero));
