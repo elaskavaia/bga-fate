@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-08-21 (v260821-1803)
+
+- Fixed Undo answering "nothing to undo" on the first turn of a solo game (#238872)
+- Fixed leaving Grimheim costing an extra movement step when exiting through another town hex
+
 ## 2026-08-19 (v260820-0855)
 
 - Wrecking Ball: click occupied areas directly; works on any move (#238475)
