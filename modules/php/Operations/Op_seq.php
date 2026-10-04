@@ -50,7 +50,7 @@ class Op_seq extends ComplexOperation {
         // cannot look beyond first sub, world can change after its executed
         $sub = $this->delegates[0];
 
-        if ($sub->noValidTargets()) {
+        if ($sub->isVoid()) {
             return $sub->getErrorInfo();
         }
 
@@ -59,6 +59,11 @@ class Op_seq extends ComplexOperation {
             if ($max > 1) {
                 return parent::getRangeMoves();
             }
+            return ["confirm"];
+        }
+
+        // sub is not void, so an empty first sub only means it is skippable - later delegates may still be doable
+        if ($sub->noValidTargets() && count($this->delegates) > 1) {
             return ["confirm"];
         }
 

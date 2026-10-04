@@ -71,7 +71,8 @@ final class Op_addDamageTest extends AbstractOpTestCase {
     /**
      * With no dice on display_battle there is nothing to add damage to. The op is not `isVoid`,
      * because canSkip() makes it auto-skip rather than becoming a mandatory unsatisfiable
-     * prompt; callers gate on noValidTargets (Op_seq, Op_paygain) rather than on void-ness.
+     * prompt. Op_paygain gates on noValidTargets; Op_seq only does so for a lone delegate, since
+     * later delegates in a sequence can still be doable.
      */
     public function testNoParamHasNoTargets(): void {
         $this->game->tokens->moveToken("die_attack_1", "limbo", 1);
