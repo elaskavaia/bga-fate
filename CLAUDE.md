@@ -66,16 +66,10 @@ When the chrome-devtools-mcp plugin is available, you can drive a real browser a
 - Login session persists in the MCP browser profile (`~/.cache/chrome-devtools-mcp/`); if redirected to the login page, ask the user to log in in the MCP-controlled Chrome window, then retry
 - **The game runs inside `iframe#gameIframe`** on the tableview page. `evaluate_script` executes against the top document, so `document.getElementById(...)` will NOT find game DOM. Reach it via `document.getElementById('gameIframe').contentDocument` (and `.contentWindow` for `getComputedStyle` / `localStorage`). The iframe is same-origin, so this works.
 
-### Code Formatting
+### Code Style
 
-- Prettier is configured with PHP plugin (see package.json)
-- Print width: 140 characters
-- Brace style: 1tbs
-
-
-### Naming (all languages)
-
-- **Getter naming.** Methods that return a value start with `get` (`getCardCost`, `getGoldOn`) - in PHP and TypeScript alike. The only sanctioned exceptions are `is` for boolean predicates (`isEndOfGame`) and `count` for methods that also double as barewords in the expression engine (`countCardsInHand`, descriptive even then). Do not invent bare-noun getters (`cardCost()`) or new player concepts - use the framework's own (`getActivePlayerId`, `getActivePlayerList`, `getMostlyActivePlayerId`).
+Naming, formatting, comment and test conventions are in
+[misc/docs/CODE_STYLE.md](misc/docs/CODE_STYLE.md) - read it before writing code.
 
 
 ### Material System
