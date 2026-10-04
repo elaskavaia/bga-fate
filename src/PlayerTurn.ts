@@ -69,10 +69,8 @@ export class PlayerTurn extends GameMachine {
       const slot = paramInfo.tokenIdUi ? $(paramInfo.tokenIdUi) : null;
       if (!slot) continue;
       slot.dataset.targetId = target;
-      if (paramInfo.q != 0) {
-        slot.dataset.targetErr = String(paramInfo.q);
-        slot.title = this.getTargetErrText(paramInfo);
-      }
+      if (paramInfo.q != 0) slot.dataset.targetErr = String(paramInfo.q);
+      this.game.updateActionSlotTooltip(slot, paramInfo.q == 0 ? null : this.getTargetErrText(paramInfo));
       slots.push(slot);
     }
     const previousHook = this.onLeavingHook;
@@ -80,7 +78,7 @@ export class PlayerTurn extends GameMachine {
       previousHook?.();
       slots.forEach((slot) => {
         delete slot.dataset.targetErr;
-        slot.removeAttribute("title");
+        this.game.updateActionSlotTooltip(slot);
       });
     };
   }

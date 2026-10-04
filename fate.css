@@ -271,6 +271,14 @@
   background-color: red;
 }
 
+.marker.n_1,
+.marker.n_2 {
+  box-sizing: border-box;
+  width: 20px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
 .marker_attack {
   background: none;
   position: relative;
@@ -1845,7 +1853,7 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   font-weight: bold;
 }
 .aslot_action.active_slot {
-  background: #f0ead8;
+  background: white;
 }
 .aslot_action[data-target-err] > :not(.marker) {
   opacity: 0.5;
@@ -2185,6 +2193,18 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 
 .tundra .dijitTooltipContainer .tooltipcontainer + .tooltipcontainer {
   border-top: 1px solid #ccc;
+}
+
+.tooltipimage.wicon {
+  height: 64px;
+}
+
+.tt_status_available {
+  color: green;
+}
+
+.tt_status_unavailable {
+  color: red;
 }
 
 .tooltipimage.hcard {

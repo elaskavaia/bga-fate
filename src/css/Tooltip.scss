@@ -115,6 +115,17 @@
   }
 }
 
+.tooltipimage.wicon {
+  height: 64px;
+}
+
+.tt_status_available {
+  color: green;
+}
+.tt_status_unavailable {
+  color: red;
+}
+
 // Hero cards in tooltips: 1.5x bigger for readability
 .tooltipimage.hcard {
   height: 400px;

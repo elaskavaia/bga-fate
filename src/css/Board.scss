@@ -329,7 +329,7 @@
   font-weight: bold;
 
   &.active_slot {
-    background: #f0ead8;
+    background: white;
   }
 
   &[data-target-err] > :not(.marker) {

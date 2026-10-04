@@ -381,8 +381,29 @@ export class Game extends Game1Tokens {
     }
   }
 
+  getMainActionDescriptions(): Record<string, string> {
+    return {
+      actionMove:
+        _(
+          "Move your hero up to 3 areas on the board. Each area may only be occupied by one character at a time. You cannot move through occupied areas, not even your co-players' areas. Heroes cannot move into mountain areas."
+        ) + this.iiSection(_("Select an empty hex to move into to auto-execute this action")),
+      actionAttack:
+        _(
+          "Sum up your attack strength indicated on all your cards in play. Roll that many attack dice against a monster within your attack range."
+        ) + this.iiSection(_("Select a monster within attack range to auto-execute this action")),
+      actionPrepare: _(
+        "Draw 1 card from your event deck. You may never have more than 4 cards in your hand, but you may discard cards without effect at any time to make room for new cards."
+      ),
+      actionFocus: _("Add 1 mana (green crystal) to one of your abilities or equipment that uses mana."),
+      actionMend: _(
+        "Remove 2 damage (red crystal) from your hero. If you are in Grimheim, damage may also be removed from equipment cards, and you may remove a total of 5 instead of 2."
+      ),
+      actionPractice: _("Add 1 experience/gold (yellow crystal) to your player board.")
+    };
+  }
+
   setupPlayerBoard(color: string) {
-    const actions = ["actionMove", "actionAttack", "actionPrepare", "actionFocus", "actionMend", "actionPractice"];
+    const actions = Object.keys(this.getMainActionDescriptions());
     const slots = actions
       .map((action) => {
         const opKey = `Op_${action}`;
@@ -404,8 +425,27 @@ export class Game extends Game1Tokens {
     actions.forEach((action) => {
       const slot = $(`aslot_${color}_${action}`)!;
       this.addListenerWithGuard(slot, (e) => this.onToken(e));
-      this.updateTooltip(`Op_${action}`, slot);
+      this.updateActionSlotTooltip(slot);
     });
+  }
+
+  /** reason null means the action is available */
+  updateActionSlotTooltip(slot: HTMLElement, reason: string | null = _("Not available right now")) {
+    if (reason) slot.dataset.reason = reason;
+    else delete slot.dataset.reason;
+    this.updateTooltip(`Op_${getPart(slot.id, 2)}`, slot);
+  }
+
+  getTooltipHtmlForTokenInfo(tokenInfo: TokenDisplayInfo | undefined, attachNode?: HTMLElement) {
+    if (tokenInfo && attachNode?.classList.contains("aslot_action")) {
+      const reason = attachNode.dataset.reason;
+      const status = reason
+        ? `<span class="tt_status_unavailable">${reason}</span>`
+        : `<span class="tt_status_available">${_("Available")}</span>`;
+      const tooltip = tokenInfo.tooltip ? this.getTr(tokenInfo.tooltip) : "";
+      tokenInfo = { ...tokenInfo, tooltip: tooltip + this.ttSection(_("Status"), status) };
+    }
+    return super.getTooltipHtmlForTokenInfo(tokenInfo, attachNode);
   }
 
   createMap(parent: HTMLElement) {
@@ -674,7 +714,14 @@ export class Game extends Game1Tokens {
       const q = getIntPart(hex, 1);
       const r = getIntPart(hex, 2);
       // Axial neighbors, matching server HexMap::getAdjacentHexes.
-      for (const [dq, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]]) {
+      for (const [dq, dr] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+        [1, -1],
+        [-1, 1]
+      ]) {
         const other = $(`hex_${q + dq}_${r + dr}`)?.querySelector(':scope > [id^="monster_"]');
         if (other && this.getRulesFor(other.id, "faction", "") === "trollkin") {
           attack += support;
@@ -796,6 +843,11 @@ export class Game extends Game1Tokens {
     const tokenId = tokenInfo.tokenId;
     const subType = getPart(tokenId, 1);
     switch (mainType) {
+      case "Op": {
+        if (tokenInfo.wicon) tokenInfo.imageTypes = `wicon ${tokenInfo.wicon}`;
+        tokenInfo.tooltip ??= this.getMainActionDescriptions()[subType];
+        break;
+      }
       case "card": {
         if (subType === "monster") {
           const spawnLoc = this.getTokenName(tokenInfo.spawnloc);

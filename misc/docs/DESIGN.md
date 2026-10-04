@@ -393,7 +393,7 @@ When a player picks a main action, a marker token moves to `aslot_{color}_{actio
 
 - `aslot_{color}_{actionType}` - Slot showing which action the player chose (e.g. `aslot_ff0000_actionPractice`)
 
-The slots also act as the main action buttons: `Op_turn` sends `tokenIdUi` = the slot id, so the client marks it `active_slot`; `PlayerTurn.markActionSlots` sets `data-target-id` and, when the action is unavailable, `data-target-err` and the error as `title`.
+The slots also act as the main action buttons: `Op_turn` sends `tokenIdUi` = the slot id, so the client marks it `active_slot`; `PlayerTurn.markActionSlots` sets `data-target-id` and, when the action is unavailable, `data-target-err` plus the error in the tooltip "Status" section (`Game.updateActionSlotTooltip`); available actions read "Available", and outside the turn op it reads "Not available right now".
 
 ### Supply / Off-Board Locations
 

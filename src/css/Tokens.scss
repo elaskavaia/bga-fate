@@ -102,6 +102,14 @@
   aspect-ratio: 1;
   background-color: red;
 }
+// n_1/n_2 are the two action cubes (n_3 is the upgrade cost marker)
+.marker.n_1,
+.marker.n_2 {
+  box-sizing: border-box;
+  width: 20px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
 
 .marker_attack {
   background: none;
