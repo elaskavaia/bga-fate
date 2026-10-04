@@ -1736,13 +1736,14 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 .pboard {
-  position: relative;
-  width: 200px;
-  aspect-ratio: 1;
-  background-image: url(img/EN_Player_Board.jpg);
-  background-size: 571% auto;
-  background-position: 58% 0%;
-  background-repeat: no-repeat;
+  order: -1;
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 }
 
 .deck {
@@ -1830,46 +1831,45 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   padding: 10px 0;
 }
 
-.aslot {
+.aslot_action {
+  position: relative;
+  box-sizing: border-box;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 32px 2px 4px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: transparent;
+  font-weight: bold;
+}
+.aslot_action.active_slot {
+  background: #f0ead8;
+}
+.aslot_action[data-target-err] > :not(.marker) {
+  opacity: 0.5;
+}
+.aslot_action[data-target-err]:not([data-target-err="4"])::after {
+  content: "⊘";
+  color: red;
+  font-size: 22px;
+}
+.aslot_action > .marker, .aslot_action::after {
   position: absolute;
-  height: 24%;
-  aspect-ratio: 1;
-  outline: 1px solid red;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+}
+
+.pboard_reserve {
+  display: flex;
+  gap: 4px;
 }
 
 .aslot_empty {
-  top: 2%;
-  left: 73%;
-}
-
-.aslot_actionMove {
-  top: 36%;
-  left: 3%;
-}
-
-.aslot_actionAttack {
-  top: 36%;
-  left: 40%;
-}
-
-.aslot_actionPrepare {
-  top: 36%;
-  left: 73%;
-}
-
-.aslot_actionFocus {
-  top: 63%;
-  left: 3%;
-}
-
-.aslot_actionMend {
-  top: 63%;
-  left: 40%;
-}
-
-.aslot_actionPractice {
-  top: 63%;
-  left: 73%;
+  min-width: 24px;
+  min-height: 24px;
 }
 
 .hand {
@@ -2343,30 +2343,6 @@ button.bgabutton > * {
 }
 .bgabutton[data-count]::after {
   content: " x " attr(data-count);
-}
-
-.fateaction {
-  position: relative;
-}
-.fateaction.err_4::after {
-  content: "✓";
-  position: absolute;
-  bottom: 10px;
-  right: -14px;
-  height: 50%;
-  aspect-ratio: 1;
-  font-size: 32px;
-  color: green;
-}
-.fateaction.err_2::after, .fateaction.err_6::after {
-  content: "⊘";
-  position: absolute;
-  bottom: 14%;
-  right: -18%;
-  height: 50%;
-  aspect-ratio: 1;
-  font-size: medium;
-  color: red;
 }
 
 .action-button {

@@ -939,8 +939,9 @@ class Game1Tokens extends Game0Basics {
             result.blocked = false;
             return result;
         }
-        if (target?.dataset.targetId)
-            result.targetId = target.dataset.targetId;
+        const dataTargetId = target?.dataset.targetId ?? event.currentTarget.dataset?.targetId;
+        if (dataTargetId)
+            result.targetId = dataTargetId;
         // Toolbar image buttons wrap inner content with no dataset, so the click falls back to the
         // bound element id "button_<target>". Strip the prefix (house pattern, cf. bga-mars) so the
         // server receives the bare target instead of rejecting it (checkUserTargetSelection).
@@ -1948,7 +1949,7 @@ class GameMachine {
             altNode.dataset.targetId = target;
             altNode.dataset.targetOpType = opInfo.type;
             if (!active) {
-                altNode.title = this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
+                altNode.title = this.getTargetErrText(paramInfo);
                 altNode.classList.add(this.game.classButtonDisabled);
             }
             else {
@@ -2070,6 +2071,9 @@ class GameMachine {
         child.classList.add(this.game.classActiveSlotHidden);
         child.addEventListener("click", (event) => this.onToken(event));
         return child;
+    }
+    getTargetErrText(paramInfo) {
+        return this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
     }
     getReasonText(reason) {
         if (!reason)
@@ -2430,6 +2434,32 @@ class PlayerTurn extends GameMachine {
     onPlayerActivationChange(args, isCurrentPlayerActive) { }
     onEntering_Op_turn(opInfo) {
         this.markHexes(opInfo);
+        this.markActionSlots(opInfo);
+    }
+    // action slots stand in for the main action targets, so they behave like their buttons
+    markActionSlots(opInfo) {
+        if (!this.bga.players.isCurrentPlayerActive())
+            return;
+        const slots = [];
+        for (const [target, paramInfo] of Object.entries(opInfo.info)) {
+            const slot = paramInfo.tokenIdUi ? $(paramInfo.tokenIdUi) : null;
+            if (!slot)
+                continue;
+            slot.dataset.targetId = target;
+            if (paramInfo.q != 0) {
+                slot.dataset.targetErr = String(paramInfo.q);
+                slot.title = this.getTargetErrText(paramInfo);
+            }
+            slots.push(slot);
+        }
+        const previousHook = this.onLeavingHook;
+        this.onLeavingHook = () => {
+            previousHook?.();
+            slots.forEach((slot) => {
+                delete slot.dataset.targetErr;
+                slot.removeAttribute("title");
+            });
+        };
     }
     onEntering_Op_moveStep(opInfo) {
         this.markHexes(opInfo, "actionMove");
@@ -2463,17 +2493,6 @@ class PlayerTurn extends GameMachine {
             });
             $("map_area").classList.remove("fadeinactive");
         };
-    }
-    createCustomButtonImageHtml(target, paramInfo) {
-        if (target.startsWith("action")) {
-            const opKey = `Op_${target}`;
-            const icon = this.game.getRulesFor(opKey, "wicon", "");
-            const name = this.game.getTokenName(opKey);
-            const q = paramInfo.q;
-            const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
-            return `<div id='${target}' class="fateaction err_${q}">${iconHtml}<span>${name}</span></div>`;
-        }
-        return super.createCustomButtonImageHtml(target, paramInfo);
     }
     onToken_nonActive(target, node) {
         if (!target)
@@ -2597,6 +2616,7 @@ class Game extends Game1Tokens {
                 const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
                 const tableauParent = color == this.player_color ? "current_player_panel" : "players_panels";
                 placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, tableauParent);
+                this.setupPlayerBoard(color);
                 ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
                     const name = this.getTr(_("${hero}'s ${deck}"), {
                         hero: heroName,
@@ -2609,17 +2629,6 @@ class Game extends Game1Tokens {
           <div class="miniboard_banner">${heroName}</div>
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`, panel);
-                placeHtml(`
-        <div id="pboard_${color}" class="pboard">
-          <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
-          <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
-          <div id="aslot_${color}_actionPrepare" class="pboard_slot aslot aslot_actionPrepare"></div>
-          <div id="aslot_${color}_actionFocus" class="pboard_slot aslot aslot_actionFocus"></div>
-          <div id="aslot_${color}_actionMend" class="pboard_slot aslot aslot_actionMend"></div>
-          <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
-          <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
-          <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
-        </div>`, `limbo`);
             });
             this.setupTokens(gamedatas);
             this.zoomControls = new LaZoom(this.bga, { targetId: "thething", storagePrefix: "fate" });
@@ -2827,6 +2836,29 @@ class Game extends Game1Tokens {
             this.updateTooltip(slotId);
         }
     }
+    setupPlayerBoard(color) {
+        const actions = ["actionMove", "actionAttack", "actionPrepare", "actionFocus", "actionMend", "actionPractice"];
+        const slots = actions
+            .map((action) => {
+            const opKey = `Op_${action}`;
+            const icon = this.getRulesFor(opKey, "wicon", "");
+            const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
+            return `<div id="aslot_${color}_${action}" class="aslot aslot_action">${iconHtml}<span>${this.getTokenName(opKey)}</span></div>`;
+        })
+            .join("");
+        placeHtml(`<div id="pboard_${color}" class="pboard">
+        ${slots}
+        <div class="pboard_reserve">
+          <div id="aslot_${color}_empty_1" class="aslot aslot_empty"></div>
+          <div id="aslot_${color}_empty_2" class="aslot aslot_empty"></div>
+        </div>
+      </div>`, `tableau_${color}`);
+        actions.forEach((action) => {
+            const slot = $(`aslot_${color}_${action}`);
+            this.addListenerWithGuard(slot, (e) => this.onToken(e));
+            this.updateTooltip(`Op_${action}`, slot);
+        });
+    }
     createMap(parent) {
         // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
         // Shifted axial coordinates: center at (9,9), range 1..17. Hex boundary: |q-9| + |r-9| + |q+r-18| <= 16
@@ -2868,6 +2900,10 @@ class Game extends Game1Tokens {
         if (args.place_from)
             result.place_from = args.place_from;
         switch (mainType) {
+            case "aslot":
+                // static board slot, only its marker moves
+                result.nop = true;
+                break;
             case "tracker":
                 // Redirect tracker tokens to miniboard in player panel
                 if (loc.startsWith("tableau_")) {

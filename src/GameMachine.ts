@@ -102,7 +102,7 @@ export class GameMachine {
       altNode.dataset.targetId = target;
       altNode.dataset.targetOpType = opInfo.type;
       if (!active) {
-        altNode.title = this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
+        altNode.title = this.getTargetErrText(paramInfo);
         altNode.classList.add(this.game.classButtonDisabled);
       } else {
         const title = paramInfo.tooltip;
@@ -232,6 +232,10 @@ export class GameMachine {
     child.classList.add(this.game.classActiveSlotHidden);
     child.addEventListener("click", (event: Event) => this.onToken(event));
     return child;
+  }
+
+  getTargetErrText(paramInfo: ParamInfo) {
+    return this.game.getTr(paramInfo.err ?? _("Operation cannot be performed now"), paramInfo);
   }
 
   getReasonText(reason: string) {

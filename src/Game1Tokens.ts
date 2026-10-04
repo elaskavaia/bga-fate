@@ -300,7 +300,8 @@ export class Game1Tokens extends Game0Basics {
       result.blocked = false;
       return result;
     }
-    if (target?.dataset.targetId) result.targetId = target.dataset.targetId;
+    const dataTargetId = target?.dataset.targetId ?? (event.currentTarget as HTMLElement).dataset?.targetId;
+    if (dataTargetId) result.targetId = dataTargetId;
     // Toolbar image buttons wrap inner content with no dataset, so the click falls back to the
     // bound element id "button_<target>". Strip the prefix (house pattern, cf. bga-mars) so the
     // server receives the bare target instead of rejecting it (checkUserTargetSelection).

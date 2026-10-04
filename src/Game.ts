@@ -127,6 +127,7 @@ export class Game extends Game1Tokens {
         const heroName = player.heroNo ? this.getTokenName(`hero_${player.heroNo}`) : "";
         const tableauParent = color == this.player_color ? "current_player_panel" : "players_panels";
         placeHtml(`<div id="tableau_${color}" class="tableau ${hnoClass}"></div`, tableauParent);
+        this.setupPlayerBoard(color);
         ["deck_ability", "deck_equip", "deck_event", "discard"].forEach((d) => {
           const name = this.getTr(_("${hero}'s ${deck}"), {
             hero: heroName,
@@ -146,21 +147,6 @@ export class Game extends Game1Tokens {
           <div id="bucket_crystal_yellow_tableau_${color}" class="pboard_slot bucket bucket_crystal_yellow"></div>
         </div>`,
           panel
-        );
-
-        placeHtml(
-          `
-        <div id="pboard_${color}" class="pboard">
-          <div id="aslot_${color}_actionMove" class="pboard_slot aslot aslot_actionMove"></div>
-          <div id="aslot_${color}_actionAttack" class="pboard_slot aslot aslot_actionAttack"></div>
-          <div id="aslot_${color}_actionPrepare" class="pboard_slot aslot aslot_actionPrepare"></div>
-          <div id="aslot_${color}_actionFocus" class="pboard_slot aslot aslot_actionFocus"></div>
-          <div id="aslot_${color}_actionMend" class="pboard_slot aslot aslot_actionMend"></div>
-          <div id="aslot_${color}_actionPractice" class="pboard_slot aslot aslot_actionPractice"></div>
-          <div id="aslot_${color}_empty_1" class="pboard_slot aslot aslot_empty"></div>
-          <div id="aslot_${color}_empty_2" class="pboard_slot aslot aslot_empty"></div>
-        </div>`,
-          `limbo`
         );
       });
 
@@ -395,6 +381,33 @@ export class Game extends Game1Tokens {
     }
   }
 
+  setupPlayerBoard(color: string) {
+    const actions = ["actionMove", "actionAttack", "actionPrepare", "actionFocus", "actionMend", "actionPractice"];
+    const slots = actions
+      .map((action) => {
+        const opKey = `Op_${action}`;
+        const icon = this.getRulesFor(opKey, "wicon", "");
+        const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
+        return `<div id="aslot_${color}_${action}" class="aslot aslot_action">${iconHtml}<span>${this.getTokenName(opKey)}</span></div>`;
+      })
+      .join("");
+    placeHtml(
+      `<div id="pboard_${color}" class="pboard">
+        ${slots}
+        <div class="pboard_reserve">
+          <div id="aslot_${color}_empty_1" class="aslot aslot_empty"></div>
+          <div id="aslot_${color}_empty_2" class="aslot aslot_empty"></div>
+        </div>
+      </div>`,
+      `tableau_${color}`
+    );
+    actions.forEach((action) => {
+      const slot = $(`aslot_${color}_${action}`)!;
+      this.addListenerWithGuard(slot, (e) => this.onToken(e));
+      this.updateTooltip(`Op_${action}`, slot);
+    });
+  }
+
   createMap(parent: HTMLElement) {
     // create map area: Pointy-top hex grid, hexagonal shape with side length 9.
     // Shifted axial coordinates: center at (9,9), range 1..17. Hex boundary: |q-9| + |r-9| + |q+r-18| <= 16
@@ -444,6 +457,11 @@ export class Game extends Game1Tokens {
     if (args.place_from) result.place_from = args.place_from;
 
     switch (mainType) {
+      case "aslot":
+        // static board slot, only its marker moves
+        result.nop = true;
+        break;
+
       case "tracker":
         // Redirect tracker tokens to miniboard in player panel
         if (loc.startsWith("tableau_")) {

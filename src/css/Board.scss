@@ -253,15 +253,16 @@
   }
 }
 
-// --- Player board (pboard): background image with positioned slots ---
+// --- Player board (pboard): row of action slots on top of the tableau ---
 .pboard {
-  position: relative;
-  width: v.$cardHeight;
-  aspect-ratio: 1;
-  background-image: url(img/EN_Player_Board.jpg);
-  background-size: 571% auto;
-  background-position: 58% 0%;
-  background-repeat: no-repeat;
+  order: -1;
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 }
 
 .deck {
@@ -313,43 +314,51 @@
   @include v.vertical-title;
 }
 
-// Action slots — positioned over the action icons on the player board
-// Top row: Move, Attack, Prepare
-// Bottom row: Focus, Mend, Practice
-.aslot {
-  position: absolute;
-  height: 24%;
-  aspect-ratio: 1;
-  outline: 1px solid red;
-}
-.aslot_empty {
-  top: 2%;
-  left: 73%;
+// Action slots look like buttons; right padding leaves room for the taken-action marker cube
+.aslot_action {
+  position: relative;
+  box-sizing: border-box;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 32px 2px 4px;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: transparent;
+  font-weight: bold;
+
+  &.active_slot {
+    background: #f0ead8;
+  }
+
+  &[data-target-err] > :not(.marker) {
+    opacity: 0.5;
+  }
+
+  // taken action (ERR_MAX = 4) shows its marker cube in this spot instead
+  &[data-target-err]:not([data-target-err="4"])::after {
+    content: "\2298";
+    color: red;
+    font-size: 22px;
+  }
+
+  > .marker,
+  &::after {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+  }
 }
 
-.aslot_actionMove {
-  top: 36%;
-  left: 3%;
+.pboard_reserve {
+  display: flex;
+  gap: 4px;
 }
-.aslot_actionAttack {
-  top: 36%;
-  left: 40%;
-}
-.aslot_actionPrepare {
-  top: 36%;
-  left: 73%;
-}
-.aslot_actionFocus {
-  top: 63%;
-  left: 3%;
-}
-.aslot_actionMend {
-  top: 63%;
-  left: 40%;
-}
-.aslot_actionPractice {
-  top: 63%;
-  left: 73%;
+.aslot_empty {
+  min-width: 24px;
+  min-height: 24px;
 }
 
 // --- Hand: current player's private hand of event cards ---

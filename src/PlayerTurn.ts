@@ -12,7 +12,7 @@
 import { getPart } from "./Game0Basics";
 import { GameMachine } from "./GameMachine";
 import type { Game } from "./Game";
-import { OpInfo, ParamInfo } from "./types";
+import { OpInfo } from "./types";
 
 type OpRenderer = (opInfo: OpInfo) => void;
 
@@ -58,6 +58,31 @@ export class PlayerTurn extends GameMachine {
 
   onEntering_Op_turn(opInfo: OpInfo) {
     this.markHexes(opInfo);
+    this.markActionSlots(opInfo);
+  }
+
+  // action slots stand in for the main action targets, so they behave like their buttons
+  markActionSlots(opInfo: OpInfo) {
+    if (!this.bga.players.isCurrentPlayerActive()) return;
+    const slots: HTMLElement[] = [];
+    for (const [target, paramInfo] of Object.entries(opInfo.info)) {
+      const slot = paramInfo.tokenIdUi ? $(paramInfo.tokenIdUi) : null;
+      if (!slot) continue;
+      slot.dataset.targetId = target;
+      if (paramInfo.q != 0) {
+        slot.dataset.targetErr = String(paramInfo.q);
+        slot.title = this.getTargetErrText(paramInfo);
+      }
+      slots.push(slot);
+    }
+    const previousHook = this.onLeavingHook;
+    this.onLeavingHook = () => {
+      previousHook?.();
+      slots.forEach((slot) => {
+        delete slot.dataset.targetErr;
+        slot.removeAttribute("title");
+      });
+    };
   }
   onEntering_Op_moveStep(opInfo: OpInfo) {
     this.markHexes(opInfo, "actionMove");
@@ -94,19 +119,6 @@ export class PlayerTurn extends GameMachine {
       });
       $("map_area").classList.remove("fadeinactive");
     };
-  }
-
-  createCustomButtonImageHtml(target: string, paramInfo: ParamInfo): string | undefined {
-    if (target.startsWith("action")) {
-      const opKey = `Op_${target}`;
-      const icon = this.game.getRulesFor(opKey, "wicon", "");
-      const name = this.game.getTokenName(opKey);
-      const q = paramInfo.q;
-      const iconHtml = icon ? `<div class="wicon ${icon}"></div>` : "";
-      return `<div id='${target}' class="fateaction err_${q}">${iconHtml}<span>${name}</span></div>`;
-    }
-
-    return super.createCustomButtonImageHtml(target, paramInfo);
   }
 
   onToken_nonActive(target: string, node: HTMLElement) {
