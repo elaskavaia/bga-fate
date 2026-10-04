@@ -150,6 +150,9 @@ class Game extends Base {
             $this->tokens->pickTokensForLocation(1, "supply_crystal_green", "card_ability_{$heroNo}_3");
             // Place upgrade cost marker on tableau with starting cost of 5
             $this->tokens->moveToken("marker_{$color}_3", "tableau_{$color}", 5);
+            // Action markers start in the empty slots, same as after Op_turnEnd
+            $this->tokens->moveToken("marker_{$color}_1", "aslot_{$color}_empty_1");
+            $this->tokens->moveToken("marker_{$color}_2", "aslot_{$color}_empty_2");
             // Shuffle decks
             $this->tokens->shuffle("deck_ability_{$color}");
             $this->tokens->shuffle("deck_equip_{$color}");

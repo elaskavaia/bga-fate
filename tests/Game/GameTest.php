@@ -254,6 +254,15 @@ final class GameTest extends TestCase {
         $this->assertEquals(5, (int) $game->tokens->getTokenState($markerId));
     }
 
+    public function testSetupActionMarkersInEmptySlots() {
+        $game = $this->game;
+        $game->setupGameTables();
+
+        foreach ([1, 2] as $i) {
+            $this->assertEquals("aslot_" . PCOLOR . "_empty_$i", $game->tokens->getTokenLocation("marker_" . PCOLOR . "_$i"));
+        }
+    }
+
     public function testSetupUnusedHeroesInLimbo() {
         $game = $this->game;
         $game->setupGameTables();
