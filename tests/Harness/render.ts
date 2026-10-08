@@ -191,6 +191,7 @@ const tooltipRegistry = new Map<string, string>();
   updatePageTitle: () => {},
   wait: (_ms: number) => Promise.resolve(),
   clienttranslate_string: (s: string) => s,
+  addMoveToLog: () => {},
   tooltips: {}
 };
 

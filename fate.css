@@ -2606,3 +2606,9 @@ html:before {
   background-color: #e0e0e0;
   cursor: pointer;
 }
+
+.log .movestamp {
+  font-size: 75%;
+  color: #777;
+  text-align: center;
+}

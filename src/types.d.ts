@@ -29,6 +29,13 @@ export interface NotificationMessage {
   };
 }
 
+/** Runtime members of gameui this game relies on that bga-framework.d.ts does not declare. */
+export interface GameGuiInternal extends GameGui {
+  prevent_error_rentry?: number;
+  addMoveToLog(log_id: number, move_id: number): void;
+  log_to_move_id?: { [log_id: string]: number };
+}
+
 export interface UiOptions {
   buttons?: boolean;
   replicate?: boolean;

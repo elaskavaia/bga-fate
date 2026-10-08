@@ -55,7 +55,20 @@ class Game0Basics {
             this.player_color = gamedatas.players[this.player_id].color;
         else
             this.player_color = gamedatas.players[first_player_id].color;
+        this.hookMoveToLog();
         // caller must set inSetup to false
+    }
+    /** framework only calls addMoveToLog on gameui, and this class does not extend gameui */
+    hookMoveToLog() {
+        const gameacc = gameui;
+        const original = gameacc.addMoveToLog.bind(gameacc);
+        gameacc.addMoveToLog = (log_id, move_id) => {
+            original(log_id, move_id);
+            this.addMoveToLog(log_id, move_id);
+        };
+        // history logs are added before setup
+        for (const log_id in gameacc.log_to_move_id ?? {})
+            this.addMoveToLog(Number(log_id), gameacc.log_to_move_id[log_id]);
     }
     // utils
     /**
@@ -260,17 +273,20 @@ class Game0Basics {
         }
         this.addTooltipToLogItems(log_id);
         // add move #
-        var prevmove = document.querySelector('[data-move-id="' + move_id + '"]');
+        // framework also sets data-move-id on the log node itself
+        var prevmove = document.querySelector('.movestamp[data-move-id="' + move_id + '"]');
         if (prevmove) {
             // ?
         }
         else if (move_id) {
-            const tsnode = document.createElement("div");
-            tsnode.classList.add("movestamp");
-            tsnode.innerHTML = _("Move #") + move_id;
             const lognode = $("log_" + log_id);
-            lognode.appendChild(tsnode);
-            tsnode.setAttribute("data-move-id", String(move_id));
+            if (lognode) {
+                const tsnode = document.createElement("div");
+                tsnode.classList.add("movestamp");
+                tsnode.innerHTML = _("Move #") + move_id;
+                lognode.appendChild(tsnode);
+                tsnode.setAttribute("data-move-id", String(move_id));
+            }
         }
         this.prevLogId = log_id;
     }
