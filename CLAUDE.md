@@ -27,7 +27,8 @@ See [misc/docs/DESIGN.md](misc/docs/DESIGN.md) for architecture overview, token/
 - `npm run genmat` - Generate Material.php from CSV files in misc/
 - `npm run lint:php`- Check for php syntax errors
 
-- `npm run predeploy` - Generate and test everything (build + PHP lint + PHP tests + JS tests). Slow (several minutes). **Only run it when explicitly asked or right before `git commit`.** Do NOT run as mid-task verification — use targeted commands instead (`npm run build:ts`, `npm run jstests`, single PHP test file). Always redirect output to `/tmp/predeploy_output.txt` so you can re-read it instead of re-running.
+- `npm run precommit` - Generate and test everything (build + PHP lint + PHP tests + JS tests + harness). Slow (several minutes). **Only run it when explicitly asked or right before `git commit`.** Do NOT run as mid-task verification — use targeted commands instead (`npm run build:ts`, `npm run jstests`, single PHP test file). Always redirect output to `/tmp/precommit_output.txt` so you can re-read it instead of re-running.
+- `npm run predeploy` - `precommit` plus `sync:check` (needs the BGA remote mounted). Only before deploying.
 
 
 ### Testing
