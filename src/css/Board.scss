@@ -338,6 +338,8 @@
   border: 1px solid #555;
   background: transparent;
   font-weight: bold;
+  // BGA dark theme makes inherited text light; the slot backdrop stays light
+  color: black;
 
   &.active_slot {
     background: white;

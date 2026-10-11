@@ -1961,6 +1961,7 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   border: 1px solid #555;
   background: transparent;
   font-weight: bold;
+  color: black;
 }
 .aslot_action.active_slot {
   background: white;
