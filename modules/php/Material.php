@@ -5310,7 +5310,7 @@ class Material {
         "num" => 21,
         "hno" => 4,
         "name" => clienttranslate("Smiterbiter"),
-        "strength" => 1,
+        "strength" => 3,
         "r" => "c_smiter",
         "on" => "TActionAttack",
         "quest" => "<i>End your movement in the Marsh of Sorrow</i>, covered to the beard in yuck.",

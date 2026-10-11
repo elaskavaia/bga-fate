@@ -166,11 +166,25 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
     // is left to red (max 3). Excess is the remainder after the sweep, not a parallel claim
     // on it (FORUM.md designer ruling).
 
+    /** BGA #246556: the printed card is +3, the CSV had 1. */
+    public function testSmiterbiterGrantsThreeStrength(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_4_15", "limbo");
+        $this->game->tokens->moveToken("card_equip_4_21", "tableau_$color");
+        $this->game->tokens->moveToken("card_equip_4_25", "tableau_$color");
+        $hero = $this->game->getHero($color);
+        $hero->recalcTrackers();
+
+        // Hero I 3 + Smiterbiter 3 + Dwarf Pick 1
+        $this->assertEquals(7, $hero->calcBaseStrength());
+        $this->assertEquals(7, $hero->getAttackStrength());
+    }
+
     public function testSmiterbiterStoresOverkillThenSpendsOnNextAttack(): void {
         $color = $this->getActivePlayerColor();
         $cardId = "card_equip_4_21";
         $this->game->tokens->moveToken($cardId, "tableau_$color");
-        // Smiterbiter grants +1 strength; recalc since calcBaseStrength only runs at setup/turnEnd/upgrade.
+        // Smiterbiter grants +3 strength; recalc since calcBaseStrength only runs at setup/turnEnd/upgrade.
         $this->game->getHero($color)->recalcTrackers();
 
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
@@ -179,8 +193,8 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $troll = "monster_troll_1";
         $this->game->getMonster($troll)->moveTo("hex_6_9", "");
 
-        // Turn 1 attack — Boldur I(3) + First Pick(1) + Smiterbiter(1) = 5 dice. 4 hits vs goblin (h=2) → overkill 2.
-        $this->seedRand([5, 5, 5, 5, 1]);
+        // Turn 1 attack - Boldur I(3) + First Pick(1) + Smiterbiter(3) = 7 dice. 4 hits vs goblin (h=2) -> overkill 2.
+        $this->seedRand([5, 5, 5, 5, 1, 1, 1]);
         $this->respond("actionAttack");
         $this->respond("hex_7_8");
 
@@ -193,7 +207,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->skipIfOp("drawEvent");
 
         // Turn 2 attack — Smiterbiter offers a useCard prompt to spend stored reds.
-        $this->seedRand([5, 5, 5, 5, 1]); // 4 hits = 4 base damage on troll (h=6)
+        $this->seedRand([5, 5, 5, 5, 1, 1, 1]); // 4 hits = 4 base damage on troll (h=6)
         $this->respond("actionAttack");
         $this->respond("hex_6_9");
 
@@ -211,8 +225,8 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
 
     /**
      * Boldur at hex_5_9 holding Smiterbiter and Sweeping Strike I, two 2-health goblins:
-     * the attack target W of him, the sweep target NW = next clockwise. 5 dice (Boldur I 3 +
-     * First Pick 1 + Smiterbiter 1); 4 hits + the passive 1 = 5 damage, so the first kill
+     * the attack target W of him, the sweep target NW = next clockwise. 7 dice (Boldur I 3 +
+     * First Pick 1 + Smiterbiter 3); 4 hits + the passive 1 = 5 damage, so the first kill
      * leaves 3 over.
      */
     private function setupSweepBoard(string $secondMonster = "monster_goblin_2"): string {
@@ -224,7 +238,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_4_9", "");
         $this->game->getMonster($secondMonster)->moveTo("hex_5_8", "");
-        $this->seedRand([5, 5, 5, 5, 1]); // 4 hits + 1 passive = 5 on a 2-health goblin
+        $this->seedRand([5, 5, 5, 5, 1, 1, 1]); // 4 hits + 1 passive = 5 on a 2-health goblin
         return $color;
     }
 
