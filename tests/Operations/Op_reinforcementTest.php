@@ -198,6 +198,41 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $this->assertEquals(3, $bruteCount);
     }
 
+    private function countMonstersIn(string $location): int {
+        $count = 0;
+        foreach ($this->game->hexMap->getHexesInLocation($location) as $hex) {
+            $count += count($this->game->tokens->getTokensOfTypeInLocation("monster", $hex));
+        }
+        return $count;
+    }
+
+    /** BGA #245127: red Queen card is skipped (no second Queen, no escorts) while the yellow Queen is in play. */
+    public function testRedLegendCardDrawsAnotherWhileYellowSideInPlay(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_13_5");
+        $this->game->tokens->moveToken("card_monster_37", "deck_monster_red", 999);
+        $this->game->tokens->moveToken("card_monster_51", "deck_monster_red", 998);
+        $deadPlainsBefore = $this->countMonstersIn("DeadPlains");
+
+        $this->game->setPlayersNumber(1);
+        $this->createReinforcementOp(["deck" => "deck_monster_red"])->resolve();
+
+        $this->assertFalse($this->game->getMonster("monster_legend_1_2")->isOnBoard());
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_37"));
+        $this->assertEquals($deadPlainsBefore, $this->countMonstersIn("DeadPlains"));
+        $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_51"));
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_51"));
+    }
+
+    public function testSkipsLegendCardWhileSameSideInPlay(): void {
+        $this->game->tokens->moveToken("monster_legend_1_1", "hex_13_5");
+
+        $this->game->setPlayersNumber(1);
+        $this->createReinforcementOp(["card" => "card_monster_1"])->resolve();
+
+        $this->assertEquals("hex_13_5", $this->game->tokens->getTokenLocation("monster_legend_1_1"));
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_1"));
+    }
+
     public function testCardGoesToDisplay(): void {
         // Card 36 "Viral Trolls": T,T,T
         $this->game->tokens->moveToken("card_monster_36", "deck_monster_yellow");

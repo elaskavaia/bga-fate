@@ -99,11 +99,9 @@ class Op_reinforcement extends Operation {
             }
 
             if ($monsterType === "LEGEND") {
-                // Check if legend is already on the map — skip placement (upgrade handled separately)
-                $legendLoc = $this->game->tokens->getTokenLocation($legendTokenId);
-                if (str_starts_with($legendLoc, "hex_")) {
-                    // Legend already on the board — don't place again, just continue with escorts
-                    continue;
+                if ($this->isLegendInPlay($legendTokenId)) {
+                    $errors = true;
+                    break;
                 }
                 $placements[$legendTokenId] = $hex;
             } else {
@@ -173,6 +171,12 @@ class Op_reinforcement extends Operation {
     private function getLegendTokenId(string $cardId): ?string {
         $legend = (string) $this->game->material->getRulesFor($cardId, "legend", "");
         return $legend !== "" ? $legend : null;
+    }
+
+    /** Both sides of a Legend tile are separate tokens, so either one on the board means the tile is in play. */
+    private function isLegendInPlay(string $legendTokenId): bool {
+        $tile = Material::getPartsPrefix($legendTokenId, -1);
+        return $this->game->getMonster("{$tile}_1")->isOnBoard() || $this->game->getMonster("{$tile}_2")->isOnBoard();
     }
     public const MONSTER_ABBREV = [
         "trollkin" => ["G" => "monster_goblin", "B" => "monster_brute", "T" => "monster_troll"],
