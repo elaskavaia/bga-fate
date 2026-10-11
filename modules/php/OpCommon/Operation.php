@@ -786,12 +786,25 @@ abstract class Operation {
         $targets = $args[Operation::ARG_TARGET];
         $num = count($targets);
         if ($num == 0) {
-            $state = $this->action_skip();
-        } else {
-            // TODO: support multi-select
-            $state = $this->action_resolve([Operation::ARG_TARGET => $targets[$this->game->bgaRand(0, $num - 1)]]);
+            return $this->action_skip();
         }
-        return $state;
+
+        $min = max(1, $args["mcount"] ?? $this->getDataField("mcount", 1));
+        $max = max($min, $args["count"] ?? $this->getDataField("count", 1));
+        $ttype = $this->getArgType();
+        if ($ttype == Operation::TTYPE_TOKEN_ARRAY) {
+            $count = $this->game->bgaRand(min($min, $num), min($max, $num));
+            $target = array_slice($this->game->bgaShuffle($targets), 0, $count);
+        } elseif ($ttype == Operation::TTYPE_TOKEN_COUNT) {
+            $index = $this->game->bgaRand(0, $num - 1);
+            $count = $this->game->bgaRand($min, $max);
+            $target = [$targets[$index] => $count];
+        } else {
+            $index = $this->game->bgaRand(0, $num - 1);
+            $target = $targets[$index];
+        }
+        $this->game->zombieTarget = $target;
+        return $this->action_resolve([Operation::ARG_TARGET => $target]);
     }
 
     function getPossibleMovesDelegate(string|array $opTypes, mixed $data = null) {

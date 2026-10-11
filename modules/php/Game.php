@@ -40,6 +40,8 @@ class Game extends Base {
     public HexMap $hexMap;
     public DbMultiUndo $dbMultiUndo;
     protected array $undoSavepointMeta = [];
+    /** Last target picked by Operation::action_whatever, read by the fuzz test log */
+    public mixed $zombieTarget = null;
 
     function __construct() {
         Game::$instance = $this;
@@ -188,8 +190,7 @@ class Game extends Base {
     }
 
     protected function getHeroOrder() {
-        $heroNos = range(1, 4);
-        shuffle($heroNos);
+        $heroNos = $this->bgaShuffle(range(1, 4));
         if ($this->getPlayersNumber() === 1) {
             $chosen = (int) $this->getGameStateValue("var_solo_hero");
             if ($chosen >= 1 && $chosen <= 4) {

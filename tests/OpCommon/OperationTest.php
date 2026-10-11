@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\OpCommon\CountableOperation;
+use Bga\Games\Fate\OpCommon\Operation;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -134,5 +136,62 @@ final class OperationTest extends TestCase {
         $copy = $op->copy();
         $this->assertEquals("dealDamage(adj),moveMonster(marked)", $copy->getTypeFullExpr());
         $this->assertEquals(["reason" => "kick"], $copy->getData());
+    }
+
+    // -------------------------------------------------------------------------
+    // action_whatever (zombie pick)
+    // -------------------------------------------------------------------------
+
+    /** resolve() validates the pick with count checks, as real multi-select ops do */
+    private function fakeOp(string $ttype, array $targets, array $data = []): CountableOperation {
+        return new class ($ttype, $targets, $data) extends CountableOperation {
+            public mixed $resolved = null;
+            function __construct(private string $ttype, private array $targets, array $data) {
+                parent::__construct("fake", PCOLOR, $data);
+            }
+            function getArgType() {
+                return $this->ttype;
+            }
+            function getPossibleMoves() {
+                return $this->targets;
+            }
+            function resolve(): void {
+                $this->resolved = $this->getCheckedArg(true, true);
+            }
+        };
+    }
+
+    public function testWhateverNoTargetsSkips(): void {
+        $op = $this->fakeOp(Operation::TTYPE_TOKEN, [], ["l_skip" => true]);
+        $op->action_whatever();
+        $this->assertNull($op->resolved);
+        $this->assertNull($this->game->zombieTarget);
+    }
+
+    public function testWhateverSingleUsesRolledIndex(): void {
+        $op = $this->fakeOp(Operation::TTYPE_TOKEN, ["a", "b", "c"]);
+        $this->game->randQueue = [2];
+        $op->action_whatever();
+        $this->assertEquals("c", $op->resolved);
+        $this->assertEquals("c", $this->game->zombieTarget);
+    }
+
+    public function testWhateverArrayPicksMinCount(): void {
+        $op = $this->fakeOp(Operation::TTYPE_TOKEN_ARRAY, ["a", "b", "c"], ["count" => 3, "mcount" => 2]);
+        $op->action_whatever();
+        $this->assertEquals(["a", "b"], $op->resolved);
+    }
+
+    public function testWhateverArrayCountCappedByTargets(): void {
+        $op = $this->fakeOp(Operation::TTYPE_TOKEN_ARRAY, ["a", "b", "c"], ["count" => 5, "mcount" => 3]);
+        $op->action_whatever();
+        $this->assertEquals(["a", "b", "c"], $op->resolved);
+    }
+
+    public function testWhateverCountUsesRolledIndexAndCount(): void {
+        $op = $this->fakeOp(Operation::TTYPE_TOKEN_COUNT, ["a", "b"], ["count" => 3, "mcount" => 1]);
+        $this->game->randQueue = [1, 2];
+        $op->action_whatever();
+        $this->assertEquals(["b" => 2], $op->resolved);
     }
 }
