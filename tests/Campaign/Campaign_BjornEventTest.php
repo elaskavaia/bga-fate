@@ -83,7 +83,7 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->game->effect_moveCrystals("card_equip_1_15", "red", 2, "card_equip_1_15", ["message" => ""]);
         $this->game->effect_moveCrystals("card_equip_1_21", "red", 1, "card_equip_1_21", ["message" => ""]);
 
-        // Play Sewing — r=1repairCard(all), auto-resolves (single "confirm" target)
+        // Play Sewing - r=removeDamage(all), auto-resolves (single "confirm" target)
         $this->assertValidTarget($sewing);
         $this->respond($sewing);
         $this->confirmCardEffect();
@@ -95,6 +95,22 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
 
         // Sewing should be discarded from hand after play.
         $this->assertNotEquals("hand_$color", $this->tokenLocation($sewing));
+    }
+
+    /** BGA #242206: designer ruled Sewing works on the hero too, 1 damage like each card. */
+    public function testSewingHealsHero(): void {
+        $sewing = "card_event_1_30_1";
+        $color = $this->getActivePlayerColor();
+        $this->seedHand($sewing, $color);
+        $this->game->tokens->moveToken("card_equip_1_21", "tableau_$color");
+        $this->game->effect_moveCrystals("card_equip_1_21", "red", 1, "card_equip_1_21", ["message" => ""]);
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+
+        $this->respond($sewing);
+        $this->confirmCardEffect();
+
+        $this->assertEquals(0, $this->countDamage("card_equip_1_21"));
+        $this->assertEquals(1, $this->countDamage($this->heroId));
     }
 
     // --- Seek Shelter (card_event_1_34) ---

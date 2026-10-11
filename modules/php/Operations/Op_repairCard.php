@@ -24,7 +24,7 @@ namespace Bga\Games\Fate\Operations;
  *  - "all" — apply to every damaged card at once (no per-card prompt)
  *
  * Used by: Mend in Grimheim (5repairCard), Stitching II (2repairCard),
- *  Durability (repairCard(max)), Sewing (repairCard(all)).
+ *  Durability (repairCard(max)).
  */
 class Op_repairCard extends Op_removeDamage {
     function getPrompt() {

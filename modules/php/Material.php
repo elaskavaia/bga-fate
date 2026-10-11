@@ -5444,7 +5444,7 @@ class Material {
         "hno" => 1,
         "name" => clienttranslate("Sewing"),
         "count" => 2,
-        "r" => "repairCard(all)",
+        "r" => "removeDamage(all)",
         "effect" => clienttranslate("Remove 1 damage from each of your cards."),
         "flavour" => "Needles to say, sewing has been a common thread in Bjorn's crafts.",
 ],
