@@ -37,6 +37,7 @@ abstract class Operation {
     const TTYPE_TOKEN_COUNT = "token_count";
     const TARGET_AUTO = "auto";
     const TARGET_CONFIRM = "confirm";
+    const TARGET_SKIP = "skip";
     protected Game $game;
     protected int $player_id = 0;
     private mixed $data = null;
@@ -425,7 +426,7 @@ abstract class Operation {
         $res["subtitle"] ??= $this->getSubTitle();
 
         if ($this->canSkip()) {
-            $res["info"]["skip"] ??= $this->getSkipArgs();
+            $res["info"][Operation::TARGET_SKIP] ??= $this->getSkipArgs();
         }
 
         $res["ui"] = $this->getUiArgs();

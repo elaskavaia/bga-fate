@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 final class Op_turnTest extends AbstractOpTestCase {
     /** Simulate one action already taken by placing marker 1 in its aslot */
     private function simulateActionTaken(string $actionType): void {
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_" . $actionType);
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_" . $actionType);
     }
 
     /** Simulate both actions taken */
     private function simulateBothActionsTaken(string $action1, string $action2): void {
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_1", "aslot_" . PCOLOR . "_" . $action1);
-        $this->game->tokens->moveToken("marker_" . PCOLOR . "_2", "aslot_" . PCOLOR . "_" . $action2);
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_1", "aslot_" . $this->owner . "_" . $action1);
+        $this->game->tokens->moveToken("marker_" . $this->owner . "_2", "aslot_" . $this->owner . "_" . $action2);
     }
 
     // -------------------------------------------------------------------------
@@ -116,6 +116,26 @@ final class Op_turnTest extends AbstractOpTestCase {
         $this->simulateBothActionsTaken("actionPractice", "actionMove");
         $op = $this->op;
         $this->assertTrue($op->canSkip());
+    }
+
+    /** Boldur with Orebiter (2spendXp:gainEquip) on deck top: inline completeQuest is offered. */
+    private function initWithCompletableQuest(): void {
+        $this->init(4);
+        $this->game->tokens->moveToken("card_equip_4_19", "deck_equip_" . $this->owner);
+        $this->game->effect_moveCrystals("hero_4", "yellow", 2, $this->getPlayersTableau(), ["message" => ""]);
+        $this->assertEquals("completeQuest", $this->getTargetInfo("card_equip_4_19")["action"]);
+    }
+
+    public function testInlineQuestSkipNotHoistedAtStart(): void {
+        $this->initWithCompletableQuest();
+        $this->assertArrayNotHasKey("skip", $this->op->getArgsInfo());
+    }
+
+    public function testEndTurnSkipNotReplacedByInlineQuestSkip(): void {
+        $this->initWithCompletableQuest();
+        $this->simulateBothActionsTaken("actionPractice", "actionMove");
+        $this->createOp();
+        $this->assertEquals("End Turn", $this->getTargetInfo("skip")["name"]);
     }
 
     // -------------------------------------------------------------------------

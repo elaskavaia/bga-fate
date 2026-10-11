@@ -104,6 +104,9 @@ class Op_turn extends Operation {
                     // action is available, shortcut - send action parameters also
                     $info = $op->getArgsInfo();
                     foreach ($info as $key => $value) {
+                        if ($key === Operation::TARGET_SKIP) {
+                            continue;
+                        }
                         $existingQ = $res[$key]["q"] ?? null;
                         $newQ = $value["q"] ?? 0;
                         if ($existingQ === 0) {
