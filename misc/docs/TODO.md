@@ -5,6 +5,22 @@ Bug triage state (last-checked marker, tracked BGA reports, run log) lives in [B
 [ ] Quest UI polish: progress badge (`X / N`) on deck-top card, `completeQuest` button styling/icon, completion fanfare animation, enriched log lines (running progress + completion).
 [ ] Dice roll animation
 
+### Beta review feedback (BGA request #6423645, 2026-10-06)
+see guidelines A.1, A.2:
+
+- [x] **Card collection: one collapsible section with filter checkboxes** instead of a section per collection (reviewer asked for tabs, filters keep multiple types visible at once). Checkboxes enable/disable card/token types.
+  - DONE: `setupCardCatalog()` builds one "Card Reference" section with a shared search, an All checkbox and one checkbox per hero + Monsters; defaults to own hero (spectators: all), state saved in localStorage (`fate.catalog_groups`); notes search matches hidden in unchecked groups.
+- [x] **Action bar: drop "Use Card" button, show "Complete Quest" only when valid** - FIXED: Op_turn drops a free action's menu entry when invalid or when `Operation::showTurnButton()` is false (Op_useCard); cards stay clickable. Op_completeQuest skip renamed "Not now" -> "Cancel". Tests: `Op_turnTest::testUseCardHasNoTurnButton`, `testCompletableQuestHasTurnButton`, `testDisabledQuestHasNoTurnButton`.
+  - NOTE: not browser-verified - please check the bar on Studio
+- [ ] **"Show me" button: use an eye icon** (with tooltip) instead of the text label to save action bar space.
+  - Idea: keep both, label `<i class="fa fa-eye"></i><span class="showme_label"> Show me</span>` + `tooltip: _("Show me")`, hide only the span via CSS
+  - Option a: hide when many buttons: `#generalactions:has(> .bgabutton:nth-child(5)) .showme_label { display: none; }` (verify bar markup in harness first)
+  - Option b: hide on small bar: `@media (max-width: 600px)` or a container query on the action bar
+  - Note: button count is a proxy for overflow (long labels can overflow with fewer buttons); exact fix needs ResizeObserver - not doing
+
+
+### Random stuff
+
 - [ ] **Card "Sophisticated": Mend throws a SERVER ERROR on click (hero HAD damage).** STILL OPEN. Repro (2026-07-09): hero had 4 damage, had JUST MOVED into Grimheim that same turn, then played Sophisticated; the choice dialog OFFERED Mend, clicking it threw a server error "like it was invalid choice" (checkUserTargetSelection rejection). So the choice was built as valid but re-validated as void on resolve - suspect stale state between args build and resolve (delegate switch `2heal` vs `5removeDamage` depends on hero hex; occupancy/args caching). Trace path: `Op_or -> Op_actionMend -> 5removeDamage` ([Op_actionMend.php](../../modules/php/Operations/Op_actionMend.php), [Op_removeDamage.php](../../modules/php/Operations/Op_removeDamage.php)). Harness STILL cannot reproduce even with the exact scenario: `Op_actionMendGrimheimMoveTest` is green. `checkUserTargetSelection:01` ("Internal Error") means the picked choice key was MISSING from freshly recomputed moves - `Op_or::getPossibleMoves` returns bare `ERR_COST` when ALL choices are void at resolve time. Remaining suspects: multiplayer state, the real card-play path (costs), playing the card mid step-move, undo savepoint interaction. NEED: exact error text from BGA log / table id.
 - [ ] **Zombie turn uses wrong player id in `MultiPlayerTurnPrivate`/`MultiPlayerWaitPrivate::zombie()`** - passes `getCurrentPlayerId()` (no request player during a zombie turn) instead of `$playerId`, and calls the misspelled `multiplayerDistpatchAfterAction`. Dead code: `OpMachine::isMultiplayerSupported()` returns false. Port scholars `c1153e3`: delete the three MultiPlayer* states, the `STATE_MULTI_*` constants, the OpMachine multiplayer dispatch code and the `Operation::onEnteringGameState` branch.
 - [ ] **Zombie turn stalls in the confirm state** - `PlayerTurnConfirm::zombie()` is a bare `return`, so a player quitting while a confirmation is pending leaves the table stuck. Port scholars `6f838ba`: delegate to `action_resolve()`, but return null when the game is not over and the machine is empty (otherwise MachineHalted -> confirm -> GameDispatch loops with no click to break it). Test there: `Campaign_TurnFlowTest::testZombieConfirmsLikeThePlayer`.
