@@ -238,7 +238,7 @@ class DbTokens {
         self::checkLocation($location);
         $this->clear_cache();
         $token_keys = $this->game->getObjectListFromDB("SELECT token_key FROM " . $this->table . " WHERE token_location='$location'", true);
-        shuffle($token_keys);
+        $token_keys = $this->game->bgaShuffle($token_keys);
         $n = 0;
         foreach ($token_keys as $token_key) {
             $this->game->DbQuery("UPDATE " . $this->table . " SET token_state='$n' WHERE token_key='$token_key'");

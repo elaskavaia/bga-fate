@@ -43,6 +43,11 @@ class GameUT extends Game {
         return $min;
     }
 
+    /** Keeps the original order; does not consume randQueue so seeded dice stay intact */
+    function bgaShuffle(array $arr): array {
+        return array_values($arr);
+    }
+
     function __construct() {
         parent::__construct();
         $this->xtable = [];

@@ -52,6 +52,11 @@ class GameWrapper extends Game implements HarnessGameInterface {
         return $min;
     }
 
+    /** Keeps the original order; does not consume randQueue so seeded dice stay intact */
+    function bgaShuffle(array $arr): array {
+        return array_values($arr);
+    }
+
     function setPlayerColor(int $playerId, string $color): void {
         $players = $this->loadPlayersBasicInfos();
         if (isset($players[$playerId])) {

@@ -109,8 +109,7 @@ class Base extends Table {
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
         // Activate first player (which is in general a good idea :) )
-        $player_ids = array_keys($players);
-        shuffle($player_ids);
+        $player_ids = $this->bgaShuffle(array_keys($players));
         $startingPlayer = array_shift($player_ids);
         $this->gamestate->changeActivePlayer($startingPlayer);
 
@@ -464,6 +463,14 @@ class Base extends Table {
      */
     function bgaRand(int $min, int $max): int {
         return bga_rand($min, $max);
+    }
+
+    /**
+     * Wrapper for shuffle - override in test subclass to control randomness.
+     */
+    function bgaShuffle(array $arr): array {
+        shuffle($arr);
+        return $arr;
     }
 
     function dumpError($log) {

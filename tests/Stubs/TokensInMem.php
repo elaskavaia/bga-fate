@@ -169,8 +169,7 @@ class TokensInMem extends DbTokens {
 
     function shuffle($location) {
         $tokens = $this->getTokensOfTypeInLocation(null, $location);
-        $keys = array_keys($tokens);
-        \shuffle($keys);
+        $keys = $this->game->bgaShuffle(array_keys($tokens));
         $n = 0;
         foreach ($keys as $key) {
             $this->keyindex[$key]["state"] = $n;
