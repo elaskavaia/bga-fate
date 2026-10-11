@@ -2638,6 +2638,8 @@ class Game extends Game1Tokens {
                         deck: this.getRulesFor(d, "name")
                     });
                     placeHtml(`<div class="deck_wrapper" data-name="${name}"><div id="${d}_${color}" class="deck ${d}"></div></div>`, `tableau_${color}`);
+                    // player-scoped locations are skipped by getAllLocations, so tooltip is not set up there
+                    this.updateTooltip(`${d}_${color}`);
                 });
                 const panel = this.bga.playerPanels.getElement(Number(player.id));
                 placeHtml(`<div id="miniboard_${color}" class="miniboard ${hnoClass}" style="--player-color: #${color}">
@@ -2946,6 +2948,16 @@ class Game extends Game1Tokens {
                 : `<span class="tt_status_available">${_("Available")}</span>`;
             const tooltip = tokenInfo.tooltip ? this.getTr(tokenInfo.tooltip) : "";
             tokenInfo = { ...tokenInfo, tooltip: tooltip + this.ttSection(_("Status"), status) };
+        }
+        else if (tokenInfo?.mainType === "supply") {
+            // supply_* classes carry the pile-counter badge, so the tooltip image uses the plain token art
+            const content = tokenInfo.tokenId.substring("supply_".length);
+            if (content.startsWith("crystal_")) {
+                tokenInfo = { ...tokenInfo, imageTypes: `bucket_${content}` };
+            }
+            else if (content === "die_attack") {
+                tokenInfo = { ...tokenInfo, imageTypes: "die die_attack", imageData: { state: "6" } };
+            }
         }
         return super.getTooltipHtmlForTokenInfo(tokenInfo, attachNode);
     }
@@ -3383,6 +3395,50 @@ class Game extends Game1Tokens {
             }
             case "house": {
                 tokenInfo.tooltip = this.ttSection(_("Type"), this.getTr(tokenInfo.name));
+                break;
+            }
+            case "marker": {
+                if (tokenInfo.typeKey !== "marker")
+                    break;
+                // markers 1-2 are action markers, 3 is the upgrade cost marker
+                if (getPart(tokenId, 2) === "3") {
+                    tokenInfo.name = this.getRulesFor("upgrade_cost", "name");
+                    tokenInfo.tooltip = this.getRulesFor("upgrade_cost", "tooltip");
+                }
+                else {
+                    tokenInfo.name = _("Action Marker");
+                    tokenInfo.tooltip = _("Move it to an action space to take that action. 2 actions per turn, each on a different space.");
+                }
+                break;
+            }
+            case "supply": {
+                const usage = {
+                    supply_crystal_green: _("Can be used as mana on abilities and equipment."),
+                    supply_crystal_red: _("Can be used as damage on heroes, monsters and equipment."),
+                    supply_crystal_yellow: _("Can be used as experience (gold) on the player board."),
+                    supply_die_attack: _("Rolled when attacking: roll as many dice as the attacker's strength.")
+                };
+                if (usage[tokenId]) {
+                    tokenInfo.tooltip = usage[tokenId];
+                    tokenInfo.showtooltip = true;
+                }
+                break;
+            }
+            case "deck": {
+                if (subType === "event")
+                    tokenInfo.tooltip = _("Draw from it with the Prepare action. The number shows how many cards are left.");
+                break;
+            }
+            case "tracker": {
+                const meaning = {
+                    strength: _("Number of attack dice you roll when attacking."),
+                    range: _("How far you can attack. Range 1 means adjacent areas only."),
+                    move: _("Number of areas you can move with the Move action."),
+                    health: _("When your damage reaches your health, your hero is knocked out."),
+                    hand: _("Maximum number of cards in your hand.")
+                };
+                if (meaning[subType])
+                    tokenInfo.tooltip = meaning[subType];
                 break;
             }
             case "die": {

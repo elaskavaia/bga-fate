@@ -411,6 +411,19 @@ These locations hold tokens that are not on the map. They should have a hidden o
 - `oversurface` - Transparent overlay for phantom token animations (pointer-events: none)
 - `limbo` - Off-screen sink for tokens not yet placed
 
+### Tooltips
+
+- Names come from material; `showtooltip=0` turns a tooltip off. Explanation text that only the UI needs is built in
+  `Game.updateTokenDisplayInfo` / `getDynamicTooltip`, not added to material CSVs (that is server payload).
+- `placeTokenServer` re-runs `updateTooltip` on the token and its location after every move, so per-token text must come
+  from material or `updateTokenDisplayInfo`, not from a one-off setup call.
+- Player-scoped locations (`deck_*_{color}`, `discard_{color}`) are skipped by `getAllLocations`; setup calls `updateTooltip` for them.
+- Crystals render 0x0 inside buckets: on characters the parent tooltip lists them (`getCrystalInfo`), in the supply the bucket
+  (`supply_crystal_*`) carries the tooltip.
+- `imageTypes` from `updateTokenDisplayInfo` also becomes the element's DOM classes; to change only the tooltip image,
+  override in `getTooltipHtmlForTokenInfo` (supply buckets do this, their classes carry the pile counter badge).
+- Elements covered by a tooltipped element on top (ability/equip deck under its top card, time track under its slots) need none.
+
 ---
 
 ## Game Log Style

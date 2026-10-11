@@ -26,7 +26,7 @@
 [x] Check all your English messages for proper use of punctuation, capitalization, usage of present tense in notification (not past) and gender neutrality. See [[Translations]] for English rules.
 [x] If the elements in your game zone don't occupy all the available horizontal space, '''they should be centered'''.
 [x] If your game elements become blurry or pixellated when using the browser zoom, you may want to consider [[Game_art:_img_directory##Use_background-size | higher resolution images with background-size]]
-[  ] Non-self explanatory graphic elements should have tooltips
+[x] Non-self explanatory graphic elements should have tooltips
 [x] Strings in your source code are ready for translation. See [[Translations]]. You can generate dummy translations for checking that everything is ready for translation from your "Manage game" page.
 [x] A prefix for example a trigram for your game that you prepend to all the css classes to avoid namespace conflicts, i.e. vla_selected vs selected - WONTFIX: classes are not prefixed, no conflicts seen, full rename not worth it
 [x] If you are looking for advice on design and some 3rd party testing you can post a message on the developers forum, and ask other developers, there are a lot of people who will gladly do it.
