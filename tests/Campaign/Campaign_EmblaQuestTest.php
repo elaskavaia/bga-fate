@@ -414,6 +414,26 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertEquals(3, $this->countTokens("crystal_red", "card_equip_3_22"));
     }
 
+    /** BGA #240644: entering an area counts however the hero gets there, so a monster-die push into a forest ticks Raven's Claw. */
+    public function testMonsterDiePushIntoForestTicksRavensClaw(): void {
+        $color = $this->getActivePlayerColor();
+        $ravensClaw = "card_equip_3_22";
+        $this->seedDeck("deck_equip_$color", [$ravensClaw, "card_equip_3_16"]);
+
+        $plainsHex = "hex_10_3"; // push dir leads to hex_10_4
+        $forestHex = "hex_10_4";
+        $this->assertNotEquals("forest", $this->game->hexMap->getHexTerrain($plainsHex));
+        $this->assertEquals("forest", $this->game->hexMap->getHexTerrain($forestHex));
+        $this->game->tokens->moveToken($this->heroId, $plainsHex);
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_10_2", "");
+
+        $this->game->machine->push("monsterDiePush", $color);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals($forestHex, $this->tokenLocation($this->heroId), "push should move Embla into the forest");
+        $this->assertEquals(1, $this->countTokens("crystal_red", $ravensClaw), "push into forest counts toward Raven's Claw");
+    }
+
     /**
      * Tailored Boots (card_equip_3_18): quest_on= (empty — player-initiated),
      * quest_r=in(Grimheim):2spendXp:gainEquip.

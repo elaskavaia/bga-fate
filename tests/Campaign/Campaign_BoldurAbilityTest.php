@@ -232,6 +232,28 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($goblin), "1 damage applied even when target lands in Grimheim");
     }
 
+    /** BGA #240644: a hero pushed by Wrecking Ball enters the area, so Embla's Raven's Claw ticks on a forest. */
+    public function testWreckingBallPushingHeroIntoForestTicksTheirStepQuest(): void {
+        $this->setupGame([4, 3]); // Boldur, Embla
+        $this->clearMonstersFromMap();
+        $embla = "hero_3";
+        $emblaColor = $this->game->getHeroOwner($embla);
+        $ravensClaw = "card_equip_3_22";
+        $this->seedDeck("deck_equip_$emblaColor", [$ravensClaw, "card_equip_3_16"]);
+        $forestHex = "hex_10_4";
+        $this->game->tokens->moveToken($this->heroId, "hex_10_3");
+        $this->game->tokens->moveToken($embla, "hex_10_3");
+        $this->game->hexMap->invalidateOccupancy();
+
+        $this->game->machine->push("c_wrecking", $this->getActivePlayerColor(), ["displaced" => $embla]);
+        $this->game->machine->dispatchAll();
+        $this->respond($forestHex);
+
+        $this->assertEquals($forestHex, $this->tokenLocation($embla));
+        $this->assertEquals(1, $this->countDamage($embla), "push damage still applies");
+        $this->assertEquals(1, $this->countTokens("crystal_red", $ravensClaw), "push into forest counts toward Raven's Claw");
+    }
+
     public function testAmbiguousHexChoosingAttackRollsDice(): void {
         // The other side of the chooser: choice_1 = actionAttack performs a normal attack
         // and spends the attack action, not the move.

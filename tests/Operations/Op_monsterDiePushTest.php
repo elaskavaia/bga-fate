@@ -22,6 +22,15 @@ final class Op_monsterDiePushTest extends AbstractOpTestCase {
         $this->assertEquals("hex_11_8", $this->game->tokens->getTokenLocation("hero_1"));
     }
 
+    /** BGA #240644: the push enters an area (TStep) but is not a move action (no TMove/TActionMove). */
+    public function testPushFiresStepTriggerOnly(): void {
+        $this->call_resolve();
+        $opTypes = array_column($this->game->machine->getAllOperations($this->owner), "type");
+        $this->assertContains("trigger(TStep)", $opTypes);
+        $this->assertNotContains("trigger(TMove)", $opTypes);
+        $this->assertNotContains("trigger(TActionMove)", $opTypes);
+    }
+
     public function testHeroNotAdjacentToMonsterIsNotPushed(): void {
         // Pull the only monster off the map → hero has no adjacent monster.
         $this->game->tokens->moveToken("monster_goblin_1", "supply_monster");

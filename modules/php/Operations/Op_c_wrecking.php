@@ -77,7 +77,7 @@ class Op_c_wrecking extends Operation {
         $character = $this->game->getCharacter($displaced);
 
         // Push first so the damage pipeline sees a single-occupant hex.
-        $character->moveTo($pushHex, clienttranslate('${char_name} pushes ${char_name2} with Wrecking Ball'), [
+        $this->pushCharacter($character, $pushHex, clienttranslate('${char_name} pushes ${char_name2} with Wrecking Ball'), [
             "char_name" => $attackerId,
             "char_name2" => $displaced,
         ]);

@@ -48,7 +48,7 @@ class Op_monsterDiePush extends Operation {
             if ($this->game->hexMap->isImpassable($nextHex, $hero)) {
                 continue;
             }
-            $hero->moveTo($nextHex, clienttranslate('${char_name} is pushed toward Grimheim'));
+            $this->pushCharacter($hero, $nextHex, clienttranslate('${char_name} is pushed toward Grimheim'));
         }
     }
 

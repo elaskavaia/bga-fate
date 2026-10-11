@@ -19,6 +19,8 @@ use Bga\GameFramework\SystemException;
 use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Game;
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Character;
+use Bga\Games\Fate\Model\Hero;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\States\GameDispatch;
 use Bga\Games\Fate\States\PlayerTurn;
@@ -263,6 +265,14 @@ abstract class Operation {
 
     function queueTrigger(Trigger $event, $owner = null, mixed $data = null) {
         $this->queue("trigger({$event->value})", $owner, $data);
+    }
+
+    /** A pushed hero enters the area (TStep) but makes no move action, so no TMove (BGA #240644) */
+    function pushCharacter(Character $character, string $hex, string $message, array $args = []): void {
+        $character->moveTo($hex, $message, $args);
+        if ($character instanceof Hero) {
+            $this->queueTrigger(Trigger::Step, $character->getOwner());
+        }
     }
 
     /**
