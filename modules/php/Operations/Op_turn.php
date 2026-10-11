@@ -187,13 +187,13 @@ class Op_turn extends Operation {
     public function getPrompt() {
         $remaining = $this->getActionsRemaining();
         if ($remaining == self::ACTIONS_PER_TURN) {
-            return clienttranslate('${char_name}: select your first action or a free action');
+            return clienttranslate('${char_name} must select their first action or a free action');
         } elseif ($remaining == 1) {
-            return clienttranslate('${char_name}: select your second action or a free action');
+            return clienttranslate('${char_name} must select their second action or a free action');
         } elseif ($this->noValidTargets()) {
             return clienttranslate("Confirm end of turn");
         }
-        return clienttranslate('${char_name}: select a free action or end your turn');
+        return clienttranslate('${char_name} may select a free action or end the turn');
     }
 
     public function getSubTitle() {
