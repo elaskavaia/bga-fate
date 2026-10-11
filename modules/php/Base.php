@@ -207,12 +207,8 @@ class Base extends Table {
             }
         }
 
-        $table_options = $this->getTableOptions(); // aka Game options defined in gameoptions.json
         $result["table_options"] = [];
-        foreach ($table_options as $option_id => $option) {
-            if ($option_id < 100 || $option_id > 199) {
-                continue; // framework options (e.g. 200 game speed), tableOptions->get() rejects them
-            }
+        foreach ($this->getGameOptions() as $option_id => $option) {
             $value = $this->tableOptions->get($option_id) ?? ($option["default"] ?? 0);
             $result["table_options"][$option_id] = $option;
             $result["table_options"][$option_id]["value"] = $value;
