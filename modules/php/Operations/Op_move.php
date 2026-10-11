@@ -227,7 +227,7 @@ class Op_move extends CountableOperation {
         $top = $this->game->tokens->getTokenOnTop("deck_equip_$owner");
         if ($top !== null) {
             $questOn = (string) $this->game->material->getRulesFor($top["key"], "quest_on", "");
-            if ($this->hasStepListeners($questOn) || in_array($top["key"], self::STEP_QUEST_CARDS, true)) {
+            if ($questOn === Trigger::Step->value || in_array($top["key"], self::STEP_QUEST_CARDS, true)) {
                 return true;
             }
         }
@@ -238,19 +238,7 @@ class Op_move extends CountableOperation {
             if (method_exists($this->game->instantiateCard($card, $this), "onStep")) {
                 return true;
             }
-            if ($this->hasStepListeners((string) $this->game->material->getRulesFor($card["key"], "on", ""))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function hasStepListeners(string $on): bool {
-        if ($on === "") {
-            return false;
-        }
-        foreach (Trigger::Step->chain() as $t) {
-            if ($on === $t->value) {
+            if ($this->game->material->getRulesFor($card["key"], "on", "") === Trigger::Step->value) {
                 return true;
             }
         }

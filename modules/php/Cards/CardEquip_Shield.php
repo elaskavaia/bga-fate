@@ -32,10 +32,8 @@ use function Bga\Games\Fate\getPart;
  */
 class CardEquip_Shield extends CardGeneric {
     public function triggerQuest(Trigger $event): void {
-        $chain = $event->chain();
-
-        // Branch A - Op_step fires Step on every hop, so any hero hex entry triggers this.
-        if (in_array(Trigger::Step, $chain, true)) {
+        // Branch A - TStep fires on every area entered (step or push).
+        if ($event === Trigger::Step) {
             $heroHex = $this->game->hexMap->getCharacterHex($this->game->getHeroTokenId($this->owner));
             if ($heroHex !== null && $this->game->hexMap->getHexNamedLocation($heroHex) === "OgreValley") {
                 $this->queue("gainEquip");
@@ -44,7 +42,7 @@ class CardEquip_Shield extends CardGeneric {
         }
 
         // Branch B — troll kill prompts an optional ?(blockXp:gainEquip) chain.
-        if (in_array(Trigger::MonsterKilled, $chain, true)) {
+        if (in_array(Trigger::MonsterKilled, $event->chain(), true)) {
             $hex = $this->game->getAttackHex();
             if ($hex === null) {
                 return;

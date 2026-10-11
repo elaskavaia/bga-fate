@@ -191,7 +191,7 @@ Step mode is on when the hero has a **per-step incentive** (`Op_move::hasStepInc
 
 Once the loop has started (`moved >= 1`) step mode stays on for the rest of that move even if the incentive disappears - a TStep quest can complete mid-move and leave the deck top, and dropping to one-click there would strand the player with no "End Move" on a non-skippable op.
 
-In step mode each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, from `Op_move`, on "End Move", count exhaustion, or entering Grimheim. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum ("[0,N]move" is instead declinable before the first step via skip, mcount=0). `Trigger::Step` is its own root (not `Move`'s parent): every `Op_step` fires it, and a one-click final step fires `Move`/`ActionMove` right after it, so a card `on=TStep` fires once per area entered in both modes and `on=TMove` fires only once per move. Chaining `Move` through `Step` counted the last area twice in step mode (BGA #240884).
+In step mode each hop is queued as a non-final `Op_step` (fires `Trigger::Step` + encounter); the closing `Trigger::ActionMove`/`Move` fires exactly once, from `Op_move`, on "End Move", count exhaustion, or entering Grimheim. "End Move" is offered only after the first step, preserving the "move at least 1 area" minimum ("[0,N]move" is instead declinable before the first step via skip, mcount=0). `Trigger::Step` is its own root (not `Move`'s parent): every `Op_step` fires it, and a one-click final step fires `Move`/`ActionMove` right after it, so a card `on=TStep` fires once per area entered in both modes and `on=TMove` fires only once per move. Chaining `Move` through `Step` counted the last area twice in step mode (BGA #240884). Because Step and the closing trigger are separate dispatches in both modes, a TStep quest completed on the last hop reveals the next quest before the closing trigger fires, so that quest can complete on the same move (e.g. Belt of Youth, then Tiara in Dark Forest).
 
 **Wrecking Ball (move into occupied hexes)**: with the card on the tableau (itself a step incentive), `Op_move` also offers occupied hexes within the remaining count (not Grimheim, not impassable) as directly clickable targets at every prompt; a distant one auto-routes (walk adjacent first, shortest path). Picking one queues a non-final `Op_step` into the hex (transient multi-occupancy), then `Op_c_wrecking` - the push phase: choose where the displaced character goes (the hex Boldur came from is allowed - the pendulum swap), move it, deal 1 damage via the normal pipeline - then the loop continues with the remaining count. Works on any unfiltered movement (designer: "always active").
 
@@ -290,6 +290,10 @@ Op_roll
 Op_move
   → Trigger::ActionMove - moves queued by Op_actionMove (chains through Move)
   → Trigger::Move - all other movements (card-driven, forced moves, etc.)
+Op_step
+  -> Trigger::Step - every hop of a hero move (its own root, no parent)
+  -> Trigger::ActionMove / Trigger::Move - right after Step on a one-click final hop
+     (step mode closes from Op_move instead)
 Op_resolveHits
   → Trigger::ResolveHits - before damage is applied to a hero (for damage prevention)
 Op_dealDamage
