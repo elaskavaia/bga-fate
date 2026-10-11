@@ -1035,7 +1035,7 @@ export class Game extends Game1Tokens {
     const map: Record<string, string> = {
       trollkin: _("The Trollkin are a savage clan of goblins, brutes, and trolls that roam the forests and valleys."),
       firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
-      dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
+      dead: _("The Dead rise from marshes and plains: imps, skeletons, and the fearsome Draugr.")
     };
     return map[faction];
   }
@@ -1093,7 +1093,7 @@ export class Game extends Game1Tokens {
     };
     tokenInfo.tooltip = this.ttSection(
       _("Faction"),
-      this.getTokenName(tokenInfo.faction) + " " + _("Legend") + " " + (level === "1" ? "I" : "II")
+      this.getTr(_("${faction} Legend ${level}"), { faction: this.getTokenName(tokenInfo.faction), level: level === "1" ? "I" : "II" })
     );
 
     let rows = "";

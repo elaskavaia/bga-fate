@@ -303,7 +303,7 @@ export class Game0Basics {
       if (lognode) {
         const tsnode = document.createElement("div");
         tsnode.classList.add("movestamp");
-        tsnode.innerHTML = _("Move #") + move_id;
+        tsnode.innerHTML = this.getTr(_("Move #${move_id}"), { move_id });
         lognode.appendChild(tsnode);
 
         tsnode.setAttribute("data-move-id", String(move_id));
@@ -330,14 +330,14 @@ export class Game0Basics {
   notif_message_warning(notif: Notif) {
     if (this.gameAnimationsActive()) {
       var message = this.format_string_recursive(notif.log, notif.args);
-      this.bga.dialogs.showMessage(_("Warning:") + " " + message, "info");
+      this.bga.dialogs.showMessage(this.getTr(_("Warning: ${message}"), { message }), "info");
     }
   }
 
   notif_message_info(notif: Notif) {
     if (this.gameAnimationsActive()) {
       var message = this.format_string_recursive(notif.log, notif.args);
-      this.bga.dialogs.showMessage(_("Announcement:") + " " + message, "info");
+      this.bga.dialogs.showMessage(this.getTr(_("Announcement: ${message}"), { message }), "info");
     }
   }
 }

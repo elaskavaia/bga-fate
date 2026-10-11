@@ -283,7 +283,7 @@ class Game0Basics {
             if (lognode) {
                 const tsnode = document.createElement("div");
                 tsnode.classList.add("movestamp");
-                tsnode.innerHTML = _("Move #") + move_id;
+                tsnode.innerHTML = this.getTr(_("Move #${move_id}"), { move_id });
                 lognode.appendChild(tsnode);
                 tsnode.setAttribute("data-move-id", String(move_id));
             }
@@ -308,13 +308,13 @@ class Game0Basics {
     notif_message_warning(notif) {
         if (this.gameAnimationsActive()) {
             var message = this.format_string_recursive(notif.log, notif.args);
-            this.bga.dialogs.showMessage(_("Warning:") + " " + message, "info");
+            this.bga.dialogs.showMessage(this.getTr(_("Warning: ${message}"), { message }), "info");
         }
     }
     notif_message_info(notif) {
         if (this.gameAnimationsActive()) {
             var message = this.format_string_recursive(notif.log, notif.args);
-            this.bga.dialogs.showMessage(_("Announcement:") + " " + message, "info");
+            this.bga.dialogs.showMessage(this.getTr(_("Announcement: ${message}"), { message }), "info");
         }
     }
 }
@@ -1917,7 +1917,7 @@ class GameMachine {
         const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
         let subprompt = "";
         if (opInfo.err && opInfo.q !== ERR_SILENT) {
-            subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
+            subprompt = this.game.getTr(_("Error: ${message}"), { message: this.game.getTr(opInfo.err, opInfo) });
         }
         else if (opInfo.data?.reason) {
             subprompt = this.getReasonText(opInfo.data.reason);
@@ -2316,7 +2316,7 @@ class GameMachine {
         if (doneButton) {
             if ((count == 0 && skippable) || count < opInfo.mcount) {
                 doneButton.classList.add(this.game.classButtonDisabled);
-                doneButton.title = _("Cannot use this action because insuffient amount of elements selected");
+                doneButton.title = _("Cannot use this action because insufficient amount of elements selected");
             }
             else if (count > opInfo.count) {
                 doneButton.classList.add(this.game.classButtonDisabled);
@@ -3469,7 +3469,7 @@ class Game extends Game1Tokens {
         const map = {
             trollkin: _("The Trollkin are a savage clan of goblins, brutes, and trolls that roam the forests and valleys."),
             firehorde: _("The Fire Horde emerges from volcanic regions, bringing sprites, elementals, and mighty Jotunns."),
-            dead: _("The Dead rise from marshes and plains – imps, skeletons, and the fearsome Draugr.")
+            dead: _("The Dead rise from marshes and plains: imps, skeletons, and the fearsome Draugr.")
         };
         return map[faction];
     }
@@ -3512,7 +3512,7 @@ class Game extends Game1Tokens {
             "5": _("This brute leader is fearless and collects battle scars as trophies of his invincibility. Naturally, his presence infuses the entire trollkin clan with confidence."),
             "6": _("While the actual Midgaard Serpent encircles the entire world tree, Yggdrasil, nobody really has time to compare the sizes when this beast approaches.")
         };
-        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTokenName(tokenInfo.faction) + " " + _("Legend") + " " + (level === "1" ? "I" : "II"));
+        tokenInfo.tooltip = this.ttSection(_("Faction"), this.getTr(_("${faction} Legend ${level}"), { faction: this.getTokenName(tokenInfo.faction), level: level === "1" ? "I" : "II" }));
         let rows = "";
         // Stats as Level I / Level II
         if (side1 && side2) {

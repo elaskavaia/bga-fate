@@ -43,7 +43,7 @@ const dom = new JSDOM("<!doctype html><html><body><div id='ebd-body'></div></bod
 (global as any).gameui = {
   player_id: 1,
   on_client_state: false,
-  format_string_recursive: (log: string, args: any) => log,
+  format_string_recursive: (log: string, args: any) => log.replace(/\$\{(\w+)\}/g, (m, k) => args?.[k] ?? m),
   addTooltipHtml: () => {},
   removeTooltip: () => {},
   bgaAnimationsActive: () => false,

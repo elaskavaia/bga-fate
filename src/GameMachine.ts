@@ -46,7 +46,7 @@ export class GameMachine {
     const prompt = opInfo.prompt ? this.game.getTr(opInfo.prompt, opInfo) : "";
     let subprompt = "";
     if (opInfo.err && opInfo.q !== ERR_SILENT) {
-      subprompt = _("Error") + ": " + this.game.getTr(opInfo.err, opInfo);
+      subprompt = this.game.getTr(_("Error: ${message}"), { message: this.game.getTr(opInfo.err, opInfo) });
     } else if (opInfo.data?.reason) {
       subprompt = this.getReasonText(opInfo.data.reason);
     }
@@ -497,7 +497,7 @@ export class GameMachine {
     if (doneButton) {
       if ((count == 0 && skippable) || count < opInfo.mcount) {
         doneButton.classList.add(this.game.classButtonDisabled);
-        doneButton.title = _("Cannot use this action because insuffient amount of elements selected");
+        doneButton.title = _("Cannot use this action because insufficient amount of elements selected");
       } else if (count > opInfo.count) {
         doneButton.classList.add(this.game.classButtonDisabled);
         doneButton.title = _("Cannot use this action because superfluous amount of elements selected");
