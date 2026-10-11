@@ -166,11 +166,22 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
     // is left to red (max 3). Excess is the remainder after the sweep, not a parallel claim
     // on it (FORUM.md designer ruling).
 
-    /** BGA #246556: the printed card is +3, the CSV had 1. */
-    public function testSmiterbiterGrantsThreeStrength(): void {
+    private const SMITERBITER = "card_equip_4_21";
+    private const SWEEPING_STRIKE = "card_ability_4_5";
+
+    /** Only 1 Main Weapon (RULES.md:211), so Smiterbiter replaces First Pick. */
+    private function equipSmiterbiter(): string {
         $color = $this->getActivePlayerColor();
         $this->game->tokens->moveToken("card_equip_4_15", "limbo");
-        $this->game->tokens->moveToken("card_equip_4_21", "tableau_$color");
+        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        // calcBaseStrength only runs at setup/turnEnd/upgrade
+        $this->game->getHero($color)->recalcTrackers();
+        return $color;
+    }
+
+    /** BGA #246556: the printed card is +3, the CSV had 1. */
+    public function testSmiterbiterGrantsThreeStrength(): void {
+        $color = $this->equipSmiterbiter();
         $this->game->tokens->moveToken("card_equip_4_25", "tableau_$color");
         $hero = $this->game->getHero($color);
         $hero->recalcTrackers();
@@ -181,11 +192,8 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
     }
 
     public function testSmiterbiterStoresOverkillThenSpendsOnNextAttack(): void {
-        $color = $this->getActivePlayerColor();
-        $cardId = "card_equip_4_21";
-        $this->game->tokens->moveToken($cardId, "tableau_$color");
-        // Smiterbiter grants +3 strength; recalc since calcBaseStrength only runs at setup/turnEnd/upgrade.
-        $this->game->getHero($color)->recalcTrackers();
+        $cardId = self::SMITERBITER;
+        $this->equipSmiterbiter();
 
         $this->game->tokens->moveToken($this->heroId, "hex_7_9");
         $goblin = "monster_goblin_1";
@@ -193,11 +201,12 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $troll = "monster_troll_1";
         $this->game->getMonster($troll)->moveTo("hex_6_9", "");
 
-        // Turn 1 attack - Boldur I(3) + First Pick(1) + Smiterbiter(3) = 7 dice. 4 hits vs goblin (h=2) -> overkill 2.
-        $this->seedRand([5, 5, 5, 5, 1, 1, 1]);
+        // Turn 1 attack - Boldur I(3) + Smiterbiter(3) = 6 dice. 4 hits vs goblin (h=2) -> overkill 2.
+        $this->seedRand([5, 5, 5, 5, 1, 1]);
         $this->respond("actionAttack");
         $this->respond("hex_7_8");
 
+        $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 6 dice");
         $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
         $this->assertEquals(2, $this->countTokens("crystal_red", $cardId), "Smiterbiter should hold 2 reds after overkill 2");
 
@@ -207,7 +216,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->skipIfOp("drawEvent");
 
         // Turn 2 attack — Smiterbiter offers a useCard prompt to spend stored reds.
-        $this->seedRand([5, 5, 5, 5, 1, 1, 1]); // 4 hits = 4 base damage on troll (h=6)
+        $this->seedRand([5, 5, 5, 5, 1, 1]); // 4 hits = 4 base damage on troll (h=6)
         $this->respond("actionAttack");
         $this->respond("hex_6_9");
 
@@ -220,25 +229,19 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertEquals(6, $this->countDamage($troll));
     }
 
-    private const SMITERBITER = "card_equip_4_21";
-    private const SWEEPING_STRIKE = "card_ability_4_5";
-
     /**
      * Boldur at hex_5_9 holding Smiterbiter and Sweeping Strike I, two 2-health goblins:
-     * the attack target W of him, the sweep target NW = next clockwise. 7 dice (Boldur I 3 +
-     * First Pick 1 + Smiterbiter 3); 4 hits + the passive 1 = 5 damage, so the first kill
-     * leaves 3 over.
+     * the attack target W of him, the sweep target NW = next clockwise. 6 dice (Boldur I 3 +
+     * Smiterbiter 3); 4 hits + the passive 1 = 5 damage, so the first kill leaves 3 over.
      */
     private function setupSweepBoard(string $secondMonster = "monster_goblin_2"): string {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $color = $this->equipSmiterbiter();
         $this->game->tokens->moveToken(self::SWEEPING_STRIKE, "tableau_$color");
-        $this->game->getHero($color)->recalcTrackers();
 
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_4_9", "");
         $this->game->getMonster($secondMonster)->moveTo("hex_5_8", "");
-        $this->seedRand([5, 5, 5, 5, 1, 1, 1]); // 4 hits + 1 passive = 5 on a 2-health goblin
+        $this->seedRand([5, 5, 5, 5, 1, 1]); // 4 hits + 1 passive = 5 on a 2-health goblin
         return $color;
     }
 
@@ -259,6 +262,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
 
         $this->respond("actionAttack");
         $this->respond("hex_4_9");
+        $this->assertEmpty($this->game->randQueue, "Strength should consume exactly 6 dice");
         $this->respond(self::SWEEPING_STRIKE);
         $this->confirmCardEffect(); // sweep the 3 leftover into the second goblin
         $this->skipIfOp("useCard"); // nothing left to play on the sweep kill
@@ -320,9 +324,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
      * keeps the whole monster turn out of the player's tableau.
      */
     public function testAMonsterOverkillingBoldurBanksNothing(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
-        $this->game->getHero($color)->recalcTrackers();
+        $this->equipSmiterbiter();
 
         $boldurHex = "hex_7_9";
         $this->game->tokens->moveToken($this->heroId, $boldurHex);
@@ -352,8 +354,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
      * next attack's excess.
      */
     public function testAKillOutsideAnAttackActionDepositsNothing(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $color = $this->equipSmiterbiter();
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
         $goblin = "monster_goblin_1"; // health 2
@@ -380,8 +381,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
      * card damages a hero hard enough during its owner's own attack action.
      */
     public function testKnockingOutAHeroDuringAnAttackBanksNothing(): void {
-        $color = $this->getActivePlayerColor();
-        $this->game->tokens->moveToken(self::SMITERBITER, "tableau_$color");
+        $color = $this->equipSmiterbiter();
         $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
         $this->game->machine->push("endOfAttack", $color, []); // put us inside an attack action
