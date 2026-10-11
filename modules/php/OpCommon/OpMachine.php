@@ -270,17 +270,20 @@ class OpMachine {
         if (!$op) {
             return StateConstants::STATE_MACHINE_HALTED;
         }
-        // Sync active player to the op's owner before dispatch. Without this, a
+        // $this->game->debugLog("starting op " . $op->getType());
+        $state = $op->onEnteringGameState();
+        // Sync active player to the owner of an op that waits for input. Without this, a
         // foreign-owned interactive op (e.g. useCard queued for player B during
         // player A's monster turn) leaves PlayerTurn unable to resolve it →
         // infinite GameDispatch ⇄ PlayerTurn loop.
+        // Not for an op that resolved by itself: a teammate's automatic trigger must not
+        // take the turn or drop the active player's undo with a barrier (BGA #240644).
         $playerId = $op->getPlayerId();
-        if ($playerId !== Game::PLAYER_AUTOMA && $playerId > 0 && $playerId != $this->game->getActivePlayerId()) {
+        if ($state && $playerId !== Game::PLAYER_AUTOMA && $playerId > 0 && $playerId != $this->game->getActivePlayerId()) {
             $this->game->switchActivePlayer($playerId, true);
             $this->game->customUndoSavepoint($playerId, 1);
         }
-        // $this->game->debugLog("starting op " . $op->getType());
-        return $op->onEnteringGameState();
+        return $state;
     }
 
     /** This only runs when state first entered, after that every action has to run personal dispatch */

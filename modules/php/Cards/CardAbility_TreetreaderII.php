@@ -19,11 +19,12 @@ use Bga\Games\Fate\Model\CardGeneric;
 /**
  * Treetreader II (card_ability_2_6): on top of Treetreader I (forest-to-forest move),
  * each time the hero moves into a forest area, heal 1 damage.
+ * Not on a push: "it is not an active movement, just something that happened to you" (FORUM.md:3352).
  */
 class CardAbility_TreetreaderII extends CardGeneric {
     public function onStep(): void {
         $hero = $this->game->getHero($this->getOwner());
-        if (!$hero->isInForest()) {
+        if ($this->op->getDataField("push", false) || !$hero->isInForest()) {
             return;
         }
         $this->queue("?heal(self)");

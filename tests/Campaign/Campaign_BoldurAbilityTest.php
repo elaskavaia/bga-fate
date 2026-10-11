@@ -234,6 +234,7 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
 
     /** BGA #240644: a hero pushed by Wrecking Ball enters the area, so Embla's Raven's Claw ticks on a forest. */
     public function testWreckingBallPushingHeroIntoForestTicksTheirStepQuest(): void {
+        $this->rebuildGame();
         $this->setupGame([4, 3]); // Boldur, Embla
         $this->clearMonstersFromMap();
         $embla = "hero_3";
@@ -252,6 +253,45 @@ class Campaign_BoldurAbilityTest extends CampaignBaseTest {
         $this->assertEquals($forestHex, $this->tokenLocation($embla));
         $this->assertEquals(1, $this->countDamage($embla), "push damage still applies");
         $this->assertEquals(1, $this->countTokens("crystal_red", $ravensClaw), "push into forest counts toward Raven's Claw");
+    }
+
+    /**
+     * BGA #240644: the pushed teammate's step trigger and quest resolve on their own, so they must not
+     * hand the turn to Embla or put an undo barrier on Boldur's Wrecking Ball move.
+     */
+    public function testWreckingBallPushingTeammateKeepsBoldurActiveAndUndoable(): void {
+        $this->rebuildGame();
+        $this->setupGame([4, 3]); // Boldur, Embla
+        $this->clearMonstersFromMap();
+        $boldurPlayerId = (int) $this->game->getActivePlayerId();
+        $this->game->_setCurrentPlayerId($boldurPlayerId);
+        $embla = "hero_3";
+        $ravensClaw = "card_equip_3_22";
+        $this->seedDeck("deck_equip_" . $this->game->getHeroOwner($embla), [$ravensClaw, "card_equip_3_16"]);
+        $this->game->tokens->moveToken("card_ability_4_7", "tableau_" . $this->getActivePlayerColor());
+        $boldurStart = "hex_11_3";
+        $emblaStart = "hex_10_3";
+        $forestHex = "hex_10_4";
+        $this->game->tokens->moveToken($this->heroId, $boldurStart);
+        $this->game->tokens->moveToken($embla, $emblaStart);
+        $this->game->hexMap->invalidateOccupancy();
+        // Re-arm the turn-start barrier on the seeded board
+        $this->game->customUndoSavepoint($boldurPlayerId, 1);
+        $this->game->sendNotifications();
+
+        $this->respond($emblaStart);
+        $this->assertOperation("c_wrecking");
+        $this->respond($forestHex);
+
+        $this->assertEquals($forestHex, $this->tokenLocation($embla));
+        $this->assertEquals(1, $this->countTokens("crystal_red", $ravensClaw), "Embla's quest ticked");
+        $this->assertEquals($boldurPlayerId, (int) $this->game->getActivePlayerId(), "Boldur keeps the turn");
+
+        $this->driver->runStep("action_undo", ["move_id" => 0]);
+
+        $this->assertEquals($boldurStart, $this->tokenLocation($this->heroId), "undo reaches Boldur's turn start");
+        $this->assertEquals($emblaStart, $this->tokenLocation($embla));
+        $this->assertEquals(0, $this->countTokens("crystal_red", $ravensClaw));
     }
 
     public function testAmbiguousHexChoosingAttackRollsDice(): void {

@@ -26,6 +26,11 @@ abstract class CampaignBaseTest extends TestCase {
         if (!is_dir($this->outputDir)) {
             mkdir($this->outputDir, 0777, true);
         }
+        $this->rebuildGame();
+    }
+
+    /** Fresh game: a second setupGame() on the same wrapper keeps the first one's cached player colors */
+    protected function rebuildGame(): void {
         $this->game = new GameWrapper();
         $this->driver = new GameDriver($this->game, $this->outputDir);
         $this->driver->setVerbose(0);

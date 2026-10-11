@@ -387,13 +387,6 @@ class Campaign_UndoTest extends CampaignBaseTest {
 
     // -- helpers ----------------------------------------------------------------
 
-    /** Replace the game with a fresh wrapper + driver, dropping all in-process state. */
-    private function rebuildGame(): void {
-        $this->game = new GameWrapper();
-        $this->driver = new GameDriver($this->game, $this->outputDir);
-        $this->driver->setVerbose(0);
-    }
-
     /**
      * Solo setup modelling the BGA #238872 request shape: the setup request's deferred flush
      * never runs (pending flag and meta die with the PHP process - as on a real table), and the

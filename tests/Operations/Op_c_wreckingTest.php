@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Stubs\GameUT;
+
 /**
  * Op_c_wrecking — Wrecking Ball push phase.
  *
@@ -89,5 +91,24 @@ final class Op_c_wreckingTest extends AbstractOpTestCase {
         $this->createOp("c_wrecking", ["displaced" => "hero_2"]);
         // Hero target hexes exclude mountains/lakes — at hex_5_9 ring, all plains, so all valid.
         $this->assertValidTargetCount(6);
+    }
+
+    /** BGA #240644: the step trigger of a pushed teammate is queued for the teammate, marked as a push. */
+    public function testPushingTeammateQueuesStepTriggerForTheirColor(): void {
+        $this->game = new GameUT();
+        $this->game->initWithHeros([1, 2]);
+        $this->game->clearMachine();
+        $teammate = $this->game->getHeroOwner("hero_2");
+        $this->assertNotEquals($this->owner, $teammate);
+        $this->game->tokens->moveToken("hero_1", $this->heroHex);
+        $this->game->tokens->moveToken("hero_2", $this->heroHex);
+        $this->createOp("c_wrecking", ["displaced" => "hero_2"]);
+
+        $this->call_resolve("hex_4_9");
+
+        $teammateTriggers = array_filter($this->game->machine->getAllOperations($teammate), fn($o) => $o["type"] === "trigger(TStep)");
+        $this->assertCount(1, $teammateTriggers);
+        $this->assertTrue(json_decode(reset($teammateTriggers)["data"], true)["push"] ?? false, "trigger marked as a push");
+        $this->assertNotContains("trigger(TStep)", array_column($this->game->machine->getAllOperations($this->owner), "type"));
     }
 }

@@ -629,6 +629,27 @@ class Campaign_AlvaAbilityTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($this->heroId), "forest-entry passive still heals with the use spent");
     }
 
+    /** BGA #240644: a push "is not an active movement" (FORUM.md:3352), so neither Treetreader II nor Alva Hero II reacts. */
+    public function testPushIntoForestNeitherHealsNorGivesMana(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_ability_2_6", "tableau_$color", 0);
+        $this->game->tokens->moveToken("card_hero_2_1", "limbo");
+        $this->game->tokens->moveToken("card_hero_2_2", "tableau_$color");
+        $this->game->effect_moveCrystals("supply_red", "red", 2, $this->heroId, ["message" => ""]);
+        $manaBefore = $this->countTokens("crystal_green", self::HAIL_I);
+        $forestHex = "hex_10_4";
+        $this->game->tokens->moveToken($this->heroId, "hex_10_3"); // push dir leads to the forest
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_10_2", "");
+
+        $this->game->machine->push("monsterDiePush", $color);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals($forestHex, $this->tokenLocation($this->heroId));
+        $this->assertEquals(2, $this->countDamage($this->heroId), "Treetreader II does not heal on a push");
+        $this->assertEquals($manaBefore, $this->countTokens("crystal_green", self::HAIL_I), "Alva Hero II gains no mana on a push");
+        $this->assertNotContains("gainMana", array_column($this->game->machine->getAllOperations($color), "type"), "no mana choice pending");
+    }
+
     /** Harness has a sticky currentPlayerId; sync it to active so the action targets the right player. */
     private function syncCurrentPlayerToActive(): void {
         $this->game->_setCurrentPlayerId((int) $this->game->getActivePlayerId());

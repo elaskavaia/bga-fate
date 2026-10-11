@@ -267,11 +267,14 @@ abstract class Operation {
         $this->queue("trigger({$event->value})", $owner, $data);
     }
 
-    /** A pushed hero enters the area (TStep) but makes no move action, so no TMove (BGA #240644) */
+    /**
+     * A pushed hero enters the area (TStep) but makes no move action, so no TMove (BGA #240644).
+     * "push" lets "you move" abilities skip it: a push "is not an active movement" (FORUM.md:3352).
+     */
     function pushCharacter(Character $character, string $hex, string $message, array $args = []): void {
         $character->moveTo($hex, $message, $args);
         if ($character instanceof Hero) {
-            $this->queueTrigger(Trigger::Step, $character->getOwner());
+            $this->queueTrigger(Trigger::Step, $character->getOwner(), ["push" => true]);
         }
     }
 

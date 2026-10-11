@@ -73,6 +73,16 @@ class Campaign_TwoPlayerTurnTest extends CampaignBaseTest {
         );
     }
 
+    /** BGA #240644: an op of the non-active player that resolves by itself does not take the turn. */
+    public function testAutomaticOpForNonActivePlayerKeepsActivePlayer(): void {
+        $this->game->machine->push("trigger(TStep)", $this->color2);
+
+        $this->game->machine->dispatchOne();
+
+        $this->assertEquals($this->color1, $this->getActiveOwner());
+        $this->assertNotContains("trigger(TStep)", array_column($this->game->machine->getAllOperations($this->color2), "type"));
+    }
+
     public function testEndOfPlayer2TurnHandsControlBackToPlayer1(): void {
         // ── Player 1's turn ─────────────────────────────────────────────────
         $this->assertEquals(
