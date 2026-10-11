@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-11 (v261011-1836)
+
+- Pick main actions from the player board; action slots have full tooltips
+- More compact action bar: Complete Quest only shows when valid
+- Card reference is now one section with filters and search
+- Move numbers in the game log
+
 ## 2026-08-21 (v260821-1803)
 
 - Fixed Undo answering "nothing to undo" on the first turn of a solo game (#238872)
