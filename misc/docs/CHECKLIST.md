@@ -14,7 +14,7 @@
 [x] When giving their turn to a player, you give them some extra time with the giveExtraTime() function
 [x] Game progression is implemented (getGameProgression() in php)
 [x] Zombie turn is implemented (zombieTurn() in php). For more details about how the Zombie code should work and be tested, see [[Zombie Mode|Zombie mode]].
-[  ] You have defined and implemented some meaningful statistics for your game (i.e. total points, point from source A, B, C...)
+[x] You have defined and implemented some meaningful statistics for your game (i.e. total points, point from source A, B, C...)
 [x] Game has meaningful notification messages (but don't overkill it, more user logs will slow down the loading)
 [x] You implemented tiebreaking (using aux score field) and updated tiebreaker description in meta-data
 [x] Database: make sure you do not programmatically manage transactions or call queries that change database schema or even TRUNCATE (queries that would cause implicit commit) during normal game opearations

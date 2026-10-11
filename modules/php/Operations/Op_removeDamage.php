@@ -228,6 +228,9 @@ class Op_removeDamage extends CountableOperation {
             return;
         }
         $isHero = str_starts_with($tokenId, "hero_");
+        if ($isHero) {
+            $this->game->incPlayerStat($this->getOwner(), "game_damage_healed", $amount);
+        }
         $message = $isHero
             ? clienttranslate('${char_name} heals ${count} [DAMAGE] from ${token_name}')
             : clienttranslate('${char_name} repairs ${count} [DAMAGE] from ${token_name}');

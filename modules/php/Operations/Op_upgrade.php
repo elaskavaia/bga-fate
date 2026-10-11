@@ -121,8 +121,10 @@ class Op_upgrade extends Operation {
 
         $targetLoc = $this->game->tokens->getTokenLocation($target);
         if (str_starts_with($targetLoc, "deck_ability_")) {
+            $this->game->incPlayerStat($owner, "game_abilities_gained");
             $this->resolveGain($target, $owner);
         } else {
+            $this->game->incPlayerStat($owner, str_starts_with($target, "card_hero") ? "game_hero_upgraded" : "game_abilities_upgraded");
             $this->resolveImprove($target, $owner);
         }
         // Generate after upgrading so a gained/improved card produces its mana this same turn.

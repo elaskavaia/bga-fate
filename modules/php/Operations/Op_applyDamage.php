@@ -77,6 +77,7 @@ class Op_applyDamage extends Operation {
 
         // 3. "deals N damage" notification.
         if ($defender instanceof Hero) {
+            $this->game->incPlayerStat($defender->getOwner(), "game_damage_taken", $amount);
             $this->game->notifyMessage(clienttranslate('${char_name} takes ${amount} [DAMAGE] (${totalDamage}/${health})'), [
                 "char_name" => $defenderId,
                 "amount" => $amount,
@@ -84,6 +85,9 @@ class Op_applyDamage extends Operation {
                 "health" => $defender->getEffectiveHealth(),
             ]);
         } else {
+            if (!($defender instanceof GoldVein)) {
+                $this->game->incPlayerStat($this->game->getHeroOwner($attackerId), "game_damage_dealt", $amount);
+            }
             $this->game->notifyMessage(
                 clienttranslate('${char_name2} deals ${amount} [DAMAGE] to ${char_name} (${totalDamage}/${health})'),
                 [

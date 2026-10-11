@@ -1,0 +1,136 @@
+{
+  // Never change or reuse an id once released: BGA keys stat history by id. Ids are grouped by tens, add new ones in the gaps.
+  // game_* stats auto-initialise to 0 (see Game::getDefaultStatValue).
+  // game_monsters_killed exists in both sections: the player inc also bumps the table total.
+  "table": {
+    "game_heroes_won": {
+      "id": 10,
+      "name": "Heroes won",
+      "type": "bool"
+    },
+    "game_rune_stone_position": {
+      "id": 11,
+      "name": "Rune Stone position",
+      "type": "int"
+    },
+    "game_houses_remaining": {
+      "id": 12,
+      "name": "Town pieces left standing",
+      "type": "int"
+    },
+    "game_monsters_reached_grimheim": {
+      "id": 21,
+      "name": "Monsters that reached Grimheim",
+      "type": "int"
+    },
+    "game_monsters_killed": {
+      "id": 20,
+      "name": "Monsters killed",
+      "type": "int"
+    }
+  },
+
+  "player": {
+    // id is "game_" + action operation type, see AbsOp_action::spendTurnSlot
+    "game_actionMove": {
+      "id": 10,
+      "name": "Move actions",
+      "type": "int"
+    },
+    "game_actionAttack": {
+      "id": 11,
+      "name": "Attack actions",
+      "type": "int"
+    },
+    "game_actionPrepare": {
+      "id": 12,
+      "name": "Prepare actions",
+      "type": "int"
+    },
+    "game_actionFocus": {
+      "id": 13,
+      "name": "Focus actions",
+      "type": "int"
+    },
+    "game_actionMend": {
+      "id": 14,
+      "name": "Mend actions",
+      "type": "int"
+    },
+    "game_actionPractice": {
+      "id": 15,
+      "name": "Practice actions",
+      "type": "int"
+    },
+    "game_monsters_killed": {
+      "id": 20,
+      "name": "Monsters killed",
+      "type": "int"
+    },
+    "game_legends_killed": {
+      "id": 21,
+      "name": "Legends killed",
+      "type": "int"
+    },
+    "game_damage_dealt": {
+      "id": 22,
+      "name": "Damage dealt",
+      "type": "int"
+    },
+    "game_damage_taken": {
+      "id": 23,
+      "name": "Damage taken",
+      "type": "int"
+    },
+    "game_damage_healed": {
+      "id": 24,
+      "name": "Damage healed",
+      "type": "int"
+    },
+    "game_knockouts": {
+      "id": 25,
+      "name": "Times knocked out",
+      "type": "int"
+    },
+    "game_moves": {
+      "id": 30,
+      "name": "Total moves",
+      "type": "int"
+    },
+    "game_grimheim_visits": {
+      "id": 31,
+      "name": "Visits to Grimheim",
+      "type": "int"
+    },
+    "game_xp_gained": {
+      "id": 40,
+      "name": "XP gained",
+      "type": "int"
+    },
+    "game_quests_completed": {
+      "id": 41,
+      "name": "Quests completed",
+      "type": "int"
+    },
+    "game_hero_upgraded": {
+      "id": 42,
+      "name": "Hero upgraded to level II",
+      "type": "int"
+    },
+    "game_abilities_gained": {
+      "id": 43,
+      "name": "Abilities gained",
+      "type": "int"
+    },
+    "game_abilities_upgraded": {
+      "id": 44,
+      "name": "Abilities upgraded",
+      "type": "int"
+    },
+    "game_events_played": {
+      "id": 45,
+      "name": "Event cards played",
+      "type": "int"
+    }
+  }
+}

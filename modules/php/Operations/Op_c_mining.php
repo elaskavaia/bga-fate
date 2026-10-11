@@ -46,11 +46,7 @@ class Op_c_mining extends Operation {
     }
 
     function resolve(): void {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $this->game->effect_moveCrystals($heroId, "yellow", $this->getGoldAmount(), "tableau_$owner", [
-            "message" => clienttranslate('${char_name} gains ${count} [XP]'),
-        ]);
+        $this->game->getHero($this->getOwner())->gainXp($this->getGoldAmount());
     }
 
     public function isTrivial(): bool {

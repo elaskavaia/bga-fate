@@ -96,6 +96,12 @@ class Monster extends Character {
         // Remove monster from map
         $this->moveTo("supply_monster", clienttranslate('${token_name2} kills ${token_name}'), ["token_name2" => $attackerId]);
 
+        $killer = $this->game->getHeroOwner($attackerId);
+        $this->game->incPlayerStat($killer, "game_monsters_killed", 1, true);
+        if (str_contains($this->id, "legend")) {
+            $this->game->incPlayerStat($killer, "game_legends_killed");
+        }
+
         if (!$noXp) {
             $hero = $this->game->getHeroById($attackerId);
             $hero->gainXp($xp);

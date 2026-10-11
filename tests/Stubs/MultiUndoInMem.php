@@ -91,6 +91,8 @@ class MultiUndoInMem extends DbMultiUndo {
         return [
             "token" => $this->game->tokens->toJson(),
             "machine" => $this->game->machine->db->toJson(),
+            // one serialize call keeps playerStats linked to its tableStats after restore
+            "stats" => serialize([$this->game->tableStats, $this->game->playerStats]),
         ];
     }
 
@@ -102,6 +104,9 @@ class MultiUndoInMem extends DbMultiUndo {
         $this->game->tokens->deleteAll();
         $this->game->tokens->fromJson($saved["token"] ?? []);
         $this->game->machine->db->fromJson($saved["machine"] ?? []);
+        if (isset($saved["stats"])) {
+            [$this->game->tableStats, $this->game->playerStats] = unserialize($saved["stats"]);
+        }
         $this->game->hexMap->invalidateOccupancy();
     }
 

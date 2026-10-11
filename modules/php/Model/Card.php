@@ -280,6 +280,7 @@ class Card {
 
         if ($this->isEvent()) {
             $hero->discardEventCard($cardId);
+            $this->game->incPlayerStat($this->getOwner(), "game_events_played");
         }
     }
 

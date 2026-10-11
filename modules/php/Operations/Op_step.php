@@ -34,6 +34,11 @@ class Op_step extends Operation {
         $this->game->systemAssert("ERR:step:missingHex", $hex !== "");
         $isFinal = (bool) $this->getDataField("final", false);
         $hero = $this->game->getHero($this->getOwner());
+        $this->game->incPlayerStat($this->getOwner(), "game_moves");
+        // Entering Grimheim always ends the move, but in step mode that last hop is not "final"
+        if (!$this->game->hexMap->isInGrimheim((string) $hero->getHex()) && $this->game->hexMap->isInGrimheim($hex)) {
+            $this->game->incPlayerStat($this->getOwner(), "game_grimheim_visits");
+        }
         if ($isFinal) {
             $hero->moveTo($hex);
             // Emit the most specific trigger on the final step; ActionMove chains through Move

@@ -28,6 +28,7 @@ abstract class AbsOp_action extends Operation {
     protected function spendTurnSlot(): void {
         if ($this->getDataField("spend", 0)) {
             $this->game->getHero($this->getOwner())->placeActionMarker($this->getType());
+            $this->game->incPlayerStat($this->getOwner(), "game_" . $this->getType());
         }
     }
 }

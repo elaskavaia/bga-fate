@@ -26,7 +26,7 @@ use Override;
  *   which fires onCardEnter (e.g. Black Arrows seeds 3 arrows, Tiara seeds 6 gold).
  * - If deck is empty, auto-skips silently.
  *
- * Used by: quest completion, upgrade flow, debug_equip.
+ * Used by: quest completion, debug_equip.
  */
 class Op_gainEquip extends Operation {
     private function getTargetCard(): ?string {
@@ -108,6 +108,8 @@ class Op_gainEquip extends Operation {
         $this->dbSetTokenLocation($cardId, "tableau_$owner", 0, clienttranslate('${char_name} gains ${token_name}'), [
             "char_name" => $heroId,
         ]);
+        // gainEquip is only reached from quest rewards
+        $this->game->incPlayerStat($owner, "game_quests_completed");
 
         // Reveal the new top of the deck so the client can render it.
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$owner");

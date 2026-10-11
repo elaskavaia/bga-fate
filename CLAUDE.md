@@ -79,6 +79,10 @@ Game elements (tokens, cards, operations) are defined in CSV files in `misc/` an
 
 When editing a CSV file prefer the `awk` tool — otherwise it's easy to misplace columns.
 
+### Statistics
+
+Stats are defined in `stats.jsonc`. Once released, a stat `id` must never change or be reused (BGA keys history by id): add new stats with new ids in the gap of their group, and leave removed ids unused.
+
 ## After completing a task
 
 - Check [misc/docs/PLAN.md](misc/docs/PLAN.md) and mark completed items with `[x]`

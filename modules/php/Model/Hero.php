@@ -358,6 +358,7 @@ class Hero extends Character {
         if ($amount <= 0) {
             return;
         }
+        $this->game->incPlayerStat($this->owner, "game_xp_gained", $amount);
         $this->moveCrystals("yellow", $amount, "tableau_{$this->owner}", [
             "message" => $message == "*" ? clienttranslate('${char_name} gains ${count} [XP]') : $message,
         ]);
@@ -385,6 +386,7 @@ class Hero extends Character {
             $startHex,
             clienttranslate('${char_name} is knocked out and carried back to Grimheim. By their mother. She is not happy.')
         );
+        $this->game->incPlayerStat($this->owner, "game_knockouts");
 
         // "Some villagers panic and flee, leaving their houses undefended"
         $this->game->effect_destroyHouses(2, $this->id, clienttranslate('Villagers panic and flee; ${token_name} is left undefended!'));

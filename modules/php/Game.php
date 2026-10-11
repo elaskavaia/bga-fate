@@ -303,7 +303,11 @@ class Game extends Base {
         return $wellLoc !== "hex_9_9";
     }
 
+    /** Can run twice in one game (knockout destroying the Well, then end of monster turn), so only set stats here. */
     function handleEndOfGame(): void {
+        $this->tableStats->set("game_heroes_won", $this->isHeroesWin());
+        $this->tableStats->set("game_rune_stone_position", (int) $this->tokens->getTokenState("rune_stone"));
+        $this->tableStats->set("game_houses_remaining", $this->getHousesRemainingCount());
         $msg = $this->getEndBannerMessage();
         if ($this->isHeroesWin()) {
             $this->notify->all("message", $msg, []);
@@ -321,6 +325,15 @@ class Game extends Base {
         return $this->isHeroesWin()
             ? clienttranslate("The time track has reached the end. Freyja returns! Heroes win!")
             : clienttranslate("The Heroes have failed. The Monsters win!");
+    }
+
+    /** Colors with no player row (monsters, orphan heroes in unit tests) are ignored. */
+    function incPlayerStat(string $color, string $stat, int $inc = 1, bool $updateTableStat = false): void {
+        $playerId = $this->custom_getPlayerIdByColor($color);
+        if ($inc === 0 || $playerId === 0) {
+            return;
+        }
+        $this->playerStats->inc($stat, $inc, $playerId, $updateTableStat);
     }
 
     function getUserPreference(int $player_id, int $code): int {
@@ -663,6 +676,7 @@ class Game extends Base {
     function effect_monsterEntersGrimheim(string $monsterId): void {
         $isLegend = str_contains($monsterId, "legend");
         $destroyCount = $isLegend ? 3 : 1;
+        $this->tableStats->inc("game_monsters_reached_grimheim", 1);
         $this->effect_destroyHouses($destroyCount, $monsterId);
         // Crystals are parented to the monster token, so they would ride into the supply and
         // come back on the next spawn - the kill path sweeps them in Monster::finalizeDamage.
@@ -844,21 +858,6 @@ class Game extends Base {
         $generic = "Bga\\Games\\Fate\\Model\\CardGeneric";
         $this->systemAssert("ERR:instantiateCard:noGeneric:$generic", class_exists($generic));
         return new $generic($this, $cardOrId, $op);
-    }
-
-    function getEndScores(): array {
-        $endScores = [];
-        $players = $this->loadPlayersBasicInfos();
-        $vp_stats = ["game_vp_tags", "game_vp_sets", "game_vp_space", "game_vp_insp", "game_vp_caravan", "game_vp_guilds"];
-
-        foreach ($players as $player_id => $player) {
-            foreach ($vp_stats as $stat) {
-                $endScores[$player_id][$stat] = $this->playerStats->get($stat, $player_id);
-            }
-            $endScores[$player_id]["total"] = $this->playerStats->get("game_vp_total", $player_id);
-        }
-
-        return $endScores;
     }
 
     /**

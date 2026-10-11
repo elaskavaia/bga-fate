@@ -31,12 +31,7 @@ use Bga\Games\Fate\OpCommon\CountableOperation;
  */
 class Op_gainXp extends CountableOperation {
     function resolve(): void {
-        $owner = $this->getOwner();
-        $heroId = $this->game->getHeroTokenId($owner);
-        $amount = (int) $this->getCount();
-        $this->game->effect_moveCrystals($heroId, "yellow", $amount, "tableau_$owner", [
-            "message" => clienttranslate('${char_name} gains ${count} [XP]'),
-        ]);
+        $this->game->getHero($this->getOwner())->gainXp((int) $this->getCount());
     }
 
     public function isTrivial(): bool {
