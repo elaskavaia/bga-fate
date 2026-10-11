@@ -39,6 +39,7 @@ See [misc/docs/DESIGN.md](misc/docs/DESIGN.md) for architecture overview, token/
 - `npm run test -- tests/<TestFile>.php` - Run a single test file
 - `npm run test -- --filter testMethodName tests/<TestFile>.php` - Run a single test method
 - Note: Tests require APP_GAMEMODULE_PATH environment variable pointing to bga-sharedcode repository (but it automatically set if you run via npm)
+- `npm run tests:fuzz` - Seeded zombie fuzz test (`#[Group("fuzz")]`, excluded from `npm run tests`); plays whole games with random valid moves
 - `npm run tests:cov` - Run PHPUnit tests with code coverage report (requires Xdebug)
 - `npm run jstests` - Run TypeScript unit tests (mocha + chai, test files in src/tests/*.spec.ts)
 - `npm run play` - Run simulated game to generate web page (html), see [misc/docs/HARNESS.md](misc/docs/HARNESS.md) for usage details.

@@ -297,6 +297,16 @@ class GameDriver {
         $this->emitGameStateChange();
     }
 
+    public function runZombie(int $playerId): void {
+        $state = $this->states[$this->game->gamestate->getCurrentMainStateId()];
+        $next = $state->zombie($playerId);
+        if ($next !== null) {
+            $this->game->gamestate->jumpToState($this->getStateId($next));
+        }
+        $this->runDispatchLoop();
+        $this->emitGameStateChange();
+    }
+
     public function runSteps(array $steps): void {
         $this->debugLog("Loading " . count($steps) . " steps");
         foreach ($steps as $i => $step) {
