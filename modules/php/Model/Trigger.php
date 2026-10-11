@@ -60,7 +60,7 @@ enum Trigger: string {
         return match ($this) {
             self::ActionAttack => self::Roll,
             self::ActionMove => self::Move,
-            self::Move => self::Step, // Move is a specialization of Step — the final step
+            // Not Move => Step: step mode closes with Move after its last hop already fired Step (BGA #240884)
             default => null,
         };
     }

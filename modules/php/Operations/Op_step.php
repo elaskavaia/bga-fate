@@ -24,9 +24,9 @@ use Bga\Games\Fate\OpCommon\Operation;
  *
  * Data:
  * - hex: destination hex (required)
- * - final: true for the last step of a move (emits default log message and the
- *   caller-chosen trigger — Move or ActionMove); false for intermediate steps
- *   (silent moveTo, Step trigger)
+ * - final: true for the last step of a move (emits default log message and, after
+ *   Step, the caller-chosen trigger - Move or ActionMove); false for intermediate
+ *   steps (silent moveTo, Step trigger only)
  */
 class Op_step extends Operation {
     function resolve(): void {
@@ -41,14 +41,14 @@ class Op_step extends Operation {
         }
         if ($isFinal) {
             $hero->moveTo($hex);
-            // Emit the most specific trigger on the final step; ActionMove chains through Move
-            $trigger = $this->getReason() == "Op_actionMove" ? Trigger::ActionMove : Trigger::Move;
         } else {
             $hero->moveTo($hex, ""); // suppressed notif
-            $trigger = Trigger::Step;
         }
 
         $this->queue("encounter", $this->getOwner(), ["hex" => $hex]);
-        $this->queueTrigger($trigger);
+        $this->queueTrigger(Trigger::Step);
+        if ($isFinal) {
+            $this->queueTrigger($this->getReason() == "Op_actionMove" ? Trigger::ActionMove : Trigger::Move);
+        }
     }
 }

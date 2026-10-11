@@ -360,6 +360,60 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertEquals($nextCard, $newTop["key"], "Healing Potion should surface as the new deck-top");
     }
 
+    /** Raven's Claw on the deck top, hero on hex_9_1; returns the 3-forest path to hex_12_1. */
+    private function setupRavensClawForestPath(): array {
+        $color = $this->getActivePlayerColor();
+        $this->seedDeck("deck_equip_$color", ["card_equip_3_22", "card_equip_3_16"]);
+        $this->game->tokens->moveToken($this->heroId, "hex_9_1");
+        $path = $this->game->hexMap->getPath("hex_9_1", "hex_12_1", $this->game->getHero($color));
+        $this->assertCount(3, $path);
+        foreach ($path as $hex) {
+            $this->assertEquals("forest", $this->game->hexMap->getHexTerrain($hex), $hex);
+        }
+        return $path;
+    }
+
+    /** BGA #240884: step mode closes with ActionMove after the last hop fired TStep; the last forest counts once. */
+    public function testThreeForestStepsCountOncePerArea(): void {
+        $this->setupRavensClawForestPath();
+        $this->game->machine->push("move", $this->getActivePlayerColor(), [
+            "target" => "hex_12_1",
+            "count" => 3,
+            "reason" => "Op_actionMove",
+        ]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("hex_12_1", $this->tokenLocation($this->heroId));
+        $this->assertEquals(3, $this->countTokens("crystal_red", "card_equip_3_22"));
+    }
+
+    /** BGA #240884: "End Move" fires the closing trigger without re-counting the area the hero stands on. */
+    public function testRavensClawEndMoveCountsEachForestOnce(): void {
+        $path = $this->setupRavensClawForestPath();
+        $this->game->machine->push("move", $this->getActivePlayerColor(), ["count" => 3, "reason" => "Op_actionMove"]);
+        $this->game->machine->dispatchAll();
+        $this->respond($path[0]);
+        $this->respond($path[1]);
+        $this->respond("endOfMove");
+
+        $this->assertEquals($path[1], $this->tokenLocation($this->heroId));
+        $this->assertEquals(2, $this->countTokens("crystal_red", "card_equip_3_22"));
+    }
+
+    /** BGA #240884: a filtered move stays one-click; its final step still counts the last forest once. */
+    public function testRavensClawOneClickMoveCountsEachForestOnce(): void {
+        $this->setupRavensClawForestPath();
+        $this->game->machine->push("move(forest)", $this->getActivePlayerColor(), [
+            "target" => "hex_12_1",
+            "count" => 3,
+            "reason" => "Op_actionMove",
+        ]);
+        $this->game->machine->dispatchAll();
+
+        $this->assertEquals("hex_12_1", $this->tokenLocation($this->heroId));
+        $this->assertEquals(3, $this->countTokens("crystal_red", "card_equip_3_22"));
+    }
+
     /**
      * Tailored Boots (card_equip_3_18): quest_on= (empty — player-initiated),
      * quest_r=in(Grimheim):2spendXp:gainEquip.

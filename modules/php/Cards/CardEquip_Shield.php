@@ -34,7 +34,7 @@ class CardEquip_Shield extends CardGeneric {
     public function triggerQuest(Trigger $event): void {
         $chain = $event->chain();
 
-        // Branch A — ActionMove/Move chain through Step, so any hero hex entry triggers this.
+        // Branch A - Op_step fires Step on every hop, so any hero hex entry triggers this.
         if (in_array(Trigger::Step, $chain, true)) {
             $heroHex = $this->game->hexMap->getCharacterHex($this->game->getHeroTokenId($this->owner));
             if ($heroHex !== null && $this->game->hexMap->getHexNamedLocation($heroHex) === "OgreValley") {
