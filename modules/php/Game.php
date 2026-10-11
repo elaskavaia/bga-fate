@@ -1001,7 +1001,7 @@ class Game extends Base {
     }
 
     /**
-     * Reaper Swing harness setup. Places primary monster + a secondary adjacent to primary,
+     * Reaper Swing harness setup. Places primary monster + two secondaries adjacent to the hero,
      * rolls 4 dice (all hits) onto display_battle, sets marker_attack on primary, queues a
      * pending Op_resolveHits, then pushes Op_c_reaper. This mimics the mid-attack state
      * where Op_roll has fired the TActionAttack trigger and is about to resolveHits.
@@ -1015,10 +1015,10 @@ class Game extends Base {
         $this->tokens->dbSetTokenLocation($heroId, $heroHex, 0, "");
 
         // Primary defender adjacent to hero, plus two candidate secondaries adjacent
-        // to primary so the player gets a real choice (single-target auto-resolves).
+        // to hero so the player gets a real choice (single-target auto-resolves).
         $primaryHex = "hex_7_8";
         $this->tokens->dbSetTokenLocation("monster_brute_1", $primaryHex, 0, "");
-        $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_6_8", 0, "");
+        $this->tokens->dbSetTokenLocation("monster_brute_2", "hex_7_10", 0, "");
         $this->tokens->dbSetTokenLocation("monster_goblin_1", "hex_8_8", 0, "");
 
         // Place 4 hit-side dice on display_battle so resolveHits has a 4-hit budget.

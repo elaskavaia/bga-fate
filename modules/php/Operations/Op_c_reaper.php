@@ -20,7 +20,8 @@ use Bga\Games\Fate\OpCommon\Operation;
 use function Bga\Games\Fate\getPart;
 
 /**
- * c_reaper: Reaper Swing — divide attack damage between primary target and an adjacent monster.
+ * c_reaper: Reaper Swing - divide attack damage between primary target and another monster
+ * adjacent to the hero (the primary must be adjacent too).
  *
  * Rules (RULES.md): "Cards that refer to 'this attack action' may be played after the dice are
  * rolled to alter the outcome."
@@ -45,10 +46,17 @@ class Op_c_reaper extends Operation {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not during an attack")];
         }
 
-        // Any monster on a hex adjacent to the primary target hex (may be out of the
-        // hero's reach — same convention as Op_c_nailed).
+        // Designer ruling (FORUM.md "Reaper Swing: adjacent to what?"): both targets must be adjacent to Embla
+        $heroAdjacentHexes = $this->game->hexMap->getAdjacentHexes($this->game->getHero($this->getOwner())->getHex());
+        if (!in_array($primaryHex, $heroAdjacentHexes)) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Target is not adjacent")];
+        }
+
         $targets = [];
-        foreach ($this->game->hexMap->getAdjacentHexes($primaryHex) as $hex) {
+        foreach ($heroAdjacentHexes as $hex) {
+            if ($hex === $primaryHex) {
+                continue;
+            }
             $charId = $this->game->hexMap->getCharacterOnHex($hex);
             if ($charId !== null && getPart($charId, 0) === "monster") {
                 $targets[$hex] = ["q" => Material::RET_OK];

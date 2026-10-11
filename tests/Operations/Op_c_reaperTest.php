@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 final class Op_c_reaperTest extends AbstractOpTestCase {
+    protected function setUp(): void {
+        parent::setUp();
+        // Adjacent to both hex_7_9 and hex_6_9, the primary/secondary pair used below
+        $this->game->tokens->moveToken("hero_1", "hex_6_10");
+    }
+
     /** Place marker_attack on a hex to simulate "attack in progress". */
     private function setAttackMarker(string $hex): void {
         $this->game->tokens->moveToken("marker_attack", $hex, 0);
@@ -32,8 +38,7 @@ final class Op_c_reaperTest extends AbstractOpTestCase {
         $this->assertNoValidTargets();
     }
 
-    public function testListsMonsterAdjacentToPrimary(): void {
-        // Primary at hex_7_9, secondary candidate at hex_6_9 (adjacent to primary)
+    public function testListsMonsterAdjacentToHero(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_7_9"); // primary defender
         $this->game->tokens->moveToken("monster_goblin_2", "hex_6_9"); // secondary candidate
         $this->setAttackMarker("hex_7_9");
@@ -51,14 +56,37 @@ final class Op_c_reaperTest extends AbstractOpTestCase {
         $this->assertNotValidTarget("hex_7_9");
     }
 
-    public function testIgnoresHeroAdjacentToPrimary(): void {
-        // Adjacent hex contains a hero, not a monster — should not be a valid target
+    public function testIgnoresOtherHeroAdjacentToHero(): void {
         $this->game->tokens->moveToken("monster_goblin_1", "hex_7_9"); // primary
-        $this->game->tokens->moveToken("hero_1", "hex_6_9"); // hero adjacent to primary
+        $this->game->tokens->moveToken("hero_2", "hex_6_9");
         $this->setAttackMarker("hex_7_9");
         $this->createOp();
 
+        $this->assertEquals("hero_2", $this->game->hexMap->getCharacterOnHex("hex_6_9"));
         $this->assertNotValidTarget("hex_6_9");
+    }
+
+    /** BGA #241160: designer ruling, "both targets need to be adjacent to Embla" (FORUM.md). */
+    public function testSecondaryAdjacentToPrimaryButNotToHeroIsNotOffered(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_7_9");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_7_8"); // primary
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_6_8"); // adjacent to primary only
+        $this->game->tokens->moveToken("monster_goblin_3", "hex_7_10"); // adjacent to hero only
+        $this->setAttackMarker("hex_7_8");
+        $this->createOp();
+
+        $this->assertNotValidTarget("hex_6_8");
+        $this->assertValidTarget("hex_7_10");
+    }
+
+    /** BGA #241160: primary out of the hero's adjacency (e.g. a ranged attack) - no swing. */
+    public function testNotApplicableWhenPrimaryNotAdjacentToHero(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_8_8"); // primary, 2 away from hex_6_10
+        $this->game->tokens->moveToken("monster_goblin_2", "hex_7_9"); // adjacent to both
+        $this->setAttackMarker("hex_8_8");
+        $this->createOp();
+
+        $this->assertNoValidTargets();
     }
 
     // -------------------------------------------------------------------------
