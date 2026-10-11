@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-11 (v261011-2334)
+
+- Added game statistics
+- Tooltips on supply, event deck, trackers and markers
+- Fixed game stalling when a player quits (zombie turns)
+- Action slot labels readable in dark theme
+- All text is now translatable; typo fixes
+
 ## 2026-10-11 (v261011-1836)
 
 - Pick main actions from the player board; action slots have full tooltips
