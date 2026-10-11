@@ -1,4 +1,14 @@
 <?php
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 
 /*
  * From this file, you can edit the various meta-information of your game.

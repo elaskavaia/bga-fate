@@ -1,10 +1,30 @@
 @charset "UTF-8";
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 @keyframes active-pulse {
   0% {
     scale: 1;
@@ -63,6 +83,16 @@
     transform: perspective(40em) rotateY(-180deg);
   }
 }
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 #map_area {
   position: absolute;
   top: 0%;
@@ -136,11 +166,31 @@
 }
 
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .bucket_crystal_green,
 .bucket_crystal_red,
 .bucket_crystal_yellow {
@@ -567,11 +617,31 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .hex > .hero,
 .hex > .monster {
   position: absolute;
@@ -944,11 +1014,31 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .card {
   position: relative;
   height: 200px;
@@ -1414,11 +1504,31 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 #gsupply {
   display: flex;
   flex-direction: row;
@@ -1961,6 +2071,16 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   background-position: 100% 95%;
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .board_layout_controls {
   position: absolute;
   top: 100%;
@@ -2003,11 +2123,31 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
 }
 
 /**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
+/**
  * fate.scss
  *
  * Fate stylesheet
  */
 /********* You can start writing your CSS below this line: **********/
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .hand_wrapper {
   position: relative;
 }
@@ -2080,6 +2220,16 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   max-width: 100%;
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 .localsettings_select {
   display: block;
   width: 100%;
@@ -2089,6 +2239,16 @@ html[data-theme=dark] .miniboard .tracker_damage:not([data-state="0"])::after {
   cursor: pointer;
 }
 
+/**
+ *------
+ * BGA framework: Gregory Isabelli & Emmanuel Colin & BoardGameArena
+ * Fate implementation : © Alena Laskavaia <laskava@gmail.com> - aka Victoria_La
+ *
+ * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
+ * See http://en.boardgamearena.com/#!doc/Studio for more information.
+ * -----
+ *
+ */
 /* tooltips */
 .tundra .dijitTooltipContainer,
 .tooltipcontainer {
