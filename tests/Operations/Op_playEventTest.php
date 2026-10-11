@@ -44,7 +44,7 @@ final class Op_playEventTest extends AbstractOpTestCase {
     }
 
     public function testMultipleHandCardsAllTargetable(): void {
-        $second = "card_event_1_30"; // Bjorn "Sewing" — r=1repairCard(all), needs a damaged equipment card
+        $second = "card_event_1_30"; // Bjorn "Sewing" - void unless the hero or an own card is damaged
         $this->putInHand($second);
         $this->game->tokens->moveToken("card_equip_1_15", $this->getPlayersTableau());
         $this->game->effect_moveCrystals("hero_1", "red", 1, "card_equip_1_15", ["message" => ""]);

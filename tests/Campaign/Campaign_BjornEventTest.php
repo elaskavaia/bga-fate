@@ -113,6 +113,28 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($this->heroId));
     }
 
+    /** BGA #242206: hero damage alone makes Sewing playable. */
+    public function testSewingPlayableWhenOnlyHeroDamaged(): void {
+        $sewing = "card_event_1_30_1";
+        $this->seedHand($sewing, $this->getActivePlayerColor());
+        $this->game->effect_moveCrystals($this->heroId, "red", 2, $this->heroId, ["message" => ""]);
+
+        $this->assertValidTarget($sewing);
+        $this->respond($sewing);
+        $this->confirmCardEffect();
+
+        $this->assertEquals(1, $this->countDamage($this->heroId));
+    }
+
+    /** BGA #242206 */
+    public function testSewingNotOfferedWhenNothingDamaged(): void {
+        $sewing = "card_event_1_30_1";
+        $this->seedHand($sewing, $this->getActivePlayerColor());
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+
+        $this->assertNotValidTarget($sewing);
+    }
+
     // --- Seek Shelter (card_event_1_34) ---
 
     public function testSeekShelterMovesHeroToLocation(): void {
