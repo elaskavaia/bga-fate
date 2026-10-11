@@ -60,15 +60,9 @@ class Op_roll extends CountableOperation {
             $monster = $this->game->getMonster($attackerId);
             $monsterHex = $monster->getHex();
             $this->game->systemAssert("ERR:roll:monsterNotOnMap:$attackerId", $monsterHex !== null);
-            $hexesInRange = $this->game->hexMap->getHexesInRange($monsterHex, $monster->getAttackRange());
             $targets = [];
-            foreach ($hexesInRange as $hex) {
-                if ($this->game->hexMap->isInGrimheim($hex)) {
-                    continue;
-                }
-                if ($this->game->hexMap->isOccupiedByCharacterType($hex, "hero") !== null) {
-                    $targets[$hex] = ["q" => Material::RET_OK];
-                }
+            foreach ($this->game->hexMap->getHeroHexesAttackableFrom($monsterHex, $monster->getAttackRange()) as $hex) {
+                $targets[$hex] = ["q" => Material::RET_OK];
             }
             return $targets;
         }

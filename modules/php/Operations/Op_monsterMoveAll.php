@@ -101,11 +101,17 @@ class Op_monsterMoveAll extends Operation {
         // Charge rule C: if monster finished normal move and cannot attack a hero,
         // but would be able to after 1 extra step, it charges to get into attack range.
         // Uses the monster's attack range (Fire Horde 2, Surt II 3), not just adjacency.
+        // A step into Grimheim removes the monster, so it never enables an attack.
         if (!$charge) {
+            $hexMap = $this->game->hexMap;
             $range = $this->game->getMonster($monsterId)->getAttackRange();
-            if (!$this->game->hexMap->isCharacterTypeInRange($currentHex, $range, "hero")) {
-                $nextHex = $this->game->hexMap->getMonsterNextHex($currentHex);
-                if ($nextHex !== null && $this->game->hexMap->isCharacterTypeInRange($nextHex, $range, "hero")) {
+            if (empty($hexMap->getHeroHexesAttackableFrom($currentHex, $range))) {
+                $nextHex = $hexMap->getMonsterNextHex($currentHex);
+                if (
+                    $nextHex !== null &&
+                    !$hexMap->isInGrimheim($nextHex) &&
+                    !empty($hexMap->getHeroHexesAttackableFrom($nextHex, $range))
+                ) {
                     $this->moveMonsterOneStep($monsterId, $currentHex, clienttranslate('${token_name} charges toward the nearest hero!'));
                 }
             }

@@ -274,6 +274,28 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals("hex_13_7", $loc, "Fire Horde already within range 2 should not take an unnecessary charge step");
     }
 
+    /** BGA #240669: a hero inside Grimheim cannot be attacked from outside, so it does not trigger rule C. */
+    public function testGoblinDoesNotChargeTowardHeroInsideGrimheim(): void {
+        // Path hex_14_7 -> hex_13_7 -> hex_12_8 -> hex_11_8 (adjacent to Grimheim hex_10_8)
+        $this->game->tokens->moveToken("hero_1", "hex_10_8");
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_14_7");
+
+        $this->call_resolve();
+
+        $this->assertEquals("hex_12_8", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+    }
+
+    /** BGA #240669: entering Grimheim removes the monster, so charging in is never "can attack by charging". */
+    public function testMonsterDoesNotChargeIntoGrimheimTowardHeroOutside(): void {
+        // Imp stops on hex_11_8; hero on hex_10_7 touches Grimheim hex_10_8 but not the imp
+        $this->game->tokens->moveToken("hero_1", "hex_10_7");
+        $this->game->tokens->moveToken("monster_imp_1", "hex_12_8");
+
+        $this->call_resolve();
+
+        $this->assertEquals("hex_11_8", $this->game->tokens->getTokenLocation("monster_imp_1"));
+    }
+
     // -------------------------------------------------------------------------
     // Stun (stunmarker — Suppressive Fire)
     // -------------------------------------------------------------------------

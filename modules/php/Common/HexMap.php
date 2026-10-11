@@ -681,6 +681,18 @@ class HexMap {
     }
 
     /**
+     * Hero hexes a monster on the given hex can attack; heroes inside Grimheim are isolated (RULES.md Grimheim).
+     */
+    function getHeroHexesAttackableFrom(string $hexId, int $range): array {
+        return array_values(
+            array_filter(
+                $this->getHexesInRange($hexId, $range),
+                fn($hex) => !$this->isInGrimheim($hex) && $this->isOccupiedByCharacterType($hex, "hero") !== null
+            )
+        );
+    }
+
+    /**
      * Returns all valid hexes within the given range of a hex (excluding the hex itself).
      * For range >= 2, uses BFS so that Grimheim hexes block the path (cannot shoot over Grimheim).
      * If the source hex is in Grimheim, Grimheim hexes are not blocked.
