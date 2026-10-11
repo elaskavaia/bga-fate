@@ -202,8 +202,8 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.15.2 | In player order, each player draws 1 monster card of the matching colour and places monsters per the card. | [RULES.md:288,375](RULES.md#L288) | loops `playerCount` times drawing top (`Op_reinforcement.php:38–40`) | ✅ |
 | R.15.3 | Standard monster card → place monsters at indicated location; card to bottom of deck. | [RULES.md:379](RULES.md#L379) | `cleanupMonsterDisplay` returns card to deck bottom (`Op_turnMonster.php:70–78`) | ✅ |
 | R.15.4 | Legend card → place Legend tile (correct side per turn track) + accompanying monsters. | [RULES.md:381](RULES.md#L381) | yellow/red deck maps to `_1`/`_2` legend variant via `legend` column; **"correct side per turn track" (yellow vs red) NOT explicitly verified by a test** | ⚠️ |
-| R.15.5 | Killed Legend → card goes to bottom of corresponding deck. | [RULES.md:383](RULES.md#L383) | same `cleanupMonsterDisplay` path | ✅ |
-| R.15.6 | Card cannot be placed → discard to bottom, redraw until one fits. | [RULES.md:385–390](RULES.md#L385) | redraw loop up to 20 tries (`Op_reinforcement.php:43–60`); tests cover occupied-hex + supply-empty | ✅ |
+| R.15.5 | Killed Legend → card goes to bottom of corresponding deck. | [RULES.md:383](RULES.md#L383) | same `cleanupMonsterDisplay` path; card is returned at the next reinforcement even while the Legend is alive, see BUG_TRIAGE entry "Legend card returns to the deck while its Legend is alive" | ⚠️ |
+| R.15.6 | Card cannot be placed → discard to bottom, redraw until one fits. | [RULES.md:385–390](RULES.md#L385) | redraw loop up to 20 tries (`Op_reinforcement.php:43–60`); tests cover occupied-hex + supply-empty; Legend already in play (either side on a hex) via `Op_reinforcement::isLegendInPlay`, tests `Op_reinforcementTest::testRedLegendCardDrawsAnotherWhileYellowSideInPlay`, `Op_reinforcementTest::testSkipsLegendCardWhileSameSideInPlay` | ✅ |
 
 ## 16. Attacks (combat)
 

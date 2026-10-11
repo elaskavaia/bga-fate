@@ -206,9 +206,9 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         return $count;
     }
 
-    /** BGA #245127: red Queen card is skipped (no second Queen, no escorts) while the yellow Queen is in play. */
-    public function testRedLegendCardDrawsAnotherWhileYellowSideInPlay(): void {
-        $this->game->tokens->moveToken("monster_legend_1_1", "hex_13_5");
+    /** Red Queen card (escorts in Dead Plains) drawn while one Queen side is outside it: skipped, next card placed. */
+    private function assertRedQueenCardSkippedWhileInPlay(string $queenSideInPlay): void {
+        $this->game->tokens->moveToken($queenSideInPlay, "hex_13_5");
         $this->game->tokens->moveToken("card_monster_37", "deck_monster_red", 999);
         $this->game->tokens->moveToken("card_monster_51", "deck_monster_red", 998);
         $deadPlainsBefore = $this->countMonstersIn("DeadPlains");
@@ -216,21 +216,22 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $this->game->setPlayersNumber(1);
         $this->createReinforcementOp(["deck" => "deck_monster_red"])->resolve();
 
-        $this->assertFalse($this->game->getMonster("monster_legend_1_2")->isOnBoard());
+        $this->assertEquals("hex_13_5", $this->game->tokens->getTokenLocation($queenSideInPlay));
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("monster_legend_1", "hex%"));
         $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_37"));
         $this->assertEquals($deadPlainsBefore, $this->countMonstersIn("DeadPlains"));
         $this->assertEquals("display_monsterturn", $this->game->tokens->getTokenLocation("card_monster_51"));
         $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_51"));
     }
 
+    /** BGA #245127: red Queen card is skipped (no second Queen, no escorts) while the yellow Queen is in play. */
+    public function testRedLegendCardDrawsAnotherWhileYellowSideInPlay(): void {
+        $this->assertRedQueenCardSkippedWhileInPlay("monster_legend_1_1");
+    }
+
+    /** BGA #245127: same side already in play: skipped, next card placed. */
     public function testSkipsLegendCardWhileSameSideInPlay(): void {
-        $this->game->tokens->moveToken("monster_legend_1_1", "hex_13_5");
-
-        $this->game->setPlayersNumber(1);
-        $this->createReinforcementOp(["card" => "card_monster_1"])->resolve();
-
-        $this->assertEquals("hex_13_5", $this->game->tokens->getTokenLocation("monster_legend_1_1"));
-        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_1"));
+        $this->assertRedQueenCardSkippedWhileInPlay("monster_legend_1_2");
     }
 
     public function testCardGoesToDisplay(): void {
