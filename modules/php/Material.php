@@ -4495,7 +4495,7 @@ class Material {
         "mana" => 2,
         "r" => "3spendMana:(3preventDamage(adj):3dealDamage)",
         "on" => "TResolveHits",
-        "effect" => clienttranslate("3[MANA]: Prevent up to 3 damge dealt by an adjacent monster, and deal 3 damage to it."),
+        "effect" => clienttranslate("3[MANA]: Prevent up to 3 damage dealt by an adjacent monster, and deal 3 damage to it."),
         "flavour" => "What goes around comes around... with interest.",
 ],
     "card_ability_3_13" => [ 

@@ -45,7 +45,7 @@ class Op_reinforcement extends Operation {
         for ($retry = 0; $retry < $maxRetries; $retry++) {
             $cardInfo = $this->game->tokens->getTokenOnTop($deck);
             if ($cardInfo === null) {
-                $this->game->notifyMessage(clienttranslate("Monster deck is empty — no reinforcements"));
+                $this->game->notifyMessage(clienttranslate("Monster deck is empty: no reinforcements"));
                 return;
             }
             $cardId = $cardInfo["key"];
@@ -56,7 +56,7 @@ class Op_reinforcement extends Operation {
         }
 
         // Exhausted retries — no placeable card found
-        $this->game->notifyMessage(clienttranslate("No placeable monster card found — skipping reinforcement"));
+        $this->game->notifyMessage(clienttranslate("No placeable monster card found, skipping reinforcement"));
     }
 
     /** Place monsters from a specific card. Returns true on success, false if skipped. */
@@ -129,7 +129,7 @@ class Op_reinforcement extends Operation {
                 $cardId,
                 "display_monsterturn",
                 1, // state indicated it was skipped, make it grayed out in UI
-                clienttranslate('${token_name} cannot be placed, drawing another...')
+                clienttranslate('${token_name} cannot be placed, drawing another card')
             );
             return false;
         }

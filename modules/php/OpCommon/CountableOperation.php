@@ -26,7 +26,7 @@ abstract class CountableOperation extends Operation {
         if ($mcount == $count) {
             return [
                 "$count" => [
-                    "name" => "Confirm",
+                    "name" => clienttranslate("Confirm"),
                     "q" => 0,
                 ],
             ];

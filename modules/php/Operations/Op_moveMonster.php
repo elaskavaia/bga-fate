@@ -60,7 +60,7 @@ class Op_moveMonster extends CountableOperation {
             if ($monsterId) {
                 return clienttranslate("Choose where to move the monster");
             } else {
-                return clienttranslate("Looks like your monster is dead");
+                return clienttranslate("Monster is dead");
             }
         }
         return clienttranslate("Select a monster to move");

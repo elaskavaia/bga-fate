@@ -81,7 +81,7 @@ class Op_spawn extends CountableOperation {
         $monsterId = array_key_first($supply);
         $this->game->systemAssert("ERR:spawn:noSupply:$type", $monsterId !== null);
 
-        $this->game->getMonster($monsterId)->moveTo($hex, clienttranslate('${char_name} spawned adjacent to ${char_name2}'), [
+        $this->game->getMonster($monsterId)->moveTo($hex, clienttranslate('${char_name} spawns adjacent to ${char_name2}'), [
             "char_name2" => $heroId,
         ]);
 
