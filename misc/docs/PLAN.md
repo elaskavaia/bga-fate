@@ -82,7 +82,7 @@ See CLAUDE.md for project overview
 
 
 [x] Game option: time track (short/long)
-[ ] Game option: monster die (on/off)
+[x] Game option: monster die (on/off)
 [ ] Game option: difficulty
 [x] Long time track support
 [x] 1-4 player support with correct town piece counts
@@ -107,20 +107,20 @@ See CLAUDE.md for project overview
 ### BGA Requirements
 
 [x] `getGameProgression()` based on time track
-[ ] `zombieTurn()` for disconnected players
-[ ] Game statistics in stats.json
+[x] `zombieTurn()` for disconnected players
+[x] Game statistics in stats.jsonc
 [ ] All strings translatable
-[ ] Tooltips on all interactive elements
+[x] Tooltips on all interactive elements
 [ ] Input validation review (security)
 [ ] Private info check (event cards in hand)
 
 ### Testing
 
 [ ] Full game playthrough (short + long track)
-[ ] All hero combinations
-[ ] All player counts
+[x] All hero combinations
+[x] All player counts
 [ ] Edge cases (multiple knockouts, legend interactions, empty decks)
-[ ] Pre-alpha BGA checklist (see below)
+[x] Pre-alpha BGA checklist (see below)
 
 ---
 
