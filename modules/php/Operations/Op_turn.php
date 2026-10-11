@@ -122,6 +122,10 @@ class Op_turn extends Operation {
                         $res[$key]["action"] = $action;
                     }
                 }
+                // client renders a button for any target without a DOM node, so drop the entry instead of the flag
+                if ($kind == "free" && ($res[$action]["q"] != 0 || !$op->showTurnButton())) {
+                    unset($res[$action]);
+                }
             }
         }
         $hasValid = false;

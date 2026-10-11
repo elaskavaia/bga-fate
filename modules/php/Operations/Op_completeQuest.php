@@ -30,7 +30,7 @@ class Op_completeQuest extends Operation {
     }
 
     public function getSkipName() {
-        return clienttranslate("Not now");
+        return clienttranslate("Cancel");
     }
 
     public function canSkip() {

@@ -22,6 +22,6 @@ use Bga\Games\Fate\OpCommon\Operation;
 class Op_turnStart extends Operation {
     function resolve(): void {
         $this->queueTrigger(Trigger::TurnStart);
-        $this->queue("turn");
+        $this->queue("turn", null, ["reason" => ""]);
     }
 }

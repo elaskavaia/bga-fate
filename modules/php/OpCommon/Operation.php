@@ -760,6 +760,11 @@ abstract class Operation {
         return $this->skip() ?: $this->destroy();
     }
 
+    /** Free action: whether Op_turn offers it as an action bar button (only when valid) */
+    function showTurnButton(): bool {
+        return true;
+    }
+
     /** Called on operation to see if we can skip this one */
     function canSkip() {
         $skip = $this->getDataField("l_skip", false) ? true : false;

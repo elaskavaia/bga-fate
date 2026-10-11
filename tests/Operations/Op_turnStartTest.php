@@ -14,6 +14,13 @@ class Op_turnStartTest extends AbstractOpTestCase {
         $this->assertContains("turn", $opTypes, "Should queue turn");
     }
 
+    public function testTurnHasNoStartOfTurnReason(): void {
+        $this->createOp("turnStart");
+        $this->call_resolve();
+        $turn = $this->game->machine->findOperation($this->owner, "turn");
+        $this->assertEquals("", $turn->getDataField("reason", ""), "trivial reason should not prefix the prompt");
+    }
+
     public function testTriggerFiresBeforeTurn(): void {
         $this->createOp("turnStart");
         $this->call_resolve();

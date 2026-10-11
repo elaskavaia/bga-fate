@@ -51,6 +51,10 @@ class Op_useCard extends Operation {
     public function getSkipName() {
         return clienttranslate("Not now");
     }
+    public function showTurnButton(): bool {
+        return false; // usable cards are highlighted and clicked directly
+    }
+
     public function canSkip() {
         if ($this->requireConfirmation()) {
             return true;

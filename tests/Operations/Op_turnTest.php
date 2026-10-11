@@ -126,6 +126,25 @@ final class Op_turnTest extends AbstractOpTestCase {
         $this->assertEquals("completeQuest", $this->getTargetInfo("card_equip_4_19")["action"]);
     }
 
+    public function testUseCardHasNoTurnButton(): void {
+        $this->game->tokens->moveToken("card_event_1_27", "hand_" . $this->owner);
+        $this->game->effect_moveCrystals("hero_1", "red", 3, "hero_1", ["message" => ""]);
+        $this->assertEquals("useCard", $this->getTargetInfo("card_event_1_27")["action"]);
+        $this->assertArrayNotHasKey("useCard", $this->op->getArgsInfo());
+    }
+
+    public function testCompletableQuestHasTurnButton(): void {
+        $this->initWithCompletableQuest();
+        $this->assertValidTarget("completeQuest");
+    }
+
+    public function testDisabledQuestHasNoTurnButton(): void {
+        $this->init(4);
+        $this->game->tokens->moveToken("card_equip_4_23", "deck_equip_" . $this->owner); // Dwarf Helm: in(TempleRuins)
+        $this->createOp();
+        $this->assertArrayNotHasKey("completeQuest", $this->op->getArgsInfo());
+    }
+
     public function testInlineQuestSkipNotHoistedAtStart(): void {
         $this->initWithCompletableQuest();
         $this->assertArrayNotHasKey("skip", $this->op->getArgsInfo());
