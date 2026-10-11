@@ -109,7 +109,7 @@ See CLAUDE.md for project overview
 [x] `getGameProgression()` based on time track
 [x] `zombieTurn()` for disconnected players
 [x] Game statistics in stats.jsonc
-[ ] All strings translatable
+[x] All strings translatable
 [x] Tooltips on all interactive elements
 [ ] Input validation review (security)
 [ ] Private info check (event cards in hand)
