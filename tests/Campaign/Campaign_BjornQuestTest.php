@@ -199,6 +199,26 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
     }
 
     /**
+     * RULES.md:65 heroes inside Grimheim "cannot interact with characters or terrain outside of it",
+     * maintainer ruling "No adjacency rule can count anything in Grimheim": a monster next to town does not block the Cape.
+     */
+    public function testHomeSewnCapeQuestInGrimheimIgnoresMonsterOutside(): void {
+        $color = $this->getActivePlayerColor();
+
+        $cape = "card_equip_1_24";
+        $this->seedDeck("deck_equip_$color", [$cape, "card_equip_1_17"]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_10_9");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_11_8", "");
+
+        $this->respond("completeQuest");
+        $this->respond($cape);
+        $this->confirmCardEffect();
+
+        $this->assertEquals("tableau_$color", $this->tokenLocation($cape));
+    }
+
+    /**
      * Home Sewn Tunic (card_equip_1_23): quest_on= (empty - player-initiated),
      * quest_r=spendAction(actionPractice):spendXp:gainEquip.
      *

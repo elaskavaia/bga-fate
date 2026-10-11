@@ -174,10 +174,10 @@ class Campaign_MonsterDieTest extends CampaignBaseTest {
     public function testAttackSideBuffsMultipleAdjacentMonstersIndependently(): void {
         $this->seedDieSide(3); // attack
 
-        // Two goblins each adjacent to the hero on hex_7_9. Each must roll its own
+        // Two goblins each adjacent to the hero on hex_7_9, not to each other (Trollkin support). Each must roll its own
         // attack with strength=2 (base 1 + attack-side +1).
         $this->game->getMonster("monster_goblin_19")->moveTo("hex_7_8", "");
-        $this->game->getMonster("monster_goblin_20")->moveTo("hex_8_9", "");
+        $this->game->getMonster("monster_goblin_20")->moveTo("hex_7_10", "");
 
         $this->driveOneMonsterTurn();
 

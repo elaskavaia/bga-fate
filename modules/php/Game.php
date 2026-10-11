@@ -546,17 +546,17 @@ class Game extends Base {
 
     /** Count monsters on hexes adjacent to the active hero. Used by evaluateExpression("countAdjMonsters"). */
     function countAdjMonsters($owner = null, $context = null, $options = null): int {
+        return count($this->getAdjacentMonsters($owner));
+    }
+
+    private function getAdjacentMonsters(?string $owner): array {
         $heroHex = $this->getHero($owner)->getHex();
-        if ($heroHex === null) {
-            return 0;
+        // RULES.md Grimheim: heroes in town cannot interact with characters outside it.
+        if ($heroHex === null || $this->hexMap->isInGrimheim($heroHex)) {
+            return [];
         }
-        $count = 0;
-        foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
-            if ($this->hexMap->isOccupiedByCharacterType($hex, "monster") !== null) {
-                $count++;
-            }
-        }
-        return $count;
+        $hexes = $this->hexMap->getAdjacentHexes($heroHex);
+        return array_filter(array_map(fn($hex) => $this->hexMap->isOccupiedByCharacterType($hex, "monster"), $hexes));
     }
 
     /** Count mountain-terrain hexes adjacent to the active hero, including the hero's own hex (RULES.md Adjacency). Used by evaluateExpression("countAdjMountains"). */
@@ -584,18 +584,7 @@ class Game extends Base {
 
     /** Count legend monsters on hexes adjacent to the active hero. Used by evaluateExpression("countAdjLegends"). */
     function countAdjLegends(?string $owner = null, $context = null, $options = null): int {
-        $heroHex = $this->getHero($owner)->getHex();
-        if ($heroHex === null) {
-            return 0;
-        }
-        $count = 0;
-        foreach ($this->hexMap->getAdjacentHexes($heroHex) as $hex) {
-            $occ = $this->hexMap->isOccupiedByCharacterType($hex, "monster");
-            if ($occ !== null && getPart($occ, 1) === "legend") {
-                $count++;
-            }
-        }
-        return $count;
+        return count(array_filter($this->getAdjacentMonsters($owner), fn($monsterId) => getPart($monsterId, 1) === "legend"));
     }
 
     /** Total dice on display_battle (regardless of face). Used by evaluateExpression("countDice"). */

@@ -660,30 +660,19 @@ class HexMap {
     }
 
     /**
-     * Returns true if any hero is adjacent to the given hex (or on it).
+     * Returns true if any hero is adjacent to the given hex (or on it), from a monster's point of view.
      */
     function isHeroAdjacentTo(string $hexId): bool {
-        return $this->isCharacterTypeInRange($hexId, 1, "hero");
-    }
-
-    /**
-     * Returns true if any character of the given type is within range of the hex (or on it).
-     * @param string $type Character type prefix: "hero" or "monster"
-     */
-    function isCharacterTypeInRange(string $hexId, int $range, string $type): bool {
-        $checkHexes = array_merge([$hexId], $this->getHexesInRange($hexId, $range));
-        foreach ($checkHexes as $hex) {
-            if ($this->isOccupiedByCharacterType($hex, $type) !== null) {
-                return true;
-            }
-        }
-        return false;
+        return $this->isOccupiedByCharacterType($hexId, "hero") !== null || !empty($this->getHeroHexesAttackableFrom($hexId, 1));
     }
 
     /**
      * Hero hexes a monster on the given hex can attack; heroes inside Grimheim are isolated (RULES.md Grimheim).
      */
     function getHeroHexesAttackableFrom(string $hexId, int $range): array {
+        if ($this->isInGrimheim($hexId)) {
+            return [];
+        }
         return array_values(
             array_filter(
                 $this->getHexesInRange($hexId, $range),

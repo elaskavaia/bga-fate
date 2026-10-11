@@ -93,6 +93,21 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertEquals($countBefore - 1, count($housesAfter), "One house should have been destroyed");
     }
 
+    /**
+     * RULES.md:65 heroes inside Grimheim "cannot interact with characters or terrain outside of it and vice versa",
+     * so golden rule 1 (RULES.md:263) does not hold a monster at the gate. BGA #240669 follow-up.
+     */
+    public function testMonsterNextToHeroInsideGrimheimStillEnters(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // steps into hex_10_8
+        $this->game->tokens->moveToken("hero_1", "hex_10_9"); // Grimheim, adjacent to hex_11_8
+        $countBefore = count($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+
+        $this->call_resolve();
+
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        $this->assertCount($countBefore - 1, $this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+    }
+
     public function testFreyjasWellDestroyedLast(): void {
         for ($i = 1; $i <= 9; $i++) {
             $this->game->tokens->moveToken("house_$i", "limbo");

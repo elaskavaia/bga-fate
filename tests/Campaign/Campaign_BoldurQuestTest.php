@@ -538,6 +538,26 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
     }
 
     /**
+     * RULES.md:65 heroes inside Grimheim "cannot interact with characters or terrain outside of it",
+     * maintainer ruling "No adjacency rule can count anything in Grimheim": a legend next to town does not count.
+     */
+    public function testEitrisPickStaysInDeckWhenMoveEndsInGrimheimNextToLegend(): void {
+        $color = $this->getActivePlayerColor();
+
+        $eitrisPick = "card_equip_4_22";
+        $this->seedDeck("deck_equip_$color", [$eitrisPick, "card_equip_4_19"]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_10_10");
+        $this->game->getMonster("monster_legend_1_1")->moveTo("hex_11_8", "");
+
+        $this->respond("hex_10_9");
+
+        $this->assertEquals(0, $this->game->countAdjMonsters($color));
+        $this->assertEquals(0, $this->game->countAdjLegends($color));
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($eitrisPick), "a legend outside town is not adjacent to a hero in Grimheim");
+    }
+
+    /**
      * Negative path: ending a move on a hex with fewer than 3 adjacent mountains
      * makes the check evaluate to 0, hiding gainEquip — pick stays in deck.
      */

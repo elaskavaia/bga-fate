@@ -141,4 +141,16 @@ final class MonsterMovementTest extends TestCase {
         // Hero on the same hex counts as adjacent
         $this->assertTrue($this->game->hexMap->isHeroAdjacentTo("hex_12_8"));
     }
+
+    /** RULES.md:65 heroes inside Grimheim "cannot interact with characters or terrain outside of it and vice versa". */
+    public function testHeroInsideGrimheimIsNotAdjacentToOutside(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_10_8");
+        $this->assertFalse($this->game->hexMap->isHeroAdjacentTo("hex_11_8"));
+    }
+
+    /** RULES.md:65 "and vice versa": a monster inside Grimheim cannot attack a hero outside. */
+    public function testNoHeroAttackableFromInsideGrimheim(): void {
+        $this->game->tokens->moveToken("hero_1", "hex_7_9"); // outside, adjacent to Grimheim hex_8_9
+        $this->assertEquals([], $this->game->hexMap->getHeroHexesAttackableFrom("hex_8_9", 1));
+    }
 }
