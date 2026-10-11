@@ -782,18 +782,14 @@ abstract class Operation {
     }
 
     function action_whatever() {
-        return $this->whatever() ?: $this->destroy();
-    }
-
-    function whatever() {
         $args = $this->getArgs();
         $targets = $args[Operation::ARG_TARGET];
         $num = count($targets);
         if ($num == 0) {
-            $state = $this->skip();
+            $state = $this->action_skip();
         } else {
             // TODO: support multi-select
-            $state = $this->resolve([Operation::ARG_TARGET => $targets[$this->game->bgaRand(0, $num - 1)]]);
+            $state = $this->action_resolve([Operation::ARG_TARGET => $targets[$this->game->bgaRand(0, $num - 1)]]);
         }
         return $state;
     }

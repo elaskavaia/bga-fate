@@ -51,6 +51,10 @@ class PlayerTurnConfirm extends GameState {
     }
 
     public function zombie(int $playerId) {
-        return;
+        // halted machine mid-game: resolving would bounce straight back here forever
+        if (!$this->game->isEndOfGame() && !$this->game->machine->getTopOperations(null)) {
+            return null;
+        }
+        return $this->action_resolve();
     }
 }
