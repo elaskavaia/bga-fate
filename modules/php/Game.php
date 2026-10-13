@@ -306,7 +306,7 @@ class Game extends Base {
 
     /** Can run twice in one game (knockout destroying the Well, then end of monster turn), so only set stats here. */
     function handleEndOfGame(): void {
-        $this->tableStats->set("game_heroes_won", $this->isHeroesWin());
+        $this->tableStats->set("game_heroes_won", (int) $this->isHeroesWin());
         $this->tableStats->set("game_rune_stone_position", (int) $this->tokens->getTokenState("rune_stone"));
         $this->tableStats->set("game_houses_remaining", $this->getHousesRemainingCount());
         $msg = $this->getEndBannerMessage();

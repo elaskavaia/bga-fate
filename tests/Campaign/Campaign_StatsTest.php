@@ -275,8 +275,9 @@ class Campaign_StatsTest extends CampaignBaseTest {
         return (int) $this->game->playerStats->get($name, $this->game->custom_getPlayerIdByColor($this->color));
     }
 
-    private function tableStat(string $name): int {
-        return (int) $this->game->tableStats->get($name);
+    /** No cast, so assertSame catches a bool: BGA writes false as '' and the game end freezes (BGA #249889). */
+    private function tableStat(string $name): int|float|bool {
+        return $this->game->tableStats->get($name);
     }
 
     /** Bjorn at hex_7_9 takes 3 hits from a brute (strength 3), the way Op_turnMonster queues it. */
