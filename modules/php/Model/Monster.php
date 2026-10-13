@@ -106,6 +106,17 @@ class Monster extends Character {
             $hero = $this->game->getHeroById($attackerId);
             $hero->gainXp($xp);
         }
+
+        if ($this->id === "monster_legend_1_2") {
+            // Her +1 health is gone: the Dead she kept alive die too, XP to her killer (BGA #236814).
+            // Exactly 0: a monster below 0 was already dying and has its own finishKill queued.
+            foreach ($this->game->hexMap->getMonstersOnMap() as $entry) {
+                $monster = $this->game->getMonster($entry["key"]);
+                if ($monster->getFaction() === "dead" && $monster->getRemainingHealth() === 0) {
+                    $monster->finalizeDamage(0, $attackerId);
+                }
+            }
+        }
     }
 
     function countHit(string $rule, ?string $defenderHex = null): int {

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\Games\Fate\Model\Monster;
 use Bga\Games\Fate\Stubs\GameUT;
 use PHPUnit\Framework\TestCase;
 
@@ -135,6 +136,52 @@ final class MonsterTest extends TestCase {
         $this->assertEquals($goblin->getHealth(), $goblin->getEffectiveHealth(), "non-dead unaffected");
         $queen = $this->game->getMonster("monster_legend_1_2");
         $this->assertEquals($queen->getHealth(), $queen->getEffectiveHealth(), "Queen does not buff herself");
+    }
+
+    /** Killing Queen II also kills the Dead she kept alive with her +1 health, XP to her killer (BGA #236814). */
+    public function testKillingQueenIIKillsMonstersAliveOnlyByHerBoost(): void {
+        $queen = $this->setupQueenIIWithBoostedSkeleton();
+
+        $queen->finalizeDamage(0, "hero_1");
+
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_skeleton_1"));
+        $this->assertEquals("hex_12_9", $this->game->tokens->getTokenLocation("monster_imp_1"), "imp has health left");
+        $expectedXp = $queen->getXpReward() + $this->game->getMonster("monster_skeleton_1")->getXpReward();
+        $this->assertCount($expectedXp, $this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+    }
+
+    /** XP blocked for the Queen herself (quest taken instead) still pays for the monsters dying with her (BGA #236814). */
+    public function testQueenIIBlockedXpStillPaysForBoostedMonsters(): void {
+        $this->setupQueenIIWithBoostedSkeleton()->finalizeDamage(0, "hero_1", true);
+
+        $skeletonXp = $this->game->getMonster("monster_skeleton_1")->getXpReward();
+        $this->assertCount($skeletonXp, $this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", "tableau_" . PCOLOR));
+    }
+
+    /** Monsters already dying when the Queen falls (e.g. her kill came from their kill trigger) are left to their own finishKill. */
+    public function testKillingQueenIILeavesPendingKillsAlone(): void {
+        $queen = $this->setupQueenIIWithBoostedSkeleton();
+        $this->game->tokens->moveToken("monster_skeleton_2", "hex_12_7");
+        $this->game->effect_moveCrystals("monster_skeleton_2", "red", 4, "monster_skeleton_2", ["message" => ""]);
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_7");
+        $this->game->effect_moveCrystals("monster_goblin_1", "red", 2, "monster_goblin_1", ["message" => ""]);
+
+        $queen->finalizeDamage(0, "hero_1");
+
+        $this->assertEquals("hex_12_7", $this->game->tokens->getTokenLocation("monster_skeleton_2"), "already killed with the boost");
+        $this->assertEquals("hex_11_7", $this->game->tokens->getTokenLocation("monster_goblin_1"), "not Dead, not boosted");
+    }
+
+    /** Queen II on the board, a skeleton with damage equal to its base health, an imp with 1 damage. */
+    private function setupQueenIIWithBoostedSkeleton(): Monster {
+        $this->game->tokens->moveToken("monster_legend_1_2", "hex_5_5");
+        $this->game->tokens->moveToken("monster_skeleton_1", "hex_12_8");
+        $this->game->tokens->moveToken("monster_imp_1", "hex_12_9");
+        $skeleton = $this->game->getMonster("monster_skeleton_1");
+        $this->game->effect_moveCrystals("monster_skeleton_1", "red", $skeleton->getHealth(), "monster_skeleton_1", ["message" => ""]);
+        $this->game->effect_moveCrystals("monster_imp_1", "red", 1, "monster_imp_1", ["message" => ""]);
+        $this->assertEquals(1, $skeleton->getRemainingHealth(), "sanity: alive only by the Queen");
+        return $this->game->getMonster("monster_legend_1_2");
     }
 
     // -------------------------------------------------------------------------
