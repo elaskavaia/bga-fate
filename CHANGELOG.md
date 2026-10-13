@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-13 (v261014-0100)
+
+- Fixed lost games freezing at game end (#249889)
+
 ## 2026-10-13 (v261014-0050)
 
 - Smiterbiter has +3 strength (#246556)
