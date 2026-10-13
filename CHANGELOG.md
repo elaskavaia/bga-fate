@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-13 (v261014-0050)
+
+- Smiterbiter has +3 strength (#246556)
+- Sewing can heal the hero (#242206)
+- Reaper swing: adjacent targets only (#241160)
+- Legend skip covers both sides (#245127)
+- Push/move triggers fixed (#240644, #240884)
+- Fixed Grimheim adjacency (#240669)
+
 ## 2026-10-11 (v261011-2334)
 
 - Added game statistics
