@@ -39,6 +39,7 @@ Operations are queued, pushed or inserted in the Machine and executed sequential
 
 - **DbTokens** (`modules/php/Db/DbTokens.php`) - Token storage, notifications, counters, and material-based creation
 - Tokens represent all physical game pieces (cards, dice, workers, resources, etc.)
+- `dbSetTokenLocation` moves a token and notifies in one call. It always adds `token_id`, `place_id`, `new_state` and `place_from` to the args, and `token_name` / `place_name` / `token_div` (as raw ids) when the message uses them, so callers do not pass those; the client turns the ids into display names.
 
 ### Hex Map
 
@@ -92,6 +93,8 @@ Following the project's token naming pattern (`key = supertype_type_instance`):
 
 Shortening of words:
 - Equipment -> equip
+
+Token id helpers: `getPart($tokenId, $i)` and `Material::getPartsPrefix($tokenId, $i)` split ids with a bounds check (never `explode("_", ...)[$i]`). A player's hero is found from the owner color with `getHeroTokenId($owner)`, which reads the `card_hero_*` on `tableau_<color>`.
 
 
 **Location naming:**

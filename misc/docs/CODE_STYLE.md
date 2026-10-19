@@ -23,6 +23,9 @@ in [PROCEDURES.md](PROCEDURES.md); this file holds only what is a convention of 
   import and reference the short name.
 - Shared operation helpers go on the game's abstract op parent, not on `Game.php`; see
   [DESIGN.md](DESIGN.md).
+- System invariants (always true unless there is a bug: hero is on the map, a required data field
+  exists) use `systemAssert("ERR:<op>:<what>:$context", $cond)` - message first, condition second.
+  Game-state preconditions (no mana, card already used) return an `ERR_*` code instead.
 
 ## TypeScript
 
