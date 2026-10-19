@@ -86,6 +86,7 @@ class Op_demote extends Operation {
                 clienttranslate('${char_name} reveals new ${token_name}'),
                 ["char_name" => $heroId]
             );
+            $this->game->customUndoSavepoint($this->getPlayerId(), 1, "demote");
         }
     }
 }

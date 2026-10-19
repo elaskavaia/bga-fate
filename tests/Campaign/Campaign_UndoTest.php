@@ -10,9 +10,10 @@ use Bga\Games\Fate\StateConstants;
  * Undo driven through the real states, the real savepoint hooks and the real DbMultiUndo logic
  * (only the snapshot storage is in-memory, see MultiUndoInMem).
  *
- * Fate writes savepoints only at barriers: the start of a turn, and right after information is
- * revealed (an event draw, an attack roll). Undo therefore means "put me back where this turn
- * started", and a barrier is what stops a player from rewinding past something they have seen.
+ * Fate writes savepoints only at barriers: game setup, the seat switch, and right after information
+ * is revealed (an event draw, an attack roll, a demote revealing the next card). Undo therefore means
+ * "put me back where this turn started", and a barrier is what stops a player from rewinding past
+ * something they have seen.
  *
  * The savepoint is deferred to the end of the request (Game::doCustomUndoSavePoint, reached from
  * sendNotifications) - taking it inline would freeze the still-running operation into the saved
@@ -67,6 +68,27 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->undo();
 
         $this->assertSame(1, $this->handSize(), "undo cannot reach back to before the draw");
+    }
+
+    /** BGA #251077: a demote reveals the next card of the pile, so it is a barrier too. */
+    public function testUndoAfterDemoteKeepsTheRevealedCard(): void {
+        $deck = "deck_ability_$this->color";
+        $this->driveToEventDraw();
+        $this->respond("confirm");
+        $this->assertSame("demote", $this->opType());
+
+        $demoted = $this->game->tokens->getTokenOnTop($deck)["key"];
+        $this->respond($demoted);
+        $revealed = $this->game->tokens->getTokenOnTop($deck)["key"];
+        $this->assertNotSame($demoted, $revealed, "demote revealed a new top ability");
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertCount(1, $moves, "the demote barrier dropped the draw snapshot");
+        $this->assertSame("demote", reset($moves)["label"]);
+
+        $this->undo();
+
+        $this->assertSame($revealed, $this->game->tokens->getTokenOnTop($deck)["key"], "undo cannot bring the demoted card back");
+        $this->assertSame("turn", $this->opType());
     }
 
     /** The ordinary case: one action taken, undo rewinds to the turn-start barrier. */
