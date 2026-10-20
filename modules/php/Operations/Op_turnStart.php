@@ -32,6 +32,11 @@ use Bga\Games\Fate\OpCommon\Operation;
  */
 class Op_turnStart extends Operation {
     function resolve(): void {
+        // Solo has no seat switch to anchor a barrier, so undo would cross the monster turn.
+        // Turn 1 (rune stone on step 1) is covered by the immediate setup barrier.
+        if ($this->game->isSolo() && $this->game->tokens->getTokenState("rune_stone") > 1) {
+            $this->game->customUndoSavepoint($this->getPlayerId(), 1);
+        }
         $this->queueTrigger(Trigger::TurnStart);
         $this->queue("turn", null, ["reason" => ""]);
     }

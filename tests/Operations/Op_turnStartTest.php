@@ -30,4 +30,30 @@ class Op_turnStartTest extends AbstractOpTestCase {
         $turnIdx = array_search("turn", $opTypes);
         $this->assertLessThan($turnIdx, $triggerIdx, "trigger(turnStart) should be queued before turn");
     }
+
+    public function testSoloLaterTurnWritesAnUndoBarrier(): void {
+        $this->game->tokens->setTokenState("rune_stone", 2);
+        $this->clearPendingUndoSavepoint();
+        $this->createOp("turnStart");
+        $this->call_resolve();
+        $this->assertSame(1, $this->pendingUndoSavepoint()["barrier"] ?? null);
+    }
+
+    /** Turn 1 is covered by the immediate setup barrier. */
+    public function testSoloFirstTurnWritesNoUndoBarrier(): void {
+        $this->clearPendingUndoSavepoint();
+        $this->createOp("turnStart");
+        $this->call_resolve();
+        $this->assertSame([], $this->pendingUndoSavepoint());
+    }
+
+    /** Multiplayer turns are anchored by the seat switch. */
+    public function testMultiplayerWritesNoUndoBarrier(): void {
+        $this->game->setPlayersNumber(2);
+        $this->game->tokens->setTokenState("rune_stone", 2);
+        $this->clearPendingUndoSavepoint();
+        $this->createOp("turnStart");
+        $this->call_resolve();
+        $this->assertSame([], $this->pendingUndoSavepoint());
+    }
 }

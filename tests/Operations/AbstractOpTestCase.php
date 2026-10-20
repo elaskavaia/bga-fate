@@ -109,6 +109,15 @@ abstract class AbstractOpTestCase extends TestCase {
         $this->game->machine->dispatchOne();
     }
 
+    /** Undo savepoint meta waiting for the end-of-request flush ([] when none). */
+    protected function pendingUndoSavepoint(): array {
+        return (new ReflectionProperty($this->game, "undoSavepointMeta"))->getValue($this->game);
+    }
+
+    protected function clearPendingUndoSavepoint(): void {
+        (new ReflectionProperty($this->game, "undoSavepointMeta"))->setValue($this->game, []);
+    }
+
     protected function getPlayersTableau(): string {
         return "tableau_" . $this->owner;
     }

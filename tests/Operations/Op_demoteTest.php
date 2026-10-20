@@ -85,6 +85,19 @@ final class Op_demoteTest extends AbstractOpTestCase {
         $this->assertEquals($this->equipDeck(), $this->game->tokens->getTokenLocation($belt), "still in the deck, just lower");
     }
 
+    /** BGA #251077: the revealed card must not be undoable. */
+    public function testDemoteWritesAnUndoBarrier(): void {
+        $belt = "card_equip_2_22";
+        $this->seedDeckTop($belt, $this->equipDeck());
+        $this->clearPendingUndoSavepoint();
+        $this->createOp();
+        $this->call_resolve($belt);
+
+        $meta = $this->pendingUndoSavepoint();
+        $this->assertSame("demote", $meta["label"] ?? null);
+        $this->assertSame(1, $meta["barrier"]);
+    }
+
     // -------------------------------------------------------------------------
     // Equip demote — no progress in flight (still works, no-op sweep)
     // -------------------------------------------------------------------------
