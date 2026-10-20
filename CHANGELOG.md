@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-19 (v261020-0432)
+
+- Fixed undo reaching past the card revealed by end-of-turn demote (#251077)
+- Fixed solo undo rewinding through the monster turn
+- Fixed Dead surviving after Queen II dies (#236814)
+
 ## 2026-10-13 (v261014-0100)
 
 - Fixed lost games freezing at game end (#249889)
