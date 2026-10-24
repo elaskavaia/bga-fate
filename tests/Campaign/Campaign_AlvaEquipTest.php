@@ -157,6 +157,31 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertEquals(2, $this->countDamage($brute));
     }
 
+    /** BGA #251284: add-damage not offered again in a second attack action; shares the use with the draw branch. */
+    public function testBloodlineCrystalAddDamageOncePerTurn(): void {
+        $crystal = "card_equip_2_25";
+        $troll = "monster_troll_1";
+        $this->setupTrollWithBracers($crystal);
+        $this->game->effect_moveCrystals($this->heroId, "green", 6, $crystal, ["message" => ""]);
+
+        // Strength = Alva I(2) + First Bow(1) = 3 dice, all misses
+        $this->seedRand([1, 1, 1, 1, 1, 1]);
+        $this->respond("hex_5_9");
+        $this->assertOperation("useCard");
+        $this->respond($crystal);
+        $this->respond("choice_0");
+        $this->skipIfOp("useCard");
+        $this->assertEquals(2, $this->countDamage($troll));
+
+        $this->respond("card_equip_2_23");
+        $this->assertEquals(0, $this->countTokens("crystal_green", "card_equip_2_23"), "Bracers' attack happened");
+        $this->assertOperation("turn");
+        $this->assertEquals(3, $this->countTokens("crystal_green", $crystal));
+        $this->assertEquals(2, $this->countDamage($troll));
+
+        $this->assertNotValidTarget($crystal, "draw branch is blocked once the add-damage branch used the card");
+    }
+
     // --- Belt of Youth (card_equip_2_22) ---
     // r=spendUse:1heal(self) — flip card as used, then heal 1 damage from Alva.
 
@@ -370,6 +395,39 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         // Brute takes 1 damage (base=0 + addDamage 1)
         $this->assertEquals(1, $this->countDamage($brute));
         $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
+    }
+
+    /** BGA #251620: Quiver may only be used once per turn, not once per attack action. */
+    public function testQuiverOncePerTurnAcrossTwoAttackActions(): void {
+        $quiver = "card_equip_2_18";
+        $troll = "monster_troll_1";
+        $this->setupTrollWithBracers($quiver);
+
+        // Strength = Alva I(2) + First Bow(1) + Quiver(1) = 4 dice, all misses
+        $this->seedRand([1, 1, 1, 1, 1, 1, 1, 1]);
+        $this->respond("hex_5_9");
+        $this->assertOperation("useCard");
+        $this->respond($quiver);
+        $this->skipIfOp("useCard");
+        $this->assertEquals(1, $this->countDamage($quiver));
+        $this->assertEquals(1, $this->countDamage($troll));
+
+        // Bracers' extra attack auto-targets the only monster in range
+        $this->respond("card_equip_2_23");
+        $this->assertEquals(0, $this->countTokens("crystal_green", "card_equip_2_23"), "Bracers' attack happened");
+        $this->assertOperation("turn");
+        $this->assertEquals(1, $this->countDamage($quiver));
+        $this->assertEquals(1, $this->countDamage($troll));
+    }
+
+    private function setupTrollWithBracers(string $card): void {
+        $bracers = "card_equip_2_23";
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($card, "tableau_$color");
+        $this->game->tokens->moveToken($bracers, "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, $bracers, ["message" => ""]);
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_troll_1")->moveTo("hex_5_9", "");
     }
 
     // --- Tiara (card_equip_2_16) ---

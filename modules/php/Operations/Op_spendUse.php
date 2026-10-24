@@ -19,11 +19,11 @@ use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
 /**
- * spendUse: Mark the context card used this turn (card token state → 1).
+ * spendUse: Mark the context card used this turn (card token state -> 1).
  * Voids with ERR_OCCUPIED if already used. Reset by Op_turnEnd.
  *
  * Composable with other costs via paygain, e.g. `spendUse:spendDurab:gainXp`
- *   or `spendMana:spendUse:2addDamage`.
+ *   or `spendUse:3spendMana:drawEvent`.
  */
 class Op_spendUse extends Operation {
     private function getCardId(): string {
@@ -31,12 +31,17 @@ class Op_spendUse extends Operation {
         return (string) $cardId;
     }
 
+    protected function isManualOnly(): bool {
+        return true;
+    }
+
     function getPossibleMoves() {
         // spendUse is implicitly a manual-activation cost: voluntary free-action use only,
         // never fires from a trigger context. Void on non-manual events so branches using
         // spendUse are filtered out of trigger-driven useCard offerings.
+        // Trigger-driven once-per-turn effects use spendUseAny instead.
         $event = (string) $this->getDataField("event", "");
-        if ($event !== "" && $event !== Trigger::Manual->value) {
+        if ($this->isManualOnly() && $event !== "" && $event !== Trigger::Manual->value) {
             return ["q" => Material::ERR_PREREQ];
         }
 

@@ -545,7 +545,7 @@ Card effects are categorized by card type (Ability, Equipment, Event) and how th
 
 **1. Activated / Free Action Effects (Abilities & Equipment)** - used as free actions any time during your turn (outside a main action, unless the card says otherwise).
 
-* *Once-per-turn limit*: enforced explicitly via `spendUse` in the card's `r`, not implicit. Cards without `spendUse` (damage-prevention equipment, bespoke `r=custom` classes, "any number of times" cards) are unlimited.
+* *Once-per-turn limit*: enforced explicitly via `spendUse` in the card's `r`, not implicit. `spendUse` voids off the manual event; trigger-time effects (Quiver, Bloodline Crystal add-damage) use `spendUseAny`, which shares the same used flag. Cards without `spendUse` (damage-prevention equipment, bespoke `r=custom` classes, "any number of times" cards) are unlimited.
 * *Mana-activated*: pay mana to trigger, e.g. `spendMana:addDamage`.
 * *Action modifiers*: used inside another action - e.g. add damage after the attack roll.
 

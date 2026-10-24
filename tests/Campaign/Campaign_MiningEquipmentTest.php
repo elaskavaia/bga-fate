@@ -8,7 +8,7 @@ require_once __DIR__ . "/CampaignBase.php";
  * Verifies the fix for BGA #233793: Boldur's Mining Equipment (card_equip_4_17)
  * can be clicked/used when standing adjacent to a mountain.
  *
- * Card data: r = spendDurab:c_mining, durability = 2.
+ * Card data: r = spendUse:spendDurab:c_mining, durability = 2.
  * Effect: gain 2 gold [XP] adjacent to 1 mountain / 3 gold adjacent to 3.
  *
  * Was broken because the gain half was the unimplemented Op_custom stub (always
@@ -97,5 +97,21 @@ class Campaign_MiningEquipmentTest extends CampaignBaseTest {
         }
 
         $this->assertNotValidTarget($this->cardId, "Mining Equipment needs an adjacent mountain to be useful");
+    }
+
+    /** BGA #251284: equipment may only be used once per turn. */
+    public function testMiningEquipmentUsableOncePerTurn(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($this->cardId, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_5_8"); // adjacent to 1 mountain
+        $this->game->hexMap->invalidateOccupancy();
+        $before = $this->countXp();
+
+        $this->respond($this->cardId);
+        $this->confirmCardEffect();
+        $this->assertEquals($before + 2, $this->countXp());
+        $this->assertEquals(1, $this->countDamage($this->cardId));
+
+        $this->assertNotValidTarget($this->cardId, "Mining Equipment is not offered again in the same turn");
     }
 }

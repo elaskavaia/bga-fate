@@ -36,6 +36,11 @@ final class Op_spendUseTest extends AbstractOpTestCase {
         $this->assertNoValidTargets();
     }
 
+    public function testVoidsInTriggerContext(): void {
+        $this->createOp(null, ["card" => $this->cardId, "event" => "TActionAttack"]);
+        $this->assertNoValidTargets();
+    }
+
     public function testResolveMarksCardAsUsed(): void {
         $this->createOp(null, ["card" => $this->cardId]);
         $this->assertEquals(0, (int) $this->game->tokens->getTokenInfo($this->cardId)["state"]);
