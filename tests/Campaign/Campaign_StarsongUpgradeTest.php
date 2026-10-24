@@ -38,4 +38,20 @@ class Campaign_StarsongUpgradeTest extends CampaignBaseTest {
         $this->skipIfOp("demote");
         $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . $this->color));
     }
+
+    // Pins buggy behavior for BGA #251630 - flip when Starsong draws at step 4, after the upgrade.
+    public function testStarsongDrawsBeforeUpgradeOnLaterTurns(): void {
+        $heroId = $this->game->getHeroTokenId($this->color);
+        $this->game->tokens->moveToken("card_ability_2_7", "tableau_" . $this->color);
+        $this->game->effect_moveCrystals($heroId, "yellow", 5, "tableau_" . $this->color, ["message" => ""]);
+
+        $this->respond("hex_7_9");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->confirmCardEffect();
+        $this->assertOperation("drawEvent");
+        $this->respond("confirm");
+        $this->assertCount(1, $this->game->tokens->getTokensOfTypeInLocation("card", "hand_" . $this->color));
+        $this->assertOperation("upgrade");
+    }
 }
