@@ -2707,7 +2707,7 @@ class Game extends Game1Tokens {
                 $(`tableau_${color}`).dataset.name = this.getTr(tname);
                 const hand = document.querySelector(`.hand_area > #hand_${color}`);
                 if (hand)
-                    hand.parentElement.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
+                    hand.parentElement.dataset.name = this.getTr(_("${hero}'s Hand"), { hero: this.getTr(tname) });
             });
         }
         catch (e) {
@@ -3349,7 +3349,7 @@ class Game extends Game1Tokens {
                     const spawnLoc = this.getTokenName(tokenInfo.spawnloc);
                     tokenInfo.tooltip = this.ttSection(_("Spawn Location"), spawnLoc);
                     if (tokenInfo.ftext)
-                        tokenInfo.tooltip += this.ttSection(_("Flavor"), tokenInfo.ftext);
+                        tokenInfo.tooltip += this.ttSection(_("Flavor"), this.getTr(tokenInfo.ftext));
                 }
                 else if (["hero", "ability", "equip", "event"].includes(subType)) {
                     const heroName = this.getTokenName(`hero_${tokenInfo.hno}`);

@@ -1,6 +1,7 @@
 num|name|spawnloc|spawn|legend|ftext
 
 #set create=1
+#set _tr=ftext
 # spawnloc - locate where they spawn
 # spawn format: one character per hex slot — single-letter monster abbreviation (faction-specific) or "L" for legend; "-" marks an empty slot. Example: Flanking is "GG--B--T-B".
 #set id=card_monster_{num}

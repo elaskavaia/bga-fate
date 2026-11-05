@@ -185,3 +185,5 @@ To update:
 2. Run `npm run genmat` to regenerate Material.php
 3. Material generation uses pipe (|) as field separator
 4. Special directives in CSV: `#set _tr=field` (mark field as translatable), `#set _noquotes=field` (no quotes in output)
+5. Every field the player sees needs `#set _tr=<field>` (only name, tooltip, tooltip_action, text, effect are translatable by default); `tests/MaterialTest.php` checks it
+6. Write a `"` in text literally (genmat escapes it), never spreadsheet-style `""`

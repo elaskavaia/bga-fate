@@ -265,6 +265,7 @@ function genbody($incsv, $conout) {
                 $value = trim($value);
                 if ($value) {
                     //$value = str_replace("'", "\\'", $value);
+                    $value = str_replace('"', '\"', $value);
                     $exp = "clienttranslate(\"$value\")";
                     if (stripos($value, "<li") !== false) {
                         $items = extractListItems($value, $incsv, $key);

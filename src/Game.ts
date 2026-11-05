@@ -231,7 +231,7 @@ export class Game extends Game1Tokens {
         const tname = this.getRulesFor(`hero_${player.heroNo}`, "name");
         $(`tableau_${color}`)!.dataset.name = this.getTr(tname);
         const hand = document.querySelector(`.hand_area > #hand_${color}`);
-        if (hand) hand.parentElement!.dataset.name = this.getTr("${hero}'s Hand", { hero: this.getTr(tname) });
+        if (hand) hand.parentElement!.dataset.name = this.getTr(_("${hero}'s Hand"), { hero: this.getTr(tname) });
       });
     } catch (e) {
       console.error(e);
@@ -917,7 +917,7 @@ export class Game extends Game1Tokens {
         if (subType === "monster") {
           const spawnLoc = this.getTokenName(tokenInfo.spawnloc);
           tokenInfo.tooltip = this.ttSection(_("Spawn Location"), spawnLoc);
-          if (tokenInfo.ftext) tokenInfo.tooltip += this.ttSection(_("Flavor"), tokenInfo.ftext);
+          if (tokenInfo.ftext) tokenInfo.tooltip += this.ttSection(_("Flavor"), this.getTr(tokenInfo.ftext));
         } else if (["hero", "ability", "equip", "event"].includes(subType)) {
           const heroName = this.getTokenName(`hero_${tokenInfo.hno}`);
           tokenInfo.tooltip = this.ttSection(_("Hero"), heroName);
