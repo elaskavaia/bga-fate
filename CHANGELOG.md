@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-04 (v261105-0350)
+
+- Fixed equipment effects usable more than once per turn (#251284, #251620)
+- Quest, flavor and monster card texts can now be translated (#254408)
+
 ## 2026-10-19 (v261020-0432)
 
 - Fixed undo reaching past the card revealed by end-of-turn demote (#251077)
