@@ -83,7 +83,7 @@ move,attack                     ; move then attack
 ?heal                           ; optionally heal
 spendUse:heal(adj)              ; pay one use to heal an adjacent target
 spendUse:(heal(adj)/repairCard) ; pay one use, then choose heal or repair
-spendUseAny:spendDurab:addDamage
+spendUseTrigger:spendDurab:addDamage
                                 ; once per turn, inside an attack action
 spendDurab:1preventDamage       ; pay 1 durability to prevent 1 damage
 counter(countRunes):dealDamage(adj_attack)

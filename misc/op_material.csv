@@ -76,7 +76,7 @@ spendDurab|Take Damage|wicon_damage
 gainTracker|Quest Progress|wicon_damage
 spendHealth|Take Unpreventable Damage|wicon_damage
 spendUse|Once per turn
-spendUseAny|Once per turn
+spendUseTrigger|Once per turn
 spendAction|Spend Action
 
 #Card effect operations:

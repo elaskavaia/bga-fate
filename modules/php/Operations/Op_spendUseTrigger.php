@@ -15,12 +15,12 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 /**
- * spendUseAny: spendUse that also works in trigger context, for once-per-turn
- * effects played inside another action, e.g. Quiver `spendUseAny:spendDurab:addDamage`.
+ * spendUseTrigger: spendUse that also works in trigger context, for once-per-turn
+ * effects played inside another action, e.g. Quiver `spendUseTrigger:spendDurab:addDamage`.
  * Shares the card's used flag with spendUse.
  * Not for damage-prevention (TResolveHits) cards - RULES.md exempts them from once per turn.
  */
-class Op_spendUseAny extends Op_spendUse {
+class Op_spendUseTrigger extends Op_spendUse {
     protected function isManualOnly(): bool {
         return false;
     }

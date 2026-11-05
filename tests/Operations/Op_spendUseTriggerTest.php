@@ -5,9 +5,9 @@ declare(strict_types=1);
 use Bga\Games\Fate\Material;
 
 /**
- * Tests for Op_spendUseAny - spendUse that also works in trigger context.
+ * Tests for Op_spendUseTrigger - spendUse that also works in trigger context.
  */
-final class Op_spendUseAnyTest extends AbstractOpTestCase {
+final class Op_spendUseTriggerTest extends AbstractOpTestCase {
     private string $cardId = "card_ability_1_3"; // Sure Shot I, on Bjorn's starting tableau
 
     protected function setUp(): void {

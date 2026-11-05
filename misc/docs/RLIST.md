@@ -101,7 +101,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 
 | ID | Rule | Source | Clarif / Forum / Code | Status |
 |---|---|---|---|---|
-| R.7.1 | **Use Equipment** — once per turn per card, except damage-prevention effects (those fire once per damage received). | [RULES.md:183](RULES.md#L183) | `Op_spendUse`, `Op_spendUseAny` (trigger-time); `testCardWithoutTriggerCannotBeUsedTwice`, `testQuiverOncePerTurnAcrossTwoAttackActions` | ✅ |
+| R.7.1 | **Use Equipment** — once per turn per card, except damage-prevention effects (those fire once per damage received). | [RULES.md:183](RULES.md#L183) | `Op_spendUse`, `Op_spendUseTrigger` (trigger-time); `testCardWithoutTriggerCannotBeUsedTwice`, `testQuiverOncePerTurnAcrossTwoAttackActions` | ✅ |
 | R.7.2 | An equipment with a **durability** value tracks damage markers as its use-counter; once full, it cannot be used again until repaired. | [RULES.md:183](RULES.md#L183) | `Op_spendDurab.php:39–42` blocks at cap | ✅ |
 | R.7.3 | **Use Ability** — once per turn per card; same prevention exception. Mana paid for an ability must come from that same card. | [RULES.md:185](RULES.md#L185) | same `spendUse` mechanism; mana-from-same-card via `card` data-field threading | ✅ |
 | R.7.4 | **Play Event** — play from hand, resolve effect, discard. Cannot interrupt your own ongoing action (e.g. mid-movement). | [RULES.md:187](RULES.md#L187) | events play via `useCard` from hand; **"cannot interrupt mid-action" relies on op-queue ordering, no explicit unit test** | ⚠️ |

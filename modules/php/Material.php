@@ -431,8 +431,8 @@ class Material {
         "type" => "spendUse",
         "name" => clienttranslate("Once per turn"),
 ],
-    "Op_spendUseAny" => [ 
-        "type" => "spendUseAny",
+    "Op_spendUseTrigger" => [ 
+        "type" => "spendUseTrigger",
         "name" => clienttranslate("Once per turn"),
 ],
     "Op_spendAction" => [ 
@@ -4781,7 +4781,7 @@ class Material {
         "name" => clienttranslate("Quiver"),
         "strength" => 1,
         "durability" => 3,
-        "r" => "spendUseAny:spendDurab:addDamage",
+        "r" => "spendUseTrigger:spendDurab:addDamage",
         "on" => "TActionAttack",
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),
@@ -4871,7 +4871,7 @@ class Material {
         "hno" => 2,
         "name" => clienttranslate("Bloodline Crystal"),
         "mana" => 2,
-        "r" => "(on(TActionAttack):(spendUseAny:3spendMana:2addDamage))/(spendUse:3spendMana:drawEvent)",
+        "r" => "(on(TActionAttack):(spendUseTrigger:3spendMana:2addDamage))/(spendUse:3spendMana:drawEvent)",
         "on" => "custom",
         "quest" => "<i>Discard 2 cards in Temple Ruins</i> as you realize you're related to Gandalf, king of Alfheim.",
         "effect" => clienttranslate("<ul><li>3[MANA]: Add 2 damage to this attack action</li><li>3[MANA]: Draw 1 card</li></ul>"),
@@ -4915,7 +4915,7 @@ class Material {
         "name" => clienttranslate("Quiver"),
         "strength" => 1,
         "durability" => 3,
-        "r" => "spendUseAny:spendDurab:addDamage",
+        "r" => "spendUseTrigger:spendDurab:addDamage",
         "on" => "TActionAttack",
         "quest" => "<i>Kill a rank 3 monster without getting the gold</i> [XP]. Make this quiver instead.",
         "effect" => clienttranslate("[DAMAGE]: Add 1 damage to this attack action."),

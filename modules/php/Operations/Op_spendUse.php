@@ -39,7 +39,7 @@ class Op_spendUse extends Operation {
         // spendUse is implicitly a manual-activation cost: voluntary free-action use only,
         // never fires from a trigger context. Void on non-manual events so branches using
         // spendUse are filtered out of trigger-driven useCard offerings.
-        // Trigger-driven once-per-turn effects use spendUseAny instead.
+        // Trigger-driven once-per-turn effects use spendUseTrigger instead.
         $event = (string) $this->getDataField("event", "");
         if ($this->isManualOnly() && $event !== "" && $event !== Trigger::Manual->value) {
             return ["q" => Material::ERR_PREREQ];
