@@ -292,6 +292,34 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
     }
 
     /**
+     * Tiara (card_equip_2_16): passing through the Dark Forest mid-move should qualify
+     * ("if you are in the Dark Forest at any time, you may find it" - designer, BGG 3787758).
+     * BGA #252286
+     *
+     * Pushes the same step chain Op_move queues for a 2-hop path:
+     * hex_7_5 (out) -> hex_7_4 (DarkForest, non-final) -> hex_6_5 (out, final).
+     */
+    public function testTiaraPassingThroughDarkForestMidMove(): void {
+        $color = $this->getActivePlayerColor();
+        $tiara = "card_equip_2_16";
+        $this->seedDeck("deck_equip_$color", [$tiara, "card_equip_2_22"]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_7_5");
+        $this->game->hexMap->invalidateOccupancy();
+        $this->assertContains("hex_7_4", $this->game->hexMap->getAdjacentHexes("hex_7_5"));
+        $this->assertContains("hex_6_5", $this->game->hexMap->getAdjacentHexes("hex_7_4"));
+
+        $this->game->machine->push("step", $color, ["hex" => "hex_6_5", "final" => true]);
+        $this->game->machine->push("step", $color, ["hex" => "hex_7_4", "final" => false]);
+        $this->game->machine->dispatchAll();
+        $this->confirmCardEffect();
+
+        $this->assertEquals("hex_6_5", $this->tokenLocation($this->heroId));
+        // documents buggy behavior for BGA #252286; flip assertion when fixed
+        $this->assertEquals("deck_equip_$color", $this->tokenLocation($tiara));
+    }
+
+    /**
      * Elven Arrows (card_equip_2_24): quest_on= (empty - player-initiated),
      * quest_r=in(TrollCaves):spawn(troll):gainEquip.
      *

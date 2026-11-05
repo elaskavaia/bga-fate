@@ -7745,3 +7745,14 @@ You can visit the same, but more efficient to walk between forest spaces. You ad
 This quest is not always easy to accomplish, but Alva has several effects that help her movement, including her ability Treetreader, which will be effective for this.
 
 ---
+
+## Alva - Tiara in the Dark Forest
+*Added 2026-11-04 by hand (not part of the scrape)* - [link](https://boardgamegeek.com/thread/3787758/article/48332189#48332189)
+
+Q (BGA #252286): does Alva get the Tiara by passing through the Dark Forest during a move, or must she end the move there?
+
+🎲 **DESIGNER** - Jonathan Fryxelius (@Lord_Aethan), Oct 25:
+
+> Yes, of you are in the Dark Forest at any time, you may find it.
+
+---
