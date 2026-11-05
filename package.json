@@ -18,6 +18,8 @@
     "tests": "npm run test -- --exclude-group fuzz tests",
     "tests:fuzz": "npm run test -- --group fuzz tests",
     "tests:cov": "XDEBUG_MODE=coverage APP_GAMEMODULE_PATH=~/git/bga-sharedcode/misc/ phpunit --bootstrap ./tests/_autoload.php --coverage-text",
+    "testdb:start": "php8.4 ~/git/bga-sharedcode/misc/php/stubs/BgaTestDb.php start",
+    "testdb:stop": "php8.4 ~/git/bga-sharedcode/misc/php/stubs/BgaTestDb.php stop",
     "jstests": "NODE_OPTIONS='--disable-warning=MODULE_TYPELESS_PACKAGE_JSON' TS_NODE_PROJECT=src/tests/tsconfig.json mocha -r ts-node/register -r src/tests/setup.ts src/tests/**/*.spec.ts",
     "play": "php8.4 tests/Harness/play.php && ts-node --project tests/Harness/tsconfig.json tests/Harness/render.ts",
     "sync:check": "python3 misc/other/sync_check.py"
