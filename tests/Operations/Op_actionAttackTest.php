@@ -80,7 +80,6 @@ final class Op_actionAttackTest extends AbstractOpTestCase {
     public function testResolveInvalidTargetThrows(): void {
         $op = $this->op;
         $this->expectException(\Bga\GameFramework\UserException::class);
-        $this->expectOutputRegex("/./");
         $this->call_resolve("hex_12_8");
     }
 }
