@@ -93,6 +93,31 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->assertSame("turn", $this->opType());
     }
 
+    /**
+     * BGA #251077 recurrence (table 941272922): completing a quest reveals the next card of the
+     * equipment pile, but Op_gainEquip writes no barrier, so undo hides the revealed quest again.
+     */
+    public function testUndoAfterCompletingAQuestRewindsTheRevealedEquipment(): void {
+        $deck = "deck_equip_$this->color";
+        $bow = "card_equip_1_16";
+        $nextCard = "card_equip_1_17";
+        $this->seedDeck($deck, [$bow, $nextCard]);
+        $this->game->tokens->moveToken($this->heroId, "hex_16_5"); // Nailfare, Bone Bane Bow quest location
+        $this->rearmTurnStart();
+
+        $this->respond("completeQuest");
+        $this->respond($bow);
+        $this->confirmCardEffect();
+        $this->assertSame("tableau_$this->color", $this->tokenLocation($bow), "quest completed");
+        $this->assertSame($nextCard, $this->game->tokens->getTokenOnTop($deck)["key"], "next quest revealed");
+
+        $this->undo();
+
+        // documents buggy behavior for BGA #251077 (recurrence); flip assertion when fixed
+        $this->assertSame($bow, $this->game->tokens->getTokenOnTop($deck)["key"], "undo rewound the reveal of the next quest");
+        $this->assertSame($deck, $this->tokenLocation($bow));
+    }
+
     /** Solo has no seat switch, so without a turn-start barrier undo after a skipped demote crossed the monster turn. */
     public function testSoloUndoStopsAtTheStartOfTheNextTurn(): void {
         $this->driveToEventDraw();

@@ -169,6 +169,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
      * Negative path for Home Sewn Cape - adjacent monster makes
      * check('countAdjMonsters==0') evaluate to 0, which hides the grouped
      * (spendAction(actionAttack):gainEquip) chain so neither op fires.
+     * BGA #253223: the quest is still OFFERED while the monster is adjacent.
      */
     public function testHomeSewnCapeQuestBlockedWhenMonsterAdjacent(): void {
         $color = $this->getActivePlayerColor();
@@ -181,9 +182,13 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($this->heroId, $heroHex);
         $this->game->getMonster("monster_goblin_1")->moveTo("hex_7_8", "");
 
+        // documents buggy behavior for BGA #253223; flip assertion when fixed
+        $this->assertValidTarget("completeQuest");
         $this->respond("completeQuest");
 
         $this->assertOperation("completeQuest");
+        // documents buggy behavior for BGA #253223; flip assertion when fixed
+        $this->assertValidTarget($cape);
         $this->respond($cape);
 
         $this->assertEquals(

@@ -348,4 +348,55 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $hexes = $this->game->hexMap->getHexesInLocation("NonExistentLocation");
         $this->assertEmpty($hexes);
     }
+
+    // -------------------------------------------------------------------------
+    // Highlands (BGA #253727, #253962): map has 10 Highlands areas, its cards use 12 positions
+    // -------------------------------------------------------------------------
+
+    private function placeCardOnEmptyMap(string $cardId): void {
+        foreach ($this->game->hexMap->getMonstersOnMap() as $monster) {
+            $this->game->tokens->moveToken($monster["key"], "supply_monster");
+        }
+        $this->game->hexMap->invalidateOccupancy();
+        $this->createReinforcementOp(["card" => $cardId])->resolve();
+        $this->game->hexMap->invalidateOccupancy();
+    }
+
+    private function getOccupiedHighlands(): array {
+        $hexes = $this->game->hexMap->getHexesInLocation("Highlands");
+        return array_values(array_filter($hexes, fn($hex) => $this->game->hexMap->isOccupied($hex)));
+    }
+
+    public function testHighlandsHasFewerHexesThanCardPositions(): void {
+        $longest = 0;
+        foreach (array_keys($this->game->material->getTokensWithPrefix("card_monster")) as $cardId) {
+            if ($this->game->material->getRulesFor($cardId, "spawnloc", "") === "Highlands") {
+                $longest = max($longest, strlen((string) $this->game->material->getRulesFor($cardId, "spawn", "")));
+            }
+        }
+        $this->assertEquals(12, $longest);
+        // documents buggy behavior for BGA #253727 / #253962; flip assertion when fixed (expect $longest)
+        $this->assertCount(10, $this->game->hexMap->getHexesInLocation("Highlands"));
+    }
+
+    public function testJotunnClanCannotBePlacedOnEmptyHighlands(): void {
+        $this->placeCardOnEmptyMap("card_monster_11");
+        // documents buggy behavior for BGA #253727; flip assertion when fixed (expected state 0, 4 monsters placed)
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_11"));
+        $this->assertCount(0, $this->getOccupiedHighlands());
+    }
+
+    public function testFieryProjectilesCannotBePlacedOnEmptyHighlands(): void {
+        $this->placeCardOnEmptyMap("card_monster_7");
+        // documents buggy behavior for BGA #253727; flip assertion when fixed (expected state 0, 3 monsters placed)
+        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_7"));
+        $this->assertCount(0, $this->getOccupiedHighlands());
+    }
+
+    public function testTrendingMonstersHexes(): void {
+        $this->placeCardOnEmptyMap("card_monster_9");
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_9"));
+        // documents buggy behavior for BGA #253962; positions index into a 10-hex list, so hexes shift once the 2 missing hexes are added
+        $this->assertEquals(["hex_12_14", "hex_9_16", "hex_10_16", "hex_6_17", "hex_8_17"], $this->getOccupiedHighlands());
+    }
 }
