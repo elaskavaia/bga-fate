@@ -380,10 +380,6 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $mismatches = [];
         foreach (array_keys($this->game->material->getTokensWithPrefix("card_monster")) as $cardId) {
             $spawnLoc = $this->game->material->getRulesFor($cardId, "spawnloc", "");
-            // known exception, BGA #253727: map has 10 Highlands hexes, cards use 11-12 (check 4, 7, 10 against the art once fixed)
-            if ($spawnLoc === "Highlands") {
-                continue;
-            }
             $spawnLength = strlen((string) $this->game->material->getRulesFor($cardId, "spawn", ""));
             $hexCount = count($this->game->hexMap->getHexesInLocation($spawnLoc));
             if ($spawnLength !== $hexCount) {
@@ -460,45 +456,108 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         );
     }
 
-    // -------------------------------------------------------------------------
-    // Highlands (BGA #253727, #253962): map has 10 Highlands areas, its cards use 12 positions
-    // -------------------------------------------------------------------------
-
-    private function getOccupiedHighlands(): array {
-        $hexes = $this->game->hexMap->getHexesInLocation("Highlands");
-        return array_values(array_filter($hexes, fn($hex) => $this->game->hexMap->isOccupied($hex)));
+    /** BGA #253727: the board's Highlands border also holds hex_7_16 and hex_8_16, 12 areas as on the cards. */
+    public function testHighlandsAreaOrder(): void {
+        $this->assertEquals(
+            [
+                "hex_11_14",
+                "hex_12_14",
+                "hex_10_15",
+                "hex_11_15",
+                "hex_7_16",
+                "hex_8_16",
+                "hex_9_16",
+                "hex_10_16",
+                "hex_6_17",
+                "hex_7_17",
+                "hex_8_17",
+                "hex_9_17",
+            ],
+            $this->game->hexMap->getHexesInLocation("Highlands")
+        );
     }
 
-    public function testHighlandsHasFewerHexesThanCardPositions(): void {
-        $longest = 0;
-        foreach (array_keys($this->game->material->getTokensWithPrefix("card_monster")) as $cardId) {
-            if ($this->game->material->getRulesFor($cardId, "spawnloc", "") === "Highlands") {
-                $longest = max($longest, strlen((string) $this->game->material->getRulesFor($cardId, "spawn", "")));
-            }
-        }
-        $this->assertEquals(12, $longest);
-        // documents buggy behavior for BGA #253727 / #253962; flip assertion when fixed (expect $longest)
-        $this->assertCount(10, $this->game->hexMap->getHexesInLocation("Highlands"));
-    }
-
-    public function testJotunnClanCannotBePlacedOnEmptyHighlands(): void {
+    /** BGA #253727: Jotunn Clan used to be unplaceable (positions past the 10th Highlands hex). */
+    public function testJotunnClanPlacement(): void {
         $this->placeCardOnEmptyMap("card_monster_11");
-        // documents buggy behavior for BGA #253727; flip assertion when fixed (expected state 0, 4 monsters placed)
-        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_11"));
-        $this->assertCount(0, $this->getOccupiedHighlands());
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_11"));
+        $this->assertEquals(
+            [
+                "hex_11_14" => "sprite",
+                "hex_10_15" => "sprite",
+                "hex_9_16" => "elemental",
+                "hex_10_16" => "jotunn",
+                "hex_8_17" => "elemental",
+            ],
+            $this->getPlacement("Highlands")
+        );
     }
 
-    public function testFieryProjectilesCannotBePlacedOnEmptyHighlands(): void {
+    /** BGA #253727: Fiery Projectiles used to be unplaceable. */
+    public function testFieryProjectilesPlacement(): void {
         $this->placeCardOnEmptyMap("card_monster_7");
-        // documents buggy behavior for BGA #253727; flip assertion when fixed (expected state 0, 3 monsters placed)
-        $this->assertEquals(1, $this->game->tokens->getTokenState("card_monster_7"));
-        $this->assertCount(0, $this->getOccupiedHighlands());
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_7"));
+        $this->assertEquals(
+            ["hex_10_15" => "elemental", "hex_10_16" => "jotunn", "hex_8_17" => "jotunn"],
+            $this->getPlacement("Highlands")
+        );
     }
 
-    public function testTrendingMonstersHexes(): void {
+    /** BGA #253962: Trending Monsters places on the hexes printed on the card. */
+    public function testTrendingMonstersPlacement(): void {
         $this->placeCardOnEmptyMap("card_monster_9");
         $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_9"));
-        // documents buggy behavior for BGA #253962; positions index into a 10-hex list, so hexes shift once the 2 missing hexes are added
-        $this->assertEquals(["hex_12_14", "hex_9_16", "hex_10_16", "hex_6_17", "hex_8_17"], $this->getOccupiedHighlands());
+        $this->assertEquals(
+            [
+                "hex_12_14" => "elemental",
+                "hex_7_16" => "elemental",
+                "hex_8_16" => "sprite",
+                "hex_9_16" => "sprite",
+                "hex_6_17" => "jotunn",
+            ],
+            $this->getPlacement("Highlands")
+        );
+    }
+
+    /** BGA #253727: Surt row reads elemental, Surt, jotunn left to right, as printed on the card. */
+    public function testSurtPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_4");
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_4"));
+        $this->assertEquals(
+            ["hex_7_16" => "elemental", "hex_8_16" => "legend", "hex_9_16" => "jotunn", "hex_8_17" => "elemental"],
+            $this->getPlacement("Highlands")
+        );
+    }
+
+    /** BGA #253727: Nidhuggr II (red deck) lands on the last Highlands hex. */
+    public function testNidhuggrHighlandsPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_42");
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_42"));
+        $this->assertEquals(
+            [
+                "hex_12_14" => "elemental",
+                "hex_10_15" => "elemental",
+                "hex_6_17" => "elemental",
+                "hex_7_17" => "elemental",
+                "hex_9_17" => "legend",
+            ],
+            $this->getPlacement("Highlands")
+        );
+    }
+
+    /** BGA #253727: Burnt Offerings bottom row is elementals on the 2nd and 4th hex, as printed on the card. */
+    public function testBurntOfferingsPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_10");
+        $this->assertEquals(0, $this->game->tokens->getTokenState("card_monster_10"));
+        $this->assertEquals(
+            [
+                "hex_11_15" => "elemental",
+                "hex_7_16" => "sprite",
+                "hex_8_16" => "elemental",
+                "hex_7_17" => "elemental",
+                "hex_9_17" => "elemental",
+            ],
+            $this->getPlacement("Highlands")
+        );
     }
 }

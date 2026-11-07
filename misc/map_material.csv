@@ -206,8 +206,8 @@ y|x|terrain|loc|c|road|dir
 16|4|plains|SpewingMountain|red||1
 16|5|plains|WyrmLair|yellow|1|1
 16|6|plains|WyrmLair|yellow||11
-16|7|plains||||11
-16|8|plains||||11
+16|7|plains|Highlands|red||11
+16|8|plains|Highlands|red||11
 16|9|mountain|Highlands|red||11
 16|10|mountain|Highlands|red||11
 17|1|mountain|SpewingMountain|red||1

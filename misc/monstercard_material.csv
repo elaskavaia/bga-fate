@@ -14,14 +14,14 @@ num|name|spawnloc|spawn|legend|ftext
 1|Queen of the Dead|Nailfare|-L|monster_legend_1_1|Scary as Hel.
 2|Seer of Odin|TempleRuins|L|monster_legend_2_1|They say she sees everything, except what's before her eyes.
 3|Grendel|TrollCaves|--L|monster_legend_3_1|Grendel has a face only a mother could love...and she's not too sure.
-4|Surt|Highlands|----LJE---E|monster_legend_4_1|He really lights up the day.
+4|Surt|Highlands|----ELJ---E-|monster_legend_4_1|He really lights up the day.
 5|Hrungbald|OgreValley|B--LB-B---|monster_legend_5_1|Hrungbald Hammerfist has a fearsome reputation, a word he can't really pronounce.
 6|Nidhuggr|WyrmLair|---L|monster_legend_6_1|Rumor has it that whoever dies will be his personal flosser in the afterlife.
 # Yellow regular (7-36)
-7|Fiery Projectiles|Highlands|--E----J--J||I never expected this hero business to include so much running!
+7|Fiery Projectiles|Highlands|--E----J--J-||I never expected this hero business to include so much running!
 8|Whirlwinds|Highlands|E-E----E--EE||They always wind up attacking.
 9|Trending Monsters|Highlands|-E--ESS-J---||They are so hot right now.
-10|Burnt Offerings|Highlands|---ESE--E-E||They just have to fire you first.
+10|Burnt Offerings|Highlands|---ESE---E-E||They just have to fire you first.
 11|Jotunn Clan|Highlands|S-S---EJ--E-||We just follow the big guy's orders.
 12|Mischievous Sprites|SpewingMountain|S-S-SS--SSSS||Like a bunch of hot-tempered kids, only on fire.
 13|Fire-Breathing Stones|SpewingMountain|-E-E--JE----||As if just "breathing stones" wasn't bad enough...

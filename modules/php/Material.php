@@ -1395,7 +1395,7 @@ class Material {
         "num" => 4,
         "name" => clienttranslate("Surt"),
         "spawnloc" => "Highlands",
-        "spawn" => "----LJE---E",
+        "spawn" => "----ELJ---E-",
         "legend" => "monster_legend_4_1",
         "ftext" => clienttranslate("He really lights up the day."),
 ],
@@ -1432,7 +1432,7 @@ class Material {
         "num" => 7,
         "name" => clienttranslate("Fiery Projectiles"),
         "spawnloc" => "Highlands",
-        "spawn" => "--E----J--J",
+        "spawn" => "--E----J--J-",
         "ftext" => clienttranslate("I never expected this hero business to include so much running!"),
 ],
     "card_monster_8" => [ 
@@ -1465,7 +1465,7 @@ class Material {
         "num" => 10,
         "name" => clienttranslate("Burnt Offerings"),
         "spawnloc" => "Highlands",
-        "spawn" => "---ESE--E-E",
+        "spawn" => "---ESE---E-E",
         "ftext" => clienttranslate("They just have to fire you first."),
 ],
     "card_monster_11" => [ 
@@ -3576,6 +3576,8 @@ class Material {
         "y" => 16,
         "x" => 7,
         "terrain" => "plains",
+        "loc" => "Highlands",
+        "c" => "red",
         "dir" => 11,
 ],
     "hex_8_16" => [ 
@@ -3583,6 +3585,8 @@ class Material {
         "y" => 16,
         "x" => 8,
         "terrain" => "plains",
+        "loc" => "Highlands",
+        "c" => "red",
         "dir" => 11,
 ],
     "hex_9_16" => [ 
