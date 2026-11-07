@@ -19,12 +19,13 @@ use Bga\Games\Fate\OpCommon\Operation;
 
 /**
  * endOfAttack: Cleanup after the attack pipeline completes and trigger events.
- *
+ * Data field "free": a free-action roll (not an attack action), cleanup only, no TAfterActionAttack.
  */
 class Op_endOfAttack extends Operation {
     function resolve(): void {
-        $trigger = Trigger::AfterActionAttack;
-        $this->queueTrigger($trigger);
+        if (!$this->getDataField("free")) {
+            $this->queueTrigger(Trigger::AfterActionAttack);
+        }
         $this->game->tokens->dbSetTokenLocation("marker_attack", "limbo", 0, "");
         $this->game->tokens->dbSetTokenLocation("marker_instigator", "limbo", 0, "");
         // Reset the rune HWM used by countNewRunes (Windbite et al.).

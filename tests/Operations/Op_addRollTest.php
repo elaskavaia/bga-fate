@@ -29,6 +29,14 @@ final class Op_addRollTest extends AbstractOpTestCase {
         $this->assertTrue($op->isVoid(), "addRoll should be void when no marker_attack is set");
     }
 
+    /** BGA #250666: a stale marker on an empty hex (old save) must not reach Op_roll's noCharOnHex assert. */
+    public function testVoidWhenAttackHexIsEmpty(): void {
+        $this->game->tokens->moveToken("monster_troll_1", "supply_monster");
+        $this->game->hexMap->invalidateOccupancy();
+        $op = $this->createOp("4addRoll");
+        $this->assertTrue($op->isVoid());
+    }
+
     public function testValidWhenDicePresent(): void {
         $this->game->tokens->moveToken("die_attack_1", "display_battle", 6);
         $this->createOp("4addRoll");

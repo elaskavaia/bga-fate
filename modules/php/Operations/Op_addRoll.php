@@ -49,7 +49,8 @@ class Op_addRoll extends Op_roll {
         }
 
         $attackHex = $this->game->getAttackHex();
-        if (!$attackHex) {
+        // Empty hex: stale marker, e.g. a save from before BGA #250666
+        if (!$attackHex || !$this->game->hexMap->getCharacterOnHex($attackHex)) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not possible at this moment")];
         }
 

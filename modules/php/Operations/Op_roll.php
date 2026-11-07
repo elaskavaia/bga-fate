@@ -24,7 +24,7 @@ use function Bga\Games\Fate\getPart;
  * roll: Roll X attack dice against a target monster.
  * Count = number of dice to roll.
  * Parameter: range filter — "adj" (adjacent), "inRange" (hero attack range), "inRangeN" (fixed range N).
- * After rolling, queues resolveHits to convert dice into damage.
+ * After rolling, queues resolveHits to convert dice into damage, and a free endOfAttack for a standalone hero roll.
  * Used by: Snipe, Hard Rock, Fire Spark, Throwing Axes/Darts/Knives, etc.
  */
 class Op_roll extends CountableOperation {
@@ -79,8 +79,15 @@ class Op_roll extends CountableOperation {
         $attackerId = $this->getAttackerId();
         $diceCount = (int) $this->getCount();
 
-        // Roll dice onto display_battle
+        // A card roll outside any attack (Throwing Darts) owns its marker_attack/marker_runes, or they go stale
         $add = $this->isAddition();
+        $standalone =
+            !$add && str_starts_with($attackerId, "hero_") && !$this->game->machine->findOperation($this->getOwner(), "endOfAttack");
+        if ($standalone) {
+            $this->game->tokens->dbSetTokenLocation("marker_attack", $targetHex, 0, "");
+        }
+
+        // Roll dice onto display_battle
         $this->game->effect_rollAttackDice($attackerId, $targetHex, $diceCount, $add);
 
         // Only trigger on player rolls (hero is attacker), not monster rolls.
@@ -95,11 +102,14 @@ class Op_roll extends CountableOperation {
         // Queue resolveHits to convert dice into dealDamage.
         // addRoll skips this — the already-queued resolveHits from the original roll will
         // count the newly-added dice too.
-        if (!$this->isAddition()) {
+        if (!$add) {
             $this->queue("resolveHits", null, [
                 "attacker" => $attackerId,
                 "target" => $targetHex,
             ]);
+        }
+        if ($standalone) {
+            $this->queue("endOfAttack", null, ["free" => true]);
         }
     }
     function isAddition() {

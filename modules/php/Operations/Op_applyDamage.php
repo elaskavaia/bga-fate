@@ -133,7 +133,7 @@ class Op_applyDamage extends Operation {
         if ($attackerId !== null && !str_starts_with($attackerId, "hero_")) {
             return null;
         }
-        if (!$this->game->machine->findOperation($this->getOwner(), "endOfAttack")) {
+        if (!$this->game->machine->findOperation($this->getOwner(), "endOfAttack", fn($op) => !$op->getDataField("free"))) {
             return null;
         }
         /** @var CardEquip_Smiterbiter $card */

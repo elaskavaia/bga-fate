@@ -326,6 +326,8 @@ actionAttack → player picks target → roll dice
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
 
+A free-action roll (Throwing Darts, Snipe, Multi-Shot - any hero `roll` with no `endOfAttack` pending) owns `marker_attack` itself and ends with `endOfAttack` flagged `free`: same cleanup (`marker_attack`, `marker_runes`), but no `TAfterActionAttack`, since free actions are not attack actions. Without it the marker went stale and a later Windbite `addRoll` rolled against an empty hex (BGA #250666).
+
 ### Quest System
 
 Quests are the only path to gain equipment past the starter card. Each row in [card_equip_material.csv](../card_equip_material.csv) carries two extra fields:
@@ -602,7 +604,7 @@ Boldur is the center of the "clock", so he sweeps around himself, going clockwis
 
 3b. **Smiterbiter's "excess damage" is the remainder, not a parallel claim**
 Designer ruling (FORUM.md, "Smiterbiter + Sweeping Strike"): *"if your sweeping strike goes against a second monster, the damage is dealt to that monster, so it isn't 'excess damage'."* Excess is therefore only knowable once the attack action is over, which is why storage cannot happen at kill time:
-- `Op_applyDamage` puts a kill's overkill on Smiterbiter as **yellow** crystals (pending), gated on the attacker being the owner's hero and on an `endOfAttack` being queued.
+- `Op_applyDamage` puts a kill's overkill on Smiterbiter as **yellow** crystals (pending), gated on the attacker being the owner's hero and on a non-`free` `endOfAttack` being queued (a free-action roll has no attack action to commit the pool).
 - The sweep ops (`Op_c_sweep`, `Op_c_nailed`) mark their damage `spendsExcess`, and `Op_applyDamage` withdraws that much when the damage lands - after the Queen I refusal guard, so refused damage stays excess.
 - `Op_endOfAttack` commits what is left to **red**, capped at 3, and returns the remainder to the supply. Capping at deposit time would let a withdrawal eat damage banked on an earlier turn.
 - Yellow because nothing can reach it there: XP is only counted in `tableau_<color>` and `spendGold` is scoped to the host card of its rule. Green would be handed out as free mana by `Op_spendManaAny`, which sweeps every tableau card.

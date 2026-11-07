@@ -64,26 +64,25 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
     // --- Throwing Darts (card_equip_2_17) ---
     // r=spendDurab:3roll(adj), durability 2: pay 1 durability → roll 3 dice vs adjacent monster
 
-    private function placeAdjacentGoblin(string $goblinId = "monster_goblin_20"): string {
-        // Move Alva out of Grimheim (heroes can't fight from inside the Grimheim location),
-        // then place a goblin on the first non-Grimheim plains/forest neighbor.
-        $heroHex = "hex_7_9"; // plains, outside Grimheim
-        $this->assertFalse($this->game->hexMap->isInGrimheim($heroHex), "$heroHex should not be Grimheim");
+    /** Move Alva to hex_7_9 (plains, outside Grimheim) and list its non-Grimheim plains/forest neighbors. */
+    private function adjacentOpenHexes(): array {
+        $heroHex = "hex_7_9";
         $this->game->tokens->moveToken($this->heroId, $heroHex);
+        $hexes = array_values(
+            array_filter(
+                $this->game->hexMap->getAdjacentHexes($heroHex),
+                fn($hex) => !$this->game->hexMap->isInGrimheim($hex) &&
+                    in_array($this->game->material->getRulesFor($hex, "terrain", ""), ["plains", "forest"])
+            )
+        );
+        $this->assertNotEmpty($hexes, "No plains/forest neighbor found for $heroHex");
+        return $hexes;
+    }
 
-        $neighbors = $this->game->hexMap->getAdjacentHexes($heroHex);
-        foreach ($neighbors as $hex) {
-            if ($this->game->hexMap->isInGrimheim($hex)) {
-                continue;
-            }
-            $terrain = $this->game->material->getRulesFor($hex, "terrain", "");
-            if ($terrain === "plains" || $terrain === "forest") {
-                $this->game->getMonster($goblinId)->moveTo($hex, "");
-
-                return $hex;
-            }
-        }
-        $this->fail("No plains/forest neighbor found for $heroHex");
+    private function placeAdjacentGoblin(string $goblinId = "monster_goblin_20"): string {
+        $hex = $this->adjacentOpenHexes()[0];
+        $this->game->getMonster($goblinId)->moveTo($hex, "");
+        return $hex;
     }
 
     public function testThrowingDartsResolveDealsDamageAndCostsDurability(): void {
@@ -323,6 +322,57 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
 
         $this->assertEquals(1, $this->countDamage($brute), "1 hit lands from the recursive chain (the final added die)");
         $this->assertEmpty($this->game->randQueue, "Expected dice consumed: 5 initial + 2 added");
+    }
+
+    /**
+     * BGA #250666: an earlier Darts kill left marker_attack on the dead goblin's hex, so Windbite
+     * on a later Darts rune rolled against the empty hex (ERR:roll:noCharOnHex). Verifies the fix:
+     * a free-action roll cleans its own marker and Windbite adds to the Darts roll.
+     */
+    public function testWindbiteOnThrowingDartsRuneAfterEarlierDartsKill(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_2_15", "limbo");
+        $this->game->tokens->moveToken("card_equip_2_19", "tableau_$color");
+        $this->game->tokens->moveToken("card_equip_2_17", "tableau_$color");
+        $this->game->getHeroById($this->heroId)->recalcTrackers();
+        [$goblinHex, $bruteHex] = $this->adjacentOpenHexes();
+        $this->game->getMonster("monster_goblin_20")->moveTo($goblinHex, "");
+
+        $this->seedRand([5, 5, 5]);
+        $this->respond("card_equip_2_17");
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_20"));
+        $this->assertNull($this->game->getAttackHex(), "free-action roll must clean up marker_attack");
+
+        // Next throw (use reset as on a later turn): 1 rune + 2 misses, Windbite adds a hit
+        $this->game->tokens->setTokenState("card_equip_2_17", 0);
+        $brute = "monster_brute_1";
+        $this->game->getMonster($brute)->moveTo($bruteHex, "");
+        $this->seedRand([3, 1, 1, 5]);
+        $this->respond("card_equip_2_17");
+        $this->assertOperation("useCard");
+        $this->assertValidTarget("card_equip_2_19");
+        $this->respond("card_equip_2_19");
+        $this->confirmCardEffect();
+
+        $this->assertEmpty($this->game->randQueue, "3 Darts dice + 1 Windbite die");
+        $this->assertEquals(1, $this->countDamage($brute));
+        $this->assertNull($this->game->getAttackHex());
+        $this->assertEquals(0, $this->game->tokens->getTokenState("marker_runes"));
+    }
+
+    /** BGA #250666: a free-action roll is not an attack action, so TAfterActionAttack cards stay silent. */
+    public function testThrowingDartsDoesNotTriggerElvenBlade(): void {
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken("card_equip_2_17", "tableau_$color");
+        $this->game->tokens->moveToken("card_equip_2_21", "tableau_$color");
+        $goblin = "monster_goblin_20";
+        $this->placeAdjacentGoblin($goblin);
+
+        $this->seedRand([1, 1, 1]);
+        $this->respond("card_equip_2_17");
+
+        $this->assertNotValidTarget("card_equip_2_21");
+        $this->assertEquals(0, $this->countDamage($goblin));
     }
 
     // --- Singing Bow (card_equip_2_20) ---

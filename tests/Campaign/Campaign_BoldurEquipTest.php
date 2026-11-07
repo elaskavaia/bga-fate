@@ -191,6 +191,21 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertEquals(7, $hero->getAttackStrength());
     }
 
+    /** BGA #250666: a free-action roll queues a cleanup endOfAttack, which must not open the excess pool. */
+    public function testSmiterbiterIgnoresOverkillFromFreeActionRoll(): void {
+        $color = $this->equipSmiterbiter();
+        $this->game->tokens->moveToken("card_equip_1_17", "tableau_$color"); // Throwing Axes, 3roll(adj)
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_goblin_1")->moveTo("hex_7_8", "");
+
+        $this->seedRand([5, 5, 5]);
+        $this->respond("card_equip_1_17");
+
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_goblin_1"));
+        $this->assertEquals(0, $this->countPending());
+        $this->assertEquals(0, $this->countStored());
+    }
+
     public function testSmiterbiterStoresOverkillThenSpendsOnNextAttack(): void {
         $cardId = self::SMITERBITER;
         $this->equipSmiterbiter();
