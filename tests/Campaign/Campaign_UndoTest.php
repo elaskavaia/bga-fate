@@ -95,27 +95,34 @@ class Campaign_UndoTest extends CampaignBaseTest {
 
     /**
      * BGA #251077 recurrence (table 941272922): completing a quest reveals the next card of the
-     * equipment pile, but Op_gainEquip writes no barrier, so undo hides the revealed quest again.
+     * equipment pile, so it is a barrier and undo cannot hide the revealed quest again.
      */
-    public function testUndoAfterCompletingAQuestRewindsTheRevealedEquipment(): void {
+    public function testUndoAfterCompletingAQuestKeepsTheRevealedEquipment(): void {
         $deck = "deck_equip_$this->color";
         $bow = "card_equip_1_16";
         $nextCard = "card_equip_1_17";
-        $this->seedDeck($deck, [$bow, $nextCard]);
-        $this->game->tokens->moveToken($this->heroId, "hex_16_5"); // Nailfare, Bone Bane Bow quest location
-        $this->rearmTurnStart();
+        $this->driveBowQuestToGainPrompt($bow, $nextCard);
 
-        $this->respond("completeQuest");
-        $this->respond($bow);
-        $this->confirmCardEffect();
+        $this->confirmGainEquip();
         $this->assertSame("tableau_$this->color", $this->tokenLocation($bow), "quest completed");
         $this->assertSame($nextCard, $this->game->tokens->getTokenOnTop($deck)["key"], "next quest revealed");
 
         $this->undo();
 
-        // documents buggy behavior for BGA #251077 (recurrence); flip assertion when fixed
-        $this->assertSame($bow, $this->game->tokens->getTokenOnTop($deck)["key"], "undo rewound the reveal of the next quest");
-        $this->assertSame($deck, $this->tokenLocation($bow));
+        $this->assertSame($nextCard, $this->game->tokens->getTokenOnTop($deck)["key"], "undo cannot hide the revealed quest");
+        $this->assertSame("tableau_$this->color", $this->tokenLocation($bow));
+    }
+
+    /** BGA #251077: nothing is revealed until the player confirms the gain, so undo is still free at that prompt. */
+    public function testUndoAtTheGainEquipmentPromptRewindsTheQuest(): void {
+        $bow = "card_equip_1_16";
+        $this->driveBowQuestToGainPrompt($bow, "card_equip_1_17");
+
+        $this->undo();
+
+        $this->assertSame($bow, $this->game->tokens->getTokenOnTop("deck_equip_$this->color")["key"], "the quest card is back on top");
+        $this->assertSame("turn", $this->opType(), "back at the action choice");
+        $this->assertValidTarget("completeQuest");
     }
 
     /** Solo has no seat switch, so without a turn-start barrier undo after a skipped demote crossed the monster turn. */
@@ -548,6 +555,18 @@ class Campaign_UndoTest extends CampaignBaseTest {
     private function rearmTurnStart(): void {
         $this->game->customUndoSavepoint($this->playerId(), 1);
         $this->game->sendNotifications();
+    }
+
+    /** Complete Bone Bane Bow's quest (Mend on Nailfare) up to the gain confirm, where nothing is revealed yet. */
+    private function driveBowQuestToGainPrompt(string $bow, string $nextCard): void {
+        $this->seedDeck("deck_equip_$this->color", [$bow, $nextCard]);
+        $this->game->tokens->moveToken($this->heroId, "hex_16_5");
+        $this->rearmTurnStart();
+
+        $this->respond("completeQuest");
+        $this->respond($bow);
+        $this->assertOperation("gainEquip");
+        $this->assertSame("deck_equip_$this->color", $this->tokenLocation($bow), "nothing gained or revealed before the confirm");
     }
 
     /** Spend both actions on free ones and settle the turn end until the event draw is waiting. */

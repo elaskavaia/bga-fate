@@ -494,8 +494,9 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
 
         // Gain equipment via Op_gainEquip — onCardEnter seeds 6 gold
         $this->seedDeck("deck_equip_$color", [$tiara]);
-        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
-        $op->resolve();
+        $this->game->machine->push("gainEquip", $color);
+        $this->game->machine->dispatchAll();
+        $this->confirmGainEquip();
 
         $this->assertEquals("tableau_$color", $this->tokenLocation($tiara));
         $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara));

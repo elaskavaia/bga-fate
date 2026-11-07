@@ -260,6 +260,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
         $this->assertOperation("discardEvent");
         $this->respond($cardA);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($heels),
@@ -348,6 +349,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
 
         $this->game->machine->dispatchAll();
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($ravensClaw),
@@ -617,6 +619,7 @@ class Campaign_EmblaQuestTest extends CampaignBaseTest {
 
         $this->confirmCardEffect();
 
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet should land on tableau on brute kill");
         $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the brute's XP reward");

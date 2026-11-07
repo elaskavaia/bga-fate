@@ -22,37 +22,44 @@ use Override;
  * gainEquip: Draw the top equipment card from the player's deck and place it on their tableau.
  *
  * Behaviour:
- * - Automated: picks top card from deck_equip_{owner}, places on tableau via effect_gainEquipment,
- *   which fires onCardEnter (e.g. Black Arrows seeds 3 arrows, Tiara seeds 6 gold).
- * - If deck is empty, auto-skips silently.
+ * - Player confirms ("Complete quest"), then the top card of deck_equip_{owner} goes on the tableau via
+ *   effect_gainEquipment, which fires onCardEnter (e.g. Black Arrows seeds 3 arrows, Tiara seeds 6 gold).
+ * - The gain reveals the next quest, so it is an undo barrier (BGA #251077).
+ * - If deck is empty, resolves as a no-op.
  *
  * Used by: quest completion, debug_equip.
  */
 class Op_gainEquip extends Operation {
-    private function getTargetCard(): ?string {
-        return $this->getDataField("target");
+    private function getCardToGain(): ?string {
+        return $this->getDataField("target") ?: $this->game->tokens->getTokenOnTop("deck_equip_" . $this->getOwner())["key"] ?? null;
+    }
+
+    function getPrompt() {
+        return clienttranslate('Complete quest ${token_name}? This cannot be undone');
+    }
+
+    function getExtraArgs() {
+        return ["token_name" => $this->getCardToGain()];
     }
 
     public function getPossibleMoves() {
-        $card = $this->getTargetCard();
-        if ($card) {
-            return [$card];
-        }
-        return ["confirm"];
-    }
-    function resolve(): void {
-        $owner = $this->getOwner();
-        $cardId = $this->getTargetCard();
+        $cardId = $this->getCardToGain();
         if (!$cardId) {
-            $top = $this->game->tokens->pickTokensForLocation(1, "deck_equip_{$owner}", "limbo");
-            if (empty($top)) {
-                return; // deck empty — nothing to gain
-            }
-            $card = reset($top);
-        } else {
-            $card = $this->game->tokens->getTokenInfo($cardId);
+            return ["confirm"];
         }
-        $this->effect_gainEquipment($card);
+        return [$cardId => ["q" => 0, "name" => clienttranslate("Complete quest")]];
+    }
+
+    function resolve(): void {
+        $cardId = $this->getCheckedArg();
+        if ($cardId === "confirm") {
+            return;
+        }
+        $this->effect_gainEquipment($this->game->tokens->getTokenInfo($cardId));
+    }
+
+    function requireConfirmation() {
+        return $this->getCardToGain() !== null;
     }
 
     #[Override]
@@ -127,5 +134,6 @@ class Op_gainEquip extends Operation {
         $cardObj->onTrigger(Trigger::CardEnter);
         // equip changes attributes
         $this->game->getHero($owner)->recalcTrackers();
+        $this->game->customUndoSavepoint($this->getPlayerId(), 1, "quest");
     }
 }

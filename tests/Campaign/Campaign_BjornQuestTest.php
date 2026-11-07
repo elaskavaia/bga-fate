@@ -313,6 +313,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt - accept it.
         $this->confirmCardEffect();
 
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"), "Troll should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($quiver), "Quiver should land on tableau on rank-3 kill");
         $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the troll's XP reward");
@@ -402,6 +403,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         // Optional ?(blockXp:gainEquip) inside the quest_r pops a confirm prompt - accept it.
         $this->confirmCardEffect();
 
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"), "Brute should be killed");
         $this->assertEquals("tableau_$color", $this->tokenLocation($helmet), "Helmet should land on tableau on brute kill");
         $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the brute's XP reward");
@@ -617,6 +619,9 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
             $this->game->getMonster($monsterId)->moveTo($killHex, "");
             $this->game->machine->push("dealDamage", $color, ["target" => $killHex, "count" => $hp]);
             $this->game->machine->dispatchAll();
+            if ($monsterId === "monster_troll_1") {
+                $this->confirmGainEquip(); // the third kill reaches the threshold
+            }
             $this->assertEquals("supply_monster", $this->tokenLocation($monsterId), "$monsterId should be killed");
         }
 
@@ -705,6 +710,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $xpBefore = $this->countXp();
         $this->respond("1"); // forfeit XP, take the Helmet
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_" . $this->getActivePlayerColor(), $this->tokenLocation("card_equip_1_21"), "Helmet claimed");
         $this->pierceSecondBrute();
 
@@ -724,6 +730,7 @@ class Campaign_BjornQuestTest extends CampaignBaseTest {
         $this->assertOperation("paygain"); // Helmet still on top: fresh offer for the second kill
         $this->respond("1");
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_" . $this->getActivePlayerColor(), $this->tokenLocation("card_equip_1_21"), "Helmet claimed");
         $this->assertEquals("turn", $this->getOpArgs()["type"] ?? "");
         $this->assertEquals(2, $this->countXp() - $xpBefore, "first kill's XP awarded, second forfeited for the Helmet");

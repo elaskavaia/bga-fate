@@ -82,6 +82,7 @@ class Campaign_TerrainAdjacencyTest extends CampaignBaseTest {
         $this->assertValidTarget("hex_6_6", "Troll Caves mountain is hero-passable");
         $this->respond("hex_6_6");
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_" . $this->color,
             $this->tokenLocation($dvalinsPick),

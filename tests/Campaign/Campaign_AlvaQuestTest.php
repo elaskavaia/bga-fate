@@ -58,6 +58,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
 
         $this->game->machine->dispatchAll();
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_$color", $this->tokenLocation($belt), "Belt of Youth should land on tableau after 8 forest TSteps");
         $this->assertEquals(0, $this->countTokens("crystal_red", $belt), "Op_gainEquip should sweep tracker crystals back to supply");
 
@@ -161,6 +162,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->assertOperation("discardEvent");
         $this->respond($cardA);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($crystal),
@@ -407,6 +409,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
         $this->confirmCardEffect();
         $this->game->machine->dispatchAll();
 
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"));
         $this->assertEquals("tableau_$color", $this->tokenLocation($quiver), "Quiver should land on tableau on rank-3 kill");
         $this->assertEquals($xpBefore, $this->countXp(), "blockXp should suppress the troll's XP reward");
@@ -500,6 +503,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->game->machine->dispatchAll();
         }
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_$color", $this->tokenLocation($blade), "Elven Blade should land on tableau after 3 adjacent kills");
         $this->assertEquals(0, $this->countTokens("crystal_red", $blade), "gainEquip should sweep tracker crystals back to supply");
 
@@ -560,6 +564,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->game->machine->dispatchAll();
         }
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_$color", $this->tokenLocation($windbite), "Windbite should land on tableau after 4 range-2+ kills");
         $this->assertEquals(0, $this->countTokens("crystal_red", $windbite), "gainEquip should sweep tracker crystals back to supply");
 
@@ -616,6 +621,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             $this->game->machine->dispatchAll();
         }
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($bow),

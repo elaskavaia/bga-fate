@@ -43,6 +43,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->game->machine->push("gainEquip", $color, ["target" => $eitri]);
         $this->game->machine->dispatchAll();
 
+        $this->confirmGainEquip();
         $this->assertEquals("tableau_$color", $this->tokenLocation($eitri), "Eitri's Pick lands on tableau");
         $this->assertEquals("limbo", $this->tokenLocation($firstPick), "First Pick displaced to limbo");
     }

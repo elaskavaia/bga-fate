@@ -526,6 +526,10 @@ final class Op_moveTest extends AbstractOpTestCase {
         $this->createOp("move", ["count" => 3, "reason" => "Op_actionMove"]);
         $this->call_resolve("hex_9_3"); // adjacent forest -> 8th forest -> quest completes
         $this->dispatchAll();
+        $gain = $this->game->machine->createTopOperationFromDbForOwner($this->owner);
+        $this->assertEquals("gainEquip", $gain->getType(), "the gain prompt comes before the rest of the move");
+        $gain->action_resolve([Operation::ARG_TARGET => $belt]);
+        $this->dispatchAll();
 
         $this->assertEquals("hex_9_3", $this->game->tokens->getTokenLocation($this->heroId()), "hero took the completing step");
         $this->assertEquals("tableau_" . $this->owner, $this->game->tokens->getTokenLocation($belt), "quest completed mid-step (Belt gained)");

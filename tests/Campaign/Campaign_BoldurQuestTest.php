@@ -203,6 +203,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Trigger::Move. Smiterbiter listens on TMove, so it matches.
         $this->respond($marshHex);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($smiterbiter),
@@ -274,6 +275,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Third kill — counter ticks to 3, check passes, gainEquip runs.
         $this->game->machine->push("dealDamage", $color, ["target" => $goblinHexes[2], "count" => 2]);
         $this->game->machine->dispatchAll();
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation($goblins[2]), "Goblin 3 should be killed");
 
         $this->assertEquals("tableau_$color", $this->tokenLocation($dwarfPick), "Dwarf Pick should land on tableau after 3 monster kills");
@@ -353,6 +355,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->game->machine->dispatchAll();
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($dwarfMail),
@@ -439,6 +442,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->respond($endHex);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($dvalinsPick),
@@ -477,6 +481,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->respond($endHex);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($eitrisPick),
@@ -507,6 +512,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->respond($endHex);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($eitrisPick),
@@ -603,6 +609,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
 
         $this->respond($ogreValleyHex);
 
+        $this->confirmGainEquip();
         $this->assertEquals(
             "tableau_$color",
             $this->tokenLocation($shield),
@@ -648,6 +655,7 @@ class Campaign_BoldurQuestTest extends CampaignBaseTest {
         // Optional ?(blockXp:gainEquip) prompt — accept it.
         $this->confirmCardEffect();
 
+        $this->confirmGainEquip();
         $this->assertEquals("supply_monster", $this->tokenLocation("monster_troll_1"), "Troll should be killed");
         $this->assertEquals(
             "tableau_$color",

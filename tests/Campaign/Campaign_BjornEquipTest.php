@@ -68,8 +68,9 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
 
         // Gain equipment via Op_gainEquip - seeds deck so Black Arrows is on top, then run the op
         $this->seedDeck("deck_equip_$color", [$blackArrows]);
-        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
-        $op->resolve();
+        $this->game->machine->push("gainEquip", $color);
+        $this->game->machine->dispatchAll();
+        $this->confirmGainEquip();
 
         // Card should now be on tableau with 3 yellow crystals (arrows)
         $this->assertEquals("tableau_$color", $this->tokenLocation($blackArrows));
@@ -89,8 +90,9 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // we kill the goblin (a trollkin) and queues an interactive spawn that desyncs this test.
         // Bone Bane Bow's quest does not react to kills, so it is inert here.
         $this->seedDeck("deck_equip_$color", [$blackArrows, "card_equip_1_16"]);
-        $op = $this->game->machine->instantiateOperation("gainEquip", $color);
-        $op->resolve();
+        $this->game->machine->push("gainEquip", $color);
+        $this->game->machine->dispatchAll();
+        $this->confirmGainEquip();
         $this->assertEquals(3, $this->countTokens("crystal_yellow", $blackArrows));
 
         // Place goblin adjacent to heroHex (Goblin has 2 health).

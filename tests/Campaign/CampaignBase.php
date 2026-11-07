@@ -103,6 +103,12 @@ abstract class CampaignBaseTest extends TestCase {
         $this->respond($targets[0]);
     }
 
+    /** Click "Complete quest": a completed quest waits for it because the gain is an undo barrier (BGA #251077). */
+    protected function confirmGainEquip(): void {
+        $this->assertOperation("gainEquip");
+        $this->respond($this->getOpArgs()["target"][0]);
+    }
+
     /** Get current game state (id, name, active_player, args) */
     protected function getStateArgs(bool $merge = true): array {
         $stateId = $this->game->gamestate->getCurrentMainStateId();
