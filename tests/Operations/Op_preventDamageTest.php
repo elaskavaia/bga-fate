@@ -175,6 +175,30 @@ final class Op_preventDamageTest extends AbstractOpTestCase {
         $this->assertEquals(1, $pending->getEffectiveDamage(), "3 damage - 1 prevented - 1 armor, armor counted once");
     }
 
+    // -------------------------------------------------------------------------
+    // BGA #251305: full prevention drops only a TResolveHits-only useCard prompt
+    // -------------------------------------------------------------------------
+
+    private function queueEmptyUseCardPrompt(array $on): void {
+        $this->game->machine->push("useCard", $this->owner, ["l_confirm" => true, "on" => $on, "excluded" => ["card_equip_1_21"]]);
+        $prompt = $this->game->machine->findOperation($this->owner, "useCard");
+        $this->assertTrue($prompt->noValidTargets(), "precondition: only the on filter decides");
+    }
+
+    public function testFullPreventionDropsResolveHitsPrompt(): void {
+        $this->queueEmptyUseCardPrompt(["TResolveHits"]);
+        $this->queueDealDamage(1);
+        $this->createOp("1preventDamage")->resolve();
+        $this->assertNull($this->game->machine->findOperation($this->owner, "useCard"));
+    }
+
+    public function testFullPreventionKeepsPromptMergedWithAnotherTrigger(): void {
+        $this->queueEmptyUseCardPrompt(["TResolveHits", "TMonsterKilled"]);
+        $this->queueDealDamage(1);
+        $this->createOp("1preventDamage")->resolve();
+        $this->assertNotNull($this->game->machine->findOperation($this->owner, "useCard"));
+    }
+
     public function testGetCurrentDamageReflectsPostPreventCount(): void {
         $this->queueDealDamage(5);
         $op = $this->createOp("2preventDamage");
