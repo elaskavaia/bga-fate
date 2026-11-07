@@ -5,6 +5,8 @@ declare(strict_types=1);
 use Bga\Games\Fate\Operations\Op_reinforcement;
 use Bga\Games\Fate\Operations\Op_turnMonster;
 
+use function Bga\Games\Fate\getPart;
+
 final class Op_reinforcementTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
@@ -350,7 +352,7 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
     }
 
     // -------------------------------------------------------------------------
-    // Highlands (BGA #253727, #253962): map has 10 Highlands areas, its cards use 12 positions
+    // Spawn strings vs printed card art: one char per location hex, in getHexesInLocation order
     // -------------------------------------------------------------------------
 
     private function placeCardOnEmptyMap(string $cardId): void {
@@ -361,6 +363,106 @@ final class Op_reinforcementTest extends AbstractOpTestCase {
         $this->createReinforcementOp(["card" => $cardId])->resolve();
         $this->game->hexMap->invalidateOccupancy();
     }
+
+    private function getPlacement(string $location): array {
+        $result = [];
+        foreach ($this->game->hexMap->getHexesInLocation($location) as $hex) {
+            $monster = $this->game->hexMap->getCharacterOnHex($hex);
+            if ($monster !== null) {
+                $result[$hex] = getPart($monster, 1);
+            }
+        }
+        return $result;
+    }
+
+    /** Hardening for BGA #255238: a spawn string one slot off shifts every monster after the gap. */
+    public function testSpawnStringLengthMatchesLocationHexCount(): void {
+        $mismatches = [];
+        foreach (array_keys($this->game->material->getTokensWithPrefix("card_monster")) as $cardId) {
+            $spawnLoc = $this->game->material->getRulesFor($cardId, "spawnloc", "");
+            // known exception, BGA #253727: map has 10 Highlands hexes, cards use 11-12 (check 4, 7, 10 against the art once fixed)
+            if ($spawnLoc === "Highlands") {
+                continue;
+            }
+            $spawnLength = strlen((string) $this->game->material->getRulesFor($cardId, "spawn", ""));
+            $hexCount = count($this->game->hexMap->getHexesInLocation($spawnLoc));
+            if ($spawnLength !== $hexCount) {
+                $mismatches[$cardId] = "$spawnLoc: $spawnLength chars, $hexCount hexes";
+            }
+        }
+        $this->assertEquals([], $mismatches);
+    }
+
+    public function testMarshAreaOrder(): void {
+        $this->assertEquals(
+            [
+                "hex_16_7",
+                "hex_17_7",
+                "hex_16_8",
+                "hex_17_8",
+                "hex_16_9",
+                "hex_17_9",
+                "hex_15_10",
+                "hex_16_10",
+                "hex_14_11",
+                "hex_15_11",
+                "hex_13_12",
+                "hex_14_12",
+            ],
+            $this->game->hexMap->getHexesInLocation("MarshOfSorrow")
+        );
+    }
+
+    /** BGA #255238: Boneyard places on the hexes printed on the card. */
+    public function testBoneyardPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_17");
+        $this->assertEquals(
+            [
+                "hex_16_9" => "skeleton",
+                "hex_15_10" => "skeleton",
+                "hex_16_10" => "imp",
+                "hex_15_11" => "skeleton",
+                "hex_14_12" => "skeleton",
+            ],
+            $this->getPlacement("MarshOfSorrow")
+        );
+    }
+
+    /** BGA #255238: Marshing places its last imp on hex_14_12, as printed on the card. */
+    public function testMarshingPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_21");
+        $this->assertEquals(
+            [
+                "hex_16_7" => "draugr",
+                "hex_17_7" => "skeleton",
+                "hex_16_9" => "imp",
+                "hex_17_9" => "imp",
+                "hex_16_10" => "imp",
+                "hex_14_12" => "imp",
+            ],
+            $this->getPlacement("MarshOfSorrow")
+        );
+    }
+
+    /** Forest Patrol bottom row is brute on the river hex then goblin, as printed on the card. */
+    public function testForestPatrolPlacement(): void {
+        $this->placeCardOnEmptyMap("card_monster_35");
+        $this->assertEquals(
+            [
+                "hex_9_1" => "brute",
+                "hex_12_1" => "brute",
+                "hex_8_2" => "brute",
+                "hex_9_2" => "goblin",
+                "hex_6_4" => "brute",
+                "hex_7_4" => "goblin",
+            ],
+            $this->getPlacement("DarkForest")
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Highlands (BGA #253727, #253962): map has 10 Highlands areas, its cards use 12 positions
+    // -------------------------------------------------------------------------
 
     private function getOccupiedHighlands(): array {
         $hexes = $this->game->hexMap->getHexesInLocation("Highlands");
