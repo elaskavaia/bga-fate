@@ -60,27 +60,34 @@ final class Op_reinforcementMarshTest extends AbstractOpTestCase {
         );
     }
 
+    /** BGA #255238: Boneyard places on the hexes printed on the card. */
     public function testBoneyardPlacement(): void {
         $this->placeCardOnEmptyMap("card_monster_17");
-        // pins buggy behavior for BGA #255238: spawn string lacks a leading "-", flips when fixed
-        // card art: S hex_16_9, S hex_15_10, I hex_16_10, S hex_15_11, S hex_14_12
         $this->assertEquals(
             [
-                "hex_17_8" => "skeleton",
-                "hex_17_9" => "skeleton",
-                "hex_15_10" => "imp",
-                "hex_14_11" => "skeleton",
-                "hex_13_12" => "skeleton",
+                "hex_16_9" => "skeleton",
+                "hex_15_10" => "skeleton",
+                "hex_16_10" => "imp",
+                "hex_15_11" => "skeleton",
+                "hex_14_12" => "skeleton",
             ],
             $this->getMarshPlacement()
         );
     }
 
+    /** BGA #255238: Marshing places its last imp on hex_14_12, as printed on the card. */
     public function testMarshingPlacement(): void {
         $this->placeCardOnEmptyMap("card_monster_21");
-        // pins buggy behavior for BGA #255238: last imp is on hex_14_12 on the card, flips when fixed
-        $placement = $this->getMarshPlacement();
-        $this->assertEquals("imp", $placement["hex_13_12"] ?? null);
-        $this->assertArrayNotHasKey("hex_14_12", $placement);
+        $this->assertEquals(
+            [
+                "hex_16_7" => "draugr",
+                "hex_17_7" => "skeleton",
+                "hex_16_9" => "imp",
+                "hex_17_9" => "imp",
+                "hex_16_10" => "imp",
+                "hex_14_12" => "imp",
+            ],
+            $this->getMarshPlacement()
+        );
     }
 }

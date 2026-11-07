@@ -1542,7 +1542,7 @@ class Material {
         "num" => 17,
         "name" => clienttranslate("Boneyard"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "---S-SI-S-S",
+        "spawn" => "----S-SI-S-S",
         "ftext" => clienttranslate("Ivar the Boneless had bones after all!"),
 ],
     "card_monster_18" => [ 
@@ -1586,7 +1586,7 @@ class Material {
         "num" => 21,
         "name" => clienttranslate("Marshing"),
         "spawnloc" => "MarshOfSorrow",
-        "spawn" => "DS--II-I--I",
+        "spawn" => "DS--II-I---I",
         "ftext" => clienttranslate("Out for a walk..."),
 ],
     "card_monster_22" => [ 
