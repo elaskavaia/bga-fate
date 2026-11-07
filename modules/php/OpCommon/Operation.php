@@ -383,10 +383,6 @@ abstract class Operation {
 
                 $this->game->systemAssert("Array is passed for $ttype, but it is not supported", false);
             } else {
-                if (count($possible_targets) == 1) {
-                    return $possible_targets[0];
-                }
-
                 $this->checkUserTargetSelection($target, $info[$target] ?? false);
                 return $target;
             }

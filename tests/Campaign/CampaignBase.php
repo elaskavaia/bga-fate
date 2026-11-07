@@ -92,8 +92,7 @@ abstract class CampaignBaseTest extends TestCase {
 
     /** Confirm the card effect resolution prompt (Card::useCard queues its r-expression with confirm=true).
      * Sends "confirm" only when the active op is in a single-choice/confirm state - i.e. it has
-     * exactly one valid target or "confirm" is explicitly listed. Single-target ops accept
-     * "confirm" via target substitution in Operation::_getCheckedArg. No-op otherwise so tests
+     * exactly one valid target or "confirm" is explicitly listed. No-op otherwise so tests
      * stay agnostic about whether a separate confirm step exists. */
     protected function confirmCardEffect(): void {
         $targets = $this->getOpArgs()["target"] ?? [];

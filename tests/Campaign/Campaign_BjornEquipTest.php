@@ -437,22 +437,13 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->game->tokens->moveToken($trollbane, "tableau_$color");
 
         $this->moveHeroOutOfGrimheim();
-        [$sprite] = $this->spawnMonsterAdjacent("sprite");
-        $spriteHex = $this->tokenLocation($sprite);
+        $this->spawnMonsterAdjacent("sprite");
 
         $this->seedRand([5, 5, 5]);
         $this->respond("actionAttack");
-        $this->respond($spriteHex);
 
-        $args = $this->getOpArgs();
-        if (($args["type"] ?? "") === "useCard" && in_array("card_hero_1_1", $args["target"] ?? [])) {
-            $this->skip();
-            $args = $this->getOpArgs();
-        }
-
-        // Trollbane should NOT be offered - filter rejects non-trollkin
-        if (($args["type"] ?? "") === "useCard") {
-            $this->assertNotValidTarget($trollbane, "Trollbane should not be usable against firehorde");
-        }
+        $this->assertOperation("useCard");
+        $this->assertNotValidTarget($trollbane, "Trollbane should not be usable against firehorde");
+        $this->skipUseCard("card_hero_1_1");
     }
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\UserException;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -77,6 +78,15 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->game->effect_moveCrystals("hero_1", "red", -3, "hero_1");
         $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
         $this->assertNotValidTarget($this->abilityCard);
+    }
+
+    /** Clicking a greyed card explains why instead of playing the only valid one */
+    public function testGreyedCardClickRejectedWhenOneCardIsValid(): void {
+        $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
+        $this->game->tokens->moveToken("card_ability_1_9", $this->getPlayersTableau());
+        $this->assertSame([$this->abilityCard], $this->op->getArgsTarget(), "precondition: only Stitching is valid");
+        $this->expectException(UserException::class);
+        $this->call_resolve("card_ability_1_9");
     }
 
     public function testPresetTargetReturnsDirectly(): void {

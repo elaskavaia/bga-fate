@@ -306,7 +306,7 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->assertCount(1, $moves, "the roll barrier dropped the turn-start snapshot");
         $this->assertSame("roll", reset($moves)["label"]);
 
-        $this->respond($monsterHex);
+        $this->skipUseCard("card_hero_1_1");
         $this->undo();
 
         $this->assertSame($rolled, $this->countTokens("die_attack", "display_battle"), "the rolled dice stay rolled");

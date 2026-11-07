@@ -234,7 +234,7 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         // Turn 2 attack — Smiterbiter offers a useCard prompt to spend stored reds.
         $this->seedRand([5, 5, 5, 5, 1, 1]); // 4 hits = 4 base damage on troll (h=6)
         $this->respond("actionAttack");
-        $this->respond("hex_6_9");
+        $this->respond($cardId);
 
         $this->assertOperation("c_smiter");
 

@@ -117,7 +117,7 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         // (addDamage requires dice on display_battle).
         $this->assertValidTarget("card_equip_2_25");
         $this->respond("card_equip_2_25");
-        $this->respond("1");
+        $this->respond("choice_1");
         $this->respond("confirm");
 
         // 3 mana spent
@@ -146,7 +146,7 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
         $this->assertOperation("useCard");
 
         $this->respond("card_equip_2_25");
-        $this->respond("choice_2");
+        $this->respond("choice_0");
         $this->skipIfOp("drawEvent");
         // 3 mana spent (branch A)
         $this->assertEquals(0, $this->countTokens("crystal_green", "card_equip_2_25"));

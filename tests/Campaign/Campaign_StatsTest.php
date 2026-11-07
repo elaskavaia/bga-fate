@@ -255,7 +255,7 @@ class Campaign_StatsTest extends CampaignBaseTest {
         $this->seedRand([5, 5, 5]);
 
         $this->respond("actionAttack");
-        $this->respond($monsterHex);
+        $this->skipUseCard("card_hero_1_1");
         $this->assertSame(1, $this->stat("game_monsters_killed"), "sanity: the kill counted");
 
         $this->undo();
@@ -265,7 +265,7 @@ class Campaign_StatsTest extends CampaignBaseTest {
         $this->assertSame(0, $this->stat("game_damage_dealt"));
         $this->assertSame(0, $this->tableStat("game_monsters_killed"));
 
-        $this->respond($monsterHex);
+        $this->skipUseCard("card_hero_1_1");
 
         $this->assertSame(1, $this->stat("game_monsters_killed"), "redoing the kill counts it once");
         $this->assertSame(1, $this->tableStat("game_monsters_killed"));
