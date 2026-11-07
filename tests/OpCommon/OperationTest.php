@@ -194,4 +194,37 @@ final class OperationTest extends TestCase {
         $op->action_whatever();
         $this->assertEquals(["b" => 2], $op->resolved);
     }
+
+    // -------------------------------------------------------------------------
+    // notifyMessage
+    // -------------------------------------------------------------------------
+
+    private function notifyMessageArgs(string $owner, array $args): array {
+        $op = $this->game->machine->instantiateOperation("actionMend", $owner);
+        $op->notifyMessage('${card_name} ${reason_tr} ${token_name}', $args);
+        return $this->game->notify->_getLastNotification()["args"];
+    }
+
+    public function testNotifyMessageAddsNameAndTrKeysToI18n(): void {
+        $args = $this->notifyMessageArgs(PCOLOR, ["card_name" => "Sword", "reason_tr" => "because"]);
+        $this->assertEqualsCanonicalizing(["card_name", "reason_tr"], $args["i18n"]);
+    }
+
+    public function testNotifyMessageSkipsReservedNameKeysInI18n(): void {
+        $args = $this->notifyMessageArgs(PCOLOR, [
+            "card_name" => "Sword",
+            "token_name" => "hero_1",
+            "place_name" => "hex_11_8",
+            "char_name" => "Bjorn",
+            "player_name" => "Bob",
+        ]);
+        $this->assertEquals(["card_name"], $args["i18n"]);
+    }
+
+    public function testNotifyMessageUsesOwnerPlayerId(): void {
+        $op = $this->game->machine->instantiateOperation("actionMend", BCOLOR);
+        $op->notifyMessage("hello");
+        $this->assertEquals($op->getPlayerId(), $this->game->notify->_getLastNotification()["args"]["player_id"]);
+        $this->assertNotEquals($this->game->getActivePlayerId(), $op->getPlayerId());
+    }
 }
