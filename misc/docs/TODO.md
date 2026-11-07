@@ -76,6 +76,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 
 [ ] Allow moveMonster to push into Grimheim (designer-confirmed) *(matches RLIST **R.22.6**)*
 [ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control *(matches RLIST **R.7.7**)*
+[ ] Hero choice in multiplayer - heroes are random (`bgaShuffle` in Game.php setup), only solo option 100 picks one. RULES.md:143 "Each player chooses one of the hero decks" (BGA #255224)
   [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
 [ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
 [ ] Turn signal in title bar — currently says "laskava1 performs an action" using player name; should say "Bjorn / laskava1" or just hero name so the active *hero* is identifiable.
