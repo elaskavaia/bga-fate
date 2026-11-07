@@ -33,6 +33,7 @@ use function Bga\Games\Fate\getPart;
  * Behaviour:
  * - getPossibleMoves() returns: top card of ability deck (gain) + flippable L1 cards on tableau (improve)
  * - Auto-skips if not enough XP or no valid targets
+ * - Gaining reveals the next ability card, so it is an undo barrier; improving reveals nothing
  * - End-of-turn mana generation (step 3 of the End-of-Turn sequence) runs here, after the upgrade
  *   resolves or is skipped, so a gained/improved card generates its mana the same turn.
  *
@@ -80,7 +81,7 @@ class Op_upgrade extends Operation {
     }
 
     function getPrompt() {
-        return clienttranslate('Upgrade: choose a new ability or a card to improve (cost ${cost} XP)');
+        return clienttranslate('Upgrade (cost ${cost} XP): choose a card to improve, or a new ability (this cannot be undone)');
     }
 
     function getPossibleMoves() {
@@ -162,7 +163,10 @@ class Op_upgrade extends Operation {
         // Reveal the new top of the ability deck so the client can render it.
         $newTop = $this->game->tokens->getTokenOnTop("deck_ability_$owner");
         if ($newTop !== null) {
-            $this->dbSetTokenLocation($newTop["key"], "deck_ability_$owner", (int) $newTop["state"], "");
+            $this->dbSetTokenLocation($newTop["key"], "deck_ability_$owner", (int) $newTop["state"], clienttranslate('${char_name} reveals new ${token_name}'), [
+                "char_name" => $heroId,
+            ]);
+            $this->game->customUndoSavepoint($this->getPlayerId(), 1, "upgrade");
         }
     }
 

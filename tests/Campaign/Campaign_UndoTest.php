@@ -11,8 +11,8 @@ use Bga\Games\Fate\StateConstants;
  * (only the snapshot storage is in-memory, see MultiUndoInMem).
  *
  * Fate writes savepoints only at barriers: game setup, the seat switch (solo: the turn start), and
- * right after information is revealed (an event draw, an attack roll, a demote revealing the next
- * card). Undo therefore means "put me back where this turn started", and a barrier is what stops a
+ * right after information is revealed (an event draw, an attack roll, a demote, a quest completion
+ * or an ability gain revealing the next card). Undo therefore means "put me back where this turn started", and a barrier is what stops a
  * player from rewinding past something they have seen.
  *
  * The savepoint is deferred to the end of the request (Game::doCustomUndoSavePoint, reached from
@@ -123,6 +123,49 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->assertSame($bow, $this->game->tokens->getTokenOnTop("deck_equip_$this->color")["key"], "the quest card is back on top");
         $this->assertSame("turn", $this->opType(), "back at the action choice");
         $this->assertValidTarget("completeQuest");
+    }
+
+    /** Gaining an ability reveals the next card of the ability pile, so it is a barrier and undo cannot hide it again. */
+    public function testUndoAfterGainingAnAbilityKeepsTheRevealedCard(): void {
+        $deck = "deck_ability_$this->color";
+        $this->giveUpgradeXp();
+        $this->seedDeck($deck, ["card_ability_1_9", "card_ability_1_11"]);
+        $this->rearmTurnStart();
+        $this->driveToUpgrade();
+
+        $this->respond("card_ability_1_9");
+        $this->assertSame("card_ability_1_11", $this->game->tokens->getTokenOnTop($deck)["key"], "next ability revealed");
+        $this->assertSame("drawEvent", $this->opType());
+        $moves = $this->game->dbMultiUndo->getAvailableUndoMoves($this->playerId());
+        $this->assertCount(1, $moves, "the gain barrier dropped the turn-start snapshot");
+        $this->assertSame("upgrade", reset($moves)["label"]);
+        $xpAfterGain = $this->countXp();
+
+        $this->undo();
+
+        $this->assertSame("drawEvent", $this->opType(), "undo lands on the step after the gain");
+        $this->assertSame($xpAfterGain, $this->countXp(), "the XP stays spent");
+
+        $this->assertSame("tableau_$this->color", $this->tokenLocation("card_ability_1_9"), "undo cannot take the gain back");
+        $this->assertSame("card_ability_1_11", $this->game->tokens->getTokenOnTop($deck)["key"], "undo cannot hide the revealed ability");
+    }
+
+    /** Improving a card reveals nothing, so undo at the next prompt (the event draw) still rewinds it. */
+    public function testUndoAfterImprovingACardRewindsIt(): void {
+        $this->giveUpgradeXp();
+        $this->rearmTurnStart();
+        $xpAtTurnStart = $this->countXp();
+        $this->driveToUpgrade();
+
+        $this->respond("card_hero_1_1");
+        $this->assertSame("tableau_$this->color", $this->tokenLocation("card_hero_1_2"), "improved");
+        $this->assertSame("drawEvent", $this->opType());
+
+        $this->undo();
+
+        $this->assertSame("tableau_$this->color", $this->tokenLocation("card_hero_1_1"), "undo rewound the improve");
+        $this->assertNotSame("tableau_$this->color", $this->tokenLocation("card_hero_1_2"));
+        $this->assertSame($xpAtTurnStart, $this->countXp(), "back to the turn start, XP refunded");
     }
 
     /** Solo has no seat switch, so without a turn-start barrier undo after a skipped demote crossed the monster turn. */
@@ -569,15 +612,27 @@ class Campaign_UndoTest extends CampaignBaseTest {
         $this->assertSame("deck_equip_$this->color", $this->tokenLocation($bow), "nothing gained or revealed before the confirm");
     }
 
-    /** Spend both actions on free ones and settle the turn end until the event draw is waiting. */
     private function driveToEventDraw(): void {
+        $this->driveToEndOfTurnOp("drawEvent");
+    }
+
+    private function giveUpgradeXp(): void {
+        $this->game->effect_moveCrystals($this->heroId, "yellow", 5, "tableau_$this->color", ["message" => ""]);
+    }
+
+    private function driveToUpgrade(): void {
+        $this->driveToEndOfTurnOp("upgrade");
+    }
+
+    /** Spend both actions on free ones and settle the turn end until the $type prompt is waiting. */
+    private function driveToEndOfTurnOp(string $type): void {
         $this->respond("actionPractice");
         $this->respond("actionFocus");
         $this->skip(); // decline the free third action, ending the turn
-        for ($i = 0; $i < 6 && $this->opType() !== "drawEvent"; $i++) {
+        for ($i = 0; $i < 6 && $this->opType() !== $type; $i++) {
             $this->skip();
         }
-        $this->assertSame("drawEvent", $this->opType(), "expected the end-of-turn event draw");
+        $this->assertSame($type, $this->opType(), "expected the end-of-turn $type");
     }
 
     private function countManaOnTableau(): int {
