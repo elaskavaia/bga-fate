@@ -178,6 +178,33 @@ class Campaign_EmblaEventTest extends CampaignBaseTest {
         $this->assertNotEquals("hand_$color", $this->tokenLocation($retaliation), "Retaliation discarded after use");
     }
 
+    /** BGA #251305: fully preventing the hit keeps the prompt when Retaliation is still playable. */
+    public function testRetaliationStillOfferedAfterHelmetPreventsTheHit(): void {
+        $color = $this->getActivePlayerColor();
+        $retaliation = "card_event_3_31_1";
+        $helmet = "card_equip_3_20";
+        $goblin = "monster_goblin_1";
+        $this->seedHand($retaliation, $color);
+        $this->game->tokens->moveToken($helmet, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster($goblin)->moveTo("hex_7_8", "");
+        $this->seedRand([5, 5]);
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        $this->assertOperation("useCard");
+        $this->respond($helmet);
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($retaliation);
+        $this->respond($retaliation);
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+    }
+
     // --- Vigilance (card_event_3_32) ---
     // r=dealDamage(adj), on=TAfterMonsterMove
     // Play after the Monsters Move step. Deal 1 damage to an adjacent monster.

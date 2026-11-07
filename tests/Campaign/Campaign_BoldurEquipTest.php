@@ -476,4 +476,31 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         // Use marker spent — card state flips to 1 (used-this-turn).
         $this->assertEquals(1, $this->game->tokens->getTokenState($cardId), "spendUse sets card state to 1");
     }
+
+    /** BGA #251305: armor absorbs the hit Shield leaves, so no second prevention prompt. */
+    public function testNoPreventionPromptWhenArmorAbsorbsTheRest(): void {
+        $color = $this->getActivePlayerColor();
+        $shield = "card_equip_4_16"; // 2preventDamage
+        $dwarfHelm = "card_equip_4_23";
+        $this->seedDeck("deck_monster_yellow", ["card_monster_7", "card_monster_8", "card_monster_9", "card_monster_10"]);
+        $this->seedDeck("deck_event_$color", ["card_event_4_30_1", "card_event_4_33_1"]);
+        $this->game->tokens->moveToken($shield, "tableau_$color");
+        $this->game->tokens->moveToken($dwarfHelm, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_troll_1")->moveTo("hex_7_8", "");
+        $this->seedRand([5, 5, 5]); // troll str=3 - three hits, armor takes one
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($dwarfHelm);
+        $this->respond($shield);
+
+        $this->assertNotEquals("useCard", $this->getOpArgs()["type"] ?? "");
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertEquals(0, $this->countDamage($dwarfHelm));
+    }
 }

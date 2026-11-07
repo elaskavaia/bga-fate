@@ -177,6 +177,52 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         $this->assertEquals("tableau_$color", $this->tokenLocation($helmet));
     }
 
+    private function setupHelmetAndTunicVs(string $monster, array $rolls): array {
+        $color = $this->getActivePlayerColor();
+        $helmet = "card_equip_1_21";
+        $tunic = "card_equip_1_23";
+        $this->game->tokens->moveToken($helmet, "tableau_$color");
+        $this->game->tokens->moveToken($tunic, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster($monster)->moveTo("hex_7_8", "");
+        $this->seedRand($rolls);
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skipOp("turn");
+        $this->skipOp("drawEvent");
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($helmet);
+        $this->assertValidTarget($tunic);
+        $this->respond($helmet);
+        return [$helmet, $tunic];
+    }
+
+    /** BGA #251305: no second prevention prompt once damage is fully prevented. */
+    public function testNoPreventionPromptAfterDamageFullyPrevented(): void {
+        [$helmet, $tunic] = $this->setupHelmetAndTunicVs("monster_goblin_20", [5]); // goblin str=1 - one hit
+
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertNotEquals("useCard", $this->getOpArgs()["type"] ?? "");
+        $this->assertEquals(1, $this->countDamage($helmet));
+        $this->assertEquals(0, $this->countDamage($tunic));
+    }
+
+    /** BGA #251305: damage left after the first prevention card still chains to the next one. */
+    public function testSecondPreventionCardOfferedWhileDamageRemains(): void {
+        [$helmet, $tunic] = $this->setupHelmetAndTunicVs("monster_brute_1", [5, 5, 1]); // brute str=3 - two hits
+
+        $this->assertOperation("useCard");
+        $this->assertValidTarget($tunic);
+        $this->respond($tunic);
+
+        $this->assertNotEquals("useCard", $this->getOpArgs()["type"] ?? "");
+        $this->assertEquals(0, $this->countDamage($this->heroId));
+        $this->assertEquals(1, $this->countDamage($helmet));
+        $this->assertEquals(1, $this->countDamage($tunic));
+    }
+
     // --- Trollbane (card_equip_1_22) ---
 
     public function testTrollbaneOfferedWhenAttackingTrollkin(): void {
@@ -231,6 +277,26 @@ class Campaign_BjornEquipTest extends CampaignBaseTest {
         // Brute takes 1 damage (base=0 + addDamage 1)
         $this->assertEquals(1, $this->countDamage($brute));
         $this->assertEquals("hex_5_9", $this->tokenLocation($brute));
+    }
+
+    /** BGA #251305: only the prevention prompt is dropped - an attack prompt still re-queues showing disabled cards. */
+    public function testAttackPromptRequeuedWithDisabledCard(): void {
+        $quiver = "card_equip_1_18";
+        $blackArrows = "card_equip_1_20"; // 0 arrows - shown but not playable
+        $color = $this->getActivePlayerColor();
+        $this->game->tokens->moveToken($quiver, "tableau_$color");
+        $this->game->tokens->moveToken($blackArrows, "tableau_$color");
+        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_5_9", "");
+        $this->seedRand([1, 1, 1, 1]);
+        $this->respond("hex_5_9");
+
+        $this->assertOperation("useCard");
+        $this->respond($quiver);
+
+        $this->assertOperation("useCard");
+        $this->assertNotValidTarget($blackArrows);
+        $this->assertNotEquals(0, $this->getOpArgs()["info"][$blackArrows]["q"] ?? 0);
     }
 
     // --- Bone Bane Bow (card_equip_1_16) ---

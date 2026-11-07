@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Bga\Games\Fate\Operations;
 
 use Bga\Games\Fate\Material;
+use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\CountableOperation;
 use Override;
 
@@ -26,6 +27,7 @@ use Override;
  * - Finds the pending dealDamage operation on the machine stack
  * - Reduces its count by up to this operation's count
  * - If dealDamage count reaches 0, hides it from the stack
+ * - If nothing is left to prevent, drops the re-queued TResolveHits prompt when it has no playable card
  *
  * Rules: "Cards that prevent damage may be used once each time you receive damage."
  * Used by: Dodge, Stoneskin, Riposte, Dreadnought (1spendMana:1preventDamage).
@@ -113,10 +115,29 @@ class Op_preventDamage extends CountableOperation {
         $this->game->machine->setCounts($dealDamageOp, $newCount);
         $this->retargetCounterAttackDamage($dealDamageOp);
 
+        $nothingLeft = $dealDamageOp->getEffectiveDamage() <= 0;
         if ($newCount <= 0) {
             $dealDamageOp->destroy();
         }
+        if ($nothingLeft) {
+            $this->dropPreventionPrompt();
+        }
         $this->notifyPrevented($prevented, $newCount <= 0);
+    }
+
+    /**
+     * The useCard prompt re-queued for this hit would only offer greyed prevention cards (BGA #251305).
+     * Kept when another card is still playable on the hit (e.g. Retaliation).
+     */
+    private function dropPreventionPrompt(): void {
+        $prompt = $this->game->machine->findOperation(
+            $this->getOwner(),
+            "useCard",
+            fn($op) => $op->getDataField("on", []) === [Trigger::ResolveHits->value]
+        );
+        if ($prompt && $prompt->noValidTargets()) {
+            $prompt->destroy();
+        }
     }
 
     /**
