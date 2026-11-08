@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-08 (v261108-1905)
+
+- Starsong now draws after the upgrade, including the turn it is gained or improved (#251068, #251630)
+
 ## 2026-11-07 (v261108-0218)
 
 - Fixed Marsh of Sorrow spawns (#255238)
