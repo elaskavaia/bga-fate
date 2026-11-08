@@ -1395,6 +1395,11 @@ class Game1Tokens extends Game0Basics {
                 if (args.sides) {
                     args.sides = this.replaceSimpleIconsInLog(args.sides);
                 }
+                if (typeof log == "string" && log.includes("${actplayer}") && args.actplayer === undefined) {
+                    const activePlayerId = this.bga.players.getActivePlayerId();
+                    if (activePlayerId)
+                        args.actplayer = this.bga.players.getFormattedPlayerName(activePlayerId);
+                }
             }
             if (log && typeof log == "string") {
                 log = gameui.clienttranslate_string(log);

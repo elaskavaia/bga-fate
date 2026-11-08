@@ -630,3 +630,32 @@ describe("Game.getEffectiveMonsterAttack", () => {
     expect(game.getEffectiveMonsterAttack("monster_goblin_1", 1)).to.equal(2);
   });
 });
+
+describe("Game.bgaFormatText", () => {
+  let game: Game;
+  let bga: any;
+
+  beforeEach(() => {
+    bga = createMockBga();
+    bga.players.getActivePlayerId.returns(7);
+    bga.players.getFormattedPlayerName = sinon.stub().withArgs(7).returns("<b>Alice</b>");
+    game = new Game(bga);
+  });
+
+  // BGA console error "missing substitution argument: ${actplayer}" on the inactive status title
+  it("fills actplayer from the active player", () => {
+    const res = game.bgaFormatText("${actplayer} must select an action", {});
+    expect(res.args.actplayer).to.equal("<b>Alice</b>");
+  });
+
+  it("leaves actplayer unset when there is no active player", () => {
+    bga.players.getActivePlayerId.returns(null);
+    const res = game.bgaFormatText("${actplayer} must select an action", {});
+    expect(res.args.actplayer).to.be.undefined;
+  });
+
+  it("keeps an explicit actplayer arg", () => {
+    const res = game.bgaFormatText("${actplayer} must select an action", { actplayer: "Bob" });
+    expect(res.args.actplayer).to.equal("Bob");
+  });
+});
