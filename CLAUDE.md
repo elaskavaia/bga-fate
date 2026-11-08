@@ -87,6 +87,7 @@ Stats are defined in `stats.jsonc`. Once released, a stat `id` must never change
 ## After completing a task
 
 - Check [misc/docs/PLAN.md](misc/docs/PLAN.md) and mark completed items with `[x]`
+- Stale items found in [misc/docs/TODO.md](misc/docs/TODO.md) or [misc/docs/BUG_TRIAGE.md](misc/docs/BUG_TRIAGE.md) (already done in code): mark them `[x]` with the commit, no need to ask
 
 ## Common Development Patterns
 
