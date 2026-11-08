@@ -108,6 +108,31 @@ final class Op_monsterMoveAllTest extends AbstractOpTestCase {
         $this->assertCount($countBefore - 1, $this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
     }
 
+    /** RULES.md:65 Grimheim is one big area and heroes there never block monsters outside, even on the entry hex. */
+    public function testHeroOnGrimheimEntryHexDoesNotBlockMonster(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_11_8"); // steps into hex_10_8
+        $this->game->tokens->moveToken("hero_1", "hex_10_8");
+        $countBefore = count($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+
+        $this->call_resolve();
+
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
+        $this->assertEquals("hex_10_8", $this->game->tokens->getTokenLocation("hero_1"));
+        $this->assertCount($countBefore - 1, $this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+    }
+
+    public function testHeroOnGrimheimEntryHexDoesNotBlockLegend(): void {
+        $this->game->tokens->moveToken("monster_legend_3_1", "hex_11_8");
+        $this->game->tokens->moveToken("hero_1", "hex_10_8");
+        $countBefore = count($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+
+        $this->call_resolve();
+
+        $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_legend_3_1"));
+        $this->assertEquals("hex_10_8", $this->game->tokens->getTokenLocation("hero_1"));
+        $this->assertCount($countBefore - 3, $this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
+    }
+
     public function testFreyjasWellDestroyedLast(): void {
         for ($i = 1; $i <= 9; $i++) {
             $this->game->tokens->moveToken("house_$i", "limbo");

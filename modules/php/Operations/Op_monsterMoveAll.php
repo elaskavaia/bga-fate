@@ -34,9 +34,9 @@ class Op_monsterMoveAll extends Operation {
      * Each monster moves a number of steps equal to its move value (default 1).
      * Charge: on skull turns, all monsters get +1 additional step.
      * Charge rule C: any monster that can reach a hero with 1 extra step charges.
-     * Rules: skip if adjacent to a hero; skip if target hex is occupied
+     * Rules: skip if adjacent to a hero; a step into Grimheim removes the monster and destroys
+     * town pieces (heroes inside never block); otherwise skip if target hex is occupied
      * (Legends swap places with a blocking non-Legend monster instead of skipping).
-     * If a monster enters Grimheim, it is removed and town pieces are destroyed.
      */
     private function moveAllMonsters(bool $isChargeTurn): void {
         $monsters = $this->game->hexMap->getMonstersOnMap();
@@ -135,6 +135,12 @@ class Op_monsterMoveAll extends Operation {
             return null; // no path
         }
 
+        // Before the occupancy check: heroes inside Grimheim never block monsters outside (RULES.md Grimheim)
+        if ($this->game->hexMap->isInGrimheim($nextHex)) {
+            $this->monsterEntersGrimheim($monsterId, $currentHex);
+            return null;
+        }
+
         // Can't enter an occupied hex (by another monster or hero)
         // Exception: Legends swap places with a blocking non-Legend monster (RULES.md §3).
         if ($this->game->hexMap->isOccupied($nextHex)) {
@@ -151,12 +157,6 @@ class Op_monsterMoveAll extends Operation {
                 $this->game->getMonster($monsterId)->moveTo($nextHex, $message);
                 return $nextHex;
             }
-            return null;
-        }
-
-        if ($this->game->hexMap->isInGrimheim($nextHex)) {
-            // Monster reaches Grimheim — remove monster and destroy town pieces
-            $this->monsterEntersGrimheim($monsterId, $currentHex);
             return null;
         }
 
