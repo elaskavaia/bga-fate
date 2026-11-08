@@ -48,7 +48,6 @@ Priority (set on triage, revisit each run): **P1** error / stuck UI, or a cheap 
 
 ### Confirmed (green pinning test in tree)
 
-- [x] P3 **#251068 / #251630 Starsong vs upgrade order.** FIXED on main 2026-11-08, not deployed -> flip both with the next tag. [Op_turnEnd](../../modules/php/Operations/Op_turnEnd.php) now queues `trigger(TTurnEnd)` after `upgrade` (mana inside Op_upgrade), right before `drawEvent`; Starsong is its only listener. Player-visible: Starsong gained or improved in the upgrade draws that same turn (release-note line). Tests `Campaign_StarsongUpgradeTest::testStarsongGainedInUpgradeDrawsExtraSameTurn`, `::testStarsongDrawsAfterUpgradeOnLaterTurns`, `::testStarsongImprovedInUpgradeDrawsTwoExtraWithFiveCardLimit`. NOTE: ruled 2026-10-19 (Victoria); designer agreement is second-hand (Peter_panq citing BGG 3785234, not in FORUM.md).
 - [ ] P3 **#240269 (dup #251273) Trollkin attack label stale after a kill (client).** Test `src/tests/TrollkinLabel.spec.ts`. `prepareToken` ([src/Game1Tokens.ts](../../src/Game1Tokens.ts)) refreshes labels before `slideAndPlace` moves the token. FIX: refresh after the DOM move for monster tokens.
 - [ ] P2 **#251878 Seek Shelter does not stop later card moves.** Test `Campaign_Bug251878Test::testManeuverStillMovesAfterSeekShelter`. FORUM.md "## Seek Shelter", designer: "the restriction applies after using the card". FIX: per-turn "no more movement" flag checked by [Op_move](../../modules/php/Operations/Op_move.php) (not the move tracker).
 - [ ] P2 **#251884 Sweeping Strike leftover ignores Draugr armor.** Test `Campaign_BoldurSweepArmorTest::testSweepIgnoresDraugrArmor`. [Op_c_sweep](../../modules/php/Operations/Op_c_sweep.php) queues `applyDamage` directly. FIX: shared armor helper; `Op_c_nailed`, `Op_spendHealth` likely same.
@@ -93,6 +92,7 @@ Priority (set on triage, revisit each run): **P1** error / stuck UI, or a cheap 
 
 Short log of each run: date, reports touched, outcome.
 
+- **2026-11-08 (deploy)** - Deployed **v261108-1905**: #251068, #251630 Confirmed -> **Fixed** (template comment). Starsong TTurnEnd moved after upgrade (44246b1); designer agreement still second-hand (BGG 3785234). Status flip only, marker not bumped.
 - **2026-11-07 (deploy)** - Deployed **v261108-0218**: #255238, #253727, #253962, #251077, #251305, #251864, #250666 Confirmed -> **Fixed** (template comment). No error-log recheck (fresh release); recheck Release breakdown next run. Status flip only, marker not bumped.
 - **2026-11-07** - 5 new reports, no Waiting-for-deploy rows. #255176 -> **Duplicate** of #253990. #255238 -> **Confirmed** (agent, Boneyard + Marshing spawn strings shifted). #255184 -> **Not a bug** (Leather Purse was the active quest; its quest spawns 2 brutes on a trollkin kill). #255225 (Share Gold), #255224 (hero choice): not implemented, on TODO.md, "on our list" comment posted, then **Confirmed** (Victoria's call, known gap, no test). #251068 Open -> **Confirmed** (ruled 10-19, matches #251630). File compacted. Marker bumped.
 
