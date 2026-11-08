@@ -98,17 +98,20 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
     // --- Inspire Defense (card_event_2_30) ---
     // r=in(Grimheim):2spendManaAny:addTownPiece — in Grimheim, spend 2 mana (any tableau card) to add a town piece.
 
-    public function testInspireDefenseAddsTownPieceInGrimheim(): void {
+    /** 1 mana on each of 2 tableau cards: card_ability_2_3 (seeded at setup) and card_ability_2_13, to prove cross-card spending. */
+    private function seedInspireDefenseWithTwoMana(): string {
         $color = $this->getActivePlayerColor();
         $inspire = "card_event_2_30_1";
         $this->seedHand($inspire, $color);
+        $this->game->tokens->moveToken("card_ability_2_13", "tableau_$color");
+        $this->game->effect_moveCrystals($this->heroId, "green", 1, "card_ability_2_13", ["message" => ""]);
+        return $inspire;
+    }
 
-        // Seed 1 mana on two different tableau cards to prove cross-card spending works.
-        // card_ability_2_3 is on Alva's starting tableau; move card_ability_2_13 onto it too.
-        $cardA = "card_ability_2_3"; // Hail of Arrows I (mana cap 1; seeded with 1 mana at setup)
-        $cardB = "card_ability_2_13"; // Flexibility I
-        $this->game->tokens->moveToken($cardB, "tableau_$color");
-        $this->game->effect_moveCrystals($this->heroId, "green", 1, $cardB, ["message" => ""]);
+    public function testInspireDefenseAddsTownPieceInGrimheim(): void {
+        $inspire = $this->seedInspireDefenseWithTwoMana();
+        $cardA = "card_ability_2_3";
+        $cardB = "card_ability_2_13";
 
         // Destroy a house so addTownPiece has something to restore
         $house = array_key_first($this->game->tokens->getTokensOfTypeInLocation("house", "hex%"));
@@ -125,6 +128,37 @@ class Campaign_AlvaEventTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countTokens("crystal_green", $cardA));
         $this->assertEquals(0, $this->countTokens("crystal_green", $cardB));
         $this->assertNotEquals("limbo", $this->tokenLocation($house));
+    }
+
+    /** BGA #251864: adding a Town Piece above the starting count re-notifies the Grimheim counter. */
+    public function testInspireDefenseNotifiesHouseCounter(): void {
+        $inspire = $this->seedInspireDefenseWithTwoMana();
+        $this->assertEquals(4, $this->game->getHousesRemainingCount());
+
+        $notifsBefore = count($this->game->notify->_getNotifications());
+        $this->respond($inspire);
+        $this->confirmCardEffect();
+        $this->respond("card_ability_2_3");
+
+        // Solo starts with all 4 pieces placed; the 5th comes from the unused physical pieces in limbo.
+        $this->assertEquals(5, $this->game->getHousesRemainingCount());
+        $notifs = array_slice($this->game->notify->_getNotifications(), $notifsBefore);
+        $houseCounter = array_values(
+            array_filter($notifs, fn($n) => $n["type"] === "counter" && ($n["args"]["name"] ?? "") === "counter_house_0")
+        );
+        $this->assertCount(1, $houseCounter);
+        $this->assertEquals(5, $houseCounter[0]["args"]["value"]);
+    }
+
+    public function testInspireDefenseNotOfferedWhenAllTenPiecesPlaced(): void {
+        $inspire = $this->seedInspireDefenseWithTwoMana();
+        $this->assertValidTarget($inspire);
+        foreach (array_keys($this->game->tokens->getTokensOfTypeInLocation("house", "limbo")) as $houseId) {
+            $this->game->tokens->moveToken($houseId, $this->game->material->getRulesFor($houseId, "location"));
+        }
+        $this->assertEquals(10, $this->game->getHousesRemainingCount());
+
+        $this->assertNotValidTarget($inspire, "Inspire Defense must not add an 11th Town Piece");
     }
 
     public function testInspireDefenseNotOfferedWithoutMana(): void {

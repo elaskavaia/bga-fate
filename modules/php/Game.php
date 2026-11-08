@@ -700,6 +700,10 @@ class Game extends Base {
                 "char_name" => $charId,
             ]);
         }
+        $this->notifyHousesCounter();
+    }
+
+    function notifyHousesCounter(): void {
         $this->tokens->notifyCounterDirect("counter_house_0", $this->getHousesRemainingCount(), "");
     }
 
