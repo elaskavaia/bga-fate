@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-07 (v261108-0218)
+
+- Fixed Marsh of Sorrow spawns (#255238)
+- Fixed Highlands areas/cards (#253727, #253962)
+- Quest completion asks to confirm (#251077)
+- Fixed extra prevention prompt (#251305)
+- Fixed Town Piece count (#251864)
+- Fixed stale attack markers (#250666)
+
 ## 2026-11-04 (v261105-0350)
 
 - Fixed equipment effects usable more than once per turn (#251284, #251620)
