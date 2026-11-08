@@ -29,7 +29,6 @@ class Campaign_Bug252904Test extends CampaignBaseTest {
         $this->confirmCardEffect();
 
         $this->assertEquals(1, $this->countTokens("crystal_red", $cardId), "durability spent");
-        // documents buggy behavior for BGA #252904; flip assertion when fixed (expected 1: unpreventable ignores armor)
-        $this->assertEquals(0, $this->countDamage($draugr), "draugr armor currently absorbs unpreventable damage");
+        $this->assertEquals(1, $this->countDamage($draugr), "unpreventable damage ignores draugr armor");
     }
 }

@@ -94,6 +94,7 @@ gainAtt_strength|Gain Strength|wicon_strength
 
 # damage / health
 dealDamage|Deal Damage|wicon_damage
+dealDamageUnprev|Deal Unpreventable Damage|wicon_damage
 applyDamage|Apply Damage|wicon_damage
 finishKill|Finish Kill|wicon_damage
 blockXp|Forfeit XP Reward|

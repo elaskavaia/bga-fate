@@ -483,6 +483,11 @@ class Material {
         "name" => clienttranslate("Deal Damage"),
         "wicon" => "wicon_damage",
 ],
+    "Op_dealDamageUnprev" => [ 
+        "type" => "dealDamageUnprev",
+        "name" => clienttranslate("Deal Unpreventable Damage"),
+        "wicon" => "wicon_damage",
+],
     "Op_applyDamage" => [ 
         "type" => "applyDamage",
         "name" => clienttranslate("Apply Damage"),
@@ -5290,7 +5295,7 @@ class Material {
         "hno" => 4,
         "name" => clienttranslate("Precision Axes"),
         "durability" => 3,
-        "r" => "spendUse:spendDurab:dealDamage(adj)",
+        "r" => "spendUse:spendDurab:dealDamageUnprev(adj)",
         "quest" => clienttranslate("<i>Spend 1 practice action in a forest</i> to get access to these."),
         "effect" => clienttranslate("[DAMAGE]: Deal 1 unpreventable damage to an adjacent monster."),
         "flavour" => clienttranslate("Boldur is not happy until he can fell a tree in one throw."),
