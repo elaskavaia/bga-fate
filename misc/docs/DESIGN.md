@@ -302,7 +302,7 @@ Op_resolveHits
 Op_dealDamage
   → Trigger::MonsterKilled - when a monster is killed
 Op_turnEnd
-  → Trigger::TurnEnd - at end of player turn
+  → Trigger::TurnEnd - at end of player turn, after upgrade + mana (Op_upgrade), right before the step 4 drawEvent
 Op_turnMonster
   → Trigger::MonsterMove - before the Monsters Move step
 Op_gainEquip
@@ -559,7 +559,7 @@ Card effects are categorized by card type (Ability, Equipment, Event) and how th
 **3. Static / Persistent Effects** - always-on modifications to base stats or rules.
 
 * *Rule changes*: e.g. Embla moves 4 instead of 3; permanent strength bonuses from equipment on the tableau. Computed by `Hero::calcBaseStrength/Range/Move/Health` and stored in attribute trackers.
-* *Mana regeneration*: end-of-turn refill, applied during `Op_turnEnd`.
+* *Mana regeneration*: end-of-turn refill, applied in `Op_upgrade` (after the upgrade or its skip).
 
 **4. Instant / One-Time Effects (Events)** - drawn into hand, played from hand, discarded after resolving.
 

@@ -33,7 +33,6 @@ class Op_turnEnd extends Operation {
             $dieKeys = array_map(fn($d) => $d["key"], $dice);
             $this->dbSetTokensLocation($dieKeys, "supply_die_attack", 6, "");
         }
-        $this->queueTrigger(Trigger::TurnEnd);
         $hero = $this->game->getHero($owner);
         // 2. Check for upgrade eligibility (spend experience to upgrade hero/abilities).
         //    Step 3 (mana generation) runs inside Op_upgrade, after the upgrade resolves or is
@@ -45,7 +44,9 @@ class Op_turnEnd extends Operation {
             $this->game->instantiateCard($card, $this)->setUsed(false);
         }
 
-        // 4. Draw 1 event card (handles hand limit internally)
+        // 4. Draw 1 event card (handles hand limit internally). TTurnEnd sits here, after the
+        //    upgrade, because Starsong adds to this draw (BGA #251068).
+        $this->queueTrigger(Trigger::TurnEnd);
         $this->queue("drawEvent");
 
         // 5. Allow demoting top equipment or top ability to the bottom of its pile (RULES.md §End-of-Turn step 5)
