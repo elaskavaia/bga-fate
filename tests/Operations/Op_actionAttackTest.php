@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
 use Bga\Games\Fate\Operations\Op_actionAttack;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -79,7 +80,8 @@ final class Op_actionAttackTest extends AbstractOpTestCase {
 
     public function testResolveInvalidTargetThrows(): void {
         $op = $this->op;
-        $this->expectException(\Bga\GameFramework\UserException::class);
+        $this->expectException(VisibleSystemException::class);
+        $this->expectExceptionMessage("Operation is not allowed by the rules");
         $this->call_resolve("hex_12_8");
     }
 }

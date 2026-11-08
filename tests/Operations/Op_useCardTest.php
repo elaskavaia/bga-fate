@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use Bga\Games\Fate\Model\Trigger;
 use Bga\Games\Fate\OpCommon\Operation;
 
@@ -87,6 +88,13 @@ final class Op_useCardTest extends AbstractOpTestCase {
         $this->assertSame([$this->abilityCard], $this->op->getArgsTarget(), "precondition: only Stitching is valid");
         $this->expectException(UserException::class);
         $this->call_resolve("card_ability_1_9");
+    }
+
+    public function testUnknownTargetSaysNotAllowedByRules(): void {
+        $this->game->tokens->moveToken($this->abilityCard, $this->getPlayersTableau());
+        $this->expectException(VisibleSystemException::class);
+        $this->expectExceptionMessage("Operation is not allowed by the rules");
+        $this->call_resolve("card_not_offered");
     }
 
     public function testPresetTargetReturnsDirectly(): void {

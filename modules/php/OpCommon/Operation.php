@@ -396,7 +396,11 @@ abstract class Operation {
         return null;
     }
     private function checkUserTargetSelection($target, $info) {
-        $this->game->systemAssert("checkUserTargetSelection:01", $info);
+        $this->game->systemAssert(
+            "checkUserTargetSelection:01 $target for " . $this->getType(),
+            $info,
+            clienttranslate("Operation is not allowed by the rules")
+        );
         $this->game->systemAssert("checkUserTargetSelection:02", is_array($info));
         $q = $info["q"] ?? null;
         $this->game->systemAssert("checkUserTargetSelection:03", $q !== null);

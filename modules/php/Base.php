@@ -18,6 +18,7 @@ use Bga\GameFramework\NotificationMessage;
 use Bga\GameFramework\SystemException;
 use Bga\GameFramework\Table;
 use Bga\GameFramework\UserException;
+use Bga\GameFramework\VisibleSystemException;
 use Bga\Games\Fate\OpCommon\MathExpression;
 use Bga\Games\Fate\OpCommon\OpMachine;
 
@@ -445,17 +446,17 @@ class Base extends Table {
      *            server side log message, no translation needed
      * @param bool $cond
      *            condition of assert
-     * @throws UserException
+     * @param string|null $userMessage
+     *            fixed message the player sees, keep it free of ids so the backend groups it
+     * @throws VisibleSystemException
      */
-    function systemAssert($log, $cond = false, ?string $logonly = null) {
+    function systemAssert($log, $cond = false, ?string $userMessage = null) {
         if ($cond) {
             return;
         }
-        $this->dumpError($log);
-        if ($logonly) {
-            $this->error($logonly);
-        }
-        throw new UserException("Internal Error. That should not have happened. Reload page and Retry" . " " . $log);
+        $move = $this->getNextMoveId();
+        $this->error("Internal Error during move $move: $log.");
+        throw new VisibleSystemException($userMessage ?? "Internal Error. Reload page and Retry");
     }
 
     /**
@@ -471,13 +472,6 @@ class Base extends Table {
     function bgaShuffle(array $arr): array {
         shuffle($arr);
         return $arr;
-    }
-
-    function dumpError($log) {
-        $move = $this->getNextMoveId();
-        $this->error("Internal Error during move $move: $log.");
-        $e = new Exception($log);
-        $this->error($e->getTraceAsString());
     }
 
     function getNextMoveId() {

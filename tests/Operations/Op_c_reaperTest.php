@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Bga\GameFramework\VisibleSystemException;
+
 final class Op_c_reaperTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
@@ -116,12 +118,11 @@ final class Op_c_reaperTest extends AbstractOpTestCase {
         $this->setAttackMarker("hex_7_9");
         $this->createOp();
 
-        $this->expectExceptionMessage("ERR:c_reaper:noPendingResolveHits");
-        ob_start();
         try {
             $this->call_resolve("hex_6_9");
-        } finally {
-            ob_end_clean();
+            $this->fail("expected systemAssert");
+        } catch (VisibleSystemException) {
+            $this->assertStringContainsString("ERR:c_reaper:noPendingResolveHits", implode("\n", $this->game->_errors));
         }
     }
 }
