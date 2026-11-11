@@ -38,6 +38,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 #### Missing rules / unimplemented options
 
 - [ ] **R.14.1 — No player choice on monster attack resolution order.** [Op_monsterAttackAll.php:24–44](../../modules/php/Operations/Op_monsterAttackAll.php#L24) auto-buckets by hero hex with no prompt. Rule (RULES.md:284): "In whichever order the players decide". Matters when ≥2 monsters attack the same hero and chain effects (Trollkin adjacency, KO timing) depend on order. Distinct from R.14.2 (which monster picks which hero); this one is which monster goes first.
+- [ ] **Wrecking Ball on filtered moves** (Seek Shelter, Treetreader). Designer (FORUM.md): "Yes, it is always active"; only unfiltered moves let Boldur enter occupied areas (BGA #235051).
 - [ ] **R.21.3 — No gameoption for "skip starting kit"** (start with no gold, mana, or hand). [gameoptions.json](../../gameoptions.json) has only options 100/101/102.
 - [ ] **R.21.4 — No gameoption for "start one step up on upgrade-cost track"** to make upgrades more expensive. Same file.
 
@@ -78,6 +79,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 [ ] Share Gold - non-interactive, like "e-mail" it or drop on the board, do not want to stop game to give other player control *(matches RLIST **R.7.7**)*
 [ ] Hero choice in multiplayer - heroes are random (`bgaShuffle` in Game.php setup), only solo option 100 picks one. RULES.md:143 "Each player chooses one of the hero decks" (BGA #255224)
   [ ] **Remove `Op_performAction` — useless wrapper.** `performAction(X)` does `$this->queue($X)` which the DSL already does for bare `X` (see Speedy Attack `discardEvent:actionAttack` vs Rapid Strike `performAction(actionAttack)` — equivalent). Migrate Rapid Strike I/II, Alva's Bracers, and any other callers to bare-action form, then delete `Op_performAction.php` and the `performAction` row from `op_material.csv`.
+[ ] Mark the first player on the player panel - own panel is always on top, so turn order is unclear (BGA #255447, suggestion acknowledged)
 [ ] Add `tracker_armor` for consistency with other stats — move armor out of Material-only read path so it can be modified by cards
 [ ] Turn signal in title bar — currently says "laskava1 performs an action" using player name; should say "Bjorn / laskava1" or just hero name so the active *hero* is identifiable.
 [ ] [Game.php:427](../../modules/php/Game.php#L427) `effect_rollAttackDice` — thread through a "reason"/source (e.g. which card queued the attack) so the roll notification/log explains *why* this attack happened. Debugging Eitri's Pick showed a roll firing with no visible source; a reason field would make the flow self-explanatory.
