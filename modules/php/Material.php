@@ -4200,6 +4200,7 @@ class Material {
         "num" => 8,
         "hno" => 1,
         "name" => clienttranslate("Stitching II"),
+        "health" => 2,
         "r" => "spendUse:(2heal(adj)/2repairCard(adj)/(heal(adj),repairCard(adj)))",
         "effect" => clienttranslate("Remove a total of 2 damage from heroes and equipment within range 1."),
 ],
