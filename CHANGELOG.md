@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-10 (v261111-0340)
+
+- Precision Axes damage now ignores Draugr armor (#252904)
+- Stitching II now gives +2 health (#255758)
+- "Heroes win" message no longer shows before the final monster turn ends (#255804)
+
 ## 2026-11-08 (v261108-1905)
 
 - Starsong now draws after the upgrade, including the turn it is gained or improved (#251068, #251630)
