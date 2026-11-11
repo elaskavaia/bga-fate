@@ -48,7 +48,7 @@ Surfaced by the 7-agent code-review pass against [RLIST.md](RLIST.md). Cross-ref
 - [ ] **R.1.2** — Roads work via `dir` clock-tag indirection; CSV has a `road` column code never reads explicitly. No test exercises a non-`dir` road semantic.
 - [ ] **R.1.5** — Forest cover (`hitcov` in `Character::countHit`) has no dedicated unit test.
 - [ ] **R.2.4** — Exit-Grimheim-blocked-by-mountain works via `canStopOn` but no explicit test asserts it.
-- [ ] **R.3.4** — Win-by-track-end branch in `Game::isEndOfGame` has no test.
+- [x] **R.3.4** — Win-by-track-end branch in `Game::isEndOfGame` has no test. Covered by `Campaign_StatsTest::testCompletingTheTimeTrackSetsTheEndStats`, `Campaign_TimeTrackTest::testWinBannerAfterTheFinalMonsterTurn`.
 - [ ] **R.4 (most rows)** — Setup steps R.4.1, R.4.2, R.4.5, R.4.6, R.4.8 (action markers), R.4.9, R.4.10, R.4.11, R.4.12 are implemented but largely under-asserted. A single `Campaign_SetupTest` covering "post-setup state matches RULES.md §4" would close most.
 - [ ] **R.5.5** — Round → monster turn transition only covered indirectly via campaign tests.
 - [ ] **R.6.6** — No dedicated `Op_actionPracticeTest`.

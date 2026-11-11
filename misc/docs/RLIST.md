@@ -55,7 +55,7 @@ Statuses below were swept on **2026-06-02** by a 7-agent code-review pass. Per-r
 | R.3.1 | Two alternative time tracks: short (12-turn, ~30 min/player) and long (16-turn, ~40 min/player). Pick one at setup. | [RULES.md:75,135](RULES.md#L75) | Option 101; `TimeTrackTest` | ✅ |
 | R.3.2 | Each turn with **crossed axes** triggers a Reinforcements step (monster cards drawn). | [RULES.md:75,288](RULES.md#L75) | `Op_turnMonster` checks `tm_yellow_axes`/`tm_red_axes`; `testReinforcementTriggeredOnYellowAxesStep` | ✅ |
 | R.3.3 | Each turn with a **skull** spot triggers a global Charge — all monsters charge that turn. | [RULES.md:75,273](RULES.md#L75) | `tm_red_skull` → `isChargeTurn=true`; `testChargeAddsOneStep` | ✅ |
-| R.3.4 | If Freyja's Well remains after the **last** spot, players **win**. | [RULES.md:77,248](RULES.md#L77) | `Game::isEndOfGame` checks `currentStep >= max`; **no end-of-track-win test** | ⚠️ |
+| R.3.4 | If Freyja's Well remains after the **last** spot, players **win**. | [RULES.md:77,248](RULES.md#L77) | `Game::isEndOfGame` checks `currentStep >= max`; win banner waits for the final monster turn (`Game::getAllDatas`). Tests `Campaign_TimeTrackTest::testWinBannerAfterTheFinalMonsterTurn`, `Campaign_StatsTest::testCompletingTheTimeTrackSetsTheEndStats` | ✅ |
 
 ## 4. Setup
 

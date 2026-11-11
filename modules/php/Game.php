@@ -252,7 +252,9 @@ class Game extends Base {
 
         $result["counters"]["counter_house_0"] = ["value" => $this->getHousesRemainingCount()];
 
-        $result["gameEnded"] = $isGameEnded = $this->isEndOfGame();
+        // a full time track only wins once the final monster turn has resolved
+        $result["gameEnded"] = $isGameEnded =
+            $this->isWellDestroyed() || ($this->isEndOfGame() && !$this->machine->getTopOperations(null));
         if ($isGameEnded) {
             $result["endBanner"] = ["message" => $this->getEndBannerMessage(), "isWellDestroyed" => $this->isWellDestroyed()];
         }

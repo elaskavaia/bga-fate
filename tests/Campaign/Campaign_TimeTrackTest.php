@@ -69,6 +69,45 @@ class Campaign_TimeTrackTest extends CampaignBaseTest {
         $this->assertEquals(4, $this->game->tokens->getTokenState("rune_stone"), "rune_stone should advance 3 steps to step 4");
     }
 
+    /** BGA #255804: a page load during the final monster turn must not show the heroes-win banner yet. */
+    public function testNoWinBannerBeforeTheFinalMonsterTurnEnds(): void {
+        $this->putRuneStoneBeforeTheLastStep();
+        while ($ops = $this->game->machine->getTopOperations(null)) {
+            $this->game->machine->db->hide(array_column($ops, "id")); // only the monster turn is pending, as in a real game
+        }
+
+        $this->game->machine->instantiateOperation("turnMonster", $this->game->getAutomaColor())->resolve();
+
+        $this->assertSame($this->game->getTimeTrackLength(), $this->game->tokens->getTokenState("rune_stone"), "sanity: last step");
+        $this->assertNotNull($this->game->machine->findOperation(null, "endOfMonsterTurn"), "sanity: monster turn not finished");
+        $gamedatas = $this->game->getAllDatas();
+        $this->assertFalse($gamedatas["gameEnded"]);
+        $this->assertArrayNotHasKey("endBanner", $gamedatas);
+    }
+
+    /** BGA #255804: once the final monster turn is over and the Well stands, the reload shows the heroes-win banner. */
+    public function testWinBannerAfterTheFinalMonsterTurn(): void {
+        $this->putRuneStoneBeforeTheLastStep();
+
+        $this->driveOneMonsterTurn();
+
+        $gamedatas = $this->game->getAllDatas();
+        $this->assertTrue($gamedatas["gameEnded"]);
+        $this->assertFalse($gamedatas["endBanner"]["isWellDestroyed"]);
+    }
+
+    public function testLossBannerAsSoonAsTheWellIsDestroyed(): void {
+        $this->game->tokens->moveToken("house_0", "limbo");
+
+        $gamedatas = $this->game->getAllDatas();
+        $this->assertTrue($gamedatas["gameEnded"]);
+        $this->assertTrue($gamedatas["endBanner"]["isWellDestroyed"]);
+    }
+
+    private function putRuneStoneBeforeTheLastStep(): void {
+        $this->game->tokens->moveToken("rune_stone", $this->game->getTimeTrackId(), $this->game->getTimeTrackLength() - 1);
+    }
+
     /**
      * Burn the player's two actions, skip turn, skip any optional end-of-turn ops
      * (upgrade, drawEvent) so the monster turn actually fires.
