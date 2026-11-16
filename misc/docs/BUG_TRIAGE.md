@@ -38,7 +38,7 @@ In the latest deployed tag -> **Fixed**. Committed/tagged but that tag not deplo
 
 ## Bug triage last checked
 
-**2026-11-10 19:34 EST** - only triage BGA reports created/updated after this time; bump this line to `date` at run start after each run.
+**2026-11-16 18:34 EST** - only triage BGA reports created/updated after this time; bump this line to `date` at run start after each run.
 
 ## Tracked bugs
 
@@ -72,6 +72,7 @@ Priority (set on triage, revisit each run): **P1** error / stuck UI, or a cheap 
 - [ ] **#252103 Bonus crystals from the exact area (Portuguese).** Info needed since 2026-11-04 (EN + PT comment). Claim 1 contradicts the designer (FORUM.md: resources sit on a specific area); claim 2 too vague.
 - [ ] P3 **#251306 Equipment pile shows old top card after demote (client).** Info needed. Lead: `slideAndPlace` returns early when the parent is unchanged, so a cycled pile does not reorder. Reporter: happens after cycling the whole deck, F5 fixes it. No JS test yet.
 - [ ] **#236791 Sweeping Strike re-kills the same monsters.** Re-entry hypothesis DISPROVED (`Campaign_BoldurSweepTest::testSweepMultiKillScoresEachMonsterOnce`, `spendsExcess` survives the queue). Untested: 4-player, Sweeping II + Rapid Strike II. Ask: exact log lines, did XP/gold really rise, Smiterbiter in play. Table 893045130. **Info needed** 2026-11-08 (asked move number, gold rise, Boldur cards in play).
+- [ ] **#256311 Stitching heals only Bjorn, no hero choice.** Card: "Remove 1 damage from any hero or equipment within range 1." `heal(adj)` does offer adjacent heroes but greys out undamaged ones ([Op_removeDamage](../../modules/php/Operations/Op_removeDamage.php)), so a lone damaged Bjorn auto-resolves. Likely not a bug. **Info needed** 2026-11-16 (asked adjacent hero, its damage, Stitching I or II). Table 942983061, 4p, move 233; no server errors.
 - [ ] **#236519 / #235314 No way to back out of a targeting prompt (event card, Move without stepping).** Likely nothing to undo (turn 1, draw barrier). #236519 -> **Works for me** 2026-11-10 (reporter no longer remembers). #235314 still open.
 
 ### Unreported / follow-ups
@@ -89,6 +90,8 @@ Priority (set on triage, revisit each run): **P1** error / stuck UI, or a cheap 
 ## Triage run log
 
 Short log of each run: date, reports touched, outcome.
+
+- **2026-11-16** - No Waiting-for-deploy rows. #256311 (Stitching target choice) -> **Info needed**. #256758 new suggestion (confirm before an attack roll, Boldur Wrecking Ball misclicks), left Awaiting for Victoria. Error log 7d on v261111-0340: no new crash types, no frontend errors; "Operation is not allowed by the rules" across 5 ids (~10 events, 1-2 users each) = expected greyed-card rejections; 795351 `action_resolve` crawler noise; "Multiple conceder team found" 9 events. Marker bumped.
 
 - **2026-11-10 (deploy)** - Deployed **v261111-0340** (first deploy with the Studio smoke test, table 991879): #252904 Confirmed, #255758 and #255804 Waiting for deploy -> **Fixed** (template comment). Fresh release, recheck the Release breakdown next run. Status flip only, marker not bumped.
 
