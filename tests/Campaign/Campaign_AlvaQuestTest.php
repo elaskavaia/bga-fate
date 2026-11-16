@@ -285,8 +285,7 @@ class Campaign_AlvaQuestTest extends CampaignBaseTest {
             "Tiara should auto-complete and land on tableau when the move ends in Dark Forest"
         );
 
-        // onCardEnter seeds 6 yellow crystals on the card.
-        $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara), "Tiara should seed 6 [XP] on enter");
+        $this->assertEquals(5, $this->countTokens("crystal_yellow", $tiara), "Tiara seeds 6 [XP] on enter and pays 1 this turn");
 
         $newTop = $this->game->tokens->getTokenOnTop("deck_equip_$color");
         $this->assertNotNull($newTop, "deck_equip should have a new top card");

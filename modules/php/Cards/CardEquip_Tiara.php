@@ -21,6 +21,7 @@ use Bga\Games\Fate\Model\CardGeneric;
 // On enter: seed 6 yellow crystals on the card.
 // On TurnStart (Alva's only — Op_trigger already scopes to owner's cards): move 1 yellow
 // off the card onto Alva via gainXp. No-op silently when the card is empty.
+// Also pays on enter: the quest only completes during Alva's turn, after TurnStart, so "each turn" includes this one.
 
 class CardEquip_Tiara extends CardGeneric {
     public function onCardEnter(): void {
@@ -29,9 +30,14 @@ class CardEquip_Tiara extends CardGeneric {
         $this->game->effect_moveCrystals($heroId, "yellow", 6, $this->id, [
             "message" => clienttranslate('${char_name} places ${count} [XP] on ${place_name}'),
         ]);
+        $this->takeGold();
     }
 
     public function onTurnStart(): void {
+        $this->takeGold();
+    }
+
+    private function takeGold(): void {
         $remaining = count($this->game->tokens->getTokensOfTypeInLocation("crystal_yellow", $this->id));
         if ($remaining <= 0) {
             return;

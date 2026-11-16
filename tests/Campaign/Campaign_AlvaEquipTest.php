@@ -482,24 +482,49 @@ class Campaign_AlvaEquipTest extends CampaignBaseTest {
 
     // --- Tiara (card_equip_2_16) ---
     // r="" (bespoke class only), on="".
-    // CardEquip_Tiara::onCardEnter seeds 6 yellow on the card.
+    // CardEquip_Tiara::onCardEnter seeds 6 yellow on the card, then pays this turn's 1.
     // CardEquip_Tiara::onTurnStart: while card has yellow, move 1 off and gainXp(1) for Alva.
 
-    public function testTiaraOnEnterSeeds6Gold(): void {
+    public function testTiaraOnEnterSeeds6GoldAndPaysOne(): void {
         $tiara = "card_equip_2_16";
         $color = $this->getActivePlayerColor();
 
-        // Card starts in supply — no yellow crystals on it
         $this->assertEquals(0, $this->countTokens("crystal_yellow", $tiara));
+        $xpBefore = $this->countXp();
 
-        // Gain equipment via Op_gainEquip — onCardEnter seeds 6 gold
         $this->seedDeck("deck_equip_$color", [$tiara]);
         $this->game->machine->push("gainEquip", $color);
         $this->game->machine->dispatchAll();
         $this->confirmGainEquip();
 
         $this->assertEquals("tableau_$color", $this->tokenLocation($tiara));
-        $this->assertEquals(6, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals(5, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals($xpBefore + 1, $this->countXp());
+    }
+
+    /** BGA #252119: Tiara pays 1 gold on the turn Alva finds it, and again at her next turn start. */
+    public function testTiaraPaysGoldOnTurnGainedViaQuest(): void {
+        $tiara = "card_equip_2_16";
+        $color = $this->getActivePlayerColor();
+        $this->seedDeck("deck_equip_$color", [$tiara, "card_equip_2_22"]);
+
+        $this->game->tokens->moveToken($this->heroId, "hex_6_5");
+        $this->game->hexMap->invalidateOccupancy();
+        $xpBefore = $this->countXp();
+        $this->game->machine->push("move", $color, ["target" => "hex_6_4"]);
+        $this->game->machine->dispatchAll();
+        $this->confirmCardEffect();
+        $this->assertEquals("tableau_$color", $this->tokenLocation($tiara), "sanity: Tiara gained this turn");
+        $this->assertEquals(5, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals($xpBefore + 1, $this->countXp(), "Tiara +1 on the turn gained");
+
+        $this->respond("actionPractice");
+        $this->respond("actionFocus");
+        $this->skip();
+        $this->skipIfOp("drawEvent");
+
+        $this->assertEquals(4, $this->countTokens("crystal_yellow", $tiara));
+        $this->assertEquals($xpBefore + 3, $this->countXp(), "Tiara +1 gained turn, Practice +1, Tiara +1 next turn start");
     }
 
     public function testTiaraTurnStartMovesOneGoldFromCardToAlva(): void {
