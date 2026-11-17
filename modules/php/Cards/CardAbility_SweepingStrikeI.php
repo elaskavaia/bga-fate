@@ -63,7 +63,7 @@ class CardAbility_SweepingStrikeI extends CardGeneric {
      * regularly miss. Name the missing precondition in the log instead of going quiet.
      */
     private function explainMiss(array $errorRes): void {
-        if ($this->game->getAttackHex() === null) {
+        if (!$this->game->isInAttackAction($this->op->getOwner())) {
             return; // kill outside an attack action - the card never applied in the first place
         }
         $this->game->notifyMessage(clienttranslate('${token_name} not used: ${reason_tr}'), [

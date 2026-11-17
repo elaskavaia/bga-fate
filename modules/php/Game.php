@@ -785,6 +785,14 @@ class Game extends Base {
         return $loc !== null && $loc !== "limbo" ? $loc : null;
     }
 
+    /**
+     * True while the owner's attack action is unresolved. Free-action damage (Sure Shot, a
+     * card roll's free endOfAttack) is not an attack action (RULES.md, Free actions).
+     */
+    function isInAttackAction(string $owner): bool {
+        return $this->machine->findOperation($owner, "endOfAttack", fn($op) => !$op->getDataField("free")) !== null;
+    }
+
     /** Factory: create a Hero model from a hero token id. */
     function getHeroById(string $heroId): Hero {
         return new Hero($this, $heroId);

@@ -326,7 +326,7 @@ actionAttack → player picks target → roll dice
 
 Triggered card effects (like `2addDamage` from Master Shot) are queued between the trigger and subsequent operations, so they modify the ongoing action (e.g., adding damage dice before `resolveHits` counts them).
 
-A free-action roll (Throwing Darts, Snipe, Multi-Shot - any hero `roll` with no `endOfAttack` pending) owns `marker_attack` itself and ends with `endOfAttack` flagged `free`: same cleanup (`marker_attack`, `marker_runes`), but no `TAfterActionAttack`, since free actions are not attack actions. Without it the marker went stale and a later Windbite `addRoll` rolled against an empty hex (BGA #250666).
+A free-action roll (Throwing Darts, Snipe, Multi-Shot - any hero `roll` with no `endOfAttack` pending) owns `marker_attack` itself and ends with `endOfAttack` flagged `free`: same cleanup (`marker_attack`, `marker_runes`), but no `TAfterActionAttack`, since free actions are not attack actions. `Game::isInAttackAction` (a non-`free` `endOfAttack` queued for the owner) is the shared check: Smiterbiter's pending excess, Nailed Together (`Op_c_nailed`) and Sweeping Strike (`Op_c_sweep`) only apply inside a real attack action (BGA #254509). Without it the marker went stale and a later Windbite `addRoll` rolled against an empty hex (BGA #250666).
 
 ### Quest System
 

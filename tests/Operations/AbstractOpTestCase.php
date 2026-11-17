@@ -109,6 +109,20 @@ abstract class AbstractOpTestCase extends TestCase {
         $this->game->machine->dispatchOne();
     }
 
+    /** Dispatch until the top op is $type or waits for input; returns the top op type. */
+    function dispatchUntil(string $type): string {
+        $lastId = null;
+        for ($i = 0; $i < OpMachine::MA_GAME_DISPATCH_MAX && ($top = $this->game->machine->getTopOperations(null)); $i++) {
+            $op = reset($top);
+            if ($op["type"] === $type || $op["id"] === $lastId) {
+                return $op["type"];
+            }
+            $lastId = $op["id"];
+            $this->dispatchOne();
+        }
+        $this->fail("dispatchUntil($type): machine drained or did not settle");
+    }
+
     /** Undo savepoint meta waiting for the end-of-request flush ([] when none). */
     protected function pendingUndoSavepoint(): array {
         return (new ReflectionProperty($this->game, "undoSavepointMeta"))->getValue($this->game);

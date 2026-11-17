@@ -274,31 +274,29 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->assertNotNull($this->findLog("not used"), "the void sweep must say why it did nothing");
     }
 
-    /** Kills outside an attack action never involved the card - no explanation to give. */
-    public function testNoExplanationForKillsOutsideAnAttack(): void {
-        $cardId = "card_ability_4_5";
-        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
-        $this->game->tokens->moveToken($this->heroId, "hex_7_9");
-        $this->game->getMonster("monster_goblin_1")->moveTo("hex_6_9", "");
+    /** BGA #254509: a Sure Shot kill is a free action, not an attack action - no sweep, no log. */
+    public function testNoSweepAfterSureShotKill(): void {
+        $sureShotId = "card_ability_1_3";
+        $this->game->tokens->moveToken("card_ability_4_5", "tableau_" . $this->color);
+        $this->game->tokens->moveToken($sureShotId, "tableau_" . $this->color);
+        $this->game->effect_moveCrystals($this->heroId, "green", 3, $sureShotId, ["message" => ""]);
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
 
-        $this->seedRand([5, 5, 5, 5]);
-        $this->respond("actionAttack");
-        $this->skipIfOp("useCard");
-        $notifsBefore = count($this->game->notify->_getNotifications());
+        $primary = "monster_goblin_1";
+        $second = "monster_goblin_2";
+        $this->game->getMonster($primary)->moveTo("hex_4_9", "");
+        $this->game->getMonster($second)->moveTo("hex_5_8", "");
 
-        // A free-action kill: marker_attack is back in limbo, so the card never applied.
-        $op = $this->game->machine->instantiateOperation("applyDamage", $this->color, [
-            "target" => "monster_goblin_2",
-            "amount" => 5,
-        ]);
-        $this->game->getMonster("monster_goblin_2")->moveTo("hex_7_8", "");
-        $op->action_resolve(["target" => "monster_goblin_2"]);
+        $this->respond($sureShotId);
+        $this->confirmCardEffect();
+        $this->respond("hex_4_9");
 
-        $logs = array_slice($this->game->notify->_getNotifications(), $notifsBefore);
-        foreach ($logs as $notif) {
-            $this->assertStringNotContainsString("not used", (string) ($notif["log"] ?? ""));
-        }
+        $this->assertOperation("turn");
+        $this->assertEquals("supply_monster", $this->tokenLocation($primary));
+        $this->assertEquals(0, $this->countDamage($second));
+        $this->assertNull($this->findLog("not used"));
     }
+
 
     public function testSweepingStrikeIDoesNotSweepWithoutOverkill(): void {
         // Goblin health=2, armor=0. 1 hit + 1 sweep die = 2 damage → exact kill, 0 overkill.

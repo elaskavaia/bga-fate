@@ -21,6 +21,7 @@ final class Op_c_nailedChainSoftlockTest extends AbstractOpTestCase {
     protected function setUp(): void {
         parent::setUp();
         $this->game->tokens->moveToken("hero_1", "hex_8_9");
+        $this->game->machine->push("endOfAttack", $this->owner);
     }
 
     /**
@@ -38,13 +39,13 @@ final class Op_c_nailedChainSoftlockTest extends AbstractOpTestCase {
         $this->call_resolve("hex_6_9");
 
         // Runs the queued applyDamage/finishKill, then the void chain step.
-        $this->dispatchAll();
+        $top = $this->dispatchUntil("endOfAttack");
 
         // Exact kill: 0 overkill remains.
         $this->assertEquals(0, $this->game->tokens->getTokenState("marker_attack"), "exact kill leaves 0 overkill");
 
         // The void chain step skipped itself away instead of prompting for 0 piercing damage.
-        $this->assertNull($this->game->machine->createTopOperationFromDbForOwner(null), "no pending op left, no softlock");
+        $this->assertEquals("endOfAttack", $top, "only the attack's own end is left, no softlock");
     }
 
     /** The other void reason, and the more common one: the chain killed the last monster in the line. */
@@ -56,9 +57,9 @@ final class Op_c_nailedChainSoftlockTest extends AbstractOpTestCase {
 
         $this->createOp("c_nailed(chain)");
         $this->call_resolve("hex_6_9");
-        $this->dispatchAll();
+        $top = $this->dispatchUntil("endOfAttack");
 
-        $this->assertNull($this->game->machine->createTopOperationFromDbForOwner(null), "no pending op left, no softlock");
+        $this->assertEquals("endOfAttack", $top, "only the attack's own end is left, no softlock");
     }
 
     /** A chain step that still has overkill and a monster behind must NOT skip itself. */
@@ -69,7 +70,7 @@ final class Op_c_nailedChainSoftlockTest extends AbstractOpTestCase {
 
         $this->createOp("c_nailed(chain)");
         $this->call_resolve("hex_6_9");
-        $this->dispatchAll();
+        $this->dispatchUntil("endOfAttack");
 
         $this->assertEquals(2, $this->game->getCharacter("monster_brute_1")->getDamage(), "brute took the pierce damage");
     }

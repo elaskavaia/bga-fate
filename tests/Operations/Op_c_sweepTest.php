@@ -26,10 +26,18 @@ final class Op_c_sweepTest extends AbstractOpTestCase {
 
     private function setAttackMarker(string $hex, int $overkill): void {
         $this->game->tokens->moveToken("marker_attack", $hex, $overkill);
+        $this->game->machine->push("endOfAttack", $this->owner);
     }
 
     public function testNoAttackHexBails(): void {
         // marker_attack in limbo → no current attack
+        $this->createOp("c_sweep");
+        $this->assertNoValidTargets();
+    }
+
+    public function testOutsideAttackActionBails(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_5_8");
+        $this->game->tokens->moveToken("marker_attack", "hex_4_9", 2);
         $this->createOp("c_sweep");
         $this->assertNoValidTargets();
     }

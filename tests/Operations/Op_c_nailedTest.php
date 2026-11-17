@@ -9,9 +9,10 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
         $this->game->tokens->moveToken("hero_1", "hex_8_9");
     }
 
-    /** Place marker_attack on a hex with given overkill state */
+    /** Place marker_attack on a hex with given overkill state, inside an attack action */
     private function setAttackMarker(string $hex, int $overkill): void {
         $this->game->tokens->moveToken("marker_attack", $hex, $overkill);
+        $this->game->machine->push("endOfAttack", $this->owner);
     }
 
     public function testNoOverkillReturnsError(): void {
@@ -22,6 +23,13 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
     public function testNoMarkerReturnsError(): void {
         // marker_attack in limbo (no active attack)
+        $this->createOp("c_nailed");
+        $this->assertNoValidTargets();
+    }
+
+    public function testOutsideAttackActionReturnsError(): void {
+        $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");
+        $this->game->tokens->moveToken("marker_attack", "hex_7_9", 2);
         $this->createOp("c_nailed");
         $this->assertNoValidTargets();
     }
@@ -80,7 +88,8 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
 
         // Dispatch the kill chain — Op_applyDamage moves marker_attack to the new
         // killed hex with the leftover overkill, which is what c_nailed(chain) reads.
-        $this->dispatchAll();
+        // Stop before endOfAttack, which clears the marker.
+        $this->dispatchUntil("endOfAttack");
 
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
         $this->assertEquals("hex_6_9", $this->game->tokens->getTokenLocation("marker_attack"));

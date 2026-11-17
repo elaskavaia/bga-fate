@@ -574,6 +574,30 @@ class Campaign_BjornAbilityTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countDamage($third), "level I pierces one monster, not a chain");
     }
 
+    /**
+     * BGA #254509: a Sure Shot kill is a free action, and "Free actions never count as attack
+     * actions" (RULES.md), so Nailed Together must not pierce.
+     */
+    public function testNailedTogetherNotOfferedAfterSureShotKill(): void {
+        $sureShotId = "card_ability_1_3";
+        $this->game->tokens->moveToken("card_ability_1_13", "tableau_$this->color");
+        $this->game->effect_moveCrystals($this->heroId, "green", 2, $sureShotId, ["message" => ""]);
+
+        $this->moveHeroOutOfGrimheim("hex_7_9");
+        $goblin = "monster_goblin_20";
+        $brute = "monster_brute_1";
+        $this->game->getMonster($goblin)->moveTo("hex_6_9", "");
+        $this->game->getMonster($brute)->moveTo("hex_5_9", "");
+
+        $this->respond($sureShotId);
+        $this->confirmCardEffect();
+        $this->respond("hex_6_9");
+
+        $this->assertOperation("turn");
+        $this->assertEquals("supply_monster", $this->tokenLocation($goblin));
+        $this->assertEquals(0, $this->countDamage($brute));
+    }
+
     public function testNailedTogetherIIChainWithChoice(): void {
         $this->clearMonstersFromMap();
         $color = $this->getActivePlayerColor();

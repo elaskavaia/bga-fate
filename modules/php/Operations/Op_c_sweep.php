@@ -74,6 +74,9 @@ class Op_c_sweep extends Operation {
         if ($killedHex === null) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No attack target")];
         }
+        if (!$this->game->isInAttackAction($this->getOwner())) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not in an attack action")];
+        }
 
         $heroHex = $this->game->getHero($this->getOwner())->getHex();
         if (!in_array($killedHex, $this->game->hexMap->getAdjacentHexes($heroHex), true)) {

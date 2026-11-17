@@ -61,6 +61,9 @@ class Op_c_nailed extends Operation {
         if ($killedHex === null) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No attack target")];
         }
+        if (!$this->game->isInAttackAction($this->getOwner())) {
+            return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("Not in an attack action")];
+        }
         $overkill = $this->getOverkill();
         if ($overkill <= 0) {
             return ["q" => Material::ERR_NOT_APPLICABLE, "err" => clienttranslate("No overkill damage")];
