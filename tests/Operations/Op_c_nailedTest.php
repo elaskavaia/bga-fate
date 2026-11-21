@@ -71,6 +71,40 @@ final class Op_c_nailedTest extends AbstractOpTestCase {
         $this->assertEquals("supply_monster", $this->game->tokens->getTokenLocation("monster_goblin_1"));
     }
 
+    /** BGA #251884: pierced damage is still damage, so Draugr armor absorbs 1. */
+    public function testArmorAbsorbsPiercedDamage(): void {
+        $this->game->tokens->moveToken("monster_draugr_1", "hex_6_9");
+
+        $this->setAttackMarker("hex_7_9", 1);
+        $this->call_resolve("hex_6_9");
+        $this->dispatchAll();
+
+        $this->assertEquals(0, count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1")));
+    }
+
+    /** BGA #251884: overkill equal to Draugr health is one short after armor, so no kill and no chain. */
+    public function testNoChainWhenArmorSavesTheMonster(): void {
+        $this->game->tokens->moveToken("monster_draugr_1", "hex_6_9");
+
+        $this->setAttackMarker("hex_7_9", 5);
+        $this->createOp("c_nailed(chain)");
+        $this->call_resolve("hex_6_9");
+
+        $opTypes = array_map(fn($o) => $o["type"], $this->game->machine->getAllOperations(PCOLOR));
+        $this->assertNotContains("c_nailed(chain)", $opTypes);
+    }
+
+    public function testEagleEyeIIPiercesThroughArmor(): void {
+        $this->game->tokens->moveToken("card_ability_1_10", "tableau_" . PCOLOR);
+        $this->game->tokens->moveToken("monster_draugr_1", "hex_6_9");
+
+        $this->setAttackMarker("hex_7_9", 1);
+        $this->call_resolve("hex_6_9");
+        $this->dispatchAll();
+
+        $this->assertEquals(1, count($this->game->tokens->getTokensOfTypeInLocation("crystal_red", "monster_draugr_1")));
+    }
+
     public function testChainQueuesNextNailedTogether(): void {
         // Goblin (health=2), overkill=3 → kills with 1 overkill, chains
         $this->game->tokens->moveToken("monster_goblin_1", "hex_6_9");

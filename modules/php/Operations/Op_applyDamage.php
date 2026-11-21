@@ -31,7 +31,8 @@ use Bga\Games\Fate\OpCommon\Operation;
  *  - target: defender token id (required)
  *  - attacker: attacker token id; defaults to the owner's hero
  *  - amount: damage amount to apply (required)
- *  - spendsExcess: this damage is drawn from Smiterbiter's pending excess pool. Set by
+ *  - spendsExcess: how much of Smiterbiter's pending excess pool this damage draws, before
+ *    armor (armor-absorbed damage was still dealt, so it is not excess). Set by
  *    Op_c_sweep and Op_c_nailed. Landing it takes that much back out of the pool, and it
  *    is passed on to the kill trigger, where CardAbility_SweepingStrikeI and
  *    CardAbility_NailedTogetherI read it to ignore a kill their own effect caused.
@@ -66,7 +67,7 @@ class Op_applyDamage extends Operation {
 
         // Withdraw only once the damage is known to land - a refusal above leaves it excess.
         if ($this->getDataField("spendsExcess")) {
-            $this->getSmiterbiter()?->removePendingExcess($amount);
+            $this->getSmiterbiter()?->removePendingExcess((int) $this->getDataField("spendsExcess"));
         }
 
         // 1. Place the red crystals on the defender (was each caller's job).

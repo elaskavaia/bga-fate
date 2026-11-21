@@ -26,7 +26,7 @@ use Bga\Games\Fate\OpCommon\Operation;
  * Behaviour (designer rule clarification, DESIGN.md §"Sweeping Strike"):
  *  - Hero is the centre of the "clock"; sweep walks clockwise around the hero's
  *    own ring of 6 adjacent hexes, starting just past the killed hex.
- *  - Hits the first live monster encountered, dealing the overkill amount.
+ *  - Hits the first live monster encountered, dealing the overkill amount less its armor.
  *  - Hard cap: at most 1 sweep hit per attack (2 enemies total). Damage left
  *    after the sweep kill is wasted — no chain.
  *  - Clockwise order picks the victim, so the player only answers yes/no; the card
@@ -103,9 +103,16 @@ class Op_c_sweep extends Operation {
         $this->queue("applyDamage", null, [
             "attacker" => $this->game->getHeroTokenId($this->getOwner()),
             "target" => $defenderId,
-            "amount" => $this->getOverkill(),
-            "spendsExcess" => true,
+            "amount" => $this->getSweepDamage($defenderId),
+            "spendsExcess" => $this->getOverkill(),
         ]);
+    }
+
+    private function getSweepDamage(?string $defenderId): int {
+        if ($defenderId === null) {
+            return $this->getOverkill();
+        }
+        return $this->game->getCharacter($defenderId)->applyArmor($this->getOverkill(), $this->game->getHero($this->getOwner()));
     }
 
     public function canSkip() {
@@ -113,6 +120,8 @@ class Op_c_sweep extends Operation {
     }
 
     function getExtraArgs() {
-        return ["overkill" => $this->getOverkill()];
+        $targetHex = $this->getAttackHex() === null ? null : $this->getSweepHex();
+        $defenderId = $targetHex === null ? null : $this->game->hexMap->getCharacterOnHex($targetHex, "monster");
+        return ["overkill" => $this->getSweepDamage($defenderId)];
     }
 }

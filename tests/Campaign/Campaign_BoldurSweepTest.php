@@ -68,6 +68,29 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
         $this->assertEquals(1, $this->countDamage($second), "Second goblin should take 1 overkill damage");
     }
 
+    /** BGA #251884: verifies the fix - Draugr armor absorbs 1 of the sweep's leftover damage. */
+    public function testSweepRespectsDraugrArmor(): void {
+        $cardId = "card_ability_4_5";
+        $this->game->tokens->moveToken($cardId, "tableau_" . $this->color);
+        $this->game->tokens->moveToken($this->heroId, "hex_5_9");
+
+        $skeleton = "monster_skeleton_1";
+        $draugr = "monster_draugr_1";
+        $this->game->getMonster($skeleton)->moveTo("hex_4_9", "");
+        $this->game->getMonster($draugr)->moveTo("hex_5_8", "");
+        $this->assertEquals(1, $this->game->getMonster($draugr)->getArmor(), "sanity: draugr has armor 1");
+
+        $this->seedRand([5, 5, 5, 1]); // 3 hits + 1 passive = 4 vs skeleton health 3 -> 1 overkill
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond($cardId);
+        $this->confirmCardEffect();
+
+        $this->assertEquals("supply_monster", $this->tokenLocation($skeleton), "skeleton should be dead");
+        $this->assertEquals(0, $this->countDamage($draugr), "armor prevents the 1 swept damage");
+    }
+
     public function testSweepingStrikeDoesNotReofferAfterBothMonstersDead(): void {
         // BGA #233927: two goblins (health=2) adjacent. Primary dies with enough overkill
         // that the sweep also kills the second goblin. The sweep kill re-fires
@@ -433,14 +456,14 @@ class Campaign_BoldurSweepTest extends CampaignBaseTest {
 
     /**
      * Answers the standing question about the sweep cap: an arbitrary data field does
-     * survive queue -> db row -> re-instantiate, so the spendsExcess flag that
+     * survive queue -> db row -> re-instantiate, so the spendsExcess amount that
      * Op_applyDamage carries into the kill trigger is readable by the card handlers.
      */
     public function testTriggerDataFieldSurvivesTheQueue(): void {
-        $this->game->machine->queue("trigger(TMonsterKilled)", $this->color, ["spendsExcess" => true]);
+        $this->game->machine->queue("trigger(TMonsterKilled)", $this->color, ["spendsExcess" => 3]);
         $op = $this->game->machine->findOperation($this->color, "trigger(TMonsterKilled)");
         $this->assertNotNull($op, "trigger op is in the machine");
-        $this->assertTrue((bool) $op->getDataField("spendsExcess"), "spendsExcess survives the machine round trip");
+        $this->assertEquals(3, $op->getDataField("spendsExcess"), "spendsExcess survives the machine round trip");
         $op->destroy();
     }
 }

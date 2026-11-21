@@ -315,6 +315,21 @@ class Campaign_BoldurEquipTest extends CampaignBaseTest {
         $this->assertEquals(0, $this->countPending());
     }
 
+    /** BGA #251884: armor absorbs 1 of the sweep, but all 3 were dealt, so none of it is excess. */
+    public function testSweepIntoArmorBanksNothing(): void {
+        $this->setupSweepBoard("monster_draugr_1"); // health 5, armor 1
+
+        $this->respond("actionAttack");
+        $this->respond("hex_4_9");
+        $this->respond(self::SWEEPING_STRIKE);
+        $this->confirmCardEffect();
+        $this->skipIfOp("useCard");
+
+        $this->assertEquals(2, $this->countDamage("monster_draugr_1"), "armor absorbs 1 of the 3 leftover");
+        $this->assertEquals(0, $this->countStored(), "damage absorbed by armor was still dealt");
+        $this->assertEquals(0, $this->countPending());
+    }
+
     public function testASweepDoesNotEatDamageBankedEarlier(): void {
         $color = $this->setupSweepBoard();
         $this->game->effect_moveCrystals($this->heroId, "red", 2, self::SMITERBITER, ["message" => ""]);

@@ -30,7 +30,7 @@ use function Bga\Games\Fate\getPart;
  * Behaviour:
  * - Finds monsters on hexes adjacent to killedHex that are farther from the hero
  * - Player picks a target (or auto if only one)
- * - Deals overkill damage to chosen monster
+ * - Deals overkill damage, less its armor, to chosen monster
  * - Level II: if that monster also dies, updates marker_attack and re-queues
  *
  * Queues its damage with `spendsExcess` (see Op_applyDamage), which does two things: the
@@ -89,23 +89,22 @@ class Op_c_nailed extends Operation {
     function resolve(): void {
         $targetHex = $this->getCheckedArg();
         $overkill = $this->getOverkill();
-        $attackerId = $this->game->getHeroTokenId($this->getOwner());
+        $hero = $this->game->getHero($this->getOwner());
 
         $defenderId = $this->game->hexMap->getCharacterOnHex($targetHex);
         $this->game->systemAssert("ERR:c_nailed:noMonsterOnHex:$targetHex", $defenderId !== null);
 
         // Open-coded kill peek for the Level II chain decision — crystals aren't placed yet so
-        // evaluateDamage would under-report by $overkill. Op_applyDamage is the source of truth.
+        // evaluateDamage would under-report by $amount. Op_applyDamage is the source of truth.
         $defender = $this->game->getCharacter($defenderId);
-        $totalDamage = $defender->getDamage() + $overkill;
-        $health = $defender->getEffectiveHealth();
-        $willKill = $totalDamage >= $health;
+        $amount = $defender->applyArmor($overkill, $hero);
+        $willKill = $defender->getDamage() + $amount >= $defender->getEffectiveHealth();
 
         $this->queue("applyDamage", null, [
-            "attacker" => $attackerId,
+            "attacker" => $hero->getId(),
             "target" => $defenderId,
-            "amount" => $overkill,
-            "spendsExcess" => true,
+            "amount" => $amount,
+            "spendsExcess" => $overkill,
         ]);
 
         // Level II: chain on kill — Op_applyDamage updates marker_attack with the new overkill,

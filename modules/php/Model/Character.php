@@ -104,12 +104,14 @@ class Character {
     }
 
     /**
-     * Reduce raw hits by armor. Call once with total hit count.
+     * Reduce raw hits by armor, unless the attacker ignores it. Call once with total hit count.
      * @return int effective damage after armor absorption
      */
-    function applyArmor(int $hits): int {
-        $armor = $this->getArmor();
-        return max(0, $hits - $armor);
+    function applyArmor(int $hits, ?Character $attacker = null): int {
+        if ($attacker?->canIgnoreArmor()) {
+            return $hits;
+        }
+        return max(0, $hits - $this->getArmor());
     }
 
     function getRulesFor(string $field, mixed $default = ""): mixed {

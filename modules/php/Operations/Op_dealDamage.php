@@ -112,10 +112,10 @@ class Op_dealDamage extends CountableOperation {
             return (int) $this->getCount();
         }
         $amount = $this->getDamageAmount($defenderId);
-        if ($amount <= 0 || !$this->isArmorApplicable() || $this->game->getCharacter($this->getAttackerId())->canIgnoreArmor()) {
+        if ($amount <= 0 || !$this->isArmorApplicable()) {
             return $amount;
         }
-        return $this->game->getCharacter($defenderId)->applyArmor($amount);
+        return $this->game->getCharacter($defenderId)->applyArmor($amount, $this->game->getCharacter($this->getAttackerId()));
     }
 
     function resolve(): void {
