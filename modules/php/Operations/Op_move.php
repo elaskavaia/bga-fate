@@ -144,15 +144,16 @@ class Op_move extends CountableOperation {
             return;
         }
 
-        // Wrecking Ball move into an occupied hex: walk adjacent if needed (auto-route),
+        // Wrecking Ball move into an occupied hex: walk adjacent first if distant or inside Grimheim,
         // step in (transient multi-occupancy), then c_wrecking pushes the occupant and
         // deals the damage, and the loop continues with the remaining count.
         $occupant = $hero->getWreckingCard() !== null ? $this->game->hexMap->getCharacterOnHex($arg) : null;
         if ($occupant !== null) {
             $stepsUsed = 1;
-            if ($this->game->hexMap->getHexDistance($hero->getHex(), $arg) > 1) {
+            $from = $hero->getHex();
+            if ($this->game->hexMap->isInGrimheim($from) || $this->game->hexMap->getHexDistance($from, $arg) > 1) {
                 $approach = $this->findWreckingApproach($arg);
-                $path = $this->game->hexMap->getPath($hero->getHex(), $approach, $hero);
+                $path = $this->game->hexMap->getPath($from, $approach, $hero);
                 foreach ($path as $hex) {
                     $this->queueStep($hex);
                 }
@@ -248,8 +249,9 @@ class Op_move extends CountableOperation {
     /**
      * Wrecking Ball targets: occupied hexes the hero can reach and move into within $remaining -
      * adjacent to the current hex, or to any hex reachable with remaining-1 steps (the move-in
-     * itself costs 1). Grimheim is excluded: it is not an "occupied area" (designer ruling),
-     * and a hex inside it cannot serve as an approach either (entering ends the move).
+     * itself costs 1). Grimheim is excluded: it is not an "occupied area" (designer ruling).
+     * No Grimheim hex is a source either: entering ends the move, and a hero inside cannot
+     * interact with characters outside it, so he must step out first.
      */
     private function getWreckingTargets(int $remaining): array {
         $hero = $this->game->getHero($this->getOwner());
@@ -259,8 +261,8 @@ class Op_move extends CountableOperation {
             $sources += $hexMap->getReachableHexes($hero->getHex(), $remaining - 1, $hero);
         }
         $targets = [];
-        foreach ($sources as $from => $dist) {
-            if ($dist > 0 && $hexMap->isInGrimheim($from)) {
+        foreach (array_keys($sources) as $from) {
+            if ($hexMap->isInGrimheim($from)) {
                 continue;
             }
             foreach ($hexMap->getAdjacentHexes($from) as $hex) {
