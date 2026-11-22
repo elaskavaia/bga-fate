@@ -80,6 +80,20 @@ final class Op_gainEquipTest extends AbstractOpTestCase {
         $this->assertEquals($tableau, $this->game->tokens->getTokenLocation("card_equip_1_22"), "Trollbane on tableau");
     }
 
+    /** BGA #257482: a mid-turn gain applies the base change on top of this turn's bonuses. */
+    public function testGainMainWeaponKeepsTurnBonusesAndAppliesBaseDelta(): void {
+        $hero = $this->game->getHero($this->owner);
+        $hero->incTrackerValue("range", 2);
+        $hero->incTrackerValue("strength", 1);
+        $range = $hero->getAttackRange();
+        $strength = $hero->getAttackStrength();
+
+        $this->pushGain("card_equip_1_16"); // Bone Bane Bow (strength 3) replaces First Bow (strength 1)
+
+        $this->assertEquals($range, $hero->getAttackRange());
+        $this->assertEquals($strength + 2, $hero->getAttackStrength());
+    }
+
     public function testReplacingMainWeaponSweepsAttachedTokens(): void {
         // Boldur's Smiterbiter stores damage on its own card (state-tracked).
         $this->game = new GameUT();

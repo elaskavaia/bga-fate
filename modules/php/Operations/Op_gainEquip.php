@@ -81,6 +81,8 @@ class Op_gainEquip extends Operation {
         $owner = $this->getOwner();
         $heroId = $this->game->getHeroTokenId($owner);
         $cardId = $card["key"];
+        $hero = $this->game->getHero($owner);
+        $baseBefore = $hero->calcBaseTrackers();
 
         $isMainWeapon = $this->game->getRulesFor($cardId, "mw");
         if ($isMainWeapon) {
@@ -132,8 +134,7 @@ class Op_gainEquip extends Operation {
 
         $cardObj = $this->game->instantiateCard($card, $this);
         $cardObj->onTrigger(Trigger::CardEnter);
-        // equip changes attributes
-        $this->game->getHero($owner)->recalcTrackers();
+        $hero->recalcTrackers($baseBefore);
         $this->game->customUndoSavepoint($this->getPlayerId(), 1, "quest");
     }
 }

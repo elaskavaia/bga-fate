@@ -411,6 +411,36 @@ class Campaign_BjornEventTest extends CampaignBaseTest {
         $this->assertEquals($baseRange, $hero->getAttackRange());
     }
 
+    private function playLimberBowThenKillBrute(): void {
+        $color = $this->getActivePlayerColor();
+        $this->seedHand("card_event_1_32", $color);
+        $this->respond("card_event_1_32");
+        $this->confirmCardEffect();
+        $this->assertEquals(4, $this->game->getHero($color)->getAttackRange());
+
+        $this->game->tokens->moveToken($this->heroId, "hex_11_8");
+        $this->game->getMonster("monster_brute_1")->moveTo("hex_12_8", "");
+        $this->game->machine->push("dealDamage", $color, ["target" => "hex_12_8", "count" => 3]);
+        $this->game->machine->dispatchAll();
+    }
+
+    public function testLimberBowRangeSurvivesKillWithoutQuest(): void {
+        $this->playLimberBowThenKillBrute();
+        $this->assertEquals("supply_monster", $this->tokenLocation("monster_brute_1"));
+        $this->assertEquals(4, $this->game->getHero($this->getActivePlayerColor())->getAttackRange());
+    }
+
+    /** BGA #257482: a quest completed mid-turn must not reset the Limber Bow range bonus. */
+    public function testLimberBowRangeSurvivesQuestCompletedMidTurn(): void {
+        $color = $this->getActivePlayerColor();
+        $this->seedDeck("deck_equip_$color", ["card_equip_1_21", "card_equip_1_17"]);
+        $this->playLimberBowThenKillBrute();
+        $this->confirmCardEffect();
+        $this->confirmGainEquip();
+        $this->assertEquals("tableau_$color", $this->tokenLocation("card_equip_1_21"));
+        $this->assertEquals(4, $this->game->getHero($color)->getAttackRange());
+    }
+
     // --- Piercing Arrows (card_event_1_33) ---
 
     public function testPiercingArrowsOfferedOnRollTrigger(): void {

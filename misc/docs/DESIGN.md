@@ -354,7 +354,8 @@ Hero attributes (strength, range, move, health) are stored as tracker tokens in 
 **Token IDs:** `tracker_strength_{color}`, `tracker_range_{color}`, `tracker_move_{color}`, `tracker_health_{color}`
 
 **How it works:**
-- `Hero::recalcTrackers()` - recomputes all trackers from base card values (tableau cards). Called at setup and end of turn.
+- `Hero::recalcTrackers()` - recomputes all trackers (incl. `hand`) from base card values (tableau cards). Called at setup, end of turn and `Op_upgrade` (runs after the turn-end reset).
+- `Hero::recalcTrackers($baseBefore)` - mid-turn form: pass `calcBaseTrackers()` taken before the tableau changed, and only the base delta is applied so this turn's bonuses survive (`Op_gainEquip`, quest rewards). Any mid-turn tableau change must use this form.
 - `Hero::incTrackerValue($type, $delta)` - bumps a tracker mid-turn (e.g. Flexibility: `$hero->incTrackerValue("move", 1)`)
 - Public getters (`getAttackStrength()`, `getAttackRange()`, `getMaxHealth()`, `getNumberOfMoves()`) read from trackers
 - Base computation methods (`calcBaseStrength()`, `calcBaseRange()`, `calcBaseMove()`, `calcBaseHealth()`) derive values from tableau cards
